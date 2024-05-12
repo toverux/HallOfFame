@@ -1,0 +1,5 @@
+﻿{
+  "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Hall of Fame server",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Hostname (not URL) of the hall of fame server. You should not change it unless you're developing on the mod or using an alternative server."
+}

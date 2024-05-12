@@ -1,0 +1,10 @@
+# Machine-specific settings
+.idea/**/workspace.xml
+
+# UI mod
+HallOfFame/UI/node_modules
+
+# Build artifacts
+Library/
+bin/
+obj/

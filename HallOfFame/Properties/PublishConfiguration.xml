@@ -1,0 +1,20 @@
+﻿<Publish>
+	<ModId Value="" />
+	<DisplayName Value="Hall of Fame" />
+	<ShortDescription Value="This is a short description" />
+	<LongDescription>
+This is a long description
+	</LongDescription>
+	<Thumbnail Value="Properties/Thumbnail.png" />
+	<Screenshot Value="" />
+	<Tag Value="Code Mod" />
+	<ForumLink Value="" />
+	<ModVersion Value="1.0.0" />
+	<GameVersion Value="1.1.*" />
+	<Dependency Id="77209" DisplayName="DependencyPack" />
+	<Dependency Id="75426" DisplayName="I18n EveryWhere" />
+	<!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
+	<ChangeLog>Initial release.</ChangeLog>
+	<!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon-->
+	<ExternalLink Type="github" Url="" />
+</Publish>
