@@ -1,0 +1,33 @@
+﻿// Vanilla .menu-ui class override.
+// ! Do not change the class name.
+.menu-ui {
+    background-image: initial;
+    background-color: transparent;
+}
+
+.splashscreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+
+    // background-image is set dynamically.
+    background-position-x: 50%;
+    background-position-y: 50%;
+    background-size: cover;
+    background-repeat: no-repeat no-repeat;
+
+    &.splashscreen-fade-in {
+        animation: fadeIn 2s;
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    }
+}
