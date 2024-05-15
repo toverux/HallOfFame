@@ -1,33 +1,31 @@
-﻿/**
- * Component that displays the splashscreen image on the main menu.
- */
-
-import { useState } from 'react';
+﻿import { ReactElement, useEffect, useState } from 'react';
 import styles from './menu-splashscreen.module.scss';
 
-// This is the Vanilla image when the mod was written.
-// It could be retrieved dynamically from calculated styles before we apply our
-// override class, but it's unlikely to change. (right?)
-const defaultSplashSrc = 'Media/Menu/Background2.jpg';
+interface Props {
+    readonly imageUri: string;
+}
 
-export function MenuSplashscreen() {
+/**
+ * Component that displays the splashscreen image on the main menu.
+ */
+export function MenuSplashscreen({ imageUri }: Props): ReactElement {
     // How this works: when a new image is requested (incomingImage), we load it
     // into browser cache memory. When it's ready (onLoad), we create a div with
     // the new image, and perform a fade-in over the previous image (currentImage).
     // When the fade-in animation is done, we set the new image as the current one.
     // This destroys the previous image div, freeing up memory. And the cycle repeats.
 
-    const [currentImage, setCurrentImage] = useState(defaultSplashSrc);
+    const [currentImage, setCurrentImage] = useState(imageUri);
     const [incomingImage, setIncomingImage] = useState<string | null>(null);
 
     // When a new image is requested, we load it into browser cache memory.
     // And when it's loaded, only then we set it as the incoming image, that
     // will start the fade-in animation.
-    function loadNewImage(uri: string): void {
+    useEffect(() => {
         const splash = new Image();
-        splash.onload = () => setIncomingImage(uri);
-        splash.src = uri;
-    }
+        splash.onload = () => setIncomingImage(imageUri);
+        splash.src = imageUri;
+    }, [imageUri]);
 
     // When the fade-in animation is done, we set the incoming image as the
     // current one.
@@ -35,8 +33,6 @@ export function MenuSplashscreen() {
         setCurrentImage(incomingImage!);
         setIncomingImage(null);
     }
-
-    (window as any).loadNewImage = loadNewImage;
 
     // Note: We'll use <div> and not <img> to display background images, because
     // cohtml's engine does not support `object-fit: cover`.

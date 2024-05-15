@@ -1,0 +1,17 @@
+﻿.screenshot-button {
+    position: relative;
+    display: block;
+    margin-right: calc(22rem) !important;
+
+    > [class*="icon"] {
+        background-color: gold;
+    }
+
+    span {
+        position: absolute;
+        display: block;
+        height: 32rem;
+        left: 1.4em;
+        transform: rotate(90deg);
+    }
+}
