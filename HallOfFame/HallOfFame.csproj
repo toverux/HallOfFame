@@ -34,6 +34,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Reference Include="cohtml.Net">
+            <Private>false</Private>
+        </Reference>
         <Reference Include="Game">
             <Private>false</Private>
         </Reference>

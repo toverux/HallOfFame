@@ -4,6 +4,7 @@ using Colossal.IO.AssetDatabase;
 using Colossal.Logging;
 using Game;
 using Game.Modding;
+using HallOfFame.Systems;
 using HarmonyLib;
 using JetBrains.Annotations;
 
@@ -43,6 +44,9 @@ public class Mod : IMod {
         this.settings.RegisterInOptionsUI();
 
         AssetDatabase.global.LoadSettings(nameof(HallOfFame), this.settings, new Settings(this));
+
+        // Initialize subsystems.
+        updateSystem.UpdateAt<HallOfFameUISystem>(SystemUpdatePhase.UIUpdate);
 
         Mod.Log.Info($"{nameof(this.OnLoad)} complete.");
     }

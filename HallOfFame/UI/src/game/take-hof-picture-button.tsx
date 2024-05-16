@@ -1,4 +1,5 @@
-﻿import { Tooltip } from 'cs2/ui';
+﻿import { trigger } from 'cs2/api';
+import { Tooltip, UISound } from 'cs2/ui';
 import { ReactElement, useEffect, useRef } from 'react';
 import styles from './take-hof-picture-button.module.scss';
 
@@ -31,12 +32,25 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
         button.appendChild(text);
     }, [spanRef]);
 
-    function onClick() {
-        console.log('Take HoF picture!');
-    }
-
     return (
         <Tooltip tooltip="Take your city to the Hall of Fame!">
-            <span onClick={onClick} ref={spanRef} dangerouslySetInnerHTML={{ __html: html }}/>
+            <span
+                ref={spanRef}
+                onClick={takePicture}
+                dangerouslySetInnerHTML={{ __html: html }}/>
         </Tooltip>);
+}
+
+function takePicture(): void {
+    trigger('hallOfFame', 'takeScreenshot');
+
+    // Delay the shutter sound when the screenshot is actually taken, and not
+    // just before. This is actually taken from Vanilla code.
+    requestAnimationFrame(() => {
+        trigger(
+            'audio', 'playSound',
+            // UISound is not available at runtime and I like type safety,
+            // so just checking with a little trick that this sound exists.
+            'take-photo' satisfies `${UISound.takePhoto}`, 1);
+    });
 }
