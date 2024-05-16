@@ -1,4 +1,4 @@
-﻿import { ReactElement, useEffect, useState } from 'react';
+﻿import { type ReactElement, useEffect, useState } from 'react';
 import styles from './menu-splashscreen.module.scss';
 
 interface Props {
@@ -30,6 +30,7 @@ export function MenuSplashscreen({ imageUri }: Props): ReactElement {
     // When the fade-in animation is done, we set the incoming image as the
     // current one.
     function handleIncomingImageAnimationEnd(): void {
+        // biome-ignore lint/style/noNonNullAssertion: it can't be null when the event occurs.
         setCurrentImage(incomingImage!);
         setIncomingImage(null);
     }
@@ -37,23 +38,27 @@ export function MenuSplashscreen({ imageUri }: Props): ReactElement {
     // Note: We'll use <div> and not <img> to display background images, because
     // cohtml's engine does not support `object-fit: cover`.
     // noinspection HtmlRequiredAltAttribute
-    return <>
-        {currentImage &&
-            <div
-                // With [key], we actually recycle the main currentImage element,
-                // that is, the div for incomingImage below will "become" this div.
-                // This is a perf optimization to avoid creating two times a div
-                // with the same image (state != dom).
-                key={currentImage}
-                className={styles.splashscreen}
-                style={{ backgroundImage: `url(${currentImage})` }}/>
-        }
-        {incomingImage &&
-            <div
-                key={incomingImage}
-                className={`${styles.splashscreen} ${styles.splashscreenFadeIn}`}
-                style={{ backgroundImage: `url(${incomingImage})` }}
-                onAnimationEnd={handleIncomingImageAnimationEnd}/>
-        }
-    </>;
+    return (
+        <>
+            {currentImage && (
+                <div
+                    // With [key], we actually recycle the main currentImage element,
+                    // that is, the div for incomingImage below will "become" this div.
+                    // This is a perf optimization to avoid creating two times a div
+                    // with the same image (state != dom).
+                    key={currentImage}
+                    className={styles.splashscreen}
+                    style={{ backgroundImage: `url(${currentImage})` }}
+                />
+            )}
+            {incomingImage && (
+                <div
+                    key={incomingImage}
+                    className={`${styles.splashscreen} ${styles.splashscreenFadeIn}`}
+                    style={{ backgroundImage: `url(${incomingImage})` }}
+                    onAnimationEnd={handleIncomingImageAnimationEnd}
+                />
+            )}
+        </>
+    );
 }

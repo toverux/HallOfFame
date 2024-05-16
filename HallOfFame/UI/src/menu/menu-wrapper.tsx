@@ -3,7 +3,7 @@
  * rendering the splashscreen and its controls.
  */
 
-import { ReactElement, ReactNode, useState } from 'react';
+import { type ReactElement, type ReactNode, useState } from 'react';
 import { MenuControls } from './menu-controls';
 import { MenuSplashscreen } from './menu-splashscreen';
 
@@ -24,11 +24,14 @@ export function MenuWrapper({ children }: Props): ReactElement {
     const [imageUri, setImageUri] = useState(defaultSplashSrc);
 
     // @todo For debug, remove on release.
+    // biome-ignore lint/suspicious/noExplicitAny: todo
     (window as any).loadNewImage = setImageUri;
 
-    return <>
-        <MenuSplashscreen imageUri={imageUri}/>
+    return (
+        <>
+            <MenuSplashscreen imageUri={imageUri} />
             {children}
-        <MenuControls/>
-    </>;
+            <MenuControls />
+        </>
+    );
 }

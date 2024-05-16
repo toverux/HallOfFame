@@ -1,6 +1,6 @@
 ﻿import { trigger } from 'cs2/api';
-import { Tooltip, UISound } from 'cs2/ui';
-import { ReactElement, useEffect, useRef } from 'react';
+import { Tooltip, type UISound } from 'cs2/ui';
+import { type ReactElement, useEffect, useRef } from 'react';
 import styles from './take-hof-picture-button.module.scss';
 
 /**
@@ -14,7 +14,7 @@ import styles from './take-hof-picture-button.module.scss';
  * with no way to change the text either.
  */
 export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
-    // An neutral element just needed to put the HTML of the button somewhere.
+    // A neutral element just needed to put the HTML of the button somewhere.
     const spanRef = useRef<HTMLElement>(null);
 
     // This runs once when the DOM is loaded, with the spanRef element having
@@ -22,7 +22,11 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
     // our needs.
     useEffect(() => {
         // Retrieve button element, and add our custom class to it.
-        const button = spanRef.current!.firstElementChild!;
+        const button = spanRef.current?.firstElementChild;
+        if (!(button instanceof HTMLButtonElement)) {
+            throw new Error(`Expected template HTML to be a <button>.`);
+        }
+
         button.classList.add(styles.screenshotButton);
 
         // Adds the side label to the button, the original button has no text.
@@ -30,15 +34,17 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
         text.innerHTML = 'HoF';
 
         button.appendChild(text);
-    }, [spanRef]);
+    }, []);
 
     return (
-        <Tooltip tooltip="Take your city to the Hall of Fame!">
+        <Tooltip tooltip='Take your city to the Hall of Fame!'>
             <span
                 ref={spanRef}
                 onClick={takePicture}
-                dangerouslySetInnerHTML={{ __html: html }}/>
-        </Tooltip>);
+                dangerouslySetInnerHTML={{ __html: html }}
+            />
+        </Tooltip>
+    );
 }
 
 function takePicture(): void {
@@ -48,9 +54,12 @@ function takePicture(): void {
     // just before. This is actually taken from Vanilla code.
     requestAnimationFrame(() => {
         trigger(
-            'audio', 'playSound',
+            'audio',
+            'playSound',
             // UISound is not available at runtime and I like type safety,
             // so just checking with a little trick that this sound exists.
-            'take-photo' satisfies `${UISound.takePhoto}`, 1);
+            'take-photo' satisfies `${UISound.takePhoto}`,
+            1
+        );
     });
 }
