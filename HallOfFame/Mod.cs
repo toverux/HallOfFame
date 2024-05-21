@@ -1,9 +1,10 @@
+﻿using System;
 using System.Linq;
-using System.Reflection;
 using Colossal.IO.AssetDatabase;
 using Colossal.Logging;
 using Game;
 using Game.Modding;
+using HallOfFame.Patches;
 using HallOfFame.Systems;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -11,27 +12,54 @@ using JetBrains.Annotations;
 namespace HallOfFame;
 
 [UsedImplicitly]
-public class Mod : IMod {
-    internal static readonly ILog Log =
+public sealed class Mod : IMod {
+    /// <summary>
+    /// A little more than a singleton, it is set only when the mod has
+    /// successfully finished its <see cref="OnLoad"/> and reset when disposed.
+    /// </summary>
+    /// <exception cref="NullReferenceException">
+    /// If the mod has not been loaded yet.
+    /// </exception>
+    public static Mod Instance =>
+        Mod.instanceValue ??
+        throw new NullReferenceException(
+            $"Mod {nameof(Mod.OnLoad)}() was not called yet.");
+
+    /// <exception cref="NullReferenceException">
+    /// If the mod settings have not been loaded yet.
+    /// </exception>
+    public Settings Settings =>
+        Mod.instanceValue?.settingsValue ??
+        throw new NullReferenceException(
+            $"Mod {nameof(Mod.OnLoad)}() was not called yet.");
+
+    internal static ILog Log { get; } =
         LogManager.GetLogger($"{nameof(HallOfFame)}.{nameof(Mod)}")
-            .SetShowsErrorsInUI(false);
+            .SetShowsErrorsInUI(true);
 
     private const string HarmonyId = "io.mtq.cs2.halloffame";
 
-    private Settings? settings;
+    private static Mod? instanceValue;
+
+    private Settings? settingsValue;
 
     private Harmony? harmony;
 
     public void OnLoad(UpdateSystem updateSystem) {
         // Register Harmony patches and print debug logs.
         this.harmony = new Harmony(Mod.HarmonyId);
-        this.harmony.PatchAll(Assembly.GetExecutingAssembly());
+        PhotoModeUISystemPatch.Install(this.harmony);
 
         var patchedMethods = this.harmony.GetPatchedMethods().ToArray();
-        Mod.Log.Info($"Registered as harmony plugin \"{Mod.HarmonyId}\". Patched methods: {patchedMethods.Length}");
+
+        Mod.Log.Info(
+            $"Registered as harmony plugin \"{Mod.HarmonyId}\". " +
+            $"Patched methods: {patchedMethods.Length}");
 
         foreach (var method in patchedMethods) {
-            Mod.Log.Info($"Patched method: {method.Module.Name}:{method.DeclaringType!.Name}.{method.Name}");
+            Mod.Log.Info(
+                $"Patched method: {method.FullDescription()} " +
+                $"[{method.Module.Name}]");
         }
 
         #if DEBUG
@@ -40,13 +68,17 @@ public class Mod : IMod {
         #endif
 
         // Register settings UI and load settings.
-        this.settings = new Settings(this);
-        this.settings.RegisterInOptionsUI();
+        this.settingsValue = new Settings(this);
+        this.settingsValue.RegisterInOptionsUI();
 
-        AssetDatabase.global.LoadSettings(nameof(HallOfFame), this.settings, new Settings(this));
+        AssetDatabase.global.LoadSettings(
+            nameof(HallOfFame), this.settingsValue, new Settings(this));
 
         // Initialize subsystems.
-        updateSystem.UpdateAt<HallOfFameUISystem>(SystemUpdatePhase.UIUpdate);
+        updateSystem.UpdateAt<HallOfFameGameUISystem>(SystemUpdatePhase.UIUpdate);
+
+        // Done!
+        Mod.instanceValue = this;
 
         Mod.Log.Info($"{nameof(this.OnLoad)} complete.");
     }
@@ -61,10 +93,12 @@ public class Mod : IMod {
         }
 
         // Unregister settings UI
-        if (this.settings is not null) {
-            this.settings.UnregisterInOptionsUI();
-            this.settings = null;
+        if (this.settingsValue is not null) {
+            this.settingsValue.UnregisterInOptionsUI();
+            this.settingsValue = null;
         }
+
+        Mod.instanceValue = null;
 
         Mod.Log.Info($"{nameof(this.OnDispose)} complete.");
     }

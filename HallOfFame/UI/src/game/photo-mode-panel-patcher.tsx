@@ -10,7 +10,7 @@ interface Props {
 /**
  * This component wraps the photo mode panel, but does not directly change how
  * it renders it in any way. Instead, it borrows its lifecycle to then create a
- * React Portal that will be inserted next to the Take Picture button.
+ * React Portal that will be inserted next to the Take Photo button.
  */
 export function PhotoModePanelPatcher({ children }: Props): ReactElement {
     const [hofButton, setHofButton] = useState<{
@@ -20,7 +20,7 @@ export function PhotoModePanelPatcher({ children }: Props): ReactElement {
 
     // This is executed once each time the photo mode panel is displayed.
     // This patches the DOM and inserts a React Portal rendering our button next
-    // to the Vanilla Take Picture button.
+    // to the Vanilla Take Photo button.
     useEffect(() => {
         // Get panel CSS classes
         const coPanelStyles: Record<string, string> = getModule(
@@ -28,7 +28,7 @@ export function PhotoModePanelPatcher({ children }: Props): ReactElement {
             'classes'
         );
 
-        // Find the Take Picture button, it's located in the panel and has a style
+        // Find the Take Photo button, it's located in the panel and has a style
         // attribute containing "TakePicture". This seems to be a good way to
         // locate it in a reliable way as it does not have any other special
         // class or ID.
@@ -38,19 +38,19 @@ export function PhotoModePanelPatcher({ children }: Props): ReactElement {
 
         if (!(takePictureButton instanceof Element)) {
             console.error(
-                `HoF: Could not locate Take Picture button (using selector "${takePhotoSelector}")`
+                `HoF: Could not locate Take Photo button (using selector "${takePhotoSelector}")`
             );
             return;
         }
 
-        // Insert a span element before the Take Picture button, it will be our
+        // Insert a span element before the Take Photo button, it will be our
         // React Portal target. We use span because it's a relatively neutral
         // element.
         const span = document.createElement('span');
         takePictureButton.insertAdjacentElement('beforebegin', span);
 
         // This will render the portal!
-        // We pass the Vanilla Take Picture button as a template for our own button.
+        // We pass the Vanilla Take Photo button as a template for our own button.
         setHofButton({
             target: span,
             htmlTemplate: takePictureButton.outerHTML

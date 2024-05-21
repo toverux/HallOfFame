@@ -49,6 +49,9 @@
         <Reference Include="Colossal.IO.AssetDatabase">
             <Private>false</Private>
         </Reference>
+        <Reference Include="Colossal.PSI.Common">
+            <Private>false</Private>
+        </Reference>
         <Reference Include="Colossal.UI">
             <Private>false</Private>
         </Reference>
@@ -73,6 +76,12 @@
         <Reference Include="Unity.Mathematics">
             <Private>false</Private>
         </Reference>
+        <Reference Include="UnityEngine.ImageConversionModule">
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="UnityEngine.ScreenCaptureModule">
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>
@@ -88,12 +97,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="$(ModPropsFile)" Link="Properties\Mod.props"/>
-        <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets"/>
+        <PackageReference Include="Lib.Harmony" Version="2.2.2" ExcludeAssets="runtime" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Lib.Harmony" Version="2.2.2" ExcludeAssets="runtime" />
+        <None Include="$(ModPropsFile)" Link="Properties\Mod.props"/>
+        <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets"/>
     </ItemGroup>
 
     <Target Name="BuildUI" AfterTargets="AfterBuild">
