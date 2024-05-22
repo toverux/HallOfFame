@@ -1,7 +1,7 @@
 ﻿{
   "HallOfFame.LogExtensions.BASE_ERROR": "Hall of Fame has encountered an unexpected error. Please report the problem to the mod author on Paradox Mods/Forum or via Discord/GitHub (@toverux).",
   "HallOfFame.LogExtensions.RECOVERABLE_ERROR": "The error is recoverable and you should be able to ignore and continue to play.",
-  "HallOfFame.LogExtensions.FATAL_ERROR": "The error is fatal can have unintended side effects, recommend to save and restart the game.",
+  "HallOfFame.LogExtensions.FATAL_ERROR": "The error is fatal and can have unintended side effects, recommend to save and restart the game and disable the mod if this repeats.",
   "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "Also take local screenshot",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "When using the Hall of Fame screenshot button, also take a screenshot using the standard basegame mechanism (ex. on Windows, C:\\Users\\You\\AppData\\LocalLow\\Colossal Order\\Cities Skylines II\\Screenshots).",

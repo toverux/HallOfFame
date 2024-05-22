@@ -4,8 +4,10 @@ using Colossal.IO.AssetDatabase;
 using Colossal.Logging;
 using Game;
 using Game.Modding;
+using Game.SceneFlow;
 using HallOfFame.Patches;
 using HallOfFame.Systems;
+using HallOfFame.Utils;
 using HarmonyLib;
 using JetBrains.Annotations;
 
@@ -46,41 +48,52 @@ public sealed class Mod : IMod {
     private Harmony? harmony;
 
     public void OnLoad(UpdateSystem updateSystem) {
-        // Register Harmony patches and print debug logs.
-        this.harmony = new Harmony(Mod.HarmonyId);
-        PhotoModeUISystemPatch.Install(this.harmony);
+        try {
+            // Register Harmony patches and print debug logs.
+            this.harmony = new Harmony(Mod.HarmonyId);
+            PhotoModeUISystemPatch.Install(this.harmony);
 
-        var patchedMethods = this.harmony.GetPatchedMethods().ToArray();
+            var patchedMethods = this.harmony.GetPatchedMethods().ToArray();
 
-        Mod.Log.Info(
-            $"Registered as harmony plugin \"{Mod.HarmonyId}\". " +
-            $"Patched methods: {patchedMethods.Length}");
-
-        foreach (var method in patchedMethods) {
             Mod.Log.Info(
-                $"Patched method: {method.FullDescription()} " +
-                $"[{method.Module.Name}]");
+                $"Registered as harmony plugin \"{Mod.HarmonyId}\". " +
+                $"Patched methods: {patchedMethods.Length}");
+
+            foreach (var method in patchedMethods) {
+                Mod.Log.Info(
+                    $"Patched method: {method.FullDescription()} " +
+                    $"[{method.Module.Name}]");
+            }
+
+            #if DEBUG
+            // This will create harmony.log.txt on the Desktop, with generated
+            // IL debug output.
+            Harmony.DEBUG = true;
+            #endif
+
+            // Register settings UI and load settings.
+            this.settingsValue = new Settings(this);
+            this.settingsValue.RegisterInOptionsUI();
+
+            AssetDatabase.global.LoadSettings(
+                nameof(HallOfFame), this.settingsValue, new Settings(this));
+
+            // Initialize subsystems.
+            updateSystem.UpdateAt<HallOfFameGameUISystem>(SystemUpdatePhase.UIUpdate);
+
+            // Done!
+            Mod.instanceValue = this;
+
+            Mod.Log.Info($"{nameof(this.OnLoad)} complete.");
         }
-
-        #if DEBUG
-        // This will create harmony.log.txt on the Desktop, with generated IL debug output.
-        Harmony.DEBUG = true;
-        #endif
-
-        // Register settings UI and load settings.
-        this.settingsValue = new Settings(this);
-        this.settingsValue.RegisterInOptionsUI();
-
-        AssetDatabase.global.LoadSettings(
-            nameof(HallOfFame), this.settingsValue, new Settings(this));
-
-        // Initialize subsystems.
-        updateSystem.UpdateAt<HallOfFameGameUISystem>(SystemUpdatePhase.UIUpdate);
-
-        // Done!
-        Mod.instanceValue = this;
-
-        Mod.Log.Info($"{nameof(this.OnLoad)} complete.");
+        catch (Exception ex) {
+            // We have to delay this to the next frame because it uses
+            // translations and I18n EveryWhere might not be ready just yet.
+            // Especially in development where we can't change load order.
+            // All mods OnLoad()s are executed in the same frame, so this is
+            // deterministic.
+            GameManager.instance.RegisterUpdater(() => Mod.Log.ErrorFatal(ex));
+        }
     }
 
     public void OnDispose() {
