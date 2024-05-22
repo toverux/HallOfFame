@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Colossal.IO.AssetDatabase;
 using Colossal.Logging;
@@ -28,7 +28,7 @@ public sealed class Mod : IMod {
     /// <exception cref="NullReferenceException">
     /// If the mod settings have not been loaded yet.
     /// </exception>
-    public Settings Settings =>
+    public static Settings Settings =>
         Mod.instanceValue?.settingsValue ??
         throw new NullReferenceException(
             $"Mod {nameof(Mod.OnLoad)}() was not called yet.");

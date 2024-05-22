@@ -3,12 +3,10 @@ using System.IO;
 using System.Reflection;
 using Colossal.UI;
 using Colossal.UI.Binding;
-using Game.SceneFlow;
-using Game.Tools;
 using Game.UI;
 using Game.UI.InGame;
-using Game.UI.Localization;
 using HallOfFame.Patches;
+using HallOfFame.Utils;
 using HarmonyLib;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -46,19 +44,24 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     protected override void OnCreate() {
         base.OnCreate();
 
-        this.photoModeUISystem =
-            this.World.GetOrCreateSystemManaged<PhotoModeUISystem>();
+        try {
+            this.photoModeUISystem =
+                this.World.GetOrCreateSystemManaged<PhotoModeUISystem>();
 
-        this.AddBinding(new TriggerBinding(
-            "hallOfFame", "takeScreenshot", this.BeginTakeScreenshot));
+            this.AddBinding(new TriggerBinding(
+                "hallOfFame", "takeScreenshot", this.BeginTakeScreenshot));
 
-        // Temp directory must be created before AddHostLocation() is called,
-        // otherwise if watch mode is enabled we'll get an exception.
-        Directory.CreateDirectory(HallOfFameGameUISystem.ScreenshotDirectory);
+            // Temp directory must be created before AddHostLocation() is called,
+            // otherwise if watch mode is enabled we'll get an exception.
+            Directory.CreateDirectory(HallOfFameGameUISystem.ScreenshotDirectory);
 
-        // Adds "coui://halloffame/" host location for serving images.
-        UIManager.defaultUISystem.AddHostLocation(
-            "halloffame", HallOfFameGameUISystem.ScreenshotDirectory);
+            // Adds "coui://halloffame/" host location for serving images.
+            UIManager.defaultUISystem.AddHostLocation(
+                "halloffame", HallOfFameGameUISystem.ScreenshotDirectory);
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorFatal(ex);
+        }
     }
 
     protected override void OnDestroy() {
@@ -88,19 +91,28 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     private bool ContinueTakeScreenshot() {
         PhotoModeUISystemPatch.OnCaptureScreenshot -= this.ContinueTakeScreenshot;
 
-        var screenshotTexture =
-            ScreenCapture.CaptureScreenshotAsTexture(superSize: 1);
+        // This bricks the current game session if this throws, so we will
+        // handle exceptions properly here, as there is a non-zero chance of
+        // failure in this section (notably due to I/O).
+        try {
+            var screenshotTexture =
+                ScreenCapture.CaptureScreenshotAsTexture(superSize: 1);
 
-        this.latestScreenshotBytes = screenshotTexture.EncodeToJPG();
+            this.latestScreenshotBytes = screenshotTexture.EncodeToJPG();
 
-        Object.DestroyImmediate(screenshotTexture);
+            Object.DestroyImmediate(screenshotTexture);
 
-        File.WriteAllBytes(
-            Path.Combine(
-                HallOfFameGameUISystem.ScreenshotDirectory,
-                "screenshot.jpg"),
-            this.latestScreenshotBytes);
+            File.WriteAllBytes(
+                Path.Combine(
+                    HallOfFameGameUISystem.ScreenshotDirectory,
+                    "test",
+                    "screenshot.jpg"),
+                this.latestScreenshotBytes);
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
+        }
 
-        return Mod.Instance.Settings.MakePlatformScreenshots;
+        return Mod.Settings.MakePlatformScreenshots;
     }
 }
