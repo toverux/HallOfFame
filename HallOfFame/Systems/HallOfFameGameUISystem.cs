@@ -95,8 +95,14 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         // handle exceptions properly here, as there is a non-zero chance of
         // failure in this section (notably due to I/O).
         try {
+            // Take a supersize screenshot that is *at least* 2160 pixels (4K).
+            // Height is better than width because of widescreen monitors.
+            // The server will decide the final resolution, i.e. rescale to
+            // 2160p if the resulting image is bigger.
+            var scaleFactor = (int) Math.Ceiling(2160d / Screen.height);
+
             var screenshotTexture =
-                ScreenCapture.CaptureScreenshotAsTexture(superSize: 1);
+                ScreenCapture.CaptureScreenshotAsTexture(scaleFactor);
 
             this.latestScreenshotBytes = screenshotTexture.EncodeToJPG();
 
@@ -105,7 +111,6 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             File.WriteAllBytes(
                 Path.Combine(
                     HallOfFameGameUISystem.ScreenshotDirectory,
-                    "test",
                     "screenshot.jpg"),
                 this.latestScreenshotBytes);
         }

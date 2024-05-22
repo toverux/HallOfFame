@@ -88,6 +88,8 @@ Scope can be one or more of the following:
  - `mod`: for general changes to how the mod "presents itself" to the game or user;
  - `cs`: for C# mod changes;
  - `ui`: for UI mod changes;
+ - `menu`: for changes in the main menu part of the mod;
+ - `game`: for changes in the in-game part of the mod;
  - `i18n`: for changes in translations and translations system;
  - `deps`: for dependencies updates;
  - Propose new scopes if needed!
