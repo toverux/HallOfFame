@@ -48,7 +48,7 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 }
 
 function takePicture(): void {
-    trigger('hallOfFame', 'takeScreenshot');
+    trigger('hallOfFame.game', 'takeScreenshot');
 
     // Delay the shutter sound when the screenshot is actually taken, and not
     // just before. This is actually taken from Vanilla code.

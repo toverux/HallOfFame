@@ -3,14 +3,20 @@
  * rendering the splashscreen and its controls.
  */
 
-import { type ReactElement, type ReactNode, useState } from 'react';
+import { bindValue, useValue } from 'cs2/api';
+import type { ReactElement, ReactNode } from 'react';
 import { MenuControls } from './menu-controls';
 import { MenuSplashscreen } from './menu-splashscreen';
+import modLoadingErrorSrc from './mod-loading-error.jpg';
 
-// This is the Vanilla image when the mod was written.
-// It could be retrieved dynamically from calculated styles before we apply our
-// override class, but it's unlikely to change. (right?)
-const defaultSplashSrc = 'Media/Menu/Background2.jpg';
+const currentImageUri$ = bindValue<string>(
+    'hallOfFame.menu',
+    'currentImageUri',
+    // This is the Vanilla image when the mod was written.
+    // Used here as a fallback in case the C# binding fails, which should really
+    // not happen.
+    modLoadingErrorSrc
+);
 
 interface Props {
     readonly children: ReactNode;
@@ -21,15 +27,11 @@ interface Props {
  * HoF components inside it.
  */
 export function MenuWrapper({ children }: Props): ReactElement {
-    const [imageUri, setImageUri] = useState(defaultSplashSrc);
-
-    // @todo For debug, remove on release.
-    // biome-ignore lint/suspicious/noExplicitAny: todo
-    (window as any).loadNewImage = setImageUri;
+    const currentImageUri = useValue(currentImageUri$);
 
     return (
         <>
-            <MenuSplashscreen imageUri={imageUri} />
+            <MenuSplashscreen imageUri={currentImageUri} />
             {children}
             <MenuControls />
         </>

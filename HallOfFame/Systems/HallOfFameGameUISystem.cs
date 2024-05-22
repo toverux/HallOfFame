@@ -49,7 +49,7 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
                 this.World.GetOrCreateSystemManaged<PhotoModeUISystem>();
 
             this.AddBinding(new TriggerBinding(
-                "hallOfFame", "takeScreenshot", this.BeginTakeScreenshot));
+                "hallOfFame.game", "takeScreenshot", this.BeginTakeScreenshot));
 
             // Temp directory must be created before AddHostLocation() is called,
             // otherwise if watch mode is enabled we'll get an exception.
