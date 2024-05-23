@@ -36,8 +36,7 @@ public sealed class Mod : IMod {
             $"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
     internal static ILog Log { get; } =
-        LogManager.GetLogger($"{nameof(HallOfFame)}.{nameof(Mod)}")
-            .SetShowsErrorsInUI(true);
+        LogManager.GetLogger(nameof(HallOfFame)).SetShowsErrorsInUI(true);
 
     private const string HarmonyId = "io.mtq.cs2.halloffame";
 

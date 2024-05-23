@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Colossal.PSI.Environment;
 using Colossal.UI;
 using Colossal.UI.Binding;
 using Game.UI;
@@ -24,7 +25,7 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     /// memory to discourage tampering.
     /// </summary>
     private static readonly string ScreenshotDirectory =
-        Path.Combine(Application.temporaryCachePath, "HallOfFame");
+        Path.Combine(EnvPath.kCacheDataPath, "HallOfFame");
 
     /// <summary>
     /// This is the method that is called when the "Take Photo" button is

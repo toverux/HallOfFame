@@ -4,7 +4,7 @@ using Game.Settings;
 
 namespace HallOfFame;
 
-[FileLocation(nameof(HallOfFame))]
+[FileLocation($"ModsSettings/{nameof(HallOfFame)}/{nameof(HallOfFame)}")]
 public sealed class Settings(IMod mod) : ModSetting(mod) {
     /// <summary>
     /// Whether to inhibit the vanilla screenshot capture or not, when taking
