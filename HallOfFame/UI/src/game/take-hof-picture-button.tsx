@@ -1,6 +1,7 @@
 ﻿import { trigger } from 'cs2/api';
 import { Tooltip, type UISound } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
+import { logError } from '../common';
 import styles from './take-hof-picture-button.module.scss';
 
 /**
@@ -24,7 +25,9 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
         // Retrieve button element, and add our custom class to it.
         const button = spanRef.current?.firstElementChild;
         if (!(button instanceof HTMLButtonElement)) {
-            throw new Error(`Expected template HTML to be a <button>.`);
+            return logError(
+                new Error(`Expected template HTML to be a <button>.`)
+            );
         }
 
         button.classList.add(styles.screenshotButton);

@@ -1,7 +1,7 @@
 ﻿{
-  "HallOfFame.LogExtensions.BASE_ERROR": "Hall of Fame a rencontré une erreur inattendue. Veuillez contacter l'auteur du mod sur Paradox Mods/Forums ou via Discord/GitHub (@toverux).",
-  "HallOfFame.LogExtensions.RECOVERABLE_ERROR": "L'erreur n'est pas fatale et vous devriez pouvoir continuer votre session de jeu sans problème.",
-  "HallOfFame.LogExtensions.FATAL_ERROR": "Cette erreur est fatale et vous devriez sauvegarder votre partie et redémarrer le jeu et de désactiver le mod si le problème se répète.",
+  "HallOfFame.Common.BASE_ERROR": "Hall of Fame a rencontré une erreur inattendue. Veuillez contacter l'auteur du mod sur Paradox Mods/Forums ou via Discord/GitHub (@toverux).",
+  "HallOfFame.Common.RECOVERABLE_ERROR": "L'erreur n'est pas fatale et vous devriez pouvoir continuer votre session de jeu sans problème.",
+  "HallOfFame.Common.FATAL_ERROR": "Cette erreur est fatale et vous devriez sauvegarder votre partie et redémarrer le jeu et de désactiver le mod si le problème se répète.",
   "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "Prendre des captures d'écran locales",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "Quand vous ferez une capture d'écran avec Hall of Fame, faire aussi un screenshot avec la méthode par défaut du jeu de base (ex. sur Windows, C:\\Users\\You\\AppData\\LocalLow\\Colossal Order\\Cities Skylines II\\Screenshots).",

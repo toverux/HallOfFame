@@ -11,10 +11,10 @@ internal static class LogExtensions {
     /// We warn them that they can probably safely continue to play.
     /// </summary>
     internal static void ErrorRecoverable(this ILog log, Exception ex) {
-        var @base = "HallOfFame.LogExtensions.BASE_ERROR".Translate();
-        var gravity = "HallOfFame.LogExtensions.RECOVERABLE_ERROR".Translate();
+        var @base = "HallOfFame.Common.BASE_ERROR".Translate();
+        var gravity = "HallOfFame.Common.RECOVERABLE_ERROR".Translate();
 
-        log.Error(ex, $"{@base} \n{gravity}".Translate());
+        log.Error(ex, $"{@base} \n{gravity}");
     }
 
     /// <summary>
@@ -22,9 +22,9 @@ internal static class LogExtensions {
     /// that we don't know what side effects they might have.
     /// </summary>
     internal static void ErrorFatal(this ILog log, Exception ex) {
-        var @base = "HallOfFame.LogExtensions.BASE_ERROR".Translate();
-        var gravity = "HallOfFame.LogExtensions.FATAL_ERROR".Translate();
+        var @base = "HallOfFame.Common.BASE_ERROR".Translate();
+        var gravity = "HallOfFame.Common.FATAL_ERROR".Translate();
 
-        log.Error(ex, $"{@base} \n{gravity}".Translate());
+        log.Error(ex, $"{@base} \n{gravity}");
     }
 }

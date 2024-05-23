@@ -1,6 +1,7 @@
 ﻿import { getModule } from 'cs2/modding';
 import { type ReactElement, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { logError } from '../common';
 import { TakeHofPictureButton } from './take-hof-picture-button';
 
 interface Props {
@@ -37,10 +38,9 @@ export function PhotoModePanelPatcher({ children }: Props): ReactElement {
             document.querySelector(takePhotoSelector)?.parentNode;
 
         if (!(takePictureButton instanceof Element)) {
-            console.error(
+            return logError(
                 `HoF: Could not locate Take Photo button (using selector "${takePhotoSelector}")`
             );
-            return;
         }
 
         // Insert a span element before the Take Photo button, it will be our

@@ -79,6 +79,7 @@ public sealed class Mod : IMod {
                 nameof(HallOfFame), this.settingsValue, new Settings(this));
 
             // Initialize subsystems.
+            updateSystem.UpdateAt<HallOfFameUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<HallOfFameMenuUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<HallOfFameGameUISystem>(SystemUpdatePhase.UIUpdate);
 
