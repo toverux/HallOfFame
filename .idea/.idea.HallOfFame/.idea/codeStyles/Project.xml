@@ -78,6 +78,7 @@
       </indentOptions>
     </codeStyleSettings>
     <codeStyleSettings language="TypeScript">
+      <option name="RIGHT_MARGIN" value="80" />
       <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
       <option name="BLANK_LINES_AROUND_FIELD" value="1" />
       <option name="BLANK_LINES_AROUND_FIELD_IN_INTERFACE" value="1" />
@@ -104,7 +105,6 @@
       <option name="WHILE_BRACE_FORCE" value="3" />
       <option name="FOR_BRACE_FORCE" value="3" />
       <option name="ENUM_CONSTANTS_WRAP" value="1" />
-      <option name="SOFT_MARGINS" value="80" />
     </codeStyleSettings>
   </code_scheme>
 </component>

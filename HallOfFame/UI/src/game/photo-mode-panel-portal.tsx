@@ -13,7 +13,7 @@ interface Props {
  * it renders it in any way. Instead, it borrows its lifecycle to then create a
  * React Portal that will be inserted next to the Take Photo button.
  */
-export function PhotoModePanelPatcher({ children }: Props): ReactElement {
+export function PhotoModePanelPortal({ children }: Props): ReactElement {
     const [hofButton, setHofButton] = useState<{
         target: Element;
         htmlTemplate: string;
