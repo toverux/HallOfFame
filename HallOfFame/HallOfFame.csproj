@@ -1,5 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <Version>1.0.0</Version>
+        <FileVersion>1.0.0</FileVersion>
+
         <OutputType>Library</OutputType>
         <!-- According to @Wayz on Discord, C# 9 is the highest version supported by Burst. -->
         <!-- With a version higher than that it fails silently. -->
@@ -97,7 +100,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Lib.Harmony" Version="2.2.2" ExcludeAssets="runtime" />
+        <PackageReference Include="Lib.Harmony" Version="2.2.2" ExcludeAssets="runtime"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -105,7 +108,13 @@
         <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets"/>
     </ItemGroup>
 
+    <Target Name="SetupAttributes" BeforeTargets="BeforeBuild">
+        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/LongDescription.md))" Query="//LongDescription"/>
+        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/ChangeLog.md))" Query="//ChangeLog"/>
+        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$(Version)" Query="//ModVersion/@Value"/>
+    </Target>
+
     <Target Name="BuildUI" AfterTargets="AfterBuild">
-        <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)/UI" />
+        <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)/UI"/>
     </Target>
 </Project>
