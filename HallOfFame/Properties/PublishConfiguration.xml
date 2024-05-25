@@ -9,7 +9,6 @@
   <ForumLink Value="" />
   <ModVersion Value="1.0.0" />
   <GameVersion Value="1.1.*" />
-  <Dependency Id="77209" DisplayName="DependencyPack" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
   <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
   <ChangeLog>Initial release.</ChangeLog>
