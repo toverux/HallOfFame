@@ -16,7 +16,7 @@ export function MenuSplashscreen({ imageUri }: Props): ReactElement {
     // This destroys the previous image div, freeing up memory. And the cycle repeats.
 
     const [currentImage, setCurrentImage] = useState(imageUri);
-    const [incomingImage, setIncomingImage] = useState<string | null>(null);
+    const [incomingImage, setIncomingImage] = useState<string>();
 
     // When a new image is requested, we load it into browser cache memory.
     // And when it's loaded, only then we set it as the incoming image, that
@@ -32,7 +32,7 @@ export function MenuSplashscreen({ imageUri }: Props): ReactElement {
     function handleIncomingImageAnimationEnd(): void {
         // biome-ignore lint/style/noNonNullAssertion: it can't be null when the event occurs.
         setCurrentImage(incomingImage!);
-        setIncomingImage(null);
+        setIncomingImage(undefined);
     }
 
     // Note: We'll use <div> and not <img> to display background images, because
