@@ -1,6 +1,7 @@
 import type { ModRegistrar } from 'cs2/modding';
 import { register as registerOnGame } from './game';
 import { register as registerOnMenu } from './menu';
+import { register as registerOnTimeControls } from './time-controls';
 
 const register: ModRegistrar = moduleRegistry => {
     // @todo For debug, remove on release.
@@ -9,6 +10,7 @@ const register: ModRegistrar = moduleRegistry => {
 
     registerOnMenu(moduleRegistry);
     registerOnGame(moduleRegistry);
+    registerOnTimeControls(moduleRegistry);
 
     console.info(`HoF: Successfully registered all modules.`);
 };
