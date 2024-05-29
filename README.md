@@ -17,6 +17,27 @@ For fellow CS2 modders in search of code samples, the source code notably featur
  - [Harmony](https://harmony.pardeike.net/index.html) transpiler patches for
    .NET IL-level modding;
 
+## Roadmap
+
+ - For Beta:
+   - Upload photo along with basic info (creator name, city name, population).
+   - Refresh photo in menu screen.
+   - Display city name, creator name, date of upload.
+   - Toggle menu UI to better see the image.
+
+ - Planned next:
+   - Permanently disable CS2 logo in menu screen to better see the images.
+   - Report abuse.
+   - Upvote button.
+   - Show photo not already seen.
+   - Discover mode: most liked, most recent, mixed...
+
+ - Nice to have:
+   - Photo in background when loading a game save.
+   - See another photo from the same city.
+   - Save photo to disk.
+   - Follow creator (see more of their pictures).
+
 ## Installation
 
  - Standard CS2 modding toolchain;
