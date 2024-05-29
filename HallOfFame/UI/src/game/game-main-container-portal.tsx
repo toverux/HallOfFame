@@ -1,9 +1,13 @@
 ﻿import { stripIndent } from 'common-tags';
-import { getModule } from 'cs2/modding';
 import { type ReactElement, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { logError } from '../common';
+import { getClassesModule, logError } from '../common';
 import { ScreenshotUploadPanel } from './screenshot-upload-panel';
+
+const coMainScreenStyles = getClassesModule(
+    'game-ui/game/components/game-main-screen.module.scss',
+    ['mainContainer']
+);
 
 /**
  * This component is added to the main game UI, but does not add content
@@ -20,18 +24,13 @@ export function GameMainContainerPortal(): ReactElement {
     // This will be executed once when our host is ready, i.e. when the
     // .main-container has been created in the DOM.
     useEffect(() => {
-        const coMainScreenStyles: Record<string, string> = getModule(
-            'game-ui/game/components/game-main-screen.module.scss',
-            'classes'
-        );
-
         const mainContainerSelector = `.${coMainScreenStyles.mainContainer}`;
         const mainContainerEl = document.querySelector(mainContainerSelector);
 
         if (!(mainContainerEl instanceof Element)) {
             return logError(
                 new Error(stripIndent`
-                    HoF: Could not locate Main Container div
+                    Could not locate Main Container div
                     (using selector "${mainContainerSelector}")`)
             );
         }

@@ -1,13 +1,12 @@
 ﻿import { stripIndent } from 'common-tags';
-import { getModule } from 'cs2/modding';
 import { type ReactElement, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { logError } from '../common';
+import { getClassesModule, logError } from '../common';
 import { TakeHofPictureButton } from './take-hof-picture-button';
 
-const coPanelStyles: Record<string, string> = getModule(
+const coPanelStyles = getClassesModule(
     'game-ui/game/components/photo-mode/photo-mode-panel.module.scss',
-    'classes'
+    ['buttonPanel']
 );
 
 interface Props {
@@ -40,7 +39,7 @@ export function PhotoModePanelPortal({ children }: Props): ReactElement {
         if (!(takePictureButton instanceof Element)) {
             return logError(
                 new Error(stripIndent`
-                    HoF: Could not locate Main Container div
+                    Could not locate Main Container div
                     (using selector "${takePhotoSelector}")`)
             );
         }

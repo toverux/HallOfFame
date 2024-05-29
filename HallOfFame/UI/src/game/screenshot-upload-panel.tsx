@@ -1,9 +1,8 @@
-import { bindValue, trigger, useValue } from 'cs2/api';
+﻿import { bindValue, trigger, useValue } from 'cs2/api';
 import { useLocalization } from 'cs2/l10n';
-import { getModule } from 'cs2/modding';
 import { Button, Icon } from 'cs2/ui';
 import { type CSSProperties, type ReactElement, useMemo } from 'react';
-import { logError } from '../common';
+import { getClassesModule, logError } from '../common';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
 import * as styles from './screenshot-upload-panel.module.scss';
 
@@ -20,14 +19,14 @@ type ScreenshottingState =
     | { name: 'uploading' }
     | { name: 'uploaded' };
 
-const coFixedRatioImageStyles: Record<string, string> = getModule(
+const coFixedRatioImageStyles = getClassesModule(
     'game-ui/common/image/fixed-ratio-image.module.scss',
-    'classes'
+    ['fixedRatioImage', 'image', 'ratio']
 );
 
-const coMainScreenStyles: Record<string, string> = getModule(
+const coMainScreenStyles = getClassesModule(
     'game-ui/game/components/game-main-screen.module.scss',
-    'classes'
+    ['centerPanelLayout']
 );
 
 const screenshottingState$ = bindValue<ScreenshottingState>(
@@ -70,7 +69,7 @@ export function ScreenshotUploadPanel(): ReactElement {
     // Check vanilla class exists.
     if (!coMainScreenStyles.centerPanelLayout) {
         logError(
-            new Error('HoF: Could not get a hold on .center-panel-layout class')
+            new Error('Could not get a hold on .center-panel-layout class')
         );
 
         return <></>;
