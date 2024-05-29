@@ -2,7 +2,7 @@
 import { Tooltip, type UISound } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
 import { logError } from '../common';
-import styles from './take-hof-picture-button.module.scss';
+import * as styles from './take-hof-picture-button.module.scss';
 
 /**
  * Component that displays the HoF Take Photo button in the photo mode panel.

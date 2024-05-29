@@ -1,5 +1,5 @@
 ﻿import { type ReactElement, useEffect, useState } from 'react';
-import styles from './menu-splashscreen.module.scss';
+import * as styles from './menu-splashscreen.module.scss';
 
 interface Props {
     readonly imageUri: string;

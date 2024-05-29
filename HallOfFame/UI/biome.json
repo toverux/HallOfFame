@@ -22,6 +22,7 @@
       },
       "style": {
         "noCommaOperator": "off",
+        "noNamespaceImport": "off",
         "noUnusedTemplateLiteral": "off",
         "useNamingConvention": {
           "level": "error",

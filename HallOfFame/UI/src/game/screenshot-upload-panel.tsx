@@ -1,11 +1,11 @@
-﻿import { bindValue, trigger, useValue } from 'cs2/api';
+import { bindValue, trigger, useValue } from 'cs2/api';
 import { useLocalization } from 'cs2/l10n';
 import { getModule } from 'cs2/modding';
 import { Button, Icon } from 'cs2/ui';
 import { type CSSProperties, type ReactElement, useMemo } from 'react';
 import { logError } from '../common';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
-import styles from './screenshot-upload-panel.module.scss';
+import * as styles from './screenshot-upload-panel.module.scss';
 
 type ScreenshottingState =
     | { name: 'idle' }
