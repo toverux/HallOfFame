@@ -1,10 +1,12 @@
 ﻿{
-  "HallOfFame.Common.BASE_ERROR": "Hall of Fame a rencontré une erreur inattendue. Veuillez contacter l'auteur du mod sur Paradox Mods/Forums ou via Discord/GitHub (@toverux).",
-  "HallOfFame.Common.RECOVERABLE_ERROR": "L'erreur n'est pas fatale et vous devriez pouvoir continuer votre session de jeu sans problème.",
+  "HallOfFame.Common.BASE_ERROR": "Hall of Fame a rencontré une erreur inattendue. Veuillez contacter l’auteur du mod sur Paradox Mods/Forums ou via Discord/GitHub (@toverux).",
+  "HallOfFame.Common.RECOVERABLE_ERROR": "L’erreur n’est pas fatale et vous devriez pouvoir continuer votre session de jeu sans problème.",
   "HallOfFame.Common.FATAL_ERROR": "Cette erreur est fatale et vous devriez sauvegarder votre partie et redémarrer le jeu et de désactiver le mod si le problème se répète.",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message. Do not translate literally, be creative, or use ChatGPT. Separate each different message with a line break. You can have as much messages as you want.\nVue magnifique\u00a0!\nLa fierté de votre ville\u00a0!\nSpectaculaire\u00a0!\nPrêt à partager\u00a0?\nQuelle vue splendide\u00a0!\nPartagez votre création\u00a0!\nVotre ville en lumière\u00a0!\nUn instant magique\u00a0!\nFaites-en profiter tout le monde\u00a0!\nIl semble y faire bon vivre\u00a0!",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD": "Envoyer",
   "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
-  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "Prendre des captures d'écran locales",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "Quand vous ferez une capture d'écran avec Hall of Fame, faire aussi un screenshot avec la méthode par défaut du jeu de base (ex. sur Windows, C:\\Users\\You\\AppData\\LocalLow\\Colossal Order\\Cities Skylines II\\Screenshots).",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "Prendre des captures d’écran locales",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "Quand vous ferez une capture d’écran avec Hall of Fame, faire aussi un screenshot avec la méthode par défaut du jeu de base (ex. sur Windows, C:\\Users\\You\\AppData\\LocalLow\\Colossal Order\\Cities Skylines II\\Screenshots).",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Serveur Hall of Fame",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Nom d'hôte (et non URL) du serveur Hall of Fame. Ne le changez pas à moins que vous ne développiez sur le mod ou voulez utiliser un serveur alternatif."
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Nom d’hôte (et non URL) du serveur Hall of Fame. Ne le changez pas à moins que vous ne développiez sur le mod ou voulez utiliser un serveur alternatif."
 }

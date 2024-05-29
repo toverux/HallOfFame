@@ -1,4 +1,4 @@
-﻿using Colossal.UI.Binding;
+using Colossal.UI.Binding;
 using Game.UI;
 using HallOfFame.Utils;
 

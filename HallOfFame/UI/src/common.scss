@@ -1,0 +1,11 @@
+﻿// CoHTML engine does not support border-radius shorthand.
+@mixin border-radius($value) {
+    //noinspection CssReplaceWithShorthandSafely
+    border-top-right-radius: $value;
+    //noinspection CssReplaceWithShorthandSafely
+    border-top-left-radius: $value;
+    //noinspection CssReplaceWithShorthandSafely
+    border-bottom-right-radius: $value;
+    //noinspection CssReplaceWithShorthandSafely
+    border-bottom-left-radius: $value;
+}

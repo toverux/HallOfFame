@@ -2,9 +2,11 @@
   "HallOfFame.Common.BASE_ERROR": "Hall of Fame has encountered an unexpected error. Please report the problem to the mod author on Paradox Mods/Forum or via Discord/GitHub (@toverux).",
   "HallOfFame.Common.RECOVERABLE_ERROR": "The error is recoverable and you should be able to ignore and continue to play.",
   "HallOfFame.Common.FATAL_ERROR": "The error is fatal and can have unintended side effects, recommend to save and restart the game and disable the mod if this repeats.",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message. Do not translate literally, be creative, or use ChatGPT. Separate each different message with a line break. You can have as much messages as you want.\nHall of Fame material!\nShare this masterpiece?\nStunning view!\nNice shot!\nA picture worth sharing!\nSnapshot of glory!\nFrame this memory!\nShow the community!\nThis one’s a keeper!\nVery nice skyline!",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD": "Upload",
   "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "Also take local screenshot",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "When using the Hall of Fame screenshot button, also take a screenshot using the standard basegame mechanism (ex. on Windows, C:\\Users\\You\\AppData\\LocalLow\\Colossal Order\\Cities Skylines II\\Screenshots).",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Hall of Fame server",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Hostname (not URL) of the hall of fame server. You should not change it unless you're developing on the mod or using an alternative server."
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Hostname (not URL) of the hall of fame server. You should not change it unless you’re developing on the mod or using an alternative server."
 }

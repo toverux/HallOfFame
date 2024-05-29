@@ -24,8 +24,15 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     /// purposes in the UI. The actual image sent to the server is kept in
     /// memory to discourage tampering.
     /// </summary>
-    private static readonly string ScreenshotDirectory =
-        Path.Combine(EnvPath.kCacheDataPath, "HallOfFame");
+    private static readonly string ScreenshotDirectory = Path.Combine(
+        EnvPath.kCacheDataPath, "HallOfFame");
+
+    /// <summary>
+    /// File path of the screenshot.
+    /// <seealso cref="ScreenshotDirectory"/>
+    /// </summary>
+    private static readonly string ScreenshotFile = Path.Combine(
+        HallOfFameGameUISystem.ScreenshotDirectory, "screenshot.jpg");
 
     /// <summary>
     /// This is the method that is called when the "Take Photo" button is
@@ -40,7 +47,8 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
 
     private PhotoModeUISystem? photoModeUISystem;
 
-    private byte[]? latestScreenshotBytes;
+    private ScreenshottingState screenshottingState =
+        new ScreenshottingStateIdle();
 
     protected override void OnCreate() {
         base.OnCreate();
@@ -49,8 +57,15 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             this.photoModeUISystem =
                 this.World.GetOrCreateSystemManaged<PhotoModeUISystem>();
 
+            this.AddUpdateBinding(new GetterValueBinding<ScreenshottingState>(
+                "hallOfFame.game", "screenshottingState",
+                () => this.screenshottingState));
+
             this.AddBinding(new TriggerBinding(
                 "hallOfFame.game", "takeScreenshot", this.BeginTakeScreenshot));
+
+            this.AddBinding(new TriggerBinding(
+                "hallOfFame.game", "clearScreenshot", this.ClearScreenshot));
 
             // Temp directory must be created before AddHostLocation() is called,
             // otherwise if watch mode is enabled we'll get an exception.
@@ -58,7 +73,12 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
 
             // Adds "coui://halloffame/" host location for serving images.
             UIManager.defaultUISystem.AddHostLocation(
-                "halloffame", HallOfFameGameUISystem.ScreenshotDirectory);
+                "halloffame",
+                HallOfFameGameUISystem.ScreenshotDirectory,
+                // True by default, but it makes the whole UI reload when an
+                // image changes with --uiDeveloperMode. But we don't desire
+                // that for this host, whether in dev mode or not.
+                shouldWatch: false);
         }
         catch (Exception ex) {
             Mod.Log.ErrorFatal(ex);
@@ -76,7 +96,15 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     /// Our Harmony patch installed via <see cref="PhotoModeUISystemPatch"/>
     /// will call us back for custom screenshot taking.
     /// </summary>
-    private void BeginTakeScreenshot() {
+    private async void BeginTakeScreenshot() {
+        if (this.screenshottingState is not ScreenshottingStateIdle &&
+            this.screenshottingState is not ScreenshottingStateReady &&
+            this.screenshottingState is not ScreenshottingStateUploaded) {
+            return;
+        }
+
+        this.screenshottingState = new ScreenshottingStateTaking();
+
         PhotoModeUISystemPatch.OnCaptureScreenshot += this.ContinueTakeScreenshot;
 
         HallOfFameGameUISystem.TakeScreenshotOriginalMethod.Invoke(
@@ -105,20 +133,41 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             var screenshotTexture =
                 ScreenCapture.CaptureScreenshotAsTexture(scaleFactor);
 
-            this.latestScreenshotBytes = screenshotTexture.EncodeToJPG();
+            var screenshotBytes = screenshotTexture.EncodeToJPG();
+            var screenshotSize = new Vector2Int(
+                screenshotTexture.width, screenshotTexture.height);
 
             Object.DestroyImmediate(screenshotTexture);
 
             File.WriteAllBytes(
-                Path.Combine(
-                    HallOfFameGameUISystem.ScreenshotDirectory,
-                    "screenshot.jpg"),
-                this.latestScreenshotBytes);
+                HallOfFameGameUISystem.ScreenshotFile,
+                screenshotBytes);
+
+            this.screenshottingState = new ScreenshottingStateReady(
+                screenshotBytes, screenshotSize);
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
+
+            this.screenshottingState = new ScreenshottingStateIdle();
+        }
+
+        return Mod.Settings.MakePlatformScreenshots;
+    }
+
+    private void ClearScreenshot() {
+        if (this.screenshottingState is not ScreenshottingStateReady) {
+            return;
+        }
+
+        try {
+            File.Delete(HallOfFameGameUISystem.ScreenshotFile);
         }
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
         }
-
-        return Mod.Settings.MakePlatformScreenshots;
+        finally {
+            this.screenshottingState = new ScreenshottingStateIdle();
+        }
     }
 }
