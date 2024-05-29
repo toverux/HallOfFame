@@ -12,8 +12,8 @@ public sealed partial class HallOfFameMenuUISystem : UISystemBase {
     protected override void OnCreate() {
         base.OnCreate();
 
-        this.AddUpdateBinding(new GetterValueBinding<string>(
+        this.AddBinding(new ValueBinding<string>(
             "hallOfFame.menu", "currentImageUri",
-            () => HallOfFameMenuUISystem.VanillaDefaultImageUri));
+            HallOfFameMenuUISystem.VanillaDefaultImageUri));
     }
 }

@@ -96,7 +96,7 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     /// Our Harmony patch installed via <see cref="PhotoModeUISystemPatch"/>
     /// will call us back for custom screenshot taking.
     /// </summary>
-    private async void BeginTakeScreenshot() {
+    private void BeginTakeScreenshot() {
         if (this.screenshottingState is not ScreenshottingStateIdle &&
             this.screenshottingState is not ScreenshottingStateReady &&
             this.screenshottingState is not ScreenshottingStateUploaded) {
