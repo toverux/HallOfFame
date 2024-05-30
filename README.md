@@ -2,6 +2,9 @@
 
 # Hall of Fame for Cities: Skylines II
 
+[![Discord](https://img.shields.io/badge/Discord-@toverux-5865f2?logo=discord&logoColor=white&style=flat-square)](https://discord.gg/SsshDVq2Zj)
+[![Paradox Mods](https://img.shields.io/badge/Paradox_Mods-Unreleased_yet-5abe41?style=flat-square)](https://mods.paradoxplaza.com/games/cities_skylines_2)
+
 A Cities: Skylines II mod that allow players to take and upload screenshots of
 their city, and share them with the community.
 
@@ -15,9 +18,20 @@ For fellow CS2 modders in search of code samples, the source code notably featur
  - Use of React portals and manual DOM manipulation to patch specific parts of
    the game's UI that aren't exposed in the modding API;
  - [Harmony](https://harmony.pardeike.net/index.html) transpiler patches for
-   .NET IL-level modding;
+   .NET IL-level modding.
 
-## Roadmap
+### Acknowledgements
+
+The mod is directly inspired from the homonymous mod for Factorio,
+[Hall of Fame](https://mods.factorio.com/mod/HallOfFame).
+[Loading Screen Mod Revisited](https://steamcommunity.com/sharedfiles/filedetails/?id=2858591409)
+for Cities: Skylines 1 also provided a similar feature.
+
+Special thanks to:
+ - The Cities: Skylines Modding Discord community in general for their help.
+ - [@chameleon_tbn](https://linktr.ee/chameleon_tbn) for providing icons.
+
+## Features & Roadmap
 
  - For Beta:
    - Upload photo along with basic info (creator name, city name, population).
@@ -29,7 +43,7 @@ For fellow CS2 modders in search of code samples, the source code notably featur
    - Permanently disable CS2 logo in menu screen to better see the images.
    - Report abuse.
    - Upvote button.
-   - Show photo not already seen.
+   - Show pictures that have not been already seen.
    - Discover mode: most liked, most recent, mixed...
 
  - Nice to have:
@@ -38,7 +52,9 @@ For fellow CS2 modders in search of code samples, the source code notably featur
    - Save photo to disk.
    - Follow creator (see more of their pictures).
 
-## Installation
+## Development
+
+### Installation
 
  - Standard CS2 modding toolchain;
  - `npm i` in `HallOfFame/UI` to install UI mod dependencies.
@@ -50,15 +66,14 @@ Here's a game launch command to also skip launcher in Steam:
 "C:\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2.exe" %command% --developerMode --uiDeveloperMode
 ```
 
-## Development
+### Development workflow
 
 The UI mod will be built automatically with the C# solution.
 
 However, if you are actively working on the UI, you may recompile it on change
 with `cd HallOfFame/UI && npm run dev`.
 
-You can also enable the game's live reload feature in the options and set
-File tracking to All.
+You can enable the game's UI live reload on change with `--uiDeveloperMode`.
 
 Debugging C# code can be done following these steps:
 https://cs2.paradoxwikis.com/Debugging.
@@ -69,9 +84,9 @@ Debugging JS code can be done with the browser's dev tools by opening http://loc
 Logs are situated in either:
  - `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Player.log`
  - `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Logs\UI.log`
- - `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Logs\HallOfFame.Mod.log`
+ - `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Logs\HallOfFame.log`
 
-## Publishing a new version
+### Publishing a new version
 
  - Update `Version` and `FileVersion` in `HallOfFame/HallOfFame.csproj`;
  - Update `HallOfFame/ChangeLog.md` *with only what's changed since the last version*;
