@@ -32,6 +32,11 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 
         button.classList.add(styles.screenshotButton);
 
+        // Neutralize the vanilla mask image, let our CSS take over.
+        if (button.firstElementChild instanceof HTMLElement) {
+            button.firstElementChild.style.maskImage = '';
+        }
+
         // Adds the side label to the button, the original button has no text.
         const text = document.createElement('span');
         text.innerHTML = 'HoF';

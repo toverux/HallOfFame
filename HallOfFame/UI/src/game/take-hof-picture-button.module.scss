@@ -4,14 +4,15 @@
     margin-right: calc(22rem) !important;
 
     > [class*="icon"] {
-        background-color: gold;
+        //noinspection CssUnknownTarget
+        mask-image: url(coui://uil/Standard/SharePicture.svg);
     }
 
     span {
         position: absolute;
         display: block;
         height: 32rem;
-        left: 1.4em;
+        left: 1.6em;
         transform: rotate(90deg);
     }
 }
