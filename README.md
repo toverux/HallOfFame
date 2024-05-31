@@ -34,12 +34,14 @@ Special thanks to:
 ## Features & Roadmap
 
  - For Beta:
+   - Set username and Creator ID in settings.
    - Upload photo along with basic info (creator name, city name, population).
    - Refresh photo in menu screen.
    - Display city name, creator name, date of upload.
    - Toggle menu UI to better see the image.
 
  - Planned next:
+   - Localization for all CS2-supported languages via Crowdin.
    - Permanently disable CS2 logo in menu screen to better see the images.
    - Report abuse.
    - Upvote button.
