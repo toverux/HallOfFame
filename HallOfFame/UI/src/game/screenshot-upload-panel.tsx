@@ -1,4 +1,4 @@
-﻿import { bindValue, trigger, useValue } from 'cs2/api';
+import { bindValue, trigger, useValue } from 'cs2/api';
 import { useLocalization } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { type CSSProperties, type ReactElement, useMemo } from 'react';
@@ -6,18 +6,14 @@ import { getClassesModule, logError } from '../common';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
 import * as styles from './screenshot-upload-panel.module.scss';
 
-type ScreenshottingState =
-    | { name: 'idle' }
-    | { name: 'taking' }
-    | {
-          name: 'ready';
-          uri: string;
-          fileSize: number;
-          width: number;
-          height: number;
-      }
-    | { name: 'uploading' }
-    | { name: 'uploaded' };
+interface ScreenshotSnapshot {
+    readonly achievedMilestone: number;
+    readonly population: number;
+    readonly imageUri: string;
+    readonly imageFileSize: number;
+    readonly imageWidth: number;
+    readonly imageHeight: number;
+}
 
 const coFixedRatioImageStyles = getClassesModule(
     'game-ui/common/image/fixed-ratio-image.module.scss',
@@ -29,10 +25,14 @@ const coMainScreenStyles = getClassesModule(
     ['centerPanelLayout']
 );
 
-const screenshottingState$ = bindValue<ScreenshottingState>(
+const creatorName$ = bindValue<string>('hallOfFame.game', 'creatorName', '');
+
+const cityName$ = bindValue<string>('hallOfFame.game', 'cityName', '');
+
+const screenshotSnapshot$ = bindValue<ScreenshotSnapshot | null>(
     'hallOfFame.game',
-    'screenshottingState',
-    { name: 'idle' }
+    'screenshotSnapshot',
+    null
 );
 
 /**
@@ -40,7 +40,18 @@ const screenshottingState$ = bindValue<ScreenshottingState>(
  */
 export function ScreenshotUploadPanel(): ReactElement {
     const { translate } = useLocalization();
-    const state = useValue(screenshottingState$);
+
+    const creatorName =
+        useValue(creatorName$) ||
+        // biome-ignore lint/style/noNonNullAssertion: we have fallback.
+        translate('HallOfFame.Common.DEFAULT[CreatorName]', 'Anonymous')!;
+
+    const cityName =
+        useValue(cityName$) ||
+        // biome-ignore lint/style/noNonNullAssertion: we have fallback.
+        translate('HallOfFame.Common.DEFAULT[CityName]')!;
+
+    const screenshotSnapshot = useValue(screenshotSnapshot$);
 
     // Change the congratulation message every time a screenshot is taken.
     // Congratulation messages are stored in one string, separated by newlines.
@@ -48,7 +59,7 @@ export function ScreenshotUploadPanel(): ReactElement {
     // type and image URI actually change.
     // biome-ignore lint/correctness/useExhaustiveDependencies: explained above.
     const congratulation = useMemo(() => {
-        if (state.name != 'ready') {
+        if (!screenshotSnapshot) {
             return;
         }
 
@@ -64,7 +75,7 @@ export function ScreenshotUploadPanel(): ReactElement {
         return congratulations[
             Math.floor(Math.random() * congratulations.length)
         ];
-    }, [translate, state.name == 'ready' ? state.uri : 'no-congrats']);
+    }, [translate, screenshotSnapshot?.imageUri]);
 
     // Check vanilla class exists.
     if (!coMainScreenStyles.centerPanelLayout) {
@@ -76,45 +87,91 @@ export function ScreenshotUploadPanel(): ReactElement {
     }
 
     // Show panel when there is a screenshot to upload.
-    if (!['ready', 'uploading', 'uploaded'].includes(state.name)) {
+    if (!screenshotSnapshot) {
         return <></>;
     }
 
+    // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
         <div
             className={`${coMainScreenStyles.centerPanelLayout} ${styles.screenshotUploadPanelLayout}`}>
             <div className={styles.screenshotUploadPanel}>
                 <div className={styles.screenshotUploadPanelHeader}>
                     {congratulation}
+
+                    <Button
+                        variant='round'
+                        className={styles.screenshotUploadPanelHeaderClose}
+                        onSelect={discardScreenshot}
+                        selectSound={'close-menu'}>
+                        <Icon src='Media/Glyphs/Close.svg' />
+                    </Button>
                 </div>
 
-                {state.name == 'ready' && (
-                    <div
-                        className={coFixedRatioImageStyles.fixedRatioImage}
-                        style={
-                            {
-                                '--w': state.width,
-                                '--h': state.height
-                            } as CSSProperties
-                        }>
-                        <div className={coFixedRatioImageStyles.ratio} />
-                        <img
-                            className={`${styles.screenshotUploadPanelImage} ${coFixedRatioImageStyles.image}`}
-                            src={state.uri}
-                            alt='Screenshot'
-                        />
-                    </div>
-                )}
+                <div
+                    className={coFixedRatioImageStyles.fixedRatioImage}
+                    style={
+                        {
+                            '--w': screenshotSnapshot.imageWidth,
+                            '--h': screenshotSnapshot.imageHeight
+                        } as CSSProperties
+                    }>
+                    <div className={coFixedRatioImageStyles.ratio} />
+                    <img
+                        className={`${styles.screenshotUploadPanelImage} ${coFixedRatioImageStyles.image}`}
+                        src={screenshotSnapshot.imageUri}
+                    />
+                </div>
 
-                <div className={styles.screenshotUploadPanelContent} />
+                <div
+                    className={`${styles.screenshotUploadPanelContent} ${styles.screenshotUploadPanelCityInfo}`}>
+                    <span className={styles.screenshotUploadPanelCityInfoName}>
+                        <strong>{cityName}</strong>
+                        {/* biome-ignore lint/style/noNonNullAssertion: we have fallback */}
+                        {translate(
+                            'HallOfFame.UI.Game.ScreenshotUploadPanel.CITY_BY',
+                            'by {CREATOR_NAME}'
+                        )!.replace('{CREATOR_NAME}', creatorName)}
+                    </span>
+                    <div style={{ flex: 1 }} />
+                    <span>
+                        <img src='Media/Game/Icons/Trophy.svg' />
+                        {translate(
+                            `Progression.MILESTONE_NAME:${screenshotSnapshot.achievedMilestone}`
+                        )}
+                    </span>
+                    <span>
+                        <img src='Media/Game/Icons/Population.svg' />
+                        {screenshotSnapshot.population}
+                    </span>
+                </div>
+
+                <div className={styles.screenshotUploadPanelContent}>
+                    <p>
+                        {translate(
+                            'HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY',
+                            `You can update your creator name or city name without closing this window.`
+                        )}
+                    </p>
+                    <p>
+                        {translate(
+                            'HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING',
+                            `Future update will let you manage your collection on our website.`
+                        )}
+                    </p>
+                    <p style={{ margin: 0 }}>
+                        {translate(
+                            'HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED',
+                            `Uploaded content is moderated, any abuse will result in a permanent ban.`
+                        )}
+                    </p>
+                </div>
 
                 <div className={styles.screenshotUploadPanelFooter}>
                     <Button
                         className={`${styles.screenshotUploadPanelFooterButton} ${styles.cancel}`}
                         variant='primary'
-                        onSelect={() =>
-                            trigger('hallOfFame.game', 'clearScreenshot')
-                        }
+                        onSelect={discardScreenshot}
                         selectSound={'close-menu'}>
                         {translate('Common.ACTION[Cancel]', 'Cancel')}
                     </Button>
@@ -129,13 +186,18 @@ export function ScreenshotUploadPanel(): ReactElement {
                                 styles.screenshotUploadPanelFooterButtonIcon
                             }
                         />
+
                         {translate(
-                            'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD',
-                            'Upload'
+                            'HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE',
+                            'Share'
                         )}
                     </Button>
                 </div>
             </div>
         </div>
     );
+}
+
+function discardScreenshot(): void {
+    trigger('hallOfFame.game', 'clearScreenshot');
 }

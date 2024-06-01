@@ -15,6 +15,7 @@
         "recommended": true
       },
       "a11y": {
+        "useAltText": "off",
         "useKeyWithClickEvents": "off"
       },
       "security": {

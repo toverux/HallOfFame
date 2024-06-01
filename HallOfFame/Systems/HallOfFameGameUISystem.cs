@@ -1,14 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Colossal.PSI.Environment;
 using Colossal.UI;
 using Colossal.UI.Binding;
+using Game.City;
+using Game.SceneFlow;
+using Game.Simulation;
 using Game.UI;
 using Game.UI.InGame;
 using HallOfFame.Patches;
 using HallOfFame.Utils;
 using HarmonyLib;
+using Unity.Entities;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -19,6 +24,8 @@ namespace HallOfFame.Systems;
 /// screenshot taking.
 /// </summary>
 public sealed partial class HallOfFameGameUISystem : UISystemBase {
+    private const string BindingGroup = "hallOfFame.game";
+
     /// <summary>
     /// Directory where the current screenshot is stored, just for file-serving
     /// purposes in the UI. The actual image sent to the server is kept in
@@ -45,27 +52,73 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         throw new MissingMethodException(
             $"Could not find method {nameof(PhotoModeUISystem)}.TakeScreenshot().");
 
+    private CitySystem? citySystem;
+
+    private CityConfigurationSystem? cityConfigurationSystem;
+
     private PhotoModeUISystem? photoModeUISystem;
 
-    private ScreenshottingState screenshottingState =
-        new ScreenshottingStateIdle();
+    private EntityQuery milestoneLevelQuery;
+
+    /// <summary>
+    /// Current screenshot snapshot.
+    /// Null if no screenshot is being displayed/uploaded.
+    /// </summary>
+    private ScreenshotSnapshot? CurrentScreenshot {
+        get => this.currentScreenshotValue;
+        set {
+            this.currentScreenshotValue = value;
+
+            // Optimization: only enable live bindings when a screenshot is
+            // being displayed/uploaded.
+            // Run on next frame to let the UI update one last time.
+            GameManager.instance.RegisterUpdater(() => { this.Enabled = value is not null; });
+        }
+    }
+
+    /// <summary>
+    /// Backing field for <see cref="CurrentScreenshot"/>.
+    /// </summary>
+    private ScreenshotSnapshot? currentScreenshotValue;
 
     protected override void OnCreate() {
         base.OnCreate();
 
         try {
+            // Re-enabled when there is an active screenshot.
+            this.Enabled = false;
+
+            this.citySystem = this.World.GetOrCreateSystemManaged<CitySystem>();
+
+            this.cityConfigurationSystem =
+                this.World.GetOrCreateSystemManaged<CityConfigurationSystem>();
+
             this.photoModeUISystem =
                 this.World.GetOrCreateSystemManaged<PhotoModeUISystem>();
 
-            this.AddUpdateBinding(new GetterValueBinding<ScreenshottingState>(
-                "hallOfFame.game", "screenshottingState",
-                () => this.screenshottingState));
+            this.milestoneLevelQuery =
+                this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
+
+            this.AddUpdateBinding(new GetterValueBinding<string>(
+                HallOfFameGameUISystem.BindingGroup, "creatorName",
+                () => Mod.Settings.CreatorName));
+
+            this.AddUpdateBinding(new GetterValueBinding<string>(
+                HallOfFameGameUISystem.BindingGroup, "cityName",
+                this.GetCityName));
+
+            this.AddUpdateBinding(new GetterValueBinding<ScreenshotSnapshot?>(
+                HallOfFameGameUISystem.BindingGroup, "screenshotSnapshot",
+                () => this.CurrentScreenshot,
+                new ValueWriter<ScreenshotSnapshot?>().Nullable()));
 
             this.AddBinding(new TriggerBinding(
-                "hallOfFame.game", "takeScreenshot", this.BeginTakeScreenshot));
+                HallOfFameGameUISystem.BindingGroup, "takeScreenshot",
+                this.BeginTakeScreenshot));
 
             this.AddBinding(new TriggerBinding(
-                "hallOfFame.game", "clearScreenshot", this.ClearScreenshot));
+                HallOfFameGameUISystem.BindingGroup, "clearScreenshot",
+                this.ClearScreenshot));
 
             // Temp directory must be created before AddHostLocation() is called,
             // otherwise if watch mode is enabled we'll get an exception.
@@ -92,19 +145,42 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     }
 
     /// <summary>
+    /// Get the name of the city.
+    /// </summary>
+    private string GetCityName() {
+        return this.cityConfigurationSystem?.cityName ?? string.Empty;
+    }
+
+    /// <summary>
+    /// Get the current achieved milestone level.
+    /// </summary>
+    private int GetAchievedMilestone() {
+        return this.milestoneLevelQuery.IsEmptyIgnoreFilter
+            ? 0
+            : this.milestoneLevelQuery
+                .GetSingleton<MilestoneLevel>().m_AchievedMilestone;
+    }
+
+    /// <summary>
+    /// Get the current population of the city.
+    /// </summary>
+    private int GetPopulation() {
+        if (this.citySystem is null) {
+            return 0;
+        }
+
+        return this.EntityManager.HasComponent<Population>(this.citySystem.City)
+            ? this.EntityManager.GetComponentData<Population>(this.citySystem.City)
+                .m_Population
+            : 0;
+    }
+
+    /// <summary>
     /// Call original Vanilla screenshot method.
     /// Our Harmony patch installed via <see cref="PhotoModeUISystemPatch"/>
     /// will call us back for custom screenshot taking.
     /// </summary>
     private void BeginTakeScreenshot() {
-        if (this.screenshottingState is not ScreenshottingStateIdle &&
-            this.screenshottingState is not ScreenshottingStateReady &&
-            this.screenshottingState is not ScreenshottingStateUploaded) {
-            return;
-        }
-
-        this.screenshottingState = new ScreenshottingStateTaking();
-
         PhotoModeUISystemPatch.OnCaptureScreenshot += this.ContinueTakeScreenshot;
 
         HallOfFameGameUISystem.TakeScreenshotOriginalMethod.Invoke(
@@ -143,21 +219,25 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
                 HallOfFameGameUISystem.ScreenshotFile,
                 screenshotBytes);
 
-            this.screenshottingState = new ScreenshottingStateReady(
-                screenshotBytes, screenshotSize);
+            this.CurrentScreenshot = new ScreenshotSnapshot(
+                this.GetAchievedMilestone(),
+                this.GetPopulation(),
+                screenshotBytes,
+                screenshotSize);
         }
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
 
-            this.screenshottingState = new ScreenshottingStateIdle();
+            this.CurrentScreenshot = null;
         }
 
         return Mod.Settings.MakePlatformScreenshots;
     }
 
     private void ClearScreenshot() {
-        if (this.screenshottingState is not ScreenshottingStateReady) {
-            return;
+        if (this.CurrentScreenshot is null) {
+            Mod.Log.Warn(
+                $"Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
         }
 
         try {
@@ -167,7 +247,56 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             Mod.Log.ErrorRecoverable(ex);
         }
         finally {
-            this.screenshottingState = new ScreenshottingStateIdle();
+            this.CurrentScreenshot = null;
+        }
+    }
+
+    /// <summary>
+    /// Snapshot of the latest screenshot.
+    /// Stores the state of the current screenshot and accompanying info that we
+    /// don't want to update in real-time after the screenshot is taken (other
+    /// info like city name and username have their own separated binding as
+    /// we want to allow the user to change them on the fly).
+    /// Serialized to JSON for displaying in the UI.
+    /// </summary>
+    private sealed class ScreenshotSnapshot(
+        int achievedMilestone,
+        int population,
+        IReadOnlyCollection<byte> imageBytes,
+        Vector2Int imageSize) : IJsonWritable {
+        /// <summary>
+        /// As we use the same file name for each new screenshot, this is a
+        /// refresh counter appended to the URL of the image as a query
+        /// parameter for cache busting.
+        /// </summary>
+        private static int latestVersion;
+
+        private readonly int currentVersion =
+            ScreenshotSnapshot.latestVersion++;
+
+        public void Write(IJsonWriter writer) {
+            writer.TypeBegin(this.GetType().FullName);
+
+            writer.PropertyName("achievedMilestone");
+            writer.Write(achievedMilestone);
+
+            writer.PropertyName("population");
+            writer.Write(population);
+
+            writer.PropertyName("imageUri");
+            writer.Write(
+                $"coui://halloffame/screenshot.jpg?v={this.currentVersion}");
+
+            writer.PropertyName("imageWidth");
+            writer.Write(imageSize.x);
+
+            writer.PropertyName("imageHeight");
+            writer.Write(imageSize.y);
+
+            writer.PropertyName("imageFileSize");
+            writer.Write(imageBytes.Count);
+
+            writer.TypeEnd();
         }
     }
 }
