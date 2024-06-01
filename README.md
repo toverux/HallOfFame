@@ -41,6 +41,7 @@ Special thanks to:
    - Toggle menu UI to better see the image.
 
  - Planned next:
+   - Ability to send a short comment along with the photo.
    - Localization for all CS2-supported languages via Crowdin.
    - Permanently disable CS2 logo in menu screen to better see the images.
    - Report abuse.
