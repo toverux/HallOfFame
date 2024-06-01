@@ -178,13 +178,24 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     /// <summary>
     /// Call original Vanilla screenshot method.
     /// Our Harmony patch installed via <see cref="PhotoModeUISystemPatch"/>
-    /// will call us back for custom screenshot taking.
+    /// will call us back (<see cref="ContinueTakeScreenshot"/>) for custom
+    /// screenshot taking.
     /// </summary>
     private void BeginTakeScreenshot() {
         PhotoModeUISystemPatch.OnCaptureScreenshot += this.ContinueTakeScreenshot;
 
-        HallOfFameGameUISystem.TakeScreenshotOriginalMethod.Invoke(
-            this.photoModeUISystem, null);
+        // This is unlikely to break except if the Vanilla method changes
+        // parameters signature, but we will make sure to handle that properly.
+        // Note that this does not encapsulate ContinueTakeScreenshot() which
+        // is executed in a coroutine, and has its own try/catch.
+        try {
+            HallOfFameGameUISystem.TakeScreenshotOriginalMethod.Invoke(
+                this.photoModeUISystem, null);
+        } catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
+
+            PhotoModeUISystemPatch.OnCaptureScreenshot -= this.ContinueTakeScreenshot;
+        }
     }
 
     /// <summary>
