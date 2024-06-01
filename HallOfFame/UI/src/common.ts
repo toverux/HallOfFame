@@ -54,6 +54,57 @@ export function getClassesModule<const TClassNames extends readonly string[]>(
 }
 
 /**
+ * Resolve a Vanilla module export, ensuring the export exists and is of the
+ * correct type.
+ * A missing module or export will show an error in the UI the first time it
+ * fails to resolve, then it will be ignored to avoid spamming the user.
+ * A missing export will resolve to the provided fallback value.
+ *
+ * @param module     Path of the vanilla module.
+ * @param exportName Symbol export name.
+ * @param guard      Type guard to ensure the export is of the correct type.
+ * @param fallback   Fallback value to use if the export is missing or invalid.
+ */
+export function getModuleExport<TExport>(
+    module: string,
+    exportName: string,
+    guard: (value: unknown) => value is TExport,
+    fallback: TExport
+): TExport {
+    try {
+        const exported = getModule(module, exportName);
+
+        if (guard(exported)) {
+            return exported;
+        }
+
+        if (!ignoreResolveErrorsFor.has(module)) {
+            logError(
+                new Error(
+                    `Export "${exportName}" in module "${module}" did not pass type guard.`
+                )
+            );
+
+            ignoreResolveErrorsFor.add(module);
+        }
+
+        return fallback;
+    } catch {
+        if (!ignoreResolveErrorsFor.has(module)) {
+            logError(
+                new Error(
+                    `Could not find export "${exportName}" in module "${module}".`
+                )
+            );
+
+            ignoreResolveErrorsFor.add(module);
+        }
+
+        return fallback;
+    }
+}
+
+/**
  * Shows an error dialog and logs the error in the mod's logs instead of just in
  * UI log.
  */

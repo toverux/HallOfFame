@@ -1,5 +1,5 @@
 import { bindValue, trigger, useValue } from 'cs2/api';
-import { useLocalization } from 'cs2/l10n';
+import { LocalizedNumber, useLocalization } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { type CSSProperties, type ReactElement, useMemo } from 'react';
 import { getClassesModule, logError } from '../common';
@@ -142,7 +142,9 @@ export function ScreenshotUploadPanel(): ReactElement {
                     </span>
                     <span>
                         <img src='Media/Game/Icons/Population.svg' />
-                        {screenshotSnapshot.population}
+                        <LocalizedNumber
+                            value={screenshotSnapshot.population}
+                        />
                     </span>
                 </div>
 
