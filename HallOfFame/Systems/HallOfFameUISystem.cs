@@ -5,11 +5,14 @@ using HallOfFame.Utils;
 namespace HallOfFame.Systems;
 
 public sealed partial class HallOfFameUISystem : UISystemBase {
+    private const string BindingGroup = "hallOfFame";
+
     protected override void OnCreate() {
         base.OnCreate();
 
         this.AddBinding(new TriggerBinding<bool, string>(
-            "hallOfFame", "logJavaScriptError", this.LogJavaScriptError));
+            HallOfFameUISystem.BindingGroup, "logJavaScriptError",
+            this.LogJavaScriptError));
 
         // No need to OnUpdate as there are no bindings that require it.
         this.Enabled = false;
