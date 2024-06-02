@@ -1,4 +1,6 @@
+using System;
 using Colossal.UI.Binding;
+using Game.SceneFlow;
 using Game.UI;
 using HallOfFame.Utils;
 
@@ -7,15 +9,40 @@ namespace HallOfFame.Systems;
 public sealed partial class HallOfFameUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame";
 
+    private IUpdateBinding? localeBinding;
+
     protected override void OnCreate() {
         base.OnCreate();
 
-        this.AddBinding(new TriggerBinding<bool, string>(
-            HallOfFameUISystem.BindingGroup, "logJavaScriptError",
-            this.LogJavaScriptError));
+        try {
+            this.AddBinding(new TriggerBinding<bool, string>(
+                HallOfFameUISystem.BindingGroup, "logJavaScriptError",
+                this.LogJavaScriptError));
 
-        // No need to OnUpdate as there are no bindings that require it.
-        this.Enabled = false;
+            this.AddBinding(this.localeBinding = new GetterValueBinding<string>(
+                HallOfFameUISystem.BindingGroup, "locale",
+                () => GameManager.instance.localizationManager.activeLocaleId));
+
+            GameManager.instance.localizationManager.onActiveDictionaryChanged +=
+                this.OnActiveDictionaryChanged;
+
+            // No need to OnUpdate as there are no bindings that require it.
+            this.Enabled = false;
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorFatal(ex);
+        }
+    }
+
+    protected override void OnDestroy() {
+        base.OnDestroy();
+
+        GameManager.instance.localizationManager.onActiveDictionaryChanged -=
+            this.OnActiveDictionaryChanged;
+    }
+
+    private void OnActiveDictionaryChanged() {
+        this.localeBinding?.Update();
     }
 
     /// <summary>

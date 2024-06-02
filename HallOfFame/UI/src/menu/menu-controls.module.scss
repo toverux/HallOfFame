@@ -1,0 +1,92 @@
+﻿@use '../common';
+
+.menu-controls {
+    position: absolute;
+    bottom: 60rem;
+    padding: 0 40rem;
+
+    display: flex;
+    flex-direction: column;
+
+    color: var(--menuText1Normal);
+
+    &-city-name, &-city-stats, &-buttons {
+        display: flex;
+        flex-direction: row;
+    }
+
+    &-city-name {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15rem;
+        text-shadow: 0 1rem 1rem  var(--panelColorDark) ;
+
+        strong {
+            margin-right: 10rem;
+            font-size: calc(30rem * var(--fontScale));
+            font-weight: normal;
+        }
+    }
+
+    &-city-stats {
+        margin-bottom: 35rem;
+
+        span {
+            margin-right: 15rem;
+            @include common.border-radius(var(--panelRadius));
+            background-color: var(--menuPanel1);
+            backdrop-filter: var(--menuBlur);
+            padding: 8rem 12rem;
+
+            // This circumvents a rare bug where a span element can collapse
+            // in a random way, a bug in cohtml's layout engine.
+            white-space: nowrap;
+
+            img {
+                width: 22rem;
+                height: 100%;
+                margin-right: 10rem;
+                filter: drop-shadow(0 1rem .4rem var(--panelColorNormal));
+            }
+        }
+    }
+
+    &-buttons {
+        $vanilla-button-height: 56rem;
+
+        pointer-events: auto;
+
+        &-button, &-button-circle {
+            // Override Vanilla adjacent <MenuButton>s' to have a margin-top.
+            margin-top: 0 !important;
+        }
+
+        &-button {
+            margin-right: 15rem;
+
+            padding-left: 30rem !important;
+            padding-right: 30rem !important;
+
+            [class*="icon"] {
+                width: 25rem;
+                height: 25rem;
+            }
+        }
+
+        &-button-circle {
+            width: $vanilla-button-height;
+            height: $vanilla-button-height;
+            padding: 0 !important;
+            display: flex;
+            justify-content: center;
+
+            [class*="label"] {
+                display: none;
+            }
+
+            [class*="icon"] {
+                margin: 0;
+            }
+        }
+    }
+}

@@ -18,6 +18,9 @@
         "useAltText": "off",
         "useKeyWithClickEvents": "off"
       },
+      "complexity": {
+        "noVoid": "off"
+      },
       "security": {
         "noDangerouslySetInnerHtml": "off"
       },

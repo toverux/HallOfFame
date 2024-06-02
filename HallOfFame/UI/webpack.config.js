@@ -5,6 +5,8 @@
 //   leave them as-is (`options.url.filter`).
 // - Change css-loader to add "hof-" prefix to CSS modules class names.
 //   This can help debugging and other mods to target our classes.
+// - Add `optimization.chunkIds`, `output.chunkFilename` and `TerserPlugin.test`
+//   to customize chunk names, so they're not loaded as UI mods.
 
 const path = require('path');
 const MOD = require('./mod.json');
@@ -101,11 +103,16 @@ module.exports = {
             type: 'module',
         },
         publicPath: `coui://ui-mods/`,
+        // We use the made-up .chunkmjs extension to avoid the game mod loader
+        // from trying to load chunk files as a mods, which would fail.
+        chunkFilename: '[name].chunkmjs',
     },
     optimization: {
+        chunkIds: 'named',
         minimize: true,
         minimizer: [
             new TerserPlugin({
+                test: /\.(chunk)?m?js(\?.*)?$/i,
                 extractComments: {
                     banner: () => banner,
                 },

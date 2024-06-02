@@ -1,5 +1,7 @@
-﻿using Colossal.UI.Binding;
+﻿using System;
+using Colossal.UI.Binding;
 using Game.UI;
+using HallOfFame.Utils;
 
 namespace HallOfFame.Systems;
 
@@ -14,8 +16,13 @@ public sealed partial class HallOfFameMenuUISystem : UISystemBase {
     protected override void OnCreate() {
         base.OnCreate();
 
-        this.AddBinding(new ValueBinding<string>(
-            HallOfFameMenuUISystem.BindingGroup, "currentImageUri",
-            HallOfFameMenuUISystem.VanillaDefaultImageUri));
+        try {
+            this.AddBinding(new ValueBinding<string>(
+                HallOfFameMenuUISystem.BindingGroup, "currentImageUri",
+                HallOfFameMenuUISystem.VanillaDefaultImageUri));
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorFatal(ex);
+        }
     }
 }

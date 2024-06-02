@@ -1,5 +1,5 @@
 import { bindValue, trigger, useValue } from 'cs2/api';
-import { LocalizedNumber, useLocalization } from 'cs2/l10n';
+import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { type CSSProperties, type ReactElement, useMemo } from 'react';
 import { getClassesModule, logError } from '../common';
@@ -127,11 +127,12 @@ export function ScreenshotUploadPanel(): ReactElement {
                     className={`${styles.screenshotUploadPanelContent} ${styles.screenshotUploadPanelCityInfo}`}>
                     <span className={styles.screenshotUploadPanelCityInfoName}>
                         <strong>{cityName}</strong>
-                        {/* biome-ignore lint/style/noNonNullAssertion: we have fallback */}
-                        {translate(
-                            'HallOfFame.UI.Game.ScreenshotUploadPanel.CITY_BY',
-                            'by {CREATOR_NAME}'
-                        )!.replace('{CREATOR_NAME}', creatorName)}
+                        <LocalizedString
+                            id='HallOfFame.Common.CITY_BY'
+                            fallback={'by {CREATOR_NAME}'}
+                            // biome-ignore lint/style/useNamingConvention: i18n
+                            args={{ CREATOR_NAME: creatorName }}
+                        />
                     </span>
                     <div style={{ flex: 1 }} />
                     <span>
