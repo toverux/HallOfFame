@@ -1,25 +1,31 @@
 ﻿@use '../common';
 
 .menu-controls {
-    position: absolute;
-    bottom: 60rem;
-    padding: 0 40rem;
-
     display: flex;
     flex-direction: column;
+    transition: opacity .3s;
+
+    @at-root [class*="exit-active"] & {
+        opacity: 0;
+    }
+
+    @at-root [class*="enter-active"] & {
+        opacity: 1;
+    }
 
     color: var(--menuText1Normal);
 
     &-city-name, &-city-stats, &-buttons {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
     }
 
     &-city-name {
         display: flex;
         align-items: center;
         margin-bottom: 15rem;
-        text-shadow: 0 1rem 1rem  var(--panelColorDark) ;
+        text-shadow: 0 1rem 1rem var(--panelColorDark);
 
         strong {
             margin-right: 10rem;
@@ -28,40 +34,34 @@
         }
     }
 
-    &-city-stats {
-        margin-bottom: 35rem;
+    &-city-stats span {
+        margin-right: 15rem;
+        margin-bottom: 15rem;
+        @include common.border-radius(var(--panelRadius));
+        background-color: var(--menuPanel1);
+        backdrop-filter: var(--menuBlur);
+        padding: 8rem 12rem;
 
-        span {
-            margin-right: 15rem;
-            @include common.border-radius(var(--panelRadius));
-            background-color: var(--menuPanel1);
-            backdrop-filter: var(--menuBlur);
-            padding: 8rem 12rem;
+        // This circumvents a rare bug where a span element can collapse
+        // in a random way, a bug in cohtml's layout engine.
+        white-space: nowrap;
 
-            // This circumvents a rare bug where a span element can collapse
-            // in a random way, a bug in cohtml's layout engine.
-            white-space: nowrap;
-
-            img {
-                width: 22rem;
-                height: 100%;
-                margin-right: 10rem;
-                filter: drop-shadow(0 1rem .4rem var(--panelColorNormal));
-            }
+        img {
+            width: 22rem;
+            height: 100%;
+            margin-right: 10rem;
+            filter: drop-shadow(0 1rem .4rem var(--panelColorNormal));
         }
     }
 
     &-buttons {
         $vanilla-button-height: 56rem;
 
+        margin-top: 10rem;
         pointer-events: auto;
 
-        &-button, &-button-circle {
-            // Override Vanilla adjacent <MenuButton>s' to have a margin-top.
-            margin-top: 0 !important;
-        }
-
         &-button {
+            margin-top: 15rem;
             margin-right: 15rem;
 
             padding-left: 30rem !important;
@@ -74,11 +74,14 @@
         }
 
         &-button-circle {
+            margin-top: 15rem;
+            margin-right: 15rem;
+
             width: $vanilla-button-height;
             height: $vanilla-button-height;
-            padding: 0 !important;
             display: flex;
             justify-content: center;
+            padding: 0 !important;
 
             [class*="label"] {
                 display: none;

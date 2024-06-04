@@ -1,5 +1,5 @@
 ﻿import { stripIndent } from 'common-tags';
-import { type ReactElement, useEffect, useState } from 'react';
+import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getClassesModule, logError } from '../common';
 import { TakeHofPictureButton } from './take-hof-picture-button';
@@ -10,7 +10,7 @@ const coPanelStyles = getClassesModule(
 );
 
 interface Props {
-    readonly children: ReactElement;
+    readonly children: ReactNode;
 }
 
 /**

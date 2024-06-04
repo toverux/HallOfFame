@@ -105,6 +105,15 @@ export function getModuleExport<TExport>(
 }
 
 /**
+ * Transforms a space-separated list of class names into a query selector, i.e.
+ * "class1 class2 class3" -> ".class1.class2.class3".
+ */
+export function classNamesToSelector(classNames: string): string {
+    // biome-ignore lint/style/useTemplate: intent clearer like that
+    return `.` + classNames.replaceAll(' ', '.');
+}
+
+/**
  * Shows an error dialog and logs the error in the mod's logs instead of just in
  * UI log.
  */

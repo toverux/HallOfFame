@@ -3,18 +3,32 @@
  */
 
 import type { ModRegistrar } from 'cs2/modding';
+import { MasterScreenPortal } from './master-screen-portal';
+import { MenuSplashscreen } from './menu-splashscreen';
 import * as splashscreenStyles from './menu-splashscreen.module.scss';
-import { MenuWrapper } from './menu-wrapper';
 
 export const register: ModRegistrar = moduleRegistry => {
     moduleRegistry.extend(
         'game-ui/menu/components/menu-ui.tsx',
         'MenuUI',
         COMenuUI => props => (
-            <MenuWrapper>
+            <>
+                <MenuSplashscreen />
                 <COMenuUI {...props} />
-            </MenuWrapper>
+            </>
         )
+    );
+
+    moduleRegistry.extend(
+        'game-ui/menu/components/shared/master-screen/master-screen.tsx',
+        'MasterScreen',
+        COMasterScreen => props => {
+            return (
+                <MasterScreenPortal>
+                    <COMasterScreen {...props} />
+                </MasterScreenPortal>
+            );
+        }
     );
 
     moduleRegistry.extend(
