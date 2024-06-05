@@ -15,32 +15,47 @@ export function MenuControls(): ReactElement {
     const dfnsLocale = useDateFnsLocale();
     const [menuState, setMenuState] = useHofMenuState();
 
+    if (!menuState.cityInfo) {
+        return <></>;
+    }
+
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
         <div className={styles.menuControls}>
             <div className={styles.menuControlsCityName}>
-                <strong>{'Colossal City'}</strong>
+                <strong>{menuState.cityInfo.name}</strong>
                 <LocalizedString
                     id='HallOfFame.Common.CITY_BY'
                     fallback={'by {CREATOR_NAME}'}
-                    // biome-ignore lint/style/useNamingConvention: i18n
-                    args={{ CREATOR_NAME: 'toverux' }}
+                    args={{
+                        // biome-ignore lint/style/useNamingConvention: i18n
+                        CREATOR_NAME: menuState.cityInfo.creatorName
+                    }}
                 />
             </div>
 
             <div className={styles.menuControlsCityStats}>
                 <span>
                     <img src='Media/Game/Icons/Trophy.svg' />
-                    {translate(`Progression.MILESTONE_NAME:${0}`)}
+                    {translate(
+                        `Progression.MILESTONE_NAME:${menuState.cityInfo.milestone}`
+                    )}
                 </span>
                 <span>
                     <img src='Media/Game/Icons/Population.svg' />
-                    <LocalizedNumber value={0} />
+                    <LocalizedNumber
+                        value={
+                            Math.round(menuState.cityInfo.population / 1000) *
+                            1000
+                        }
+                    />
                 </span>
                 <Tooltip
-                    tooltip={format(new Date(), 'Pp', { locale: dfnsLocale })}>
+                    tooltip={format(menuState.cityInfo.postedAt, 'Pp', {
+                        locale: dfnsLocale
+                    })}>
                     <span>
-                        {formatDistanceToNow(new Date(), {
+                        {formatDistanceToNow(menuState.cityInfo.postedAt, {
                             locale: dfnsLocale,
                             addSuffix: true
                         })}

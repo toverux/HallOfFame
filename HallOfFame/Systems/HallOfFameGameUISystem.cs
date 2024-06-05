@@ -72,7 +72,9 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             // Optimization: only enable live bindings when a screenshot is
             // being displayed/uploaded.
             // Run on next frame to let the UI update one last time.
-            GameManager.instance.RegisterUpdater(() => { this.Enabled = value is not null; });
+            GameManager.instance.RegisterUpdater(() => {
+                this.Enabled = value is not null;
+            });
         }
     }
 
@@ -191,7 +193,8 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         try {
             HallOfFameGameUISystem.TakeScreenshotOriginalMethod.Invoke(
                 this.photoModeUISystem, null);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
 
             PhotoModeUISystemPatch.OnCaptureScreenshot -= this.ContinueTakeScreenshot;

@@ -28,10 +28,11 @@
         align-items: center;
         margin-bottom: 15rem;
         text-shadow: 0 1rem 1rem var(--panelColorDark);
+        font-size: var(--fontSizeL);
 
         strong {
             margin-right: 10rem;
-            font-size: calc(30rem * var(--fontScale));
+            font-size: calc(35rem * var(--fontScale));
             font-weight: normal;
         }
     }

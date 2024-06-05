@@ -3,8 +3,17 @@ import type { Dispatch } from 'react';
 import { createSingletonHook } from '../utils';
 import modLoadingErrorSrc from './mod-loading-error.jpg';
 
+export interface CityInfo {
+    readonly name: string;
+    readonly creatorName: string;
+    readonly milestone: number;
+    readonly population: number;
+    readonly postedAt: Date;
+}
+
 interface ReadonlyMenuState {
-    readonly currentImageUri: string;
+    readonly imageUri: string;
+    readonly cityInfo: CityInfo | undefined;
 }
 
 interface SettableMenuState {
@@ -14,10 +23,17 @@ interface SettableMenuState {
 const currentImageUri$ = bindValue<string>(
     'hallOfFame.menu',
     'currentImageUri',
-    // This is the Vanilla image when the mod was written.
-    // Used here as a fallback in case the C# binding fails, which should really
-    // not happen.
+    // Fallback binding value that is an image that indicates a problem with the
+    // initialization of the .NET mod while the UI mod was still loaded.
     modLoadingErrorSrc
+);
+
+const currentCityInfo$ = bindValue<Record<string, unknown> | null>(
+    'hallOfFame.menu',
+    'currentImageCity',
+    // Do not use undefined because it's interpreted as "no fallback", causing
+    // an error on useValue() if there is a problem with the .NET mod.
+    null
 );
 
 const useSingletonMenuState = createSingletonHook<SettableMenuState>({
@@ -30,11 +46,21 @@ export function useHofMenuState(): [
 ] {
     const [storedMenuState, setMenuState] = useSingletonMenuState();
 
-    const currentImageUri = useValue(currentImageUri$);
+    const imageUri = useValue(currentImageUri$);
+    const cityInfo = useValue(currentCityInfo$);
 
     const menuState: ReadonlyMenuState & SettableMenuState = {
         ...storedMenuState,
-        currentImageUri
+        imageUri: imageUri,
+        cityInfo: cityInfo
+            ? {
+                  name: String(cityInfo.name),
+                  creatorName: String(cityInfo.creatorName),
+                  milestone: Number(cityInfo.milestone),
+                  population: Number(cityInfo.population),
+                  postedAt: new Date(String(cityInfo.postedAt))
+              }
+            : undefined
     };
 
     return [menuState, setMenuState];

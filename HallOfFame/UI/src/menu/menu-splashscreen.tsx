@@ -13,9 +13,7 @@ export function MenuSplashscreen(): ReactElement {
     // This destroys the previous image div, freeing up memory. And the cycle repeats.
     const [menuState] = useHofMenuState();
 
-    const [displayedImage, setDisplayedImage] = useState(
-        menuState.currentImageUri
-    );
+    const [displayedImage, setDisplayedImage] = useState(menuState.imageUri);
 
     const [incomingImage, setIncomingImage] = useState<string>();
 
@@ -24,9 +22,9 @@ export function MenuSplashscreen(): ReactElement {
     // will start the fade-in animation.
     useEffect(() => {
         const splash = new Image();
-        splash.onload = () => setIncomingImage(menuState.currentImageUri);
-        splash.src = menuState.currentImageUri;
-    }, [menuState.currentImageUri]);
+        splash.onload = () => setIncomingImage(menuState.imageUri);
+        splash.src = menuState.imageUri;
+    }, [menuState.imageUri]);
 
     // When the fade-in animation is done, we set the incoming image as the
     // current one.
