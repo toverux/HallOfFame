@@ -1,6 +1,6 @@
 import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { MenuButton, Tooltip } from 'cs2/ui';
-import { formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import type { ReactElement } from 'react';
 import { snappyOnSelect, useDateFnsLocale } from '../utils';
 import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
@@ -37,12 +37,15 @@ export function MenuControls(): ReactElement {
                     <img src='Media/Game/Icons/Population.svg' />
                     <LocalizedNumber value={0} />
                 </span>
-                <span>
-                    {formatDistanceToNow(new Date(), {
-                        locale: dfnsLocale,
-                        addSuffix: true
-                    })}
-                </span>
+                <Tooltip
+                    tooltip={format(new Date(), 'Pp', { locale: dfnsLocale })}>
+                    <span>
+                        {formatDistanceToNow(new Date(), {
+                            locale: dfnsLocale,
+                            addSuffix: true
+                        })}
+                    </span>
+                </Tooltip>
             </div>
 
             <div className={styles.menuControlsButtons}>
