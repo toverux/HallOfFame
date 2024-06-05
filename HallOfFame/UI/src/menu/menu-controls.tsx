@@ -1,10 +1,11 @@
 import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { MenuButton, Tooltip } from 'cs2/ui';
 import { formatDistanceToNow } from 'date-fns';
-import { type ReactElement, useState } from 'react';
-import { useDateFnsLocale } from '../date-fns-utils';
+import type { ReactElement } from 'react';
+import { snappyOnSelect, useDateFnsLocale } from '../utils';
 import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
 import * as styles from './menu-controls.module.scss';
+import { useHofMenuState } from './menu-state-hook';
 
 /**
  * Component that renders the menu controls and city/creator information.
@@ -12,8 +13,7 @@ import * as styles from './menu-controls.module.scss';
 export function MenuControls(): ReactElement {
     const { translate } = useLocalization();
     const dfnsLocale = useDateFnsLocale();
-
-    const [isMenuVisible, setIsMenuVisible] = useState(true);
+    const [menuState, setMenuState] = useHofMenuState();
 
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
@@ -69,13 +69,20 @@ export function MenuControls(): ReactElement {
                     <MenuButton
                         className={styles.menuControlsButtonsButtonCircle}
                         src={
-                            isMenuVisible
+                            menuState.isMenuVisible
                                 ? 'coui://uil/Colored/EyeOpen.svg'
                                 : 'coui://uil/Colored/EyeClosed.svg'
                         }
                         tinted={false}
                         focusKey={FOCUS_DISABLED}
-                        onSelect={() => setIsMenuVisible(!isMenuVisible)}
+                        {...snappyOnSelect(
+                            () =>
+                                setMenuState({
+                                    ...menuState,
+                                    isMenuVisible: !menuState.isMenuVisible
+                                }),
+                            menuState.isMenuVisible ? 'close-menu' : 'open-menu'
+                        )}
                     />
                 </Tooltip>
             </div>

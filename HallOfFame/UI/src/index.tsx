@@ -1,7 +1,7 @@
 import type { ModRegistrar } from 'cs2/modding';
-import { logError } from './common';
 import { register as registerOnGame } from './game';
 import { register as registerOnMenu } from './menu';
+import { logError } from './utils';
 
 const register: ModRegistrar = moduleRegistry => {
     // @todo For debug, remove on release.

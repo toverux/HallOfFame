@@ -10,24 +10,44 @@
   "linter": {
     "enabled": true,
     "rules": {
+      // Enable all by default (not just recommended), disable as-needed.
       "all": true,
       "nursery": {
         "recommended": true
       },
       "a11y": {
+        // PROJECT-SPECIFIC, alt text in the context of CS2 does not make sense.
         "useAltText": "off",
+        // PROJECT-SPECIFIC, does not make too much sense in the context of CS2.
         "useKeyWithClickEvents": "off"
       },
       "complexity": {
+        // Learn the language.
         "noVoid": "off"
       },
+      "performance": {
+        // Virtually not an issue with modern bundlers.
+        // It can indeed cause slower builds though, but my projects generally
+        // don't have much unused symbols.
+        "noBarrelFile": "off",
+        // Same as noBarrelFile.
+        "noReExportAll": "off"
+      },
       "security": {
+        // It's already pretty clear when you use it
+        // (`dangerouslySetInnerHTML={{ __html: html }}`)
         "noDangerouslySetInnerHtml": "off"
       },
       "style": {
+        // I must admit I just like it.
         "noCommaOperator": "off",
+        // Same reason as performance.noBarrelFile.
         "noNamespaceImport": "off",
+        // I like using template literals for hardcoded english strings, ex.
+        // exception error messages. This makes spotting them easier and also it
+        // makes it easier to use double or single quotes.
         "noUnusedTemplateLiteral": "off",
+        // Keep it but with a few exceptions.
         "useNamingConvention": {
           "level": "error",
           "options": {
@@ -36,6 +56,9 @@
         }
       },
       "suspicious": {
+        // Double equals is not THAT bad, although I understand why the rule
+        // exists. If you know the language you can avoid the pitfalls and even
+        // enjoy the benefits of loose equality.
         "noDoubleEquals": "off"
       }
     }

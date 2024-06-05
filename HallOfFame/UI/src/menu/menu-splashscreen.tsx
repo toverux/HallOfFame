@@ -1,16 +1,6 @@
-﻿import { bindValue, useValue } from 'cs2/api';
-import { type ReactElement, useEffect, useState } from 'react';
+﻿import { type ReactElement, useEffect, useState } from 'react';
 import * as styles from './menu-splashscreen.module.scss';
-import modLoadingErrorSrc from './mod-loading-error.jpg';
-
-const currentImageUri$ = bindValue<string>(
-    'hallOfFame.menu',
-    'currentImageUri',
-    // This is the Vanilla image when the mod was written.
-    // Used here as a fallback in case the C# binding fails, which should really
-    // not happen.
-    modLoadingErrorSrc
-);
+import { useHofMenuState } from './menu-state-hook';
 
 /**
  * Component that displays the splashscreen image on the main menu.
@@ -21,9 +11,12 @@ export function MenuSplashscreen(): ReactElement {
     // the new image, and perform a fade-in over the previous image (displayedImage).
     // When the fade-in animation is done, we set the new image as the current one.
     // This destroys the previous image div, freeing up memory. And the cycle repeats.
-    const currentImageUri = useValue(currentImageUri$);
+    const [menuState] = useHofMenuState();
 
-    const [displayedImage, setDisplayedImage] = useState(currentImageUri);
+    const [displayedImage, setDisplayedImage] = useState(
+        menuState.currentImageUri
+    );
+
     const [incomingImage, setIncomingImage] = useState<string>();
 
     // When a new image is requested, we load it into browser cache memory.
@@ -31,9 +24,9 @@ export function MenuSplashscreen(): ReactElement {
     // will start the fade-in animation.
     useEffect(() => {
         const splash = new Image();
-        splash.onload = () => setIncomingImage(currentImageUri);
-        splash.src = currentImageUri;
-    }, [currentImageUri]);
+        splash.onload = () => setIncomingImage(menuState.currentImageUri);
+        splash.src = menuState.currentImageUri;
+    }, [menuState.currentImageUri]);
 
     // When the fade-in animation is done, we set the incoming image as the
     // current one.

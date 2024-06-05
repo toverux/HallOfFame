@@ -1,7 +1,7 @@
 ﻿import { stripIndent } from 'common-tags';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { getClassesModule, logError } from '../common';
+import { getClassesModule, logError, selector } from '../utils';
 import { TakeHofPictureButton } from './take-hof-picture-button';
 
 const coPanelStyles = getClassesModule(
@@ -32,7 +32,10 @@ export function PhotoModePanelPortal({ children }: Props): ReactElement {
         // attribute containing "TakePicture". This seems to be a good way to
         // locate it in a reliable way as it does not have any other special
         // class or ID.
-        const takePhotoSelector = `.${coPanelStyles.buttonPanel} > button > [style*=TakePicture]`;
+        const takePhotoSelector = `${selector(
+            coPanelStyles.buttonPanel
+        )} > button > [style*=TakePicture]`;
+
         const takePictureButton =
             document.querySelector(takePhotoSelector)?.parentNode;
 

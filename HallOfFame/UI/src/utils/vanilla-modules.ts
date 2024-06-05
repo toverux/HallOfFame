@@ -1,5 +1,5 @@
-﻿import { trigger } from 'cs2/api';
-import { getModule } from 'cs2/modding';
+﻿import { getModule } from 'cs2/modding';
+import { logError } from './ui-helpers';
 
 /** @see getClassesModule */
 const ignoreResolveErrorsFor = new Set<string>();
@@ -108,19 +108,7 @@ export function getModuleExport<TExport>(
  * Transforms a space-separated list of class names into a query selector, i.e.
  * "class1 class2 class3" -> ".class1.class2.class3".
  */
-export function classNamesToSelector(classNames: string): string {
+export function selector(classNames: string): string {
     // biome-ignore lint/style/useTemplate: intent clearer like that
     return `.` + classNames.replaceAll(' ', '.');
-}
-
-/**
- * Shows an error dialog and logs the error in the mod's logs instead of just in
- * UI log.
- */
-export function logError(error: unknown, fatal = false): void {
-    console.error(error);
-
-    const errorString = error instanceof Error ? error.stack : String(error);
-
-    trigger('hallOfFame', 'logJavaScriptError', fatal, errorString);
 }

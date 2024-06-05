@@ -1,7 +1,7 @@
 ﻿import { trigger } from 'cs2/api';
 import { Tooltip, type UISound } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
-import { logError } from '../common';
+import { logError } from '../utils';
 import * as styles from './take-hof-picture-button.module.scss';
 
 /**
@@ -61,13 +61,6 @@ function takePicture(): void {
     // Delay the shutter sound when the screenshot is actually taken, and not
     // just before. This is actually taken from Vanilla code.
     requestAnimationFrame(() => {
-        trigger(
-            'audio',
-            'playSound',
-            // UISound is not available at runtime and I like type safety,
-            // so just checking with a little trick that this sound exists.
-            'take-photo' satisfies `${UISound.takePhoto}`,
-            1
-        );
+        trigger('audio', 'playSound', 'take-photo' satisfies `${UISound}`, 1);
     });
 }

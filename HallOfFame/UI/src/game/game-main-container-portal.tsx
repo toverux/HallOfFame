@@ -1,7 +1,7 @@
 ﻿import { stripIndent } from 'common-tags';
 import { type ReactElement, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { getClassesModule, logError } from '../common';
+import { getClassesModule, logError, selector } from '../utils';
 import { ScreenshotUploadPanel } from './screenshot-upload-panel';
 
 const coMainScreenStyles = getClassesModule(
@@ -24,7 +24,10 @@ export function GameMainContainerPortal(): ReactElement {
     // This will be executed once when our host is ready, i.e. when the
     // .main-container has been created in the DOM.
     useEffect(() => {
-        const mainContainerSelector = `.${coMainScreenStyles.mainContainer}`;
+        const mainContainerSelector = selector(
+            coMainScreenStyles.mainContainer
+        );
+
         const mainContainerEl = document.querySelector(mainContainerSelector);
 
         if (!(mainContainerEl instanceof Element)) {

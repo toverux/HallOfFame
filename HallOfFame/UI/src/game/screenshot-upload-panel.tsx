@@ -2,8 +2,8 @@ import { bindValue, trigger, useValue } from 'cs2/api';
 import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { type CSSProperties, type ReactElement, useMemo } from 'react';
-import { getClassesModule, logError } from '../common';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
+import { getClassesModule, logError } from '../utils';
 import * as styles from './screenshot-upload-panel.module.scss';
 
 interface ScreenshotSnapshot {

@@ -1,17 +1,18 @@
 ﻿import { stripIndent } from 'common-tags';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { classNamesToSelector, getClassesModule, logError } from '../common';
+import { getClassesModule, logError, selector } from '../utils';
 import { MenuControls } from './menu-controls';
+import { useHofMenuState } from './menu-state-hook';
 
-const menuUiStyles = getClassesModule(
+const coMenuUiStyles = getClassesModule(
     'game-ui/menu/components/menu-ui.module.scss',
-    ['menuUi']
+    ['corner', 'menuUi', 'version']
 );
 
 const coMainMenuScreenStyles = getClassesModule(
     'game-ui/menu/components/main-menu-screen/main-menu-screen.module.scss',
-    ['column']
+    ['column', 'logo']
 );
 
 interface Props {
@@ -24,12 +25,19 @@ interface Props {
  * It borrows its life cycle to install a portal which patches its DOM to
  * install the menu screenshot controls, only when not in game, where we let
  * the translucent overlay with your city behind.
+ * It also handles toggling the game UI (except our controls).
  */
 export function MasterScreenPortal({ children }: Props): ReactNode {
+    const [menuState] = useHofMenuState();
+
     const [portalTargetEl, setPortalTargetEl] = useState<Element>();
 
+    const menuControlsColumn = useRef<Element>();
+
+    // Finds the first column div in the Master Screen (when not in pause mode)
+    // and mounts the menu controls portal there.
     useEffect(() => {
-        const menuUiSelector = classNamesToSelector(menuUiStyles.menuUi);
+        const menuUiSelector = selector(coMenuUiStyles.menuUi);
         const menuUiEl = document.querySelector(menuUiSelector);
 
         // We this element does not exist, we are in-game with the pause menu,
@@ -42,10 +50,14 @@ export function MasterScreenPortal({ children }: Props): ReactNode {
             return;
         }
 
-        const columnSelector = `${menuUiSelector} .${coMainMenuScreenStyles.column}`;
-        const firstColumnEl = document.querySelector(columnSelector);
+        const columnSelector = `${menuUiSelector} ${selector(
+            coMainMenuScreenStyles.column
+        )}`;
 
-        if (!(firstColumnEl instanceof HTMLElement)) {
+        menuControlsColumn.current =
+            document.querySelector(columnSelector) ?? undefined;
+
+        if (!(menuControlsColumn.current instanceof HTMLElement)) {
             return logError(
                 new Error(stripIndent`
                     Could not locate Master Screen's first column div
@@ -53,10 +65,39 @@ export function MasterScreenPortal({ children }: Props): ReactNode {
             );
         }
 
-        firstColumnEl.style.justifyContent = 'flex-end';
+        menuControlsColumn.current.style.justifyContent = 'flex-end';
 
-        setPortalTargetEl(firstColumnEl);
+        setPortalTargetEl(menuControlsColumn.current);
     }, []);
+
+    // Handles menu visibility.
+    useEffect(() => {
+        // Ignore if we're not set up in this menu.
+        if (!menuControlsColumn.current) {
+            return;
+        }
+
+        // Note that we'll use `opacity` instead of `visibility` because the
+        // background blur filter stays visible when the element is hidden,
+        // which is probably an engine bug.
+        const opacity = menuState.isMenuVisible ? '' : '0';
+
+        const elementsToHide = document.querySelectorAll(
+            [
+                selector(coMainMenuScreenStyles.column),
+                selector(coMainMenuScreenStyles.logo),
+                selector(coMenuUiStyles.corner),
+                selector(coMenuUiStyles.version)
+            ].join(',')
+        );
+
+        // Hide all columns except the one with the menu controls.
+        for (const element of elementsToHide) {
+            if (element != menuControlsColumn.current) {
+                (element as HTMLElement).style.opacity = opacity;
+            }
+        }
+    }, [menuState.isMenuVisible]);
 
     return (
         <>
