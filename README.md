@@ -45,7 +45,7 @@ Special thanks to:
    - Localization for all CS2-supported languages via Crowdin.
    - Permanently disable CS2 logo in menu screen to better see the images.
    - Report abuse.
-   - Upvote button.
+   - Upvote button, upvote count in main menu.
    - Show pictures that have not been already seen.
    - Discover mode: most liked, most recent, mixed...
 
@@ -54,6 +54,8 @@ Special thanks to:
    - See another photo from the same city.
    - Save photo to disk.
    - Follow creator (see more of their pictures).
+   - Labelling so you can choose your preferred style of pictures to see
+     (ex. landscape, detailing, skyline, aerial, etc.).
 
 ## Development
 
