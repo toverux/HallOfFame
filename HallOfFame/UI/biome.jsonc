@@ -81,7 +81,7 @@
       "semicolons": "always",
       "arrowParentheses": "asNeeded",
       "quoteProperties": "preserve",
-      "trailingComma": "none",
+      "trailingCommas": "none",
       "bracketSameLine": true
     }
   }

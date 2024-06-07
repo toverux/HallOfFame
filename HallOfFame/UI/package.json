@@ -5,7 +5,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "check": "biome check . --apply",
+    "check": "biome check --fix",
     "build": "npm run check && webpack",
     "dev": "webpack --watch",
     "update": "npx create-csii-ui-mod update",
@@ -20,14 +20,14 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "~1.7.3",
+    "@biomejs/biome": "~1.8.0",
     "@types/common-tags": "^1.8.4",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "css-loader": "^7.1.2",
-    "lefthook": "^1.6.13",
+    "lefthook": "^1.6.15",
     "mini-css-extract-plugin": "^2.9.0",
-    "sass": "^1.77.2",
+    "sass": "^1.77.4",
     "sass-loader": "^14.2.1",
     "style-loader": "^4.0.0",
     "swc-loader": "^0.2.6",
