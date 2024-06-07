@@ -1,9 +1,18 @@
 import { bindValue, trigger, useValue } from 'cs2/api';
 import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
-import { type CSSProperties, type ReactElement, useMemo } from 'react';
+import {
+    type CSSProperties,
+    type ReactElement,
+    type MouseEvent as ReactMouseEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState
+} from 'react';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
-import { getClassesModule, logError } from '../utils';
+import { getClassesModule } from '../utils';
 import * as styles from './screenshot-upload-panel.module.scss';
 
 interface ScreenshotSnapshot {
@@ -77,14 +86,62 @@ export function ScreenshotUploadPanel(): ReactElement {
         ];
     }, [translate, screenshotSnapshot?.imageUri]);
 
-    // Check vanilla class exists.
-    if (!coMainScreenStyles.centerPanelLayout) {
-        logError(
-            new Error('Could not get a hold on .center-panel-layout class')
-        );
+    const [isDragging, setIsDragging] = useState(false);
 
-        return <></>;
-    }
+    // Maintains the state of the draggable panel.
+    const draggableState = useRef({
+        panelEl: undefined as HTMLElement | undefined,
+        x: 0,
+        y: 0
+    });
+
+    // Start dragging the panel when the user mouses down on the panel.
+    const onMouseDown = useCallback((event: ReactMouseEvent) => {
+        const { current: state } = draggableState;
+
+        // If the panel element changed, reset the offset to 0, 0.
+        if (state.panelEl != event.currentTarget) {
+            state.x = state.y = 0;
+        }
+
+        state.panelEl = event.currentTarget as HTMLElement;
+
+        setIsDragging(true);
+    }, []);
+
+    // Move the panel when the user moves the mouse, just applying delta.
+    const onMouseMove = useCallback((event: MouseEvent) => {
+        const { current: state } = draggableState;
+        if (!state.panelEl) {
+            return;
+        }
+
+        state.x += event.movementX;
+        state.y += event.movementY;
+
+        // translate() would be more appropriate in theory, in a normal browser,
+        // but here at low FPS I found left/top to work better.
+        state.panelEl.style.left = `${state.x}px`;
+        state.panelEl.style.top = `${state.y}px`;
+    }, []);
+
+    // Stop dragging when the user releases the mouse.
+    const onMouseUp = useCallback(() => setIsDragging(false), []);
+
+    // Add/remove event listeners when dragging.
+    useEffect(() => {
+        if (isDragging) {
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        } else {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        }
+        return () => {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+        };
+    }, [isDragging, onMouseMove, onMouseUp]);
 
     // Show panel when there is a screenshot to upload.
     if (!screenshotSnapshot) {
@@ -95,7 +152,9 @@ export function ScreenshotUploadPanel(): ReactElement {
     return (
         <div
             className={`${coMainScreenStyles.centerPanelLayout} ${styles.screenshotUploadPanelLayout}`}>
-            <div className={styles.screenshotUploadPanel}>
+            <div
+                className={styles.screenshotUploadPanel}
+                onMouseDown={onMouseDown}>
                 <div className={styles.screenshotUploadPanelHeader}>
                     {congratulation}
 
