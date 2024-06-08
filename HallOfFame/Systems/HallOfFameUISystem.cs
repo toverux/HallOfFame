@@ -1,6 +1,7 @@
 using System;
 using Colossal.UI.Binding;
 using Game.SceneFlow;
+using Game.Settings;
 using Game.UI;
 using HallOfFame.Utils;
 
@@ -10,6 +11,8 @@ public sealed partial class HallOfFameUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame";
 
     private IUpdateBinding? localeBinding;
+
+    private IUpdateBinding? settingsBinding;
 
     protected override void OnCreate() {
         base.OnCreate();
@@ -23,8 +26,14 @@ public sealed partial class HallOfFameUISystem : UISystemBase {
                 HallOfFameUISystem.BindingGroup, "locale",
                 () => GameManager.instance.localizationManager.activeLocaleId));
 
+            this.AddBinding(this.settingsBinding = new GetterValueBinding<Settings>(
+                HallOfFameUISystem.BindingGroup, "settings",
+                () => Mod.Settings));
+
             GameManager.instance.localizationManager.onActiveDictionaryChanged +=
                 this.OnActiveDictionaryChanged;
+
+            Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
 
             // No need to OnUpdate as there are no bindings that require it.
             this.Enabled = false;
@@ -39,10 +48,16 @@ public sealed partial class HallOfFameUISystem : UISystemBase {
 
         GameManager.instance.localizationManager.onActiveDictionaryChanged -=
             this.OnActiveDictionaryChanged;
+
+        Mod.Settings.onSettingsApplied -= this.OnSettingsApplied;
     }
 
     private void OnActiveDictionaryChanged() {
         this.localeBinding?.Update();
+    }
+
+    private void OnSettingsApplied(Setting setting) {
+        this.settingsBinding?.Update();
     }
 
     /// <summary>

@@ -102,10 +102,6 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
                 this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
 
             this.AddUpdateBinding(new GetterValueBinding<string>(
-                HallOfFameGameUISystem.BindingGroup, "creatorName",
-                () => Mod.Settings.CreatorName));
-
-            this.AddUpdateBinding(new GetterValueBinding<string>(
                 HallOfFameGameUISystem.BindingGroup, "cityName",
                 this.GetCityName));
 

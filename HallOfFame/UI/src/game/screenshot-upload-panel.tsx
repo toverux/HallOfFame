@@ -11,11 +11,12 @@ import {
     useRef,
     useState
 } from 'react';
+import type { JsonSettings } from '../common';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
 import { getClassesModule } from '../utils';
 import * as styles from './screenshot-upload-panel.module.scss';
 
-interface ScreenshotSnapshot {
+interface JsonScreenshotSnapshot {
     readonly achievedMilestone: number;
     readonly population: number;
     readonly imageUri: string;
@@ -34,11 +35,11 @@ const coMainScreenStyles = getClassesModule(
     ['centerPanelLayout']
 );
 
-const creatorName$ = bindValue<string>('hallOfFame.game', 'creatorName', '');
+const settings$ = bindValue<JsonSettings>('hallOfFame', 'settings');
 
-const cityName$ = bindValue<string>('hallOfFame.game', 'cityName', '');
+const cityName$ = bindValue<string>('hallOfFame.game', 'cityName');
 
-const screenshotSnapshot$ = bindValue<ScreenshotSnapshot | null>(
+const screenshotSnapshot$ = bindValue<JsonScreenshotSnapshot | null>(
     'hallOfFame.game',
     'screenshotSnapshot',
     null
@@ -50,8 +51,10 @@ const screenshotSnapshot$ = bindValue<ScreenshotSnapshot | null>(
 export function ScreenshotUploadPanel(): ReactElement {
     const { translate } = useLocalization();
 
+    const settings = useValue(settings$);
+
     const creatorName =
-        useValue(creatorName$) ||
+        settings.creatorName ||
         // biome-ignore lint/style/noNonNullAssertion: we have fallback.
         translate('HallOfFame.Common.DEFAULT[CreatorName]', 'Anonymous')!;
 
@@ -230,6 +233,19 @@ export function ScreenshotUploadPanel(): ReactElement {
                 </div>
 
                 <div className={styles.screenshotUploadPanelFooter}>
+                    <span
+                        className={styles.screenshotUploadPanelFooterCreatorId}>
+                        <LocalizedString
+                            id='HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID'
+                            fallback='Creator ID: {CREATOR_ID}'
+                            // biome-ignore lint/style/useNamingConvention: i18n
+                            args={{ CREATOR_ID: settings.creatorIdClue }}
+                        />
+                        &ndash;*
+                    </span>
+
+                    <div style={{ flex: 1 }} />
+
                     <Button
                         className={`${styles.screenshotUploadPanelFooterButton} ${styles.cancel}`}
                         variant='primary'

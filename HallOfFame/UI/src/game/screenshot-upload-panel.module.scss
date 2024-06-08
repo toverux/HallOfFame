@@ -94,8 +94,14 @@
     &-footer {
         display: flex;
         flex-direction: row;
-        justify-content: flex-end;
+        align-items: center;
         background-color: var(--panelColorDark);
+
+        &-creator-id {
+            color: var(--menuText1Normal);
+            opacity: .5;
+            text-transform: uppercase;
+        }
 
         &-button {
             margin-left: 20rem;

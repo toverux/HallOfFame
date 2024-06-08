@@ -77,13 +77,13 @@ public sealed class Mod : IMod {
             AssetDatabase.global.LoadSettings(
                 nameof(HallOfFame), this.settingsValue, new Settings(this));
 
+            // Set singleton instance only when OnLoad is likely to complete.
+            Mod.instanceValue = this;
+
             // Initialize subsystems.
             updateSystem.UpdateAt<HallOfFameUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<HallOfFameMenuUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<HallOfFameGameUISystem>(SystemUpdatePhase.UIUpdate);
-
-            // Done!
-            Mod.instanceValue = this;
 
             Mod.Log.Info($"{nameof(this.OnLoad)} complete.");
         }
