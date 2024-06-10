@@ -1,6 +1,11 @@
 import { bindValue, trigger, useValue } from 'cs2/api';
-import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
-import { Button, Icon } from 'cs2/ui';
+import {
+    type Localization,
+    LocalizedNumber,
+    LocalizedString,
+    useLocalization
+} from 'cs2/l10n';
+import { Button, Icon, Tooltip } from 'cs2/ui';
 import {
     type CSSProperties,
     type ReactElement,
@@ -70,24 +75,10 @@ export function ScreenshotUploadPanel(): ReactElement {
     // useMemo() with state.uri is used to change the message when the state
     // type and image URI actually change.
     // biome-ignore lint/correctness/useExhaustiveDependencies: explained above.
-    const congratulation = useMemo(() => {
-        if (!screenshotSnapshot) {
-            return;
-        }
-
-        // biome-ignore lint/style/noNonNullAssertion: we have fallback.
-        const congratulations = translate(
-            'HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS',
-            'Nice shot!'
-        )!
-            // Each message is separated by a newline.
-            .split('\n')
-            .filter(translation => !translation.startsWith('//'));
-
-        return congratulations[
-            Math.floor(Math.random() * congratulations.length)
-        ];
-    }, [translate, screenshotSnapshot?.imageUri]);
+    const congratulation = useMemo(
+        () => getCongratulation(translate, screenshotSnapshot),
+        [translate, screenshotSnapshot?.imageUri]
+    );
 
     const [isDragging, setIsDragging] = useState(false);
 
@@ -100,6 +91,19 @@ export function ScreenshotUploadPanel(): ReactElement {
 
     // Start dragging the panel when the user mouses down on the panel.
     const onMouseDown = useCallback((event: ReactMouseEvent) => {
+        // Do not start dragging if the user clicked on a button.
+        let maybeButton: EventTarget | null = event.target;
+        while (maybeButton) {
+            if (maybeButton instanceof HTMLButtonElement) {
+                return;
+            }
+
+            maybeButton =
+                maybeButton instanceof HTMLElement
+                    ? maybeButton.parentElement
+                    : null;
+        }
+
         const { current: state } = draggableState;
 
         // If the panel element changed, reset the offset to 0, 0.
@@ -146,8 +150,13 @@ export function ScreenshotUploadPanel(): ReactElement {
         };
     }, [isDragging, onMouseMove, onMouseUp]);
 
+    const ratioPreviewInfo = useMemo(
+        () => screenshotSnapshot && getRatioPreviewInfo(screenshotSnapshot),
+        [screenshotSnapshot]
+    );
+
     // Show panel when there is a screenshot to upload.
-    if (!screenshotSnapshot) {
+    if (!(screenshotSnapshot && ratioPreviewInfo)) {
         return <></>;
     }
 
@@ -171,18 +180,37 @@ export function ScreenshotUploadPanel(): ReactElement {
                 </div>
 
                 <div
-                    className={coFixedRatioImageStyles.fixedRatioImage}
+                    className={`${styles.screenshotUploadPanelImage} ${coFixedRatioImageStyles.fixedRatioImage}`}
                     style={
                         {
                             '--w': screenshotSnapshot.imageWidth,
                             '--h': screenshotSnapshot.imageHeight
                         } as CSSProperties
                     }>
+                    {/* This div sets the size of its parent and therefore the size of the image. */}
                     <div className={coFixedRatioImageStyles.ratio} />
+
                     <img
-                        className={`${styles.screenshotUploadPanelImage} ${coFixedRatioImageStyles.image}`}
+                        className={coFixedRatioImageStyles.image}
                         src={screenshotSnapshot.imageUri}
                     />
+
+                    {ratioPreviewInfo.type != 'equal' && (
+                        <Tooltip
+                            direction='down'
+                            tooltip={translate(
+                                'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_DESCRIPTION',
+                                'The border shows you how your image will be cropped on the most common aspect ratio.'
+                            )}>
+                            <div
+                                className={
+                                    styles.screenshotUploadPanelImageRatioPreview
+                                }
+                                style={ratioPreviewInfo.style}>
+                                16:9
+                            </div>
+                        </Tooltip>
+                    )}
                 </div>
 
                 <div
@@ -274,6 +302,51 @@ export function ScreenshotUploadPanel(): ReactElement {
             </div>
         </div>
     );
+}
+
+function getCongratulation(
+    translate: Localization['translate'],
+    screenshot: JsonScreenshotSnapshot | null
+) {
+    if (!screenshot) {
+        return;
+    }
+
+    // biome-ignore lint/style/noNonNullAssertion: we have fallback.
+    const congratulations = translate(
+        'HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS',
+        'Nice shot!'
+    )!
+        // Each message is separated by a newline.
+        .split('\n')
+        .filter(translation => !translation.startsWith('//'));
+
+    return congratulations[Math.floor(Math.random() * congratulations.length)];
+}
+
+/**
+ * Computes the type and style of the ratio preview overlay on the image,
+ * helping the user to understand how the image will be cropped on the most
+ * common aspect ratio, 16:9.
+ */
+function getRatioPreviewInfo(screenshot: JsonScreenshotSnapshot) {
+    const mostCommonRatio = 16 / 9;
+
+    const ratio = screenshot.imageWidth / screenshot.imageHeight;
+
+    const type =
+        ratio == mostCommonRatio
+            ? 'equal'
+            : ratio > mostCommonRatio
+              ? 'narrower'
+              : 'wider';
+
+    const style = {
+        width: type == 'wider' ? '100%' : `${(mostCommonRatio / ratio) * 100}%`,
+        height: type == 'wider' ? `${(ratio / mostCommonRatio) * 100}%` : '100%'
+    } satisfies CSSProperties;
+
+    return { type, style } as const;
 }
 
 function discardScreenshot(): void {

@@ -55,7 +55,35 @@
     &-image {
         @include common.fade-in;
 
+        display: flex;
+        justify-content: center;
+        align-items: center;
         background-color: dimgray;
+
+        &-ratio-preview {
+            // other positioning properties are set via code:
+            // display (flex/none), width, height.
+
+            z-index: 1;
+
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+
+            border: 3rem solid white;
+            border-radius: 8rem;
+            padding: 12rem;
+
+            font-size: calc(25rem * var(--fontScale));
+            color: white;
+
+            opacity: .2;
+            transition: opacity .2s ease-in-out;
+
+            &:hover {
+                opacity: .8;
+            }
+        }
     }
 
     &-content p {
