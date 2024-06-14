@@ -4,7 +4,7 @@
         <FileVersion>1.0.0</FileVersion>
 
         <OutputType>Library</OutputType>
-        <!-- According to @Wayz on Discord, C# 9 is the highest version supported by Burst. -->
+        <!-- According to @Wayz and @tdw_village on Discord, C# 9 is the highest version supported by Burst. -->
         <!-- With a version higher than that it fails silently. -->
         <!-- As I do not need Burst in Hall of Fame (no hot path), using C# 12 is fine. -->
         <LangVersion>12</LangVersion>

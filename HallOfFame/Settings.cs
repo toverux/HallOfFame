@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Colossal.IO.AssetDatabase;
+using Colossal.PSI.Common;
 using Colossal.PSI.Environment;
 using Colossal.UI.Binding;
 using Game.Modding;
@@ -17,6 +18,7 @@ namespace HallOfFame;
 public sealed class Settings : ModSetting, IJsonWritable {
     private const string GroupYourProfile = "YourProfile";
     private const string GroupAdvanced = "Advanced";
+    private const string GroupOthers = "Others";
 
     /// <summary>
     /// Creator ID read from the dedicated file.
@@ -42,7 +44,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         get;
         [UsedImplicitly]
         set;
-    } = string.Empty;
+    } = null!;
 
     [SettingsUISection(Settings.GroupYourProfile)]
     [SettingsUITextInput]
@@ -51,7 +53,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         [UsedImplicitly]
         get;
         set;
-    } = "ERROR! Mod failed to load Creator ID.";
+    } = null!;
 
     [SettingsUISection(Settings.GroupYourProfile)]
     [SettingsUIButton]
@@ -70,7 +72,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         get;
         [UsedImplicitly]
         set;
-    } = true;
+    }
 
     /// <summary>
     /// Hostname of the Hall of Fame server.
@@ -81,7 +83,15 @@ public sealed class Settings : ModSetting, IJsonWritable {
         get;
         [UsedImplicitly]
         set;
-    } = "halloffame.cs2.mtq.io";
+    } = null!;
+
+    [SettingsUIButton]
+    [SettingsUISection(Settings.GroupOthers)]
+    [UsedImplicitly]
+    public bool ResetSettings {
+        // ReSharper disable once ValueParameterNotUsed
+        set => this.SetDefaults();
+    }
 
     public Settings(IMod mod) : base(mod) {
         this.SetDefaults();
@@ -89,9 +99,21 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     /// <summary>
     /// Applies default values to the settings if it's not already done inline.
+    /// Do NOT move properties initialization out from this method, as it's used
+    /// to restore default values.
     /// </summary>
     public override void SetDefaults() {
         Settings.CreatorID ??= this.CreateOrReadCreatorID();
+
+        // Set the default creator name with the current platform username,
+        // might be Steam username or probably the Paradox one for example.
+        // I don't know exactly how this works when using a non-Steam version
+        // and I don't handle username change (PlatformManager.onUserUpdated)
+        // (ex. logging in in-game), because I can't test it, in any case we'd
+        // need to implement it intelligently to not override empty strings from
+        // creators that choose to stay anonymous. So, let's not bring too much
+        // complexity for now, this seems adequate.
+        this.CreatorName = PlatformManager.instance.userName ?? string.Empty;
 
         // Mask the Creator ID except the first segment so the user can
         // identify themselves.
@@ -101,6 +123,10 @@ public sealed class Settings : ModSetting, IJsonWritable {
                 ? segment
                 : new string('*', segment.Length))
             .Join(delimiter: "-");
+
+        this.MakePlatformScreenshots = true;
+
+        this.HostName = "halloffame.cs2.mtq.io";
     }
 
     /// <summary>

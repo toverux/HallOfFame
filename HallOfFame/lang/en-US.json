@@ -27,5 +27,7 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "Also take local screenshot",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "When using the Hall of Fame screenshot button, also take a screenshot using the standard basegame mechanism (ex. on Windows, C:\\Users\\You\\AppData\\LocalLow\\Colossal Order\\Cities Skylines II\\Screenshots).",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Hall of Fame server",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Hostname (not URL) of the hall of fame server. You should not change it unless you’re developing on the mod or using an alternative server."
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.HostName]": "Hostname (not URL) of the hall of fame server. You should not change it unless you’re developing on the mod or using an alternative server.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Reset Settings",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Reset all mod settings to their default values (except the Creator ID which will be kept untouched)."
 }
