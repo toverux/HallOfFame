@@ -11,5 +11,5 @@ insert_final_newline = true
 [*.cs]
 charset = utf-8-bom # Visual Studio does not like UTF-8 without BOM
 
-[*.json]
+[*.{json,yml}]
 indent_size = 2

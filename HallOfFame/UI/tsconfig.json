@@ -4,7 +4,6 @@
     "module": "ESNext",
     "moduleResolution": "Node",
     "baseUrl": "src",
-    "typeRoots": ["./types"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

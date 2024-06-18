@@ -118,6 +118,6 @@
     </Target>
 
     <Target Name="BuildUI" AfterTargets="AfterBuild">
-        <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)/UI"/>
+        <Exec Command="bun run build" WorkingDirectory="$(ProjectDir)/UI"/>
     </Target>
 </Project>

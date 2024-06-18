@@ -60,7 +60,8 @@ Special thanks to:
 ### Installation
 
  - Standard CS2 modding toolchain;
- - `npm i` in `HallOfFame/UI` to install UI mod dependencies.
+ - [Bun](https://bun.sh) as a replacement for Node in the build toolchain.
+ - `bun i` in `HallOfFame/UI` to install UI mod dependencies.
  - Recommended: enable `--developerMode --uiDeveloperMode` as game launch options.
 
 Here's a game launch command to also skip launcher in Steam:
@@ -74,7 +75,7 @@ Here's a game launch command to also skip launcher in Steam:
 The UI mod will be built automatically with the C# solution.
 
 However, if you are actively working on the UI, you may recompile it on change
-with `cd HallOfFame/UI && npm run dev`.
+with `cd HallOfFame/UI && bun dev`.
 
 You can enable the game's UI live reload on change with `--uiDeveloperMode`.
 
@@ -101,12 +102,12 @@ Logs are situated in either:
 ### TypeScript
 
 TypeScript code is formatted and linted by [Biome](https://biomejs.dev).
-Run `npm run check` to check for linting errors, format files and autofix simple issues.
+Run `bun check` to check for linting errors, format files and autofix simple issues.
 
-You can also use Biome directly with `npx biome`.
+You can also use Biome directly with `bun biome`.
 
 The formatter and linter should run as a pre-commit hook if you have it installed,
-which should be done automatically when running `npm i` (otherwise run `npx lefthook install`).
+which should be done automatically when running `bun i` (otherwise run `bun lefthook install`).
 
 I'd suggest to use a Biome plugin for your editor to ease development.
 

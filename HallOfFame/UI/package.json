@@ -1,12 +1,10 @@
 {
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
   "engines": {
-    "node": ">=22"
+    "bun": ">=1.1.0"
   },
   "scripts": {
     "check": "biome check --fix",
-    "build": "npm run check && webpack",
+    "build": "bun run check && webpack",
     "dev": "webpack --watch",
     "update": "npx create-csii-ui-mod update",
     "clean": "npx create-csii-ui-mod clean"
@@ -29,17 +27,11 @@
     "mini-css-extract-plugin": "^2.9.0",
     "sass": "^1.77.4",
     "sass-loader": "^14.2.1",
-    "style-loader": "^4.0.0",
-    "swc-loader": "^0.2.6",
     "terser-webpack-plugin": "^5.3.10",
     "ts-loader": "^9.5.1",
-    "tsconfig-paths-webpack-plugin": "^4.1.0",
     "typescript": "^5.4.5",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4"
   },
-  "volta": {
-    "node": "22.1.0",
-    "npm": "10.7.0"
-  }
+  "trustedDependencies": ["@biomejs/biome"]
 }
