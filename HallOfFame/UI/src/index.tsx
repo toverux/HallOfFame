@@ -18,5 +18,8 @@ const register: ModRegistrar = moduleRegistry => {
     console.info(`HoF: Successfully registered all modules.`);
 };
 
+// noinspection JSUnusedGlobalSymbols
+export const hasCSS = true;
+
 // biome-ignore lint/style/noDefaultExport: this is per contract the main entry point of the mod.
 export default register;
