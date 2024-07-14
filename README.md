@@ -61,7 +61,7 @@ Special thanks to:
 
  - Standard CS2 modding toolchain;
  - [Bun](https://bun.sh) as a replacement for Node in the build toolchain.
- - `bun i` in `HallOfFame/UI` to install UI mod dependencies.
+ - `bun i` to install UI mod dependencies.
  - Recommended: enable `--developerMode --uiDeveloperMode` as game launch options.
 
 Here's a game launch command to also skip launcher in Steam:
@@ -75,7 +75,7 @@ Here's a game launch command to also skip launcher in Steam:
 The UI mod will be built automatically with the C# solution.
 
 However, if you are actively working on the UI, you may recompile it on change
-with `cd HallOfFame/UI && bun dev`.
+with `bun dev`.
 
 You can enable the game's UI live reload on change with `--uiDeveloperMode`.
 

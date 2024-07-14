@@ -10,8 +10,6 @@
 }
 
 .screenshot-upload-panel {
-    @include common.scale-in-ver-center;
-
     pointer-events: auto;
     position: relative;
 
@@ -25,6 +23,8 @@
     overflow: hidden;
     box-shadow: 0 0 20rem rgba(0, 0, 0, 0.6);
     backdrop-filter: var(--panelBlur);
+
+    @include common.scale-in-ver-center;
 
     &-header, &-content, &-footer {
         padding: 20rem 30rem;
@@ -53,12 +53,12 @@
     }
 
     &-image {
-        @include common.fade-in;
-
         display: flex;
         justify-content: center;
         align-items: center;
         background-color: dimgray;
+
+        @include common.fade-in;
 
         &-ratio-preview {
             // other positioning properties are set via code:

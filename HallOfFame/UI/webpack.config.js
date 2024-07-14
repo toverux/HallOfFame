@@ -1,46 +1,49 @@
 // File originally by Colossal Order.
 // Changes made:
-// - Auto code reformat.
+// - Auto code reformat with Biome, renamed a few variables.
+// - Migrated to ESM (require => import, import.meta.dirname => import.meta.dirname, etc).
 // - Removed custom CSSPresencePlugin.
 // - Change css-loader to ignore resolving static game images (Media/...) and
 //   leave them as-is (`options.url.filter`).
 // - Change css-loader to add "hof-" prefix to CSS modules class names.
 //   This can help debugging and other mods to target our classes.
 // - Add `optimization.chunkIds`, `output.chunkFilename` and `TerserPlugin.test`
-//   to customize chunk names, so they're not loaded as UI mods.
+//   to set chunk extension to .chunkmjs, so they're not loaded as UI mods.
 
-const path = require('path');
-const MOD = require('./mod.json');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
-const gray = (text) => `\x1b[90m${text}\x1b[0m`;
+import * as path from 'node:path';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
+import mod from './mod.json' with { type: 'json' };
 
-const CSII_USERDATAPATH = process.env.CSII_USERDATAPATH;
+const gray = text => `\x1b[90m${text}\x1b[0m`;
 
-if (!CSII_USERDATAPATH) {
+const userDataPath = process.env.CSII_USERDATAPATH;
+
+if (!userDataPath) {
     throw 'CSII_USERDATAPATH environment variable is not set, ensure the CSII Modding Toolchain is installed correctly';
 }
 
-const OUTPUT_DIR = `${CSII_USERDATAPATH}\\Mods\\${MOD.id}`;
+const outputDir = `${userDataPath}\\Mods\\${mod.id}`;
 
 const banner = `
  * Cities: Skylines II UI Module
  *
- * Id: ${MOD.id}
- * Author: ${MOD.author}
- * Version: ${MOD.version}
- * Dependencies: ${MOD.dependencies.join(',')}
+ * Id: ${mod.id}
+ * Author: ${mod.author}
+ * Version: ${mod.version}
+ * Dependencies: ${mod.dependencies.join(',')}
 `;
 
-module.exports = {
+// biome-ignore lint/style/noDefaultExport: per webpack api contract
+export default {
     mode: 'production',
     stats: 'none',
     entry: {
-        [MOD.id]: './src/index.tsx',
+        [mod.id]: path.join(import.meta.dirname, 'src/index.tsx')
     },
     externalsType: 'window',
     externals: {
-        'react': 'React',
+        react: 'React',
         'react-dom': 'ReactDOM',
         'cs2/modding': 'cs2/modding',
         'cs2/api': 'cs2/api',
@@ -49,63 +52,63 @@ module.exports = {
         'cs2/ui': 'cs2/ui',
         'cs2/input': 'cs2/input',
         'cs2/utils': 'cs2/utils',
-        'cohtml/cohtml': 'cohtml/cohtml',
+        'cohtml/cohtml': 'cohtml/cohtml'
     },
     module: {
         rules: [
             {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
-                exclude: /node_modules/,
+                exclude: /node_modules/
             },
             {
                 test: /\.s?css$/,
-                include: path.join(__dirname, 'src'),
+                include: path.join(import.meta.dirname, 'src'),
                 use: [
                     MiniCssExtractPlugin.loader,
                     {
                         loader: 'css-loader',
                         options: {
                             url: {
-                                // Avoid requiring intrinsinc assets
+                                // Avoid requiring intrinsic assets
                                 filter: url => !url.startsWith('Media')
                             },
                             importLoaders: 1,
                             modules: {
                                 auto: true,
                                 exportLocalsConvention: 'camelCase',
-                                localIdentName: 'hof-[local]_[hash:base64:3]',
-                            },
-                        },
+                                localIdentName: 'hof-[local]_[hash:base64:3]'
+                            }
+                        }
                     },
-                    'sass-loader',
-                ],
+                    'sass-loader'
+                ]
             },
             {
                 test: /\.(png|jpe?g|gif|svg)$/i,
                 type: 'asset/resource',
                 generator: {
-                    filename: 'images/[name][ext][query]',
-                },
-            },
-        ],
+                    filename: 'images/[name][ext][query]'
+                }
+            }
+        ]
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
-        modules: ['node_modules', path.join(__dirname, 'src')],
+        modules: ['node_modules', path.join(import.meta.dirname, 'src')],
         alias: {
-            'mod.json': path.resolve(__dirname, 'mod.json'),
-        },
+            'mod.json': path.resolve(import.meta.dirname, 'mod.json')
+        }
     },
     output: {
-        path: path.resolve(__dirname, OUTPUT_DIR),
+        path: path.resolve(import.meta.dirname, outputDir),
         library: {
-            type: 'module',
+            type: 'module'
         },
         publicPath: `coui://ui-mods/`,
         // We use the made-up .chunkmjs extension to avoid the game mod loader
         // from trying to load chunk files as a mods, which would fail.
-        chunkFilename: '[name].chunkmjs',
+        chunkFilename: '[name].chunkmjs'
     },
     optimization: {
         chunkIds: 'named',
@@ -114,25 +117,27 @@ module.exports = {
             new TerserPlugin({
                 test: /\.(chunk)?m?js(\?.*)?$/i,
                 extractComments: {
-                    banner: () => banner,
-                },
-            }),
-        ],
+                    banner: () => banner
+                }
+            })
+        ]
     },
     experiments: {
-        outputModule: true,
+        outputModule: true
     },
     plugins: [
         new MiniCssExtractPlugin(),
         {
             apply(compiler) {
                 let runCount = 0;
-                compiler.hooks.done.tap('AfterDonePlugin', (stats) => {
-                    console.log(stats.toString({ colors: true }));
-                    console.log(`\n🔨 ${!runCount++ ? 'Built' : 'Updated'} ${MOD.id}`);
-                    console.log('   ' + gray(OUTPUT_DIR) + '\n');
+                compiler.hooks.done.tap('AfterDonePlugin', stats => {
+                    console.info(stats.toString({ colors: true }));
+                    console.info(
+                        `\n🔨 ${runCount++ ? 'Updated' : 'Built'} ${mod.id}`
+                    );
+                    console.info(`   ${gray(outputDir)}\n`);
                 });
-            },
-        },
-    ],
+            }
+        }
+    ]
 };

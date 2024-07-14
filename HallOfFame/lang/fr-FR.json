@@ -1,4 +1,4 @@
-﻿{
+{
   "HallOfFame.Common.BASE_ERROR": "Hall of Fame a rencontré une erreur inattendue. Veuillez contacter l’auteur du mod sur Paradox Mods/Forums ou via Discord/GitHub (@toverux).",
   "HallOfFame.Common.RECOVERABLE_ERROR": "L’erreur n’est pas fatale et vous devriez pouvoir continuer votre session de jeu sans problème.",
   "HallOfFame.Common.FATAL_ERROR": "Cette erreur est fatale et vous devriez sauvegarder votre partie et redémarrer le jeu et de désactiver le mod si le problème se répète.",

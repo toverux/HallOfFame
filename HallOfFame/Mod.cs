@@ -98,22 +98,27 @@ public sealed class Mod : IMod {
     }
 
     public void OnDispose() {
-        // Unregister Harmony patches.
-        if (this.harmony is not null) {
-            this.harmony.UnpatchAll(Mod.HarmonyId);
-            this.harmony = null;
+        // Run dispose logic on the next frame because systems are destroyed
+        // after IMods are disposed, so this can cause null references for our
+        // systems while they're living their last moments.
+        GameManager.instance.RegisterUpdater(() => {
+            // Unregister Harmony patches.
+            if (this.harmony is not null) {
+                this.harmony.UnpatchAll(Mod.HarmonyId);
+                this.harmony = null;
 
-            Mod.Log.Info("Unregistered Harmony patches.");
-        }
+                Mod.Log.Info("Unregistered Harmony patches.");
+            }
 
-        // Unregister settings UI
-        if (this.settingsValue is not null) {
-            this.settingsValue.UnregisterInOptionsUI();
-            this.settingsValue = null;
-        }
+            // Unregister settings UI
+            if (this.settingsValue is not null) {
+                this.settingsValue.UnregisterInOptionsUI();
+                this.settingsValue = null;
+            }
 
-        Mod.instanceValue = null;
+            Mod.instanceValue = null;
 
-        Mod.Log.Info($"{nameof(this.OnDispose)} complete.");
+            Mod.Log.Info($"{nameof(this.OnDispose)} complete.");
+        });
     }
 }

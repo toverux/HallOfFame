@@ -1,8 +1,8 @@
 # Machine-specific settings
-.idea/**/workspace.xml
+/.idea/**/workspace.xml
 
 # UI mod
-node_modules
+/node_modules
 
 # Build artifacts
 Library/

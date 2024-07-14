@@ -1,6 +1,8 @@
 pre-commit:
   commands:
-    check:
-      root: HallOfFame/UI
-      glob: "*.{ts,tsx,json}"
-      run: bun tsc --noEmit && bun biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+    tsc:
+      glob: "*.{ts,tsx,js,json}"
+      run: bun --bun tsc --p HallOfFame/UI --noEmit
+    biome:
+      glob: "*.{ts,tsx,js,json}"
+      run: bun biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}

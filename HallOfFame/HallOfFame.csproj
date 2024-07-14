@@ -12,16 +12,6 @@
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release</Configurations>
 
-        <!--The folder where Game.dll is located. Set it only if the game is not installed in the default location, otherwise keep it empty-->
-        <CustomManagedPath/>
-
-        <!--Path to the text file where PDX account data is stored which is required to publish the mod-->
-        <!--Keep it outside of project in order to not commit it or share accidentally-->
-        <!--The file should contain 2 lines:-->
-        <!--Your.PDX@Account.login-->
-        <!--Your-PDX-Account-Pa$$word-->
-        <PDXAccountDataPath>$(USERPROFILE)\Documents\Paradox Interactive\pdx_account.txt</PDXAccountDataPath>
-
         <!--The file where mod information which is required for publishing mod on PDX mods are stored-->
         <PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
     </PropertyGroup>
@@ -118,6 +108,6 @@
     </Target>
 
     <Target Name="BuildUI" AfterTargets="AfterBuild">
-        <Exec Command="bun run build" WorkingDirectory="$(ProjectDir)/UI"/>
+        <Exec Command="bun run build" WorkingDirectory="$(SolutionDir)"/>
     </Target>
 </Project>

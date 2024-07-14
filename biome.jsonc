@@ -1,8 +1,8 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "include": ["**/*.ts", "**/*.tsx", "**/*.json"],
-    "ignore": ["types"]
+    "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.json"],
+    "ignore": ["**/bin", "**/obj", "**/types", "*.personal.*"]
   },
   "organizeImports": {
     "enabled": true
@@ -24,6 +24,10 @@
       "complexity": {
         // Learn the language.
         "noVoid": "off"
+      },
+      "correctness": {
+        // I generally know what I'm doing.
+        "noNodejsModules": "off"
       },
       "performance": {
         // Virtually not an issue with modern bundlers.
@@ -67,7 +71,8 @@
     "lineEnding": "lf",
     "indentStyle": "space",
     "indentWidth": 4,
-    "lineWidth": 80
+    "lineWidth": 80,
+    "formatWithErrors": true
   },
   "json": {
     "formatter": {

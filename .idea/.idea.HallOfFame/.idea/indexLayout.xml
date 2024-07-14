@@ -2,7 +2,14 @@
 <project version="4">
   <component name="UserContentModel">
     <attachedFolders />
-    <explicitIncludes />
+    <explicitIncludes>
+      <Path>.gitattributes</Path>
+      <Path>.gitignore</Path>
+      <Path>.lefthook.yml</Path>
+      <Path>README.md</Path>
+      <Path>biome.jsonc</Path>
+      <Path>package.json</Path>
+    </explicitIncludes>
     <explicitExcludes />
   </component>
 </project>
