@@ -5,7 +5,7 @@ import {
     LocalizedString,
     useLocalization
 } from 'cs2/l10n';
-import { Button, Icon, Tooltip } from 'cs2/ui';
+import { Button, Icon } from 'cs2/ui';
 import {
     type CSSProperties,
     type ReactElement,
@@ -19,6 +19,7 @@ import {
 import type { JsonSettings } from '../common';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
 import { getClassesModule } from '../utils';
+import { DescriptionTooltip } from '../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
 import * as styles from './screenshot-upload-panel.module.scss';
 
 interface JsonScreenshotSnapshot {
@@ -196,10 +197,14 @@ export function ScreenshotUploadPanel(): ReactElement {
                     />
 
                     {ratioPreviewInfo.type != 'equal' && (
-                        <Tooltip
+                        <DescriptionTooltip
                             direction='down'
-                            tooltip={translate(
-                                'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_DESCRIPTION',
+                            title={translate(
+                                'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE',
+                                '16:9 Aspect Ratio Preview'
+                            )}
+                            description={translate(
+                                'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION',
                                 'The border shows you how your image will be cropped on the most common aspect ratio.'
                             )}>
                             <div
@@ -209,7 +214,7 @@ export function ScreenshotUploadPanel(): ReactElement {
                                 style={ratioPreviewInfo.style}>
                                 16:9
                             </div>
-                        </Tooltip>
+                        </DescriptionTooltip>
                     )}
                 </div>
 
