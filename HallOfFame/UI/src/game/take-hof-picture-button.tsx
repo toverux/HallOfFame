@@ -1,5 +1,5 @@
 ﻿import { trigger } from 'cs2/api';
-import { Tooltip, type UISound } from 'cs2/ui';
+import { Tooltip } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
 import { logError } from '../utils';
 import * as styles from './take-hof-picture-button.module.scss';
@@ -57,10 +57,4 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 
 function takePicture(): void {
     trigger('hallOfFame.game', 'takeScreenshot');
-
-    // Delay the shutter sound when the screenshot is actually taken, and not
-    // just before. This is actually taken from Vanilla code.
-    requestAnimationFrame(() => {
-        trigger('audio', 'playSound', 'take-photo' satisfies `${UISound}`, 1);
-    });
 }

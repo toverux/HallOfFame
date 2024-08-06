@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Colossal.PSI.Environment;
 using Colossal.UI;
 using Colossal.UI.Binding;
+using Game;
 using Game.City;
 using Game.SceneFlow;
 using Game.Simulation;
@@ -206,6 +207,11 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     private bool ContinueTakeScreenshot() {
         PhotoModeUISystemPatch.OnCaptureScreenshot -= this.ContinueTakeScreenshot;
 
+        // Slightly deferred take photo sound, otherwise it seems to play too
+        // early. Vanilla screenshot capture is actually doing the same thing on
+        // UI-side with a `setTimeout()`bb.
+        GameManager.instance.RegisterUpdater(this.PlayTakePhotoSound);
+
         // This bricks the current game session if this throws, so we will
         // handle exceptions properly here, as there is a non-zero chance of
         // failure in this section (notably due to I/O).
@@ -214,12 +220,13 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             // Height is better than width because of widescreen monitors.
             // The server will decide the final resolution, i.e. rescale to
             // 2160p if the resulting image is bigger.
-            var scaleFactor = (int) Math.Ceiling(2160d / Screen.height);
+            var scaleFactor = (int)Math.Ceiling(2160d / Screen.height);
 
             var screenshotTexture =
                 ScreenCapture.CaptureScreenshotAsTexture(scaleFactor);
 
             var screenshotBytes = screenshotTexture.EncodeToJPG();
+
             var screenshotSize = new Vector2Int(
                 screenshotTexture.width, screenshotTexture.height);
 
@@ -258,6 +265,17 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         }
         finally {
             this.CurrentScreenshot = null;
+        }
+    }
+
+    private void PlayTakePhotoSound() {
+        try {
+            // ReSharper disable once Unity.UnknownResource
+            var sounds = Resources.Load<UISoundCollection>("Audio/UI Sounds");
+            sounds.PlaySound("take-photo");
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
         }
     }
 
