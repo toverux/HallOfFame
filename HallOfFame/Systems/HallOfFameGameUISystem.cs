@@ -11,6 +11,8 @@ using Game.SceneFlow;
 using Game.Simulation;
 using Game.UI;
 using Game.UI.InGame;
+using Game.UI.Localization;
+using Game.UI.Menu;
 using HallOfFame.Patches;
 using HallOfFame.Utils;
 using HarmonyLib;
@@ -181,6 +183,11 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     /// screenshot taking.
     /// </summary>
     private void BeginTakeScreenshot() {
+        // Early exit if the user has not set a creator name.
+        if (this.CheckShouldSetCreatorName()) {
+            return;
+        }
+
         PhotoModeUISystemPatch.OnCaptureScreenshot += this.ContinueTakeScreenshot;
 
         // This is unlikely to break except if the Vanilla method changes
@@ -265,6 +272,56 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         }
         finally {
             this.CurrentScreenshot = null;
+        }
+    }
+
+    /// <summary>
+    /// Checks if the user has set a creator name in the mod settings, if not a
+    /// dialog will be shown to prompt the user to set one and direct them to
+    /// the settings.
+    /// </summary>
+    /// <returns>Whether the user must go set their Creator Name.</returns>
+    private bool CheckShouldSetCreatorName() {
+        if (!string.IsNullOrWhiteSpace(Mod.Settings.CreatorName)) {
+            return false;
+        }
+
+        var dialog = new ConfirmationDialog(
+            LocalizedString.IdWithFallback(
+                "HallOfFame.Systems.GameUI.SetCreatorNameDialog[Title]",
+                "Choose a Creator Name"),
+            LocalizedString.IdWithFallback(
+                "HallOfFame.Systems.GameUI.SetCreatorNameDialog[Message]",
+                "To be able to upload a picture, you must first choose a Creator Name in the mod settings."),
+            LocalizedString.IdWithFallback(
+                "HallOfFame.Systems.GameUI.SetCreatorNameDialog[ConfirmAction]",
+                "Open Mod Settings"),
+            LocalizedString.IdWithFallback(
+                "Common.ACTION[Cancel]",
+                "Cancel"));
+
+        GameManager.instance.userInterface.appBindings
+            .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
+
+        return true;
+
+        void OnConfirmOrCancel(int choice) {
+            var optionsUISystem =
+                this.World.GetOrCreateSystemManaged<OptionsUISystem>();
+
+            if (choice != 0) {
+                return;
+            }
+
+            var gamePanelUISystem =
+                this.World.GetOrCreateSystemManaged<GamePanelUISystem>();
+
+            gamePanelUISystem.ClosePanel(typeof(PhotoModePanel).FullName);
+
+            optionsUISystem.OpenPage(
+                "HallOfFame.HallOfFame.Mod",
+                "HallOfFame.HallOfFame.Mod.General",
+                false);
         }
     }
 

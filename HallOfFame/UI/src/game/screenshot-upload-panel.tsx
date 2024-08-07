@@ -59,15 +59,10 @@ export function ScreenshotUploadPanel(): ReactElement {
 
     const settings = useValue(settings$);
 
-    const creatorName =
-        settings.creatorName ||
-        // biome-ignore lint/style/noNonNullAssertion: we have fallback.
-        translate('HallOfFame.Common.DEFAULT[CreatorName]', 'Anonymous')!;
-
     const cityName =
         useValue(cityName$) ||
         // biome-ignore lint/style/noNonNullAssertion: we have fallback.
-        translate('HallOfFame.Common.DEFAULT[CityName]')!;
+        translate('HallOfFame.Common.DEFAULT_CITY_NAME')!;
 
     const screenshotSnapshot = useValue(screenshotSnapshot$);
 
@@ -161,6 +156,8 @@ export function ScreenshotUploadPanel(): ReactElement {
         return <></>;
     }
 
+    const creatorNameIsEmpty = !settings.creatorName.trim();
+
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
         <div
@@ -222,12 +219,14 @@ export function ScreenshotUploadPanel(): ReactElement {
                     className={`${styles.screenshotUploadPanelContent} ${styles.screenshotUploadPanelCityInfo}`}>
                     <span className={styles.screenshotUploadPanelCityInfoName}>
                         <strong>{cityName}</strong>
-                        <LocalizedString
-                            id='HallOfFame.Common.CITY_BY'
-                            fallback={'by {CREATOR_NAME}'}
-                            // biome-ignore lint/style/useNamingConvention: i18n
-                            args={{ CREATOR_NAME: creatorName }}
-                        />
+                        {!creatorNameIsEmpty && (
+                            <LocalizedString
+                                id='HallOfFame.Common.CITY_BY'
+                                fallback={'by {CREATOR_NAME}'}
+                                // biome-ignore lint/style/useNamingConvention: i18n
+                                args={{ CREATOR_NAME: settings.creatorName }}
+                            />
+                        )}
                     </span>
                     <div style={{ flex: 1 }} />
                     <span>
@@ -265,6 +264,15 @@ export function ScreenshotUploadPanel(): ReactElement {
                     </p>
                 </div>
 
+                {creatorNameIsEmpty && (
+                    <div className={styles.screenshotUploadPanelWarning}>
+                        {translate(
+                            'HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY',
+                            `You must set your Creator Name in the mod settings to upload a picture.`
+                        )}
+                    </div>
+                )}
+
                 <div className={styles.screenshotUploadPanelFooter}>
                     <span
                         className={styles.screenshotUploadPanelFooterCreatorId}>
@@ -289,7 +297,8 @@ export function ScreenshotUploadPanel(): ReactElement {
 
                     <Button
                         variant='primary'
-                        className={styles.screenshotUploadPanelFooterButton}>
+                        className={styles.screenshotUploadPanelFooterButton}
+                        disabled={creatorNameIsEmpty}>
                         <Icon
                             src={cloudArrowUpSolidSrc}
                             tinted={true}
