@@ -1,5 +1,6 @@
 # Machine-specific settings
 /.idea/**/workspace.xml
+*.DotSettings.user
 
 # UI mod
 /node_modules
