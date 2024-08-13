@@ -111,7 +111,9 @@ public sealed partial class HallOfFameMenuUISystem : UISystemBase {
             }
         }
 
-        PreloadNextScreenshot();
+        if (this.screenshotBinding.value is not null) {
+            PreloadNextScreenshot();
+        }
 
         return;
 
@@ -126,7 +128,8 @@ public sealed partial class HallOfFameMenuUISystem : UISystemBase {
             do {
                 this.nextScreenshot = await this.LoadScreenshot();
             } while (
-                this.nextScreenshot?.Id ==
+                this.nextScreenshot is not null &&
+                this.nextScreenshot.Id ==
                 this.screenshotBinding.value?.Id);
 
             this.isRefreshingBinding.Update(false);
