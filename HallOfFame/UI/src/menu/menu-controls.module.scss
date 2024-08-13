@@ -22,23 +22,22 @@
         align-items: flex-start;
     }
 
-    &-city-name {
+    &-names {
         display: flex;
-        align-items: center;
-        margin-bottom: 15rem;
-        text-shadow: 0 1rem 1rem var(--panelColorDark);
-        font-size: var(--fontSizeL);
+        flex-direction: column;
+        margin-bottom: 45rem;
+        text-shadow: 0 2rem 10rem var(--panelColorDark);
+        font-size: calc(30rem * var(--fontScale));
 
-        strong {
-            margin-right: 10rem;
-            font-size: calc(35rem * var(--fontScale));
+        &-city {
+            font-size: calc(45rem * var(--fontScale));
             font-weight: normal;
         }
     }
 
     &-city-stats span {
         margin-right: 15rem;
-        margin-bottom: 15rem;
+        margin-bottom: 55rem;
 
         // Normally we would not have to use a hardcoded height here, but this
         // circumvents a cohtml layout bug where images have trouble stretching
@@ -68,7 +67,6 @@
     &-buttons {
         $vanilla-button-height: 56rem;
 
-        margin-top: 10rem;
         pointer-events: auto;
 
         &-button {

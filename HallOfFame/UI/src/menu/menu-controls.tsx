@@ -31,8 +31,11 @@ export function MenuControls(): ReactElement {
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
         <div className={styles.menuControls}>
-            <div className={styles.menuControlsCityName}>
-                <strong>{menuState.screenshot.cityName}</strong>
+            <div className={styles.menuControlsNames}>
+                <div className={styles.menuControlsNamesCity}>
+                    {menuState.screenshot.cityName}
+                </div>
+
                 <LocalizedString
                     id='HallOfFame.Common.CITY_BY'
                     fallback={'by {CREATOR_NAME}'}
