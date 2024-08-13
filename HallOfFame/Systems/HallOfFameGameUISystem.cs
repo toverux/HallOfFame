@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Colossal.PSI.Environment;
 using Colossal.UI;
 using Colossal.UI.Binding;
 using Game;
@@ -30,19 +29,11 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame.game";
 
     /// <summary>
-    /// Directory where the current screenshot is stored, just for file-serving
-    /// purposes in the UI. The actual image sent to the server is kept in
-    /// memory to discourage tampering.
+    /// File path of the latest screenshot taken.
+    /// For file-serving purposes only.
     /// </summary>
-    private static readonly string ScreenshotDirectory = Path.Combine(
-        EnvPath.kCacheDataPath, "HallOfFame");
-
-    /// <summary>
-    /// File path of the screenshot.
-    /// <seealso cref="ScreenshotDirectory"/>
-    /// </summary>
-    private static readonly string ScreenshotFile = Path.Combine(
-        HallOfFameGameUISystem.ScreenshotDirectory, "screenshot.jpg");
+    private static readonly string ScreenshotFilePath =
+        Path.Combine(Mod.ModDataPath, "screenshot.jpg");
 
     /// <summary>
     /// This is the method that is called when the "Take Photo" button is
@@ -120,29 +111,10 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             this.AddBinding(new TriggerBinding(
                 HallOfFameGameUISystem.BindingGroup, "clearScreenshot",
                 this.ClearScreenshot));
-
-            // Temp directory must be created before AddHostLocation() is called,
-            // otherwise if watch mode is enabled we'll get an exception.
-            Directory.CreateDirectory(HallOfFameGameUISystem.ScreenshotDirectory);
-
-            // Adds "coui://halloffame/" host location for serving images.
-            UIManager.defaultUISystem.AddHostLocation(
-                "halloffame",
-                HallOfFameGameUISystem.ScreenshotDirectory,
-                // True by default, but it makes the whole UI reload when an
-                // image changes with --uiDeveloperMode. But we don't desire
-                // that for this host, whether in dev mode or not.
-                shouldWatch: false);
         }
         catch (Exception ex) {
             Mod.Log.ErrorFatal(ex);
         }
-    }
-
-    protected override void OnDestroy() {
-        base.OnDestroy();
-
-        UIManager.defaultUISystem.RemoveHostLocation("halloffame");
     }
 
     /// <summary>
@@ -171,7 +143,8 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         }
 
         return this.EntityManager.HasComponent<Population>(this.citySystem.City)
-            ? this.EntityManager.GetComponentData<Population>(this.citySystem.City)
+            ? this.EntityManager
+                .GetComponentData<Population>(this.citySystem.City)
                 .m_Population
             : 0;
     }
@@ -188,7 +161,8 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             return;
         }
 
-        PhotoModeUISystemPatch.OnCaptureScreenshot += this.ContinueTakeScreenshot;
+        PhotoModeUISystemPatch.OnCaptureScreenshot +=
+            this.ContinueTakeScreenshot;
 
         // This is unlikely to break except if the Vanilla method changes
         // parameters signature, but we will make sure to handle that properly.
@@ -201,7 +175,8 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
 
-            PhotoModeUISystemPatch.OnCaptureScreenshot -= this.ContinueTakeScreenshot;
+            PhotoModeUISystemPatch.OnCaptureScreenshot -=
+                this.ContinueTakeScreenshot;
         }
     }
 
@@ -212,7 +187,8 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
     /// A boolean indicating whether the Vanilla capture should proceed.
     /// </returns>
     private bool ContinueTakeScreenshot() {
-        PhotoModeUISystemPatch.OnCaptureScreenshot -= this.ContinueTakeScreenshot;
+        PhotoModeUISystemPatch.OnCaptureScreenshot -=
+            this.ContinueTakeScreenshot;
 
         // Slightly deferred take photo sound, otherwise it seems to play too
         // early. Vanilla screenshot capture is actually doing the same thing on
@@ -240,7 +216,7 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             Object.DestroyImmediate(screenshotTexture);
 
             File.WriteAllBytes(
-                HallOfFameGameUISystem.ScreenshotFile,
+                HallOfFameGameUISystem.ScreenshotFilePath,
                 screenshotBytes);
 
             this.CurrentScreenshot = new ScreenshotSnapshot(
@@ -265,7 +241,7 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         }
 
         try {
-            File.Delete(HallOfFameGameUISystem.ScreenshotFile);
+            File.Delete(HallOfFameGameUISystem.ScreenshotFilePath);
         }
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);

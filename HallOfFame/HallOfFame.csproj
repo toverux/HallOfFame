@@ -78,6 +78,9 @@
         <Reference Include="UnityEngine.ScreenCaptureModule">
             <Private>false</Private>
         </Reference>
+        <Reference Include="UnityEngine.UnityWebRequestModule">
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>

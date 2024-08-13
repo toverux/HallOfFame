@@ -6,9 +6,11 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "DONT_FORGET_LEFTHOOK": "when making changes in scripts check out if .lefthook.yml should be updated",
+    "// When making changes in scripts check out if .lefthook.yml should be synched (`bun lefthook install`)": "",
     "pm:update": "bunx npm-check-updates -i && bun update",
-    "check": "bun --bun tsc --p HallOfFame/UI --noEmit && biome check",
+    "check": "bun --bun tsc --p HallOfFame/UI --noEmit && biome check --fix",
+    "// Cannot 'bun --bun' webpack yet: https://github.com/oven-sh/bun/issues/10768": "",
+    "// When we can bunify (or replace) webpack, use 'bun --bun --smol' to consume less memory, it's useful with CS2 in the background...": "",
     "build": "webpack --config HallOfFame/UI/webpack.config.js --progress",
     "dev": "webpack --config HallOfFame/UI/webpack.config.js --progress --watch"
   },

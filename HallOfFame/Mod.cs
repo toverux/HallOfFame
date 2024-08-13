@@ -1,7 +1,10 @@
 using System;
+using System.IO;
 using System.Linq;
 using Colossal.IO.AssetDatabase;
 using Colossal.Logging;
+using Colossal.PSI.Environment;
+using Colossal.UI;
 using Game;
 using Game.Modding;
 using Game.SceneFlow;
@@ -35,6 +38,12 @@ public sealed class Mod : IMod {
         throw new NullReferenceException(
             $"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
+    internal static readonly string ModSettingsPath =
+        Path.Combine(EnvPath.kUserDataPath, "ModsSettings", nameof(HallOfFame));
+
+    internal static readonly string ModDataPath =
+        Path.Combine(EnvPath.kUserDataPath, "ModsData", nameof(HallOfFame));
+
     internal static ILog Log { get; } =
         LogManager.GetLogger(nameof(HallOfFame)).SetShowsErrorsInUI(true);
 
@@ -48,6 +57,9 @@ public sealed class Mod : IMod {
 
     public void OnLoad(UpdateSystem updateSystem) {
         try {
+            // Create directories for settings and data.
+            this.CreateDirectories();
+
             // Register Harmony patches and print debug logs.
             this.harmony = new Harmony(Mod.HarmonyId);
             PhotoModeUISystemPatch.Install(this.harmony);
@@ -64,9 +76,9 @@ public sealed class Mod : IMod {
                     $"[{method.Module.Name}]");
             }
 
-            #if DEBUG
             // This will create harmony.log.txt on the Desktop, with generated
             // IL debug output.
+            #if DEBUG
             Harmony.DEBUG = true;
             #endif
 
@@ -80,10 +92,25 @@ public sealed class Mod : IMod {
             // Set singleton instance only when OnLoad is likely to complete.
             Mod.instanceValue = this;
 
+            // Adds "coui://halloffame/" host location for serving images.
+            UIManager.defaultUISystem.AddHostLocation(
+                "halloffame",
+                Mod.ModDataPath,
+
+                // True by default, but it makes the whole UI reload when an
+                // image changes with --uiDeveloperMode. But we don't desire
+                // that for this host, whether in dev mode or not.
+                shouldWatch: false);
+
             // Initialize subsystems.
-            updateSystem.UpdateAt<HallOfFameUISystem>(SystemUpdatePhase.UIUpdate);
-            updateSystem.UpdateAt<HallOfFameMenuUISystem>(SystemUpdatePhase.UIUpdate);
-            updateSystem.UpdateAt<HallOfFameGameUISystem>(SystemUpdatePhase.UIUpdate);
+            updateSystem.UpdateAt<HallOfFameUISystem>(
+                SystemUpdatePhase.UIUpdate);
+
+            updateSystem.UpdateAt<HallOfFameMenuUISystem>(
+                SystemUpdatePhase.UIUpdate);
+
+            updateSystem.UpdateAt<HallOfFameGameUISystem>(
+                SystemUpdatePhase.UIUpdate);
 
             Mod.Log.Info($"{nameof(this.OnLoad)} complete.");
         }
@@ -116,9 +143,18 @@ public sealed class Mod : IMod {
                 this.settingsValue = null;
             }
 
+            // Remove our custom coui:// host.
+            UIManager.defaultUISystem.RemoveHostLocation("halloffame");
+
             Mod.instanceValue = null;
 
             Mod.Log.Info($"{nameof(this.OnDispose)} complete.");
         });
+    }
+
+    private void CreateDirectories() {
+        // No need to check if they exist, CreateDirectory does it for us.
+        Directory.CreateDirectory(Mod.ModSettingsPath);
+        Directory.CreateDirectory(Mod.ModDataPath);
     }
 }

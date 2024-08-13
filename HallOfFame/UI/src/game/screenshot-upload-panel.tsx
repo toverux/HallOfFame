@@ -16,9 +16,8 @@ import {
     useRef,
     useState
 } from 'react';
-import type { JsonSettings } from '../common';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
-import { getClassesModule } from '../utils';
+import { getClassesModule, useModSettings } from '../utils';
 import { DescriptionTooltip } from '../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
 import * as styles from './screenshot-upload-panel.module.scss';
 
@@ -41,8 +40,6 @@ const coMainScreenStyles = getClassesModule(
     ['centerPanelLayout']
 );
 
-const settings$ = bindValue<JsonSettings>('hallOfFame', 'settings');
-
 const cityName$ = bindValue<string>('hallOfFame.game', 'cityName');
 
 const screenshotSnapshot$ = bindValue<JsonScreenshotSnapshot | null>(
@@ -57,7 +54,7 @@ const screenshotSnapshot$ = bindValue<JsonScreenshotSnapshot | null>(
 export function ScreenshotUploadPanel(): ReactElement {
     const { translate } = useLocalization();
 
-    const settings = useValue(settings$);
+    const settings = useModSettings();
 
     const cityName =
         useValue(cityName$) ||

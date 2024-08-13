@@ -18,6 +18,10 @@ public sealed partial class HallOfFameUISystem : UISystemBase {
         base.OnCreate();
 
         try {
+            // No need to OnUpdate as there are no bindings that require it,
+            // they are manually updated when needed.
+            this.Enabled = false;
+
             this.AddBinding(new TriggerBinding<bool, string>(
                 HallOfFameUISystem.BindingGroup, "logJavaScriptError",
                 this.LogJavaScriptError));
@@ -34,9 +38,6 @@ public sealed partial class HallOfFameUISystem : UISystemBase {
                 this.OnActiveDictionaryChanged;
 
             Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
-
-            // No need to OnUpdate as there are no bindings that require it.
-            this.Enabled = false;
         }
         catch (Exception ex) {
             Mod.Log.ErrorFatal(ex);

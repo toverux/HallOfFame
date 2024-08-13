@@ -1,6 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
+using Game;
+using Game.SceneFlow;
 using Game.UI;
+using HallOfFame.Domain;
+using HallOfFame.Http;
 using HallOfFame.Utils;
 
 namespace HallOfFame.Systems;
@@ -13,60 +19,143 @@ public sealed partial class HallOfFameMenuUISystem : UISystemBase {
 
     private const string VanillaDefaultImageUri = "Media/Menu/Background2.jpg";
 
+    private ValueBinding<bool> isRefreshingBinding = null!;
+
+    private ValueBinding<Screenshot?> screenshotBinding = null!;
+
+    private Screenshot? nextScreenshot = null;
+
+    private GameMode previousGameMode = GameMode.MainMenu;
+
     protected override void OnCreate() {
         base.OnCreate();
 
         try {
+            // No need to OnUpdate as there are no bindings that require it,
+            // they are manually updated when needed.
+            this.Enabled = false;
+
             this.AddBinding(new ValueBinding<string>(
-                HallOfFameMenuUISystem.BindingGroup, "currentImageUri",
+                HallOfFameMenuUISystem.BindingGroup, "defaultImageUri",
                 HallOfFameMenuUISystem.VanillaDefaultImageUri));
 
-            this.AddBinding(new ValueBinding<CityInfo?>(
-                HallOfFameMenuUISystem.BindingGroup, "currentImageCity",
-                new CityInfo {
-                    Name = "Colossal City",
-                    CreatorName = "Toverux",
-                    Milestone = 20,
-                    Population = 20000,
-                    PostedAt = DateTime.Now
-                },
-                new ValueWriter<CityInfo?>().Nullable()));
+            this.AddBinding(this.isRefreshingBinding =
+                new ValueBinding<bool>(
+                    HallOfFameMenuUISystem.BindingGroup, "isRefreshing",
+                    false));
+
+            this.AddBinding(this.screenshotBinding =
+                new ValueBinding<Screenshot?>(
+                    HallOfFameMenuUISystem.BindingGroup, "currentScreenshot",
+                    null,
+                    new ValueWriter<Screenshot?>().Nullable()));
+
+            this.AddBinding(new TriggerBinding(
+                HallOfFameMenuUISystem.BindingGroup, "refreshScreenshot",
+                this.RefreshScreenshot));
+
+            if (GameManager.instance.gameMode
+                is GameMode.MainMenu
+                or GameMode.None) {
+                this.RefreshScreenshot();
+            }
         }
         catch (Exception ex) {
             Mod.Log.ErrorFatal(ex);
         }
     }
 
-    private sealed class CityInfo : IJsonWritable {
-        public string Name { get; set; } = "";
+    /// <summary>
+    /// Lifecycle method used for changing the current screenshot when the user
+    /// returns to the main menu.
+    /// </summary>
+    protected override void OnGameLoadingComplete(
+        Purpose purpose,
+        GameMode mode) {
+        // The condition serves two purposes:
+        // 1. Avoid potentially repeating the RefreshScreenshot call when the
+        //    game boots and mods are initialized before the first game mode is
+        //    set, this happens rarely, but it's possible.
+        // 2. Call RefreshScreenshot when the user returns to the main menu from
+        //    another game mode.
+        if (mode is GameMode.MainMenu &&
+            this.previousGameMode is not GameMode.MainMenu) {
+            this.RefreshScreenshot();
+        }
 
-        public string CreatorName { get; set; } = "";
+        this.previousGameMode = mode;
+    }
 
-        public int Milestone { get; set; }
+    /// <summary>
+    /// Switches the current screenshot to the next if there is one
+    /// (<see cref="nextScreenshot"/>), otherwise it loads a new one.
+    /// Then it preloads the next screenshot again in the background.
+    /// The method is `async void` because it is designed to be called in a
+    /// fire-and-forget manner, and it should be designed to never throw.
+    /// </summary>
+    private async void RefreshScreenshot() {
+        if (this.isRefreshingBinding.value) {
+            return;
+        }
 
-        public int Population { get; set; }
+        this.isRefreshingBinding.Update(true);
 
-        public DateTime PostedAt { get; set; }
+        if (this.nextScreenshot is not null) {
+            this.screenshotBinding.Update(this.nextScreenshot);
+        }
+        else {
+            var screenshot = await this.LoadScreenshot();
 
-        public void Write(IJsonWriter writer) {
-            writer.TypeBegin(this.GetType().FullName);
+            if (screenshot is not null) {
+                this.screenshotBinding.Update(screenshot);
+            }
+        }
 
-            writer.PropertyName("name");
-            writer.Write(this.Name);
+        PreloadNextScreenshot();
 
-            writer.PropertyName("creatorName");
-            writer.Write(this.CreatorName);
+        return;
 
-            writer.PropertyName("milestone");
-            writer.Write(this.Milestone);
+        async void PreloadNextScreenshot() {
+            // The loop is a workaround to avoid loading the same screenshot
+            // twice if the server returns the same screenshot twice (or more).
+            // This should be extremely rare, only happening in dev mode with a
+            // small number of screenshots and the random algorithm without
+            // views taken into account because all screenshots have been seen.
+            // The check is cheap, and it's more complex to implement
+            // server-side, so let's do that frontend-side.
+            do {
+                this.nextScreenshot = await this.LoadScreenshot();
+            } while (
+                this.nextScreenshot?.Id ==
+                this.screenshotBinding.value?.Id);
 
-            writer.PropertyName("population");
-            writer.Write(this.Population);
+            this.isRefreshingBinding.Update(false);
+        }
+    }
 
-            writer.PropertyName("postedAt");
-            writer.Write(this.PostedAt.ToLocalTime().ToString("o"));
+    /// <summary>
+    /// Loads a new screenshot from the server and preloads the image in the UI,
+    /// also is responsible to handle all errors.
+    /// </summary>
+    private async Task<Screenshot?> LoadScreenshot() {
+        try {
+            var screenshot = await HttpQueries.GetRandomScreenshotWeighted();
 
-            writer.TypeEnd();
+            var imageUrl = Mod.Settings.ScreenshotResolution switch {
+                "fhd" => screenshot.ImageUrlFHD,
+                "4k" => screenshot.ImageUrl4K,
+                var resolution => throw new InvalidOperationException(
+                    $"Unknown screenshot resolution: {resolution}.")
+            };
+
+            await UIImagePreloader.Preload(imageUrl);
+
+            return screenshot;
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
+
+            return null;
         }
     }
 }

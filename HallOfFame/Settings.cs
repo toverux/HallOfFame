@@ -3,10 +3,10 @@ using System.IO;
 using System.Linq;
 using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
-using Colossal.PSI.Environment;
 using Colossal.UI.Binding;
 using Game.Modding;
 using Game.Settings;
+using Game.UI.Widgets;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -14,10 +14,17 @@ using UnityEngine;
 namespace HallOfFame;
 
 [FileLocation($"ModsSettings/{nameof(HallOfFame)}/{nameof(HallOfFame)}")]
-[SettingsUIShowGroupName(Settings.GroupYourProfile, Settings.GroupAdvanced)]
+[SettingsUIShowGroupName(
+    Settings.GroupYourProfile,
+    Settings.GroupContentPreferences,
+    Settings.GroupAdvanced)]
 public sealed class Settings : ModSetting, IJsonWritable {
     private const string GroupYourProfile = "YourProfile";
+
+    private const string GroupContentPreferences = "ContentPreferences";
+
     private const string GroupAdvanced = "Advanced";
+
     private const string GroupOthers = "Others";
 
     /// <summary>
@@ -26,13 +33,15 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// </summary>
     public static string? CreatorID { get; private set; }
 
-    private static readonly string ModsSettingsPath =
-        Path.Combine(EnvPath.kUserDataPath, "ModsSettings", nameof(HallOfFame));
-
     private static readonly string CreatorIDFilePath =
-        Path.Combine(Settings.ModsSettingsPath, "CreatorID.txt");
+        Path.Combine(Mod.ModSettingsPath, "CreatorID.txt");
 
     private static bool IsCreatorIDDisabled => true;
+
+    private static DropdownItem<string>[] ResolutionDropdownItems => [
+        new DropdownItem<string> { value = "fhd", displayName = "Full HD" },
+        new DropdownItem<string> { value = "4k", displayName = "4K" }
+    ];
 
     /// <summary>
     /// Creator username.
@@ -40,21 +49,22 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// </summary>
     [SettingsUISection(Settings.GroupYourProfile)]
     [SettingsUITextInput]
-    public string CreatorName {
-        get;
-        [UsedImplicitly]
-        set;
-    } = null!;
+    public string CreatorName { get; set; } = null!;
 
+    /// <summary>
+    /// Masked Creator ID, only the first segment is shown in the Options UI,
+    /// and it is not editable.
+    /// </summary>
     [SettingsUISection(Settings.GroupYourProfile)]
     [SettingsUITextInput]
-    [SettingsUIDisableByCondition(typeof(Settings), nameof(Settings.IsCreatorIDDisabled))]
-    public string MaskedCreatorID {
-        [UsedImplicitly]
-        get;
-        set;
-    } = null!;
+    [SettingsUIDisableByCondition(
+        typeof(Settings),
+        nameof(Settings.IsCreatorIDDisabled))]
+    public string MaskedCreatorID { get; set; } = null!;
 
+    /// <summary>
+    /// Button to copy the Creator ID to the clipboard.
+    /// </summary>
     [SettingsUISection(Settings.GroupYourProfile)]
     [SettingsUIButton]
     [UsedImplicitly]
@@ -64,26 +74,81 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     /// <summary>
+    /// Text explaining the algorithms' weight selection mechanism.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    [SettingsUIMultilineText]
+    [UsedImplicitly]
+    public string WeightsDescription =>
+        string.Empty; // The actual text comes from the translations files.
+
+    /// <summary>
+    /// Weight of the recent screenshot selection algorithm.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    [SettingsUISlider(min = 0, max = 10)]
+    public int RecentScreenshotWeight { get; set; }
+
+    /// <summary>
+    /// Weight of the low-views screenshot selection algorithm.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    [SettingsUISlider(min = 0, max = 10)]
+    public int ArcheologistScreenshotWeight { get; set; }
+
+    /// <summary>
+    /// Weight of the random screenshot selection algorithm.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    [SettingsUISlider(min = 0, max = 10)]
+    public int RandomScreenshotWeight { get; set; }
+
+    /// <summary>
+    /// Weight of the supporter screenshot selection algorithm.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    [SettingsUISlider(min = 0, max = 10)]
+    public int SupporterScreenshotWeight { get; set; }
+
+    /// <summary>
+    /// Text separator for other content preferences.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    [SettingsUIMultilineText]
+    [UsedImplicitly]
+    public string OtherContentPreferences =>
+        string.Empty; // The actual text comes from the translations files.
+
+    /// <summary>
+    /// Minimum time in days before a screenshot the user has already seen is
+    /// eligible to be shown again.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    [SettingsUISlider(min = 0, max = 365, step = 5)]
+    public int ViewMaxAge { get; set; }
+
+    /// <summary>
+    /// Resolution of downloaded screenshots.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    [SettingsUIDropdown(
+        typeof(Settings),
+        nameof(Settings.ResolutionDropdownItems))]
+    public string ScreenshotResolution { get; set; } = null!;
+
+    /// <summary>
     /// Whether to inhibit the vanilla screenshot capture or not, when taking
     /// a screenshot with Hall of Fame.
     /// </summary>
     [SettingsUISection(Settings.GroupAdvanced)]
-    public bool MakePlatformScreenshots {
-        get;
-        [UsedImplicitly]
-        set;
-    }
+    public bool MakePlatformScreenshots { get; set; }
 
     /// <summary>
-    /// Hostname of the Hall of Fame server.
+    /// Base URL of the Hall of Fame server.
     /// </summary>
     [SettingsUISection(Settings.GroupAdvanced)]
     [SettingsUITextInput]
-    public string HostName {
-        get;
-        [UsedImplicitly]
-        set;
-    } = null!;
+    public string BaseUrl { get; set; } = null!;
 
     [SettingsUIButton]
     [SettingsUISection(Settings.GroupOthers)]
@@ -124,9 +189,17 @@ public sealed class Settings : ModSetting, IJsonWritable {
                 : new string('*', segment.Length))
             .Join(delimiter: "-");
 
+        this.RecentScreenshotWeight = 5;
+        this.ArcheologistScreenshotWeight = 5;
+        this.RandomScreenshotWeight = 5;
+        this.SupporterScreenshotWeight = 10;
+
+        this.ViewMaxAge = 60;
+        this.ScreenshotResolution = "fhd";
+
         this.MakePlatformScreenshots = true;
 
-        this.HostName = "halloffame.cs2.mtq.io";
+        this.BaseUrl = "halloffame.cs2.mtq.io";
     }
 
     /// <summary>
@@ -135,8 +208,6 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// </summary>
     /// <returns></returns>
     private string CreateOrReadCreatorID() {
-        Directory.CreateDirectory(Settings.ModsSettingsPath);
-
         try {
             // Parse trims the string and is resilient to no-perfectly-formatted
             // GUIDs.
@@ -170,6 +241,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
         writer.PropertyName("creatorIdClue");
         writer.Write(this.MaskedCreatorID.Split('-')[0]);
+
+        writer.PropertyName("screenshotResolution");
+        writer.Write(this.ScreenshotResolution);
 
         writer.TypeEnd();
     }
