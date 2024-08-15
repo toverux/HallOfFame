@@ -103,14 +103,9 @@ public sealed class Mod : IMod {
                 shouldWatch: false);
 
             // Initialize subsystems.
-            updateSystem.UpdateAt<HallOfFameUISystem>(
-                SystemUpdatePhase.UIUpdate);
-
-            updateSystem.UpdateAt<HallOfFameMenuUISystem>(
-                SystemUpdatePhase.UIUpdate);
-
-            updateSystem.UpdateAt<HallOfFameGameUISystem>(
-                SystemUpdatePhase.UIUpdate);
+            updateSystem.UpdateAt<GlobalUISystem>(SystemUpdatePhase.UIUpdate);
+            updateSystem.UpdateAt<MenuUISystem>(SystemUpdatePhase.UIUpdate);
+            updateSystem.UpdateAt<GameUISystem>(SystemUpdatePhase.UIUpdate);
 
             Mod.Log.Info($"{nameof(this.OnLoad)} complete.");
         }

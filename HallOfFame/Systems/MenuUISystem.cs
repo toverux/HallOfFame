@@ -14,7 +14,7 @@ namespace HallOfFame.Systems;
 /// <summary>
 /// System responsible for handling the Hall of Fame UI on the game's main menu.
 /// </summary>
-public sealed partial class HallOfFameMenuUISystem : UISystemBase {
+public sealed partial class MenuUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame.menu";
 
     private const string VanillaDefaultImageUri = "Media/Menu/Background2.jpg";
@@ -36,22 +36,22 @@ public sealed partial class HallOfFameMenuUISystem : UISystemBase {
             this.Enabled = false;
 
             this.AddBinding(new ValueBinding<string>(
-                HallOfFameMenuUISystem.BindingGroup, "defaultImageUri",
-                HallOfFameMenuUISystem.VanillaDefaultImageUri));
+                MenuUISystem.BindingGroup, "defaultImageUri",
+                MenuUISystem.VanillaDefaultImageUri));
 
             this.AddBinding(this.isRefreshingBinding =
                 new ValueBinding<bool>(
-                    HallOfFameMenuUISystem.BindingGroup, "isRefreshing",
+                    MenuUISystem.BindingGroup, "isRefreshing",
                     false));
 
             this.AddBinding(this.screenshotBinding =
                 new ValueBinding<Screenshot?>(
-                    HallOfFameMenuUISystem.BindingGroup, "currentScreenshot",
+                    MenuUISystem.BindingGroup, "currentScreenshot",
                     null,
                     new ValueWriter<Screenshot?>().Nullable()));
 
             this.AddBinding(new TriggerBinding(
-                HallOfFameMenuUISystem.BindingGroup, "refreshScreenshot",
+                MenuUISystem.BindingGroup, "refreshScreenshot",
                 this.RefreshScreenshot));
 
             if (GameManager.instance.gameMode

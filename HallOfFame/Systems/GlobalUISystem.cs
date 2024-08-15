@@ -7,7 +7,7 @@ using HallOfFame.Utils;
 
 namespace HallOfFame.Systems;
 
-public sealed partial class HallOfFameUISystem : UISystemBase {
+public sealed partial class GlobalUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame";
 
     private IUpdateBinding? localeBinding;
@@ -23,18 +23,22 @@ public sealed partial class HallOfFameUISystem : UISystemBase {
             this.Enabled = false;
 
             this.AddBinding(new TriggerBinding<bool, string>(
-                HallOfFameUISystem.BindingGroup, "logJavaScriptError",
+                GlobalUISystem.BindingGroup, "logJavaScriptError",
                 this.LogJavaScriptError));
 
-            this.AddBinding(this.localeBinding = new GetterValueBinding<string>(
-                HallOfFameUISystem.BindingGroup, "locale",
-                () => GameManager.instance.localizationManager.activeLocaleId));
+            this.AddBinding(this.localeBinding =
+                new GetterValueBinding<string>(
+                    GlobalUISystem.BindingGroup, "locale",
+                    () => GameManager.instance.localizationManager
+                        .activeLocaleId));
 
-            this.AddBinding(this.settingsBinding = new GetterValueBinding<Settings>(
-                HallOfFameUISystem.BindingGroup, "settings",
-                () => Mod.Settings));
+            this.AddBinding(this.settingsBinding =
+                new GetterValueBinding<Settings>(
+                    GlobalUISystem.BindingGroup, "settings",
+                    () => Mod.Settings));
 
-            GameManager.instance.localizationManager.onActiveDictionaryChanged +=
+            GameManager.instance.localizationManager
+                    .onActiveDictionaryChanged +=
                 this.OnActiveDictionaryChanged;
 
             Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
@@ -66,6 +70,7 @@ public sealed partial class HallOfFameUISystem : UISystemBase {
     /// </summary>
     private void LogJavaScriptError(bool isFatal, string error) {
         var @base = "HallOfFame.Common.BASE_ERROR".Translate();
+
         var gravity = isFatal
             ? "HallOfFame.Common.FATAL_ERROR".Translate()
             : "HallOfFame.Common.RECOVERABLE_ERROR".Translate();

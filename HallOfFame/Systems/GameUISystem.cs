@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Colossal.UI;
 using Colossal.UI.Binding;
 using Game;
 using Game.City;
@@ -25,7 +24,7 @@ namespace HallOfFame.Systems;
 /// System responsible for handling the Hall of Fame in-game UI, notably the
 /// screenshot taking.
 /// </summary>
-public sealed partial class HallOfFameGameUISystem : UISystemBase {
+public sealed partial class GameUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame.game";
 
     /// <summary>
@@ -96,20 +95,20 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
                 this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
 
             this.AddUpdateBinding(new GetterValueBinding<string>(
-                HallOfFameGameUISystem.BindingGroup, "cityName",
+                GameUISystem.BindingGroup, "cityName",
                 this.GetCityName));
 
             this.AddUpdateBinding(new GetterValueBinding<ScreenshotSnapshot?>(
-                HallOfFameGameUISystem.BindingGroup, "screenshotSnapshot",
+                GameUISystem.BindingGroup, "screenshotSnapshot",
                 () => this.CurrentScreenshot,
                 new ValueWriter<ScreenshotSnapshot?>().Nullable()));
 
             this.AddBinding(new TriggerBinding(
-                HallOfFameGameUISystem.BindingGroup, "takeScreenshot",
+                GameUISystem.BindingGroup, "takeScreenshot",
                 this.BeginTakeScreenshot));
 
             this.AddBinding(new TriggerBinding(
-                HallOfFameGameUISystem.BindingGroup, "clearScreenshot",
+                GameUISystem.BindingGroup, "clearScreenshot",
                 this.ClearScreenshot));
         }
         catch (Exception ex) {
@@ -169,7 +168,7 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         // Note that this does not encapsulate ContinueTakeScreenshot() which
         // is executed in a coroutine, and has its own try/catch.
         try {
-            HallOfFameGameUISystem.TakeScreenshotOriginalMethod.Invoke(
+            GameUISystem.TakeScreenshotOriginalMethod.Invoke(
                 this.photoModeUISystem, null);
         }
         catch (Exception ex) {
@@ -216,8 +215,7 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             Object.DestroyImmediate(screenshotTexture);
 
             File.WriteAllBytes(
-                HallOfFameGameUISystem.ScreenshotFilePath,
-                screenshotBytes);
+                GameUISystem.ScreenshotFilePath, screenshotBytes);
 
             this.CurrentScreenshot = new ScreenshotSnapshot(
                 this.GetAchievedMilestone(),
@@ -241,7 +239,7 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
         }
 
         try {
-            File.Delete(HallOfFameGameUISystem.ScreenshotFilePath);
+            File.Delete(GameUISystem.ScreenshotFilePath);
         }
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
@@ -345,6 +343,7 @@ public sealed partial class HallOfFameGameUISystem : UISystemBase {
             writer.Write(population);
 
             writer.PropertyName("imageUri");
+
             writer.Write(
                 $"coui://halloffame/screenshot.jpg?v={this.currentVersion}");
 
