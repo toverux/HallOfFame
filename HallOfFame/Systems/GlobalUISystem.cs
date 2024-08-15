@@ -7,7 +7,7 @@ using HallOfFame.Utils;
 
 namespace HallOfFame.Systems;
 
-public sealed partial class GlobalUISystem : UISystemBase {
+internal sealed partial class GlobalUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame";
 
     private IUpdateBinding? localeBinding;

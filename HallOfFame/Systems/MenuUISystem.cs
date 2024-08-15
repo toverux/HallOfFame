@@ -14,7 +14,7 @@ namespace HallOfFame.Systems;
 /// <summary>
 /// System responsible for handling the Hall of Fame UI on the game's main menu.
 /// </summary>
-public sealed partial class MenuUISystem : UISystemBase {
+internal sealed partial class MenuUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame.menu";
 
     private const string VanillaDefaultImageUri = "Media/Menu/Background2.jpg";
@@ -23,7 +23,7 @@ public sealed partial class MenuUISystem : UISystemBase {
 
     private ValueBinding<Screenshot?> screenshotBinding = null!;
 
-    private Screenshot? nextScreenshot = null;
+    private Screenshot? nextScreenshot;
 
     private GameMode previousGameMode = GameMode.MainMenu;
 

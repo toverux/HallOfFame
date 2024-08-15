@@ -24,7 +24,7 @@ namespace HallOfFame.Systems;
 /// System responsible for handling the Hall of Fame in-game UI, notably the
 /// screenshot taking.
 /// </summary>
-public sealed partial class GameUISystem : UISystemBase {
+internal sealed partial class GameUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame.game";
 
     /// <summary>
