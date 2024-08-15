@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
@@ -19,6 +19,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
     private const string VanillaDefaultImageUri = "Media/Menu/Background2.jpg";
 
+    private ImagePreloaderUISystem imagePreloaderUISystem = null!;
+
     private ValueBinding<string> defaultImageUriBinding = null!;
 
     private ValueBinding<bool> isRefreshingBinding = null!;
@@ -38,6 +40,9 @@ internal sealed partial class MenuUISystem : UISystemBase {
             // No need to OnUpdate as there are no bindings that require it,
             // they are manually updated when needed.
             this.Enabled = false;
+
+            this.imagePreloaderUISystem =
+                this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
 
             this.defaultImageUriBinding = new ValueBinding<string>(
                 MenuUISystem.BindingGroup, "defaultImageUri",
@@ -158,7 +163,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
                     $"Unknown screenshot resolution: {resolution}.")
             };
 
-            await UIImagePreloader.Preload(imageUrl);
+            await this.imagePreloaderUISystem.Preload(imageUrl);
 
             return screenshot;
         }
