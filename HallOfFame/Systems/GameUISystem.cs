@@ -53,6 +53,15 @@ internal sealed partial class GameUISystem : UISystemBase {
 
     private EntityQuery milestoneLevelQuery;
 
+    private GetterValueBinding<string> cityNameBinding = null!;
+
+    private GetterValueBinding<ScreenshotSnapshot?> screenshotSnapshotBinding =
+        null!;
+
+    private TriggerBinding takeScreenshotBinding = null!;
+
+    private TriggerBinding clearScreenshotBinding = null!;
+
     /// <summary>
     /// Current screenshot snapshot.
     /// Null if no screenshot is being displayed/uploaded.
@@ -83,7 +92,8 @@ internal sealed partial class GameUISystem : UISystemBase {
             // Re-enabled when there is an active screenshot.
             this.Enabled = false;
 
-            this.citySystem = this.World.GetOrCreateSystemManaged<CitySystem>();
+            this.citySystem =
+                this.World.GetOrCreateSystemManaged<CitySystem>();
 
             this.cityConfigurationSystem =
                 this.World.GetOrCreateSystemManaged<CityConfigurationSystem>();
@@ -94,22 +104,28 @@ internal sealed partial class GameUISystem : UISystemBase {
             this.milestoneLevelQuery =
                 this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
 
-            this.AddUpdateBinding(new GetterValueBinding<string>(
+            this.cityNameBinding = new GetterValueBinding<string>(
                 GameUISystem.BindingGroup, "cityName",
-                this.GetCityName));
+                this.GetCityName);
 
-            this.AddUpdateBinding(new GetterValueBinding<ScreenshotSnapshot?>(
-                GameUISystem.BindingGroup, "screenshotSnapshot",
-                () => this.CurrentScreenshot,
-                new ValueWriter<ScreenshotSnapshot?>().Nullable()));
+            this.screenshotSnapshotBinding =
+                new GetterValueBinding<ScreenshotSnapshot?>(
+                    GameUISystem.BindingGroup, "screenshotSnapshot",
+                    () => this.CurrentScreenshot,
+                    new ValueWriter<ScreenshotSnapshot?>().Nullable());
 
-            this.AddBinding(new TriggerBinding(
+            this.takeScreenshotBinding = new TriggerBinding(
                 GameUISystem.BindingGroup, "takeScreenshot",
-                this.BeginTakeScreenshot));
+                this.BeginTakeScreenshot);
 
-            this.AddBinding(new TriggerBinding(
+            this.clearScreenshotBinding = new TriggerBinding(
                 GameUISystem.BindingGroup, "clearScreenshot",
-                this.ClearScreenshot));
+                this.ClearScreenshot);
+
+            this.AddUpdateBinding(this.cityNameBinding);
+            this.AddUpdateBinding(this.screenshotSnapshotBinding);
+            this.AddBinding(this.takeScreenshotBinding);
+            this.AddBinding(this.clearScreenshotBinding);
         }
         catch (Exception ex) {
             Mod.Log.ErrorFatal(ex);

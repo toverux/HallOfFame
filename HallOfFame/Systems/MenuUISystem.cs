@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
@@ -19,9 +19,13 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
     private const string VanillaDefaultImageUri = "Media/Menu/Background2.jpg";
 
+    private ValueBinding<string> defaultImageUriBinding = null!;
+
     private ValueBinding<bool> isRefreshingBinding = null!;
 
     private ValueBinding<Screenshot?> screenshotBinding = null!;
+
+    private TriggerBinding refreshScreenshotBinding = null!;
 
     private Screenshot? nextScreenshot;
 
@@ -35,24 +39,27 @@ internal sealed partial class MenuUISystem : UISystemBase {
             // they are manually updated when needed.
             this.Enabled = false;
 
-            this.AddBinding(new ValueBinding<string>(
+            this.defaultImageUriBinding = new ValueBinding<string>(
                 MenuUISystem.BindingGroup, "defaultImageUri",
-                MenuUISystem.VanillaDefaultImageUri));
+                MenuUISystem.VanillaDefaultImageUri);
 
-            this.AddBinding(this.isRefreshingBinding =
-                new ValueBinding<bool>(
-                    MenuUISystem.BindingGroup, "isRefreshing",
-                    false));
+            this.isRefreshingBinding = new ValueBinding<bool>(
+                MenuUISystem.BindingGroup, "isRefreshing",
+                false);
 
-            this.AddBinding(this.screenshotBinding =
-                new ValueBinding<Screenshot?>(
-                    MenuUISystem.BindingGroup, "currentScreenshot",
-                    null,
-                    new ValueWriter<Screenshot?>().Nullable()));
+            this.screenshotBinding = new ValueBinding<Screenshot?>(
+                MenuUISystem.BindingGroup, "currentScreenshot",
+                null,
+                new ValueWriter<Screenshot?>().Nullable());
 
-            this.AddBinding(new TriggerBinding(
+            this.refreshScreenshotBinding = new TriggerBinding(
                 MenuUISystem.BindingGroup, "refreshScreenshot",
-                this.RefreshScreenshot));
+                this.RefreshScreenshot);
+
+            this.AddBinding(this.defaultImageUriBinding);
+            this.AddBinding(this.isRefreshingBinding);
+            this.AddBinding(this.screenshotBinding);
+            this.AddBinding(this.refreshScreenshotBinding);
 
             if (GameManager.instance.gameMode
                 is GameMode.MainMenu

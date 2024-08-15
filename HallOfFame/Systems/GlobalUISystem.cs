@@ -1,4 +1,5 @@
 using System;
+using Colossal.Localization;
 using Colossal.UI.Binding;
 using Game.SceneFlow;
 using Game.Settings;
@@ -10,9 +11,14 @@ namespace HallOfFame.Systems;
 internal sealed partial class GlobalUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame";
 
-    private IUpdateBinding? localeBinding;
+    private readonly LocalizationManager localizationManager =
+        GameManager.instance.localizationManager;
 
-    private IUpdateBinding? settingsBinding;
+    private TriggerBinding<bool, string>? logJavaScriptErrorBinding;
+
+    private GetterValueBinding<string>? localeBinding;
+
+    private GetterValueBinding<Settings>? settingsBinding;
 
     protected override void OnCreate() {
         base.OnCreate();
@@ -22,23 +28,23 @@ internal sealed partial class GlobalUISystem : UISystemBase {
             // they are manually updated when needed.
             this.Enabled = false;
 
-            this.AddBinding(new TriggerBinding<bool, string>(
+            this.localeBinding = new GetterValueBinding<string>(
+                GlobalUISystem.BindingGroup, "locale",
+                () => this.localizationManager.activeLocaleId);
+
+            this.settingsBinding = new GetterValueBinding<Settings>(
+                GlobalUISystem.BindingGroup, "settings",
+                () => Mod.Settings);
+
+            this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
                 GlobalUISystem.BindingGroup, "logJavaScriptError",
-                this.LogJavaScriptError));
+                this.LogJavaScriptError);
 
-            this.AddBinding(this.localeBinding =
-                new GetterValueBinding<string>(
-                    GlobalUISystem.BindingGroup, "locale",
-                    () => GameManager.instance.localizationManager
-                        .activeLocaleId));
+            this.AddBinding(this.localeBinding);
+            this.AddBinding(this.settingsBinding);
+            this.AddBinding(this.logJavaScriptErrorBinding);
 
-            this.AddBinding(this.settingsBinding =
-                new GetterValueBinding<Settings>(
-                    GlobalUISystem.BindingGroup, "settings",
-                    () => Mod.Settings));
-
-            GameManager.instance.localizationManager
-                    .onActiveDictionaryChanged +=
+            this.localizationManager.onActiveDictionaryChanged +=
                 this.OnActiveDictionaryChanged;
 
             Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
@@ -51,7 +57,7 @@ internal sealed partial class GlobalUISystem : UISystemBase {
     protected override void OnDestroy() {
         base.OnDestroy();
 
-        GameManager.instance.localizationManager.onActiveDictionaryChanged -=
+        this.localizationManager.onActiveDictionaryChanged -=
             this.OnActiveDictionaryChanged;
 
         Mod.Settings.onSettingsApplied -= this.OnSettingsApplied;
