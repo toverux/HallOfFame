@@ -86,11 +86,6 @@ internal sealed partial class GlobalUISystem : UISystemBase {
             errorDetails = error
         });
 
-        var prevShowsErrorsInUI = Mod.Log.showsErrorsInUI;
-        Mod.Log.showsErrorsInUI = false;
-
-        Mod.Log.Error(error);
-
-        Mod.Log.showsErrorsInUI = prevShowsErrorsInUI;
+        Mod.Log.ErrorSilent(error);
     }
 }

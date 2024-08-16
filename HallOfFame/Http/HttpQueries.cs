@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Colossal.Json;
 using Game;
+using HallOfFame.Utils;
 using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
@@ -127,22 +128,19 @@ internal static partial class HttpQueries {
             return HttpQueries.ParseResponseJson<T>(request);
         }
         catch (Exception ex) {
-            var prevShowsErrorsInUI = Mod.Log.showsErrorsInUI;
-            Mod.Log.showsErrorsInUI = false;
-
             // If this is a network error (or else), log as-is.
             if (request.result is not UnityWebRequest.Result.ProtocolError) {
-                Mod.Log.Error(ex, $"HTTP: Error sending request #{requestId}.");
+                Mod.Log.ErrorSilent(
+                    ex,
+                    $"HTTP: Error sending request #{requestId}.");
             }
 
             // If this is an HTTP error, log the response body as well.
             if (request.result is UnityWebRequest.Result.ProtocolError) {
-                Mod.Log.Error(
+                Mod.Log.ErrorSilent(
                     $"HTTP: Error response {request.responseCode} " +
                     $"for request #{requestId}: {request.downloadHandler.text}");
             }
-
-            Mod.Log.showsErrorsInUI = prevShowsErrorsInUI;
 
             throw;
         }
