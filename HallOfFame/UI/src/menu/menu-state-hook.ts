@@ -1,4 +1,5 @@
 ﻿import { bindValue, useValue } from 'cs2/api';
+import type { LocalizedString } from 'cs2/l10n';
 import type { Dispatch } from 'react';
 import type { Screenshot } from '../common';
 import { createSingletonHook, useModSettings } from '../utils';
@@ -24,6 +25,12 @@ interface ReadonlyMenuState {
      * Current screenshot data, or `null` when no data is available yet.
      */
     readonly screenshot: Screenshot | null;
+
+    /**
+     * Error that occurred while loading the screenshot, API request or image
+     * preloading included.
+     */
+    readonly error: LocalizedString | null;
 }
 
 interface SettableMenuState {
@@ -59,11 +66,15 @@ const isRefreshing$ = bindValue<boolean>(
     false
 );
 
-const currentScreenshot$ = bindValue<Screenshot | null>(
+const screenshot$ = bindValue<Screenshot | null>(
     'hallOfFame.menu',
-    'currentScreenshot',
-    // Do not use undefined because it's interpreted as "no fallback", causing
-    // an error on useValue() if there is a problem with the .NET mod.
+    'screenshot',
+    null
+);
+
+const error$ = bindValue<LocalizedString | null>(
+    'hallOfFame.menu',
+    'error',
     null
 );
 
@@ -81,7 +92,8 @@ export function useHofMenuState(): [
 
     const defaultImageUri = useValue(defaultImageUri$);
     const isRefreshing = useValue(isRefreshing$);
-    const screenshot = useValue(currentScreenshot$);
+    const screenshot = useValue(screenshot$);
+    const error = useValue(error$);
 
     const menuState: ReadonlyMenuState & SettableMenuState = {
         ...settableMenuState,
@@ -91,7 +103,8 @@ export function useHofMenuState(): [
                 ? screenshot.imageUrlFHD
                 : screenshot.imageUrl4K
             : defaultImageUri,
-        screenshot
+        screenshot,
+        error
     };
 
     return [menuState, setMenuState];

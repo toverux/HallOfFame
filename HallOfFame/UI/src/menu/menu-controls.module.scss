@@ -14,6 +14,48 @@
         opacity: 1;
     }
 
+    &-error {
+        margin-right: 8rem;
+        display: flex;
+        flex-direction: column;
+        border-radius: 12rem;
+        background-color: rgba(233, 95, 74, 0.55); // --negativeColor + some alpha
+        backdrop-filter: var(--menuBlur);
+        padding: 16rem;
+        line-height: 1.35;
+        font-size: var(--fontSizeL);
+
+        &-header {
+            margin-bottom: 16rem;
+            display: flex;
+
+            &-image {
+                flex: 1 1 40%;
+                max-width: 150rem;
+                margin-right: 16rem;
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+            }
+
+            &-text {
+                flex: 1 1;
+                display: flex;
+                flex-direction: column;
+                font-size: 130%;
+
+                strong {
+                    font-size: 130%;
+                }
+            }
+        }
+
+        &-gameplay-not-affected {
+            margin-top: 8rem;
+            font-size: var(--fontSizeXL);
+        }
+    }
+
     &-city-name, &-city-stats, &-buttons {
         display: flex;
         flex-direction: row;
@@ -37,7 +79,7 @@
 
     &-city-stats span {
         margin-right: 15rem;
-        margin-bottom: 55rem;
+        margin-bottom: 30rem;
 
         // Normally we would not have to use a hardcoded height here, but this
         // circumvents a cohtml layout bug where images have trouble stretching
@@ -68,9 +110,14 @@
         $vanilla-button-height: 56rem;
 
         pointer-events: auto;
+        margin-top: 25rem;
+
+        button {
+            // Override a Vanilla style on a button class
+            margin-top: 0 !important;
+        }
 
         &-button {
-            margin-top: 15rem;
             margin-right: 15rem;
 
             padding-left: 30rem !important;
@@ -83,7 +130,6 @@
         }
 
         &-button-circle {
-            margin-top: 15rem;
             margin-right: 15rem;
 
             width: $vanilla-button-height;

@@ -15,7 +15,7 @@ internal abstract class HttpException(
     /// request ID, add period).
     /// </summary>
     private static string ReformatMessage(string requestId, string message) {
-        return $"{message.TrimEnd('.')} (Log Request ID #{requestId}).";
+        return $"{message.TrimEnd('.')} (log request ID #{requestId}).";
     }
 }
 

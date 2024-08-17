@@ -220,7 +220,7 @@ export function ScreenshotUploadPanel(): ReactElement {
                             <LocalizedString
                                 id='HallOfFame.Common.CITY_BY'
                                 fallback={'by {CREATOR_NAME}'}
-                                // biome-ignore lint/style/useNamingConvention: i18n
+                                // biome-ignore lint/style/useNamingConvention: i18n convention
                                 args={{ CREATOR_NAME: settings.creatorName }}
                             />
                         )}
@@ -276,7 +276,7 @@ export function ScreenshotUploadPanel(): ReactElement {
                         <LocalizedString
                             id='HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID'
                             fallback='Creator ID: {CREATOR_ID}'
-                            // biome-ignore lint/style/useNamingConvention: i18n
+                            // biome-ignore lint/style/useNamingConvention: i18n convention
                             args={{ CREATOR_ID: settings.creatorIdClue }}
                         />
                         &ndash;*

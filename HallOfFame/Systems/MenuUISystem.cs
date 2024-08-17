@@ -5,6 +5,7 @@ using Colossal.UI.Binding;
 using Game;
 using Game.SceneFlow;
 using Game.UI;
+using Game.UI.Localization;
 using HallOfFame.Domain;
 using HallOfFame.Http;
 using HallOfFame.Utils;
@@ -26,6 +27,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
     private ValueBinding<bool> isRefreshingBinding = null!;
 
     private ValueBinding<Screenshot?> screenshotBinding = null!;
+
+    private ValueBinding<LocalizedString?> errorBinding = null!;
 
     private TriggerBinding refreshScreenshotBinding = null!;
 
@@ -53,9 +56,14 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 false);
 
             this.screenshotBinding = new ValueBinding<Screenshot?>(
-                MenuUISystem.BindingGroup, "currentScreenshot",
+                MenuUISystem.BindingGroup, "screenshot",
                 null,
                 new ValueWriter<Screenshot?>().Nullable());
+
+            this.errorBinding = new ValueBinding<LocalizedString?>(
+                MenuUISystem.BindingGroup, "error",
+                null,
+                new ValueWriter<LocalizedString>().Nullable());
 
             this.refreshScreenshotBinding = new TriggerBinding(
                 MenuUISystem.BindingGroup, "refreshScreenshot",
@@ -64,6 +72,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
             this.AddBinding(this.defaultImageUriBinding);
             this.AddBinding(this.isRefreshingBinding);
             this.AddBinding(this.screenshotBinding);
+            this.AddBinding(this.errorBinding);
             this.AddBinding(this.refreshScreenshotBinding);
 
             if (GameManager.instance.gameMode
@@ -112,20 +121,28 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
         this.isRefreshingBinding.Update(true);
 
-        if (this.nextScreenshot is not null) {
-            this.screenshotBinding.Update(this.nextScreenshot);
-        }
-        else {
-            var screenshot = await this.LoadScreenshot();
+        // If there is a preloaded screenshot, use it, if not, load one.
+        var screenshot =
+            this.nextScreenshot ??
+            await this.LoadScreenshot(preload: false);
 
-            if (screenshot is not null) {
-                this.screenshotBinding.Update(screenshot);
-            }
+        // Reset preloaded screenshot, as it is now the current one.
+        this.nextScreenshot = null;
+
+        // There was an error, don't preload the next image, but leave the
+        // previous screenshot displayed. Reset the refresh state.
+        // The error binding is already updated by LoadScreenshot().
+        if (screenshot is null) {
+            this.isRefreshingBinding.Update(false);
+
+            return;
         }
 
-        if (this.screenshotBinding.value is not null) {
-            PreloadNextScreenshot();
-        }
+        // The screenshot was successfully loaded, update the screenshot being
+        // displayed and asynchronously preload the next one.
+        this.screenshotBinding.Update(screenshot);
+
+        PreloadNextScreenshot();
 
         return;
 
@@ -138,7 +155,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
             // The check is cheap, and it's more complex to implement
             // server-side, so let's do that frontend-side.
             do {
-                this.nextScreenshot = await this.LoadScreenshot();
+                this.nextScreenshot = await this.LoadScreenshot(preload: true);
             } while (
                 this.nextScreenshot is not null &&
                 this.nextScreenshot.Id ==
@@ -152,7 +169,18 @@ internal sealed partial class MenuUISystem : UISystemBase {
     /// Loads a new screenshot from the server and preloads the image in the UI,
     /// also is responsible to handle all errors.
     /// </summary>
-    private async Task<Screenshot?> LoadScreenshot() {
+    /// <param name="preload">
+    /// If true, network errors will be logged, but not displayed, as it is a
+    /// non-critical background operation.<br/>
+    /// It is the responsibility of the caller to handle the fact that the
+    /// preloading failed, and ex. retry a classic loading operation the next
+    /// time the user refreshes the image.
+    /// </param>
+    /// <returns>
+    /// A <see cref="Screenshot"/> if the API call *and* image were successful,
+    /// null if there was an error.
+    /// </returns>
+    private async Task<Screenshot?> LoadScreenshot(bool preload) {
         try {
             var screenshot = await HttpQueries.GetRandomScreenshotWeighted();
 
@@ -165,12 +193,32 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
             await this.imagePreloaderUISystem.Preload(imageUrl);
 
+            if (!preload) {
+                this.errorBinding.Update(null);
+            }
+
             return screenshot;
+        }
+        catch (Exception ex) when (preload) {
+            Mod.Log.ErrorSilent(ex);
+
+            return null;
+        }
+        catch (Exception ex) when (this.IsNetworkError(ex)) {
+            this.errorBinding.Update(ex.GetUserFriendlyMessage());
+
+            return null;
         }
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
 
             return null;
         }
+    }
+
+    private bool IsNetworkError(Exception ex) {
+        return ex
+            is HttpException
+            or ImagePreloaderUISystem.ImagePreloadFailedException;
     }
 }
