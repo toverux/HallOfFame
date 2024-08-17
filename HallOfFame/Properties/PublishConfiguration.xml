@@ -11,8 +11,10 @@
   <GameVersion Value="1.1.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
-  <!--Change log for new version. Single line or multi line. Supports minimal markdown subset-->
   <ChangeLog>Initial release.</ChangeLog>
-  <!--External link. supported types are discord, github, youtube, twitch, x, paypal, patreon-->
-  <ExternalLink Type="github" Url="" />
+  <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
+  <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
+  <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
+  <ExternalLink Type="paypal" Url="https://paypal.me/MorganTouverey" />
+  <ExternalLink Type="kofi" Url="https://ko-fi.com/toverux" />
 </Publish>
