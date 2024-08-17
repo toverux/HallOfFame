@@ -11,58 +11,80 @@ background image in the main menu, with information about the creator, the city
 name, and controls to refresh the image, upvote or hide the UI to better see the
 image, to name a few features.
 
-For fellow CS2 modders in search of code samples, the source code notably features:
- - A C# and UI mod;
- - Use of React portals and manual DOM manipulation to patch specific parts of
-   the game's UI that aren't exposed in the modding API;
- - [Harmony](https://harmony.pardeike.net/index.html) transpiler patches for
-   .NET IL-level modding.
+The source code for the server is at
+[toverux/HallOfFameServer](https://github.com/toverux/HallOfFameServer)
+
+For fellow CS2 modders in search of code samples, the source code notably
+features:
+
+- A C# and UI mod;
+- Use of React portals and manual DOM manipulation to patch specific parts of
+  the game's UI that aren't exposed in the modding API;
+- [Harmony](https://harmony.pardeike.net/index.html) transpiler patches for .NET
+  IL-level modding.
 
 ### Acknowledgements
 
 The mod is directly inspired from the homonymous mod for Factorio,
 [Hall of Fame](https://mods.factorio.com/mod/HallOfFame).
 [Loading Screen Mod Revisited](https://steamcommunity.com/sharedfiles/filedetails/?id=2858591409)
-for Cities: Skylines 1 also provided a similar feature.
+for Cities: Skylines 1 also provided a similar feature.<br>
+Both mods featured hand-picked screenshots, whereas this mod allows everyone to
+share their creations.
 
 Special thanks to:
- - The Cities: Skylines Modding Discord community in general for their help.
- - [@chameleon_tbn](https://linktr.ee/chameleon_tbn) for providing icons.
+
+- The Cities: Skylines Modding Discord community in general for their help.
+- [@chameleon_tbn](https://linktr.ee/chameleon_tbn) for providing some icons the
+  mod uses.
 
 ## Features & Roadmap
 
- - For Beta:
-   - Set username and Creator ID in settings.
-   - Upload photo along with basic info (creator name, city name, population).
-   - Refresh photo in menu screen.
-   - Display city name, creator name, date of upload.
-   - Toggle menu UI to better see the image.
+**Current major features**:
 
- - Planned next:
-   - Ability to send a short comment along with the photo.
-   - Localization for all CS2-supported languages via Crowdin.
-   - Permanently disable CS2 logo in menu screen to better see the images.
-   - Report abuse.
-   - Upvote button, upvote count in main menu.
-   - Show pictures that have not been already seen.
-   - Discover mode: most liked, most recent, mixed...
+- Have pictures displayed in the main menu.<br>
+  Pictures show various information about the city, the author, etc.<br>
+- Toggle menu UI visibility to admire the pictures (like a slideshow).
+- Make screenshots and upload them via a dedicated interface, all in-game.
+- Fine-tune how the algorithm chooses screenshots that are presented to you
+  (recent screenshots, most liked, ancient and forgotten, etc.).
+- Choose between Full HD and 4K resolution for downloaded pictures.
+- Report pictures that are inappropriate.
 
- - Nice to have:
-   - Photo in background when loading a game save.
-   - See another photo from the same city.
-   - Save photo to disk.
-   - Follow creator (see more of their pictures).
-   - Labelling so you can choose your preferred style of pictures to see
-     (ex. landscape, detailing, skyline, aerial, etc.).
+**Roadmap, planned next:**
+
+- Set up Canny account for feature requests & publish roadmap.
+- More UI animations/transitions.
+- Add Discord support & donate links to the mod settings.
+- Hotkeys support for Next-ing the images and toggling the menu UI visibility.
+- Localization for all CS2-supported languages via Crowdin.
+- Upvote button, upvote count in main menu.
+- Ability to send a comment along with the screenshot.
+
+**Roadmap, ideas to explore:**
+
+- Permanently disable CS2 logo in menu screen to better see the images.
+- Screenshot in background when loading a game save.
+- See another screenshot from the same city.
+- See another screenshot from the same creator.
+- Save screenshot to disk.
+- Follow creator (see more of their pictures).
+- Publish expenses/donations balance monthly to encourage donations when needed.
+- Manage your collection in-game (edit and delete your screenshots).
+- Labelling so you can choose your preferred style of pictures to see
+  (ex. landscape, detailing, skyline, aerial, etc.).
+- Publish mods playset when uploading a screenshot so people can see what mods
+  were used to create the city.
 
 ## Development
 
 ### Installation
 
- - Standard CS2 modding toolchain;
- - [Bun](https://bun.sh) as a replacement for Node in the build toolchain.
- - `bun i` to install UI mod dependencies.
- - Recommended: enable `--developerMode --uiDeveloperMode` as game launch options.
+- Standard CS2 modding toolchain;
+- [Bun](https://bun.sh) as a replacement for Node in the build toolchain.
+- `bun i` to install UI mod dependencies.
+- Recommended: enable `--developerMode --uiDeveloperMode` as game launch
+  options.
 
 Here's a game launch command to also skip launcher in Steam:
 
@@ -82,58 +104,70 @@ You can enable the game's UI live reload on change with `--uiDeveloperMode`.
 Debugging C# code can be done following these steps:
 https://cs2.paradoxwikis.com/Debugging.
 
-Debugging JS code can be done with the browser's dev tools by opening http://localhost:9444
+Debugging JS code can be done with the browser's dev tools by
+opening http://localhost:9444
 (sadly not working well on Firefox, Chrome is recommended).
 
 Logs are situated in either:
- - `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Player.log`
- - `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Logs\UI.log`
- - `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Logs\HallOfFame.log`
+
+- `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Player.log`
+- `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Logs\UI.log`
+- `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Logs\HallOfFame.log`
 
 ### Publishing a new version
 
- - Update `Version` and `FileVersion` in `HallOfFame/HallOfFame.csproj`;
- - Update `HallOfFame/ChangeLog.md` *with only what's changed since the last version*;
- - Update `HallOfFame/LongDescription.md` if needed;
- - @todo
+- Update `Version` and `FileVersion` in `HallOfFame/HallOfFame.csproj`;
+- Update `HallOfFame/ChangeLog.md` *with only what's changed since the last
+  version*;
+- Update `HallOfFame/LongDescription.md` if needed;
+- @todo
 
 ## Code style
 
 ### TypeScript
 
 TypeScript code is formatted and linted by [Biome](https://biomejs.dev).
-Run `bun check` to check for linting errors, format files and autofix simple issues.
+Run `bun check` to check for linting errors, format files and autofix simple
+issues.
 
 You can also use Biome directly with `bun biome`.
 
-The formatter and linter should run as a pre-commit hook if you have it installed,
-which should be done automatically when running `bun i` (otherwise run `bun lefthook install`).
+The formatter and linter should run as a pre-commit hook if you have it
+installed,
+which should be done automatically when running `bun i` (otherwise run
+`bun lefthook install`).
 
 I'd suggest to use a Biome plugin for your editor to ease development.
 
-If a rule seems out of place for this project, you can either disable/reconfigure
+If a rule seems out of place for this project, you can either
+disable/reconfigure
 it in the `biome.json` file or disable it with an annotation comment, but these
 should be justified and concerted.
 
 ### C#
 
-For C#, prefer using Rider, as code style and linting settings are saved in the project.
+For C#, prefer using Rider, as code style and linting settings are saved in the
+project.
 Reformat your code before committing (CTRL+ALT+L with Rider).
 
 At the very least, please ensure your IDE has `.editorconfig` support enabled.
 
 ### Commit messages
 
-Commits must follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0) specification and more
+Commits must follow
+the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0)
+specification and more
 specifically the Angular one.
 
 Scope can be one or more of the following:
- - `mod`: for general changes to how the mod "presents itself" to the game or user;
- - `cs`: for C# mod changes;
- - `ui`: for UI mod changes;
- - `options`: for changes in the mod options;
- - `menu`: for changes in the main menu part of the mod;
- - `game`: for changes in the in-game part of the mod;
- - `i18n`: for changes in translations and translations system;
- - `deps`: for dependencies updates;
- - Propose new scopes if needed!
+
+- `mod`: for general changes to how the mod "presents itself" to the game or
+  user;
+- `cs`: for C# mod changes;
+- `ui`: for UI mod changes;
+- `options`: for changes in the mod options;
+- `menu`: for changes in the main menu part of the mod;
+- `game`: for changes in the in-game part of the mod;
+- `i18n`: for changes in translations and translations system;
+- `deps`: for dependencies updates;
+- Propose new scopes if needed!
