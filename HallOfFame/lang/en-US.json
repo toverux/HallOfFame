@@ -28,7 +28,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 is by far the most common aspect ratio. This rectangle shows you how your image will be cropped on such screens, so you can ensure all the important details are in it.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Your Creator Name is currently empty. You must set it in the mod settings to upload a picture.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "You can change your Creator name in mod options or the name of the city without closing this window.",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING": "In a future release, you will be able to manage your collection on our website using the same login you are using now!",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING": "In a future release, you will be able to manage your collection, edit or delete your screenshots, and much more!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "Uploaded content is moderated and any abuse, including identity theft, will result in a permanent ban of your account and IP address.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "Creator ID: {CREATOR_ID}",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE": "Share",

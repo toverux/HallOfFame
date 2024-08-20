@@ -17,7 +17,7 @@ import {
     useState
 } from 'react';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
-import { getClassesModule, useModSettings } from '../utils';
+import { type ModSettings, getClassesModule, useModSettings } from '../utils';
 import { DescriptionTooltip } from '../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
 import * as styles from './screenshot-upload-panel.module.scss';
 
@@ -155,162 +155,246 @@ export function ScreenshotUploadPanel(): ReactElement {
 
     const creatorNameIsEmpty = !settings.creatorName.trim();
 
-    // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
         <div
             className={`${coMainScreenStyles.centerPanelLayout} ${styles.screenshotUploadPanelLayout}`}>
             <div
                 className={styles.screenshotUploadPanel}
                 onMouseDown={onMouseDown}>
-                <div className={styles.screenshotUploadPanelHeader}>
-                    {congratulation}
+                {/* biome-ignore lint/style/noNonNullAssertion: this should be defined at this point */}
+                <ScreenshotUploadPanelHeader congratulation={congratulation!} />
 
-                    <Button
-                        variant='round'
-                        className={styles.screenshotUploadPanelHeaderClose}
-                        onSelect={discardScreenshot}
-                        selectSound={'close-menu'}>
-                        <Icon src='Media/Glyphs/Close.svg' />
-                    </Button>
-                </div>
+                <ScreenshotUploadPanelImage
+                    translate={translate}
+                    screenshotSnapshot={screenshotSnapshot}
+                    ratioPreviewInfo={ratioPreviewInfo}
+                />
 
-                <div
-                    className={`${styles.screenshotUploadPanelImage} ${coFixedRatioImageStyles.fixedRatioImage}`}
-                    style={
-                        {
-                            '--w': screenshotSnapshot.imageWidth,
-                            '--h': screenshotSnapshot.imageHeight
-                        } as CSSProperties
-                    }>
-                    {/* This div sets the size of its parent and therefore the size of the image. */}
-                    <div className={coFixedRatioImageStyles.ratio} />
+                <ScreenshotUploadPanelContentCityInfo
+                    translate={translate}
+                    settings={settings}
+                    screenshotSnapshot={screenshotSnapshot}
+                    cityName={cityName}
+                    creatorNameIsEmpty={creatorNameIsEmpty}
+                />
 
-                    <img
-                        className={coFixedRatioImageStyles.image}
-                        src={screenshotSnapshot.imageUri}
+                <ScreenshotUploadPanelContentOthers
+                    translate={translate}
+                    creatorNameIsEmpty={creatorNameIsEmpty}
+                />
+
+                <ScreenshotUploadPanelFooter
+                    translate={translate}
+                    settings={settings}
+                    creatorNameIsEmpty={creatorNameIsEmpty}
+                />
+            </div>
+        </div>
+    );
+}
+
+function ScreenshotUploadPanelHeader({
+    congratulation
+}: Readonly<{
+    congratulation: string;
+}>): ReactElement {
+    return (
+        <div className={styles.screenshotUploadPanelHeader}>
+            {congratulation}
+
+            <Button
+                variant='round'
+                className={styles.screenshotUploadPanelHeaderClose}
+                onSelect={discardScreenshot}
+                selectSound={'close-menu'}>
+                <Icon src='Media/Glyphs/Close.svg' />
+            </Button>
+        </div>
+    );
+}
+
+function ScreenshotUploadPanelImage({
+    translate,
+    screenshotSnapshot,
+    ratioPreviewInfo
+}: Readonly<{
+    translate: Localization['translate'];
+    screenshotSnapshot: JsonScreenshotSnapshot;
+    ratioPreviewInfo: ReturnType<typeof getRatioPreviewInfo>;
+}>): ReactElement {
+    // noinspection HtmlRequiredAltAttribute
+    return (
+        <div
+            className={`${styles.screenshotUploadPanelImage} ${coFixedRatioImageStyles.fixedRatioImage}`}
+            style={
+                {
+                    '--w': screenshotSnapshot.imageWidth,
+                    '--h': screenshotSnapshot.imageHeight
+                } as CSSProperties
+            }>
+            {/* This div sets the size of its parent and therefore the size of the image. */}
+            <div className={coFixedRatioImageStyles.ratio} />
+
+            <img
+                className={coFixedRatioImageStyles.image}
+                src={screenshotSnapshot.imageUri}
+            />
+
+            {ratioPreviewInfo.type != 'equal' && (
+                <DescriptionTooltip
+                    direction='down'
+                    title={translate(
+                        'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE',
+                        '16:9 Aspect Ratio Preview'
+                    )}
+                    description={translate(
+                        'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION',
+                        'The border shows you how your image will be cropped on the most common aspect ratio.'
+                    )}>
+                    <div
+                        className={
+                            styles.screenshotUploadPanelImageRatioPreview
+                        }
+                        style={ratioPreviewInfo.style}>
+                        16:9
+                    </div>
+                </DescriptionTooltip>
+            )}
+        </div>
+    );
+}
+
+function ScreenshotUploadPanelContentCityInfo({
+    translate,
+    settings,
+    screenshotSnapshot,
+    cityName,
+    creatorNameIsEmpty
+}: Readonly<{
+    translate: Localization['translate'];
+    settings: ModSettings;
+    screenshotSnapshot: JsonScreenshotSnapshot;
+    cityName: string;
+    creatorNameIsEmpty: boolean;
+}>): ReactElement {
+    // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
+    return (
+        <div
+            className={`${styles.screenshotUploadPanelContent} ${styles.screenshotUploadPanelCityInfo}`}>
+            <span className={styles.screenshotUploadPanelCityInfoName}>
+                <strong>{cityName}</strong>
+                {!creatorNameIsEmpty && (
+                    <LocalizedString
+                        id='HallOfFame.Common.CITY_BY'
+                        fallback={'by {CREATOR_NAME}'}
+                        // biome-ignore lint/style/useNamingConvention: i18n convention
+                        args={{ CREATOR_NAME: settings.creatorName }}
                     />
+                )}
+            </span>
+            <div style={{ flex: 1 }} />
+            <span>
+                <img src='Media/Game/Icons/Trophy.svg' />
+                {translate(
+                    `Progression.MILESTONE_NAME:${screenshotSnapshot.achievedMilestone}`
+                )}
+            </span>
+            <span>
+                <img src='Media/Game/Icons/Population.svg' />
+                <LocalizedNumber value={screenshotSnapshot.population} />
+            </span>
+        </div>
+    );
+}
 
-                    {ratioPreviewInfo.type != 'equal' && (
-                        <DescriptionTooltip
-                            direction='down'
-                            title={translate(
-                                'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE',
-                                '16:9 Aspect Ratio Preview'
-                            )}
-                            description={translate(
-                                'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION',
-                                'The border shows you how your image will be cropped on the most common aspect ratio.'
-                            )}>
-                            <div
-                                className={
-                                    styles.screenshotUploadPanelImageRatioPreview
-                                }
-                                style={ratioPreviewInfo.style}>
-                                16:9
-                            </div>
-                        </DescriptionTooltip>
+function ScreenshotUploadPanelContentOthers({
+    translate,
+    creatorNameIsEmpty
+}: Readonly<{
+    translate: Localization['translate'];
+    creatorNameIsEmpty: boolean;
+}>): ReactElement {
+    return (
+        <>
+            {creatorNameIsEmpty && (
+                <div className={styles.screenshotUploadPanelWarning}>
+                    {translate(
+                        'HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY',
+                        `You must set your Creator Name in the mod settings to upload a picture.`
                     )}
                 </div>
+            )}
 
-                <div
-                    className={`${styles.screenshotUploadPanelContent} ${styles.screenshotUploadPanelCityInfo}`}>
-                    <span className={styles.screenshotUploadPanelCityInfoName}>
-                        <strong>{cityName}</strong>
-                        {!creatorNameIsEmpty && (
-                            <LocalizedString
-                                id='HallOfFame.Common.CITY_BY'
-                                fallback={'by {CREATOR_NAME}'}
-                                // biome-ignore lint/style/useNamingConvention: i18n convention
-                                args={{ CREATOR_NAME: settings.creatorName }}
-                            />
-                        )}
-                    </span>
-                    <div style={{ flex: 1 }} />
-                    <span>
-                        <img src='Media/Game/Icons/Trophy.svg' />
-                        {translate(
-                            `Progression.MILESTONE_NAME:${screenshotSnapshot.achievedMilestone}`
-                        )}
-                    </span>
-                    <span>
-                        <img src='Media/Game/Icons/Population.svg' />
-                        <LocalizedNumber
-                            value={screenshotSnapshot.population}
-                        />
-                    </span>
-                </div>
-
-                <div className={styles.screenshotUploadPanelContent}>
-                    <p>
-                        {translate(
-                            'HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY',
-                            `You can update your creator name or city name without closing this window.`
-                        )}
-                    </p>
-                    <p>
-                        {translate(
-                            'HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING',
-                            `Future update will let you manage your collection on our website.`
-                        )}
-                    </p>
-                    <p style={{ margin: 0 }}>
-                        {translate(
-                            'HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED',
-                            `Uploaded content is moderated, any abuse will result in a permanent ban.`
-                        )}
-                    </p>
-                </div>
-
-                {creatorNameIsEmpty && (
-                    <div className={styles.screenshotUploadPanelWarning}>
-                        {translate(
-                            'HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY',
-                            `You must set your Creator Name in the mod settings to upload a picture.`
-                        )}
-                    </div>
-                )}
-
-                <div className={styles.screenshotUploadPanelFooter}>
-                    <span
-                        className={styles.screenshotUploadPanelFooterCreatorId}>
-                        <LocalizedString
-                            id='HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID'
-                            fallback='Creator ID: {CREATOR_ID}'
-                            // biome-ignore lint/style/useNamingConvention: i18n convention
-                            args={{ CREATOR_ID: settings.creatorIdClue }}
-                        />
-                        &ndash;*
-                    </span>
-
-                    <div style={{ flex: 1 }} />
-
-                    <Button
-                        className={`${styles.screenshotUploadPanelFooterButton} ${styles.cancel}`}
-                        variant='primary'
-                        onSelect={discardScreenshot}
-                        selectSound={'close-menu'}>
-                        {translate('Common.ACTION[Cancel]', 'Cancel')}
-                    </Button>
-
-                    <Button
-                        variant='primary'
-                        className={styles.screenshotUploadPanelFooterButton}
-                        disabled={creatorNameIsEmpty}>
-                        <Icon
-                            src={cloudArrowUpSolidSrc}
-                            tinted={true}
-                            className={
-                                styles.screenshotUploadPanelFooterButtonIcon
-                            }
-                        />
-
-                        {translate(
-                            'HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE',
-                            'Share'
-                        )}
-                    </Button>
-                </div>
+            <div className={styles.screenshotUploadPanelContent}>
+                <p>
+                    {translate(
+                        'HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY',
+                        `You can update your creator name or city name without closing this window.`
+                    )}
+                </p>
+                <p>
+                    {translate(
+                        'HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING',
+                        `Future update will let you manage your collection on our website.`
+                    )}
+                </p>
+                <p style={{ margin: 0 }}>
+                    {translate(
+                        'HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED',
+                        `Uploaded content is moderated, any abuse will result in a permanent ban.`
+                    )}
+                </p>
             </div>
+        </>
+    );
+}
+
+function ScreenshotUploadPanelFooter({
+    translate,
+    settings,
+    creatorNameIsEmpty
+}: Readonly<{
+    translate: Localization['translate'];
+    settings: ModSettings;
+    creatorNameIsEmpty: boolean;
+}>): ReactElement {
+    return (
+        <div className={styles.screenshotUploadPanelFooter}>
+            <span className={styles.screenshotUploadPanelFooterCreatorId}>
+                <LocalizedString
+                    id='HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID'
+                    fallback='Creator ID: {CREATOR_ID}'
+                    // biome-ignore lint/style/useNamingConvention: i18n convention
+                    args={{ CREATOR_ID: settings.creatorIdClue }}
+                />
+                &ndash;*
+            </span>
+
+            <div style={{ flex: 1 }} />
+
+            <Button
+                className={`${styles.screenshotUploadPanelFooterButton} ${styles.cancel}`}
+                variant='primary'
+                onSelect={discardScreenshot}
+                selectSound={'close-menu'}>
+                {translate('Common.ACTION[Cancel]', 'Cancel')}
+            </Button>
+
+            <Button
+                variant='primary'
+                className={styles.screenshotUploadPanelFooterButton}
+                disabled={creatorNameIsEmpty}>
+                <Icon
+                    src={cloudArrowUpSolidSrc}
+                    tinted={true}
+                    className={styles.screenshotUploadPanelFooterButtonIcon}
+                />
+
+                {translate(
+                    'HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE',
+                    'Share'
+                )}
+            </Button>
         </div>
     );
 }
@@ -318,7 +402,7 @@ export function ScreenshotUploadPanel(): ReactElement {
 function getCongratulation(
     translate: Localization['translate'],
     screenshot: JsonScreenshotSnapshot | null
-) {
+): string | undefined {
     if (!screenshot) {
         return;
     }

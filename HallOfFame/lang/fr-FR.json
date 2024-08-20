@@ -28,7 +28,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 est de loin le ratio d'écran le plus répandu. Ce rectangle vous montre comment votre image sera recadrée sur ces écrans, pour que vous puissiez vous assurer que le cadrage vous convienne.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Votre nom de créateur n’a pas été défini. Rendez-vous dans les paramètres du mod pour le définir et pouvoir téléverser une photo.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "Vous pouvez changer votre nom d’auteur dans les paramètres du mod ou le nom de la ville sans fermer cette fenêtre.",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING": "Dans une prochaine version, vous pourrez gérer votre collection depuis notre site internet avec les mêmes identifiants que vous utilisez actuellement.",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING": "Dans une prochaine version, vous pourrez gérer votre collection, éditer ou supprimer vos captures d’écran, et bien plus encore\u00a0!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "Le contenu téléversé est modéré et tout abus, incluant l’usurpation d’identité, sera résultera en un bannissement de votre compte et adresse IP.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "Creator ID\u00a0: {CREATOR_ID}",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE": "Partager",
