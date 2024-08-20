@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
@@ -31,6 +32,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
     private ValueBinding<LocalizedString?> errorBinding = null!;
 
     private TriggerBinding refreshScreenshotBinding = null!;
+
+    private TriggerBinding reportScreenshotBinding = null!;
 
     private Screenshot? nextScreenshot;
 
@@ -69,11 +72,16 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 MenuUISystem.BindingGroup, "refreshScreenshot",
                 this.RefreshScreenshot);
 
+            this.reportScreenshotBinding = new TriggerBinding(
+                MenuUISystem.BindingGroup, "reportScreenshot",
+                this.ReportScreenshot);
+
             this.AddBinding(this.defaultImageUriBinding);
             this.AddBinding(this.isRefreshingBinding);
             this.AddBinding(this.screenshotBinding);
             this.AddBinding(this.errorBinding);
             this.AddBinding(this.refreshScreenshotBinding);
+            this.AddBinding(this.reportScreenshotBinding);
 
             if (GameManager.instance.gameMode
                 is GameMode.MainMenu
@@ -220,5 +228,78 @@ internal sealed partial class MenuUISystem : UISystemBase {
         return ex
             is HttpException
             or ImagePreloaderUISystem.ImagePreloadFailedException;
+    }
+
+    private void ReportScreenshot() {
+        var screenshot = this.screenshotBinding.value;
+
+        if (screenshot is null) {
+            throw new ArgumentNullException(nameof(this.screenshotBinding));
+        }
+
+        var dialog = new ConfirmationDialog(
+            new LocalizedString(
+                "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[Title]",
+                "Report screenshot {CITY_NAME} by {AUTHOR_NAME}?",
+                new Dictionary<string, ILocElement> {
+                    {
+                        "CITY_NAME",
+                        LocalizedString.Value(screenshot.CityName)
+                    }, {
+                        "AUTHOR_NAME",
+                        LocalizedString.Value(screenshot.Creator
+                            ?.CreatorName)
+                    }
+                }),
+            LocalizedString.IdWithFallback(
+                "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[Message]",
+                "Report this screenshot to the moderation team?"),
+            LocalizedString.IdWithFallback(
+                "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[ConfirmAction]",
+                "Report screenshot"),
+            LocalizedString.IdWithFallback(
+                "Common.ACTION[Cancel]",
+                "Cancel"));
+
+        GameManager.instance.userInterface.appBindings
+            .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
+
+        return;
+
+        async void OnConfirmOrCancel(int choice) {
+            if (choice is not 0) {
+                return;
+            }
+
+            try {
+                await HttpQueries.ReportScreenshot(screenshot.Id);
+
+                var successDialog = new MessageDialog(
+                    LocalizedString.IdWithFallback(
+                        "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Title]",
+                        "Thank you"),
+                    LocalizedString.IdWithFallback(
+                        "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Message]",
+                        "The screenshot has been reported to the moderation team."),
+                    LocalizedString.IdWithFallback(
+                        "Common.ACTION[Close]",
+                        "Close"));
+
+                GameManager.instance.userInterface.appBindings
+                    .ShowMessageDialog(successDialog, _ => { });
+
+                this.RefreshScreenshot();
+            }
+            catch (HttpException ex) {
+                ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+                    localizedTitle = "HallOfFame.Common.OOPS",
+                    localizedMessage = ex.GetUserFriendlyMessage(),
+                    actions = ErrorDialog.Actions.None
+                });
+            }
+            catch (Exception ex) {
+                Mod.Log.ErrorRecoverable(ex);
+            }
+        }
     }
 }

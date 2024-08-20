@@ -96,10 +96,7 @@ function MenuControlsError({
                 />
                 <div className={styles.menuControlsErrorHeaderText}>
                     <strong>
-                        {translate(
-                            'HallOfFame.UI.Menu.MenuControls.OH_NO',
-                            'Oh no!'
-                        )}
+                        {translate('HallOfFame.Common.OOPS', 'Oh no!')}
                     </strong>
                     {translate(
                         'HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE',
@@ -228,14 +225,30 @@ function MenuControlsButtons({
                     {...snappyOnSelect(refreshScreenshot)}>
                     {translate(
                         'HallOfFame.UI.Menu.MenuControls.ACTION[Next]',
-                        'Next'
+                        'Show a new image'
                     )}
                 </MenuButton>
             </Tooltip>
 
             <Tooltip
                 tooltip={translate(
-                    'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]'
+                    'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report Abuse]',
+                    'Report inappropriate content'
+                )}>
+                <MenuButton
+                    className={styles.menuControlsButtonsButtonCircle}
+                    src={'coui://uil/Colored/ExclamationMark.svg'}
+                    tinted={false}
+                    focusKey={FOCUS_DISABLED}
+                    onSelect={reportScreenshot}
+                    selectSound='bulldoze'
+                />
+            </Tooltip>
+
+            <Tooltip
+                tooltip={translate(
+                    'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]',
+                    'Toggle menu visibility'
                 )}>
                 <MenuButton
                     className={styles.menuControlsButtonsButtonCircle}
@@ -258,6 +271,10 @@ function MenuControlsButtons({
 
 function refreshScreenshot(): void {
     trigger('hallOfFame.menu', 'refreshScreenshot');
+}
+
+function reportScreenshot(): void {
+    trigger('hallOfFame.menu', 'reportScreenshot');
 }
 
 function locElementToReactNode(

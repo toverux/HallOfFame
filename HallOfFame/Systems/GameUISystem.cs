@@ -278,13 +278,13 @@ internal sealed partial class GameUISystem : UISystemBase {
 
         var dialog = new ConfirmationDialog(
             LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.GameUI.SetCreatorNameDialog[Title]",
+                "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[Title]",
                 "Choose a Creator Name"),
             LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.GameUI.SetCreatorNameDialog[Message]",
+                "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[Message]",
                 "To be able to upload a picture, you must first choose a Creator Name in the mod settings."),
             LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.GameUI.SetCreatorNameDialog[ConfirmAction]",
+                "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[ConfirmAction]",
                 "Open Mod Settings"),
             LocalizedString.IdWithFallback(
                 "Common.ACTION[Cancel]",
@@ -299,7 +299,7 @@ internal sealed partial class GameUISystem : UISystemBase {
             var optionsUISystem =
                 this.World.GetOrCreateSystemManaged<OptionsUISystem>();
 
-            if (choice != 0) {
+            if (choice is not 0) {
                 return;
             }
 
