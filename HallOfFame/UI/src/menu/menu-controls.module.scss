@@ -1,4 +1,5 @@
-﻿@use '../common';
+﻿@use 'sass:color';
+@use '../common';
 
 .menu-controls {
     display: flex;
@@ -15,11 +16,15 @@
     }
 
     &-error {
+        // Can't mix a CSS variable with alpha in this version of CSS, so we
+        // have to copy the value here.
+        $vanillaAccentColorDark: #1e83aa;
+
         margin-right: 8rem;
         display: flex;
         flex-direction: column;
         border-radius: 12rem;
-        background-color: rgba(233, 95, 74, 0.55); // --negativeColor + some alpha
+        background-color: color.change($vanillaAccentColorDark, $alpha: 0.55);
         backdrop-filter: var(--menuBlur);
         padding: 16rem;
         line-height: 1.35;
