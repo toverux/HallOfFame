@@ -1,7 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Colossal.UI.Binding;
 using Game;
 using Game.City;
@@ -11,6 +12,7 @@ using Game.UI;
 using Game.UI.InGame;
 using Game.UI.Localization;
 using Game.UI.Menu;
+using HallOfFame.Http;
 using HallOfFame.Patches;
 using HallOfFame.Utils;
 using HarmonyLib;
@@ -58,9 +60,13 @@ internal sealed partial class GameUISystem : UISystemBase {
     private GetterValueBinding<ScreenshotSnapshot?> screenshotSnapshotBinding =
         null!;
 
+    private GetterValueBinding<UploadProgress?> uploadProgressBinding = null!;
+
     private TriggerBinding takeScreenshotBinding = null!;
 
     private TriggerBinding clearScreenshotBinding = null!;
+
+    private TriggerBinding uploadScreenshotBinding = null!;
 
     /// <summary>
     /// Current screenshot snapshot.
@@ -70,6 +76,8 @@ internal sealed partial class GameUISystem : UISystemBase {
         get => this.currentScreenshotValue;
         set {
             this.currentScreenshotValue = value;
+
+            this.uploadProgress = null;
 
             // Optimization: only enable live bindings when a screenshot is
             // being displayed/uploaded.
@@ -84,6 +92,8 @@ internal sealed partial class GameUISystem : UISystemBase {
     /// Backing field for <see cref="CurrentScreenshot"/>.
     /// </summary>
     private ScreenshotSnapshot? currentScreenshotValue;
+
+    private UploadProgress? uploadProgress;
 
     protected override void OnCreate() {
         base.OnCreate();
@@ -111,8 +121,14 @@ internal sealed partial class GameUISystem : UISystemBase {
             this.screenshotSnapshotBinding =
                 new GetterValueBinding<ScreenshotSnapshot?>(
                     GameUISystem.BindingGroup, "screenshotSnapshot",
-                    () => this.CurrentScreenshot,
-                    new ValueWriter<ScreenshotSnapshot?>().Nullable());
+                    () => this.currentScreenshotValue,
+                    new ValueWriter<ScreenshotSnapshot>().Nullable());
+
+            this.uploadProgressBinding =
+                new GetterValueBinding<UploadProgress?>(
+                    GameUISystem.BindingGroup, "uploadProgress",
+                    () => this.uploadProgress,
+                    new ValueWriter<UploadProgress>().Nullable());
 
             this.takeScreenshotBinding = new TriggerBinding(
                 GameUISystem.BindingGroup, "takeScreenshot",
@@ -122,10 +138,16 @@ internal sealed partial class GameUISystem : UISystemBase {
                 GameUISystem.BindingGroup, "clearScreenshot",
                 this.ClearScreenshot);
 
+            this.uploadScreenshotBinding = new TriggerBinding(
+                GameUISystem.BindingGroup, "uploadScreenshot",
+                this.UploadScreenshot);
+
             this.AddUpdateBinding(this.cityNameBinding);
             this.AddUpdateBinding(this.screenshotSnapshotBinding);
+            this.AddUpdateBinding(this.uploadProgressBinding);
             this.AddBinding(this.takeScreenshotBinding);
             this.AddBinding(this.clearScreenshotBinding);
+            this.AddBinding(this.uploadScreenshotBinding);
         }
         catch (Exception ex) {
             Mod.Log.ErrorFatal(ex);
@@ -252,6 +274,8 @@ internal sealed partial class GameUISystem : UISystemBase {
         if (this.CurrentScreenshot is null) {
             Mod.Log.Warn(
                 $"Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
+
+            return;
         }
 
         try {
@@ -262,6 +286,105 @@ internal sealed partial class GameUISystem : UISystemBase {
         }
         finally {
             this.CurrentScreenshot = null;
+        }
+    }
+
+    private async void UploadScreenshot() {
+        if (this.CurrentScreenshot is null) {
+            Mod.Log.Warn(
+                $"Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
+
+            return;
+        }
+
+        CancellationTokenSource? processingUpdatesCts = null;
+
+        try {
+            this.uploadProgress = new UploadProgress(0, 0);
+
+            var screenshot = await HttpQueries.UploadScreenshot(
+                this.GetCityName(),
+                this.CurrentScreenshot.Value.AchievedMilestone,
+                this.CurrentScreenshot.Value.Population,
+                this.CurrentScreenshot.Value.ImageBytes,
+                progressHandler: (upload, download) => {
+                    // Case 1: The request is being sent.
+                    if (upload < 1) {
+                        // Set progress to the current upload progress.
+                        this.uploadProgress = new UploadProgress(upload, 0);
+                    }
+
+                    // Case 2: The request has been sent and we are waiting for
+                    // the response.
+                    // The condition must ensure this runs only once.
+                    else if (upload >= 1 && processingUpdatesCts is null) {
+                        // Mark upload as done and start 'processing' progress.
+                        // Processing progress is a guess, as of now the server
+                        // does not stream back progress, so it is based on time
+                        // elapsed.
+                        this.uploadProgress = new UploadProgress(1, 0);
+
+                        processingUpdatesCts = new CancellationTokenSource();
+
+                        // This task will update the processing progress
+                        // asynchronously until we cancel it, or it reaches 90%
+                        // progress, then it will stop by itself.
+                        _ = StartUpdateProcessingProgress(
+                            processingUpdatesCts.Token);
+                    }
+
+                    // Case 3: The response has been fully received.
+                    // This is handled in the rest of the method so we ensure
+                    // the progress is set to 100% at the end.
+                });
+
+            // Set progress to done.
+            this.uploadProgress = new UploadProgress(1, 1);
+
+            Mod.Log.Info($"Screenshot uploaded, ID #{screenshot.Id}.");
+        }
+        catch (HttpException ex) {
+            // Reset progress state.
+            this.uploadProgress = null;
+
+            ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+                localizedTitle = "HallOfFame.Systems.GameUI.UPLOAD_ERROR",
+                localizedMessage = ex.GetUserFriendlyMessage(),
+                actions = ErrorDialog.Actions.None
+            });
+        }
+        catch (Exception ex) {
+            // Reset progress state.
+            this.uploadProgress = null;
+
+            Mod.Log.ErrorRecoverable(ex);
+        }
+        finally {
+            processingUpdatesCts?.Cancel();
+        }
+
+        return;
+
+        async Task StartUpdateProcessingProgress(CancellationToken ct) {
+            const float processingTimeSeconds = 5f;
+
+            var startTime = DateTime.Now;
+
+            while (!ct.IsCancellationRequested) {
+                var elapsedSeconds =
+                    (float)(DateTime.Now - startTime).TotalSeconds;
+
+                var progress = Math.Min(
+                    elapsedSeconds / processingTimeSeconds, .9f);
+
+                this.uploadProgress = new UploadProgress(1, progress);
+
+                if (progress >= .9f) {
+                    break;
+                }
+
+                await Task.Yield();
+            }
         }
     }
 
@@ -334,10 +457,10 @@ internal sealed partial class GameUISystem : UISystemBase {
     /// we want to allow the user to change them on the fly).
     /// Serialized to JSON for displaying in the UI.
     /// </summary>
-    private sealed class ScreenshotSnapshot(
+    private readonly struct ScreenshotSnapshot(
         int achievedMilestone,
         int population,
-        IReadOnlyCollection<byte> imageBytes,
+        byte[] imageBytes,
         Vector2Int imageSize) : IJsonWritable {
         /// <summary>
         /// As we use the same file name for each new screenshot, this is a
@@ -349,14 +472,20 @@ internal sealed partial class GameUISystem : UISystemBase {
         private readonly int currentVersion =
             ScreenshotSnapshot.latestVersion++;
 
+        internal int AchievedMilestone { get; } = achievedMilestone;
+
+        internal int Population { get; } = population;
+
+        internal byte[] ImageBytes { get; } = imageBytes;
+
         public void Write(IJsonWriter writer) {
             writer.TypeBegin(this.GetType().FullName);
 
             writer.PropertyName("achievedMilestone");
-            writer.Write(achievedMilestone);
+            writer.Write(this.AchievedMilestone);
 
             writer.PropertyName("population");
-            writer.Write(population);
+            writer.Write(this.Population);
 
             writer.PropertyName("imageUri");
 
@@ -370,7 +499,29 @@ internal sealed partial class GameUISystem : UISystemBase {
             writer.Write(imageSize.y);
 
             writer.PropertyName("imageFileSize");
-            writer.Write(imageBytes.Count);
+            writer.Write(this.ImageBytes.Length);
+
+            writer.TypeEnd();
+        }
+    }
+
+    private readonly struct UploadProgress(
+        float uploadProgress,
+        float processingProgress) : IJsonWritable {
+        public void Write(IJsonWriter writer) {
+            writer.TypeBegin(this.GetType().FullName);
+
+            writer.PropertyName("isComplete");
+            writer.Write(uploadProgress >= 1 && processingProgress >= 1);
+
+            writer.PropertyName("globalProgress");
+            writer.Write((uploadProgress + processingProgress) / 2);
+
+            writer.PropertyName("uploadProgress");
+            writer.Write(uploadProgress);
+
+            writer.PropertyName("processingProgress");
+            writer.Write(processingProgress);
 
             writer.TypeEnd();
         }

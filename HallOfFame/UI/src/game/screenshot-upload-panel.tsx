@@ -6,15 +6,25 @@ import {
     useLocalization
 } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
-import { type CSSProperties, type ReactElement, useMemo } from 'react';
+import {
+    type CSSProperties,
+    type ReactElement,
+    useEffect,
+    useMemo
+} from 'react';
 import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
 import {
     type ModSettings,
+    createSingletonHook,
     getClassesModule,
     useDraggable,
     useModSettings
 } from '../utils';
 import { DescriptionTooltip } from '../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
+import {
+    LoadingProgress,
+    loadingProgressVanillaProps
+} from '../vanilla-modules/game-ui/overlay/logo-screen/loading/loading-progress';
 import * as styles from './screenshot-upload-panel.module.scss';
 
 interface JsonScreenshotSnapshot {
@@ -26,9 +36,21 @@ interface JsonScreenshotSnapshot {
     readonly imageHeight: number;
 }
 
+interface JsonUploadProgress {
+    readonly isComplete: boolean;
+    readonly globalProgress: number;
+    readonly uploadProgress: number;
+    readonly processingProgress: number;
+}
+
 const coFixedRatioImageStyles = getClassesModule(
     'game-ui/common/image/fixed-ratio-image.module.scss',
     ['fixedRatioImage', 'image', 'ratio']
+);
+
+const coLoadingStyles = getClassesModule(
+    'game-ui/overlay/logo-screen/loading/loading.module.scss',
+    ['hint', 'progress']
 );
 
 const coMainScreenStyles = getClassesModule(
@@ -44,6 +66,12 @@ const screenshotSnapshot$ = bindValue<JsonScreenshotSnapshot | null>(
     null
 );
 
+const uploadProgress$ = bindValue<JsonUploadProgress | null>(
+    'hallOfFame.game',
+    'uploadProgress',
+    null
+);
+
 /**
  * Component that shows up when the user takes a HoF screenshot.
  */
@@ -55,6 +83,7 @@ export function ScreenshotUploadPanel(): ReactElement {
     const draggable = useDraggable();
 
     const screenshotSnapshot = useValue(screenshotSnapshot$);
+    const uploadProgress = useValue(uploadProgress$);
 
     // Show panel when there is a screenshot to upload.
     if (!screenshotSnapshot) {
@@ -75,6 +104,7 @@ export function ScreenshotUploadPanel(): ReactElement {
                 <ScreenshotUploadPanelImage
                     translate={translate}
                     screenshotSnapshot={screenshotSnapshot}
+                    uploadProgress={uploadProgress}
                 />
 
                 <ScreenshotUploadPanelContentCityInfo
@@ -93,6 +123,7 @@ export function ScreenshotUploadPanel(): ReactElement {
                     translate={translate}
                     settings={settings}
                     creatorNameIsEmpty={creatorNameIsEmpty}
+                    uploadProgress={uploadProgress}
                 />
             </div>
         </div>
@@ -108,7 +139,7 @@ function ScreenshotUploadPanelHeader({
 }>): ReactElement {
     // Change the congratulation message every time a screenshot is taken.
     // Congratulation messages are stored in one string, separated by newlines.
-    // useMemo() with state.uri is used to change the message when the state
+    // useMemo() with imageUri is used to change the message when the state
     // type and image URI actually change.
     // biome-ignore lint/correctness/useExhaustiveDependencies: explained above.
     const congratulation = useMemo(
@@ -131,17 +162,43 @@ function ScreenshotUploadPanelHeader({
     );
 }
 
+const useUploadSuccessImageUri = createSingletonHook<string | undefined>(
+    undefined
+);
+
 function ScreenshotUploadPanelImage({
     translate,
-    screenshotSnapshot
+    screenshotSnapshot,
+    uploadProgress
 }: Readonly<{
     translate: Localization['translate'];
     screenshotSnapshot: JsonScreenshotSnapshot;
+    uploadProgress: JsonUploadProgress | null;
 }>): ReactElement {
+    const [successImageUri, setSuccessImageUri] = useUploadSuccessImageUri();
+
     const ratioPreviewInfo = useMemo(
         () => screenshotSnapshot && getRatioPreviewInfo(screenshotSnapshot),
         [screenshotSnapshot]
     );
+
+    // This useEffect is used to display the success image after the upload is
+    // complete, but only after some time so the progress circles have finished
+    // animating.
+    // biome-ignore lint/correctness/useExhaustiveDependencies: ignore setSuccessImageUri
+    useEffect(() => {
+        // Normal/in progress state, hide the success image.
+        if (!uploadProgress?.isComplete) {
+            setSuccessImageUri(undefined);
+        }
+        // Upload is complete and success image is not shown yet, display it
+        // after the progress animation is done.
+        else if (uploadProgress.isComplete && !successImageUri) {
+            setTimeout(() => {
+                setSuccessImageUri(getRandomUploadSuccessImage());
+            }, 1500 /* This is roughly the takes it takes for the animation */);
+        }
+    }, [uploadProgress, successImageUri]);
 
     // noinspection HtmlRequiredAltAttribute
     return (
@@ -173,13 +230,46 @@ function ScreenshotUploadPanelImage({
                         'The border shows you how your image will be cropped on the most common aspect ratio.'
                     )}>
                     <div
-                        className={
-                            styles.screenshotUploadPanelImageRatioPreview
-                        }
+                        className={`${styles.screenshotUploadPanelImageRatioPreview} ${uploadProgress ? styles.screenshotUploadPanelImageRatioPreviewHide : ''}`}
                         style={ratioPreviewInfo.style}>
                         16:9
                     </div>
                 </DescriptionTooltip>
+            )}
+
+            {uploadProgress && (
+                <div
+                    className={styles.screenshotUploadPanelImageUploadProgress}>
+                    <div
+                        className={`${styles.screenshotUploadPanelImageUploadProgressContent} ${successImageUri ? styles.screenshotUploadPanelImageUploadProgressContentUploadSuccess : ''}`}>
+                        {successImageUri ? (
+                            <img
+                                src={successImageUri}
+                                width={loadingProgressVanillaProps.size}
+                                height={loadingProgressVanillaProps.size}
+                                // This class which is applied to <LoadingProgress /> by
+                                // the game can be reused as-is for the image.
+                                className={coLoadingStyles.progress}
+                            />
+                        ) : (
+                            <LoadingProgress
+                                {...loadingProgressVanillaProps}
+                                progress={[
+                                    uploadProgress.globalProgress,
+                                    uploadProgress.processingProgress,
+                                    uploadProgress.uploadProgress
+                                ]}
+                            />
+                        )}
+
+                        <div className={coLoadingStyles.hint}>
+                            {getUploadProgressHintText(
+                                translate,
+                                uploadProgress
+                            )}
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
@@ -276,12 +366,18 @@ function ScreenshotUploadPanelContentOthers({
 function ScreenshotUploadPanelFooter({
     translate,
     settings,
-    creatorNameIsEmpty
+    creatorNameIsEmpty,
+    uploadProgress
 }: Readonly<{
     translate: Localization['translate'];
     settings: ModSettings;
     creatorNameIsEmpty: boolean;
+    uploadProgress: JsonUploadProgress | null;
 }>): ReactElement {
+    const isUploading = !!uploadProgress && !uploadProgress.isComplete;
+    const isIdleOrUploading = !uploadProgress?.isComplete;
+    const isDoneUploading = !!uploadProgress?.isComplete;
+
     return (
         <div className={styles.screenshotUploadPanelFooter}>
             <span className={styles.screenshotUploadPanelFooterCreatorId}>
@@ -296,33 +392,59 @@ function ScreenshotUploadPanelFooter({
 
             <div style={{ flex: 1 }} />
 
-            <Button
-                className={`${styles.screenshotUploadPanelFooterButton} ${styles.cancel}`}
-                variant='primary'
-                onSelect={discardScreenshot}
-                selectSound={'close-menu'}>
-                {translate('Common.ACTION[Cancel]', 'Cancel')}
-            </Button>
+            {isIdleOrUploading && (
+                <>
+                    <Button
+                        className={`${styles.screenshotUploadPanelFooterButton} ${styles.cancel}`}
+                        variant='primary'
+                        disabled={isUploading}
+                        onSelect={discardScreenshot}
+                        selectSound='close-menu'>
+                        {translate('Common.ACTION[Cancel]', 'Cancel')}
+                    </Button>
 
-            <Button
-                variant='primary'
-                className={styles.screenshotUploadPanelFooterButton}
-                disabled={creatorNameIsEmpty}>
-                <Icon
-                    src={cloudArrowUpSolidSrc}
-                    tinted={true}
-                    className={styles.screenshotUploadPanelFooterButtonIcon}
-                />
+                    <Button
+                        variant='primary'
+                        className={styles.screenshotUploadPanelFooterButton}
+                        disabled={creatorNameIsEmpty || isUploading}
+                        onSelect={uploadScreenshot}>
+                        <Icon
+                            src={cloudArrowUpSolidSrc}
+                            tinted={true}
+                            className={
+                                styles.screenshotUploadPanelFooterButtonIcon
+                            }
+                        />
 
-                {translate(
-                    'HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE',
-                    'Share'
-                )}
-            </Button>
+                        {isUploading
+                            ? translate(
+                                  'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING',
+                                  'Uploading…'
+                              )
+                            : translate(
+                                  'HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE',
+                                  'Upload'
+                              )}
+                    </Button>
+                </>
+            )}
+
+            {isDoneUploading && (
+                <Button
+                    variant='primary'
+                    className={styles.screenshotUploadPanelFooterButton}
+                    onSelect={discardScreenshot}
+                    selectSound='close-menu'>
+                    {translate('Common.CLOSE', 'Close')}
+                </Button>
+            )}
         </div>
     );
 }
 
+/**
+ * Gets a random congratulation message (displayed in the dialog header).
+ */
 function getCongratulation(translate: Localization['translate']): string {
     // biome-ignore lint/style/noNonNullAssertion: we have fallback.
     const congratulations = translate(
@@ -333,11 +455,8 @@ function getCongratulation(translate: Localization['translate']): string {
         .split('\n')
         .filter(translation => !translation.startsWith('//'));
 
-    return (
-        congratulations[Math.floor(Math.random() * congratulations.length)] ??
-        // It should never happen, but just in case.
-        ''
-    );
+    // biome-ignore lint/style/noNonNullAssertion: always has at least 1 element.
+    return congratulations[Math.floor(Math.random() * congratulations.length)]!;
 }
 
 /**
@@ -365,6 +484,66 @@ function getRatioPreviewInfo(screenshot: JsonScreenshotSnapshot) {
     return { type, style } as const;
 }
 
+function getRandomUploadSuccessImage(): string {
+    const images = [
+        'Media/Game/Climate/Sun.svg',
+        'Media/Game/Icons/Content.svg',
+        'Media/Game/Icons/Happy.svg',
+        'Media/Game/Icons/TouristAttractions.svg',
+        'Media/Game/Icons/Trophy.svg',
+        'Media/Game/Notifications/LeveledUp.svg'
+    ];
+
+    // biome-ignore lint/style/noNonNullAssertion: always has at least 1 element.
+    return images[Math.floor(Math.random() * images.length)]!;
+}
+
+/**
+ * Gets the hint text for the upload progress depending on the state of
+ * {@link uploadProgress} (pending, uploading, processing).
+ */
+function getUploadProgressHintText(
+    translate: Localization['translate'],
+    uploadProgress: JsonUploadProgress
+): string | null {
+    if (uploadProgress.uploadProgress == 0) {
+        return translate(
+            'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Waiting]',
+            'Please wait…'
+        );
+    }
+
+    if (
+        uploadProgress.uploadProgress > 0 &&
+        uploadProgress.processingProgress == 0
+    ) {
+        return translate(
+            'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Uploading]',
+            'Uploading…'
+        );
+    }
+
+    if (uploadProgress.processingProgress > 0 && !uploadProgress.isComplete) {
+        return translate(
+            'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]',
+            'Processing…'
+        );
+    }
+
+    if (uploadProgress.isComplete) {
+        return translate(
+            'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]',
+            'Upload complete!'
+        );
+    }
+
+    return null;
+}
+
 function discardScreenshot(): void {
     trigger('hallOfFame.game', 'clearScreenshot');
+}
+
+function uploadScreenshot(): void {
+    trigger('hallOfFame.game', 'uploadScreenshot');
 }
