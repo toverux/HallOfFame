@@ -282,7 +282,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
                         "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Message]",
                         "The screenshot has been reported to the moderation team."),
                     LocalizedString.IdWithFallback(
-                        "Common.ACTION[Close]",
+                        "Common.CLOSE",
                         "Close"));
 
                 GameManager.instance.userInterface.appBindings
