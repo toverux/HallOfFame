@@ -5,6 +5,7 @@
   "HallOfFame.Common.FATAL_ERROR": "Cette erreur est fatale et vous devriez sauvegarder votre partie et redémarrer le jeu et de désactiver le mod si le problème se répète.",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "Impossible de joindre le serveur. Veuillez vérifier votre connexion Internet. Si elle fonctionne, il s’agit probablement d’un problème temporaire de notre côté. Détails\u00a0: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpServerException]": "Il semble que notre serveur rencontre des problèmes. Veuillez réessayer plus tard. Détails\u00a0: {ERROR_MESSAGE}",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpUserCompatibilityException]": "Votre version du mod Hall of Fame n’est pas compatible avec le serveur. Veuillez vérifier que le mod est à jour.",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Systems.ImagePreloaderUISystem.ImagePreloadFailedException]": "Nous n’avons pas réussi à télécharger l’image. Détails\u00a0: {ERROR_MESSAGE}",
   "HallOfFame.Common.DEFAULT_CITY_NAME": "Ma Ville",
   "HallOfFame.Common.CITY_BY": "par {CREATOR_NAME}",

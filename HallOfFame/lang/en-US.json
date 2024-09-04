@@ -5,6 +5,7 @@
   "HallOfFame.Common.FATAL_ERROR": "The error is fatal and can have unintended side effects, recommend to save and restart the game and disable the mod if this repeats.",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "Our server couldn’t be reached. Please check your internet connection, if it’s working, it’s likely a temporary issue on our side. Error details: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpServerException]": "It seems like our server is having issues. Please try again later. Error details: {ERROR_MESSAGE}",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpUserCompatibilityException]": "The version of Hall of Fame you have is incompatible with the server. Please verify that the mod is up to date.",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Systems.ImagePreloaderUISystem.ImagePreloadFailedException]": "We failed to download the image. Error details: {ERROR_MESSAGE}",
   "HallOfFame.Common.DEFAULT_CITY_NAME": "My City",
   "HallOfFame.Common.CITY_BY": "by {CREATOR_NAME}",

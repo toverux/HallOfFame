@@ -17,7 +17,7 @@ internal static partial class HttpQueries {
         });
 
         using var request = UnityWebRequest.Post(
-            HttpQueries.PrependBaseUrl("/api/screenshot/report"),
+            HttpQueries.PrependBaseUrl("/api/v1/screenshot/report"),
             payload,
             "application/json");
 

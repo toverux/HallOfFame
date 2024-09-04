@@ -31,8 +31,6 @@ internal sealed class HttpNetworkException(
 /// <summary>
 /// Class for an internal server error (HTTP status code 500+).
 /// </summary>
-/// <param name="requestId"></param>
-/// <param name="error"></param>
 internal sealed class HttpServerException(
     string requestId,
     HttpQueries.JsonError error)
@@ -41,9 +39,18 @@ internal sealed class HttpServerException(
 /// <summary>
 /// Class for an user error (HTTP status code 400-499).
 /// </summary>
-/// <param name="requestId"></param>
-/// <param name="error"></param>
 internal sealed class HttpUserException(
     string requestId,
     HttpQueries.JsonError error)
     : HttpException(requestId, error.Message);
+
+/// <summary>
+/// Class for a mod-server compatibility error (HTTP status code 404).
+/// A 404 error in the context of the mod is indeed the sign that the mod and
+/// server do not use the same version of the API, as it is scoped to "/api/vX".
+/// </summary>
+internal sealed class HttpUserCompatibilityException(
+    string requestId,
+    HttpQueries.JsonError error)
+    : HttpException(requestId, error.Message) {
+}

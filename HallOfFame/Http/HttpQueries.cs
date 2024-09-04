@@ -107,6 +107,7 @@ internal static partial class HttpQueries {
         try {
             // First handle classical pure network errors (ex. no internet, host
             // unreachable, etc.).
+            // ReSharper disable once ConvertIfStatementToSwitchStatement
             if (request.result
                 is UnityWebRequest.Result.ConnectionError
                 or UnityWebRequest.Result.DataProcessingError) {
@@ -115,12 +116,21 @@ internal static partial class HttpQueries {
 
             // Unity's client is high level and interprets non-2xx status codes
             // as "protocol errors".
+            // ReSharper disable once InvertIf
             if (request.result is UnityWebRequest.Result.ProtocolError) {
                 var error = HttpQueries.ParseResponseJson<JsonError>(request);
 
-                throw request.responseCode < 500
-                    ? new HttpUserException(requestId, error)
-                    : new HttpServerException(requestId, error);
+                throw request.responseCode switch {
+                    >= 500 =>
+                        new HttpServerException(requestId, error),
+                    >= 400 and not 404 =>
+                        new HttpUserException(requestId, error),
+                    404 =>
+                        new HttpUserCompatibilityException(requestId, error),
+
+                    // This should not happen.
+                    _ => new HttpNetworkException(requestId, error.Message)
+                };
             }
 
             // So far so good, we can parse the JSON response.
