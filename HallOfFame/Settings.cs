@@ -45,7 +45,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     /// <summary>
     /// Creator username.
-    /// It can be empty. Then the UI should show a string akin to "Anonymous".
+    /// It can technically be empty, but this is not allowed server-side, so any
+    /// UI interacting with the server should check for this.
     /// </summary>
     [SettingsUISection(Settings.GroupYourProfile)]
     [SettingsUITextInput]
