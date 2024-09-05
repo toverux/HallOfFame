@@ -17,7 +17,8 @@ namespace HallOfFame;
 [SettingsUIShowGroupName(
     Settings.GroupYourProfile,
     Settings.GroupContentPreferences,
-    Settings.GroupAdvanced)]
+    Settings.GroupAdvanced,
+    Settings.GroupLinks)]
 public sealed class Settings : ModSetting, IJsonWritable {
     private const string GroupYourProfile = "YourProfile";
 
@@ -25,7 +26,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     private const string GroupAdvanced = "Advanced";
 
-    private const string GroupOthers = "Others";
+    private const string GroupLinks = "Links";
 
     /// <summary>
     /// Creator ID read from the dedicated file.
@@ -152,11 +153,52 @@ public sealed class Settings : ModSetting, IJsonWritable {
     public string BaseUrl { get; set; } = null!;
 
     [SettingsUIButton]
-    [SettingsUISection(Settings.GroupOthers)]
+    [SettingsUISection(Settings.GroupAdvanced)]
     [UsedImplicitly]
     public bool ResetSettings {
         // ReSharper disable once ValueParameterNotUsed
         set => this.SetDefaults();
+    }
+
+    [SettingsUIButton]
+    [SettingsUISection(Settings.GroupLinks)]
+    [UsedImplicitly]
+    public bool DiscordLink {
+        // ReSharper disable once ValueParameterNotUsed
+        set => Application.OpenURL("https://discord.gg/HTav7ARPs2");
+    }
+
+    [SettingsUIButton]
+    [SettingsUISection(Settings.GroupLinks)]
+    [UsedImplicitly]
+    public bool DonateLink {
+        // ReSharper disable once ValueParameterNotUsed
+        set => Application.OpenURL("https://paypal.me/MorganTouverey");
+    }
+
+    [SettingsUIButton]
+    [SettingsUISection(Settings.GroupLinks)]
+    [UsedImplicitly]
+    public bool CrowdinLink {
+        // ReSharper disable once ValueParameterNotUsed
+        set =>
+            Application.OpenURL("https://crowdin.com/project/halloffame-cs2");
+    }
+
+    [SettingsUIButton]
+    [SettingsUISection(Settings.GroupLinks)]
+    [UsedImplicitly]
+    public bool UserFeedbackLink {
+        // ReSharper disable once ValueParameterNotUsed
+        set => Application.OpenURL("https://halloffame-cs2.canny.io");
+    }
+
+    [SettingsUIButton]
+    [SettingsUISection(Settings.GroupLinks)]
+    [UsedImplicitly]
+    public bool GithubLink {
+        // ReSharper disable once ValueParameterNotUsed
+        set => Application.OpenURL("https://github.com/toverux/HallOfFame");
     }
 
     public Settings(IMod mod) : base(mod) {

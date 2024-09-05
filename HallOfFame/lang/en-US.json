@@ -43,6 +43,7 @@
   "Options.GROUP[HallOfFame.HallOfFame.Mod.YourProfile]": "Your Profile",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "Content Preferences",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Advanced]": "Advanced Settings",
+  "Options.GROUP[HallOfFame.HallOfFame.Mod.Links]": "Links",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Creator Name",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Your Creator Name, will be displayed alongside your screenshots.\nYou can change it anytime as long as your Creator ID stays the same, your name will be updated for all past uploads (only once you upload a new picture).\nYou must choose a Creator Name to upload pictures.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "Creator ID",
@@ -68,5 +69,15 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fame server",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Address of the hall of Fame server. You should not change it unless you’re developing on the mod or using an alternative server.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Reset Settings",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Reset all mod settings to their default values (except the Creator ID which will be kept untouched)."
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Reset all mod settings to their default values (except the Creator ID which will be kept untouched).",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Discord (chat & support)",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "This is an invite link to join the Cities: Skylines Modding Discord server, for support requests and chatting.\nThe preferred channel is pdxm-mods-published › Hall of Fame.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "Donate <3 (on PayPal or Ko-fi)",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "Hall of Fame has monthly costs for server and image storage.\nTo make the mod viable in the long term for me, donations are greatly appreciated!\nAny donation ≥ $10 (or an approximation in your currency) will grant you the “Supporter” status (leave a message with your Creator Name when donating), which will slightly increase your view count.\nThis is a PayPal link; you can also find me on Ko-fi: https://ko-fi.com/toverux",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "Crowdin (translation)",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "Contribute to the mod translations on Crowdin.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "GitHub (source code)",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "Access the mod’s source code on GitHub.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "Canny (roadmap & feature requests)",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "Access our Canny space to see the upcoming features and propose your ideas."
 }
