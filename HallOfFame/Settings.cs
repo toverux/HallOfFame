@@ -175,10 +175,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
         // might be Steam username or probably the Paradox one for example.
         // I don't know exactly how this works when using a non-Steam version
         // and I don't handle username change (PlatformManager.onUserUpdated)
-        // (ex. logging in in-game), because I can't test it, in any case we'd
-        // need to implement it intelligently to not override empty strings from
-        // creators that choose to stay anonymous. So, let's not bring too much
-        // complexity for now, this seems adequate.
+        // (ex. logging in in-game), because I can't test it.
+        // So, let's not bring too much complexity for now, this seems adequate.
         this.CreatorName = PlatformManager.instance.userName ?? string.Empty;
 
         // Mask the Creator ID except the first segment so the user can

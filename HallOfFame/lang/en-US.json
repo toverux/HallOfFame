@@ -44,7 +44,7 @@
   "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "Content Preferences",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Advanced]": "Advanced Settings",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Creator Name",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Your creator name, will be displayed alongside your screenshots.\nYou can change it anytime as long as your Creator ID stays the same, your name will be updated for all past uploads.\nIf left empty, you will appear as “Anonymous”.",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Your Creator Name, will be displayed alongside your screenshots.\nYou can change it anytime as long as your Creator ID stays the same, your name will be updated for all past uploads (only once you upload a new picture).\nYou must choose a Creator Name to upload pictures.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "Creator ID",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "Unique and SECRET Creator ID, used to authenticate you and regroup your works.\nDo not loose it or share it! Think of it as a password.\nThe ID is stored in a separate file to avoid typical .coc corruptions (ex. on Windows, C:\\Users\\You\\AppData\\LocalLow\\Colossal Order\\Cities Skylines II\\ModsSettings\\HallOfFame\\CreatorID.txt).",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copy Creator ID",
