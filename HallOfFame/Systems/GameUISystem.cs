@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
 using Game.City;
@@ -121,7 +122,7 @@ internal sealed partial class GameUISystem : UISystemBase {
             this.screenshotSnapshotBinding =
                 new GetterValueBinding<ScreenshotSnapshot?>(
                     GameUISystem.BindingGroup, "screenshotSnapshot",
-                    () => this.currentScreenshotValue,
+                    () => this.CurrentScreenshot,
                     new ValueWriter<ScreenshotSnapshot>().Nullable());
 
             this.uploadProgressBinding =
@@ -151,6 +152,17 @@ internal sealed partial class GameUISystem : UISystemBase {
         }
         catch (Exception ex) {
             Mod.Log.ErrorFatal(ex);
+        }
+    }
+
+    protected override void OnGameLoadingComplete(
+        Purpose purpose,
+        GameMode mode) {
+        if (this.CurrentScreenshot is not null) {
+            // Clear the screenshot when the game state changes, ex. the user
+            // exits to the main menu. Otherwise, the screenshot dialog would
+            // appear when the user reopens a game.
+            this.ClearScreenshot();
         }
     }
 
