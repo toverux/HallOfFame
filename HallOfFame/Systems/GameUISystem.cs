@@ -254,14 +254,33 @@ internal sealed partial class GameUISystem : UISystemBase {
             // 2160p if the resulting image is bigger.
             var scaleFactor = (int)Math.Ceiling(2160d / Screen.height);
 
-            var screenshotTexture =
-                ScreenCapture.CaptureScreenshotAsTexture(scaleFactor);
+            // Create a RenderTexture with the supersize resolution, and ask the
+            // camera to render to it.
+            var width = Screen.width * scaleFactor;
+            var height = Screen.height * scaleFactor;
+            var renderTexture = new RenderTexture(width, height, 24);
 
+            Camera.main!.targetTexture = renderTexture;
+            Camera.main.Render();
+
+            // Now, read the RenderTexture to a Texture2D.
+            RenderTexture.active = renderTexture;
+
+            var screenshotTexture =
+                new Texture2D(width, height, TextureFormat.RGB24, false);
+
+            screenshotTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            screenshotTexture.Apply();
+
+            // Reset the camera's target texture
+            Camera.main.targetTexture = null;
+            RenderTexture.active = null;
+
+            // Encode the Texture2D to a JPG byte array.
             var screenshotBytes = screenshotTexture.EncodeToJPG();
 
-            var screenshotSize = new Vector2Int(
-                screenshotTexture.width, screenshotTexture.height);
-
+            // Clean up the textures after usage.
+            Object.DestroyImmediate(renderTexture);
             Object.DestroyImmediate(screenshotTexture);
 
             File.WriteAllBytes(
@@ -271,7 +290,7 @@ internal sealed partial class GameUISystem : UISystemBase {
                 this.GetAchievedMilestone(),
                 this.GetPopulation(),
                 screenshotBytes,
-                screenshotSize);
+                new Vector2Int(width, height));
         }
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
