@@ -58,7 +58,7 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.RandomScreenshotWeight]": "Random",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.RandomScreenshotWeight]": "Screenshots chosen completely at random!",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "Initial Supporters",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "A selection of screenshots from talented people who helped hydrating the mod’s database before release!",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "A selection of screenshots from talented people who helped hydrating the mod’s database before release!\nThanks to:\nCloverPie, Danil.V.L, Prophedt, TheBusStop.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.OtherContentPreferences]": "Other content preferences:",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ViewMaxAge]": "Minimum time before a screenshot may be shown again (in days)",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ViewMaxAge]": "Minimum time before you may see a screenshot you’ve already seen.\nSetting it to zero will actually remove any limit (you will never see a screenshot you’ve already seen).\nHowever, due to technical reasons, this preference is not guaranteed to be always honored.",
