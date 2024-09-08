@@ -22,7 +22,7 @@
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Il est absolument sans danger de lancer une partie.",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Next]": "Suivant",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Réessayer",
-  "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]": "Afficher une nouvelle image. Vous pouvez également cliquer sur l’arrière plan pour faire la même chose.",
+  "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]": "Afficher une nouvelle image.",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]": "Cacher et montrer le menu pour mieux apprécier la vue",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report Abuse]": "Signaler un contenu inapproprié",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\nVue magnifique\u00a0!\nLa fierté de votre ville\u00a0!\nSpectaculaire\u00a0!\nPrêt à partager\u00a0?\nQuelle vue splendide\u00a0!\nPartagez votre création\u00a0!\nVotre ville en lumière\u00a0!\nUn instant magique\u00a0!\nFaites-en profiter tout le monde\u00a0!\nIl semble y faire bon vivre\u00a0!",
