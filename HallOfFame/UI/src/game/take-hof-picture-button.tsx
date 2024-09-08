@@ -1,4 +1,5 @@
 ﻿import { trigger } from 'cs2/api';
+import { useLocalization } from 'cs2/l10n';
 import { Tooltip } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
 import { logError } from '../utils';
@@ -15,6 +16,8 @@ import * as styles from './take-hof-picture-button.module.scss';
  * with no way to change the text either.
  */
 export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
+    const { translate } = useLocalization();
+
     // A neutral element just needed to put the HTML of the button somewhere.
     const spanRef = useRef<HTMLElement>(null);
 
@@ -45,7 +48,11 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
     }, []);
 
     return (
-        <Tooltip tooltip='Take your city to the Hall of Fame!'>
+        <Tooltip
+            tooltip={translate(
+                'HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP',
+                `Take a screenshot with Hall of Fame`
+            )}>
             <span
                 ref={spanRef}
                 onClick={takePicture}

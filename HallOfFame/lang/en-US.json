@@ -39,6 +39,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Uploading]": "Uploading picture…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]": "Processing picture…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]": "Upload complete!",
+  "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "Take your city to the Hall of Fame! A picture will be taken, but you’ll be able to review it before uploading.",
   "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.YourProfile]": "Your Profile",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "Content Preferences",
