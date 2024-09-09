@@ -85,9 +85,13 @@
         }
     }
 
+    &-city-stats {
+        margin-bottom: 15rem;
+    }
+
     &-city-stats span {
         margin-right: 15rem;
-        margin-bottom: 30rem;
+        margin-bottom: 15rem;
 
         // Normally we would not have to use a hardcoded height here, but this
         // circumvents a cohtml layout bug where images have trouble stretching

@@ -7,7 +7,7 @@ import {
     useLocalization
 } from 'cs2/l10n';
 import { MenuButton, Tooltip } from 'cs2/ui';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNowStrict } from 'date-fns';
 import type { ReactElement, ReactNode } from 'react';
 import type { Screenshot } from '../common';
 import { snappyOnSelect, useDateFnsLocale } from '../utils';
@@ -189,7 +189,7 @@ function MenuControlsScreenshotLabels({
                     locale: dfnsLocale
                 })}>
                 <span>
-                    {formatDistanceToNow(screenshot.createdAt, {
+                    {formatDistanceToNowStrict(screenshot.createdAt, {
                         locale: dfnsLocale,
                         addSuffix: true
                     })}
