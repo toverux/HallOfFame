@@ -51,30 +51,8 @@ Special thanks to:
 - Choose between Full HD and 4K resolution for downloaded pictures.
 - Report pictures that are inappropriate.
 
-**Roadmap, planned next:**
-
-- Set up Canny account for feature requests & publish roadmap.
-- More UI animations/transitions.
-- Add Discord support & donate links to the mod settings.
-- Hotkeys support for Next-ing the images and toggling the menu UI visibility.
-- Localization for all CS2-supported languages via Crowdin.
-- Upvote button, upvote count in main menu.
-- Ability to send a comment along with the screenshot.
-
-**Roadmap, ideas to explore:**
-
-- Permanently disable CS2 logo in menu screen to better see the images.
-- Screenshot in background when loading a game save.
-- See another screenshot from the same city.
-- See another screenshot from the same creator.
-- Save screenshot to disk.
-- Follow creator (see more of their pictures).
-- Publish expenses/donations balance monthly to encourage donations when needed.
-- Manage your collection in-game (edit and delete your screenshots).
-- Labelling so you can choose your preferred style of pictures to see
-  (ex. landscape, detailing, skyline, aerial, etc.).
-- Publish mods playset when uploading a screenshot so people can see what mods
-  were used to create the city.
+**Roadmap:** see our feedback & feature requests board here:
+[feedback.halloffame.cs2.mtq.io/](https://feedback.halloffame.cs2.mtq.io)
 
 ## Development
 
