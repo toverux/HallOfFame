@@ -7,6 +7,7 @@ using Colossal.UI.Binding;
 using Game.Modding;
 using Game.Settings;
 using Game.UI.Widgets;
+using HallOfFame.Utils;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -247,7 +248,6 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// Attempts to read the Creator ID file, or creates it if it does not
     /// exist or if the GUID in it is not valid.
     /// </summary>
-    /// <returns></returns>
     private string CreateOrReadCreatorID() {
         try {
             // Parse trims the string and is resilient to no-perfectly-formatted
@@ -256,19 +256,27 @@ public sealed class Settings : ModSetting, IJsonWritable {
                 File.ReadAllText(Settings.CreatorIDFilePath)).ToString();
         }
         catch (Exception ex) {
+            // If the error is not of an expected type, rethrow it.
             if (ex is not IOException or FormatException) {
                 throw;
             }
 
-            Mod.Log.Warn(
-                ex,
-                "Cannot open or parse Creator ID file at " +
-                $"\"{Settings.CreatorIDFilePath}\", " +
-                "attempting to create it.");
+            // Log an error (like a UUID parse error) only if it's not the very
+            // expected FileNotFoundException when the user first uses the mod.
+            if (ex is not FileNotFoundException) {
+                Mod.Log.ErrorSilent(
+                    ex,
+                    "Cannot open or parse Creator ID file at " +
+                    $"\"{Settings.CreatorIDFilePath}\", " +
+                    "attempting to create it.");
+            }
 
             var guid = Guid.NewGuid().ToString();
 
             File.WriteAllText(Settings.CreatorIDFilePath, guid);
+
+            Mod.Log.Info(
+                $"Created \"{Settings.CreatorIDFilePath}\" with a new UUID.");
 
             return guid;
         }
