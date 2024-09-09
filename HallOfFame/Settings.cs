@@ -191,7 +191,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     [UsedImplicitly]
     public bool UserFeedbackLink {
         // ReSharper disable once ValueParameterNotUsed
-        set => Application.OpenURL("https://halloffame-cs2.canny.io");
+        set => Application.OpenURL("https://feedback.halloffame.cs2.mtq.io");
     }
 
     [SettingsUIButton]
