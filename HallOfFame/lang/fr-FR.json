@@ -20,6 +20,7 @@
   "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Message]": "Votre signalement a été envoyé et la capture d’écran est masquée en attendant une modération.\nMerci de nous aider à faire du Hall of Fame un endroit agréable\u00a0!",
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "Hall of Fame a eu un accident de traffic réseau :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Il est absolument sans danger de lancer une partie.",
+  "HallOfFame.UI.Menu.MenuControls.PRISTINE_WILDERNESS": "Terre immaculée",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Next]": "Suivant",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Réessayer",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]": "Afficher une nouvelle image.",

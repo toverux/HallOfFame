@@ -167,22 +167,45 @@ function MenuControlsScreenshotLabels({
 }>): ReactElement {
     const dfnsLocale = useDateFnsLocale();
 
+    // Do not show the pop/milestone labels if this is an empty map screenshot,
+    // which is likely when the pop is 0 and the milestone is 0 (Founding) or 20
+    // (Megalopolis, i.e. creative mode).
+    const isPristineWilderness =
+        screenshot.cityPopulation == 0 &&
+        (screenshot.cityMilestone == 0 || screenshot.cityMilestone == 20);
+
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
         <div className={styles.menuControlsCityStats}>
-            <span>
-                <img src='Media/Game/Icons/Trophy.svg' />
-                {translate(
-                    `Progression.MILESTONE_NAME:${screenshot.cityMilestone}`
-                )}
-            </span>
+            {isPristineWilderness ? (
+                <span>
+                    <img src='Media/Game/Icons/NaturalResources.svg' />
+                    {translate(
+                        `HallOfFame.UI.Menu.MenuControls.PRISTINE_WILDERNESS`,
+                        `Pristine wilderness`
+                    )}
+                </span>
+            ) : (
+                <>
+                    <span>
+                        <img src='Media/Game/Icons/Trophy.svg' />
+                        {translate(
+                            `Progression.MILESTONE_NAME:${screenshot.cityMilestone}`,
+                            `???`
+                        )}
+                    </span>
 
-            <span>
-                <img src='Media/Game/Icons/Population.svg' />
-                <LocalizedNumber
-                    value={Math.round(screenshot.cityPopulation / 1000) * 1000}
-                />
-            </span>
+                    <span>
+                        <img src='Media/Game/Icons/Population.svg' />
+                        <LocalizedNumber
+                            value={
+                                Math.round(screenshot.cityPopulation / 1000) *
+                                1000
+                            }
+                        />
+                    </span>
+                </>
+            )}
 
             <Tooltip
                 tooltip={format(screenshot.createdAt, 'Pp', {
