@@ -139,7 +139,10 @@
                 }
                 to {
                     background-color: rgba(24, 33, 51, 0.5);
-                    backdrop-filter: var(--panelBlur);
+                    // "5px" below was originally var(--panelBlur) but this
+                    // caused random crashes to desktop at mod load due to a bug
+                    // in cohtml engine.
+                    backdrop-filter: blur(5px);
                 }
             }
         }
