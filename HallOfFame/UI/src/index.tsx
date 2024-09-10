@@ -4,10 +4,6 @@ import { register as registerOnMenu } from './menu';
 import { logError } from './utils';
 
 const register: ModRegistrar = moduleRegistry => {
-    // @todo For debug, remove on release.
-    // biome-ignore lint/suspicious/noExplicitAny: todo
-    (window as any).reg = moduleRegistry;
-
     try {
         registerOnMenu(moduleRegistry);
         registerOnGame(moduleRegistry);
