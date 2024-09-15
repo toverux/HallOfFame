@@ -6,7 +6,11 @@ export interface ModSettings {
     readonly screenshotResolution: 'fhd' | '4k';
 }
 
-const settings$ = bindValue<ModSettings>('hallOfFame', 'settings');
+const settings$ = bindValue<ModSettings>('hallOfFame', 'settings', {
+    creatorName: '',
+    creatorIdClue: '',
+    screenshotResolution: 'fhd'
+});
 
 export function useModSettings(): ModSettings {
     return useValue(settings$);
