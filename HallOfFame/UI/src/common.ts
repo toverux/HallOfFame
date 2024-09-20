@@ -11,5 +11,7 @@ export interface Screenshot {
     readonly imageUrlFHD: string;
     readonly imageUrl4K: string;
     readonly createdAt: string;
+    readonly createdAtFormatted: string;
+    readonly createdAtFormattedDistance: string;
     readonly creator?: Creator | undefined;
 }

@@ -37,6 +37,12 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
     private Screenshot? nextScreenshot;
 
+    /// <summary>
+    /// Indicates the previous game mode to refresh the screenshot when the user
+    /// returns to the main menu.
+    /// Note: it is initialized with <see cref="GameMode.MainMenu"/> and not the
+    /// default value, it is intentional.
+    /// </summary>
     private GameMode previousGameMode = GameMode.MainMenu;
 
     protected override void OnCreate() {
@@ -83,9 +89,21 @@ internal sealed partial class MenuUISystem : UISystemBase {
             this.AddBinding(this.refreshScreenshotBinding);
             this.AddBinding(this.reportScreenshotBinding);
 
+            // Select game modes that are known to be appropriate for loading
+            // our first screenshot when the mod is loaded.
+            // All these game mods can be active when the mod is loaded.
+            // - `MainMenu` when mods initialize late.
+            // - `None` when the game is booting and mods are loaded early.
+            // - `Other` when the game is booting normally but there is some
+            //   problem with Paradox Mods, as it was observed. It is also the
+            //   default state before anything is loaded, so it's a good idea to
+            //   include it anyway.
+            // There can be other possibilities! For example, when the user
+            // clicked "Continue" their game in the Paradox launcher.
             if (GameManager.instance.gameMode
                 is GameMode.MainMenu
-                or GameMode.None) {
+                or GameMode.None
+                or GameMode.Other) {
                 this.RefreshScreenshot();
             }
         }
@@ -102,11 +120,11 @@ internal sealed partial class MenuUISystem : UISystemBase {
         Purpose purpose,
         GameMode mode) {
         // The condition serves two purposes:
-        // 1. Avoid potentially repeating the RefreshScreenshot call when the
+        // 1. Call RefreshScreenshot when the user returns to the main menu from
+        //    another game mode.
+        // 2. Avoid potentially repeating the RefreshScreenshot call when the
         //    game boots and mods are initialized before the first game mode is
         //    set, this happens rarely, but it's possible.
-        // 2. Call RefreshScreenshot when the user returns to the main menu from
-        //    another game mode.
         if (mode is GameMode.MainMenu &&
             this.previousGameMode is not GameMode.MainMenu) {
             this.RefreshScreenshot();

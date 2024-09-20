@@ -7,10 +7,9 @@ import {
     useLocalization
 } from 'cs2/l10n';
 import { MenuButton, Tooltip } from 'cs2/ui';
-import { format, formatDistanceToNowStrict } from 'date-fns';
 import type { ReactElement, ReactNode } from 'react';
 import type { Screenshot } from '../common';
-import { snappyOnSelect, useDateFnsLocale } from '../utils';
+import { snappyOnSelect } from '../utils';
 import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
 import * as styles from './menu-controls.module.scss';
 import { useHofMenuState } from './menu-state-hook';
@@ -165,8 +164,6 @@ function MenuControlsScreenshotLabels({
     screenshot: Screenshot;
     translate: Localization['translate'];
 }>): ReactElement {
-    const dfnsLocale = useDateFnsLocale();
-
     // Do not show the pop/milestone labels if this is an empty map screenshot,
     // which is likely when the pop is 0 and the milestone is 0 (Founding) or 20
     // (Megalopolis, i.e. creative mode).
@@ -207,16 +204,8 @@ function MenuControlsScreenshotLabels({
                 </>
             )}
 
-            <Tooltip
-                tooltip={format(screenshot.createdAt, 'Pp', {
-                    locale: dfnsLocale
-                })}>
-                <span>
-                    {formatDistanceToNowStrict(screenshot.createdAt, {
-                        locale: dfnsLocale,
-                        addSuffix: true
-                    })}
-                </span>
+            <Tooltip tooltip={screenshot.createdAtFormatted}>
+                <span>{screenshot.createdAtFormattedDistance}</span>
             </Tooltip>
         </div>
     );

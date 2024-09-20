@@ -7,8 +7,6 @@
 //   leave them as-is (`options.url.filter`).
 // - Change css-loader to add "hof-" prefix to CSS modules class names.
 //   This can help debugging and other mods to target our classes.
-// - Add `optimization.chunkIds`, `output.chunkFilename` and `TerserPlugin.test`
-//   to set chunk extension to .chunkmjs, so they're not loaded as UI mods.
 
 import * as path from 'node:path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -105,10 +103,7 @@ export default {
         library: {
             type: 'module'
         },
-        publicPath: `coui://ui-mods/`,
-        // We use the made-up .chunkmjs extension to avoid the game mod loader
-        // from trying to load chunk files as a mods, which would fail.
-        chunkFilename: '[name].chunkmjs'
+        publicPath: `coui://ui-mods/`
     },
     optimization: {
         chunkIds: 'named',

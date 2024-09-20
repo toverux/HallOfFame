@@ -38,10 +38,10 @@ public sealed class Mod : IMod {
         throw new NullReferenceException(
             $"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
-    internal static readonly string ModSettingsPath =
+    internal static string ModSettingsPath { get; } =
         Path.Combine(EnvPath.kUserDataPath, "ModsSettings", nameof(HallOfFame));
 
-    internal static readonly string ModDataPath =
+    internal static string ModDataPath { get; } =
         Path.Combine(EnvPath.kUserDataPath, "ModsData", nameof(HallOfFame));
 
     internal static ILog Log { get; } =
@@ -59,6 +59,10 @@ public sealed class Mod : IMod {
         try {
             // Create directories for settings and data.
             this.CreateDirectories();
+
+            // Migration from previous versions.
+            // Does not error if the file does not exist.
+            File.Delete(Path.Combine(Mod.ModSettingsPath, "CreatorID.txt"));
 
             // Register Harmony patches and print debug logs.
             this.harmony = new Harmony(Mod.HarmonyId);
@@ -88,6 +92,8 @@ public sealed class Mod : IMod {
 
             AssetDatabase.global.LoadSettings(
                 nameof(HallOfFame), this.settingsValue, new Settings(this));
+
+            this.settingsValue.InitializeCreatorId();
 
             // Set singleton instance only when OnLoad is likely to complete.
             Mod.instanceValue = this;

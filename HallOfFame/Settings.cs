@@ -1,13 +1,16 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
+using System.Reflection;
 using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
+using Colossal.PSI.PdxSdk;
 using Colossal.UI.Binding;
 using Game.Modding;
+using Game.SceneFlow;
 using Game.Settings;
+using Game.UI;
+using Game.UI.Localization;
 using Game.UI.Widgets;
-using HallOfFame.Utils;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -29,52 +32,56 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     private const string GroupLinks = "Links";
 
-    /// <summary>
-    /// Creator ID read from the dedicated file.
-    /// It's shared among all instances and initialized only once.
-    /// </summary>
-    public static string? CreatorID { get; private set; }
-
-    private static readonly string CreatorIDFilePath =
-        Path.Combine(Mod.ModSettingsPath, "CreatorID.txt");
-
-    private static bool IsCreatorIDDisabled => true;
+    private static readonly PdxSdkPlatform PdxSdk =
+        PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
 
     private static DropdownItem<string>[] ResolutionDropdownItems => [
-        new DropdownItem<string> { value = "fhd", displayName = "Full HD" },
-        new DropdownItem<string> { value = "4k", displayName = "4K" }
+        new() { value = "fhd", displayName = "Full HD" },
+        new() { value = "4k", displayName = "4K" }
     ];
 
     /// <summary>
+    /// The unique identifier of the creator, used to identify and authorize
+    /// them. Similar in use to an API key.
+    /// The default is the Paradox account UUID ("GUID"), which is actually
+    /// private.
+    /// If not available, a random UUID is generated the first time the mod is
+    /// run and this value isn't set.
+    /// </summary>
+    [SettingsUIHidden]
+    public string? CreatorID { get; set; }
+
+    /// <summary>
+    /// Stores whether the <see cref="CreatorID"/> was acquired from the Paradox
+    /// account or generated locally, communicated to the server for possible
+    /// future use.
+    /// </summary>
+    [SettingsUIHidden]
+    public bool IsParadoxAccountID { get; set; }
+
+    /// <summary>
     /// Creator username.
-    /// It can technically be empty, but this is not allowed server-side, so any
-    /// UI interacting with the server should check for this.
+    /// Although the UI asks the user to set one when uploading an image,
+    /// just because it's nicer, it is not mandatory and can be left null/empty.
+    /// Its default value is the "current platform" username, which at the
+    /// moment will only be a Steam username if Steam is used, in other cases it
+    /// will be null and in any cases the user can change it anytime.
     /// </summary>
     [SettingsUISection(Settings.GroupYourProfile)]
     [SettingsUITextInput]
-    public string CreatorName { get; set; } = null!;
+    public string? CreatorName { get; set; }
 
     /// <summary>
     /// Masked Creator ID, only the first segment is shown in the Options UI,
     /// and it is not editable.
     /// </summary>
     [SettingsUISection(Settings.GroupYourProfile)]
-    [SettingsUITextInput]
-    [SettingsUIDisableByCondition(
-        typeof(Settings),
-        nameof(Settings.IsCreatorIDDisabled))]
-    public string MaskedCreatorID { get; set; } = null!;
-
-    /// <summary>
-    /// Button to copy the Creator ID to the clipboard.
-    /// </summary>
-    [SettingsUISection(Settings.GroupYourProfile)]
-    [SettingsUIButton]
-    [UsedImplicitly]
-    public bool CopyCreatorID {
-        // ReSharper disable once ValueParameterNotUsed
-        set => GUIUtility.systemCopyBuffer = Settings.CreatorID;
-    }
+    public string? MaskedCreatorID => this.CreatorID
+        ?.Split('-')
+        .Select((segment, index) => index == 0
+            ? segment
+            : new string('*', segment.Length))
+        .Join(delimiter: "-");
 
     /// <summary>
     /// Text explaining the algorithms' weight selection mechanism.
@@ -158,7 +165,10 @@ public sealed class Settings : ModSetting, IJsonWritable {
     [UsedImplicitly]
     public bool ResetSettings {
         // ReSharper disable once ValueParameterNotUsed
-        set => this.SetDefaults();
+        set {
+            this.SetDefaults();
+            this.ApplyAndSave();
+        }
     }
 
     [SettingsUIButton]
@@ -207,29 +217,23 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     /// <summary>
+    /// <para>
     /// Applies default values to the settings if it's not already done inline.
     /// Do NOT move properties initialization out from this method, as it's used
     /// to restore default values.
+    /// </para>
+    /// <para>
+    /// Note: the only thing we won't touch here is the Creator ID stuff, as it
+    /// is supposed to stay permanent even if the user resets their settings
+    /// using our reset button.
+    /// </para>
     /// </summary>
     public override void SetDefaults() {
-        Settings.CreatorID ??= this.CreateOrReadCreatorID();
-
-        // Set the default creator name with the current platform username,
-        // might be Steam username or probably the Paradox one for example.
-        // I don't know exactly how this works when using a non-Steam version
-        // and I don't handle username change (PlatformManager.onUserUpdated)
-        // (ex. logging in in-game), because I can't test it.
-        // So, let's not bring too much complexity for now, this seems adequate.
-        this.CreatorName = PlatformManager.instance.userName ?? string.Empty;
-
-        // Mask the Creator ID except the first segment so the user can
-        // identify themselves.
-        this.MaskedCreatorID = Settings.CreatorID
-            .Split('-')
-            .Select((segment, index) => index == 0
-                ? segment
-                : new string('*', segment.Length))
-            .Join(delimiter: "-");
+        // Set the default creator name with the current platform username.
+        // For now only Steam seems supported, and a Paradox account does not
+        // necessarily have a username attached to it so it will be expected
+        // that non-Steam users will have to set their username manually.
+        this.CreatorName = PlatformManager.instance.userName;
 
         this.RecentScreenshotWeight = 5;
         this.ArcheologistScreenshotWeight = 5;
@@ -245,41 +249,83 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     /// <summary>
-    /// Attempts to read the Creator ID file, or creates it if it does not
-    /// exist or if the GUID in it is not valid.
+    /// Initializes <see cref="CreatorID"/>, <see cref="IsParadoxAccountID"/>
+    /// and <see cref="MaskedCreatorID"/> with the Paradox account ID, or a
+    /// fallback locally-generated ID if the user is not logged in or an error
+    /// occurs.
+    /// Shows a warning dialog if the user is not logged in.
     /// </summary>
-    private string CreateOrReadCreatorID() {
-        try {
-            // Parse trims the string and is resilient to no-perfectly-formatted
-            // GUIDs.
-            return Guid.Parse(
-                File.ReadAllText(Settings.CreatorIDFilePath)).ToString();
+    public void InitializeCreatorId() {
+        // If the Creator ID is already set and valid, we just leave it be.
+        if (Guid.TryParse(this.CreatorID, out _)) {
+            return;
         }
-        catch (Exception ex) {
-            // If the error is not of an expected type, rethrow it.
-            if (ex is not IOException or FormatException) {
-                throw;
+
+        // Try to get and store the Paradox account ID.
+        // Why store it?
+        // 1. If the user once plays without Internet connection or server
+        //    failure, we'll still have the previously-used ID.
+        // 2. If for some reason the user change the Paradox account they use,
+        //    it doesn't mean they want to change their Hall of Fame account,
+        //    so we keep the old ID.
+        // 3. It's more explicit and transparent to the user.
+        try {
+            this.CreatorID = typeof(PdxSdkPlatform)
+                .GetField(
+                    "m_AccountUserId",
+                    BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.GetValue(Settings.PdxSdk) as string;
+
+            if (this.CreatorID is null) {
+                this.ShowNoParadoxConnectionWarningDialog();
+
+                throw new Exception("User is not logged in to Paradox.");
             }
 
-            // Log an error (like a UUID parse error) only if it's not the very
-            // expected FileNotFoundException when the user first uses the mod.
-            if (ex is not FileNotFoundException) {
-                Mod.Log.ErrorSilent(
-                    ex,
-                    "Cannot open or parse Creator ID file at " +
-                    $"\"{Settings.CreatorIDFilePath}\", " +
-                    "attempting to create it.");
-            }
-
-            var guid = Guid.NewGuid().ToString();
-
-            File.WriteAllText(Settings.CreatorIDFilePath, guid);
+            this.IsParadoxAccountID = true;
 
             Mod.Log.Info(
-                $"Created \"{Settings.CreatorIDFilePath}\" with a new UUID.");
-
-            return guid;
+                $"Acquired Paradox account ID {this.MaskedCreatorID}.");
         }
+
+        // If the user is not logged in, or the operation failed in an
+        // unexpected way, we generate a random ID.
+        catch (Exception ex) {
+            this.CreatorID = Guid.NewGuid().ToString();
+            this.IsParadoxAccountID = false;
+
+            Mod.Log.Warn(
+                ex,
+                $"Could not acquire Paradox account ID, using a random ID as " +
+                $"a fallback ({this.MaskedCreatorID}).");
+        }
+
+        // Explicitly save the settings so they're written to disk asap.
+        this.ApplyAndSave();
+    }
+
+    /// <summary>
+    /// Show a warning dialog to the user warning them that they are not using
+    /// their Paradox account ID.
+    /// </summary>
+    private void ShowNoParadoxConnectionWarningDialog() {
+        // We also delay the dialog so localization files are loaded, as this
+        // code can be run before I18n EveryWhere is loaded.
+        GameManager.instance.RegisterUpdater(() => {
+            ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+                severity = ErrorDialog.Severity.Warning,
+                localizedTitle = LocalizedString.IdWithFallback(
+                    "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]",
+                    "Welcome to Hall of Fame!"),
+                localizedMessage = LocalizedString.IdWithFallback(
+                    "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Message]",
+                    """
+                    Hall of Fame could not use your Paradox account ID as you do not appear to be logged in.
+                    A random Creator ID was generated for you.
+                    """),
+                actions = ErrorDialog.Actions.None
+            });
+        });
     }
 
     void IJsonWritable.Write(IJsonWriter writer) {
@@ -289,7 +335,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         writer.Write(this.CreatorName);
 
         writer.PropertyName("creatorIdClue");
-        writer.Write(this.MaskedCreatorID.Split('-')[0]);
+        writer.Write(this.MaskedCreatorID?.Split('-')[0]);
 
         writer.PropertyName("screenshotResolution");
         writer.Write(this.ScreenshotResolution);

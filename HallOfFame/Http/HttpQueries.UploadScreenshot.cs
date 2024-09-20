@@ -16,23 +16,16 @@ internal static partial class HttpQueries {
         int cityPopulation,
         byte[] screenshotData,
         ProgressHandler? progressHandler = null) {
-        if (string.IsNullOrEmpty(Mod.Settings.CreatorName)) {
-            throw new ArgumentNullException(nameof(Mod.Settings.CreatorName));
-        }
-
         var multipart = new WWWForm();
 
-        multipart.AddField("creatorName", Mod.Settings.CreatorName);
         multipart.AddField("cityName", cityName);
         multipart.AddField("cityMilestone", cityMilestone);
         multipart.AddField("cityPopulation", cityPopulation);
         multipart.AddBinaryData("screenshot", screenshotData, "screenshot.jpg");
 
         using var request = UnityWebRequest.Post(
-            HttpQueries.PrependBaseUrl("/api/v1/screenshot/upload"),
+            HttpQueries.PrependApiUrl("/screenshots"),
             multipart);
-
-        HttpQueries.AddAuthorizationHeader(request);
 
         await HttpQueries.SendRequest(request, progressHandler);
 

@@ -58,6 +58,20 @@ internal record Screenshot : IJsonWritable {
         set;
     } = default;
 
+    [DecodeAlias("createdAtFormatted")]
+    internal string CreatedAtFormatted {
+        get;
+        [UsedImplicitly]
+        set;
+    } = string.Empty;
+
+    [DecodeAlias("createdAtFormattedDistance")]
+    internal string CreatedAtFormattedDistance {
+        get;
+        [UsedImplicitly]
+        set;
+    } = string.Empty;
+
     [DecodeAlias("creator")]
     internal Creator? Creator { get; set; }
 
@@ -87,6 +101,12 @@ internal record Screenshot : IJsonWritable {
 
         writer.PropertyName("createdAt");
         writer.Write(this.CreatedAt.ToLocalTime().ToString("o"));
+
+        writer.PropertyName("createdAtFormatted");
+        writer.Write(this.CreatedAtFormatted);
+
+        writer.PropertyName("createdAtFormattedDistance");
+        writer.Write(this.CreatedAtFormattedDistance);
 
         if (this.Creator is not null) {
             writer.PropertyName("creator");

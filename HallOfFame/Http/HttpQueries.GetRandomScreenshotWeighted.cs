@@ -11,15 +11,13 @@ internal static partial class HttpQueries {
     /// </summary>
     internal static async Task<Screenshot> GetRandomScreenshotWeighted() {
         using var request = UnityWebRequest.Get(
-            HttpQueries.PrependBaseUrl(
-                $"/api/v1/screenshot/weighted" +
+            HttpQueries.PrependApiUrl(
+                $"/screenshots/weighted" +
                 $"?random={Mod.Settings.RandomScreenshotWeight}" +
                 $"&recent={Mod.Settings.RecentScreenshotWeight}" +
                 $"&archeologist={Mod.Settings.ArcheologistScreenshotWeight}" +
                 $"&supporter={Mod.Settings.SupporterScreenshotWeight}" +
                 $"&viewMaxAge={Mod.Settings.ViewMaxAge}"));
-
-        HttpQueries.AddAuthorizationHeader(request);
 
         await HttpQueries.SendRequest(request);
 

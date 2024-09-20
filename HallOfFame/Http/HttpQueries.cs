@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Colossal.Json;
 using Game;
+using Game.SceneFlow;
 using HallOfFame.Utils;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
@@ -12,6 +15,11 @@ internal static partial class HttpQueries {
     internal delegate void ProgressHandler(
         float uploadProgress,
         float downloadProgress);
+
+    private const string BaseApiPath = "/api/v1";
+
+    private static string HardwareId { get; } =
+        SystemInfo.deviceUniqueIdentifier;
 
     private static ushort lastRequestId;
 
@@ -24,25 +32,24 @@ internal static partial class HttpQueries {
     private static readonly ConditionalWeakTable<UnityWebRequest, string>
         RequestIdsMap = new();
 
-    private static string PrependBaseUrl(string path) {
+    private static string PrependApiUrl(string path) {
         var baseUrl = Mod.Settings.BaseUrl.StartsWith("http")
-            ? Mod.Settings.BaseUrl
-            : $"https://{Mod.Settings.BaseUrl}";
+            ? $"{Mod.Settings.BaseUrl}{HttpQueries.BaseApiPath}"
+            : $"https://{Mod.Settings.BaseUrl}{HttpQueries.BaseApiPath}";
 
         return $"{baseUrl}{path}";
-    }
-
-    private static void AddAuthorizationHeader(UnityWebRequest request) {
-        if (!string.IsNullOrWhiteSpace(Settings.CreatorID)) {
-            request.SetRequestHeader(
-                "Authorization",
-                $"CreatorID {Settings.CreatorID}");
-        }
     }
 
     private static async Task SendRequest(
         UnityWebRequest request,
         ProgressHandler? progressHandler = null) {
+        // When using directly the UnityWebRequest constructor directly, for
+        // example when making POST requests with empty body, the download
+        // handler is not set, which prevents us from reading the response.
+        request.downloadHandler ??= new DownloadHandlerBuffer();
+
+        HttpQueries.AddModHeaders(request);
+
         var requestId = (++HttpQueries.lastRequestId).ToString();
 
         HttpQueries.RequestIdsMap.Add(request, requestId);
@@ -93,6 +100,33 @@ internal static partial class HttpQueries {
 
             progressHandler(1f, 1f);
         }
+    }
+
+    private static void AddModHeaders(UnityWebRequest request) {
+        if (!request.uri.AbsolutePath.StartsWith(HttpQueries.BaseApiPath)) {
+            return;
+        }
+
+        request.SetRequestHeader(
+            "Authorization",
+            "Creator " +
+            $"name={Mod.Settings.CreatorName}" +
+            $"&id={Mod.Settings.CreatorID}" +
+            $"&provider={(Mod.Settings.IsParadoxAccountID ? "paradox" : "local")}" +
+            $"&hwid={HttpQueries.HardwareId}");
+
+        request.SetRequestHeader(
+            "Accept-Language",
+            GameManager.instance.localizationManager.activeLocaleId);
+
+        request.SetRequestHeader(
+            "X-Timezone-Offset",
+            TimeZoneInfo.Local
+                .GetUtcOffset(DateTime.Now)
+                // For some reason `.Minutes` (int of full minutes) is always 0.
+                // But UTC offsets are always full minutes so this is fine.
+                .TotalMinutes
+                .ToString(CultureInfo.InvariantCulture));
     }
 
     private static T ParseResponse<T>(UnityWebRequest request) where T : new() {

@@ -450,15 +450,15 @@ internal sealed partial class GameUISystem : UISystemBase {
         return true;
 
         void OnConfirmOrCancel(int choice) {
-            var optionsUISystem =
-                this.World.GetOrCreateSystemManaged<OptionsUISystem>();
-
             if (choice is not 0) {
                 return;
             }
 
             var gamePanelUISystem =
                 this.World.GetOrCreateSystemManaged<GamePanelUISystem>();
+
+            var optionsUISystem =
+                this.World.GetOrCreateSystemManaged<OptionsUISystem>();
 
             gamePanelUISystem.ClosePanel(typeof(PhotoModePanel).FullName);
 

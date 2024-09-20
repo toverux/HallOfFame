@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Colossal.Json;
+﻿using System.Threading.Tasks;
 using HallOfFame.Domain;
 using UnityEngine.Networking;
 
@@ -12,14 +10,9 @@ internal static partial class HttpQueries {
     /// </summary>
     internal static async Task<Screenshot>
         ReportScreenshot(string screenshotId) {
-        var payload = JSON.Dump(new Dictionary<string, object> {
-            { "screenshotId", screenshotId }
-        });
-
-        using var request = UnityWebRequest.Post(
-            HttpQueries.PrependBaseUrl("/api/v1/screenshot/report"),
-            payload,
-            "application/json");
+        using var request = new UnityWebRequest(
+            HttpQueries.PrependApiUrl($"/screenshots/{screenshotId}/reports"),
+            "POST");
 
         await HttpQueries.SendRequest(request);
 
