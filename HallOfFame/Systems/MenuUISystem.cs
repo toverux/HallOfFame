@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
@@ -169,6 +169,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
         this.screenshotBinding.Update(screenshot);
 
         PreloadNextScreenshot();
+        MarkViewed();
 
         return;
 
@@ -197,6 +198,15 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 this.screenshotBinding.value?.Id);
 
             this.isRefreshingBinding.Update(false);
+        }
+
+        async void MarkViewed() {
+            try {
+                await HttpQueries.MarkScreenshotViewed(screenshot.Id);
+            }
+            catch (Exception ex) {
+                Mod.Log.ErrorSilent(ex);
+            }
         }
     }
 

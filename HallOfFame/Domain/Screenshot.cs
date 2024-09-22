@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace HallOfFame.Domain;
 
-[DebuggerDisplay("{CityName} by {Creator.CreatorName} (#{Id})")]
+[DebuggerDisplay("Screenshot(#{Id}) {CityName} by {Creator.CreatorName}")]
 [UsedImplicitly]
 internal record Screenshot : IJsonWritable {
     [DecodeAlias("id")]
