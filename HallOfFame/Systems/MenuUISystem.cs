@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
@@ -180,9 +180,18 @@ internal sealed partial class MenuUISystem : UISystemBase {
             // views taken into account because all screenshots have been seen.
             // The check is cheap, and it's more complex to implement
             // server-side, so let's do that frontend-side.
+            #if DEBUG
+            var iterations = 0;
+            #endif
+
             do {
                 this.nextScreenshot = await this.LoadScreenshot(preload: true);
             } while (
+                #if DEBUG
+                // Avoid infinite loops when there is only one screenshot in
+                // database (than can happen during development).
+                iterations++ < 20 &&
+                #endif
                 this.nextScreenshot is not null &&
                 this.nextScreenshot.Id ==
                 this.screenshotBinding.value?.Id);
