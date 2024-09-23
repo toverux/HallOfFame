@@ -143,16 +143,18 @@ function MenuControlsCityName({
                 {screenshot.cityName}
             </div>
 
-            <LocalizedString
-                id='HallOfFame.Common.CITY_BY'
-                fallback={'by {CREATOR_NAME}'}
-                args={{
-                    // .creator should always be defined in this context,
-                    // but we use "?." just in case.
-                    // biome-ignore lint/style/useNamingConvention: i18n convention
-                    CREATOR_NAME: screenshot.creator?.creatorName ?? ''
-                }}
-            />
+            {/* screenshot.creator should always be defined in this context, but
+                we use "?." just in case */}
+            {screenshot.creator?.creatorName && (
+                <LocalizedString
+                    id='HallOfFame.Common.CITY_BY'
+                    fallback={'by {CREATOR_NAME}'}
+                    args={{
+                        // biome-ignore lint/style/useNamingConvention: i18n convention
+                        CREATOR_NAME: screenshot.creator.creatorName ?? ''
+                    }}
+                />
+            )}
         </div>
     );
 }
