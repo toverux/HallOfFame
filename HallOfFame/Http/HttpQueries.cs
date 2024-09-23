@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -54,7 +54,8 @@ internal static partial class HttpQueries {
 
         HttpQueries.RequestIdsMap.Add(request, requestId);
 
-        Mod.Log.Info($"HTTP: Sending request #{requestId} to {request.url}.");
+        Mod.Log.Info(
+            $"HTTP: Sending request #{requestId} {request.method} {request.url}");
 
         Task? trackerTask = null;
 
@@ -107,12 +108,18 @@ internal static partial class HttpQueries {
             return;
         }
 
+        var creatorName = Mod.Settings.CreatorName is null
+            ? string.Empty
+            : Uri.EscapeDataString(Mod.Settings.CreatorName);
+
+        var provider = Mod.Settings.IsParadoxAccountID ? "paradox" : "local";
+
         request.SetRequestHeader(
             "Authorization",
             "Creator " +
-            $"name={Mod.Settings.CreatorName}" +
+            $"name={creatorName}" +
             $"&id={Mod.Settings.CreatorID}" +
-            $"&provider={(Mod.Settings.IsParadoxAccountID ? "paradox" : "local")}" +
+            $"&provider={provider}" +
             $"&hwid={HttpQueries.HardwareId}");
 
         request.SetRequestHeader(
