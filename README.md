@@ -160,4 +160,5 @@ Scope can be one or more of the following:
 - `game`: for changes in the in-game part of the mod;
 - `i18n`: for changes in translations and translations system;
 - `deps`: for dependencies updates;
+- `chore(release)`: for new releases (bump version, update changelog, etc.);
 - Propose new scopes if needed!
