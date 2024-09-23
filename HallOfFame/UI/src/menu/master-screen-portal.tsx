@@ -77,11 +77,6 @@ export function MasterScreenPortal({ children }: Props): ReactNode {
             return;
         }
 
-        // Note that we'll use `opacity` instead of `visibility` because the
-        // background blur filter stays visible when the element is hidden,
-        // which is probably an engine bug.
-        const opacity = menuState.isMenuVisible ? '' : '0';
-
         const elementsToHide = document.querySelectorAll(
             [
                 selector(coMainMenuScreenStyles.column),
@@ -92,9 +87,11 @@ export function MasterScreenPortal({ children }: Props): ReactNode {
         );
 
         // Hide all columns except the one with the menu controls.
+        const visibility = menuState.isMenuVisible ? 'visible' : 'hidden';
+
         for (const element of elementsToHide) {
             if (element != menuControlsColumn.current) {
-                (element as HTMLElement).style.opacity = opacity;
+                (element as HTMLElement).style.visibility = visibility;
             }
         }
     }, [menuState.isMenuVisible]);
