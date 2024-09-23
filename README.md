@@ -1,7 +1,7 @@
 # ﻿<img src="logo.png" alt="Hall of Fame logo" align="right" style="width: 256px">Hall of Fame for Cities: Skylines II
 
 [![Discord](https://img.shields.io/badge/Discord-@toverux-5865f2?logo=discord&logoColor=white&style=flat-square)](https://discord.gg/SsshDVq2Zj)
-[![Paradox Mods](https://img.shields.io/badge/Paradox_Mods-Unreleased_yet-5abe41?style=flat-square)](https://mods.paradoxplaza.com/games/cities_skylines_2)
+[![Paradox Mods](https://img.shields.io/badge/Paradox_Mods-Hall_of_Fame-5abe41?style=flat-square)](https://mods.paradoxplaza.com/mods/90641/Windows)
 
 A Cities: Skylines II mod that allow players to take and upload screenshots of
 their city, and share them with the community.
@@ -34,9 +34,16 @@ share their creations.
 
 Special thanks to:
 
-- The Cities: Skylines Modding Discord community in general for their help.
-- [@chameleon_tbn](https://linktr.ee/chameleon_tbn) for providing some icons the
-  mod uses.
+- The Cities: Skylines Modding Discord community in general for their help and
+  kind support.
+- **[Chamëleon TBN](https://linktr.ee/chameleon_tbn)** for providing some icons
+  the mod uses.
+- **CloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop,
+  ThemisC2, Tigon Ologdring**, for having tested the mod and uploaded the first
+  content so we have beautiful images on launch.
+- **ThemisC2** for his hum, relentless support to help me finally finish a
+  personal project.
+
 
 ## Features & Roadmap
 
@@ -96,10 +103,14 @@ Logs are situated in either:
 ### Publishing a new version
 
 - Update `Version` and `FileVersion` in `HallOfFame/HallOfFame.csproj`;
+- Update `ModVersion` in `HallOfFame/Properties/PublishConfiguration.xml`;
+- Update `version` in `HallOfFame/UI/mod.json`;
 - Update `HallOfFame/ChangeLog.md` *with only what's changed since the last
   version*;
 - Update `HallOfFame/LongDescription.md` if needed;
-- @todo
+- Run the `PublishNewVersion` publish configuration from the IDE or with
+  `dotnet publish /p:ModPublisherCommand=NewVersion`;
+- Tag version in git with `vX.Y.Z`.
 
 ## Code style
 
