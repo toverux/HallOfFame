@@ -40,16 +40,17 @@ Special thanks to:
 
 ## Features & Roadmap
 
-**Current major features**:
+**Notable features**:
 
-- Have pictures displayed in the main menu.<br>
-  Pictures show various information about the city, the author, etc.<br>
+- Have pictures displayed in the main menu, with various information about the
+  city, the author, etc.
+- Choose between Full HD and 4K resolution for pictures shown in the main menu.
 - Toggle menu UI visibility to admire the pictures (like a slideshow).
-- Make screenshots and upload them via a dedicated interface, all in-game.
 - Fine-tune how the algorithm chooses screenshots that are presented to you
   (recent screenshots, most liked, ancient and forgotten, etc.).
-- Choose between Full HD and 4K resolution for downloaded pictures.
-- Report pictures that are inappropriate.
+- Make screenshots and upload them via a dedicated interface, all in-game.
+- Supersampling all screenshots you make to 4K resolution even if you play at a
+  lower resolution.
 
 **Roadmap:** see our feedback & feature requests board here:
 [feedback.halloffame.cs2.mtq.io/](https://feedback.halloffame.cs2.mtq.io)

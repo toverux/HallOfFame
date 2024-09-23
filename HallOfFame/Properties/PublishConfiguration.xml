@@ -1,13 +1,175 @@
 <Publish>
   <ModId Value="" />
   <DisplayName Value="Hall of Fame" />
-  <ShortDescription Value="This is a short description" />
-  <LongDescription>This is the long description.</LongDescription>
+  <ShortDescription Value="Share screenshots with the community and get inspiration in return" />
+  <LongDescription># Hall of Fame for Cities: Skylines II
+
+## What does it do?
+
+If you’re in one of those situations, all you need is the mod!
+- You hate that you spend so much time on a city, but no one sees it, or at best
+  you post it on Reddit, and it still gets forgotten after a few days.
+- You want to show off your detailing or city-planning skills.
+- You want some inspiration when you fire up the game.
+- You’re too lazy to open Reddit and three Discord servers to see some cool
+  cities.
+
+This mod allows players to take and upload screenshots of their city, and share
+them with the community. Images can then be viewed by other players as a
+background image in the main menu, with information about the creator, the city
+name, and controls to refresh the image, upvote *(TBD)* or hide the menu UI to
+better see the image, to name a few features.
+
+Hall of Fame then makes sure that no city falls into oblivion, by displaying
+each uploaded images as often as possible.
+
+Mechanisms like upvotes *(TBD)* still allows the best creators to shine, but
+everyone is welcome, there is no downvote and no moderation based on skill.
+
+## Features
+
+- Have pictures displayed in the main menu, with various information about the
+  city, the author, etc.
+- Choose between Full HD and 4K resolution for pictures shown in the main menu.
+- Toggle menu UI visibility to admire the pictures (like a slideshow).
+- Fine-tune how the algorithm chooses screenshots that are presented to you
+  (recent screenshots, most liked, ancient and forgotten, etc.).
+- Make screenshots and upload them via a dedicated interface, all in-game.
+- Supersampling all screenshots you make to 4K resolution even if you play at a
+  lower resolution.
+
+**Much more to come!** See our feedback and feature requests board to follow the
+development and suggest/upvote features:
+https://feedback.halloffame.cs2.mtq.io
+
+## Rules
+
+### Should I be a pro detailer to share my screenshots?
+
+**Every** player is welcome to share their creations!
+The content is not selected or moderated based on quality or complexity.
+
+Don’t be shy, let us remember your city — if you wanna share it, we wanna see
+it!
+
+### Post-processing and other mods
+
+Yes! — you can use any assets and mods you want. This includes post-processing
+mods that change camera settings, add effects, etc., as well a custom content,
+textures, LUTs, etc.
+
+The only thing to keep in mind is that the screenshot should still showcase
+something you can actually do in the game, including heavily modded, but without
+external tools.
+So, no tampering of the image with other software is allowed, this is not the
+spirit.
+
+### Inappropriate content
+
+Inappropriate, offensive, provoking, off-topic content will be removed and your
+account will be permanently prohibited from using the service, without warning.
+
+A report button is available in the main menu to report inappropriate content.
+It will be immediately unlisted and reviewed by a human.
+
+## Participate in the project
+
+### Get support, report bugs, discuss
+
+You can join the Cities: Skylines Modding Discord server and join us in the
+dedicated thread **pdxm-mods-published › Hall of Fame**.
+
+Bug reports with useful reproduction steps and/or logs are also very welcome on
+GitHub!
+
+### Feedback and Feature requests
+
+We have a feedback and feature requests board here where you can suggest and
+vote on features you’d like to see in the mod:
+https://feedback.halloffame.cs2.mtq.io
+
+It takes a minute to sign up, but your feedback would be very appreciated!
+
+### Translations
+
+The mod is natively available in English and French. Other languages will be
+supported soon via Crowdin.
+
+### Donating
+
+Hall of Fame has low, but nonetheless existing, running costs: hosting the
+server and your images is not free.
+
+Donations are very welcome and will help keep the service running.
+
+I will soon publish, here or directly in the mod the exact donation/expenditure
+balance so people are encouraged to donate when the balance is in the red.
+(Or just donate because you like the mod!)
+
+## Known issues
+
+### Supersampling artifacts
+
+All screenshots are taken at a minimum of 4K resolution, even if you are using
+a lower resolution in-game, so that users using a better resolution can enjoy
+your images in the best quality.
+
+**On some systems, this can cause supersampling artifacts, where the image
+becomes very grainy or things that aren’t normally there appear in the
+screenshot.**
+
+Those rendering issues are not caused by the mod itself, but by the game engine,
+to simplify, it just makes problems normally not visible at your resolution
+visible in 4K, or “enlarges” them.
+
+So, take a close look at your screenshots before uploading them, seek for
+abnormalities, and if you see some that bother you, you could try the following:
+- Take the screenshot again from a slightly different position.
+- Disable DLSS or FSR if you have it enabled.
+- Scale back a little on some photo mode settings that can cause rendering
+  issues (typical with clouds, for example).
+
+If the problem is too common/prominent on your machine, please ping me or upvote
+this post https://feedback.halloffame.cs2.mtq.io/posts/22 so that I’m aware of
+the prevalence of this issue and make supersampling opt-out.
+
+### Possible (benign) crash at game load
+
+There is a bug in cohtml engine (the UI layer of Cities: Skylines II) that can
+cause random (generally rare) crashes **for some users** with some playsets.
+
+This happens only at game load and does not f* up your savegame or settings,
+it’s just a bit annoying.
+
+The symptom is a crash to desktop with no error message in Player.log, a split
+second after the main menu appears.
+
+We’re still trying to figure out what triggers it and how to work around that
+problem, but in the meantime, if you experience this issue, you can either
+disable the mod or just accept it (or help me debug this thing lol) :D
+
+## Special Thanks
+
+- **The Cities: Skylines Modding Discord community** in general for their help
+  and kind support.
+- **Chamëleon (@chameleon_tbn)** for creating some UI icons for the mod.
+- **CloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop,
+  ThemisC2, Tigon Ologdring**, for having tested the mod and uploaded the first
+  content so we have beautiful images on launch.
+- **ThemisC2** for his hum, *relentless* support to help me finally finish a
+  personal project.</LongDescription>
   <Thumbnail Value="Properties/Thumbnail.png" />
-  <Screenshot Value="" />
+  <Screenshot Value="Properties/Screenshot1.png" />
+  <Screenshot Value="Properties/Screenshot2.png" />
+  <Screenshot Value="Properties/Screenshot3.png" />
+  <Screenshot Value="Properties/Screenshot4.png" />
+  <Screenshot Value="Properties/Screenshot5.png" />
+  <Screenshot Value="Properties/Screenshot6.png" />
+  <Screenshot Value="Properties/Screenshot7.png" />
+  <Screenshot Value="Properties/Screenshot8.png" />
   <Tag Value="Code Mod" />
-  <ForumLink Value="" />
-  <ModVersion Value="1.0.4" />
+  <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
+  <ModVersion Value="1.1.0" />
   <GameVersion Value="1.1.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
