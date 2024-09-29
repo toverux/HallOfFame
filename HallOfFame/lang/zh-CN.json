@@ -58,5 +58,18 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ArcheologistScreenshotWeight]": "浏览次数最少的截图，以旧到新排序。\n我们建议不要将其设置为零，以使没有任何城市被遗忘！",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.RandomScreenshotWeight]": "随机",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.RandomScreenshotWeight]": "完全随机选择屏幕截图！",
-  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "首批支持者"
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "首批支持者",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "这些截图选自那些在发布前帮助模组数据库和测试模组的天才们！\n感谢：\nCloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop, ThemisC2, Tigon Ologdring.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.OtherContentPreferences]": "其他内容偏好：",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ViewMaxAge]": "再次显示截图前的最短时间（天数）",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ViewMaxAge]": "再次看到已看过的截图前的最短时间。\n将其设置为零实际上将会取消任何限制（您永远不会看到已经看过的截图）。\n不过，由于技术原因，不能保证始终遵守这一偏好。",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotResolution]": "截图分辨率",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotResolution]": "Hall of Fame图像分辨率。\n无论发送图像的人使用的实际分辨率是多少（超采样），该模式始终采用 4K+ 图像。\n这样，您就可以选择查看图像的分辨率。\n如果您的屏幕分辨率高于 1920×1080，或希望获得更好的图像质量，且带宽甚至内存都不短缺，请使用 4K。",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "同时进行本地截屏",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "使用名人堂截图按钮截图时，也将使用标准的基础游戏机制截图（例如，在 Windows 系统中，将保存在C:\\Users\\You\\AppData\\LocalLow\\Colossal Order\\Cities Skylines II\\Screenshots）。",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fame服务器",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fame服务器地址。除非您正在开发模组或使用其他服务器，否则不应更改该地址。\n您可以使用 “test.halloffame.cs2.mtq.io ”在沙盒数据库中测试该模组。",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "重置设置",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "将所有模组设置重置为默认选项（除了 “作者ID ”不会被修改）。",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "在Discord上聊天和提供帮助"
 }
