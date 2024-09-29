@@ -1,1 +1,21 @@
-{}
+{
+  "HallOfFame.Common.OOPS": "哦!",
+  "HallOfFame.Common.BASE_ERROR": "Hall of Fame遇到了预期之外的错误，请通过Paradox Mod/论坛 或 Discord/Github联系模组作者(@toverux)。",
+  "HallOfFame.Common.RECOVERABLE_ERROR": "此错误是致命性的且会有其他无法预期的负面效果，建议保存并重启游戏，如再次出现该错误，请禁用 MOD。",
+  "HallOfFame.Common.FATAL_ERROR": "此错误是致命性的且会有其他无法预期的负面效果，建议保存并重启游戏，如再次出现该错误，请禁用本MOD。",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "无法连接至服务器。请检查您的网络链接，如您的网络正常运作，那可能是我们服务器的问题。错误详情：{ERROR_MESSAGE}",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpServerException]": "这看起来我们的服务器出现了些许问题，请稍后再试。错误详情：{ERROR_MESSAGE}",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpUserCompatibilityException]": "您的Hall of Fame版本与服务器不兼容。请检查您的模组是否是最新版本。",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Systems.ImagePreloaderUISystem.ImagePreloadFailedException]": "下载图片失败。错误详情：{ERROR_MESSAGE}",
+  "HallOfFame.Common.DEFAULT_CITY_NAME": "我的城市",
+  "HallOfFame.Common.CITY_BY": "来自{CREATOR_NAME}",
+  "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]": "欢迎来到Hall of Fame！虽然但是.......",
+  "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Message]": "您尚未使用Paradox账号登录。\n这意味着Hall of Fame将为您的账户使用一个本地作者 ID，此ID需要手动导入到其他机器。\n如果您希望解决这个问题， 请使用Paradox登录游戏并在模组设置文件里移除您的作者ID。",
+  "HallOfFame.Systems.GameUI.UPLOAD_ERROR": "在上传屏幕截图时出现错误",
+  "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[Title]": "创建作者名称",
+  "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[Message]": "您好！为了能上传照片，您必须先在模组设置中创建一个作者名称",
+  "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[ConfirmAction]": "带我到设置！",
+  "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[Title]": "举报来自{AUTHOR_NAME} 的{CITY_NAME}？",
+  "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[Message]": "如该截图（或其文字描述）包含攻击性内容、并非来自游戏，或者图片质量极低，且作者显然无意分享其作品，您可向我们的模组团队举报该截图。\n对于其他不明原因，请联系模组的作者并说明情况。",
+  "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[ConfirmAction]": "举报屏幕截图"
+}
