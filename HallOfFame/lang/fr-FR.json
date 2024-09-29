@@ -43,6 +43,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]": "Traitement de l’image…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]": "Terminé !",
   "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "Envoyez votre ville au Hall of Fame ! Une photo sera prise, mais vous pourrez la prévisualiser avant de l’envoyer.",
+  "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.YourProfile]": "Profil créateur",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "Préférences de contenu",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Advanced]": "Paramètres avancés",
