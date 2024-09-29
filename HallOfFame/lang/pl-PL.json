@@ -1,1 +1,22 @@
-{}
+{
+  "HallOfFame.Common.OOPS": "Ups!",
+  "HallOfFame.Common.BASE_ERROR": "Hall of Fame napotkała nieoczekiwany błąd. Zgłoś problem autorowi moda przez Paradox Mods/Forums lub za pośrednictwem Discord/GitHub (@toverux).",
+  "HallOfFame.Common.RECOVERABLE_ERROR": "Błąd nie jest krytyczny, powinieneś go zignorować i kontynuować grę.",
+  "HallOfFame.Common.FATAL_ERROR": "Błąd jest krytyczny i może mieć niezamierzone efekty, Powinieneś zapisać grę, uruchomić ją ponownie i wyłączyć moda, jeśli problem się powtarza.",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "Nie udało połączyć się z serwerem. Sprawdź swoje połączenie internetowe, jeśli masz połączenie, prawdopodobnie jest to tymczasowy problem po naszej stronie. Szczegóły: {ERROR_MESSAGE}",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpServerException]": "Wygląda na to, że nasz serwer ma problemy. Spróbuj ponownie później. Szczegóły: {ERROR_MESSAGE}",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpUserCompatibilityException]": "Twoja wersja Hall of Fame jest niekompatybilna z serwerem. Upewnij się, że posiadasz aktualną wersją moda.",
+  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Systems.ImagePreloaderUISystem.ImagePreloadFailedException]": "Nie udało się pobrać obrazu. Szczegóły: {ERROR_MESSAGE}",
+  "HallOfFame.Common.DEFAULT_CITY_NAME": "Moje Miasto",
+  "HallOfFame.Common.CITY_BY": "autorstwa {CREATOR_NAME}",
+  "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]": "Witaj w Hall of Fame! Ale…",
+  "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Message]": "Nie jesteś zalogowany do konta Paradox.\nOznacza to, że Hall of Fame będzie używać lokalnego ID twórcy dla Twojego konta, które będzie musiało być ręcznie zimportowane do innych maszyn.\nJeśli chcesz to naprawić, zaloguj się za pomocą konta Paradox, zamknij grę i usuń swój ID twórcy w pliku ustawień moda.",
+  "HallOfFame.Systems.GameUI.UPLOAD_ERROR": "Błąd podczas przesyłania zrzutu ekranu",
+  "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[Title]": "Wybierz nazwę twórcy",
+  "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[Message]": "Witaj! Aby móc przesłać zdjęcie, musisz najpierw wybrać nazwę twórcy w ustawieniach moda.",
+  "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[ConfirmAction]": "Przejdź do ustawień!",
+  "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[Title]": "Zgłosić {CITY_NAME} autorstwa {AUTHOR_NAME}?",
+  "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[Message]": "Możesz zgłosić ten zrzut ekranu naszemu zespołowi moderacyjnemu, jeśli zawiera on (lub jego opisy tekstowe) obraźliwe treści, jeśli obraz nie pochodzi z gry lub jeśli obraz jest bardzo złej jakości, a autor nie miał zamiaru go udostępniać.\nZ innych, nieoczywistych na pierwszy rzut oka powodów, prosimy o kontakt z autorem moda i wyjaśnienie sytuacji.",
+  "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[ConfirmAction]": "Zgłoś zrzut ekranu",
+  "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Title]": "Dziękujemy za pomoc"
+}
