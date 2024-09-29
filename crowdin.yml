@@ -1,0 +1,3 @@
+files:
+  - source: /HallOfFame/lang/en-US.json
+    translation: /HallOfFame/lang/%locale%.json
