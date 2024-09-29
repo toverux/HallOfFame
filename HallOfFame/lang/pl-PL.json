@@ -44,5 +44,10 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]": "Przesyłanie zakończone!",
   "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "Wyślij swoje miasto do Hall of Fame! Zdjęcie zostanie zrobione, ale będziesz mógł wyświetlić jego podgląd przed przesłaniem.",
   "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
-  "Options.GROUP[HallOfFame.HallOfFame.Mod.YourProfile]": "Twój profil"
+  "Options.GROUP[HallOfFame.HallOfFame.Mod.YourProfile]": "Twój profil",
+  "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "Preferencje zawartości",
+  "Options.GROUP[HallOfFame.HallOfFame.Mod.Advanced]": "Ustawienia zaawansowane",
+  "Options.GROUP[HallOfFame.HallOfFame.Mod.Links]": "Linki",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Nazwa twórcy",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "ID twórcy"
 }
