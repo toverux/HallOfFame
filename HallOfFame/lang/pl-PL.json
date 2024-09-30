@@ -60,5 +60,10 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.RandomScreenshotWeight]": "Losowo",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.RandomScreenshotWeight]": "Zrzuty ekranu wybrane całkowicie losowo!",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "Początkowi wspierający",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "Zrzuty ekranu od utalentowanych ludzi, którzy pomogli zasilić bazę danych moda i pomogli przy testach przed wydaniem moda!\nPodziękowania:\nCloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop, ThemisC2, Tigon Ologdring."
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "Zrzuty ekranu od utalentowanych ludzi, którzy pomogli zasilić bazę danych moda i pomogli przy testach przed wydaniem moda!\nPodziękowania:\nCloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop, ThemisC2, Tigon Ologdring.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "Wesprzyj <3 na PayPal lub Ko-fi",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "Tłumaczenia na Crowdin",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "Przyczyń się do tłumaczenia moda na Crowdin.\nOtwiera: https://crowdin.com/project/halloffame-cs2",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "Kod Źródłowy na Github",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "Uzyskaj dostęp do kodu źródłowego moda na GitHub.\nOtwiera: https://github.com/toverux/HallOfFame"
 }
