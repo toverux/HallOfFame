@@ -1,5 +1,5 @@
 {
-  "HallOfFame.Common.OOPS": "啊哦！",
+  "HallOfFame.Common.OOPS": "出错了！",
   "HallOfFame.Common.BASE_ERROR": "“精彩瞬间”发生了预料之外的错误，请通过 Paradox Mods/论坛 或 Discord/Github 联系模组作者 （@toverux）。",
   "HallOfFame.Common.RECOVERABLE_ERROR": "该错误可以由模组自行解决，可以忽略该错误并继续游戏。",
   "HallOfFame.Common.FATAL_ERROR": "该错误十分致命并且为造成无法预料的副作用，建议保存并重启游戏，如果再次出现该错误，请禁用本模组。",
