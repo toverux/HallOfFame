@@ -49,7 +49,7 @@
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Advanced]": "高级设置",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Links]": "链接",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "创作者名称",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "您的创作者名称将显示在您的截图旁边。\n只要您的创作者 ID 保持不变，您就可以随时更改创作者名称，所有已上传的作品都会自动更新（当您下次向“精彩瞬间”服务器发出任何请求时）。",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "您的创作者名称将显示在您的截图旁边。\n只要您的创作者 ID 保持不变，您就可以随时更改创作者名称，所有已上传的作品都会自动更新（当您下次向“城市画廊”服务器发出任何请求时）。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "创作者 ID",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "唯一且保密的创作者 ID，用于验证您的身份并重组您的作品。\n可以将其视为一种密码，请勿分享！\n如果您清楚自己在做什么，则可以在设置文件中编辑它。\n如果您对创作者 ID 有疑问，请联系此模组的技术人员。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.WeightsDescription]": "调整下面的权重值以更改选择每个算法来显示截图的可能性（详情见滑块的描述）。",
