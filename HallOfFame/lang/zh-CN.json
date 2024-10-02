@@ -1,6 +1,6 @@
 {
   "HallOfFame.Common.OOPS": "出错了！",
-  "HallOfFame.Common.BASE_ERROR": "\"名画堂\"模组发生了预料之外的错误，请通过 Paradox Mods/论坛 或 Discord/Github 向模组作者 (@toverux) 报告问题。",
+  "HallOfFame.Common.BASE_ERROR": "“城市画廊”模组发生了预料之外的错误，请通过 Paradox Mods/论坛 或 Discord/Github 向模组作者 (@toverux) 报告问题。",
   "HallOfFame.Common.RECOVERABLE_ERROR": "此错误可以由模组自动修复，您可以忽略此错误并继续游戏。",
   "HallOfFame.Common.FATAL_ERROR": "此错误是致命的，可能会造成无法预料的副作用，建议保存并重启游戏，如果重复出现此错误，请禁用此模组。",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "无法连接至服务器，请检查您的网络链接。如果网络正常，那可能是我们服务器的问题。错误详情：{ERROR_MESSAGE}",
