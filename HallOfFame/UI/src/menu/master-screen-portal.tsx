@@ -5,6 +5,11 @@ import { getClassesModule, logError, selector } from '../utils';
 import { MenuControls } from './menu-controls';
 import { useHofMenuState } from './menu-state-hook';
 
+const coFpsDisplayStyles = getClassesModule(
+    'game-ui/debug/components/fps-display/fps-display.module.scss',
+    ['fpsDisplay']
+);
+
 const coMenuUiStyles = getClassesModule(
     'game-ui/menu/components/menu-ui.module.scss',
     ['corner', 'menuUi', 'version']
@@ -79,6 +84,7 @@ export function MasterScreenPortal({ children }: Props): ReactNode {
 
         const elementsToHide = document.querySelectorAll(
             [
+                selector(coFpsDisplayStyles.fpsDisplay),
                 selector(coMainMenuScreenStyles.column),
                 selector(coMainMenuScreenStyles.logo),
                 selector(coMenuUiStyles.corner),
