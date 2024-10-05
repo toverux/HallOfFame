@@ -230,10 +230,19 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// </summary>
     public override void SetDefaults() {
         // Set the default creator name with the current platform username.
-        // For now only Steam seems supported, and a Paradox account does not
-        // necessarily have a username attached to it so it will be expected
-        // that non-Steam users will have to set their username manually.
-        this.CreatorName = PlatformManager.instance.userName;
+        // The "platform username" is something that comes from Steam or Xbox
+        // GamePass, and not the Paradox account username.
+        // Even if there existed a fallback to the Paradox username, a Paradox
+        // account does not necessarily have a username attached to it, so users
+        // only logged in via Paradox (standalone) will have no username set by
+        // default and will be asked to set it in the mod's settings when they
+        // first upload a screenshot.
+        var userName = PlatformManager.instance.userName;
+
+        // Strip leading # from username, Xbox accounts have it.
+        this.CreatorName = userName.StartsWith("#")
+            ? userName.Substring(1)
+            : userName;
 
         this.RecentScreenshotWeight = 5;
         this.ArcheologistScreenshotWeight = 5;
