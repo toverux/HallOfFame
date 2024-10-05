@@ -1,7 +1,8 @@
 # ﻿<img src="logo.png" alt="Hall of Fame logo" align="right" style="width: 256px">Hall of Fame for Cities: Skylines II
 
-[![Discord](https://img.shields.io/badge/Discord-@toverux-5865f2?logo=discord&logoColor=white&style=flat-square)](https://discord.gg/SsshDVq2Zj)
-[![Paradox Mods](https://img.shields.io/badge/Paradox_Mods-Hall_of_Fame-5abe41?style=flat-square)](https://mods.paradoxplaza.com/mods/90641/Windows)
+[![Discord](https://img.shields.io/badge/Discord-@toverux-5865f2?logo=discord&logoColor=white)](https://discord.gg/SsshDVq2Zj)
+[![Paradox Mods](https://img.shields.io/badge/Paradox_Mods-Hall_of_Fame-5abe41)](https://mods.paradoxplaza.com/mods/90641/Windows)
+[![Crowdin](https://badges.crowdin.net/halloffame-cs2/localized.svg)](https://crowdin.com/project/halloffame-cs2)
 
 A Cities: Skylines II mod that allow players to take and upload screenshots of
 their city, and share them with the community.
