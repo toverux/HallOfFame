@@ -169,20 +169,16 @@ disable the mod or just accept it (or help me debug this thing lol) :D
   <Screenshot Value="Properties/Screenshot8.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.1.1" />
+  <ModVersion Value="1.1.2" />
   <GameVersion Value="1.1.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
-  <ChangeLog>**Changes:**
-- Commas are now allowed in City Name.
-  Do not rename your city if you already removed the comma to be able to upload, or the system will not be able associate old and new screenshots to the same city, a future feature.
-- Allow 1-character creator or city name. This is to better support languages like Chinese.
+  <ChangeLog>**New features:**
+- Added full localization for Spanish, German, Polish and Chinese Simplified.
 
-**Bugfixes:**
-- It was still possible to interact with the main menu UI even if it was invisible.
-- Non-ASCII characters in Creator Name do not result in an error anymore.
-- Chinese (simplified and traditional) date localization is fixed.
-- Empty creator names will no longer show empty "by " in the main menu.</ChangeLog>
+**Server changes that were rolled out since last release:**
+- Allow underscores in Creator Names
+- Improved screenshot selection algorithm so that you don't see screenshots you've already seen as often.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
