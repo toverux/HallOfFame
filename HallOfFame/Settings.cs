@@ -1,6 +1,9 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
 using Colossal.PSI.PdxSdk;
@@ -11,6 +14,8 @@ using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Widgets;
+using HallOfFame.Http;
+using HallOfFame.Utils;
 using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -82,6 +87,20 @@ public sealed class Settings : ModSetting, IJsonWritable {
             ? segment
             : new string('*', segment.Length))
         .Join(delimiter: "-");
+
+    /// <summary>
+    /// Live account status text ("logged in as X", "invalid username", that
+    /// kind of things).
+    /// Updated by <see cref="UpdateLoginStatus"/> on mod load and creator name
+    /// change.
+    /// </summary>
+    [SettingsUISection(Settings.GroupYourProfile)]
+    [UsedImplicitly]
+
+    // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
+    // We could use a private setter to set the text but then the game won't
+    // interpret our property as an Option entry, it has to be getter-only.
+    public LocalizedString LoginStatus => this.loginStatusValue;
 
     /// <summary>
     /// Text explaining the algorithms' weight selection mechanism.
@@ -212,6 +231,12 @@ public sealed class Settings : ModSetting, IJsonWritable {
         set => Application.OpenURL("https://github.com/toverux/HallOfFame");
     }
 
+    /// <seealso cref="LoginStatus"/>
+    private LocalizedString loginStatusValue = string.Empty;
+
+    /// <seealso cref="UpdateLoginStatus"/>
+    private CancellationTokenSource? updateLoginStatusCts;
+
     public Settings(IMod mod) : base(mod) {
         this.SetDefaults();
     }
@@ -258,13 +283,33 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     /// <summary>
+    /// Method to call on the Settings instance that is actually used by the
+    /// Options panel (i.e. not the defaults reference instance).
+    /// </summary>
+    public void Initialize() {
+        this.InitializeCreatorId();
+
+        // Update the login status when the mod is being loaded.
+        this.UpdateLoginStatus();
+
+        // Update the login status when the Creator Name is changed.
+        var prevCreatorName = this.CreatorName;
+
+        this.onSettingsApplied += _ => {
+            if (prevCreatorName != this.CreatorName) {
+                this.UpdateLoginStatus();
+            }
+        };
+    }
+
+    /// <summary>
     /// Initializes <see cref="CreatorID"/>, <see cref="IsParadoxAccountID"/>
     /// and <see cref="MaskedCreatorID"/> with the Paradox account ID, or a
     /// fallback locally-generated ID if the user is not logged in or an error
     /// occurs.
     /// Shows a warning dialog if the user is not logged in.
     /// </summary>
-    public void InitializeCreatorId() {
+    private void InitializeCreatorId() {
         // If the Creator ID is already set and valid, we just leave it be.
         if (Guid.TryParse(this.CreatorID, out _)) {
             return;
@@ -335,6 +380,71 @@ public sealed class Settings : ModSetting, IJsonWritable {
                 actions = ErrorDialog.Actions.None
             });
         });
+    }
+
+    /// <summary>
+    /// Checks and/or updates the account name with the server and reflect the
+    /// status in the Options UI (success or errors if there are any problems,
+    /// ex. an incorrect username).
+    /// </summary>
+    private async void UpdateLoginStatus() {
+        // Cancel any ongoing update.
+        this.updateLoginStatusCts?.Cancel();
+
+        var thisCts = this.updateLoginStatusCts = new CancellationTokenSource();
+
+        // Show a loading message while we're fetching the status.
+        this.loginStatusValue = LocalizedString.IdWithFallback(
+            "HallOfFame.Common.LOADING", "Loading…");
+
+        try {
+            // Delay/throttle the login status update, useful because:
+            // - This is called on mod OnLoad, but we don't need to fetch the
+            //   status so early.
+            // - This is called on every keystroke in the Creator Name input so
+            //   this will debounce the requests.
+            await Task.Delay(500, thisCts.Token);
+
+            // Fetch the creator info from the server, this will also update the
+            // Creator Name if it's different from the server's.
+            var creator = await HttpQueries.GetMyCreatorInfo();
+
+            // Stop if the operation was cancelled while we were fetching data.
+            thisCts.Token.ThrowIfCancellationRequested();
+
+            // Update the login status text with a success message.
+            var isAnonymous = string.IsNullOrEmpty(creator.CreatorName);
+
+            this.loginStatusValue = new LocalizedString(
+                isAnonymous
+                    ? "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]"
+                    : "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]",
+                isAnonymous
+                    ? "Anonymously logged in."
+                    : "Logged in as {CREATOR_NAME}.",
+                new Dictionary<string, ILocElement> {
+                    {
+                        "CREATOR_NAME",
+                        LocalizedString.Value(creator.CreatorName)
+                    }
+                });
+        }
+        catch (Exception ex) {
+            // Stop if the Task.Delay or the network request was cancelled.
+            if (ex is OperationCanceledException) {
+                return;
+            }
+
+            // Update the login status text with an error message.
+            this.loginStatusValue = ex.GetUserFriendlyMessage();
+        }
+        finally {
+            // Clear the shared cancellation token source if we're the last one
+            // to have been called.
+            if (thisCts == this.updateLoginStatusCts) {
+                this.updateLoginStatusCts = null;
+            }
+        }
     }
 
     void IJsonWritable.Write(IJsonWriter writer) {

@@ -93,7 +93,7 @@ public sealed class Mod : IMod {
             AssetDatabase.global.LoadSettings(
                 nameof(HallOfFame), this.settingsValue, new Settings(this));
 
-            this.settingsValue.InitializeCreatorId();
+            this.settingsValue.Initialize();
 
             // Set singleton instance only when OnLoad is likely to complete.
             Mod.instanceValue = this;
