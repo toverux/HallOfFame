@@ -198,8 +198,11 @@ function MenuControlsScreenshotLabels({
                         <img src='Media/Game/Icons/Population.svg' />
                         <LocalizedNumber
                             value={
-                                Math.round(screenshot.cityPopulation / 1000) *
-                                1000
+                                screenshot.cityPopulation < 1000
+                                    ? screenshot.cityPopulation
+                                    : Math.round(
+                                          screenshot.cityPopulation / 1000
+                                      ) * 1000
                             }
                         />
                     </span>
