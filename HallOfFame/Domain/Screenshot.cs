@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 
 namespace HallOfFame.Domain;
 
-[DebuggerDisplay("Screenshot(#{Id}) {CityName} by {Creator.CreatorName}")]
+[DebuggerDisplay("Screenshot #{Id} {CityName} by {Creator.CreatorName}")]
 [UsedImplicitly]
 internal record Screenshot : IJsonWritable {
     [DecodeAlias("id")]
@@ -72,11 +72,28 @@ internal record Screenshot : IJsonWritable {
         set;
     } = string.Empty;
 
+    [DecodeAlias("favoritesCount")]
+    internal int FavoritesCount {
+        get;
+        [UsedImplicitly]
+        set;
+    } = 0;
+
+    /// <summary>
+    /// Non-inherent property of screenshot only set on some endpoints.
+    /// </summary>
+    [DecodeAlias("__favorited")]
+    internal bool IsFavorite {
+        get;
+        [UsedImplicitly]
+        set;
+    }
+
     [DecodeAlias("creator")]
     internal Creator? Creator { get; set; }
 
     public override string ToString() =>
-        $"Screenshot(#{this.Id}) {this.CityName} by {this.Creator?.CreatorName}";
+        $"Screenshot #{this.Id} {this.CityName} by {this.Creator?.CreatorName}";
 
     public void Write(IJsonWriter writer) {
         // Type name does not support polymorphism, so we need to include all
@@ -110,6 +127,12 @@ internal record Screenshot : IJsonWritable {
 
         writer.PropertyName("createdAtFormattedDistance");
         writer.Write(this.CreatedAtFormattedDistance);
+
+        writer.PropertyName("favoritesCount");
+        writer.Write(this.FavoritesCount);
+
+        writer.PropertyName("isFavorite");
+        writer.Write(this.IsFavorite);
 
         if (this.Creator is not null) {
             writer.PropertyName("creator");

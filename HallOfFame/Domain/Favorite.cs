@@ -5,9 +5,9 @@ using JetBrains.Annotations;
 
 namespace HallOfFame.Domain;
 
-[DebuggerDisplay("Creator #{Id} {CreatorName}")]
+[DebuggerDisplay("Favorite #{Id} on Screenshot #{ScreenshotId}")]
 [UsedImplicitly]
-internal record Creator : IJsonWritable {
+internal record Favorite : IJsonWritable {
     [DecodeAlias("id")]
     internal string Id {
         get;
@@ -15,15 +15,15 @@ internal record Creator : IJsonWritable {
         set;
     } = "Unknown [Error]";
 
-    [DecodeAlias("creatorName")]
-    internal string CreatorName {
+    [DecodeAlias("screenshotId")]
+    internal string ScreenshotId {
         get;
         [UsedImplicitly]
         set;
-    } = "Unknown [Error]";
+    } = string.Empty;
 
     public override string ToString() =>
-        $"Creator #{this.Id} {this.CreatorName}";
+        $"Favorite #{this.Id} on Screenshot #{this.ScreenshotId}";
 
     public void Write(IJsonWriter writer) {
         writer.TypeBegin(this.GetType().FullName);
@@ -31,8 +31,8 @@ internal record Creator : IJsonWritable {
         writer.PropertyName("id");
         writer.Write(this.Id);
 
-        writer.PropertyName("creatorName");
-        writer.Write(this.CreatorName);
+        writer.PropertyName("screenshotId");
+        writer.Write(this.ScreenshotId);
 
         writer.TypeEnd();
     }

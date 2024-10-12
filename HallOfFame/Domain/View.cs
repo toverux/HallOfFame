@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace HallOfFame.Domain;
 
-[DebuggerDisplay("View(#{Id}) for Screenshot #{ScreenshotId}")]
+[DebuggerDisplay("View #{Id} on Screenshot #{ScreenshotId}")]
 [UsedImplicitly]
 internal record View : IJsonWritable {
     [DecodeAlias("id")]
@@ -23,7 +23,7 @@ internal record View : IJsonWritable {
     } = string.Empty;
 
     public override string ToString() =>
-        $"View(#{this.Id}) for Screenshot #{this.ScreenshotId}";
+        $"View #{this.Id} on Screenshot #{this.ScreenshotId}";
 
     public void Write(IJsonWriter writer) {
         writer.TypeBegin(this.GetType().FullName);

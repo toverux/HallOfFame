@@ -1,4 +1,4 @@
-@use 'sass:color';
+﻿@use 'sass:color';
 @use '../common';
 
 .menu-controls {
@@ -165,6 +165,9 @@
     &-buttons {
         $vanilla-button-height: 56rem;
 
+        // nowrap shouldn't be necessary, but just in case, because wrapping
+        // here would be ugly/unpractical.
+        flex-wrap: nowrap;
         pointer-events: auto;
         margin-top: 25rem;
 
@@ -225,6 +228,21 @@
 
             [class*="icon"] {
                 margin: 0;
+            }
+        }
+
+        &-button-favorite {
+            [class*="icon"] {
+                transition: transform .15s ease-in-out;
+            }
+
+            &:hover [class*="icon"], &-active [class*="icon"] {
+                transform: rotate(-10deg) scale(1.7) translate(0, -7rem);
+            }
+
+            &-active {
+                box-shadow: 0 0 0 2rem #e25570;
+                background-color: #e25570aa;
             }
         }
 

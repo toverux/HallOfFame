@@ -13,5 +13,7 @@ export interface Screenshot {
     readonly createdAt: string;
     readonly createdAtFormatted: string;
     readonly createdAtFormattedDistance: string;
+    readonly favoritesCount: number;
+    readonly isFavorite: boolean;
     readonly creator?: Creator | undefined;
 }

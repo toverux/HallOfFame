@@ -9,6 +9,7 @@ import {
 import { Button, MenuButton, Tooltip } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import type { Screenshot } from '../common';
+import loveChirperSrc from '../icons/love-chirper.png';
 import { snappyOnSelect } from '../utils';
 import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
 import * as styles from './menu-controls.module.scss';
@@ -75,6 +76,7 @@ export function MenuControls(): ReactElement {
                         isMenuVisible: !menuState.isMenuVisible
                     })
                 }
+                screenshot={menuState.screenshot}
             />
         </div>
     );
@@ -149,7 +151,7 @@ function MenuControlsCityName({
     useEffect(() => {
         if (shouldPeekAtCityNameMenuControls) {
             setTimeout(() => setPeekAtMenuControls(true), 100);
-            setTimeout(() => setPeekAtMenuControls(false), 2300);
+            setTimeout(() => setPeekAtMenuControls(false), 4000);
 
             shouldPeekAtCityNameMenuControls = false;
         }
@@ -267,13 +269,15 @@ function MenuControlsButtons({
     hasPreviousScreenshot,
     isLoading,
     isMenuVisible,
-    toggleMenuVisibility
+    toggleMenuVisibility,
+    screenshot
 }: Readonly<{
     translate: Localization['translate'];
     hasPreviousScreenshot: boolean;
     isLoading: boolean;
     isMenuVisible: boolean;
     toggleMenuVisibility: () => void;
+    screenshot: Screenshot;
 }>): ReactElement {
     return (
         <div className={styles.menuControlsButtons}>
@@ -332,6 +336,48 @@ function MenuControlsButtons({
                     )}
                 />
             </Tooltip>
+
+            <Tooltip
+                tooltip={
+                    <LocalizedString
+                        id={
+                            screenshot.isFavorite
+                                ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Unfavorite]'
+                                : screenshot.favoritesCount == 0
+                                  ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Zero]'
+                                  : screenshot.favoritesCount == 1
+                                    ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Singular]'
+                                    : 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Plural]'
+                        }
+                        fallback={
+                            screenshot.isFavorite
+                                ? 'Unfavorite this image'
+                                : 'Favorite this image'
+                        }
+                        args={{
+                            // biome-ignore lint/style/useNamingConvention: i18n convention
+                            NUMBER: (
+                                <LocalizedNumber
+                                    value={screenshot.favoritesCount}
+                                />
+                            )
+                        }}
+                    />
+                }>
+                <MenuButton
+                    className={`${styles.menuControlsButtonsButton} ${styles.menuControlsButtonsButtonFavorite} ${screenshot.isFavorite ? styles.menuControlsButtonsButtonFavoriteActive : ''}`}
+                    src={loveChirperSrc}
+                    tinted={false}
+                    focusKey={FOCUS_DISABLED}
+                    onSelect={favoriteScreenshot}
+                    selectSound={
+                        screenshot.isFavorite ? 'chirp-event' : 'xp-event'
+                    }>
+                    {screenshot.favoritesCount < 1000
+                        ? screenshot.favoritesCount
+                        : `${(screenshot.favoritesCount / 1000).toFixed(1)}k`}
+                </MenuButton>
+            </Tooltip>
         </div>
     );
 }
@@ -342,6 +388,10 @@ function previousScreenshot(): void {
 
 function nextScreenshot(): void {
     trigger('hallOfFame.menu', 'nextScreenshot');
+}
+
+function favoriteScreenshot(): void {
+    trigger('hallOfFame.menu', 'favoriteScreenshot');
 }
 
 function reportScreenshot(): void {

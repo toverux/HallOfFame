@@ -37,6 +37,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
     private TriggerBinding nextScreenshotBinding = null!;
 
+    private TriggerBinding favoriteScreenshotBinding = null!;
+
     private TriggerBinding reportScreenshotBinding = null!;
 
     private readonly IList<Screenshot> screenshotsQueue =
@@ -51,6 +53,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
     /// default value, it is intentional.
     /// </summary>
     private GameMode previousGameMode = GameMode.MainMenu;
+
+    private bool isTogglingFavorite;
 
     protected override void OnCreate() {
         base.OnCreate();
@@ -93,6 +97,10 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 MenuUISystem.BindingGroup, "nextScreenshot",
                 this.NextScreenshot);
 
+            this.favoriteScreenshotBinding = new TriggerBinding(
+                MenuUISystem.BindingGroup, "favoriteScreenshot",
+                this.FavoriteScreenshot);
+
             this.reportScreenshotBinding = new TriggerBinding(
                 MenuUISystem.BindingGroup, "reportScreenshot",
                 this.ReportScreenshot);
@@ -104,6 +112,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
             this.AddBinding(this.errorBinding);
             this.AddBinding(this.previousScreenshotBinding);
             this.AddBinding(this.nextScreenshotBinding);
+            this.AddBinding(this.favoriteScreenshotBinding);
             this.AddBinding(this.reportScreenshotBinding);
 
             // Select game modes that are known to be appropriate for loading
@@ -162,9 +171,9 @@ internal sealed partial class MenuUISystem : UISystemBase {
         }
 
         if (this.currentScreenshotIndex <= 0) {
-            Mod.Log.ErrorSilent("Menu: " +
-                $"{nameof(this.PreviousScreenshot)}: " +
-                "Cannot go back, already at the first screenshot.");
+            Mod.Log.ErrorSilent(
+                $"Menu: {nameof(this.PreviousScreenshot)}: " +
+                $"Cannot go back, already at the first screenshot.");
         }
 
         this.isRefreshingBinding.Update(true);
@@ -374,6 +383,57 @@ internal sealed partial class MenuUISystem : UISystemBase {
             Mod.Log.ErrorRecoverable(ex);
 
             return null;
+        }
+    }
+
+    /// <summary>
+    /// Toggle the favorite status of the current screenshot, with an optimistic
+    /// UI update.
+    /// The method is `async void` because it is designed to be called in a
+    /// fire-and-forget manner, and it should be designed to never throw.
+    /// </summary>
+    private async void FavoriteScreenshot() {
+        if (this.isTogglingFavorite ||
+            this.isRefreshingBinding.value ||
+            this.screenshotBinding.value is null) {
+            return;
+        }
+
+        this.isTogglingFavorite = true;
+
+        var prevScreenshot = this.screenshotBinding.value;
+
+        var updatedScreenshot = prevScreenshot with {
+            IsFavorite = !prevScreenshot.IsFavorite,
+            FavoritesCount = prevScreenshot.FavoritesCount +
+                             (prevScreenshot.IsFavorite ? -1 : 1)
+        };
+
+        // Replace current screenshot with the liked one.
+        this.screenshotsQueue[this.currentScreenshotIndex] = updatedScreenshot;
+        this.screenshotBinding.Update(updatedScreenshot);
+
+        try {
+            await HttpQueries.FavoriteScreenshot(
+                updatedScreenshot.Id,
+                favorite: updatedScreenshot.IsFavorite);
+        }
+        catch (HttpException ex) {
+            ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+                localizedTitle = "HallOfFame.Common.OOPS",
+                localizedMessage = ex.GetUserFriendlyMessage(),
+                actions = ErrorDialog.Actions.None
+            });
+
+            // Revert the optimistic UI update.
+            this.screenshotsQueue[this.currentScreenshotIndex] = prevScreenshot;
+            this.screenshotBinding.Update(prevScreenshot);
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
+        }
+        finally {
+            this.isTogglingFavorite = false;
         }
     }
 
