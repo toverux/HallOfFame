@@ -6,8 +6,8 @@ import {
     LocalizedString,
     useLocalization
 } from 'cs2/l10n';
-import { MenuButton, Tooltip } from 'cs2/ui';
-import type { ReactElement, ReactNode } from 'react';
+import { Button, MenuButton, Tooltip } from 'cs2/ui';
+import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import type { Screenshot } from '../common';
 import { snappyOnSelect } from '../utils';
 import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
@@ -54,11 +54,14 @@ export function MenuControls(): ReactElement {
 
     return (
         <div className={styles.menuControls}>
-            <MenuControlsCityName screenshot={menuState.screenshot} />
+            <MenuControlsCityName
+                translate={translate}
+                screenshot={menuState.screenshot}
+            />
 
             <MenuControlsScreenshotLabels
-                screenshot={menuState.screenshot}
                 translate={translate}
+                screenshot={menuState.screenshot}
             />
 
             <MenuControlsButtons
@@ -127,11 +130,31 @@ function MenuControlsError({
     );
 }
 
+// Static variable to track if we should peek at the city name menu controls,
+// only once when the mod is loaded. This is a UX feature to help the user
+// discover the city name menu controls.
+let shouldPeekAtCityNameMenuControls = true;
+
 function MenuControlsCityName({
+    translate,
     screenshot
 }: Readonly<{
+    translate: Localization['translate'];
     screenshot: Screenshot;
 }>): ReactElement {
+    const [peekAtMenuControls, setPeekAtMenuControls] = useState(false);
+
+    // When the component is first mounted, show the city name menu controls
+    // briefly to help the user discover them.
+    useEffect(() => {
+        if (shouldPeekAtCityNameMenuControls) {
+            setTimeout(() => setPeekAtMenuControls(true), 100);
+            setTimeout(() => setPeekAtMenuControls(false), 2300);
+
+            shouldPeekAtCityNameMenuControls = false;
+        }
+    }, []);
+
     if (!screenshot.creator) {
         console.warn(
             `HoF: No creator information for screenshot ${screenshot.id}`
@@ -139,7 +162,29 @@ function MenuControlsCityName({
     }
 
     return (
-        <div className={styles.menuControlsNames}>
+        <div
+            className={`${styles.menuControlsNames} ${peekAtMenuControls ? styles.menuControlsNamesShowMenu : ''}`}>
+            <div className={styles.menuControlsNamesMenu}>
+                <Tooltip
+                    tooltip={translate(
+                        'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report Abuse]',
+                        'Report inappropriate content'
+                    )}>
+                    <Button
+                        variant='round'
+                        onSelect={reportScreenshot}
+                        selectSound='bulldoze'
+                        className={styles.menuControlsNamesMenuButton}>
+                        <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            viewBox='0 0 448 512'>
+                            {/* Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. */}
+                            <path d='M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32L0 64 0 368 0 480c0 17.7 14.3 32 32 32s32-14.3 32-32l0-128 64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30l0-247.7c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48l0-16z' />
+                        </svg>
+                    </Button>
+                </Tooltip>
+            </div>
+
             <div className={styles.menuControlsNamesCity}>
                 {screenshot.cityName}
             </div>
@@ -161,11 +206,11 @@ function MenuControlsCityName({
 }
 
 function MenuControlsScreenshotLabels({
-    screenshot,
-    translate
+    translate,
+    screenshot
 }: Readonly<{
-    screenshot: Screenshot;
     translate: Localization['translate'];
+    screenshot: Screenshot;
 }>): ReactElement {
     // Do not show the pop/milestone labels if this is an empty map screenshot,
     // which is likely when the pop is 0 and the milestone is 0 (Founding) or 20
@@ -266,21 +311,6 @@ function MenuControlsButtons({
                     </MenuButton>
                 </Tooltip>
             </div>
-
-            <Tooltip
-                tooltip={translate(
-                    'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report Abuse]',
-                    'Report inappropriate content'
-                )}>
-                <MenuButton
-                    className={styles.menuControlsButtonsButtonIcon}
-                    src={'coui://uil/Colored/ExclamationMark.svg'}
-                    tinted={false}
-                    focusKey={FOCUS_DISABLED}
-                    onSelect={reportScreenshot}
-                    selectSound='bulldoze'
-                />
-            </Tooltip>
 
             <Tooltip
                 tooltip={translate(

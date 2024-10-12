@@ -17,6 +17,8 @@
       },
       "a11y": {
         // PROJECT-SPECIFIC, alt text in the context of CS2 does not make sense.
+        "noSvgWithoutTitle": "off",
+        // PROJECT-SPECIFIC, alt text in the context of CS2 does not make sense.
         "useAltText": "off",
         // PROJECT-SPECIFIC, does not make too much sense in the context of CS2.
         "useKeyWithClickEvents": "off"

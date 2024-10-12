@@ -1,4 +1,4 @@
-﻿@use 'sass:color';
+@use 'sass:color';
 @use '../common';
 
 .menu-controls {
@@ -64,7 +64,7 @@
         }
     }
 
-    &-city-name, &-city-stats, &-buttons {
+    &-city-stats, &-buttons {
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
@@ -72,12 +72,56 @@
         align-items: flex-start;
     }
 
+    &-names, &-city-stats, &-buttons {
+        @include common.fade-and-slide-in;
+    }
+
+    &-city-stats {
+        animation-delay: .2s;
+    }
+
+    &-buttons {
+        animation-delay: .4s;
+    }
+
     &-names {
+        position: relative;
         display: flex;
         flex-direction: column;
         margin-bottom: 45rem;
         text-shadow: 0 2rem 10rem var(--panelColorDark);
         font-size: calc(30rem * var(--fontScale));
+
+        &:hover &-menu, &-show-menu &-menu {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+
+        &-menu {
+            margin-bottom: 10rem;
+            opacity: 0;
+            transform: translate(0, 10rem);
+            transition: opacity .3s ease-in-out, transform .3s ease-in-out;
+
+            &-button {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 50rem;
+                height: 50rem;
+
+                &:hover svg {
+                    opacity: 1;
+                }
+
+                svg {
+                    width: 28rem;
+                    height: 28rem;
+                    fill: var(--menuText1Normal);
+                    opacity: .8;
+                }
+            }
+        }
 
         &-city {
             font-size: calc(45rem * var(--fontScale));
