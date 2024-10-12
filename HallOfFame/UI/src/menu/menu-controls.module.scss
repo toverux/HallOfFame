@@ -232,6 +232,8 @@
         }
 
         &-button-favorite {
+            transition: all .1s ease-in-out;
+
             [class*="icon"] {
                 transition: transform .15s ease-in-out;
             }
@@ -240,9 +242,19 @@
                 transform: rotate(-10deg) scale(1.7) translate(0, -7rem);
             }
 
+            &:active [class*="icon"] {
+                transform: rotate(-5deg) scale(1.6) translate(0, -7rem);
+            }
+
             &-active {
-                box-shadow: 0 0 0 2rem #e25570;
-                background-color: #e25570aa;
+                // importants are for overriding :hover styles.
+                box-shadow: 0 0 0 2rem #e25570 !important;
+                background-color: #e25570aa !important;
+                color: var(--menuText1Normal) !important;
+
+                &:active {
+                    background-color: #e25570cc !important;
+                }
             }
         }
 
