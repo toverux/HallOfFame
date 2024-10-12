@@ -62,6 +62,8 @@
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  Connecté en tant que « {CREATOR_NAME} »",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Connecté en anonyme",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.WeightsDescription]": "Ajustez les poids ci-dessous pour modifier la probabilité de chaque algorithme d’être sélectionné pour afficher une capture d'écran (voir la description des curseurs pour plus de détails).",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.TrendingScreenshotWeight]": "Tendance",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.TrendingScreenshotWeight]": "Captures d’écran populaires qui ont un nombre élevé de likes par jour.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.RecentScreenshotWeight]": "Récents",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.RecentScreenshotWeight]": "Captures d’écran récemment postées (quelques jours au maximum).\nNous recommandons de ne pas la mettre à zéro afin de laisser une chance aux nouvelles créations !",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ArcheologistScreenshotWeight]": "Les oubliés",

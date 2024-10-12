@@ -1,4 +1,4 @@
-﻿# Hall of Fame for Cities: Skylines II
+# Hall of Fame for Cities: Skylines II
 
 ## What does it do?
 
@@ -13,14 +13,15 @@ If you’re in one of those situations, all you need is the mod!
 This mod allows players to take and upload screenshots of their city, and share
 them with the community. Images can then be viewed by other players as a
 background image in the main menu, with information about the creator, the city
-name, and controls to refresh the image, upvote *(TBD)* or hide the menu UI to
+name, and controls to refresh the image, like/favorite or hide the menu UI to
 better see the image, to name a few features.
 
 Hall of Fame then makes sure that no city falls into oblivion, by displaying
 each uploaded images as often as possible.
 
-Mechanisms like upvotes *(TBD)* still allows the best creators to shine, but
-everyone is welcome, there is no downvote and no moderation based on skill.
+The liking/favorite and trending screenshots mechanisms still allows the best
+creators to shine, but everyone is welcome, there is no downvote and no
+moderation based on skill.
 
 ## Features
 

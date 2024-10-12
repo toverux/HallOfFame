@@ -63,6 +63,8 @@
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  Logged in as “{CREATOR_NAME}”",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Anonymously logged in",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.WeightsDescription]": "Adjust the weights below to change the likelihood of each algorithm being selected to show a screenshot (see the sliders’ description for details).",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.TrendingScreenshotWeight]": "Trending",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.TrendingScreenshotWeight]": "Popular screenshots that have a higher number of likes per day.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.RecentScreenshotWeight]": "Recent",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.RecentScreenshotWeight]": "Recently posted screenshots (a few days old at most).\nWe recommend not setting it to zero to give new creators and creations a chance!",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ArcheologistScreenshotWeight]": "Forgotten Ones",

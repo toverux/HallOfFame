@@ -112,6 +112,13 @@ public sealed class Settings : ModSetting, IJsonWritable {
         string.Empty; // The actual text comes from the translations files.
 
     /// <summary>
+    /// Weight of the trending screenshot selection algorithm.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    [SettingsUISlider(min = 0, max = 10)]
+    public int TrendingScreenshotWeight { get; set; }
+
+    /// <summary>
     /// Weight of the recent screenshot selection algorithm.
     /// </summary>
     [SettingsUISection(Settings.GroupContentPreferences)]
@@ -269,10 +276,11 @@ public sealed class Settings : ModSetting, IJsonWritable {
             ? userName.Substring(1)
             : userName;
 
+        this.TrendingScreenshotWeight = 10;
         this.RecentScreenshotWeight = 5;
         this.ArcheologistScreenshotWeight = 5;
-        this.RandomScreenshotWeight = 5;
-        this.SupporterScreenshotWeight = 10;
+        this.RandomScreenshotWeight = 2;
+        this.SupporterScreenshotWeight = 2;
 
         this.ViewMaxAge = 60;
         this.ScreenshotResolution = "fhd";
