@@ -397,7 +397,7 @@ internal sealed partial class GameUISystem : UISystemBase {
         return;
 
         async Task StartUpdateProcessingProgress(CancellationToken ct) {
-            const float processingTimeSeconds = 5f;
+            const float processingTimeSeconds = 3f;
 
             var startTime = DateTime.Now;
 
