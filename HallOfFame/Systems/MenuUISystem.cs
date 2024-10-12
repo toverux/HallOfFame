@@ -25,17 +25,24 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
     private ValueBinding<string> defaultImageUriBinding = null!;
 
+    private GetterValueBinding<bool> hasPreviousScreenshotBinding = null!;
+
     private ValueBinding<bool> isRefreshingBinding = null!;
 
     private ValueBinding<Screenshot?> screenshotBinding = null!;
 
     private ValueBinding<LocalizedString?> errorBinding = null!;
 
-    private TriggerBinding refreshScreenshotBinding = null!;
+    private TriggerBinding previousScreenshotBinding = null!;
+
+    private TriggerBinding nextScreenshotBinding = null!;
 
     private TriggerBinding reportScreenshotBinding = null!;
 
-    private Screenshot? nextScreenshot;
+    private readonly IList<Screenshot> screenshotsQueue =
+        new List<Screenshot>();
+
+    private int currentScreenshotIndex = -1;
 
     /// <summary>
     /// Indicates the previous game mode to refresh the screenshot when the user
@@ -60,6 +67,10 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 MenuUISystem.BindingGroup, "defaultImageUri",
                 MenuUISystem.VanillaDefaultImageUri);
 
+            this.hasPreviousScreenshotBinding = new GetterValueBinding<bool>(
+                MenuUISystem.BindingGroup, "hasPreviousScreenshot",
+                () => this.currentScreenshotIndex > 0);
+
             this.isRefreshingBinding = new ValueBinding<bool>(
                 MenuUISystem.BindingGroup, "isRefreshing",
                 false);
@@ -74,19 +85,25 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 null,
                 new ValueWriter<LocalizedString>().Nullable());
 
-            this.refreshScreenshotBinding = new TriggerBinding(
-                MenuUISystem.BindingGroup, "refreshScreenshot",
-                this.RefreshScreenshot);
+            this.previousScreenshotBinding = new TriggerBinding(
+                MenuUISystem.BindingGroup, "previousScreenshot",
+                this.PreviousScreenshot);
+
+            this.nextScreenshotBinding = new TriggerBinding(
+                MenuUISystem.BindingGroup, "nextScreenshot",
+                this.NextScreenshot);
 
             this.reportScreenshotBinding = new TriggerBinding(
                 MenuUISystem.BindingGroup, "reportScreenshot",
                 this.ReportScreenshot);
 
             this.AddBinding(this.defaultImageUriBinding);
+            this.AddBinding(this.hasPreviousScreenshotBinding);
             this.AddBinding(this.isRefreshingBinding);
             this.AddBinding(this.screenshotBinding);
             this.AddBinding(this.errorBinding);
-            this.AddBinding(this.refreshScreenshotBinding);
+            this.AddBinding(this.previousScreenshotBinding);
+            this.AddBinding(this.nextScreenshotBinding);
             this.AddBinding(this.reportScreenshotBinding);
 
             // Select game modes that are known to be appropriate for loading
@@ -104,7 +121,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 is GameMode.MainMenu
                 or GameMode.None
                 or GameMode.Other) {
-                this.RefreshScreenshot();
+                this.NextScreenshot();
             }
         }
         catch (Exception ex) {
@@ -120,40 +137,95 @@ internal sealed partial class MenuUISystem : UISystemBase {
         Purpose purpose,
         GameMode mode) {
         // The condition serves two purposes:
-        // 1. Call RefreshScreenshot when the user returns to the main menu from
+        // 1. Call NextScreenshot when the user returns to the main menu from
         //    another game mode.
-        // 2. Avoid potentially repeating the RefreshScreenshot call when the
-        //    game boots and mods are initialized before the first game mode is
-        //    set, this happens rarely, but it's possible.
+        // 2. Avoid potentially repeating the NextScreenshot call when the game
+        //    boots and mods are initialized before the first game mode is set,
+        //    this happens rarely, but it's possible.
         if (mode is GameMode.MainMenu &&
             this.previousGameMode is not GameMode.MainMenu) {
-            this.RefreshScreenshot();
+            this.NextScreenshot();
         }
 
         this.previousGameMode = mode;
     }
 
     /// <summary>
+    /// Switches the current screenshot to the previous if there is one
+    /// (<see cref="screenshotsQueue"/>).
+    /// The method is `async void` because it is designed to be called in a
+    /// fire-and-forget manner, and it should be designed to never throw.
+    /// </summary>
+    private async void PreviousScreenshot() {
+        if (this.isRefreshingBinding.value) {
+            return;
+        }
+
+        if (this.currentScreenshotIndex <= 0) {
+            Mod.Log.ErrorSilent("Menu: " +
+                $"{nameof(this.PreviousScreenshot)}: " +
+                "Cannot go back, already at the first screenshot.");
+        }
+
+        this.isRefreshingBinding.Update(true);
+
+        var screenshot = this.screenshotsQueue[--this.currentScreenshotIndex];
+
+        // We still need to make sure the image is preloaded, because these
+        // images aren't kept long in cohtml's cache; if the user clicks
+        // Previous a few times this is necessary.
+        screenshot =
+            await this.LoadScreenshot(screenshot: screenshot, preload: false);
+
+        // There was an error when preloading the previous image.
+        if (screenshot is not null) {
+            this.screenshotBinding.Update(screenshot);
+            this.hasPreviousScreenshotBinding.Update();
+        }
+
+        Mod.Log.Info(
+            $"Menu: {nameof(this.PreviousScreenshot)}: Displaying {screenshot} " +
+            $"(queue idx {this.currentScreenshotIndex}/" +
+            $"{this.screenshotsQueue.Count - 1}).");
+
+        this.isRefreshingBinding.Update(false);
+    }
+
+    /// <summary>
     /// Switches the current screenshot to the next if there is one
-    /// (<see cref="nextScreenshot"/>), otherwise it loads a new one.
+    /// (<see cref="screenshotsQueue"/>), otherwise it loads a new one.
     /// Then it preloads the next screenshot again in the background.
     /// The method is `async void` because it is designed to be called in a
     /// fire-and-forget manner, and it should be designed to never throw.
     /// </summary>
-    private async void RefreshScreenshot() {
+    private async void NextScreenshot() {
         if (this.isRefreshingBinding.value) {
             return;
         }
 
         this.isRefreshingBinding.Update(true);
 
-        // If there is a preloaded screenshot, use it, if not, load one.
-        var screenshot =
-            this.nextScreenshot ??
-            await this.LoadScreenshot(preload: false);
+        Screenshot? screenshot;
 
-        // Reset preloaded screenshot, as it is now the current one.
-        this.nextScreenshot = null;
+        // If there is a preloaded screenshot next in queue, set it as the
+        // current screenshot.
+        // This happens when the user first clicks "Next".
+        if (this.screenshotsQueue.Count - 1 > this.currentScreenshotIndex) {
+            screenshot = this.screenshotsQueue[++this.currentScreenshotIndex];
+        }
+
+        // Otherwise, load a new screenshot, add it to the queue, and set it as
+        // the current screenshot.
+        // This happens when the first image is loaded, or when there was an
+        // error preloading the next image in the previous NextScreenshot call.
+        else {
+            screenshot = await this.LoadScreenshot(preload: false);
+
+            if (screenshot is not null) {
+                this.screenshotsQueue.Add(screenshot);
+                this.currentScreenshotIndex++;
+            }
+        }
 
         // There was an error, don't preload the next image, but leave the
         // previous screenshot displayed. Reset the refresh state.
@@ -167,13 +239,40 @@ internal sealed partial class MenuUISystem : UISystemBase {
         // The screenshot was successfully loaded, update the screenshot being
         // displayed and asynchronously preload the next one.
         this.screenshotBinding.Update(screenshot);
+        this.hasPreviousScreenshotBinding.Update();
 
-        PreloadNextScreenshot();
-        MarkViewed();
+        Mod.Log.Info(
+            $"Menu: {nameof(this.NextScreenshot)}: Displaying {screenshot} " +
+            $"(queue idx {this.currentScreenshotIndex}/" +
+            $"{this.screenshotsQueue.Count - 1}).");
+
+        if (this.currentScreenshotIndex < this.screenshotsQueue.Count - 1) {
+            // If we are not at the end of the queue (the user clicked previous
+            // once or more), we're done as we have next screenshots in stock,
+            // so we don't have to preload the next one.
+            this.isRefreshingBinding.Update(false);
+        }
+        else {
+            // If we are viewing the last screenshot in the queue, prepare the
+            // next one in the background.
+            PreloadNextScreenshot();
+
+            // It also means the current screenshot was just viewed.
+            MarkViewed();
+        }
 
         return;
 
+        // Fire-and-forget async method that should be designed to never throw.
         async void PreloadNextScreenshot() {
+            // Variable used below to avoid infinite loops when there is only
+            // one screenshot in database (that can happen during development).
+            #if DEBUG
+            var iterations = 0;
+            #endif
+
+            Screenshot? nextScreenshot;
+
             // The loop is a workaround to avoid loading the same screenshot
             // twice if the server returns the same screenshot twice (or more).
             // This should be extremely rare, only happening in dev mode with a
@@ -181,25 +280,32 @@ internal sealed partial class MenuUISystem : UISystemBase {
             // views taken into account because all screenshots have been seen.
             // The check is cheap, and it's more complex to implement
             // server-side, so let's do that frontend-side.
-            #if DEBUG
-            var iterations = 0;
-            #endif
-
             do {
-                this.nextScreenshot = await this.LoadScreenshot(preload: true);
+                nextScreenshot = await this.LoadScreenshot(preload: true);
             } while (
                 #if DEBUG
-                // Avoid infinite loops when there is only one screenshot in
-                // database (than can happen during development).
                 iterations++ < 20 &&
                 #endif
-                this.nextScreenshot is not null &&
-                this.nextScreenshot.Id ==
+                nextScreenshot is not null &&
+                nextScreenshot.Id ==
                 this.screenshotBinding.value?.Id);
 
+            if (nextScreenshot is not null) {
+                this.screenshotsQueue.Add(nextScreenshot);
+
+                // Trim queue if it's more than 20 screenshots long.
+                if (this.screenshotsQueue.Count > 20) {
+                    this.screenshotsQueue.RemoveAt(0);
+                }
+            }
+
+            // Release the refresh lock.
+            // If any code above is susceptible to throw, ensure this is called
+            // inside a finally block.
             this.isRefreshingBinding.Update(false);
         }
 
+        // Fire-and-forget async method that should be designed to never throw.
         async void MarkViewed() {
             try {
                 await HttpQueries.MarkScreenshotViewed(screenshot.Id);
@@ -221,13 +327,19 @@ internal sealed partial class MenuUISystem : UISystemBase {
     /// preloading failed, and ex. retry a classic loading operation the next
     /// time the user refreshes the image.
     /// </param>
+    /// <param name="screenshot">
+    /// The screenshot to preload, if null, a new one will be fetched from the
+    /// server.
+    /// </param>
     /// <returns>
     /// A <see cref="Screenshot"/> if the API call *and* image were successful,
     /// null if there was an error.
     /// </returns>
-    private async Task<Screenshot?> LoadScreenshot(bool preload) {
+    private async Task<Screenshot?> LoadScreenshot(
+        bool preload,
+        Screenshot? screenshot = null) {
         try {
-            var screenshot = await HttpQueries.GetRandomScreenshotWeighted();
+            screenshot ??= await HttpQueries.GetRandomScreenshotWeighted();
 
             var imageUrl = Mod.Settings.ScreenshotResolution switch {
                 "fhd" => screenshot.ImageUrlFHD,
@@ -241,6 +353,10 @@ internal sealed partial class MenuUISystem : UISystemBase {
             if (!preload) {
                 this.errorBinding.Update(null);
             }
+
+            Mod.Log.Info(
+                $"Menu: {(preload ? "Preloaded" : "Loaded")} {screenshot} " +
+                $"({imageUrl}).");
 
             return screenshot;
         }
@@ -325,7 +441,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 GameManager.instance.userInterface.appBindings
                     .ShowMessageDialog(successDialog, _ => { });
 
-                this.RefreshScreenshot();
+                this.NextScreenshot();
             }
             catch (HttpException ex) {
                 ErrorDialogManager.ShowErrorDialog(new ErrorDialog {

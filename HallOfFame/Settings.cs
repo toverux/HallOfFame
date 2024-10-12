@@ -339,7 +339,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
             this.IsParadoxAccountID = true;
 
             Mod.Log.Info(
-                $"Acquired Paradox account ID {this.MaskedCreatorID}.");
+                $"Settings: Acquired Paradox account ID {this.MaskedCreatorID}.");
         }
 
         // If the user is not logged in, or the operation failed in an
@@ -350,8 +350,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
             Mod.Log.Warn(
                 ex,
-                $"Could not acquire Paradox account ID, using a random ID as " +
-                $"a fallback ({this.MaskedCreatorID}).");
+                $"Settings: Could not acquire Paradox account ID, using a " +
+                $"random ID as a fallback ({this.MaskedCreatorID}).");
         }
 
         // Explicitly save the settings so they're written to disk asap.

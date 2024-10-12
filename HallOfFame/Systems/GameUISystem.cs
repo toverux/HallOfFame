@@ -304,7 +304,8 @@ internal sealed partial class GameUISystem : UISystemBase {
     private void ClearScreenshot() {
         if (this.CurrentScreenshot is null) {
             Mod.Log.Warn(
-                $"Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
+                $"Game: Call to {nameof(this.ClearScreenshot)} " +
+                $"with no active screenshot.");
 
             return;
         }
@@ -323,7 +324,8 @@ internal sealed partial class GameUISystem : UISystemBase {
     private async void UploadScreenshot() {
         if (this.CurrentScreenshot is null) {
             Mod.Log.Warn(
-                $"Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
+                $"Game: Call to {nameof(this.ClearScreenshot)} " +
+                $"with no active screenshot.");
 
             return;
         }
@@ -372,7 +374,7 @@ internal sealed partial class GameUISystem : UISystemBase {
             // Set progress to done.
             this.uploadProgress = new UploadProgress(1, 1);
 
-            Mod.Log.Info($"Screenshot uploaded, ID #{screenshot.Id}.");
+            Mod.Log.Info($"Game: Screenshot uploaded, ID #{screenshot.Id}.");
         }
         catch (HttpException ex) {
             // Reset progress state.

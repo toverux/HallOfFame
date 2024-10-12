@@ -22,6 +22,9 @@ internal record Creator : IJsonWritable {
         set;
     } = "Unknown [Error]";
 
+    public override string ToString() =>
+        $"Creator(#{this.Id}) {this.CreatorName}";
+
     public void Write(IJsonWriter writer) {
         writer.TypeBegin(this.GetType().FullName);
 

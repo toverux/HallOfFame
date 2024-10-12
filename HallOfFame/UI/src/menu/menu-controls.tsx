@@ -37,7 +37,7 @@ export function MenuControls(): ReactElement {
                         src='Media/Glyphs/ArrowCircular.svg'
                         focusKey={FOCUS_DISABLED}
                         disabled={!menuState.isReadyForNextImage}
-                        {...snappyOnSelect(refreshScreenshot)}>
+                        {...snappyOnSelect(nextScreenshot)}>
                         {translate(
                             'HallOfFame.UI.Menu.MenuControls.ACTION[Retry]',
                             'Retry'
@@ -63,6 +63,7 @@ export function MenuControls(): ReactElement {
 
             <MenuControlsButtons
                 translate={translate}
+                hasPreviousScreenshot={menuState.hasPreviousScreenshot}
                 isLoading={!menuState.isReadyForNextImage}
                 isMenuVisible={menuState.isMenuVisible}
                 toggleMenuVisibility={() =>
@@ -218,34 +219,53 @@ function MenuControlsScreenshotLabels({
 
 function MenuControlsButtons({
     translate,
+    hasPreviousScreenshot,
     isLoading,
     isMenuVisible,
     toggleMenuVisibility
 }: Readonly<{
     translate: Localization['translate'];
+    hasPreviousScreenshot: boolean;
     isLoading: boolean;
     isMenuVisible: boolean;
     toggleMenuVisibility: () => void;
 }>): ReactElement {
     return (
         <div className={styles.menuControlsButtons}>
-            <Tooltip
-                tooltip={translate(
-                    'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]'
-                )}>
-                <MenuButton
-                    className={styles.menuControlsButtonsButton}
-                    src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
-                    tinted={false}
-                    focusKey={FOCUS_DISABLED}
-                    disabled={isLoading}
-                    {...snappyOnSelect(refreshScreenshot)}>
-                    {translate(
-                        'HallOfFame.UI.Menu.MenuControls.ACTION[Next]',
-                        'Show a new image'
-                    )}
-                </MenuButton>
-            </Tooltip>
+            <div className={styles.menuControlsButtonsButtonGroup}>
+                <Tooltip
+                    tooltip={translate(
+                        'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]',
+                        'Show the previous image'
+                    )}>
+                    <MenuButton
+                        className={`${styles.menuControlsButtonsButtonIcon} ${styles.menuControlsButtonsButtonPrevious}`}
+                        src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
+                        tinted={isLoading || !hasPreviousScreenshot}
+                        focusKey={FOCUS_DISABLED}
+                        disabled={isLoading || !hasPreviousScreenshot}
+                        {...snappyOnSelect(previousScreenshot)}
+                    />
+                </Tooltip>
+
+                <Tooltip
+                    tooltip={translate(
+                        'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]'
+                    )}>
+                    <MenuButton
+                        className={styles.menuControlsButtonsButton}
+                        src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
+                        tinted={isLoading}
+                        focusKey={FOCUS_DISABLED}
+                        disabled={isLoading}
+                        {...snappyOnSelect(nextScreenshot)}>
+                        {translate(
+                            'HallOfFame.UI.Menu.MenuControls.ACTION[Next]',
+                            'Show a new image'
+                        )}
+                    </MenuButton>
+                </Tooltip>
+            </div>
 
             <Tooltip
                 tooltip={translate(
@@ -253,7 +273,7 @@ function MenuControlsButtons({
                     'Report inappropriate content'
                 )}>
                 <MenuButton
-                    className={styles.menuControlsButtonsButtonCircle}
+                    className={styles.menuControlsButtonsButtonIcon}
                     src={'coui://uil/Colored/ExclamationMark.svg'}
                     tinted={false}
                     focusKey={FOCUS_DISABLED}
@@ -268,7 +288,7 @@ function MenuControlsButtons({
                     'Toggle menu visibility'
                 )}>
                 <MenuButton
-                    className={styles.menuControlsButtonsButtonCircle}
+                    className={styles.menuControlsButtonsButtonIcon}
                     src={
                         isMenuVisible
                             ? 'coui://uil/Colored/EyeOpen.svg'
@@ -286,8 +306,12 @@ function MenuControlsButtons({
     );
 }
 
-function refreshScreenshot(): void {
-    trigger('hallOfFame.menu', 'refreshScreenshot');
+function previousScreenshot(): void {
+    trigger('hallOfFame.menu', 'previousScreenshot');
+}
+
+function nextScreenshot(): void {
+    trigger('hallOfFame.menu', 'nextScreenshot');
 }
 
 function reportScreenshot(): void {

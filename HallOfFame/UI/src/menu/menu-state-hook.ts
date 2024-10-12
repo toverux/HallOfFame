@@ -14,6 +14,13 @@ interface ReadonlyMenuState {
     readonly imageUri: string;
 
     /**
+     * Whether a previous screenshot is available to display.
+     *
+     * @default false
+     */
+    readonly hasPreviousScreenshot: boolean;
+
+    /**
      * Whether a new screenshot is being loaded and/or a screenshot image is
      * being preloaded.
      *
@@ -60,6 +67,12 @@ const defaultImageUri$ = bindValue<string>(
     modLoadingErrorSrc
 );
 
+const hasPreviousScreenshot$ = bindValue<boolean>(
+    'hallOfFame.menu',
+    'hasPreviousScreenshot',
+    false
+);
+
 const isRefreshing$ = bindValue<boolean>(
     'hallOfFame.menu',
     'isRefreshing',
@@ -91,12 +104,14 @@ export function useHofMenuState(): [
     const [settableMenuState, setMenuState] = useSingletonMenuState();
 
     const defaultImageUri = useValue(defaultImageUri$);
+    const hasPreviousScreenshot = useValue(hasPreviousScreenshot$);
     const isRefreshing = useValue(isRefreshing$);
     const screenshot = useValue(screenshot$);
     const error = useValue(error$);
 
     const menuState: ReadonlyMenuState & SettableMenuState = {
         ...settableMenuState,
+        hasPreviousScreenshot,
         isRefreshing,
         imageUri: screenshot
             ? settings.screenshotResolution == 'fhd'

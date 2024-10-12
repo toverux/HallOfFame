@@ -71,12 +71,12 @@ public sealed class Mod : IMod {
             var patchedMethods = this.harmony.GetPatchedMethods().ToArray();
 
             Mod.Log.Info(
-                $"Registered as harmony plugin \"{Mod.HarmonyId}\". " +
+                $"Mod: Registered as harmony plugin \"{Mod.HarmonyId}\". " +
                 $"Patched methods: {patchedMethods.Length}");
 
             foreach (var method in patchedMethods) {
                 Mod.Log.Info(
-                    $"Patched method: {method.FullDescription()} " +
+                    $"Mod: Patched method: {method.FullDescription()} " +
                     $"[{method.Module.Name}]");
             }
 
@@ -113,7 +113,7 @@ public sealed class Mod : IMod {
             updateSystem.UpdateAt<MenuUISystem>(SystemUpdatePhase.UIUpdate);
             updateSystem.UpdateAt<GameUISystem>(SystemUpdatePhase.UIUpdate);
 
-            Mod.Log.Info($"{nameof(this.OnLoad)} complete.");
+            Mod.Log.Info($"Mod: {nameof(this.OnLoad)} complete.");
         }
         catch (Exception ex) {
             // We have to delay this to the next frame because it uses
@@ -135,7 +135,7 @@ public sealed class Mod : IMod {
                 this.harmony.UnpatchAll(Mod.HarmonyId);
                 this.harmony = null;
 
-                Mod.Log.Info("Unregistered Harmony patches.");
+                Mod.Log.Info("Mod: Unregistered Harmony patches.");
             }
 
             // Unregister settings UI
@@ -149,7 +149,7 @@ public sealed class Mod : IMod {
 
             Mod.instanceValue = null;
 
-            Mod.Log.Info($"{nameof(this.OnDispose)} complete.");
+            Mod.Log.Info($"Mod: {nameof(this.OnDispose)} complete.");
         });
     }
 
