@@ -160,7 +160,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// eligible to be shown again.
     /// </summary>
     [SettingsUISection(Settings.GroupContentPreferences)]
-    [SettingsUISlider(min = 0, max = 365, step = 5)]
+    [SettingsUISlider(min = 1, max = 365, step = 5)]
     public int ViewMaxAge { get; set; }
 
     /// <summary>
