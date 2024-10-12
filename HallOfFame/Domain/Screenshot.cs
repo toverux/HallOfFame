@@ -77,7 +77,7 @@ internal record Screenshot : IJsonWritable {
         get;
         [UsedImplicitly]
         set;
-    } = 0;
+    }
 
     /// <summary>
     /// Non-inherent property of screenshot only set on some endpoints.
@@ -88,6 +88,17 @@ internal record Screenshot : IJsonWritable {
         [UsedImplicitly]
         set;
     }
+
+    /// <summary>
+    /// Non-inherent property of screenshot only set on the "get screenshot with
+    /// weighted algorithms" endpoint.
+    /// </summary>
+    [DecodeAlias("__algorithm")]
+    internal string Algorithm {
+        get;
+        [UsedImplicitly]
+        set;
+    } = string.Empty;
 
     [DecodeAlias("creator")]
     internal Creator? Creator { get; set; }

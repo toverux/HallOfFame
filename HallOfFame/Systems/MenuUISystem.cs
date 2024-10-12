@@ -365,7 +365,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
             Mod.Log.Info(
                 $"Menu: {(preload ? "Preloaded" : "Loaded")} {screenshot} " +
-                $"({imageUrl}).");
+                $"({imageUrl}, algo={screenshot.Algorithm}).");
 
             return screenshot;
         }
