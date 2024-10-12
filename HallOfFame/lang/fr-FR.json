@@ -58,7 +58,6 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Votre pseudo de créateur, sera affiché avec vos photos.\nVous pouvez le changer sans problème du moment que vous conservez le même Creator ID, votre nom d’utilisateur sera mis à jour sur le serveur immédiatement ainsi que sur toutes vos photos déjà envoyées.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "Identifiant (Creator ID)",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "Identifiant unique et SECRET de créateur, utilisé pour vous identifier et regrouper vos créations.\nNe le partagez pas ! Considérez-le comme un mot de passe.\nVous pouvez l’éditer dans le fichier de paramètres du mod, si vous savez exactement ce que vous faites.\nContactez le support si vous avez un problème avec votre Creator ID.",
-  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoginStatus]": "",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.LoginStatus]": "Ceci montre le statut de votre compte sur le serveur Hall of Fame.",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  Connecté en tant que « {CREATOR_NAME} »",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Connecté en anonyme",
