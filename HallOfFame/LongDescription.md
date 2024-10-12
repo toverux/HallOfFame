@@ -1,4 +1,4 @@
-# Hall of Fame for Cities: Skylines II
+﻿# Hall of Fame for Cities: Skylines II
 
 ## What does it do?
 
@@ -150,8 +150,17 @@ disable the mod or just accept it (or help me debug this thing lol) :D
 - **The Cities: Skylines Modding Discord community** in general for their help
   and kind support.
 - **Chamëleon (@chameleon_tbn)** for creating some UI icons for the mod.
+- **Bad Peanut** for the Hearth Chirper icon.
 - **CloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop,
   ThemisC2, Tigon Ologdring**, for having tested the mod and uploaded the first
   content so we have beautiful images on launch.
+- Translators:
+  Tiago Correia (Portuguese),
+  Konsi (German),
+  baka-gourd and RilkeXS (Chinese Simplified),
+  elGendo87 (Spanish),
+  karmel68 (Polish),
+  ThemisC2 (Italian),
+  toverux (French).
 - **ThemisC2** for his hum, *relentless* support to help me finally finish a
   personal project.
