@@ -23,7 +23,7 @@
   "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Message]": "Your report was sent and the screenshot is unlisted pending review.\nThank you for helping us keep the Hall of Fame a nice place!",
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "Hall of Fame’s had a little network traffic accident :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Gameplay is not affected and it is absolutely safe to launch a game.",
-  "HallOfFame.UI.Menu.MenuControls.PRISTINE_WILDERNESS": "Pristine wilderness",
+  "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "Pristine wilderness",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Next]": "Next",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Retry",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]": "Show the previous image",

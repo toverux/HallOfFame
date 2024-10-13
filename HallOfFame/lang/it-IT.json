@@ -23,7 +23,7 @@
   "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Message]": "Il tuo report è stato inviato e lo screenshot è rimosso in attesa di revisione.\nGrazie per averci aiutato a mantenere la Hall of Fame un bel posto !",
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "Hall of Fame ha incontrato un piccolo incidente nel traffico Internet :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Il gameplay non viene affetto ed è assolutamente sicuro avviare una partita.",
-  "HallOfFame.UI.Menu.MenuControls.PRISTINE_WILDERNESS": "Natura incontaminata",
+  "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "Natura incontaminata",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Next]": "Seg.",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Riprova",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]": "Mostra l'immagine precedente",

@@ -228,7 +228,7 @@ function MenuControlsScreenshotLabels({
                 <span>
                     <img src='Media/Game/Icons/NaturalResources.svg' />
                     {translate(
-                        `HallOfFame.UI.Menu.MenuControls.PRISTINE_WILDERNESS`,
+                        `HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]`,
                         `Pristine wilderness`
                     )}
                 </span>

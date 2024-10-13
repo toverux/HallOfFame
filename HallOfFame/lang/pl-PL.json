@@ -23,7 +23,7 @@
   "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Message]": "Twoje zgłoszenie zostało wysłane, a zrzut ekranu został ukryty i oczekuje na sprawdzenie.\nDziękujemy za pomoc w utrzymywaniu Hall of Fame jako godnego miejsca!",
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "W Hall of Fame doszło do małego wypadku sieciowego :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Rozgrywka nie jest zagrożona i rozpoczęcie gry jest całkowicie bezpieczne.",
-  "HallOfFame.UI.Menu.MenuControls.PRISTINE_WILDERNESS": "Nieokiełznana przyroda",
+  "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "Nieokiełznana przyroda",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Next]": "Nast.",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Ponów próbę",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]": "Pokaż poprzedni obraz",
