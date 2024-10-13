@@ -305,6 +305,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 // Trim queue if it's more than 20 screenshots long.
                 if (this.screenshotsQueue.Count > 20) {
                     this.screenshotsQueue.RemoveAt(0);
+                    this.currentScreenshotIndex--; // Adjust index.
                 }
             }
 
