@@ -29,7 +29,12 @@
       },
       "correctness": {
         // I generally know what I'm doing.
-        "noNodejsModules": "off"
+        "noNodejsModules": "off",
+        // PROJECT-SPECIFIC, here we are forced to disable it until the rule
+        // allows us to specify exceptions ("cs2/*" imports).
+        "noUndeclaredDependencies": "off",
+        // PROJECT-SPECIFIC, it is fine in this project.
+        "useImportExtensions": "off"
       },
       "performance": {
         // Virtually not an issue with modern bundlers.
@@ -62,10 +67,19 @@
         }
       },
       "suspicious": {
+        // When I use anything other than `console.log`, it is intentional.
+        "noConsole": {
+          "level": "error",
+          "options": {
+            "allow": ["assert", "info", "warn", "error"]
+          }
+        },
         // Double equals is not THAT bad, although I understand why the rule
         // exists. If you know the language you can avoid the pitfalls and even
         // enjoy the benefits of loose equality.
-        "noDoubleEquals": "off"
+        "noDoubleEquals": "off",
+        // PROJECT-SPECIFIC, we use React.
+        "noReactSpecificProps": "off"
       }
     }
   },

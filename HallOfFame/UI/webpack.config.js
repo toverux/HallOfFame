@@ -18,6 +18,7 @@ const gray = text => `\x1b[90m${text}\x1b[0m`;
 const userDataPath = process.env.CSII_USERDATAPATH;
 
 if (!userDataPath) {
+    // biome-ignore lint/style/useThrowOnlyError: CLI pattern.
     throw 'CSII_USERDATAPATH environment variable is not set, ensure the CSII Modding Toolchain is installed correctly';
 }
 
