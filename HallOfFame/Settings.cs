@@ -156,6 +156,12 @@ public sealed class Settings : ModSetting, IJsonWritable {
         string.Empty; // The actual text comes from the translations files.
 
     /// <summary>
+    /// Whether to show the view count of screenshots in the main menu UI.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    public bool ShowViewCount { get; set; }
+
+    /// <summary>
     /// Minimum time in days before a screenshot the user has already seen is
     /// eligible to be shown again.
     /// </summary>
@@ -282,6 +288,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.RandomScreenshotWeight = 2;
         this.SupporterScreenshotWeight = 2;
 
+        this.ShowViewCount = true;
         this.ViewMaxAge = 60;
         this.ScreenshotResolution = "fhd";
 
@@ -463,6 +470,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
         writer.PropertyName("creatorIdClue");
         writer.Write(this.MaskedCreatorID?.Split('-')[0]);
+
+        writer.PropertyName("showViewCount");
+        writer.Write(this.ShowViewCount);
 
         writer.PropertyName("screenshotResolution");
         writer.Write(this.ScreenshotResolution);

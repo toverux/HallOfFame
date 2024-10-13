@@ -10,7 +10,7 @@ import { Button, MenuButton, Tooltip } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import type { Screenshot } from '../common';
 import loveChirperSrc from '../icons/love-chirper.png';
-import { snappyOnSelect } from '../utils';
+import { type ModSettings, snappyOnSelect, useModSettings } from '../utils';
 import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
 import * as styles from './menu-controls.module.scss';
 import { useHofMenuState } from './menu-state-hook';
@@ -19,6 +19,7 @@ import { useHofMenuState } from './menu-state-hook';
  * Component that renders the menu controls and city/creator information.
  */
 export function MenuControls(): ReactElement {
+    const modSettings = useModSettings();
     const [menuState, setMenuState] = useHofMenuState();
 
     const { translate } = useLocalization();
@@ -62,6 +63,7 @@ export function MenuControls(): ReactElement {
 
             <MenuControlsScreenshotLabels
                 translate={translate}
+                modSettings={modSettings}
                 screenshot={menuState.screenshot}
             />
 
@@ -209,9 +211,11 @@ function MenuControlsCityName({
 
 function MenuControlsScreenshotLabels({
     translate,
+    modSettings,
     screenshot
 }: Readonly<{
     translate: Localization['translate'];
+    modSettings: ModSettings;
     screenshot: Screenshot;
 }>): ReactElement {
     // Do not show the pop/milestone labels if this is an empty map screenshot,
@@ -247,6 +251,35 @@ function MenuControlsScreenshotLabels({
                         {formatBigNumber(screenshot.cityPopulation, translate)}
                     </span>
                 </>
+            )}
+
+            {modSettings.showViewCount && (
+                <Tooltip
+                    tooltip={
+                        <LocalizedString
+                            id='HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]'
+                            fallback='{NUMBER} views ({VIEWS_PER_DAY} views/day)'
+                            args={{
+                                // biome-ignore lint/style/useNamingConvention: i18n convention
+                                NUMBER: (
+                                    <LocalizedNumber
+                                        value={screenshot.viewsCount}
+                                    />
+                                ),
+                                // biome-ignore lint/style/useNamingConvention: i18n convention
+                                VIEWS_PER_DAY: (
+                                    <LocalizedNumber
+                                        value={screenshot.viewsPerDay}
+                                    />
+                                )
+                            }}
+                        />
+                    }>
+                    <span>
+                        <img src='coui://uil/Colored/EyeOpen.svg' />
+                        {formatBigNumber(screenshot.viewsCount, translate)}
+                    </span>
+                </Tooltip>
             )}
 
             <Tooltip tooltip={screenshot.createdAtFormatted}>
@@ -351,6 +384,12 @@ function MenuControlsButtons({
                             NUMBER: (
                                 <LocalizedNumber
                                     value={screenshot.favoritesCount}
+                                />
+                            ),
+                            // biome-ignore lint/style/useNamingConvention: i18n convention
+                            FAVORITES_PER_DAY: (
+                                <LocalizedNumber
+                                    value={screenshot.favoritesPerDay}
                                 />
                             )
                         }}
