@@ -33,6 +33,13 @@ internal sealed partial class GameUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame.game";
 
     /// <summary>
+    /// File path of the latest screenshot taken.
+    /// For file-serving purposes only.
+    /// </summary>
+    private static readonly string ScreenshotFilePath =
+        Path.Combine(Mod.ModDataPath, "screenshot.jpg");
+
+    /// <summary>
     /// File path of the preview of the latest screenshot taken.
     /// For file-serving purposes only.
     /// </summary>
@@ -340,8 +347,10 @@ internal sealed partial class GameUISystem : UISystemBase {
         // Prepare full size and preview images in a background thread.
         await Task.Run(() => {
             File.WriteAllBytes(
-                GameUISystem.ScreenshotPreviewFilePath,
-                jpgPreviewBytes);
+                GameUISystem.ScreenshotPreviewFilePath, jpgPreviewBytes);
+
+            File.WriteAllBytes(
+                GameUISystem.ScreenshotFilePath, pngScreenshotBytes);
 
             this.WriteLocalScreenshot(pngScreenshotBytes);
         });
@@ -355,9 +364,9 @@ internal sealed partial class GameUISystem : UISystemBase {
             previousGIValue && Mod.Settings.DisableGlobalIllumination,
             areSettingsTopQuality: this.AreSettingsTopQuality());
 
-        // Preload the image in cache before updating the UI.
+        // Preload the preview image in cache before updating the UI.
         await this.imagePreloaderUISystem!
-            .Preload(screenshotSnapshot.ImageUri);
+            .Preload(screenshotSnapshot.PreviewImageUri);
 
         this.CurrentScreenshot = screenshotSnapshot;
 
@@ -374,6 +383,7 @@ internal sealed partial class GameUISystem : UISystemBase {
         }
 
         try {
+            File.Delete(GameUISystem.ScreenshotFilePath);
             File.Delete(GameUISystem.ScreenshotPreviewFilePath);
         }
         catch (Exception ex) {
@@ -645,8 +655,12 @@ internal sealed partial class GameUISystem : UISystemBase {
 
         internal byte[] ImageBytes { get; } = imageBytes;
 
-        internal string ImageUri =>
+        internal string PreviewImageUri =>
             $"coui://halloffame/{Path.GetFileName(GameUISystem.ScreenshotPreviewFilePath)}" +
+            $"?v={this.currentVersion}";
+
+        private string ImageUri =>
+            $"coui://halloffame/{Path.GetFileName(GameUISystem.ScreenshotFilePath)}" +
             $"?v={this.currentVersion}";
 
         public void Write(IJsonWriter writer) {
@@ -657,6 +671,9 @@ internal sealed partial class GameUISystem : UISystemBase {
 
             writer.PropertyName("population");
             writer.Write(this.Population);
+
+            writer.PropertyName("previewImageUri");
+            writer.Write(this.PreviewImageUri);
 
             writer.PropertyName("imageUri");
             writer.Write(this.ImageUri);

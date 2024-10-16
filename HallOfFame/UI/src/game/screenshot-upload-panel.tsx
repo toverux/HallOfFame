@@ -30,6 +30,7 @@ import * as styles from './screenshot-upload-panel.module.scss';
 interface JsonScreenshotSnapshot {
     readonly achievedMilestone: number;
     readonly population: number;
+    readonly previewImageUri: string;
     readonly imageUri: string;
     readonly imageFileSize: number;
     readonly imageWidth: number;
@@ -218,7 +219,7 @@ function ScreenshotUploadPanelImage({
 
             <img
                 className={coFixedRatioImageStyles.image}
-                src={screenshotSnapshot.imageUri}
+                src={screenshotSnapshot.previewImageUri}
             />
 
             {ratioPreviewInfo.type != 'equal' && (
@@ -233,18 +234,39 @@ function ScreenshotUploadPanelImage({
                         'The border shows you how your image will be cropped on the most common aspect ratio.'
                     )}>
                     <div
-                        className={`${styles.screenshotUploadPanelImageRatioPreview} ${uploadProgress ? styles.screenshotUploadPanelImageRatioPreviewHide : ''}`}
+                        className={`${styles.screenshotUploadPanelImageRatioPreview} ${uploadProgress ? styles.screenshotUploadPanelImageHidden : ''}`}
                         style={ratioPreviewInfo.style}>
                         16:9
                     </div>
                 </DescriptionTooltip>
             )}
 
+            <Button
+                variant='round'
+                selectSound='open-panel'
+                onSelect={() =>
+                    showFullscreenImage(screenshotSnapshot.imageUri)
+                }
+                className={`${styles.screenshotUploadPanelImageMagnifyButton} ${
+                    uploadProgress
+                        ? styles.screenshotUploadPanelImageHidden
+                        : ''
+                }`}>
+                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'>
+                    {/* Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. */}
+                    <path d='M32 32C14.3 32 0 46.3 0 64l0 96c0 17.7 14.3 32 32 32s32-14.3 32-32l0-64 64 0c17.7 0 32-14.3 32-32s-14.3-32-32-32L32 32zM64 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 96c0 17.7 14.3 32 32 32l96 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-64 0 0-64zM320 32c-17.7 0-32 14.3-32 32s14.3 32 32 32l64 0 0 64c0 17.7 14.3 32 32 32s32-14.3 32-32l0-96c0-17.7-14.3-32-32-32l-96 0zM448 352c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 64-64 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l96 0c17.7 0 32-14.3 32-32l0-96z' />
+                </svg>
+            </Button>
+
             {uploadProgress && (
                 <div
                     className={styles.screenshotUploadPanelImageUploadProgress}>
                     <div
-                        className={`${styles.screenshotUploadPanelImageUploadProgressContent} ${successImageUri ? styles.screenshotUploadPanelImageUploadProgressContentUploadSuccess : ''}`}>
+                        className={`${styles.screenshotUploadPanelImageUploadProgressContent} ${
+                            successImageUri
+                                ? styles.screenshotUploadPanelImageUploadProgressContentUploadSuccess
+                                : ''
+                        }`}>
                         {successImageUri ? (
                             <img
                                 src={successImageUri}
@@ -415,7 +437,7 @@ function ScreenshotUploadPanelFooter({
                         variant='primary'
                         disabled={isUploading}
                         onSelect={discardScreenshot}
-                        selectSound='close-menu'>
+                        selectSound='close-panel'>
                         {translate('Common.ACTION[Cancel]', 'Cancel')}
                     </Button>
 
@@ -554,6 +576,19 @@ function getUploadProgressHintText(
     }
 
     return null;
+}
+
+function showFullscreenImage(src: string): void {
+    const div = document.createElement('div');
+
+    div.classList.add(styles.fullscreenImage);
+    div.style.backgroundImage = `url(${src})`;
+
+    document.body.appendChild(div);
+
+    div.addEventListener('click', () => {
+        document.body.removeChild(div);
+    });
 }
 
 function discardScreenshot(): void {

@@ -69,6 +69,34 @@
 
         @include common.fade-in;
 
+        &-hidden {
+            opacity: 0;
+        }
+
+        &-magnify-button {
+            position: absolute;
+            right: 15rem;
+            bottom: 15rem;
+
+            width: 50rem;
+            height: 50rem;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            &:hover svg {
+                opacity: .8;
+            }
+
+            svg {
+                width: 60%;
+                height: 60%;
+                fill: white;
+                opacity: .5;
+            }
+        }
+
         &-ratio-preview {
             // other positioning properties are set via code:
             // display (flex/none), width, height.
@@ -89,10 +117,6 @@
 
             &:hover {
                 opacity: .8;
-            }
-
-            &-hide {
-                opacity: 0;
             }
         }
 
@@ -220,4 +244,17 @@
             }
         }
     }
+}
+
+//noinspection CssReplaceWithShorthandSafely
+.fullscreen-image {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    z-index: 10000;
 }
