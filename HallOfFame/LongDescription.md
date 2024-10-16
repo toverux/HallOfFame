@@ -10,8 +10,8 @@ If you’re in one of those situations, all you need is the mod!
 - You’re too lazy to open Reddit and three Discord servers to see some cool
   cities.
 
-This mod allows players to take and upload screenshots of their city, and share
-them with the community. Images can then be viewed by other players as a
+This mod allows players to take and upload 4K screenshots of their city, and
+share them with the community. Images can then be viewed by other players as a
 background image in the main menu, with information about the creator, the city
 name, and controls to refresh the image, like/favorite or hide the menu UI to
 better see the image, to name a few features.
@@ -19,21 +19,23 @@ better see the image, to name a few features.
 Hall of Fame then makes sure that no city falls into oblivion, by displaying
 each uploaded images as often as possible.
 
-The liking/favorite and trending screenshots mechanisms still allows the best
-creators to shine, but everyone is welcome, there is no downvote and no
-moderation based on skill.
+The likes and trending screenshots mechanisms still allows the best creators to
+shine, but everyone is welcome, there is no downvote and no moderation based on
+skill.
 
 ## Features
 
+- Supersampling all screenshots you make to **4K** resolution even if you play
+  at a lower resolution, and makes better renders than the game’s native
+  screenshot tool.
 - Have pictures displayed in the main menu, with various information about the
   city, the author, etc.
-- Choose between Full HD and 4K resolution for pictures shown in the main menu.
+- Give a like to the pictures you appreciate and see popular pictures.
 - Toggle menu UI visibility to admire the pictures (like a slideshow).
 - Fine-tune how the algorithm chooses screenshots that are presented to you
   (recent screenshots, most liked, ancient and forgotten, etc.).
 - Make screenshots and upload them via a dedicated interface, all in-game.
-- Supersampling all screenshots you make to 4K resolution even if you play at a
-  lower resolution.
+- Choose between Full HD and 4K resolution for pictures shown in the main menu.
 
 **Much more to come!** See our feedback and feature requests board to follow the
 development and suggest/upvote features:
@@ -99,38 +101,11 @@ server and your images is not free.
 
 Donations are very welcome and will help keep the service running.
 
-I will soon publish, here or directly in the mod the exact donation/expenditure
-balance so people are encouraged to donate when the balance is in the red.
-(Or just donate because you like the mod!)
+I will soon publish the exact donation/expenditure balance for the mod so people
+are encouraged to donate when the balance is in the red.
+(Or just donate because you like the mod! =)
 
-## Known issues
-
-### Supersampling artifacts
-
-All screenshots are taken at a minimum of 4K resolution, even if you are using
-a lower resolution in-game, so that users using a better resolution can enjoy
-your images in the best quality.
-
-**On some systems, this can cause supersampling artifacts, where the image
-becomes very grainy or things that aren’t normally there appear in the
-screenshot.**
-
-Those rendering issues are not caused by the mod itself, but by the game engine,
-to simplify, it just makes problems normally not visible at your resolution
-visible in 4K, or “enlarges” them.
-
-So, take a close look at your screenshots before uploading them, seek for
-abnormalities, and if you see some that bother you, you could try the following:
-- Take the screenshot again from a slightly different position.
-- Disable DLSS or FSR if you have it enabled.
-- Scale back a little on some photo mode settings that can cause rendering
-  issues (typical with clouds, for example).
-
-If the problem is too common/prominent on your machine, please ping me or upvote
-this post https://feedback.halloffame.cs2.mtq.io/posts/22 so that I’m aware of
-the prevalence of this issue and make supersampling opt-out.
-
-### Possible (benign) crash at game load
+## Known issue: possible (but benign) crash when starting the game
 
 There is a bug in cohtml engine (the UI layer of Cities: Skylines II) that can
 cause random (generally rare) crashes **for some users** with some playsets.
