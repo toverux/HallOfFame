@@ -33,7 +33,6 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 ist mit Abstand das häufigste Seitenverhältnis. Dieses Rechteck zeigt dir, wie Ihr Bild auf solchen Bildschirmen zugeschnitten wird, sodass du sicher sein kannst, dass alle wichtigen Details darin enthalten sind.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Dein Creator-Name ist derzeit leer. Du musst ihn in den Mod-Einstellungen festlegen, um ein Bild hochzuladen.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "Du kannst deinen Creator-Namen in den Mod-Optionen oder den Namen der Stadt ändern, ohne dieses Fenster zu schließen.",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING": "In einer zukünftigen Version kannst du deine Sammlung verwalten, deine Screenshots bearbeiten oder löschen und vieles mehr!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "Hochgeladene Inhalte werden moderiert und jeder Missbrauch einschließlich Identitätsdiebstahl führt zu einem permanenten Bann deiner Account- und IP-Adresse.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "Creator-ID: {CREATOR_ID}",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE": "Teilen",

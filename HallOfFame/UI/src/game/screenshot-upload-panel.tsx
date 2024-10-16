@@ -28,6 +28,7 @@ import {
 import * as styles from './screenshot-upload-panel.module.scss';
 
 interface JsonScreenshotSnapshot {
+    readonly wasGlobalIlluminationDisabled: boolean;
     readonly achievedMilestone: number;
     readonly population: number;
     readonly imageUri: string;
@@ -117,6 +118,7 @@ export function ScreenshotUploadPanel(): ReactElement {
                 <ScreenshotUploadPanelContentOthers
                     translate={translate}
                     creatorNameIsEmpty={creatorNameIsEmpty}
+                    screenshotSnapshot={screenshotSnapshot}
                 />
 
                 <ScreenshotUploadPanelFooter
@@ -323,10 +325,12 @@ function ScreenshotUploadPanelContentCityInfo({
 
 function ScreenshotUploadPanelContentOthers({
     translate,
-    creatorNameIsEmpty
+    creatorNameIsEmpty,
+    screenshotSnapshot
 }: Readonly<{
     translate: Localization['translate'];
     creatorNameIsEmpty: boolean;
+    screenshotSnapshot: JsonScreenshotSnapshot;
 }>): ReactElement {
     return (
         <>
@@ -340,16 +344,18 @@ function ScreenshotUploadPanelContentOthers({
             )}
 
             <div className={styles.screenshotUploadPanelContent}>
+                {screenshotSnapshot.wasGlobalIlluminationDisabled && (
+                    <p>
+                        {translate(
+                            'HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED',
+                            `Global Illumination was disabled when taking the screenshot, see mod options for more info.`
+                        )}
+                    </p>
+                )}
                 <p>
                     {translate(
                         'HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY',
                         `You can update your creator name or city name without closing this window.`
-                    )}
-                </p>
-                <p>
-                    {translate(
-                        'HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING',
-                        `Future update will let you manage your collection on our website.`
                     )}
                 </p>
                 <p style={{ margin: 0 }}>

@@ -39,7 +39,6 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "Zdecydowanie najpopularniejszą rozdzielczością ekranu jest 16:9. Ten prostokąt pokazuje, jak obraz zostanie przycięty na takich ekranach, dzięki czemu możesz upewnić się, że wszystkie ważne szczegóły są w nim umieszczone.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Twoja nazwa twórcy jest obecnie pusta. Musisz ustawić ją w ustawieniach moda, aby móc przesyłać zdjęcia.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "Możesz zmienić nazwę twórcy w opcjach moda lub nazwę miasta bez zamykania tego okna.",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING": "W przyszłej wersji będziesz mógł zarządzać swoją kolekcją, edytować lub usuwać zrzuty ekranu i wiele więcej!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "Przesłane treści są moderowane i wszelkie nadużycia, w tym kradzież tożsamości, spowoduje trwałe zablokowanie Twojego konta i adresu IP.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "ID twórcy: {CREATOR_ID}",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE": "Udostępnij",

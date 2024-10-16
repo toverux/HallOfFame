@@ -321,10 +321,12 @@ internal sealed partial class GameUISystem : UISystemBase {
         });
 
         var screenshotSnapshot = new ScreenshotSnapshot(
-            this.GetAchievedMilestone(),
-            this.GetPopulation(),
-            pngScreenshotBytes,
-            new Vector2Int(width, height));
+            achievedMilestone: this.GetAchievedMilestone(),
+            population: this.GetPopulation(),
+            imageBytes: pngScreenshotBytes,
+            imageSize: new Vector2Int(width, height),
+            wasGlobalIlluminationDisabled:
+            previousGIValue && Mod.Settings.DisableGlobalIllumination);
 
         // Preload the image in cache before updating the UI.
         await this.imagePreloaderUISystem!
@@ -575,7 +577,8 @@ internal sealed partial class GameUISystem : UISystemBase {
         int achievedMilestone,
         int population,
         byte[] imageBytes,
-        Vector2Int imageSize) : IJsonWritable {
+        Vector2Int imageSize,
+        bool wasGlobalIlluminationDisabled) : IJsonWritable {
         /// <summary>
         /// As we use the same file name for each new screenshot, this is a
         /// refresh counter appended to the URL of the image as a query
@@ -616,6 +619,9 @@ internal sealed partial class GameUISystem : UISystemBase {
 
             writer.PropertyName("imageFileSize");
             writer.Write(this.ImageBytes.Length);
+
+            writer.PropertyName("wasGlobalIlluminationDisabled");
+            writer.Write(wasGlobalIlluminationDisabled);
 
             writer.TypeEnd();
         }

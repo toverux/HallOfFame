@@ -39,7 +39,6 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 é de longe a proporção de aspecto mais comum. Este retângulo mostra como sua imagem será cortada nesses monitores, para que você possa garantir que todos os detalhes importantes estejam incluídos.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Seu Nome de Criador está atualmente vazio. Você deve defini-lo nas configurações do mod para carregar uma imagem.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "Você pode mudar seu Nome de Criador nas opções do mod ou o nome da cidade sem fechar esta janela.",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_UPCOMING": "Em uma versão futura, você poderá gerenciar sua coleção, editar ou apagar suas capturas de tela, e muito mais!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "O conteúdo carregado é moderado e qualquer abuso, incluindo roubo de identidade, resultará em um banimento permanente da sua conta e endereço IP.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "ID de Criador: {CREATOR_ID}",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE": "Compartilhar",
