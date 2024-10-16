@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Colossal.Json;
 using HallOfFame.Domain;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -16,11 +17,20 @@ internal static partial class HttpQueries {
         int cityPopulation,
         byte[] screenshotData,
         ProgressHandler? progressHandler = null) {
+        var metadata = new Dictionary<string, string> {
+            { "platform", Application.platform.ToString() },
+            { "cpu", SystemInfo.processorType },
+            { "gpuName", SystemInfo.graphicsDeviceName },
+            { "gpuVendor", SystemInfo.graphicsDeviceVendor },
+            { "gpuVersion", SystemInfo.graphicsDeviceVersion }
+        };
+
         var multipart = new WWWForm();
 
         multipart.AddField("cityName", cityName);
         multipart.AddField("cityMilestone", cityMilestone);
         multipart.AddField("cityPopulation", cityPopulation);
+        multipart.AddField("metadata", JSON.Dump(metadata));
         multipart.AddBinaryData("screenshot", screenshotData, "screenshot.png");
 
         using var request = UnityWebRequest.Post(
