@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -215,6 +216,8 @@ internal sealed partial class GameUISystem : UISystemBase {
     }
 
     private async Task DoTakeScreenshot() {
+        this.PlaySound("select-item");
+
         // Hide the UI, otherwise it will be captured in the screenshot.
         GameManager.instance.userInterface.view.enabled = false;
         await Task.Yield();
@@ -233,6 +236,20 @@ internal sealed partial class GameUISystem : UISystemBase {
         var previousDlssValue = cameraData.allowDeepLearningSuperSampling;
         cameraData.allowDeepLearningSuperSampling = false;
 
+        // Disable Unity dynamic resolution upscaling, it's a low quality
+        // profile.
+        var dynResSettings = SharedSettings.instance.graphics
+            .GetQualitySetting<DynamicResolutionScaleSettings>();
+
+        var previousDynResLevel = dynResSettings.GetLevel();
+
+        if (dynResSettings.GetLevel() != QualitySetting.Level.High) {
+            // "High" actually means "Disabled" as disabling this option yields
+            // the best quality.
+            dynResSettings.SetLevel(QualitySetting.Level.High, apply: false);
+            dynResSettings.Apply();
+        }
+
         // Disable global illumination as it causes a LOT of grain in CS2's
         // implementation of GI, on some NVIDIA (?) GPUs.
         var globalIllumination = SharedSettings.instance.graphics
@@ -243,6 +260,11 @@ internal sealed partial class GameUISystem : UISystemBase {
         if (Mod.Settings.DisableGlobalIllumination) {
             globalIllumination.enable.Override(false);
         }
+
+        // Let time for some graphics settings to apply.
+        // When testing only DynamicResolutionScaleSettings needed this, but in
+        // any case it's not a bad idea.
+        await Task.Yield();
 
         // Create a RenderTexture with the supersize resolution, and ask the
         // camera to render to it.
@@ -280,6 +302,12 @@ internal sealed partial class GameUISystem : UISystemBase {
         // Reset DLSS
         cameraData.allowDeepLearningSuperSampling = previousDlssValue;
 
+        // Reset dynamic resolution
+        if (dynResSettings.GetLevel() != previousDynResLevel) {
+            dynResSettings.SetLevel(previousDynResLevel, apply: false);
+            dynResSettings.Apply();
+        }
+
         // Reset GI
         if (Mod.Settings.DisableGlobalIllumination) {
             globalIllumination.enable.Override(previousGIValue);
@@ -292,8 +320,6 @@ internal sealed partial class GameUISystem : UISystemBase {
         // Re-enable the UI.
         GameManager.instance.userInterface.view.enabled = true;
         await Task.Yield();
-
-        this.PlayTakePhotoSound();
 
         // Encode the Texture2D to a PNG byte array.
         // Note: image encoding cannot be done in a background thread
@@ -326,13 +352,16 @@ internal sealed partial class GameUISystem : UISystemBase {
             imageBytes: pngScreenshotBytes,
             imageSize: new Vector2Int(width, height),
             wasGlobalIlluminationDisabled:
-            previousGIValue && Mod.Settings.DisableGlobalIllumination);
+            previousGIValue && Mod.Settings.DisableGlobalIllumination,
+            areSettingsTopQuality: this.AreSettingsTopQuality());
 
         // Preload the image in cache before updating the UI.
         await this.imagePreloaderUISystem!
             .Preload(screenshotSnapshot.ImageUri);
 
         this.CurrentScreenshot = screenshotSnapshot;
+
+        this.PlaySound("take-photo");
     }
 
     private void ClearScreenshot() {
@@ -506,16 +535,36 @@ internal sealed partial class GameUISystem : UISystemBase {
     }
 
     /// <summary>
-    /// Simply plays the take photo sound, same as the Vanilla screenshot tool.
+    /// Verifies that all graphics settings are set to the highest possible
+    /// quality.
+    /// Ignores Global Illumination and Dynamic Resolution Scale settings as
+    /// they are overridden during the screenshot process because they cause
+    /// issues.
     /// </summary>
-    private void PlayTakePhotoSound() {
+    private bool AreSettingsTopQuality() => SharedSettings.instance.graphics
+        .qualitySettings
+        .Where(settings => settings
+            is not SSGIQualitySettings
+            and not DynamicResolutionScaleSettings)
+        .All(settings => {
+            var highestLevel = settings
+                .EnumerateAvailableLevels()
+                .Last(level => level != QualitySetting.Level.Custom);
+
+            return settings.GetLevel() >= highestLevel;
+        });
+
+    /// <summary>
+    /// Simply play a sound.
+    /// </summary>
+    private void PlaySound(string sound) {
         try {
             // ReSharper disable once Unity.UnknownResource
             var sounds = Resources.Load<UISoundCollection>("Audio/UI Sounds");
-            sounds.PlaySound("take-photo");
+            sounds.PlaySound(sound);
         }
         catch (Exception ex) {
-            Mod.Log.ErrorRecoverable(ex);
+            Mod.Log.ErrorSilent(ex, $"Could not play sound {sound}.");
         }
     }
 
@@ -578,7 +627,8 @@ internal sealed partial class GameUISystem : UISystemBase {
         int population,
         byte[] imageBytes,
         Vector2Int imageSize,
-        bool wasGlobalIlluminationDisabled) : IJsonWritable {
+        bool wasGlobalIlluminationDisabled,
+        bool areSettingsTopQuality) : IJsonWritable {
         /// <summary>
         /// As we use the same file name for each new screenshot, this is a
         /// refresh counter appended to the URL of the image as a query
@@ -622,6 +672,9 @@ internal sealed partial class GameUISystem : UISystemBase {
 
             writer.PropertyName("wasGlobalIlluminationDisabled");
             writer.Write(wasGlobalIlluminationDisabled);
+
+            writer.PropertyName("areSettingsTopQuality");
+            writer.Write(areSettingsTopQuality);
 
             writer.TypeEnd();
         }

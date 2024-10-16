@@ -39,6 +39,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Prévisualisation en 16:9",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 est de loin le ratio d'écran le plus répandu. Ce rectangle vous montre comment votre image sera recadrée sur ces écrans, pour que vous puissiez vous assurer que le cadrage vous convienne.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Votre nom de créateur n’a pas été défini. Rendez-vous dans les paramètres du mod pour le définir et pouvoir téléverser une photo.",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY": "Vos paramètres graphiques ne sont pas au maximum. Nous vous recommandons de les augmenter pendant les prises de vue !",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "L’illumination globale a été désactivée pour la capture d’écran, consultez les options du mod pour plus d’informations.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "Vous pouvez changer votre nom de créateur dans les paramètres du mod ou le nom de la ville sans fermer cette fenêtre.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "Le contenu téléversé est modéré et tout abus, incluant l’usurpation d’identité, sera résultera en un bannissement de votre compte et adresse IP.",

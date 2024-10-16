@@ -28,13 +28,14 @@ import {
 import * as styles from './screenshot-upload-panel.module.scss';
 
 interface JsonScreenshotSnapshot {
-    readonly wasGlobalIlluminationDisabled: boolean;
     readonly achievedMilestone: number;
     readonly population: number;
     readonly imageUri: string;
     readonly imageFileSize: number;
     readonly imageWidth: number;
     readonly imageHeight: number;
+    readonly wasGlobalIlluminationDisabled: boolean;
+    readonly areSettingsTopQuality: boolean;
 }
 
 interface JsonUploadProgress {
@@ -339,6 +340,15 @@ function ScreenshotUploadPanelContentOthers({
                     {translate(
                         'HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY',
                         `You must set your Creator Name in the mod settings to upload a picture.`
+                    )}
+                </div>
+            )}
+
+            {!screenshotSnapshot.areSettingsTopQuality && (
+                <div className={styles.screenshotUploadPanelWarning}>
+                    {translate(
+                        'HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY',
+                        `Your graphics settings are not set to the highest quality.`
                     )}
                 </div>
             )}
