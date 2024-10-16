@@ -3,22 +3,23 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Colossal;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
 using Game.City;
 using Game.SceneFlow;
+using Game.Settings;
 using Game.Simulation;
 using Game.UI;
 using Game.UI.InGame;
 using Game.UI.Localization;
 using Game.UI.Menu;
 using HallOfFame.Http;
-using HallOfFame.Patches;
 using HallOfFame.Utils;
-using HarmonyLib;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.Rendering.HighDefinition;
 using Object = UnityEngine.Object;
 
 namespace HallOfFame.Systems;
@@ -31,28 +32,17 @@ internal sealed partial class GameUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame.game";
 
     /// <summary>
-    /// File path of the latest screenshot taken.
+    /// File path of the preview of the latest screenshot taken.
     /// For file-serving purposes only.
     /// </summary>
-    private static readonly string ScreenshotFilePath =
-        Path.Combine(Mod.ModDataPath, "screenshot.jpg");
-
-    /// <summary>
-    /// This is the method that is called when the "Take Photo" button is
-    /// clicked. We will also use it for custom HoF screenshots.
-    /// It is private and normally called by the `photoMode.takeScreenshot`
-    /// trigger binding.
-    /// </summary>
-    private static readonly MethodInfo TakeScreenshotOriginalMethod =
-        AccessTools.Method(typeof(PhotoModeUISystem), "TakeScreenshot") ??
-        throw new MissingMethodException(
-            $"Could not find method {nameof(PhotoModeUISystem)}.TakeScreenshot().");
+    private static readonly string ScreenshotPreviewFilePath =
+        Path.Combine(Mod.ModDataPath, "preview.jpg");
 
     private CitySystem? citySystem;
 
     private CityConfigurationSystem? cityConfigurationSystem;
 
-    private PhotoModeUISystem? photoModeUISystem;
+    private ImagePreloaderUISystem? imagePreloaderUISystem;
 
     private EntityQuery milestoneLevelQuery;
 
@@ -109,8 +99,8 @@ internal sealed partial class GameUISystem : UISystemBase {
             this.cityConfigurationSystem =
                 this.World.GetOrCreateSystemManaged<CityConfigurationSystem>();
 
-            this.photoModeUISystem =
-                this.World.GetOrCreateSystemManaged<PhotoModeUISystem>();
+            this.imagePreloaderUISystem =
+                this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
 
             this.milestoneLevelQuery =
                 this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
@@ -133,7 +123,7 @@ internal sealed partial class GameUISystem : UISystemBase {
 
             this.takeScreenshotBinding = new TriggerBinding(
                 GameUISystem.BindingGroup, "takeScreenshot",
-                this.BeginTakeScreenshot);
+                this.TakeScreenshot);
 
             this.clearScreenshotBinding = new TriggerBinding(
                 GameUISystem.BindingGroup, "clearScreenshot",
@@ -199,106 +189,148 @@ internal sealed partial class GameUISystem : UISystemBase {
     }
 
     /// <summary>
-    /// Call original Vanilla screenshot method.
-    /// Our Harmony patch installed via <see cref="PhotoModeUISystemPatch"/>
-    /// will call us back (<see cref="ContinueTakeScreenshot"/>) for custom
-    /// screenshot taking.
+    /// Take a screenshot and prepare it for upload.
+    /// If the user has not set a creator name, a dialog will be shown to prompt
+    /// the user to set one and the method will not proceed.
     /// </summary>
-    private void BeginTakeScreenshot() {
+    private async void TakeScreenshot() {
         // Early exit if the user has not set a creator name.
         if (this.CheckShouldSetCreatorName()) {
             return;
         }
 
-        PhotoModeUISystemPatch.OnCaptureScreenshot +=
-            this.ContinueTakeScreenshot;
-
-        // This is unlikely to break except if the Vanilla method changes
-        // parameters signature, but we will make sure to handle that properly.
-        // Note that this does not encapsulate ContinueTakeScreenshot() which
-        // is executed in a coroutine, and has its own try/catch.
-        try {
-            GameUISystem.TakeScreenshotOriginalMethod.Invoke(
-                this.photoModeUISystem, null);
-        }
-        catch (Exception ex) {
-            Mod.Log.ErrorRecoverable(ex);
-
-            PhotoModeUISystemPatch.OnCaptureScreenshot -=
-                this.ContinueTakeScreenshot;
-        }
-    }
-
-    /// <summary>
-    /// Called back by our Harmony patch, just before Vanilla capture.
-    /// </summary>
-    /// <returns>
-    /// A boolean indicating whether the Vanilla capture should proceed.
-    /// </returns>
-    private bool ContinueTakeScreenshot() {
-        PhotoModeUISystemPatch.OnCaptureScreenshot -=
-            this.ContinueTakeScreenshot;
-
-        // Slightly deferred take photo sound, otherwise it seems to play too
-        // early. Vanilla screenshot capture is actually doing the same thing on
-        // UI-side with a `setTimeout()`bb.
-        GameManager.instance.RegisterUpdater(this.PlayTakePhotoSound);
-
         // This bricks the current game session if this throws, so we will
         // handle exceptions properly here, as there is a non-zero chance of
         // failure in this section (notably due to I/O).
         try {
-            // Take a supersize screenshot that is *at least* 2160 pixels (4K).
-            // Height is better than width because of widescreen monitors.
-            // The server will decide the final resolution, i.e. rescale to
-            // 2160p if the resulting image is bigger.
-            var scaleFactor = (int)Math.Ceiling(2160d / Screen.height);
-
-            // Create a RenderTexture with the supersize resolution, and ask the
-            // camera to render to it.
-            var width = Screen.width * scaleFactor;
-            var height = Screen.height * scaleFactor;
-            var renderTexture = new RenderTexture(width, height, 24);
-
-            Camera.main!.targetTexture = renderTexture;
-            Camera.main.Render();
-
-            // Now, read the RenderTexture to a Texture2D.
-            RenderTexture.active = renderTexture;
-
-            var screenshotTexture =
-                new Texture2D(width, height, TextureFormat.RGB24, false);
-
-            screenshotTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-            screenshotTexture.Apply();
-
-            // Reset the camera's target texture
-            Camera.main.targetTexture = null;
-            RenderTexture.active = null;
-
-            // Encode the Texture2D to a JPG byte array.
-            var screenshotBytes = screenshotTexture.EncodeToJPG();
-
-            // Clean up the textures after usage.
-            Object.DestroyImmediate(renderTexture);
-            Object.DestroyImmediate(screenshotTexture);
-
-            File.WriteAllBytes(
-                GameUISystem.ScreenshotFilePath, screenshotBytes);
-
-            this.CurrentScreenshot = new ScreenshotSnapshot(
-                this.GetAchievedMilestone(),
-                this.GetPopulation(),
-                screenshotBytes,
-                new Vector2Int(width, height));
+            await this.DoTakeScreenshot();
         }
         catch (Exception ex) {
+            GameManager.instance.userInterface.view.enabled = true;
+
             Mod.Log.ErrorRecoverable(ex);
 
             this.CurrentScreenshot = null;
         }
+    }
 
-        return Mod.Settings.MakePlatformScreenshots;
+    private async Task DoTakeScreenshot() {
+        // Hide the UI, otherwise it will be captured in the screenshot.
+        GameManager.instance.userInterface.view.enabled = false;
+        await Task.Yield();
+
+        // Take a supersize screenshot that is *at least* 2160 pixels (4K).
+        // Height is better than width because of widescreen monitors.
+        // The server will decide the final resolution, i.e. rescale to 2160p if
+        // the resulting image is bigger.
+        var scaleFactor = (int)Math.Ceiling(2160d / Screen.height);
+
+        var camera = Camera.main!;
+
+        // Disable DLSS, causes grainy pictures or artifacts with some setups
+        // + we already do actual supersampling.
+        var cameraData = camera.GetComponent<HDAdditionalCameraData>();
+        var previousDlssValue = cameraData.allowDeepLearningSuperSampling;
+        cameraData.allowDeepLearningSuperSampling = false;
+
+        // Disable global illumination as it causes a LOT of grain in CS2's
+        // implementation of GI, on some NVIDIA (?) GPUs.
+        var globalIllumination = SharedSettings.instance.graphics
+            .GetVolumeOverride<GlobalIllumination>();
+
+        var previousGIValue = globalIllumination.enable.value;
+
+        if (Mod.Settings.DisableGlobalIllumination) {
+            globalIllumination.enable.Override(false);
+        }
+
+        // Create a RenderTexture with the supersize resolution, and ask the
+        // camera to render to it.
+        var width = Screen.width * scaleFactor;
+        var height = Screen.height * scaleFactor;
+        var renderTexture = new RenderTexture(width, height, 24);
+
+        camera.targetTexture = renderTexture;
+
+        // Proceed with the rendering.
+        // Calling Render() multiple times is useful to let the GPU accumulate
+        // data for a cleaner and sharper image: this helps loading more
+        // accurate geometry and lets the antialiasing do its job over multiple
+        // frames too.
+        // You can test it on mountain ranges in the distance for example, it's
+        // quite effective.
+        // Typical values are 1, 2, 4 or 8 cycles.
+        // 8 cycles is probably almost overkill, 4 would do the job well, but
+        // I've seen some minor improvements after 4 cycles (it has diminishing
+        // returns). 8 is at the limit of what's acceptable in terms of
+        // performance too.
+        for (var i = 0; i < 8; i++) {
+            camera.Render();
+        }
+
+        // Now, read the RenderTexture to a Texture2D.
+        RenderTexture.active = renderTexture;
+
+        var screenshotTexture =
+            new Texture2D(width, height, TextureFormat.RGB24, false);
+
+        screenshotTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+        screenshotTexture.Apply();
+
+        // Reset DLSS
+        cameraData.allowDeepLearningSuperSampling = previousDlssValue;
+
+        // Reset GI
+        if (Mod.Settings.DisableGlobalIllumination) {
+            globalIllumination.enable.Override(previousGIValue);
+        }
+
+        // Reset the camera's target texture
+        camera.targetTexture = null;
+        RenderTexture.active = null;
+
+        // Re-enable the UI.
+        GameManager.instance.userInterface.view.enabled = true;
+        await Task.Yield();
+
+        this.PlayTakePhotoSound();
+
+        // Encode the Texture2D to a PNG byte array.
+        // Note: image encoding cannot be done in a background thread
+        // because Unity requires it to be done on the main thread.
+        var pngScreenshotBytes = screenshotTexture.EncodeToPNG();
+
+        // Create a light preview image.
+        var previewTexture = this.Resize(
+            screenshotTexture, Screen.width / 2, Screen.height / 2);
+
+        var jpgPreviewBytes = previewTexture.EncodeToJPG(quality: 80);
+
+        // Clean up the textures after usage.
+        Object.DestroyImmediate(renderTexture);
+        Object.DestroyImmediate(screenshotTexture);
+        Object.DestroyImmediate(previewTexture);
+
+        // Prepare full size and preview images in a background thread.
+        await Task.Run(() => {
+            File.WriteAllBytes(
+                GameUISystem.ScreenshotPreviewFilePath,
+                jpgPreviewBytes);
+
+            this.WriteLocalScreenshot(pngScreenshotBytes);
+        });
+
+        var screenshotSnapshot = new ScreenshotSnapshot(
+            this.GetAchievedMilestone(),
+            this.GetPopulation(),
+            pngScreenshotBytes,
+            new Vector2Int(width, height));
+
+        // Preload the image in cache before updating the UI.
+        await this.imagePreloaderUISystem!
+            .Preload(screenshotSnapshot.ImageUri);
+
+        this.CurrentScreenshot = screenshotSnapshot;
     }
 
     private void ClearScreenshot() {
@@ -311,7 +343,7 @@ internal sealed partial class GameUISystem : UISystemBase {
         }
 
         try {
-            File.Delete(GameUISystem.ScreenshotFilePath);
+            File.Delete(GameUISystem.ScreenshotPreviewFilePath);
         }
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
@@ -471,6 +503,9 @@ internal sealed partial class GameUISystem : UISystemBase {
         }
     }
 
+    /// <summary>
+    /// Simply plays the take photo sound, same as the Vanilla screenshot tool.
+    /// </summary>
     private void PlayTakePhotoSound() {
         try {
             // ReSharper disable once Unity.UnknownResource
@@ -480,6 +515,52 @@ internal sealed partial class GameUISystem : UISystemBase {
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
         }
+    }
+
+    /// <summary>
+    /// Write the screenshot to the local screenshot directory, if enabled.
+    /// It mimics the vanilla screenshot naming scheme.
+    /// </summary>
+    private void WriteLocalScreenshot(byte[] pngScreenshotBytes) {
+        if (!Mod.Settings.CreateLocalScreenshot) {
+            return;
+        }
+
+        // We will mimic the vanilla screenshot naming scheme.
+        // The game uses a ScreenUtility class that increments a private
+        // counter, we read it via reflection and increment it just like
+        // the game does.
+        var fieldInfo = typeof(ScreenUtility).GetField(
+            "m_Count", BindingFlags.NonPublic | BindingFlags.Static);
+
+        var count = (int)(fieldInfo?.GetValue(null) ?? 0);
+
+        fieldInfo?.SetValue(null, count++);
+
+        var fileName = Path.Combine(
+            Mod.GameScreenshotsPath,
+            $"{DateTime.Now:dd-MMMM-HH-mm-ss}-{count:00}.png");
+
+        File.WriteAllBytes(fileName, pngScreenshotBytes);
+    }
+
+    /// <summary>
+    /// Resize a Texture2D to a new width and height.
+    /// </summary>
+    private Texture2D Resize(Texture2D texture2D, int width, int height) {
+        var rt = new RenderTexture(width, height, 24);
+        RenderTexture.active = rt;
+
+        Graphics.Blit(texture2D, rt);
+
+        var result = new Texture2D(width, height);
+        result.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+        result.Apply();
+
+        RenderTexture.active = null;
+        Object.DestroyImmediate(rt);
+
+        return result;
     }
 
     /// <summary>
@@ -511,6 +592,10 @@ internal sealed partial class GameUISystem : UISystemBase {
 
         internal byte[] ImageBytes { get; } = imageBytes;
 
+        internal string ImageUri =>
+            $"coui://halloffame/{Path.GetFileName(GameUISystem.ScreenshotPreviewFilePath)}" +
+            $"?v={this.currentVersion}";
+
         public void Write(IJsonWriter writer) {
             writer.TypeBegin(this.GetType().FullName);
 
@@ -521,9 +606,7 @@ internal sealed partial class GameUISystem : UISystemBase {
             writer.Write(this.Population);
 
             writer.PropertyName("imageUri");
-
-            writer.Write(
-                $"coui://halloffame/screenshot.jpg?v={this.currentVersion}");
+            writer.Write(this.ImageUri);
 
             writer.PropertyName("imageWidth");
             writer.Write(imageSize.x);

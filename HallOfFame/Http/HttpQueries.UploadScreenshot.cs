@@ -21,7 +21,7 @@ internal static partial class HttpQueries {
         multipart.AddField("cityName", cityName);
         multipart.AddField("cityMilestone", cityMilestone);
         multipart.AddField("cityPopulation", cityPopulation);
-        multipart.AddBinaryData("screenshot", screenshotData, "screenshot.jpg");
+        multipart.AddBinaryData("screenshot", screenshotData, "screenshot.png");
 
         using var request = UnityWebRequest.Post(
             HttpQueries.PrependApiUrl("/screenshots"),

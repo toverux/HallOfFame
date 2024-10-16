@@ -1,6 +1,6 @@
 using System;
 using System.IO;
-using System.Linq;
+using Colossal;
 using Colossal.IO.AssetDatabase;
 using Colossal.Logging;
 using Colossal.PSI.Environment;
@@ -8,10 +8,8 @@ using Colossal.UI;
 using Game;
 using Game.Modding;
 using Game.SceneFlow;
-using HallOfFame.Patches;
 using HallOfFame.Systems;
 using HallOfFame.Utils;
-using HarmonyLib;
 using JetBrains.Annotations;
 
 namespace HallOfFame;
@@ -38,6 +36,9 @@ public sealed class Mod : IMod {
         throw new NullReferenceException(
             $"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
+    internal static string GameScreenshotsPath { get; } =
+        Path.Combine(EnvPath.kUserDataPath, ScreenUtility.kScreenshotDirectory);
+
     internal static string ModSettingsPath { get; } =
         Path.Combine(EnvPath.kUserDataPath, "ModsSettings", nameof(HallOfFame));
 
@@ -47,13 +48,9 @@ public sealed class Mod : IMod {
     internal static ILog Log { get; } =
         LogManager.GetLogger(nameof(HallOfFame)).SetShowsErrorsInUI(true);
 
-    private const string HarmonyId = "io.mtq.cs2.halloffame";
-
     private static Mod? instanceValue;
 
     private Settings? settingsValue;
-
-    private Harmony? harmony;
 
     public void OnLoad(UpdateSystem updateSystem) {
         try {
@@ -63,28 +60,6 @@ public sealed class Mod : IMod {
             // Migration from previous versions.
             // Does not error if the file does not exist.
             File.Delete(Path.Combine(Mod.ModSettingsPath, "CreatorID.txt"));
-
-            // Register Harmony patches and print debug logs.
-            this.harmony = new Harmony(Mod.HarmonyId);
-            PhotoModeUISystemPatch.Install(this.harmony);
-
-            var patchedMethods = this.harmony.GetPatchedMethods().ToArray();
-
-            Mod.Log.Info(
-                $"Mod: Registered as harmony plugin \"{Mod.HarmonyId}\". " +
-                $"Patched methods: {patchedMethods.Length}");
-
-            foreach (var method in patchedMethods) {
-                Mod.Log.Info(
-                    $"Mod: Patched method: {method.FullDescription()} " +
-                    $"[{method.Module.Name}]");
-            }
-
-            // This will create harmony.log.txt on the Desktop, with generated
-            // IL debug output.
-            #if DEBUG
-            Harmony.DEBUG = true;
-            #endif
 
             // Register settings UI and load settings.
             this.settingsValue = new Settings(this);
@@ -130,14 +105,6 @@ public sealed class Mod : IMod {
         // after IMods are disposed, so this can cause null references for our
         // systems while they're living their last moments.
         GameManager.instance.RegisterUpdater(() => {
-            // Unregister Harmony patches.
-            if (this.harmony is not null) {
-                this.harmony.UnpatchAll(Mod.HarmonyId);
-                this.harmony = null;
-
-                Mod.Log.Info("Mod: Unregistered Harmony patches.");
-            }
-
             // Unregister settings UI
             if (this.settingsValue is not null) {
                 this.settingsValue.UnregisterInOptionsUI();
@@ -155,6 +122,7 @@ public sealed class Mod : IMod {
 
     private void CreateDirectories() {
         // No need to check if they exist, CreateDirectory does it for us.
+        Directory.CreateDirectory(Mod.GameScreenshotsPath);
         Directory.CreateDirectory(Mod.ModSettingsPath);
         Directory.CreateDirectory(Mod.ModDataPath);
     }

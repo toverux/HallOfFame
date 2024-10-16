@@ -15,15 +15,6 @@ image, to name a few features.
 The source code for the server is at
 [toverux/HallOfFameServer](https://github.com/toverux/HallOfFameServer)
 
-For fellow CS2 modders in search of code samples, the source code notably
-features:
-
-- A C# and UI mod;
-- Use of React portals and manual DOM manipulation to patch specific parts of
-  the game's UI that aren't exposed in the modding API;
-- [Harmony](https://harmony.pardeike.net/index.html) transpiler patches for .NET
-  IL-level modding.
-
 ### Acknowledgements
 
 The mod is directly inspired from the homonymous mod for Factorio,

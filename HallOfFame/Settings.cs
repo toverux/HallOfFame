@@ -16,7 +16,6 @@ using Game.UI.Localization;
 using Game.UI.Widgets;
 using HallOfFame.Http;
 using HallOfFame.Utils;
-using HarmonyLib;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -81,12 +80,13 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// and it is not editable.
     /// </summary>
     [SettingsUISection(Settings.GroupYourProfile)]
-    public string? MaskedCreatorID => this.CreatorID
-        ?.Split('-')
-        .Select((segment, index) => index == 0
-            ? segment
-            : new string('*', segment.Length))
-        .Join(delimiter: "-");
+    public string? MaskedCreatorID => this.CreatorID is null
+        ? null
+        : string.Join("-", this.CreatorID
+            .Split('-')
+            .Select((segment, index) => index == 0
+                ? segment
+                : new string('*', segment.Length)));
 
     /// <summary>
     /// Live account status text ("logged in as X", "invalid username", that
@@ -179,11 +179,23 @@ public sealed class Settings : ModSetting, IJsonWritable {
     public string ScreenshotResolution { get; set; } = null!;
 
     /// <summary>
-    /// Whether to inhibit the vanilla screenshot capture or not, when taking
-    /// a screenshot with Hall of Fame.
+    /// Whether to create a PNG file of the screenshot when it is taken, like
+    /// the vanilla screenshot feature.
     /// </summary>
     [SettingsUISection(Settings.GroupAdvanced)]
-    public bool MakePlatformScreenshots { get; set; }
+    public bool CreateLocalScreenshot { get; set; }
+
+    /// <summary>
+    /// Whether to disable global illumination (while the screenshot is taken)
+    /// due to the grainy picture bug that happens on most (?) setups and is
+    /// hideous, especially with supersampling.
+    /// </summary>
+    [SettingsUISection(Settings.GroupAdvanced)]
+    [SettingsUIHideByCondition(
+        typeof(Settings),
+        nameof(Settings.IsNvidiaGpu),
+        invert: true)]
+    public bool DisableGlobalIllumination { get; set; }
 
     /// <summary>
     /// Base URL of the Hall of Fame server.
@@ -292,8 +304,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.ViewMaxAge = 60;
         this.ScreenshotResolution = "fhd";
 
-        this.MakePlatformScreenshots = true;
-
+        this.CreateLocalScreenshot = true;
+        this.DisableGlobalIllumination = Settings.IsNvidiaGpu();
         this.BaseUrl = "halloffame.cs2.mtq.io";
     }
 
@@ -316,6 +328,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
             }
         };
     }
+
+    private static bool IsNvidiaGpu() =>
+        SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
 
     /// <summary>
     /// Initializes <see cref="CreatorID"/>, <see cref="IsParadoxAccountID"/>

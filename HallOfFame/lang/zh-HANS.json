@@ -77,8 +77,6 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ViewMaxAge]": "再次看到已看过的截图的最短时间。\n但是，由于性能原因，如果您浏览过大量的截图，则无法保证始终遵守此偏好。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotResolution]": "截图分辨率",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotResolution]": "“城市画廊”展示的截图分辨率。\n无论发送截图的人使用的实际分辨率是多少，该模组会始终拍摄 4K分辨率+ 的图像（超级采样）。\n这样，您可以选择查看截图的分辨率。\n如果您的屏幕分辨率高于 1920×1080，或者想要更好的质量，并且带宽或显存足够，请使用 4K 分辨率。",
-  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "同时在本地进行截图",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.MakePlatformScreenshots]": "使用“城市画廊”截图时，也会使用标准基础游戏机制进行截图（例如，在 Windows 系统里，截图将保存在 C:\\Users\\用户名\\AppData\\LocalLow\\Colossal Order\\Cities Skylines II\\Screenshots 中）。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "“城市画廊”模组服务器",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "这是“城市画廊”模组服务器的地址。除非您正在开发此模组或使用其他服务器，否则不应更改地址。\n您可以使用“test.halloffame.cs2.mtq.io”在沙盒数据库上测试此模组。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "重置设置",

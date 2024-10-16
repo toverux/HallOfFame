@@ -57,9 +57,6 @@
         <Reference Include="Colossal.Localization">
             <Private>false</Private>
         </Reference>
-        <Reference Include="UnityEngine.CoreModule">
-            <Private>false</Private>
-        </Reference>
         <Reference Include="Unity.Burst">
             <Private>false</Private>
         </Reference>
@@ -72,10 +69,19 @@
         <Reference Include="Unity.Mathematics">
             <Private>false</Private>
         </Reference>
+        <Reference Include="Unity.RenderPipelines.Core.Runtime">
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime">
+            <Private>false</Private>
+        </Reference>
         <Reference Include="UnityEngine.IMGUIModule">
             <Private>false</Private>
         </Reference>
         <Reference Include="UnityEngine.ImageConversionModule">
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
             <Private>false</Private>
         </Reference>
         <Reference Include="UnityEngine.ScreenCaptureModule">
@@ -96,10 +102,6 @@
         <Reference Update="System.Data">
             <Private>false</Private>
         </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Lib.Harmony" Version="2.2.2"/>
     </ItemGroup>
 
     <ItemGroup>
