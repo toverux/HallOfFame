@@ -154,31 +154,23 @@ disable the mod or just accept it (or help me debug this thing lol) :D
   <Screenshot Value="Properties/Screenshot8.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.4.0" />
+  <ModVersion Value="1.4.1" />
   <GameVersion Value="1.1.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
-  <ChangeLog>**“The Screenshot Quality Update”**
+  <ChangeLog>This updates delays a bit the loading of a Hall of Fame background image.
 
-**New features and changes:**
-- Add maximize button on the upload dialog preview image, allowing you to review the screenshot in full screen before sending.
-- When the option for saving screenshots locally is enabled (it is by default), the mod will no longer use the Vanilla code for this (and hence take the screenshot two times, also).
-  Instead, Hall of Fame now saves its own file in the game’s Screenshots folder, using the same naming scheme as the Vanilla game.
-  This will allow you to take 4K screenshots locally no matter your actual game resolution, and benefit from the other improvements below.
-  If you want to take a Vanilla screenshot, just use the Vanilla button.
-- A warning will be shown in the upload dialog if you took the screenshot using non-High graphics quality settings, encouraging you to switch to High for the screenshotting session.
-  Custom settings are ignored.
-- (Nvidia GPUs) Disable Global Illumination (SSGI) when taking a screenshot.
-  This is because SSGI implementation in C:S 2 causes very grainy images that you are now probably familiar with if you’ve used the mod a lot, so much that it can completely ruin the screenshot.
-  For now, SSGI is only disabled with Nvidia GPUs, I will be monitoring new screenshots to see if it happens with AMD GPUs as well.
-  You can disable the SSGI override in the mod’s option menu if you know that it doesn’t cause issues with your GPU.
-  A small message will be displayed in the upload dialog if the mod disabled SSGI for the screenshot.
-- Disable Nvidia DLSS or the game’s native upsampling, as they don’t make sense when we are already taking a supersampled screenshot.
-  They only caused blurrier images or artifacts.
-- Make more render cycles (1 → 8) when taking a screenshot, improving texture and geometry precision, especially on far away objects.
-- Screenshots are now sent to the server in the original PNG quality, and no longer in 75% quality JPEG, improving the quality at the source.
-  They are still converted and served as JPG for performance reasons, but the resulting image quality will be significantly improved.
-- Updates for Spanish, Portuguese, Polish and Chinese Simplified.</ChangeLog>
+Before, the mod attempted to load an image as soon as possible to display it instantly when the menu was shown.
+
+However, on lower-end machines or with large mod playsets, this could cause more noticeable UI stuttering when loading mods.
+
+Furthermore, this could also have played a role in the elusive crash that some players experience when opening the game.
+
+This update waits for the main menu to be shown *and* waits 500ms more before doing anything.
+
+**These changes are experimental, if they don't yield good results they might be reverted.**
+
+If you used to experience the crash-at-load and still have it after this update, *please* contact me on Discord or in the Forum thread to report it.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
