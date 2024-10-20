@@ -91,7 +91,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// <summary>
     /// Live account status text ("logged in as X", "invalid username", that
     /// kind of things).
-    /// Updated by <see cref="UpdateLoginStatus"/> on mod load and creator name
+    /// Updated by <see cref="UpdateCreator"/> on mod load and creator name
     /// change.
     /// </summary>
     [SettingsUISection(Settings.GroupYourProfile)]
@@ -259,7 +259,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// <seealso cref="LoginStatus"/>
     private LocalizedString loginStatusValue = string.Empty;
 
-    /// <seealso cref="UpdateLoginStatus"/>
+    /// <seealso cref="UpdateCreator"/>
     private CancellationTokenSource? updateLoginStatusCts;
 
     public Settings(IMod mod) : base(mod) {
@@ -317,15 +317,18 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.InitializeCreatorId();
 
         // Update the login status when the mod is being loaded.
-        this.UpdateLoginStatus(debounce: false);
+        this.UpdateCreator(nameOnly: false, silent: false, debounce: false);
 
         // Update the login status when the Creator Name is changed.
         var prevCreatorName = this.CreatorName;
 
         this.onSettingsApplied += _ => {
-            if (prevCreatorName != this.CreatorName) {
-                this.UpdateLoginStatus(debounce: true);
-            }
+            this.UpdateCreator(
+                nameOnly: prevCreatorName != this.CreatorName,
+                silent: prevCreatorName == this.CreatorName,
+                debounce: true);
+
+            prevCreatorName = this.CreatorName;
         };
     }
 
@@ -417,24 +420,44 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// status in the Options UI (success or errors if there are any problems,
     /// ex. an incorrect username).
     /// </summary>
-    private async void UpdateLoginStatus(bool debounce) {
+    /// <param name="nameOnly">
+    /// If true, only update the name, not other info (currently: mod settings).
+    /// </param>
+    /// <param name="silent">
+    /// Whether to update the login status text with loading/success/error
+    /// messages.
+    /// </param>
+    /// <param name="debounce">
+    /// Whether to debounce the method if it's called multiple times in a short
+    /// period (keystrokes while typing username).
+    /// </param>
+    private async void UpdateCreator(
+        bool nameOnly,
+        bool silent,
+        bool debounce) {
         // Cancel any ongoing update.
         this.updateLoginStatusCts?.Cancel();
 
         var thisCts = this.updateLoginStatusCts = new CancellationTokenSource();
 
-        // Show a loading message while we're fetching the status.
-        this.loginStatusValue = LocalizedString.IdWithFallback(
-            "HallOfFame.Common.LOADING", "Loading…");
+        if (!silent) {
+            // Show a loading message while we're fetching the status.
+            this.loginStatusValue = LocalizedString.IdWithFallback(
+                "HallOfFame.Common.LOADING", "Loading…");
+        }
 
         try {
             if (debounce) {
+                // Apply a delay to debounce the method if it's called multiple
+                // times in a short period (keystrokes while typing username).
                 await Task.Delay(500, thisCts.Token);
             }
 
             // Fetch the creator info from the server, this will also update the
             // Creator Name if it's different from the server's.
-            var creator = await HttpQueries.GetMyCreatorInfo();
+            var creator = nameOnly
+                ? await HttpQueries.GetMyself()
+                : await HttpQueries.UpdateMyself();
 
             // Stop if the operation was cancelled while we were fetching data.
             thisCts.Token.ThrowIfCancellationRequested();
@@ -442,19 +465,21 @@ public sealed class Settings : ModSetting, IJsonWritable {
             // Update the login status text with a success message.
             var isAnonymous = string.IsNullOrEmpty(creator.CreatorName);
 
-            this.loginStatusValue = new LocalizedString(
-                isAnonymous
-                    ? "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]"
-                    : "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]",
-                isAnonymous
-                    ? "Anonymously logged in."
-                    : "Logged in as {CREATOR_NAME}.",
-                new Dictionary<string, ILocElement> {
-                    {
-                        "CREATOR_NAME",
-                        LocalizedString.Value(creator.CreatorName)
-                    }
-                });
+            if (!silent) {
+                this.loginStatusValue = new LocalizedString(
+                    isAnonymous
+                        ? "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]"
+                        : "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]",
+                    isAnonymous
+                        ? "Anonymously logged in."
+                        : "Logged in as {CREATOR_NAME}.",
+                    new Dictionary<string, ILocElement> {
+                        {
+                            "CREATOR_NAME",
+                            LocalizedString.Value(creator.CreatorName)
+                        }
+                    });
+            }
         }
         catch (Exception ex) {
             // Stop if the Task.Delay or the network request was cancelled.
@@ -462,8 +487,13 @@ public sealed class Settings : ModSetting, IJsonWritable {
                 return;
             }
 
-            // Update the login status text with an error message.
-            this.loginStatusValue = ex.GetUserFriendlyMessage();
+            if (silent) {
+                Mod.Log.ErrorSilent(ex, "Settings: Failed to update creator.");
+            }
+            else {
+                // Update the login status text with an error message.
+                this.loginStatusValue = ex.GetUserFriendlyMessage();
+            }
         }
         finally {
             // Clear the shared cancellation token source if we're the last one
