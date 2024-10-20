@@ -21,6 +21,14 @@ interface ReadonlyMenuState {
     readonly hasPreviousScreenshot: boolean;
 
     /**
+     * Index of the current refresh cycle. Used to force the UI to request a new
+     * screenshot.
+     *
+     * @default 0
+     */
+    readonly forcedRefreshIndex: number;
+
+    /**
      * Whether a new screenshot is being loaded and/or a screenshot image is
      * being preloaded.
      *
@@ -73,6 +81,12 @@ const hasPreviousScreenshot$ = bindValue<boolean>(
     false
 );
 
+const forcedRefreshIndex$ = bindValue<number>(
+    'hallOfFame.menu',
+    'forcedRefreshIndex',
+    0
+);
+
 const isRefreshing$ = bindValue<boolean>(
     'hallOfFame.menu',
     'isRefreshing',
@@ -106,12 +120,14 @@ export function useHofMenuState(): [
     const defaultImageUri = useValue(defaultImageUri$);
     const hasPreviousScreenshot = useValue(hasPreviousScreenshot$);
     const isRefreshing = useValue(isRefreshing$);
+    const forcedRefreshIndex = useValue(forcedRefreshIndex$);
     const screenshot = useValue(screenshot$);
     const error = useValue(error$);
 
     const menuState: ReadonlyMenuState & SettableMenuState = {
         ...settableMenuState,
         hasPreviousScreenshot,
+        forcedRefreshIndex,
         isRefreshing,
         imageUri: screenshot
             ? settings.screenshotResolution == 'fhd'

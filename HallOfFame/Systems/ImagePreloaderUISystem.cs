@@ -15,8 +15,10 @@ namespace HallOfFame.Systems;
 /// This could be done frontend-side (it was originally done that way), but it
 /// meant duplicating most of the loading and error logic on both sides, leading
 /// to a lot of spaghetti reconciliation code.
-/// Another advantage of doing it this way is that we can start preloading the
-/// very first image even before the UI mod is loaded.
+///
+/// [NOT USED ANYMORE, loading is done only once the UI is loaded:]
+/// [Another advantage of doing it this way is that we can start preloading the]
+/// [very first image even before the UI mod is loaded.]
 /// </summary>
 internal sealed partial class ImagePreloaderUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame.imagePreloader";

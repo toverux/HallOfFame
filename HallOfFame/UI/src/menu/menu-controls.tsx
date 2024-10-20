@@ -15,6 +15,8 @@ import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-ke
 import * as styles from './menu-controls.module.scss';
 import { useHofMenuState } from './menu-state-hook';
 
+let lastForcedRefreshIndex = 0;
+
 /**
  * Component that renders the menu controls and city/creator information.
  */
@@ -23,6 +25,13 @@ export function MenuControls(): ReactElement {
     const [menuState, setMenuState] = useHofMenuState();
 
     const { translate } = useLocalization();
+
+    useEffect(() => {
+        if (menuState.forcedRefreshIndex != lastForcedRefreshIndex) {
+            nextScreenshot();
+            lastForcedRefreshIndex = menuState.forcedRefreshIndex;
+        }
+    }, [menuState.forcedRefreshIndex]);
 
     if (menuState.error) {
         // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute

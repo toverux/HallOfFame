@@ -27,6 +27,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
     private GetterValueBinding<bool> hasPreviousScreenshotBinding = null!;
 
+    private ValueBinding<int> forcedRefreshIndexBinding = null!;
+
     private ValueBinding<bool> isRefreshingBinding = null!;
 
     private ValueBinding<Screenshot?> screenshotBinding = null!;
@@ -75,6 +77,10 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 MenuUISystem.BindingGroup, "hasPreviousScreenshot",
                 () => this.currentScreenshotIndex > 0);
 
+            this.forcedRefreshIndexBinding = new ValueBinding<int>(
+                MenuUISystem.BindingGroup, "forcedRefreshIndex",
+                1);
+
             this.isRefreshingBinding = new ValueBinding<bool>(
                 MenuUISystem.BindingGroup, "isRefreshing",
                 false);
@@ -107,6 +113,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
             this.AddBinding(this.defaultImageUriBinding);
             this.AddBinding(this.hasPreviousScreenshotBinding);
+            this.AddBinding(this.forcedRefreshIndexBinding);
             this.AddBinding(this.isRefreshingBinding);
             this.AddBinding(this.screenshotBinding);
             this.AddBinding(this.errorBinding);
@@ -114,24 +121,6 @@ internal sealed partial class MenuUISystem : UISystemBase {
             this.AddBinding(this.nextScreenshotBinding);
             this.AddBinding(this.favoriteScreenshotBinding);
             this.AddBinding(this.reportScreenshotBinding);
-
-            // Select game modes that are known to be appropriate for loading
-            // our first screenshot when the mod is loaded.
-            // All these game mods can be active when the mod is loaded.
-            // - `MainMenu` when mods initialize late.
-            // - `None` when the game is booting and mods are loaded early.
-            // - `Other` when the game is booting normally but there is some
-            //   problem with Paradox Mods, as it was observed. It is also the
-            //   default state before anything is loaded, so it's a good idea to
-            //   include it anyway.
-            // There can be other possibilities! For example, when the user
-            // clicked "Continue" their game in the Paradox launcher.
-            if (GameManager.instance.gameMode
-                is GameMode.MainMenu
-                or GameMode.None
-                or GameMode.Other) {
-                this.NextScreenshot();
-            }
         }
         catch (Exception ex) {
             Mod.Log.ErrorFatal(ex);
@@ -153,7 +142,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
         //    this happens rarely, but it's possible.
         if (mode is GameMode.MainMenu &&
             this.previousGameMode is not GameMode.MainMenu) {
-            this.NextScreenshot();
+            this.forcedRefreshIndexBinding.Update(
+                this.forcedRefreshIndexBinding.value + 1);
         }
 
         this.previousGameMode = mode;
@@ -502,7 +492,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 GameManager.instance.userInterface.appBindings
                     .ShowMessageDialog(successDialog, _ => { });
 
-                this.NextScreenshot();
+                this.forcedRefreshIndexBinding.Update(
+                    this.forcedRefreshIndexBinding.value + 1);
             }
             catch (HttpException ex) {
                 ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
