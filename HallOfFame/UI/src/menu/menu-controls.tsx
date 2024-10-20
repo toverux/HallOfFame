@@ -28,7 +28,7 @@ export function MenuControls(): ReactElement {
 
     useEffect(() => {
         if (menuState.forcedRefreshIndex != lastForcedRefreshIndex) {
-            nextScreenshot();
+            setTimeout(() => nextScreenshot(), 500);
             lastForcedRefreshIndex = menuState.forcedRefreshIndex;
         }
     }, [menuState.forcedRefreshIndex]);
