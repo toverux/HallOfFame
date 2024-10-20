@@ -68,10 +68,10 @@ public sealed class Mod : IMod {
             AssetDatabase.global.LoadSettings(
                 nameof(HallOfFame), this.settingsValue, new Settings(this));
 
-            this.settingsValue.Initialize();
-
             // Set singleton instance only when OnLoad is likely to complete.
             Mod.instanceValue = this;
+
+            this.settingsValue.Initialize();
 
             // Adds "coui://halloffame/" host location for serving images.
             UIManager.defaultUISystem.AddHostLocation(

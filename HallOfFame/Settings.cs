@@ -317,14 +317,14 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.InitializeCreatorId();
 
         // Update the login status when the mod is being loaded.
-        this.UpdateLoginStatus();
+        this.UpdateLoginStatus(debounce: false);
 
         // Update the login status when the Creator Name is changed.
         var prevCreatorName = this.CreatorName;
 
         this.onSettingsApplied += _ => {
             if (prevCreatorName != this.CreatorName) {
-                this.UpdateLoginStatus();
+                this.UpdateLoginStatus(debounce: true);
             }
         };
     }
@@ -417,7 +417,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// status in the Options UI (success or errors if there are any problems,
     /// ex. an incorrect username).
     /// </summary>
-    private async void UpdateLoginStatus() {
+    private async void UpdateLoginStatus(bool debounce) {
         // Cancel any ongoing update.
         this.updateLoginStatusCts?.Cancel();
 
@@ -428,12 +428,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
             "HallOfFame.Common.LOADING", "Loading…");
 
         try {
-            // Delay/throttle the login status update, useful because:
-            // - This is called on mod OnLoad, but we don't need to fetch the
-            //   status so early.
-            // - This is called on every keystroke in the Creator Name input so
-            //   this will debounce the requests.
-            await Task.Delay(500, thisCts.Token);
+            if (debounce) {
+                await Task.Delay(500, thisCts.Token);
+            }
 
             // Fetch the creator info from the server, this will also update the
             // Creator Name if it's different from the server's.
