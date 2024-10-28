@@ -9,6 +9,8 @@ import {
 import { Button, MenuButton, Tooltip } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import type { Screenshot } from '../common';
+import ellipsisSolidSrc from '../icons/ellipsis-solid.svg';
+import flagSolidSrc from '../icons/flag-solid.svg';
 import loveChirperSrc from '../icons/love-chirper.png';
 import { type ModSettings, snappyOnSelect, useModSettings } from '../utils';
 import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
@@ -21,10 +23,21 @@ let lastForcedRefreshIndex = 0;
  * Component that renders the menu controls and city/creator information.
  */
 export function MenuControls(): ReactElement {
+    return (
+        <div className={styles.menuControlsContainer}>
+            <MenuControlsContent />
+        </div>
+    );
+}
+
+export function MenuControlsContent(): ReactElement {
+    const { translate } = useLocalization();
+
     const modSettings = useModSettings();
+
     const [menuState, setMenuState] = useHofMenuState();
 
-    const { translate } = useLocalization();
+    const [showMoreActions, setShowOtherActions] = useState(false);
 
     useEffect(() => {
         if (menuState.forcedRefreshIndex != lastForcedRefreshIndex) {
@@ -40,21 +53,8 @@ export function MenuControls(): ReactElement {
                 <MenuControlsError
                     translate={translate}
                     error={menuState.error}
+                    isReadyForNextImage={menuState.isReadyForNextImage}
                 />
-
-                <div className={styles.menuControlsButtons}>
-                    <MenuButton
-                        className={styles.menuControlsButtonsButton}
-                        src='Media/Glyphs/ArrowCircular.svg'
-                        focusKey={FOCUS_DISABLED}
-                        disabled={!menuState.isReadyForNextImage}
-                        {...snappyOnSelect(nextScreenshot)}>
-                        {translate(
-                            'HallOfFame.UI.Menu.MenuControls.ACTION[Retry]',
-                            'Retry'
-                        )}
-                    </MenuButton>
-                </div>
             </div>
         );
     }
@@ -64,110 +64,134 @@ export function MenuControls(): ReactElement {
     }
 
     return (
-        <div className={styles.menuControls}>
-            <MenuControlsCityName
-                translate={translate}
-                screenshot={menuState.screenshot}
-            />
-
-            <MenuControlsScreenshotLabels
-                translate={translate}
-                modSettings={modSettings}
-                screenshot={menuState.screenshot}
-            />
-
-            <MenuControlsButtons
-                translate={translate}
-                hasPreviousScreenshot={menuState.hasPreviousScreenshot}
-                isLoading={!menuState.isReadyForNextImage}
-                isMenuVisible={menuState.isMenuVisible}
-                toggleMenuVisibility={() =>
-                    setMenuState({
-                        ...menuState,
-                        isMenuVisible: !menuState.isMenuVisible
-                    })
-                }
-                screenshot={menuState.screenshot}
-            />
-        </div>
-    );
-}
-
-function MenuControlsError({
-    translate,
-    error
-}: Readonly<{
-    translate: Localization['translate'];
-    error: LocalizedString;
-}>): ReactElement {
-    return (
-        <div className={styles.menuControlsError}>
-            <div className={styles.menuControlsErrorHeader}>
+        <div
+            className={`${styles.menuControls} ${styles.menuControlsApplyButtonsOffset}`}
+            onMouseLeave={() => setShowOtherActions(false)}>
+            <div className={styles.menuControlsSection}>
                 <div
-                    className={styles.menuControlsErrorHeaderImage}
-                    style={{
-                        backgroundImage:
-                            'url(Media/Game/Icons/AdvisorTrafficAccident.svg)'
-                    }}
-                />
-                <div className={styles.menuControlsErrorHeaderText}>
-                    <strong>
-                        {translate('HallOfFame.Common.OOPS', 'Oh no!')}
-                    </strong>
+                    className={styles.menuControlsSectionButtons}
+                    style={{ alignSelf: 'flex-end' }}>
+                    <MenuControlsNextButton
+                        translate={translate}
+                        isLoading={!menuState.isReadyForNextImage}
+                    />
+
+                    <MenuControlsPreviousButton
+                        translate={translate}
+                        isLoading={!menuState.isReadyForNextImage}
+                        hasPreviousScreenshot={menuState.hasPreviousScreenshot}
+                    />
+
+                    <MenuControlsToggleMenuVisibilityButton
+                        translate={translate}
+                        isMenuVisible={menuState.isMenuVisible}
+                        toggleMenuVisibility={() =>
+                            setMenuState({
+                                ...menuState,
+                                isMenuVisible: !menuState.isMenuVisible
+                            })
+                        }
+                    />
+                </div>
+
+                <div
+                    className={styles.menuControlsSectionContent}
+                    style={{ alignSelf: 'flex-start' }}>
+                    <MenuControlsCityName screenshot={menuState.screenshot} />
+
+                    <MenuControlsScreenshotLabels
+                        translate={translate}
+                        modSettings={modSettings}
+                        screenshot={menuState.screenshot}
+                    />
+                </div>
+            </div>
+
+            <div className={styles.menuControlsSection}>
+                <div className={styles.menuControlsSectionButtons}>
+                    <MenuControlsFavoriteButton
+                        screenshot={menuState.screenshot}
+                    />
+                </div>
+
+                <div
+                    className={`${styles.menuControlsSectionContent} ${styles.menuControlsFavoriteCount}`}>
+                    <span className={styles.menuControlsFavoriteCountNumber}>
+                        {menuState.screenshot.favoritesCount < 1000
+                            ? menuState.screenshot.favoritesCount
+                            : `${(
+                                  menuState.screenshot.favoritesCount / 1000
+                              ).toFixed(1)} k`}
+                    </span>
+                    &thinsp;
                     {translate(
-                        'HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE',
-                        'Hall of Fame could not load the image.'
+                        menuState.screenshot.favoritesCount == 0
+                            ? 'HallOfFame.UI.Menu.MenuControls.N_LIKES[Zero]'
+                            : menuState.screenshot.favoritesCount == 1
+                              ? 'HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]'
+                              : 'HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]'
                     )}
                 </div>
             </div>
 
-            <LocalizedString
-                id={error.id}
-                fallback={error.value}
-                args={{
-                    // biome-ignore lint/style/useNamingConvention: i18n convention
-                    ERROR_MESSAGE: locElementToReactNode(
-                        error.args?.ERROR_MESSAGE,
-                        'Unknown error'
-                    )
-                }}
-            />
+            <div
+                className={`${styles.menuControlsSection} ${styles.menuControlsSectionOtherActions}`}>
+                <div className={styles.menuControlsSectionButtons}>
+                    <MenuButton
+                        className={styles.menuControlsSectionButtonsButton}
+                        src={ellipsisSolidSrc}
+                        tinted={true}
+                        onSelect={() => setShowOtherActions(!showMoreActions)}
+                    />
+                </div>
 
-            <strong className={styles.menuControlsErrorGameplayNotAffected}>
-                <LocalizedString
-                    id='HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED'
-                    fallback='Gameplay is not affected, it is safe to launch a game.'
-                />
-            </strong>
+                <div
+                    className={`${styles.menuControlsSectionContent} ${showMoreActions ? styles.menuControlsSectionContentSlideIn : ''}`}>
+                    <Tooltip
+                        direction='down'
+                        tooltip={translate(
+                            'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report]'
+                        )}>
+                        <Button
+                            variant='menu'
+                            src={flagSolidSrc}
+                            tinted={true}
+                            onSelect={reportScreenshot}
+                            selectSound='bulldoze'>
+                            <span>
+                                {translate(
+                                    'HallOfFame.UI.Menu.MenuControls.ACTION[Report]'
+                                )}
+                            </span>
+                        </Button>
+                    </Tooltip>
+
+                    <Tooltip
+                        direction='down'
+                        tooltip={translate(
+                            'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Open Mod Settings]'
+                        )}>
+                        <Button
+                            className={
+                                styles.menuControlsSectionContentButtonSettings
+                            }
+                            variant='menu'
+                            src='Media/Glyphs/Gear.svg'
+                            tinted={true}
+                            onSelect={() => openModSettings('General')}
+                        />
+                    </Tooltip>
+                </div>
+            </div>
         </div>
     );
 }
 
-// Static variable to track if we should peek at the city name menu controls,
-// only once when the mod is loaded. This is a UX feature to help the user
-// discover the city name menu controls.
-let shouldPeekAtCityNameMenuControls = true;
-
 function MenuControlsCityName({
-    translate,
     screenshot
 }: Readonly<{
-    translate: Localization['translate'];
     screenshot: Screenshot;
 }>): ReactElement {
-    const [peekAtMenuControls, setPeekAtMenuControls] = useState(false);
-
-    // When the component is first mounted, show the city name menu controls
-    // briefly to help the user discover them.
-    useEffect(() => {
-        if (shouldPeekAtCityNameMenuControls) {
-            setTimeout(() => setPeekAtMenuControls(true), 100);
-            setTimeout(() => setPeekAtMenuControls(false), 4000);
-
-            shouldPeekAtCityNameMenuControls = false;
-        }
-    }, []);
-
     if (!screenshot.creator) {
         console.warn(
             `HoF: No creator information for screenshot ${screenshot.id}`
@@ -175,29 +199,7 @@ function MenuControlsCityName({
     }
 
     return (
-        <div
-            className={`${styles.menuControlsNames} ${peekAtMenuControls ? styles.menuControlsNamesShowMenu : ''}`}>
-            <div className={styles.menuControlsNamesMenu}>
-                <Tooltip
-                    tooltip={translate(
-                        'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report Abuse]',
-                        'Report inappropriate content'
-                    )}>
-                    <Button
-                        variant='round'
-                        onSelect={reportScreenshot}
-                        selectSound='bulldoze'
-                        className={styles.menuControlsNamesMenuButton}>
-                        <svg
-                            xmlns='http://www.w3.org/2000/svg'
-                            viewBox='0 0 448 512'>
-                            {/* Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. */}
-                            <path d='M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32L0 64 0 368 0 480c0 17.7 14.3 32 32 32s32-14.3 32-32l0-128 64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30l0-247.7c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48l0-16z' />
-                        </svg>
-                    </Button>
-                </Tooltip>
-            </div>
-
+        <div className={styles.menuControlsNames}>
             <div className={styles.menuControlsNamesCity}>
                 {screenshot.cityName}
             </div>
@@ -236,7 +238,7 @@ function MenuControlsScreenshotLabels({
 
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
-        <div className={styles.menuControlsCityStats}>
+        <div className={styles.menuControlsSectionScreenshotLabels}>
             {isPristineWilderness ? (
                 <span>
                     <img src='Media/Game/Icons/NaturalResources.svg' />
@@ -298,128 +300,201 @@ function MenuControlsScreenshotLabels({
     );
 }
 
-function MenuControlsButtons({
+function MenuControlsNextButton({
     translate,
-    hasPreviousScreenshot,
-    isLoading,
-    isMenuVisible,
-    toggleMenuVisibility,
-    screenshot
+    isLoading
 }: Readonly<{
     translate: Localization['translate'];
-    hasPreviousScreenshot: boolean;
     isLoading: boolean;
+}>): ReactElement {
+    return (
+        <Tooltip
+            direction='right'
+            tooltip={translate(
+                'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]'
+            )}>
+            <MenuButton
+                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonNext}`}
+                src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
+                tinted={isLoading}
+                focusKey={FOCUS_DISABLED}
+                disabled={isLoading}
+                {...snappyOnSelect(nextScreenshot)}
+            />
+        </Tooltip>
+    );
+}
+
+function MenuControlsPreviousButton({
+    translate,
+    isLoading,
+    hasPreviousScreenshot
+}: Readonly<{
+    translate: Localization['translate'];
+    isLoading: boolean;
+    hasPreviousScreenshot: boolean;
+}>): ReactElement {
+    return (
+        <Tooltip
+            direction='right'
+            tooltip={translate(
+                'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]'
+            )}>
+            <MenuButton
+                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonPrevious}`}
+                src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
+                tinted={isLoading || !hasPreviousScreenshot}
+                focusKey={FOCUS_DISABLED}
+                disabled={isLoading || !hasPreviousScreenshot}
+                {...snappyOnSelect(previousScreenshot)}
+            />
+        </Tooltip>
+    );
+}
+
+function MenuControlsToggleMenuVisibilityButton({
+    translate,
+    isMenuVisible,
+    toggleMenuVisibility
+}: Readonly<{
+    translate: Localization['translate'];
     isMenuVisible: boolean;
     toggleMenuVisibility: () => void;
+}>): ReactElement {
+    return (
+        <Tooltip
+            direction='right'
+            tooltip={translate(
+                'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]'
+            )}>
+            <MenuButton
+                className={styles.menuControlsSectionButtonsButton}
+                src={
+                    isMenuVisible
+                        ? 'coui://uil/Colored/EyeOpen.svg'
+                        : 'coui://uil/Colored/EyeClosed.svg'
+                }
+                tinted={false}
+                focusKey={FOCUS_DISABLED}
+                {...snappyOnSelect(
+                    toggleMenuVisibility,
+                    isMenuVisible ? 'close-menu' : 'open-menu'
+                )}
+            />
+        </Tooltip>
+    );
+}
+
+function MenuControlsFavoriteButton({
+    screenshot
+}: Readonly<{
     screenshot: Screenshot;
 }>): ReactElement {
     return (
-        <div className={styles.menuControlsButtons}>
-            <div className={styles.menuControlsButtonsButtonGroup}>
-                <Tooltip
-                    tooltip={translate(
-                        'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]',
-                        'Show the previous image'
-                    )}>
-                    <MenuButton
-                        className={`${styles.menuControlsButtonsButtonIcon} ${styles.menuControlsButtonsButtonPrevious}`}
-                        src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
-                        tinted={isLoading || !hasPreviousScreenshot}
-                        focusKey={FOCUS_DISABLED}
-                        disabled={isLoading || !hasPreviousScreenshot}
-                        {...snappyOnSelect(previousScreenshot)}
-                    />
-                </Tooltip>
+        <Tooltip
+            direction='right'
+            tooltip={
+                <LocalizedString
+                    id={
+                        screenshot.isFavorite
+                            ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Unfavorite]'
+                            : screenshot.favoritesCount == 0
+                              ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Zero]'
+                              : screenshot.favoritesCount == 1
+                                ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Singular]'
+                                : 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Plural]'
+                    }
+                    fallback={
+                        screenshot.isFavorite
+                            ? 'Unfavorite this image'
+                            : 'Favorite this image'
+                    }
+                    args={{
+                        // biome-ignore lint/style/useNamingConvention: i18n convention
+                        NUMBER: (
+                            <LocalizedNumber
+                                value={screenshot.favoritesCount}
+                            />
+                        ),
+                        // biome-ignore lint/style/useNamingConvention: i18n convention
+                        FAVORITES_PER_DAY: (
+                            <LocalizedNumber
+                                value={screenshot.favoritesPerDay}
+                            />
+                        )
+                    }}
+                />
+            }>
+            <MenuButton
+                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonFavorite} ${screenshot.isFavorite ? styles.menuControlsSectionButtonsButtonFavoriteActive : ''}`}
+                src={loveChirperSrc}
+                tinted={false}
+                focusKey={FOCUS_DISABLED}
+                onSelect={favoriteScreenshot}
+                selectSound={screenshot.isFavorite ? 'chirp-event' : 'xp-event'}
+            />
+        </Tooltip>
+    );
+}
 
-                <Tooltip
-                    tooltip={translate(
-                        'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]'
-                    )}>
-                    <MenuButton
-                        className={styles.menuControlsButtonsButton}
-                        src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
-                        tinted={isLoading}
-                        focusKey={FOCUS_DISABLED}
-                        disabled={isLoading}
-                        {...snappyOnSelect(nextScreenshot)}>
-                        {translate(
-                            'HallOfFame.UI.Menu.MenuControls.ACTION[Next]',
-                            'Show a new image'
-                        )}
-                    </MenuButton>
-                </Tooltip>
+function MenuControlsError({
+    translate,
+    error,
+    isReadyForNextImage
+}: Readonly<{
+    translate: Localization['translate'];
+    error: LocalizedString;
+    isReadyForNextImage: boolean;
+}>): ReactElement {
+    return (
+        <div className={styles.menuControlsError}>
+            <div className={styles.menuControlsErrorHeader}>
+                <div
+                    className={styles.menuControlsErrorHeaderImage}
+                    style={{
+                        backgroundImage:
+                            'url(Media/Game/Icons/AdvisorTrafficAccident.svg)'
+                    }}
+                />
+                <div className={styles.menuControlsErrorHeaderText}>
+                    <strong>{translate('HallOfFame.Common.OOPS')}</strong>
+                    {translate(
+                        'HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE'
+                    )}
+                </div>
             </div>
 
-            <Tooltip
-                tooltip={translate(
-                    'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]',
-                    'Toggle menu visibility'
-                )}>
-                <MenuButton
-                    className={styles.menuControlsButtonsButtonIcon}
-                    src={
-                        isMenuVisible
-                            ? 'coui://uil/Colored/EyeOpen.svg'
-                            : 'coui://uil/Colored/EyeClosed.svg'
-                    }
-                    tinted={false}
-                    focusKey={FOCUS_DISABLED}
-                    {...snappyOnSelect(
-                        toggleMenuVisibility,
-                        isMenuVisible ? 'close-menu' : 'open-menu'
-                    )}
-                />
-            </Tooltip>
+            <LocalizedString
+                id={error.id}
+                fallback={error.value}
+                args={{
+                    // biome-ignore lint/style/useNamingConvention: i18n convention
+                    ERROR_MESSAGE: locElementToReactNode(
+                        error.args?.ERROR_MESSAGE,
+                        'Unknown error'
+                    )
+                }}
+            />
 
-            <Tooltip
-                tooltip={
-                    <LocalizedString
-                        id={
-                            screenshot.isFavorite
-                                ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Unfavorite]'
-                                : screenshot.favoritesCount == 0
-                                  ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Zero]'
-                                  : screenshot.favoritesCount == 1
-                                    ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Singular]'
-                                    : 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Plural]'
-                        }
-                        fallback={
-                            screenshot.isFavorite
-                                ? 'Unfavorite this image'
-                                : 'Favorite this image'
-                        }
-                        args={{
-                            // biome-ignore lint/style/useNamingConvention: i18n convention
-                            NUMBER: (
-                                <LocalizedNumber
-                                    value={screenshot.favoritesCount}
-                                />
-                            ),
-                            // biome-ignore lint/style/useNamingConvention: i18n convention
-                            FAVORITES_PER_DAY: (
-                                <LocalizedNumber
-                                    value={screenshot.favoritesPerDay}
-                                />
-                            )
-                        }}
-                    />
-                }>
-                <MenuButton
-                    className={`${styles.menuControlsButtonsButton} ${styles.menuControlsButtonsButtonFavorite} ${screenshot.isFavorite ? styles.menuControlsButtonsButtonFavoriteActive : ''}`}
-                    src={loveChirperSrc}
-                    tinted={false}
-                    focusKey={FOCUS_DISABLED}
-                    onSelect={favoriteScreenshot}
-                    selectSound={
-                        screenshot.isFavorite ? 'chirp-event' : 'xp-event'
-                    }>
-                    {screenshot.favoritesCount < 1000
-                        ? screenshot.favoritesCount
-                        : `${(screenshot.favoritesCount / 1000).toFixed(1)}k`}
-                </MenuButton>
-            </Tooltip>
+            <strong className={styles.menuControlsErrorGameplayNotAffected}>
+                {translate(
+                    'HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED'
+                )}
+            </strong>
+
+            <MenuButton
+                src='Media/Glyphs/ArrowCircular.svg'
+                focusKey={FOCUS_DISABLED}
+                disabled={!isReadyForNextImage}
+                {...snappyOnSelect(nextScreenshot)}>
+                {translate('HallOfFame.UI.Menu.MenuControls.ACTION[Retry]')}
+            </MenuButton>
         </div>
     );
+}
+
+function openModSettings(tab: string): void {
+    trigger('hallOfFame', 'openModSettings', tab);
 }
 
 function previousScreenshot(): void {
@@ -430,12 +505,12 @@ function nextScreenshot(): void {
     trigger('hallOfFame.menu', 'nextScreenshot');
 }
 
-function favoriteScreenshot(): void {
-    trigger('hallOfFame.menu', 'favoriteScreenshot');
-}
-
 function reportScreenshot(): void {
     trigger('hallOfFame.menu', 'reportScreenshot');
+}
+
+function favoriteScreenshot(): void {
+    trigger('hallOfFame.menu', 'favoriteScreenshot');
 }
 
 function locElementToReactNode(

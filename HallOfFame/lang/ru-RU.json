@@ -34,7 +34,7 @@
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Plural]": "{NUMBER} лайков, которым понравилась эта фотография ({FAVORITES_PER_DAY} Лайков в день)",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Unfavorite]": "Удалить это изображение из списка избранных",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]": "Чтобы лучше рассмотреть вид, можно скрывать и показывать меню",
-  "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report Abuse]": "Сообщить о неприемлемом контенте",
+  "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report]": "Сообщить о неприемлемом контенте",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "Материал для Зала славы!\nПоделитесь этим шедевром?\nПотрясающий вид!\nОтличный снимок!\nФотографией стоит поделиться!\nМоментальный снимок славы!\nЗапечатлейте это на память!\nПокажите сообществу!\nЭтот снимок - шедевр!\nОчень красивый горизонт!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Предварительный просмотр в формате 16:9.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 - самое распространенное соотношение сторон. Этот прямоугольник показывает, как будет обрезано ваше изображение на таких экранах, чтобы вы могли убедиться, что в нем есть все важные детали.",

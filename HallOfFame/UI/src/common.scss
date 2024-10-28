@@ -28,7 +28,9 @@ $default-timing-function: cubic-bezier(.25, .46, .45, .94);
     }
 }
 
-@mixin fade-and-slide-in(
+@mixin fade-in-slide-in(
+    $x: 0,
+    $y: 0,
     $duration: .5s,
     $timing-function: $default-timing-function) {
 
@@ -37,11 +39,34 @@ $default-timing-function: cubic-bezier(.25, .46, .45, .94);
     @keyframes fade-in {
         0% {
             opacity: 0;
-            transform: translate(0, 50%);
+            transform: translate($x, $y);
         }
         100% {
             opacity: 1;
             transform: translate(0, 0);
+        }
+    }
+}
+
+@mixin fade-out-slide-out(
+    $x: 0,
+    $y: 0,
+    $duration: .5s,
+    $timing-function: $default-timing-function) {
+
+    animation: fade-out $duration $timing-function both;
+
+    @keyframes fade-out {
+        0% {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+        99% {
+            opacity: 0;
+            transform: translate($x, $y);
+        }
+        100% {
+            visibility: hidden;
         }
     }
 }

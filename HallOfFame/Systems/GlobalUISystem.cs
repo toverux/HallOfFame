@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Colossal.Localization;
 using Colossal.UI.Binding;
 using Game.SceneFlow;
 using Game.Settings;
 using Game.UI;
+using Game.UI.Menu;
 using HallOfFame.Utils;
 
 namespace HallOfFame.Systems;
@@ -14,11 +16,13 @@ internal sealed partial class GlobalUISystem : UISystemBase {
     private readonly LocalizationManager localizationManager =
         GameManager.instance.localizationManager;
 
-    private TriggerBinding<bool, string>? logJavaScriptErrorBinding;
+    private TriggerBinding<string> openModSettingsBinding = null!;
 
-    private GetterValueBinding<string>? localeBinding;
+    private TriggerBinding<bool, string> logJavaScriptErrorBinding = null!;
 
-    private GetterValueBinding<Settings>? settingsBinding;
+    private GetterValueBinding<string> localeBinding = null!;
+
+    private GetterValueBinding<Settings> settingsBinding = null!;
 
     protected override void OnCreate() {
         base.OnCreate();
@@ -34,7 +38,12 @@ internal sealed partial class GlobalUISystem : UISystemBase {
 
             this.settingsBinding = new GetterValueBinding<Settings>(
                 GlobalUISystem.BindingGroup, "settings",
-                () => Mod.Settings);
+                () => Mod.Settings,
+                comparer: new FakeSettingComparer());
+
+            this.openModSettingsBinding = new TriggerBinding<string>(
+                GlobalUISystem.BindingGroup, "openModSettings",
+                this.OpenModSettings);
 
             this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
                 GlobalUISystem.BindingGroup, "logJavaScriptError",
@@ -42,6 +51,7 @@ internal sealed partial class GlobalUISystem : UISystemBase {
 
             this.AddBinding(this.localeBinding);
             this.AddBinding(this.settingsBinding);
+            this.AddBinding(this.openModSettingsBinding);
             this.AddBinding(this.logJavaScriptErrorBinding);
 
             this.localizationManager.onActiveDictionaryChanged +=
@@ -64,11 +74,24 @@ internal sealed partial class GlobalUISystem : UISystemBase {
     }
 
     private void OnActiveDictionaryChanged() {
-        this.localeBinding?.Update();
+        this.localeBinding.Update();
     }
 
     private void OnSettingsApplied(Setting setting) {
-        this.settingsBinding?.Update();
+        this.settingsBinding.Update();
+    }
+
+    /// <summary>
+    /// Opens the mod settings page at the specified section.
+    /// </summary>
+    private void OpenModSettings(string section) {
+        var optionsUISystem =
+            this.World.GetOrCreateSystemManaged<OptionsUISystem>();
+
+        optionsUISystem.OpenPage(
+            "HallOfFame.HallOfFame.Mod",
+            $"HallOfFame.HallOfFame.Mod.{section}",
+            false);
     }
 
     /// <summary>
@@ -87,5 +110,12 @@ internal sealed partial class GlobalUISystem : UISystemBase {
         });
 
         Mod.Log.ErrorSilent(error);
+    }
+
+    private class FakeSettingComparer : EqualityComparer<Settings> {
+        public override bool Equals(Settings x, Settings y) => false;
+
+        public override int GetHashCode(Settings settings) =>
+            settings.GetHashCode();
     }
 }
