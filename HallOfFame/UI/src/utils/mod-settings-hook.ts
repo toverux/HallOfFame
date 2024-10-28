@@ -10,7 +10,7 @@ export interface ModSettings {
 const settings$ = bindValue<ModSettings>('hallOfFame', 'settings', {
     creatorName: '',
     creatorIdClue: '',
-    showViewCount: true,
+    showViewCount: false,
     screenshotResolution: 'fhd'
 });
 

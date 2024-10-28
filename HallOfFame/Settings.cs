@@ -300,7 +300,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.RandomScreenshotWeight = 2;
         this.SupporterScreenshotWeight = 5;
 
-        this.ShowViewCount = true;
+        this.ShowViewCount = false;
         this.ViewMaxAge = 60;
         this.ScreenshotResolution = "fhd";
 
