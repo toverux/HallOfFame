@@ -27,7 +27,7 @@
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]": "like",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]": "likes",
   "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "Pristine wilderness",
-  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Viewed {NUMBER} times ({VIEWS_PER_DAY} views/day).\nYou can disable this label in the mod options",
+  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Viewed {NUMBER} times ({VIEWS_PER_DAY} views/day)",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Report]": "Report",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Retry",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]": "Show the previous image",

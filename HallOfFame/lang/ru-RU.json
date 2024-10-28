@@ -24,7 +24,7 @@
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "В Hall of Fame произошла небольшая авария сетевого трафика :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Это не влияет на игровой процесс, и запускать игру абсолютно безопасно.",
   "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "Нетронутая дикая природа",
-  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Просмотрено {NUMBER} раз ({VIEWS_PER_DAY} просмотров/день).\nВы можете отключить эту опцию в настройках мода",
+  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Просмотрено {NUMBER} раз ({VIEWS_PER_DAY} просмотров/день)",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Next]": "Далее",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Повторить",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]": "Показать предыдущее изображение",

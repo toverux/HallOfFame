@@ -24,7 +24,7 @@
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "W Hall of Fame doszło do małego wypadku sieciowego :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Rozgrywka nie jest zagrożona i rozpoczęcie gry jest całkowicie bezpieczne.",
   "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "Nieokiełznana przyroda",
-  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Wyświetlono {NUMBER} razy ({VIEWS_PER_DAY} wyświetleń/dzień).\nTę etykietę możesz wyłączyć w ustawieniach moda",
+  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Wyświetlono {NUMBER} razy ({VIEWS_PER_DAY} wyświetleń/dzień)",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Ponów próbę",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]": "Pokaż poprzedni obraz",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]": "Pokaż nowy obraz",

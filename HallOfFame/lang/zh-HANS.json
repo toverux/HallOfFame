@@ -24,7 +24,7 @@
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "“城市画廊”模组遇到了一点网络交通事故 :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "此错误不影响游戏，可以安全载入。",
   "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "原初荒野",
-  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "已浏览 {NUMBER} 次（ {VIEWS_PER_DAY} 次/天）。\n您可以在模组选项中禁用此标签",
+  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "已浏览 {NUMBER} 次（ {VIEWS_PER_DAY} 次/天）",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "重试",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]": "显示上一张截图",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]": "显示一张新截图",
