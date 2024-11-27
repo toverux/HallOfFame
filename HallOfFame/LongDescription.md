@@ -107,18 +107,13 @@ are encouraged to donate when the balance is in the red.
 
 ## Known issue: possible (but benign) crash when starting the game
 
-There is a bug in cohtml engine (the UI layer of Cities: Skylines II) that can
-cause random (generally rare) crashes **for some users** with some playsets.
+There is a confirmed bug in cohtml engine (the UI layer of Cities: Skylines II)
+that can cause random (but rare) crashes for *some* users with *some* playsets.
 
-This happens only at game load and does not f* up your savegame or settings,
-it’s just a bit annoying.
+The issue only happens when the game loads, if it did load you’re good to go.
 
-The symptom is a crash to desktop with no error message in Player.log, a split
-second after the main menu appears.
-
-We’re still trying to figure out what triggers it and how to work around that
-problem, but in the meantime, if you experience this issue, you can either
-disable the mod or just accept it (or help me debug this thing lol) :D
+The issue was recently mitigated by loading the mod’s UI slightly later, if you
+still encounter this problem, please contact me.
 
 ## Special Thanks
 

@@ -13,7 +13,6 @@ import ellipsisSolidSrc from '../icons/ellipsis-solid.svg';
 import flagSolidSrc from '../icons/flag-solid.svg';
 import loveChirperSrc from '../icons/love-chirper.png';
 import { type ModSettings, snappyOnSelect, useModSettings } from '../utils';
-import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
 import * as styles from './menu-controls.module.scss';
 import { useHofMenuState } from './menu-state-hook';
 
@@ -317,7 +316,6 @@ function MenuControlsNextButton({
                 className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonNext}`}
                 src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
                 tinted={isLoading}
-                focusKey={FOCUS_DISABLED}
                 disabled={isLoading}
                 {...snappyOnSelect(nextScreenshot)}
             />
@@ -344,7 +342,6 @@ function MenuControlsPreviousButton({
                 className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonPrevious}`}
                 src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
                 tinted={isLoading || !hasPreviousScreenshot}
-                focusKey={FOCUS_DISABLED}
                 disabled={isLoading || !hasPreviousScreenshot}
                 {...snappyOnSelect(previousScreenshot)}
             />
@@ -375,7 +372,6 @@ function MenuControlsToggleMenuVisibilityButton({
                         : 'coui://uil/Colored/EyeClosed.svg'
                 }
                 tinted={false}
-                focusKey={FOCUS_DISABLED}
                 {...snappyOnSelect(
                     toggleMenuVisibility,
                     isMenuVisible ? 'close-menu' : 'open-menu'
@@ -429,7 +425,6 @@ function MenuControlsFavoriteButton({
                 className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonFavorite} ${screenshot.isFavorite ? styles.menuControlsSectionButtonsButtonFavoriteActive : ''}`}
                 src={loveChirperSrc}
                 tinted={false}
-                focusKey={FOCUS_DISABLED}
                 onSelect={favoriteScreenshot}
                 selectSound={screenshot.isFavorite ? 'chirp-event' : 'xp-event'}
             />
@@ -484,7 +479,6 @@ function MenuControlsError({
 
             <MenuButton
                 src='Media/Glyphs/ArrowCircular.svg'
-                focusKey={FOCUS_DISABLED}
                 disabled={!isReadyForNextImage}
                 {...snappyOnSelect(nextScreenshot)}>
                 {translate('HallOfFame.UI.Menu.MenuControls.ACTION[Retry]')}
