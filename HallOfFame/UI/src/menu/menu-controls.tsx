@@ -11,7 +11,6 @@ import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import type { Screenshot } from '../common';
 import loveChirperSrc from '../icons/love-chirper.png';
 import { type ModSettings, snappyOnSelect, useModSettings } from '../utils';
-import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
 import * as styles from './menu-controls.module.scss';
 import { useHofMenuState } from './menu-state-hook';
 
@@ -46,7 +45,6 @@ export function MenuControls(): ReactElement {
                     <MenuButton
                         className={styles.menuControlsButtonsButton}
                         src='Media/Glyphs/ArrowCircular.svg'
-                        focusKey={FOCUS_DISABLED}
                         disabled={!menuState.isReadyForNextImage}
                         {...snappyOnSelect(nextScreenshot)}>
                         {translate(
@@ -325,7 +323,6 @@ function MenuControlsButtons({
                         className={`${styles.menuControlsButtonsButtonIcon} ${styles.menuControlsButtonsButtonPrevious}`}
                         src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
                         tinted={isLoading || !hasPreviousScreenshot}
-                        focusKey={FOCUS_DISABLED}
                         disabled={isLoading || !hasPreviousScreenshot}
                         {...snappyOnSelect(previousScreenshot)}
                     />
@@ -339,7 +336,6 @@ function MenuControlsButtons({
                         className={styles.menuControlsButtonsButton}
                         src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
                         tinted={isLoading}
-                        focusKey={FOCUS_DISABLED}
                         disabled={isLoading}
                         {...snappyOnSelect(nextScreenshot)}>
                         {translate(
@@ -363,7 +359,6 @@ function MenuControlsButtons({
                             : 'coui://uil/Colored/EyeClosed.svg'
                     }
                     tinted={false}
-                    focusKey={FOCUS_DISABLED}
                     {...snappyOnSelect(
                         toggleMenuVisibility,
                         isMenuVisible ? 'close-menu' : 'open-menu'
@@ -408,7 +403,6 @@ function MenuControlsButtons({
                     className={`${styles.menuControlsButtonsButton} ${styles.menuControlsButtonsButtonFavorite} ${screenshot.isFavorite ? styles.menuControlsButtonsButtonFavoriteActive : ''}`}
                     src={loveChirperSrc}
                     tinted={false}
-                    focusKey={FOCUS_DISABLED}
                     onSelect={favoriteScreenshot}
                     selectSound={
                         screenshot.isFavorite ? 'chirp-event' : 'xp-event'
