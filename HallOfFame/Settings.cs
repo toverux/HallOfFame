@@ -8,6 +8,7 @@ using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
 using Colossal.PSI.PdxSdk;
 using Colossal.UI.Binding;
+using Game.Input;
 using Game.Modding;
 using Game.SceneFlow;
 using Game.Settings;
@@ -24,17 +25,31 @@ namespace HallOfFame;
 [FileLocation($"ModsSettings/{nameof(HallOfFame)}/{nameof(HallOfFame)}")]
 [SettingsUIShowGroupName(
     Settings.GroupYourProfile,
+    Settings.GroupKeyBindings,
     Settings.GroupContentPreferences,
     Settings.GroupAdvanced,
-    Settings.GroupLinks)]
+    Settings.GroupLinks,
+    Settings.GroupDevelopment)]
+[SettingsUIKeyboardAction(
+    nameof(Settings.KeyBindingPrevious), Usages.kMenuUsage)]
+[SettingsUIKeyboardAction(
+    nameof(Settings.KeyBindingNext), Usages.kMenuUsage)]
+[SettingsUIKeyboardAction(
+    nameof(Settings.KeyBindingLike), Usages.kMenuUsage)]
+[SettingsUIKeyboardAction(
+    nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
 public sealed class Settings : ModSetting, IJsonWritable {
     private const string GroupYourProfile = "YourProfile";
+
+    private const string GroupKeyBindings = "KeyBindings";
 
     private const string GroupContentPreferences = "ContentPreferences";
 
     private const string GroupAdvanced = "Advanced";
 
     private const string GroupLinks = "Links";
+
+    private const string GroupDevelopment = "Development";
 
     private static readonly PdxSdkPlatform PdxSdk =
         PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
@@ -96,11 +111,34 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// </summary>
     [SettingsUISection(Settings.GroupYourProfile)]
     [UsedImplicitly]
-
     // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
     // We could use a private setter to set the text but then the game won't
     // interpret our property as an Option entry, it has to be getter-only.
     public LocalizedString LoginStatus => this.loginStatusValue;
+
+    [SettingsUISection(Settings.GroupKeyBindings)]
+    [SettingsUIKeyboardBinding(
+        BindingKeyboard.LeftArrow,
+        nameof(Settings.KeyBindingPrevious))]
+    public ProxyBinding KeyBindingPrevious { get; set; }
+
+    [SettingsUISection(Settings.GroupKeyBindings)]
+    [SettingsUIKeyboardBinding(
+        BindingKeyboard.RightArrow,
+        nameof(Settings.KeyBindingNext))]
+    public ProxyBinding KeyBindingNext { get; set; }
+
+    [SettingsUISection(Settings.GroupKeyBindings)]
+    [SettingsUIKeyboardBinding(
+        BindingKeyboard.L,
+        nameof(Settings.KeyBindingLike))]
+    public ProxyBinding KeyBindingLike { get; set; }
+
+    [SettingsUISection(Settings.GroupKeyBindings)]
+    [SettingsUIKeyboardBinding(
+        BindingKeyboard.Space,
+        nameof(Settings.KeyBindingToggleMenu))]
+    public ProxyBinding KeyBindingToggleMenu { get; set; }
 
     /// <summary>
     /// Text explaining the algorithms' weight selection mechanism.
@@ -256,6 +294,35 @@ public sealed class Settings : ModSetting, IJsonWritable {
         set => Application.OpenURL("https://github.com/toverux/HallOfFame");
     }
 
+    #if DEBUG
+
+    [SettingsUISection(Settings.GroupDevelopment)]
+    [SettingsUITextInput]
+    public string? ScreenshotToLoad {
+        get;
+        [UsedImplicitly]
+        set;
+    }
+
+    [SettingsUIButton]
+    [SettingsUISection(Settings.GroupDevelopment)]
+    [UsedImplicitly]
+    public bool LoadScreenshot {
+        // ReSharper disable once ValueParameterNotUsed
+        set {
+            if (this.ScreenshotToLoad is null) {
+                return;
+            }
+
+            var world = Unity.Entities.World.All[0];
+
+            world.GetOrCreateSystemManaged<Systems.MenuUISystem>()
+                .LoadScreenshotById(this.ScreenshotToLoad);
+        }
+    }
+
+    #endif
+
     /// <seealso cref="LoginStatus"/>
     private LocalizedString loginStatusValue = string.Empty;
 
@@ -298,7 +365,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.RecentScreenshotWeight = 5;
         this.ArcheologistScreenshotWeight = 5;
         this.RandomScreenshotWeight = 2;
-        this.SupporterScreenshotWeight = 5;
+        this.SupporterScreenshotWeight = 2;
 
         this.ShowViewCount = false;
         this.ViewMaxAge = 60;
@@ -314,6 +381,11 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// Options panel (i.e. not the defaults reference instance).
     /// </summary>
     public void Initialize() {
+        #if DEBUG
+        GameManager.instance.localizationManager.AddSource(
+            "en-US", new DevDictionarySource());
+        #endif
+
         this.InitializeCreatorId();
 
         // Update the login status when the mod is being loaded.
@@ -521,4 +593,27 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
         writer.TypeEnd();
     }
+
+    #if DEBUG
+    private sealed class DevDictionarySource : Colossal.IDictionarySource {
+        public IEnumerable<KeyValuePair<string, string>> ReadEntries(
+            IList<Colossal.IDictionaryEntryError> errors,
+            Dictionary<string, int> indexCounts) =>
+            new Dictionary<string, string> {
+                {
+                    "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]",
+                    "{ Development }"
+                }, {
+                    "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]",
+                    "Screenshot ID"
+                }, {
+                    "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]",
+                    "Load Screenshot"
+                }
+            };
+
+        public void Unload() {
+        }
+    }
+    #endif
 }

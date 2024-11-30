@@ -1,4 +1,5 @@
 import { trigger } from 'cs2/api';
+import { ControlIcons } from 'cs2/input';
 import {
     type LocElement,
     type Localization,
@@ -6,18 +7,43 @@ import {
     LocalizedString,
     useLocalization
 } from 'cs2/l10n';
-import { Button, MenuButton, Tooltip } from 'cs2/ui';
+import { Button, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import type { Screenshot } from '../common';
 import ellipsisSolidSrc from '../icons/ellipsis-solid.svg';
 import flagSolidSrc from '../icons/flag-solid.svg';
 import loveChirperSrc from '../icons/love-chirper.png';
-import { type ModSettings, snappyOnSelect, useModSettings } from '../utils';
-import { FOCUS_DISABLED } from '../vanilla-modules/game-ui/common/focus/focus-key';
+import {
+    type ModSettings,
+    type ProxyBinding,
+    bindInputAction,
+    snappyOnSelect,
+    useModSettings
+} from '../utils';
 import * as styles from './menu-controls.module.scss';
 import { useHofMenuState } from './menu-state-hook';
 
 let lastForcedRefreshIndex = 0;
+
+const previousScreenshotInputAction = bindInputAction(
+    'hallOfFame.menu',
+    'previousScreenshotInputAction'
+);
+
+const nextScreenshotInputAction = bindInputAction(
+    'hallOfFame.menu',
+    'nextScreenshotInputAction'
+);
+
+const likeScreenshotInputAction = bindInputAction(
+    'hallOfFame.menu',
+    'likeScreenshotInputAction'
+);
+
+const toggleMenuInputAction = bindInputAction(
+    'hallOfFame.menu',
+    'toggleMenuInputAction'
+);
 
 /**
  * Component that renders the menu controls and city/creator information.
@@ -25,6 +51,7 @@ let lastForcedRefreshIndex = 0;
 export function MenuControls(): ReactElement {
     return (
         <div className={styles.menuControlsContainer}>
+            {/* Subcomponent just to avoid one stupid level of indentation! */}
             <MenuControlsContent />
         </div>
     );
@@ -51,7 +78,6 @@ export function MenuControlsContent(): ReactElement {
         return (
             <div className={styles.menuControls}>
                 <MenuControlsError
-                    translate={translate}
                     error={menuState.error}
                     isReadyForNextImage={menuState.isReadyForNextImage}
                 />
@@ -72,18 +98,15 @@ export function MenuControlsContent(): ReactElement {
                     className={styles.menuControlsSectionButtons}
                     style={{ alignSelf: 'flex-end' }}>
                     <MenuControlsNextButton
-                        translate={translate}
                         isLoading={!menuState.isReadyForNextImage}
                     />
 
                     <MenuControlsPreviousButton
-                        translate={translate}
                         isLoading={!menuState.isReadyForNextImage}
                         hasPreviousScreenshot={menuState.hasPreviousScreenshot}
                     />
 
                     <MenuControlsToggleMenuVisibilityButton
-                        translate={translate}
                         isMenuVisible={menuState.isMenuVisible}
                         toggleMenuVisibility={() =>
                             setMenuState({
@@ -100,7 +123,6 @@ export function MenuControlsContent(): ReactElement {
                     <MenuControlsCityName screenshot={menuState.screenshot} />
 
                     <MenuControlsScreenshotLabels
-                        translate={translate}
                         modSettings={modSettings}
                         screenshot={menuState.screenshot}
                     />
@@ -221,14 +243,14 @@ function MenuControlsCityName({
 }
 
 function MenuControlsScreenshotLabels({
-    translate,
     modSettings,
     screenshot
 }: Readonly<{
-    translate: Localization['translate'];
     modSettings: ModSettings;
     screenshot: Screenshot;
 }>): ReactElement {
+    const { translate } = useLocalization();
+
     // Do not show the pop/milestone labels if this is an empty map screenshot,
     // which is likely when the pop is 0 and the milestone is 0 (Founding) or 20
     // (Megalopolis, i.e. creative mode).
@@ -301,87 +323,136 @@ function MenuControlsScreenshotLabels({
 }
 
 function MenuControlsNextButton({
-    translate,
     isLoading
 }: Readonly<{
-    translate: Localization['translate'];
     isLoading: boolean;
 }>): ReactElement {
+    const disabled = isLoading;
+
+    const { translate } = useLocalization();
+
+    const { useInputBinding, useInputPhase, useOnInputPerformed } =
+        nextScreenshotInputAction;
+
+    useOnInputPerformed(
+        // setTimeout is used to give time to the key press .*active class to
+        // show briefly before [disabled] is set.
+        () => !disabled && (setTimeout(nextScreenshot), true),
+        'select-item'
+    );
+
+    const binding = useInputBinding();
+    const phase = useInputPhase();
+
+    const activeClass =
+        phase == 'Performed' && !disabled
+            ? styles.menuControlsSectionButtonsButtonActive
+            : '';
+
     return (
-        <Tooltip
-            direction='right'
+        <MenuButtonTooltip
+            binding={binding}
             tooltip={translate(
                 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]'
             )}>
             <MenuButton
-                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonNext}`}
+                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonNext} ${activeClass}`}
                 src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
                 tinted={isLoading}
-                focusKey={FOCUS_DISABLED}
                 disabled={isLoading}
                 {...snappyOnSelect(nextScreenshot)}
             />
-        </Tooltip>
+        </MenuButtonTooltip>
     );
 }
 
 function MenuControlsPreviousButton({
-    translate,
     isLoading,
     hasPreviousScreenshot
 }: Readonly<{
-    translate: Localization['translate'];
     isLoading: boolean;
     hasPreviousScreenshot: boolean;
 }>): ReactElement {
+    const disabled = isLoading || !hasPreviousScreenshot;
+
+    const { translate } = useLocalization();
+
+    const { useInputBinding, useInputPhase, useOnInputPerformed } =
+        previousScreenshotInputAction;
+
+    useOnInputPerformed(
+        // setTimeout is used to give time to the key press .*active class to
+        // show briefly before [disabled] is set.
+        () => !disabled && (setTimeout(previousScreenshot), true),
+        'select-item'
+    );
+
+    const binding = useInputBinding();
+    const phase = useInputPhase();
+
+    const activeClass =
+        phase == 'Performed' && !disabled
+            ? styles.menuControlsSectionButtonsButtonActive
+            : '';
+
     return (
-        <Tooltip
-            direction='right'
+        <MenuButtonTooltip
+            binding={binding}
             tooltip={translate(
                 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]'
             )}>
             <MenuButton
-                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonPrevious}`}
+                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonPrevious} ${activeClass}`}
                 src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
-                tinted={isLoading || !hasPreviousScreenshot}
-                focusKey={FOCUS_DISABLED}
-                disabled={isLoading || !hasPreviousScreenshot}
+                tinted={disabled}
+                disabled={disabled}
                 {...snappyOnSelect(previousScreenshot)}
             />
-        </Tooltip>
+        </MenuButtonTooltip>
     );
 }
 
 function MenuControlsToggleMenuVisibilityButton({
-    translate,
     isMenuVisible,
     toggleMenuVisibility
 }: Readonly<{
-    translate: Localization['translate'];
     isMenuVisible: boolean;
     toggleMenuVisibility: () => void;
 }>): ReactElement {
+    const selectSound = isMenuVisible ? 'close-menu' : 'open-menu';
+
+    const { translate } = useLocalization();
+
+    const { useInputBinding, useInputPhase, useOnInputPerformed } =
+        toggleMenuInputAction;
+
+    useOnInputPerformed(toggleMenuVisibility, selectSound);
+
+    const binding = useInputBinding();
+    const phase = useInputPhase();
+
+    const activeClass =
+        phase == 'Performed'
+            ? styles.menuControlsSectionButtonsButtonActive
+            : '';
+
     return (
-        <Tooltip
-            direction='right'
+        <MenuButtonTooltip
+            binding={binding}
             tooltip={translate(
                 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]'
             )}>
             <MenuButton
-                className={styles.menuControlsSectionButtonsButton}
+                className={`${styles.menuControlsSectionButtonsButton} ${activeClass}`}
                 src={
                     isMenuVisible
                         ? 'coui://uil/Colored/EyeOpen.svg'
                         : 'coui://uil/Colored/EyeClosed.svg'
                 }
                 tinted={false}
-                focusKey={FOCUS_DISABLED}
-                {...snappyOnSelect(
-                    toggleMenuVisibility,
-                    isMenuVisible ? 'close-menu' : 'open-menu'
-                )}
+                {...snappyOnSelect(toggleMenuVisibility, selectSound)}
             />
-        </Tooltip>
+        </MenuButtonTooltip>
     );
 }
 
@@ -390,9 +461,26 @@ function MenuControlsFavoriteButton({
 }: Readonly<{
     screenshot: Screenshot;
 }>): ReactElement {
+    const selectSound = screenshot.isFavorite ? 'chirp-event' : 'xp-event';
+
+    const { useInputBinding, useInputPhase, useOnInputPerformed } =
+        likeScreenshotInputAction;
+
+    useOnInputPerformed(favoriteScreenshot, selectSound);
+
+    const binding = useInputBinding();
+    const phase = useInputPhase();
+
+    const activeClass =
+        phase == 'Performed'
+            ? screenshot.isFavorite
+                ? styles.menuControlsSectionButtonsButtonFavoriteFavoritedActive
+                : styles.menuControlsSectionButtonsButtonActive
+            : '';
+
     return (
-        <Tooltip
-            direction='right'
+        <MenuButtonTooltip
+            binding={binding}
             tooltip={
                 <LocalizedString
                     id={
@@ -426,26 +514,25 @@ function MenuControlsFavoriteButton({
                 />
             }>
             <MenuButton
-                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonFavorite} ${screenshot.isFavorite ? styles.menuControlsSectionButtonsButtonFavoriteActive : ''}`}
+                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonFavorite} ${screenshot.isFavorite ? styles.menuControlsSectionButtonsButtonFavoriteFavorited : ''} ${activeClass}`}
                 src={loveChirperSrc}
                 tinted={false}
-                focusKey={FOCUS_DISABLED}
                 onSelect={favoriteScreenshot}
-                selectSound={screenshot.isFavorite ? 'chirp-event' : 'xp-event'}
+                selectSound={selectSound}
             />
-        </Tooltip>
+        </MenuButtonTooltip>
     );
 }
 
 function MenuControlsError({
-    translate,
     error,
     isReadyForNextImage
 }: Readonly<{
-    translate: Localization['translate'];
     error: LocalizedString;
     isReadyForNextImage: boolean;
 }>): ReactElement {
+    const { translate } = useLocalization();
+
     return (
         <div className={styles.menuControlsError}>
             <div className={styles.menuControlsErrorHeader}>
@@ -484,12 +571,38 @@ function MenuControlsError({
 
             <MenuButton
                 src='Media/Glyphs/ArrowCircular.svg'
-                focusKey={FOCUS_DISABLED}
                 disabled={!isReadyForNextImage}
                 {...snappyOnSelect(nextScreenshot)}>
                 {translate('HallOfFame.UI.Menu.MenuControls.ACTION[Retry]')}
             </MenuButton>
         </div>
+    );
+}
+
+function MenuButtonTooltip({
+    tooltip,
+    binding,
+    children
+}: Readonly<{
+    tooltip: TooltipProps['tooltip'];
+    binding: ProxyBinding;
+    children: TooltipProps['children'];
+}>): ReactElement {
+    return (
+        <Tooltip
+            direction='right'
+            tooltip={
+                <div className={styles.menuControlsSectionButtonsButtonTooltip}>
+                    {tooltip}
+
+                    <ControlIcons
+                        bindings={[binding.binding]}
+                        modifiers={binding.modifiers}
+                    />
+                </div>
+            }>
+            {children}
+        </Tooltip>
     );
 }
 

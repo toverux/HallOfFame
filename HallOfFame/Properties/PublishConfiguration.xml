@@ -111,18 +111,13 @@ are encouraged to donate when the balance is in the red.
 
 ## Known issue: possible (but benign) crash when starting the game
 
-There is a bug in cohtml engine (the UI layer of Cities: Skylines II) that can
-cause random (generally rare) crashes **for some users** with some playsets.
+There is a confirmed bug in cohtml engine (the UI layer of Cities: Skylines II)
+that can cause random (but rare) crashes for *some* users with *some* playsets.
 
-This happens only at game load and does not f* up your savegame or settings,
-it’s just a bit annoying.
+The issue only happens when the game loads, if it did load you’re good to go.
 
-The symptom is a crash to desktop with no error message in Player.log, a split
-second after the main menu appears.
-
-We’re still trying to figure out what triggers it and how to work around that
-problem, but in the meantime, if you experience this issue, you can either
-disable the mod or just accept it (or help me debug this thing lol) :D
+The issue was recently mitigated by loading the mod’s UI slightly later, if you
+still encounter this problem, please contact me.
 
 ## Special Thanks
 
@@ -130,17 +125,21 @@ disable the mod or just accept it (or help me debug this thing lol) :D
   and kind support.
 - **Chamëleon (@chameleon_tbn)** for creating some UI icons for the mod.
 - **Bad Peanut** for the Hearth Chirper icon.
-- **CloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop,
-  ThemisC2, Tigon Ologdring**, for having tested the mod and uploaded the first
-  content so we have beautiful images on launch.
-- Translators:
-  Tiago Correia (Portuguese),
-  Konsi (German),
-  baka-gourd and RilkeXS (Chinese Simplified),
+- **b00tyaddict, CloverPie, Danil.V.L, Hendrix, Jason_Stephen, Jojodaisuke,
+  Konsi, obelix, Prophedt, TheBusStop, ThemisC2, Tigon Ologdring**, valuable
+  community members who, in one way or the other, provided a lot of help,
+  feedback, support and enthusiasm.
+- **Translators:**
+  baka-gourd (Chinese Simplified),
   elGendo87 (Spanish),
+  Fuchs23 (German),
   karmel68 (Polish),
+  Konsi (German),
+  RilkeXS (Chinese Simplified),
   ThemisC2 (Italian),
-  toverux (French).
+  Tiago Correia (Portuguese),
+  toverux (French),
+  y1ito4ka (Russian).
 - **ThemisC2** for his hum, *relentless* support to help me finally finish a
   personal project.</LongDescription>
   <Thumbnail Value="Properties/Thumbnail.png" />
@@ -151,26 +150,16 @@ disable the mod or just accept it (or help me debug this thing lol) :D
   <Screenshot Value="Properties/Screenshot5.png" />
   <Screenshot Value="Properties/Screenshot6.png" />
   <Screenshot Value="Properties/Screenshot7.png" />
-  <Screenshot Value="Properties/Screenshot8.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.4.1" />
+  <ModVersion Value="1.4.2" />
   <GameVersion Value="1.1.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
-  <ChangeLog>This updates delays a bit the loading of a Hall of Fame background image.
+  <ChangeLog>**Fixes:**
 
-Before, the mod attempted to load an image as soon as possible to display it instantly when the menu was shown.
-
-However, on lower-end machines or with large mod playsets, this could cause more noticeable UI stuttering when loading mods.
-
-Furthermore, this could also have played a role in the elusive crash that some players experience when opening the game.
-
-This update waits for the main menu to be shown *and* waits 500ms more before doing anything.
-
-**These changes are experimental, if they don't yield good results they might be reverted.**
-
-If you used to experience the crash-at-load and still have it after this update, *please* contact me on Discord or in the Forum thread to report it.</ChangeLog>
+ - Fix a benign UI error for game update 1.1.12f1.
+ - Slight spacing fix for the Take photo with HoF button that was too small since the previous game update.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />

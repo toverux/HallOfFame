@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Version>1.4.1</Version>
-        <FileVersion>1.4.1</FileVersion>
+        <Version>1.4.2</Version>
+        <FileVersion>1.4.2</FileVersion>
 
         <OutputType>Library</OutputType>
         <!-- According to @Wayz and @tdw_village on Discord, C# 9 is the highest version supported by Burst. -->
@@ -64,6 +64,9 @@
             <Private>false</Private>
         </Reference>
         <Reference Include="Unity.Entities">
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Unity.InputSystem">
             <Private>false</Private>
         </Reference>
         <Reference Include="Unity.Mathematics">

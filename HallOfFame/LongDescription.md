@@ -107,18 +107,13 @@ are encouraged to donate when the balance is in the red.
 
 ## Known issue: possible (but benign) crash when starting the game
 
-There is a bug in cohtml engine (the UI layer of Cities: Skylines II) that can
-cause random (generally rare) crashes **for some users** with some playsets.
+There is a confirmed bug in cohtml engine (the UI layer of Cities: Skylines II)
+that can cause random (but rare) crashes for *some* users with *some* playsets.
 
-This happens only at game load and does not f* up your savegame or settings,
-it’s just a bit annoying.
+The issue only happens when the game loads, if it did load you’re good to go.
 
-The symptom is a crash to desktop with no error message in Player.log, a split
-second after the main menu appears.
-
-We’re still trying to figure out what triggers it and how to work around that
-problem, but in the meantime, if you experience this issue, you can either
-disable the mod or just accept it (or help me debug this thing lol) :D
+The issue was recently mitigated by loading the mod’s UI slightly later, if you
+still encounter this problem, please contact me.
 
 ## Special Thanks
 
@@ -126,16 +121,20 @@ disable the mod or just accept it (or help me debug this thing lol) :D
   and kind support.
 - **Chamëleon (@chameleon_tbn)** for creating some UI icons for the mod.
 - **Bad Peanut** for the Hearth Chirper icon.
-- **CloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop,
-  ThemisC2, Tigon Ologdring**, for having tested the mod and uploaded the first
-  content so we have beautiful images on launch.
-- Translators:
-  Tiago Correia (Portuguese),
-  Konsi (German),
-  baka-gourd and RilkeXS (Chinese Simplified),
+- **b00tyaddict, CloverPie, Danil.V.L, Hendrix, Jason_Stephen, Jojodaisuke,
+  Konsi, obelix, Prophedt, TheBusStop, ThemisC2, Tigon Ologdring**, valuable
+  community members who, in one way or the other, provided a lot of help,
+  feedback, support and enthusiasm.
+- **Translators:**
+  baka-gourd (Chinese Simplified),
   elGendo87 (Spanish),
+  Fuchs23 (German),
   karmel68 (Polish),
+  Konsi (German),
+  RilkeXS (Chinese Simplified),
   ThemisC2 (Italian),
-  toverux (French).
+  Tiago Correia (Portuguese),
+  toverux (French),
+  y1ito4ka (Russian).
 - **ThemisC2** for his hum, *relentless* support to help me finally finish a
   personal project.

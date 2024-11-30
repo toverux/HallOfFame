@@ -64,6 +64,7 @@ public sealed class Mod : IMod {
             // Register settings UI and load settings.
             this.settingsValue = new Settings(this);
             this.settingsValue.RegisterInOptionsUI();
+            this.settingsValue.RegisterKeyBindings();
 
             AssetDatabase.global.LoadSettings(
                 nameof(HallOfFame), this.settingsValue, new Settings(this));

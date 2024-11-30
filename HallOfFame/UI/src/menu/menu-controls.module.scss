@@ -127,6 +127,16 @@
             flex-shrink: 0;
             flex-basis: var(--button-size);
 
+            &-button-tooltip {
+                display: flex;
+                flex-direction: column;
+
+                [class*="hint"] {
+                    font-size: .8em;
+                    margin-top: 5rem;
+                }
+            }
+
             &-button {
                 margin-top: 8rem;
                 margin-bottom: 8rem;
@@ -140,7 +150,14 @@
                 backdrop-filter: brightness(80%) contrast(90%) blur(25px);
 
                 &[disabled], &[disabled]:hover {
-                    background-color: rgba(16, 19, 29, .2);
+                    background-color: rgba(16, 19, 29, .2) !important;
+                }
+
+                &-active {
+                    // Class set when the related action is performed via
+                    // keypress and not via the button.
+                    // Values taken from the vanilla :active button style.
+                    background-color: var(--menuActiveColorBright);
                 }
 
                 [class*="label"] {
@@ -172,7 +189,7 @@
                         transition: transform .15s ease-in-out;
                     }
 
-                    &:hover [class*="icon"], &-active [class*="icon"] {
+                    &:hover [class*="icon"], &-favorited [class*="icon"] {
                         transform: rotate(-10deg) scale(1.6) translateX(3rem);
                     }
 
@@ -180,13 +197,17 @@
                         transform: rotate(-5deg) scale(1.45) translateX(3rem);
                     }
 
-                    &-active {
+                    &-favorited {
                         // importants are for overriding :hover styles.
                         box-shadow: 0 0 0 2rem #e25570 !important;
                         background-color: #e25570aa !important;
                         color: var(--menuText1Normal) !important;
 
                         &:active {
+                            background-color: #e25570cc !important;
+                        }
+
+                        &-active {
                             background-color: #e25570cc !important;
                         }
                     }
