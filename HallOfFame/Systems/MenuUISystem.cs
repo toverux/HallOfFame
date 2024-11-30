@@ -182,6 +182,33 @@ internal sealed partial class MenuUISystem : UISystemBase {
         this.previousGameMode = mode;
     }
 
+    #if DEBUG
+    /// <summary>
+    /// Debug/development method to load a screenshot by its ID.
+    /// Does not use the queue system.
+    /// </summary>
+    internal async void LoadScreenshotById(string screenshotId) {
+        this.isRefreshingBinding.Update(true);
+
+        try {
+            var screenshot = await HttpQueries.GetScreenshot(screenshotId);
+
+            screenshot = await this.LoadScreenshot(
+                screenshot: screenshot, preload: false);
+
+            if (screenshot is not null) {
+                this.screenshotBinding.Update(screenshot);
+            }
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
+        }
+        finally {
+            this.isRefreshingBinding.Update(false);
+        }
+    }
+    #endif
+
     /// <summary>
     /// Switches the current screenshot to the previous if there is one
     /// (<see cref="screenshotsQueue"/>).

@@ -28,7 +28,8 @@ namespace HallOfFame;
     Settings.GroupKeyBindings,
     Settings.GroupContentPreferences,
     Settings.GroupAdvanced,
-    Settings.GroupLinks)]
+    Settings.GroupLinks,
+    Settings.GroupDevelopment)]
 [SettingsUIKeyboardAction(
     nameof(Settings.KeyBindingPrevious), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(
@@ -47,6 +48,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
     private const string GroupAdvanced = "Advanced";
 
     private const string GroupLinks = "Links";
+
+    private const string GroupDevelopment = "Development";
 
     private static readonly PdxSdkPlatform PdxSdk =
         PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
@@ -291,6 +294,35 @@ public sealed class Settings : ModSetting, IJsonWritable {
         set => Application.OpenURL("https://github.com/toverux/HallOfFame");
     }
 
+    #if DEBUG
+
+    [SettingsUISection(Settings.GroupDevelopment)]
+    [SettingsUITextInput]
+    public string? ScreenshotToLoad {
+        get;
+        [UsedImplicitly]
+        set;
+    }
+
+    [SettingsUIButton]
+    [SettingsUISection(Settings.GroupDevelopment)]
+    [UsedImplicitly]
+    public bool LoadScreenshot {
+        // ReSharper disable once ValueParameterNotUsed
+        set {
+            if (this.ScreenshotToLoad is null) {
+                return;
+            }
+
+            var world = Unity.Entities.World.All[0];
+
+            world.GetOrCreateSystemManaged<Systems.MenuUISystem>()
+                .LoadScreenshotById(this.ScreenshotToLoad);
+        }
+    }
+
+    #endif
+
     /// <seealso cref="LoginStatus"/>
     private LocalizedString loginStatusValue = string.Empty;
 
@@ -349,6 +381,11 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// Options panel (i.e. not the defaults reference instance).
     /// </summary>
     public void Initialize() {
+        #if DEBUG
+        GameManager.instance.localizationManager.AddSource(
+            "en-US", new DevDictionarySource());
+        #endif
+
         this.InitializeCreatorId();
 
         // Update the login status when the mod is being loaded.
@@ -556,4 +593,27 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
         writer.TypeEnd();
     }
+
+    #if DEBUG
+    private sealed class DevDictionarySource : Colossal.IDictionarySource {
+        public IEnumerable<KeyValuePair<string, string>> ReadEntries(
+            IList<Colossal.IDictionaryEntryError> errors,
+            Dictionary<string, int> indexCounts) =>
+            new Dictionary<string, string> {
+                {
+                    "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]",
+                    "{ Development }"
+                }, {
+                    "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]",
+                    "Screenshot ID"
+                }, {
+                    "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]",
+                    "Load Screenshot"
+                }
+            };
+
+        public void Unload() {
+        }
+    }
+    #endif
 }
