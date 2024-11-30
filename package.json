@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "packageManager": "bun@1.1.36",
+  "packageManager": "bun@1.1.38",
   "engines": {
     "bun": ">=1.1.0",
     "node": ">=22.0.0"
@@ -15,7 +15,7 @@
     "dev": "webpack --config HallOfFame/UI/webpack.config.js --progress --watch"
   },
   "dependencies": {
-    "@csmodding/urbandevkit": "^0.1.0",
+    "@csmodding/urbandevkit": "^0.1.2",
     "classnames": "^2.5.1",
     "common-tags": "^1.8.2",
     "react": "^18.3.1",

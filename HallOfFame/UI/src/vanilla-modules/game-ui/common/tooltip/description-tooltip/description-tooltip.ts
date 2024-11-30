@@ -3,9 +3,9 @@ import type { FC, ReactNode } from 'react';
 import { getModuleExport } from '../../../../../utils';
 
 interface DescriptionTooltipProps extends Omit<TooltipProps, 'tooltip'> {
-    title: string | null;
-    description: string | null;
-    content?: ReactNode;
+    readonly title: string | null;
+    readonly description: string | null;
+    readonly content?: ReactNode;
 }
 
 export const DescriptionTooltip = getModuleExport<FC<DescriptionTooltipProps>>(

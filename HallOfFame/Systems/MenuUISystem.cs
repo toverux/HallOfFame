@@ -35,6 +35,14 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
     private ValueBinding<LocalizedString?> errorBinding = null!;
 
+    private InputActionBinding previousScreenshotInputActionBinding = null!;
+
+    private InputActionBinding nextScreenshotInputActionBinding = null!;
+
+    private InputActionBinding likeScreenshotInputActionBinding = null!;
+
+    private InputActionBinding toggleMenuInputActionBinding = null!;
+
     private TriggerBinding previousScreenshotBinding = null!;
 
     private TriggerBinding nextScreenshotBinding = null!;
@@ -69,6 +77,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
             this.imagePreloaderUISystem =
                 this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
 
+            // VALUE BINDINGS
             this.defaultImageUriBinding = new ValueBinding<string>(
                 MenuUISystem.BindingGroup, "defaultImageUri",
                 MenuUISystem.VanillaDefaultImageUri);
@@ -95,6 +104,36 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 null,
                 new ValueWriter<LocalizedString>().Nullable());
 
+            this.AddBinding(this.defaultImageUriBinding);
+            this.AddBinding(this.hasPreviousScreenshotBinding);
+            this.AddBinding(this.forcedRefreshIndexBinding);
+            this.AddBinding(this.isRefreshingBinding);
+            this.AddBinding(this.screenshotBinding);
+            this.AddBinding(this.errorBinding);
+
+            // INPUT ACTION BINDINGS
+            this.previousScreenshotInputActionBinding = new InputActionBinding(
+                MenuUISystem.BindingGroup, "previousScreenshotInputAction",
+                Mod.Settings.KeyBindingPrevious);
+
+            this.nextScreenshotInputActionBinding = new InputActionBinding(
+                MenuUISystem.BindingGroup, "nextScreenshotInputAction",
+                Mod.Settings.KeyBindingNext);
+
+            this.likeScreenshotInputActionBinding = new InputActionBinding(
+                MenuUISystem.BindingGroup, "likeScreenshotInputAction",
+                Mod.Settings.KeyBindingLike);
+
+            this.toggleMenuInputActionBinding = new InputActionBinding(
+                MenuUISystem.BindingGroup, "toggleMenuInputAction",
+                Mod.Settings.KeyBindingToggleMenu);
+
+            this.AddBinding(this.previousScreenshotInputActionBinding);
+            this.AddBinding(this.nextScreenshotInputActionBinding);
+            this.AddBinding(this.likeScreenshotInputActionBinding);
+            this.AddBinding(this.toggleMenuInputActionBinding);
+
+            // TRIGGER BINDINGS
             this.previousScreenshotBinding = new TriggerBinding(
                 MenuUISystem.BindingGroup, "previousScreenshot",
                 this.PreviousScreenshot);
@@ -111,12 +150,6 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 MenuUISystem.BindingGroup, "reportScreenshot",
                 this.ReportScreenshot);
 
-            this.AddBinding(this.defaultImageUriBinding);
-            this.AddBinding(this.hasPreviousScreenshotBinding);
-            this.AddBinding(this.forcedRefreshIndexBinding);
-            this.AddBinding(this.isRefreshingBinding);
-            this.AddBinding(this.screenshotBinding);
-            this.AddBinding(this.errorBinding);
             this.AddBinding(this.previousScreenshotBinding);
             this.AddBinding(this.nextScreenshotBinding);
             this.AddBinding(this.favoriteScreenshotBinding);
@@ -164,6 +197,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
             Mod.Log.ErrorSilent(
                 $"Menu: {nameof(this.PreviousScreenshot)}: " +
                 $"Cannot go back, already at the first screenshot.");
+
+            return;
         }
 
         this.isRefreshingBinding.Update(true);

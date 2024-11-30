@@ -79,8 +79,6 @@ const uploadProgress$ = bindValue<JsonUploadProgress | null>(
  * Component that shows up when the user takes a HoF screenshot.
  */
 export function ScreenshotUploadPanel(): ReactElement {
-    const { translate } = useLocalization();
-
     const settings = useModSettings();
 
     const draggable = useDraggable();
@@ -100,31 +98,26 @@ export function ScreenshotUploadPanel(): ReactElement {
             className={`${coMainScreenStyles.centerPanelLayout} ${styles.screenshotUploadPanelLayout}`}>
             <div className={styles.screenshotUploadPanel} {...draggable}>
                 <ScreenshotUploadPanelHeader
-                    translate={translate}
                     screenshotSnapshot={screenshotSnapshot}
                 />
 
                 <ScreenshotUploadPanelImage
-                    translate={translate}
                     screenshotSnapshot={screenshotSnapshot}
                     uploadProgress={uploadProgress}
                 />
 
                 <ScreenshotUploadPanelContentCityInfo
-                    translate={translate}
                     settings={settings}
                     screenshotSnapshot={screenshotSnapshot}
                     creatorNameIsEmpty={creatorNameIsEmpty}
                 />
 
                 <ScreenshotUploadPanelContentOthers
-                    translate={translate}
                     creatorNameIsEmpty={creatorNameIsEmpty}
                     screenshotSnapshot={screenshotSnapshot}
                 />
 
                 <ScreenshotUploadPanelFooter
-                    translate={translate}
                     settings={settings}
                     creatorNameIsEmpty={creatorNameIsEmpty}
                     uploadProgress={uploadProgress}
@@ -135,12 +128,12 @@ export function ScreenshotUploadPanel(): ReactElement {
 }
 
 function ScreenshotUploadPanelHeader({
-    translate,
     screenshotSnapshot
 }: Readonly<{
-    translate: Localization['translate'];
     screenshotSnapshot: JsonScreenshotSnapshot;
 }>): ReactElement {
+    const { translate } = useLocalization();
+
     // Change the congratulation message every time a screenshot is taken.
     // Congratulation messages are stored in one string, separated by newlines.
     // useMemo() with imageUri is used to change the message when the state
@@ -171,14 +164,14 @@ const useUploadSuccessImageUri = createSingletonHook<string | undefined>(
 );
 
 function ScreenshotUploadPanelImage({
-    translate,
     screenshotSnapshot,
     uploadProgress
 }: Readonly<{
-    translate: Localization['translate'];
     screenshotSnapshot: JsonScreenshotSnapshot;
     uploadProgress: JsonUploadProgress | null;
 }>): ReactElement {
+    const { translate } = useLocalization();
+
     const [successImageUri, setSuccessImageUri] = useUploadSuccessImageUri();
 
     const ratioPreviewInfo = useMemo(
@@ -301,16 +294,16 @@ function ScreenshotUploadPanelImage({
 }
 
 function ScreenshotUploadPanelContentCityInfo({
-    translate,
     settings,
     screenshotSnapshot,
     creatorNameIsEmpty
 }: Readonly<{
-    translate: Localization['translate'];
     settings: ModSettings;
     screenshotSnapshot: JsonScreenshotSnapshot;
     creatorNameIsEmpty: boolean;
 }>): ReactElement {
+    const { translate } = useLocalization();
+
     const cityName =
         useValue(cityName$) ||
         // biome-ignore lint/style/noNonNullAssertion: we have fallback.
@@ -347,14 +340,14 @@ function ScreenshotUploadPanelContentCityInfo({
 }
 
 function ScreenshotUploadPanelContentOthers({
-    translate,
     creatorNameIsEmpty,
     screenshotSnapshot
 }: Readonly<{
-    translate: Localization['translate'];
     creatorNameIsEmpty: boolean;
     screenshotSnapshot: JsonScreenshotSnapshot;
 }>): ReactElement {
+    const { translate } = useLocalization();
+
     return (
         <>
             {creatorNameIsEmpty && (
@@ -402,16 +395,16 @@ function ScreenshotUploadPanelContentOthers({
 }
 
 function ScreenshotUploadPanelFooter({
-    translate,
     settings,
     creatorNameIsEmpty,
     uploadProgress
 }: Readonly<{
-    translate: Localization['translate'];
     settings: ModSettings;
     creatorNameIsEmpty: boolean;
     uploadProgress: JsonUploadProgress | null;
 }>): ReactElement {
+    const { translate } = useLocalization();
+
     const isUploading = !!uploadProgress && !uploadProgress.isComplete;
     const isIdleOrUploading = !uploadProgress?.isComplete;
     const isDoneUploading = !!uploadProgress?.isComplete;
