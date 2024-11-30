@@ -121,16 +121,20 @@ still encounter this problem, please contact me.
   and kind support.
 - **Chamëleon (@chameleon_tbn)** for creating some UI icons for the mod.
 - **Bad Peanut** for the Hearth Chirper icon.
-- **CloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop,
-  ThemisC2, Tigon Ologdring**, for having tested the mod and uploaded the first
-  content so we have beautiful images on launch.
-- Translators:
-  Tiago Correia (Portuguese),
-  Konsi (German),
-  baka-gourd and RilkeXS (Chinese Simplified),
+- **b00tyaddict, CloverPie, Danil.V.L, Hendrix, Jason_Stephen, Jojodaisuke,
+  Konsi, obelix, Prophedt, TheBusStop, ThemisC2, Tigon Ologdring**, valuable
+  community members who, in one way or the other, provided a lot of help,
+  feedback, support and enthusiasm.
+- **Translators:**
+  baka-gourd (Chinese Simplified),
   elGendo87 (Spanish),
+  Fuchs23 (German),
   karmel68 (Polish),
+  Konsi (German),
+  RilkeXS (Chinese Simplified),
   ThemisC2 (Italian),
-  toverux (French).
+  Tiago Correia (Portuguese),
+  toverux (French),
+  y1ito4ka (Russian).
 - **ThemisC2** for his hum, *relentless* support to help me finally finish a
   personal project.
