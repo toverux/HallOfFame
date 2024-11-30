@@ -333,7 +333,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.RecentScreenshotWeight = 5;
         this.ArcheologistScreenshotWeight = 5;
         this.RandomScreenshotWeight = 2;
-        this.SupporterScreenshotWeight = 5;
+        this.SupporterScreenshotWeight = 2;
 
         this.ShowViewCount = false;
         this.ViewMaxAge = 60;
