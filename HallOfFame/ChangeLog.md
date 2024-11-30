@@ -1,4 +1,7 @@
-﻿**Fixes:**
+﻿**New features:**
+- Completely revamped menu UI! Sleeeeek.
+- Added (configurable) key bindings for Next (right arrow), Previous (left arrow), Like (L) and Toggle Menu UI (space) actions.
 
- - Fix a benign UI error for game update 1.1.12f1.
- - Slight spacing fix for the Take photo with HoF button that was too small since the previous game update.
+**Changes:**
+- Now the view count label is hidden by default, to limit UI clutter. You can opt-in to show it in the settings.
+- Default Supporters algorithm weight debuffed to 2 (again).
