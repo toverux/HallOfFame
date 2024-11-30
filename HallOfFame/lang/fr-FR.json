@@ -71,7 +71,7 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingPrevious]": "Image précédente",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingPrevious]": "Raccourci clavier pour afficher l’image précédente.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingNext]": "Image suivante",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingNext]": "Ralenti clavier pour afficher une nouvelle image.",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingNext]": "Raccourci clavier pour afficher une nouvelle image.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingToggleMenu]": "Afficher/cacher le menu",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingToggleMenu]": "Raccourci clavier pour afficher ou cacher le menu principal.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingLike]": "J’aime",
