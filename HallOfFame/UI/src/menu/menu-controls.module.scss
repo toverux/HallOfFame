@@ -189,7 +189,7 @@
                         transition: transform .15s ease-in-out;
                     }
 
-                    &:hover [class*="icon"], &-active [class*="icon"] {
+                    &:hover [class*="icon"], &-favorited [class*="icon"] {
                         transform: rotate(-10deg) scale(1.6) translateX(3rem);
                     }
 
