@@ -1,4 +1,3 @@
 ﻿**Fixes:**
 
- - Fix a benign UI error for game update 1.1.12f1.
- - Slight spacing fix for the Take photo with HoF button that was too small since the previous game update.
+- Revert all changes made in 1.5.0 as there is an unidentified issue leading to a crash to desktop when loading a save.
