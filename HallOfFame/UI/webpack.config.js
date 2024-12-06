@@ -7,9 +7,12 @@
 //   leave them as-is (`options.url.filter`).
 // - Change css-loader to add "hof-" prefix to CSS modules class names.
 //   This can help debugging and other mods to target our classes.
+// - Change loaders for SVG to use asset/inline and PNG/JPG/GIF to use asset,
+//   instead of asset/resource.
 
 import * as path from 'node:path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import miniSvgDataUri from 'mini-svg-data-uri';
 import TerserPlugin from 'terser-webpack-plugin';
 import mod from './mod.json' with { type: 'json' };
 
@@ -84,8 +87,12 @@ export default {
                 ]
             },
             {
-                test: /\.(png|jpe?g|gif|svg)$/i,
-                type: 'asset/resource',
+                test: /\.svg$/i,
+                type: 'asset/inline'
+            },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                type: 'asset',
                 generator: {
                     filename: 'images/[name][ext][query]'
                 }
