@@ -1,17 +1,15 @@
 ﻿.screenshot-button {
     position: relative;
     display: block;
-    // Override vanilla width to make room for the 90° rotated HoF side label.
-    // 32rem is the original margin, we add 1em for the text.
+    // Override vanilla margin to make room for the 90° rotated HoF side label.
+    // 25rem is the original margin, we add 1em as a basis.
     // We do not want to be exact actually, this is the kind of thing to adjust
     // by eyeballing.
-    width: calc(32rem + 1em - 2rem) !important;
+    margin-right: calc(25rem + 1em - 2rem) !important;
 
     > [class*="icon"] {
         //noinspection CssUnknownTarget
         mask-image: url(coui://uil/Standard/SharePicture.svg);
-        // Dock icon to left to adjust for the increased width.
-        mask-position: 0 50%;
     }
 
     span {
