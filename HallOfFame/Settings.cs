@@ -528,8 +528,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
             // Fetch the creator info from the server, this will also update the
             // Creator Name if it's different from the server's.
             var creator = nameOnly
-                ? await HttpQueries.GetMyself()
-                : await HttpQueries.UpdateMyself();
+                ? await HttpQueries.GetMe()
+                : await HttpQueries.UpdateMe();
 
             // Stop if the operation was cancelled while we were fetching data.
             thisCts.Token.ThrowIfCancellationRequested();

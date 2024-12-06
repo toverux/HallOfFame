@@ -7,16 +7,7 @@ using UnityEngine.Networking;
 namespace HallOfFame.Http;
 
 internal static partial class HttpQueries {
-    internal static async Task<Creator> GetMyself() {
-        using var request = UnityWebRequest.Get(
-            HttpQueries.PrependApiUrl("/creators/me"));
-
-        await HttpQueries.SendRequest(request);
-
-        return HttpQueries.ParseResponse<Creator>(request);
-    }
-
-    internal static async Task<Creator> UpdateMyself() {
+    internal static async Task<Creator> UpdateMe() {
         var payload = new Dictionary<string, object> {
             { "modSettings", Mod.Settings }
         };
