@@ -19,11 +19,7 @@ namespace HallOfFame.Systems;
 internal sealed partial class MenuUISystem : UISystemBase {
     private const string BindingGroup = "hallOfFame.menu";
 
-    private const string VanillaDefaultImageUri = "Media/Menu/Background2.jpg";
-
     private ImagePreloaderUISystem imagePreloaderUISystem = null!;
-
-    private ValueBinding<string> defaultImageUriBinding = null!;
 
     private GetterValueBinding<bool> hasPreviousScreenshotBinding = null!;
 
@@ -78,10 +74,6 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
 
             // VALUE BINDINGS
-            this.defaultImageUriBinding = new ValueBinding<string>(
-                MenuUISystem.BindingGroup, "defaultImageUri",
-                MenuUISystem.VanillaDefaultImageUri);
-
             this.hasPreviousScreenshotBinding = new GetterValueBinding<bool>(
                 MenuUISystem.BindingGroup, "hasPreviousScreenshot",
                 () => this.currentScreenshotIndex > 0);
@@ -104,7 +96,6 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 null,
                 new ValueWriter<LocalizedString>().Nullable());
 
-            this.AddBinding(this.defaultImageUriBinding);
             this.AddBinding(this.hasPreviousScreenshotBinding);
             this.AddBinding(this.forcedRefreshIndexBinding);
             this.AddBinding(this.isRefreshingBinding);

@@ -3,7 +3,6 @@ import type { LocalizedString } from 'cs2/l10n';
 import type { Dispatch } from 'react';
 import type { Screenshot } from '../common';
 import { createSingletonHook, useModSettings } from '../utils';
-import modLoadingErrorSrc from './mod-loading-error.jpg';
 
 interface ReadonlyMenuState {
     /**
@@ -67,13 +66,7 @@ interface SettableMenuState {
     readonly isReadyForNextImage: boolean;
 }
 
-const defaultImageUri$ = bindValue<string>(
-    'hallOfFame.menu',
-    'defaultImageUri',
-    // Fallback binding value that is an image that indicates a problem with the
-    // initialization of the .NET mod while the UI mod was still loaded.
-    modLoadingErrorSrc
-);
+const vanillaDefaultImageUri = 'Media/Menu/Background2.jpg';
 
 const hasPreviousScreenshot$ = bindValue<boolean>(
     'hallOfFame.menu',
@@ -117,7 +110,6 @@ export function useHofMenuState(): [
     const settings = useModSettings();
     const [settableMenuState, setMenuState] = useSingletonMenuState();
 
-    const defaultImageUri = useValue(defaultImageUri$);
     const hasPreviousScreenshot = useValue(hasPreviousScreenshot$);
     const isRefreshing = useValue(isRefreshing$);
     const forcedRefreshIndex = useValue(forcedRefreshIndex$);
@@ -133,7 +125,7 @@ export function useHofMenuState(): [
             ? settings.screenshotResolution == 'fhd'
                 ? screenshot.imageUrlFHD
                 : screenshot.imageUrl4K
-            : defaultImageUri,
+            : vanillaDefaultImageUri,
         screenshot,
         error
     };
