@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿#if DEBUG
+using System.Threading.Tasks;
 using HallOfFame.Domain;
 using UnityEngine.Networking;
 
@@ -17,3 +18,4 @@ internal static partial class HttpQueries {
         return HttpQueries.ParseResponse<Screenshot>(request);
     }
 }
+#endif

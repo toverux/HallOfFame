@@ -85,8 +85,13 @@ public sealed class Mod : IMod {
                 shouldWatch: false);
 
             // Initialize subsystems.
+            updateSystem.UpdateAt<MenuNotificationSystem>(
+                SystemUpdatePhase.MainLoop);
+
             updateSystem.UpdateAt<GlobalUISystem>(SystemUpdatePhase.UIUpdate);
+
             updateSystem.UpdateAt<MenuUISystem>(SystemUpdatePhase.UIUpdate);
+
             updateSystem.UpdateAt<GameUISystem>(SystemUpdatePhase.UIUpdate);
 
             Mod.Log.Info($"Mod: {nameof(this.OnLoad)} complete.");
