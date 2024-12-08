@@ -154,17 +154,22 @@ still encounter this problem, please contact me.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.5.0" />
+  <ModVersion Value="1.6.0" />
   <GameVersion Value="1.1.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
   <ChangeLog>**New features:**
 - Completely revamped menu UI! Sleeeeek.
 - Added (configurable) key bindings for Next (right arrow), Previous (left arrow), Like (L) and Toggle Menu UI (space) actions.
+- When the main menu loads, a notification will show you how many times your screenshots have been viewed and liked.
+  Clicking the notification will show some more global stats in a dialog.
 
 **Changes:**
 - Now the view count label is hidden by default, to limit UI clutter. You can opt-in to show it in the settings.
-- Default Supporters algorithm weight debuffed to 2 (again).</ChangeLog>
+- Default Supporters algorithm weight debuffed to 2 (again).
+- Minor improvements/fixes.
+
+*(This is a republish of the very short-lived 1.5.0 version with the load game crash bug fixed, plus the new notification).*</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
