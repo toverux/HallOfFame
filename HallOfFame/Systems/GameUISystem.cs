@@ -202,15 +202,15 @@ internal sealed partial class GameUISystem : UISystemBase {
     /// the user to set one and the method will not proceed.
     /// </summary>
     private async void TakeScreenshot() {
-        // Early exit if the user has not set a creator name.
-        if (this.CheckShouldSetCreatorName()) {
-            return;
-        }
-
         // This bricks the current game session if this throws, so we will
         // handle exceptions properly here, as there is a non-zero chance of
         // failure in this section (notably due to I/O).
         try {
+            // Early exit if the user has not set a creator name.
+            if (this.CheckShouldSetCreatorName()) {
+                return;
+            }
+
             await this.DoTakeScreenshot();
         }
         catch (Exception ex) {
@@ -394,6 +394,7 @@ internal sealed partial class GameUISystem : UISystemBase {
         }
     }
 
+    // ReSharper disable once AsyncVoidMethod
     private async void UploadScreenshot() {
         if (this.CurrentScreenshot is null) {
             Mod.Log.Warn(

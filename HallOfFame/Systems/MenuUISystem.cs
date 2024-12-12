@@ -204,8 +204,9 @@ internal sealed partial class MenuUISystem : UISystemBase {
     /// Switches the current screenshot to the previous if there is one
     /// (<see cref="screenshotsQueue"/>).
     /// The method is `async void` because it is designed to be called in a
-    /// fire-and-forget manner, and it should be designed to never throw.
+    /// fire-and-forget manner, and it must be designed to never throw.
     /// </summary>
+    // ReSharper disable once AsyncVoidMethod
     private async void PreviousScreenshot() {
         if (this.isRefreshingBinding.value) {
             return;
@@ -250,6 +251,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
     /// The method is `async void` because it is designed to be called in a
     /// fire-and-forget manner, and it should be designed to never throw.
     /// </summary>
+    // ReSharper disable once AsyncVoidMethod
     private async void NextScreenshot() {
         if (this.isRefreshingBinding.value) {
             return;
@@ -316,6 +318,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
         return;
 
         // Fire-and-forget async method that should be designed to never throw.
+        // ReSharper disable once AsyncVoidMethod
         async void PreloadNextScreenshot() {
             // Variable used below to avoid infinite loops when there is only
             // one screenshot in database (that can happen during development).
@@ -436,6 +439,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
     /// The method is `async void` because it is designed to be called in a
     /// fire-and-forget manner, and it should be designed to never throw.
     /// </summary>
+    // ReSharper disable once AsyncVoidMethod
     private async void FavoriteScreenshot() {
         if (this.isTogglingFavorite ||
             this.isRefreshingBinding.value ||
@@ -524,11 +528,11 @@ internal sealed partial class MenuUISystem : UISystemBase {
         return;
 
         async void OnConfirmOrCancel(int choice) {
-            if (choice is not 0) {
-                return;
-            }
-
             try {
+                if (choice is not 0) {
+                    return;
+                }
+
                 await HttpQueries.ReportScreenshot(screenshot.Id);
 
                 var successDialog = new MessageDialog(

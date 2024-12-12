@@ -503,6 +503,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     /// Whether to debounce the method if it's called multiple times in a short
     /// period (keystrokes while typing username).
     /// </param>
+    // ReSharper disable once AsyncVoidMethod
     private async void UpdateCreator(
         bool nameOnly,
         bool silent,

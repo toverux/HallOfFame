@@ -72,13 +72,13 @@ internal sealed partial class MenuNotificationSystem : GameSystemBase {
     /// fire-and-forget manner, and it should be designed to never throw.
     /// </summary>
     private async void LoadAndShowNotification() {
-        if (this.notificationShownOrLoading) {
-            return;
-        }
-
-        this.notificationShownOrLoading = true;
-
         try {
+            if (this.notificationShownOrLoading) {
+                return;
+            }
+
+            this.notificationShownOrLoading = true;
+
             if (this.notificationUISystem is null) {
                 Mod.Log.ErrorSilent($"{nameof(NotificationUISystem)} is null.");
 
