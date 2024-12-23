@@ -13,6 +13,9 @@ If you’re in one of those situations, all you need is the mod!
 - You want some inspiration when you fire up the game.
 - You’re too lazy to open Reddit and three Discord servers to see some cool
   cities.
+- Oh, and last but not least: the mod allows you to take **4K screenshots**,
+  even when playing at a lower resolution, and **makes better screenshot
+  renders than the Vanilla tool**!
 
 This mod allows players to take and upload 4K screenshots of their city, and
 share them with the community. Images can then be viewed by other players as a
@@ -107,20 +110,6 @@ server and your images is not free.
 
 Donations are very welcome and will help keep the service running.
 
-I will soon publish the exact donation/expenditure balance for the mod so people
-are encouraged to donate when the balance is in the red.
-(Or just donate because you like the mod! =)
-
-## Known issue: possible (but benign) crash when starting the game
-
-There is a confirmed bug in cohtml engine (the UI layer of Cities: Skylines II)
-that can cause random (but rare) crashes for *some* users with *some* playsets.
-
-The issue only happens when the game loads, if it did load you’re good to go.
-
-The issue was recently mitigated by loading the mod’s UI slightly later, if you
-still encounter this problem, please contact me.
-
 ## Special Thanks
 
 - **The Cities: Skylines Modding Discord community** in general for their help
@@ -154,13 +143,11 @@ still encounter this problem, please contact me.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.6.1" />
+  <ModVersion Value="1.6.2" />
   <GameVersion Value="1.2.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
-  <ChangeLog>Compatibility with patch 1.2.0f1:
- - Fix stats dialog not opening and throwing an error.
- - Fix take photo button throwing an error.</ChangeLog>
+  <ChangeLog>Updated Chinese translations.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />

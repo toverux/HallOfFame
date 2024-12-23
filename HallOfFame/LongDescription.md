@@ -9,6 +9,9 @@ If you’re in one of those situations, all you need is the mod!
 - You want some inspiration when you fire up the game.
 - You’re too lazy to open Reddit and three Discord servers to see some cool
   cities.
+- Oh, and last but not least: the mod allows you to take **4K screenshots**,
+  even when playing at a lower resolution, and **makes better screenshot
+  renders than the Vanilla tool**!
 
 This mod allows players to take and upload 4K screenshots of their city, and
 share them with the community. Images can then be viewed by other players as a
@@ -102,20 +105,6 @@ Hall of Fame has low, but nonetheless existing, running costs: hosting the
 server and your images is not free.
 
 Donations are very welcome and will help keep the service running.
-
-I will soon publish the exact donation/expenditure balance for the mod so people
-are encouraged to donate when the balance is in the red.
-(Or just donate because you like the mod! =)
-
-## Known issue: possible (but benign) crash when starting the game
-
-There is a confirmed bug in cohtml engine (the UI layer of Cities: Skylines II)
-that can cause random (but rare) crashes for *some* users with *some* playsets.
-
-The issue only happens when the game loads, if it did load you’re good to go.
-
-The issue was recently mitigated by loading the mod’s UI slightly later, if you
-still encounter this problem, please contact me.
 
 ## Special Thanks
 
