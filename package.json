@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "packageManager": "bun@1.1.38",
+  "packageManager": "bun@1.1.42",
   "engines": {
     "bun": ">=1.1.0",
     "node": ">=22.0.0"
@@ -24,21 +24,21 @@
   "devDependencies": {
     "@biomejs/biome": "~1.9.4",
     "@types/common-tags": "^1.8.4",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "css-loader": "^7.1.2",
-    "lefthook": "^1.8.4",
+    "lefthook": "^1.10.0",
     "mini-css-extract-plugin": "^2.9.2",
-    "sass": "^1.81.0",
-    "sass-loader": "^16.0.3",
-    "terser-webpack-plugin": "^5.3.10",
+    "sass": "^1.83.0",
+    "sass-loader": "^16.0.4",
+    "terser-webpack-plugin": "^5.3.11",
     "ts-loader": "^9.5.1",
     "typescript": "^5.7.2",
-    "webpack": "^5.96.1",
-    "webpack-cli": "^5.1.4"
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
   },
   "trustedDependencies": ["@biomejs/biome", "lefthook"],
   "optionalDependencies": {
-    "sass-embedded": "^1.81.0"
+    "sass-embedded": "^1.83.0"
   }
 }
