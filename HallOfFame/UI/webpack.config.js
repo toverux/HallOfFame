@@ -12,7 +12,6 @@
 
 import * as path from 'node:path';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import miniSvgDataUri from 'mini-svg-data-uri';
 import TerserPlugin from 'terser-webpack-plugin';
 import mod from './mod.json' with { type: 'json' };
 
