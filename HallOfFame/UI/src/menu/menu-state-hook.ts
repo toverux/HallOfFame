@@ -45,6 +45,11 @@ interface ReadonlyMenuState {
      * preloading included.
      */
     readonly error: LocalizedString | null;
+
+    /**
+     * Whether a save image to disk operation is going on.
+     */
+    readonly isSaving: boolean;
 }
 
 interface SettableMenuState {
@@ -98,6 +103,8 @@ const error$ = bindValue<LocalizedString | null>(
     null
 );
 
+const isSaving$ = bindValue<boolean>('hallOfFame.menu', 'isSaving', false);
+
 const useSingletonMenuState = createSingletonHook<SettableMenuState>({
     isMenuVisible: true,
     isReadyForNextImage: true
@@ -115,6 +122,7 @@ export function useHofMenuState(): [
     const forcedRefreshIndex = useValue(forcedRefreshIndex$);
     const screenshot = useValue(screenshot$);
     const error = useValue(error$);
+    const isSaving = useValue(isSaving$);
 
     const menuState: ReadonlyMenuState & SettableMenuState = {
         ...settableMenuState,
@@ -127,7 +135,8 @@ export function useHofMenuState(): [
                 : screenshot.imageUrl4K
             : vanillaDefaultImageUri,
         screenshot,
-        error
+        error,
+        isSaving
     };
 
     return [menuState, setMenuState];

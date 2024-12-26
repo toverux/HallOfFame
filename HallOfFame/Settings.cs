@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -217,6 +218,13 @@ public sealed class Settings : ModSetting, IJsonWritable {
     public string ScreenshotResolution { get; set; } = null!;
 
     /// <summary>
+    /// Where to save other creators' screenshots downloaded from the main menu.
+    /// </summary>
+    [SettingsUISection(Settings.GroupAdvanced)]
+    [SettingsUIDirectoryPicker]
+    public string CreatorsScreenshotSaveDirectory { get; set; } = null!;
+
+    /// <summary>
     /// Whether to create a PNG file of the screenshot when it is taken, like
     /// the vanilla screenshot feature.
     /// </summary>
@@ -370,6 +378,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.ShowViewCount = false;
         this.ViewMaxAge = 60;
         this.ScreenshotResolution = "fhd";
+
+        this.CreatorsScreenshotSaveDirectory = Path.GetFullPath(
+            Path.Combine(Mod.GameScreenshotsPath, "Hall Of Fame Creators"));
 
         this.CreateLocalScreenshot = true;
         this.DisableGlobalIllumination = Settings.IsNvidiaGpu();
@@ -591,6 +602,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
         writer.PropertyName("screenshotResolution");
         writer.Write(this.ScreenshotResolution);
+
+        writer.PropertyName("creatorsScreenshotSaveDirectory");
+        writer.Write(this.CreatorsScreenshotSaveDirectory);
 
         writer.TypeEnd();
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
@@ -31,6 +32,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
     private ValueBinding<LocalizedString?> errorBinding = null!;
 
+    private ValueBinding<bool> isSavingBinding = null!;
+
     private InputActionBinding previousScreenshotInputActionBinding = null!;
 
     private InputActionBinding nextScreenshotInputActionBinding = null!;
@@ -44,6 +47,8 @@ internal sealed partial class MenuUISystem : UISystemBase {
     private TriggerBinding nextScreenshotBinding = null!;
 
     private TriggerBinding favoriteScreenshotBinding = null!;
+
+    private TriggerBinding saveScreenshotBinding = null!;
 
     private TriggerBinding reportScreenshotBinding = null!;
 
@@ -96,11 +101,16 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 null,
                 new ValueWriter<LocalizedString>().Nullable());
 
+            this.isSavingBinding = new ValueBinding<bool>(
+                MenuUISystem.BindingGroup, "isSaving",
+                false);
+
             this.AddBinding(this.hasPreviousScreenshotBinding);
             this.AddBinding(this.forcedRefreshIndexBinding);
             this.AddBinding(this.isRefreshingBinding);
             this.AddBinding(this.screenshotBinding);
             this.AddBinding(this.errorBinding);
+            this.AddBinding(this.isSavingBinding);
 
             // INPUT ACTION BINDINGS
             this.previousScreenshotInputActionBinding = new InputActionBinding(
@@ -137,6 +147,10 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 MenuUISystem.BindingGroup, "favoriteScreenshot",
                 this.FavoriteScreenshot);
 
+            this.saveScreenshotBinding = new TriggerBinding(
+                MenuUISystem.BindingGroup, "saveScreenshot",
+                this.SaveScreenshot);
+
             this.reportScreenshotBinding = new TriggerBinding(
                 MenuUISystem.BindingGroup, "reportScreenshot",
                 this.ReportScreenshot);
@@ -144,6 +158,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
             this.AddBinding(this.previousScreenshotBinding);
             this.AddBinding(this.nextScreenshotBinding);
             this.AddBinding(this.favoriteScreenshotBinding);
+            this.AddBinding(this.saveScreenshotBinding);
             this.AddBinding(this.reportScreenshotBinding);
         }
         catch (Exception ex) {
@@ -179,9 +194,9 @@ internal sealed partial class MenuUISystem : UISystemBase {
     /// Does not use the queue system.
     /// </summary>
     internal async void LoadScreenshotById(string screenshotId) {
-        this.isRefreshingBinding.Update(true);
-
         try {
+            this.isRefreshingBinding.Update(true);
+
             var screenshot = await HttpQueries.GetScreenshot(screenshotId);
 
             screenshot = await this.LoadScreenshot(
@@ -485,10 +500,50 @@ internal sealed partial class MenuUISystem : UISystemBase {
         }
     }
 
-    private bool IsNetworkError(Exception ex) {
-        return ex
-            is HttpException
-            or ImagePreloaderUISystem.ImagePreloadFailedException;
+    /// <summary>
+    /// Saves the current screenshot 4K image to the disk, to the path specified
+    /// in the mod settings.
+    /// The method is `async void` because it is designed to be called in a
+    /// fire-and-forget manner, and it should be designed to never throw.
+    /// </summary>
+    // ReSharper disable once AsyncVoidMethod
+    private async void SaveScreenshot() {
+        var screenshot = this.screenshotBinding.value;
+
+        if (this.isSavingBinding.value || screenshot is null) {
+            return;
+        }
+
+        try {
+            this.isSavingBinding.Update(true);
+
+            var imageBytes =
+                await HttpQueries.DownloadImage(screenshot.ImageUrl4K);
+
+            var directory = Mod.Settings.CreatorsScreenshotSaveDirectory;
+
+            var filePath = Path.Combine(
+                Mod.Settings.CreatorsScreenshotSaveDirectory,
+                $"{screenshot.Creator?.CreatorName} - " +
+                $"{screenshot.CityName} - " +
+                $"{screenshot.CreatedAt.ToLocalTime():yyyy.MM.dd HH.mm.ss}.jpg");
+
+            await Task.Run(() => {
+                Directory.CreateDirectory(directory);
+                File.WriteAllBytes(filePath, imageBytes);
+            });
+
+            Mod.Log.Info($"Menu: Saved {screenshot} image to {filePath}.");
+        }
+        catch (Exception ex) when (this.IsNetworkError(ex)) {
+            Mod.Log.Error(ex.GetUserFriendlyMessage());
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
+        }
+        finally {
+            this.isSavingBinding.Update(false);
+        }
     }
 
     private void ReportScreenshot() {
@@ -563,5 +618,11 @@ internal sealed partial class MenuUISystem : UISystemBase {
                 Mod.Log.ErrorRecoverable(ex);
             }
         }
+    }
+
+    private bool IsNetworkError(Exception ex) {
+        return ex
+            is HttpException
+            or ImagePreloaderUISystem.ImagePreloadFailedException;
     }
 }

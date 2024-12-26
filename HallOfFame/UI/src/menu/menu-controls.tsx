@@ -171,6 +171,43 @@ export function MenuControlsContent(): ReactElement {
                     className={`${styles.menuControlsSectionContent} ${showMoreActions ? styles.menuControlsSectionContentSlideIn : ''}`}>
                     <Tooltip
                         direction='down'
+                        tooltip={
+                            <LocalizedString
+                                id={
+                                    'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Save]'
+                                }
+                                args={{
+                                    // biome-ignore lint/style/useNamingConvention: i18n convention
+                                    DIRECTORY:
+                                        modSettings.creatorsScreenshotSaveDirectory
+                                }}
+                            />
+                        }>
+                        <Button
+                            className={
+                                menuState.isSaving
+                                    ? styles.menuControlsSectionContentButtonSaveSpin
+                                    : ''
+                            }
+                            variant='menu'
+                            src={
+                                menuState.isSaving
+                                    ? 'Media/Glyphs/Progress.svg'
+                                    : 'Media/Editor/Save.svg'
+                            }
+                            tinted={true}
+                            disabled={menuState.isSaving}
+                            onSelect={saveScreenshot}>
+                            <span>
+                                {translate(
+                                    'HallOfFame.UI.Menu.MenuControls.ACTION[Save]'
+                                )}
+                            </span>
+                        </Button>
+                    </Tooltip>
+
+                    <Tooltip
+                        direction='down'
                         tooltip={translate(
                             'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report]'
                         )}>
@@ -616,6 +653,10 @@ function previousScreenshot(): void {
 
 function nextScreenshot(): void {
     trigger('hallOfFame.menu', 'nextScreenshot');
+}
+
+function saveScreenshot(): void {
+    trigger('hallOfFame.menu', 'saveScreenshot');
 }
 
 function reportScreenshot(): void {
