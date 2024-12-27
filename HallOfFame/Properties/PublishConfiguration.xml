@@ -64,6 +64,9 @@ Yes! — you can use any assets and mods you want. This includes post-processing
 mods that change camera settings, add effects, etc., as well a custom content,
 textures, LUTs, etc.
 
+One of such mods is Lumina, check it out!
+https://mods.paradoxplaza.com/mods/94394/Windows
+
 The only thing to keep in mind is that the screenshot should still showcase
 something you can actually do in the game, including heavily modded, but without
 external tools.
@@ -143,11 +146,17 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.6.2" />
+  <ModVersion Value="1.7.0" />
   <GameVersion Value="1.2.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
-  <ChangeLog>Updated Chinese translations.</ChangeLog>
+  <ChangeLog>**New features:**
+ - You can now download images from the main menu, using the kebab menu (the three dots) and click "Save".
+   This will save the 4K version of the image on your computer.
+
+   The location is configurable in the mod settings, but by default they will be saved to `%userprofile%/AppData/LocalLow/Colossal Order/Cities Skylines II/Screenshots/Hall Of Fame Creators`.
+
+   This is great to save the images you'd like to take inspiration from and organize your own collection locally, the way you desire.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />

@@ -60,6 +60,9 @@ Yes! — you can use any assets and mods you want. This includes post-processing
 mods that change camera settings, add effects, etc., as well a custom content,
 textures, LUTs, etc.
 
+One of such mods is Lumina, check it out!
+https://mods.paradoxplaza.com/mods/94394/Windows
+
 The only thing to keep in mind is that the screenshot should still showcase
 something you can actually do in the game, including heavily modded, but without
 external tools.
