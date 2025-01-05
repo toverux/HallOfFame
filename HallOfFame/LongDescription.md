@@ -122,6 +122,7 @@ Donations are very welcome and will help keep the service running.
 - **Translators:**
   baka-gourd (Chinese Simplified),
   elGendo87 (Spanish),
+  Finn (Dutch),
   Fuchs23 (German),
   karmel68 (Polish),
   Konsi (German),
