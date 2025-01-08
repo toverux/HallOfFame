@@ -48,7 +48,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 是目前最常见的宽高比。此矩形显示了截图在此类屏幕上的裁剪方式，因此您可以确保所有重要细节都包含在内。",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "您的创作者名称目前为空。您必须在模组设置中设置一个名称才能上传截图。",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY": "您的画面设置低于“高”。我们建议您在截图时将其设置为“高”！",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "截图时会禁用全局光影，请查看模组选项以了解更多信息。",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "截图时会禁用全局光影 (SSGI)，请查看模组选项以了解更多信息。",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "您可以在模组选项中更改您的创作者名称或城市名称，而无需关闭此窗口。",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "上传的内容会受到审核，任何滥用行为（包括假冒他人）都将导致您的帐户和 IP 地址被永久禁止。",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "创作者 ID：{CREATOR_ID}",
