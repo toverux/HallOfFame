@@ -1,5 +1,5 @@
 {
-  "HallOfFame.Common.OOPS": "Ops!",
+  "HallOfFame.Common.OOPS": "Eh lá!",
   "HallOfFame.Common.BASE_ERROR": "O Hall of Fame encontrou um erro inesperado. Por favor, reporta o problema ao autor do mod no Paradox Mods/Fórum ou via Discord/GitHub (@toverux).",
   "HallOfFame.Common.RECOVERABLE_ERROR": "O erro é recuperável e podes ignorá-lo e continuar a jogar.",
   "HallOfFame.Common.FATAL_ERROR": "O erro é fatal e pode ter efeitos secundários não intencionais. Recomendo que graves e reinicies o jogo e desatives o mod se isto se repetir.",
@@ -98,6 +98,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "Capturas de ecrã de membros valiosos da comunidade que, de uma forma ou de outra, deram muita ajuda, feedback, apoio e entusiasmo <3\nOs agradecimentos vão para: b00tyaddict, CloverPie, Danil.V.L, Hendrix, Jason_Stephen, Jojodaisuke, Konsi, obelix, Prophedt, TheBusStop, ThemisC2, Tigon Ologdring.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.OtherContentPreferences]": "Outras preferências de conteúdo:",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "Mostrar redes sociais dos criadores",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "Ao visualizares as capturas de ecrã, mostra um botão para as contas das redes sociais do criador.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowViewCount]": "Mostrar contador de visualizações no menu",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ShowViewCount]": "Mostra o número de visualizações que uma captura de ecrã recebeu nos rótulos da captura de ecrã (junto às etapas da cidade, população, etc.).\nNota que, se vires frequentemente o mesmo número, isso deve-se aos algoritmos que tentam equilibrar as visualizações entre capturas de ecrã com poucas visualizações.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ViewMaxAge]": "Tempo mínimo antes que uma captura de ecrã possa ser mostrada novamente (em dias)",
