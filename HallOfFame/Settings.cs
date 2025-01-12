@@ -632,14 +632,16 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     #if DEBUG
     private void DoLoadScreenshot() {
-        if (this.ScreenshotToLoad is null) {
+        if (string.IsNullOrWhiteSpace(this.ScreenshotToLoad)) {
             return;
         }
 
         var world = Unity.Entities.World.All[0];
 
         world.GetOrCreateSystemManaged<Systems.MenuUISystem>()
-            .LoadScreenshotById(this.ScreenshotToLoad);
+            .LoadScreenshotById(this.ScreenshotToLoad!);
+
+        this.ScreenshotToLoad = null;
     }
 
     private void DoDumpTranslations() {
