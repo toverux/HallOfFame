@@ -147,15 +147,16 @@ internal sealed partial class GlobalUISystem : UISystemBase {
         return;
 
         void OnConfirmOrCancel(int choice) {
+            Mod.Settings.PrefersOpeningPdxModsInBrowser = choice is 0;
+            Mod.Settings.ApplyAndSave();
+
             switch (choice) {
                 case 0:
                     Application.OpenURL(url);
-                    Mod.Settings.PrefersOpeningPdxModsInBrowser = true;
 
                     break;
                 case 2:
                     OpenCreatorPageInGame();
-                    Mod.Settings.PrefersOpeningPdxModsInBrowser = false;
 
                     break;
             }
