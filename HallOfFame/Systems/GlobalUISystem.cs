@@ -13,6 +13,7 @@ using Game.UI.Menu;
 using HallOfFame.Utils;
 using PDX.ModsUI;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace HallOfFame.Systems;
 
@@ -118,7 +119,7 @@ internal sealed partial class GlobalUISystem : UISystemBase {
     /// <summary>
     /// Opens the in-game Paradox Mods Creator page UI for the given username.
     /// </summary>
-    private void OpenCreatorPage(string username, string fallbackUrl) {
+    private void OpenCreatorPage(string username, string url) {
         switch (Mod.Settings.PrefersOpeningPdxModsInBrowser) {
             case true:
                 OpenCreatorPageInBrowser();
@@ -148,7 +149,7 @@ internal sealed partial class GlobalUISystem : UISystemBase {
         void OnConfirmOrCancel(int choice) {
             switch (choice) {
                 case 0:
-                    Application.OpenURL(fallbackUrl);
+                    Application.OpenURL(url);
                     Mod.Settings.PrefersOpeningPdxModsInBrowser = true;
 
                     break;
@@ -161,7 +162,7 @@ internal sealed partial class GlobalUISystem : UISystemBase {
         }
 
         void OpenCreatorPageInBrowser() {
-            Application.OpenURL(fallbackUrl);
+            Application.OpenURL(url);
         }
 
         void OpenCreatorPageInGame() {
@@ -170,21 +171,26 @@ internal sealed partial class GlobalUISystem : UISystemBase {
                     PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
 
                 // Get method "private void ShowModsUI(Action<ModsUIView> showAction)"
-                var method = sdk.GetType().GetMethod(
+                var showModsUi = sdk.GetType().GetMethod(
                     "ShowModsUI",
                     BindingFlags.Instance | BindingFlags.NonPublic,
                     null, CallingConventions.Any,
                     [typeof(Action<ModsUIView>)], []);
 
-                method?.Invoke(sdk, [
+                showModsUi?.Invoke(sdk, [
                     (ModsUIView view) =>
                         view.Show(ModsUIScreen.Creator, username)
                 ]);
+
+                // Send a GET request to our server so that the click count is
+                // still incremented.
+                // We don't care about the result, success or not.
+                UnityWebRequest.Get(url).SendWebRequest();
             }
             catch (Exception ex) {
                 Mod.Log.ErrorRecoverable(ex);
 
-                Application.OpenURL(fallbackUrl);
+                Application.OpenURL(url);
             }
         }
     }
