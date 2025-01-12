@@ -195,6 +195,12 @@ public sealed class Settings : ModSetting, IJsonWritable {
         string.Empty; // The actual text comes from the translations files.
 
     /// <summary>
+    /// Whether to show creators' social links in the main menu UI.
+    /// </summary>
+    [SettingsUISection(Settings.GroupContentPreferences)]
+    public bool ShowCreatorSocials { get; set; }
+
+    /// <summary>
     /// Whether to show the view count of screenshots in the main menu UI.
     /// </summary>
     [SettingsUISection(Settings.GroupContentPreferences)]
@@ -330,6 +336,13 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     #endif
 
+    [SettingsUIHidden]
+    public bool? PrefersOpeningPdxModsInBrowser { get; set; }
+
+    internal string BaseUrlWithScheme => this.BaseUrl.StartsWith("http")
+        ? $"{this.BaseUrl}"
+        : $"https://{Mod.Settings.BaseUrl}";
+
     /// <seealso cref="LoginStatus"/>
     private LocalizedString loginStatusValue = string.Empty;
 
@@ -374,6 +387,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.RandomScreenshotWeight = 2;
         this.SupporterScreenshotWeight = 2;
 
+        this.ShowCreatorSocials = true;
         this.ShowViewCount = false;
         this.ViewMaxAge = 60;
         this.ScreenshotResolution = "fhd";
@@ -384,6 +398,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
         this.CreateLocalScreenshot = true;
         this.DisableGlobalIllumination = Settings.IsNvidiaGpu();
         this.BaseUrl = "halloffame.cs2.mtq.io";
+
+        this.PrefersOpeningPdxModsInBrowser = null;
     }
 
     /// <summary>
@@ -596,6 +612,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
         writer.PropertyName("creatorIdClue");
         writer.Write(this.MaskedCreatorID?.Split('-')[0]);
 
+        writer.PropertyName("showCreatorSocials");
+        writer.Write(this.ShowCreatorSocials);
+
         writer.PropertyName("showViewCount");
         writer.Write(this.ShowViewCount);
 
@@ -604,6 +623,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
         writer.PropertyName("creatorsScreenshotSaveDirectory");
         writer.Write(this.CreatorsScreenshotSaveDirectory);
+
+        writer.PropertyName("baseUrl");
+        writer.Write(this.BaseUrlWithScheme);
 
         writer.TypeEnd();
     }

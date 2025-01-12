@@ -32,13 +32,8 @@ internal static partial class HttpQueries {
     private static readonly ConditionalWeakTable<UnityWebRequest, string>
         RequestIdsMap = new();
 
-    private static string PrependApiUrl(string path) {
-        var baseUrl = Mod.Settings.BaseUrl.StartsWith("http")
-            ? $"{Mod.Settings.BaseUrl}{HttpQueries.BaseApiPath}"
-            : $"https://{Mod.Settings.BaseUrl}{HttpQueries.BaseApiPath}";
-
-        return $"{baseUrl}{path}";
-    }
+    private static string PrependApiUrl(string path) =>
+        $"{Mod.Settings.BaseUrlWithScheme}{HttpQueries.BaseApiPath}{path}";
 
     private static async Task SendRequest(
         UnityWebRequest request,

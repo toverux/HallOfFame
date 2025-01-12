@@ -57,6 +57,9 @@
         <Reference Include="Colossal.Localization">
             <Private>false</Private>
         </Reference>
+        <Reference Include="PDX.ModsUI">
+            <Private>false</Private>
+        </Reference>
         <Reference Include="Unity.Burst">
             <Private>false</Private>
         </Reference>

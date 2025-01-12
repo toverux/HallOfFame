@@ -1,12 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Colossal.Localization;
+using Colossal.PSI.Common;
+using Colossal.PSI.PdxSdk;
 using Colossal.UI.Binding;
 using Game.SceneFlow;
 using Game.Settings;
 using Game.UI;
+using Game.UI.Localization;
 using Game.UI.Menu;
 using HallOfFame.Utils;
+using PDX.ModsUI;
+using UnityEngine;
 
 namespace HallOfFame.Systems;
 
@@ -17,6 +23,11 @@ internal sealed partial class GlobalUISystem : UISystemBase {
         GameManager.instance.localizationManager;
 
     private TriggerBinding<string> openModSettingsBinding = null!;
+
+    private TriggerBinding<string> openWebPageBinding = null!;
+
+    private TriggerBinding<string, string>
+        openCreatorPageBinding = null!;
 
     private TriggerBinding<bool, string> logJavaScriptErrorBinding = null!;
 
@@ -45,6 +56,14 @@ internal sealed partial class GlobalUISystem : UISystemBase {
                 GlobalUISystem.BindingGroup, "openModSettings",
                 this.OpenModSettings);
 
+            this.openWebPageBinding = new TriggerBinding<string>(
+                GlobalUISystem.BindingGroup, "openWebPage",
+                Application.OpenURL);
+
+            this.openCreatorPageBinding = new TriggerBinding<string, string>(
+                GlobalUISystem.BindingGroup, "openCreatorPage",
+                this.OpenCreatorPage);
+
             this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
                 GlobalUISystem.BindingGroup, "logJavaScriptError",
                 this.LogJavaScriptError);
@@ -52,6 +71,8 @@ internal sealed partial class GlobalUISystem : UISystemBase {
             this.AddBinding(this.localeBinding);
             this.AddBinding(this.settingsBinding);
             this.AddBinding(this.openModSettingsBinding);
+            this.AddBinding(this.openWebPageBinding);
+            this.AddBinding(this.openCreatorPageBinding);
             this.AddBinding(this.logJavaScriptErrorBinding);
 
             this.localizationManager.onActiveDictionaryChanged +=
@@ -92,6 +113,80 @@ internal sealed partial class GlobalUISystem : UISystemBase {
             "HallOfFame.HallOfFame.Mod",
             $"HallOfFame.HallOfFame.Mod.{section}",
             false);
+    }
+
+    /// <summary>
+    /// Opens the in-game Paradox Mods Creator page UI for the given username.
+    /// </summary>
+    private void OpenCreatorPage(string username, string fallbackUrl) {
+        switch (Mod.Settings.PrefersOpeningPdxModsInBrowser) {
+            case true:
+                OpenCreatorPageInBrowser();
+
+                return;
+            case false:
+                OpenCreatorPageInGame();
+
+                return;
+        }
+
+        var dialog = new ConfirmationDialog(
+            title: null,
+            message: LocalizedString.Id(
+                "HallOfFame.Systems.GlobalUI.OPEN_PDX_MODS_DIALOG[Message]"),
+            confirmAction: LocalizedString.Id(
+                "HallOfFame.Systems.GlobalUI.OPEN_PDX_MODS_DIALOG[OpenInBrowserAction]"),
+            cancelAction: null,
+            otherActions: LocalizedString.Id(
+                "HallOfFame.Systems.GlobalUI.OPEN_PDX_MODS_DIALOG[OpenInGameAction]"));
+
+        GameManager.instance.userInterface.appBindings
+            .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
+
+        return;
+
+        void OnConfirmOrCancel(int choice) {
+            switch (choice) {
+                case 0:
+                    Application.OpenURL(fallbackUrl);
+                    Mod.Settings.PrefersOpeningPdxModsInBrowser = true;
+
+                    break;
+                case 2:
+                    OpenCreatorPageInGame();
+                    Mod.Settings.PrefersOpeningPdxModsInBrowser = false;
+
+                    break;
+            }
+        }
+
+        void OpenCreatorPageInBrowser() {
+            Application.OpenURL(fallbackUrl);
+        }
+
+        void OpenCreatorPageInGame() {
+            try {
+                var sdk =
+                    PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
+
+                // Get method "private void ShowModsUI(Action<ModsUIView> showAction)"
+                var method = sdk.GetType().GetMethod(
+                    "ShowModsUI",
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null, CallingConventions.Any,
+                    [typeof(Action<ModsUIView>)], []);
+
+                method?.Invoke(sdk, [
+                    (ModsUIView view) =>
+                        view.Show(ModsUIScreen.Creator, username)
+                ]);
+            }
+            catch (Exception ex) {
+                Mod.Log.ErrorRecoverable(ex);
+
+                Application.OpenURL(fallbackUrl);
+            }
+        }
     }
 
     /// <summary>

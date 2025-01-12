@@ -292,6 +292,42 @@
         &-city {
             font-size: calc(45rem * var(--fontScale));
         }
+
+        &-creator {
+            display: flex;
+            flex-wrap: wrap;
+
+            &-socials {
+                display: flex;
+                align-items: center;
+                margin-left: 5px;
+
+                &-button {
+                    width: 1.2em;
+                    height: 1.2em;
+                    margin-right: 2px;
+
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    &:hover {
+                        background-color: var(--brand-color);
+
+                        [class*="icon"] {
+                            filter: none;
+                        }
+                    }
+
+                    [class*="icon"] {
+                        width: 70%;
+                        height: 70%;
+                        // Copied from the city/creator name text but made less prominent.
+                        filter: drop-shadow(0rem 0rem 3rem var(--panelColorDark));
+                    }
+                }
+            }
+        }
     }
 
     &-favorite-count {

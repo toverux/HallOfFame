@@ -9,10 +9,14 @@ import {
 } from 'cs2/l10n';
 import { Button, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
-import type { Screenshot } from '../common';
+import type { CreatorSocialLink, Screenshot } from '../common';
+import discordBrandsSolid from '../icons/discord-brands-solid.svg';
 import ellipsisSolidSrc from '../icons/ellipsis-solid.svg';
 import flagSolidSrc from '../icons/flag-solid.svg';
 import loveChirperSrc from '../icons/love-chirper.png';
+import redditBrandsSolid from '../icons/reddit-brands-solid.svg';
+import twitchBrandsSolid from '../icons/twitch-brands-solid.svg';
+import youtubeBrandsSolid from '../icons/youtube-brands-solid.svg';
 import {
     type ModSettings,
     type ProxyBinding,
@@ -44,6 +48,28 @@ const toggleMenuInputAction = bindInputAction(
     'hallOfFame.menu',
     'toggleMenuInputAction'
 );
+
+const socialPlatforms: Record<
+    CreatorSocialLink['platform'],
+    {
+        logo: string;
+        color: string;
+    }
+> = {
+    paradoxMods: { logo: 'Media/Glyphs/ParadoxMods.svg', color: '#5abe41' },
+    discordServer: { logo: discordBrandsSolid, color: '#5865F2' },
+    reddit: { logo: redditBrandsSolid, color: '#FF4500' },
+    twitch: { logo: twitchBrandsSolid, color: '#8956FB' },
+    youtube: { logo: youtubeBrandsSolid, color: '#FF0000' }
+};
+
+const socialPlatformsOrder: readonly CreatorSocialLink['platform'][] = [
+    'paradoxMods',
+    'youtube',
+    'twitch',
+    'discordServer',
+    'reddit'
+];
 
 /**
  * Component that renders the menu controls and city/creator information.
@@ -168,7 +194,11 @@ export function MenuControlsContent(): ReactElement {
                 </div>
 
                 <div
-                    className={`${styles.menuControlsSectionContent} ${showMoreActions ? styles.menuControlsSectionContentSlideIn : ''}`}>
+                    className={`${styles.menuControlsSectionContent} ${
+                        showMoreActions
+                            ? styles.menuControlsSectionContentSlideIn
+                            : ''
+                    }`}>
                     <Tooltip
                         direction='down'
                         tooltip={
@@ -250,12 +280,25 @@ function MenuControlsCityName({
     screenshot
 }: Readonly<{
     screenshot: Screenshot;
-}>): ReactElement {
+}>): ReactElement | null {
+    const modSettings = useModSettings();
+
     if (!screenshot.creator) {
+        // This will not happen - unless we have a broken ObjectId reference.
         console.warn(
             `HoF: No creator information for screenshot ${screenshot.id}`
         );
+
+        return null;
     }
+
+    const supportedSocials = screenshot.creator.social
+        .filter(link => link.platform in socialPlatforms)
+        .sort(
+            (a, b) =>
+                socialPlatformsOrder.indexOf(a.platform) -
+                socialPlatformsOrder.indexOf(b.platform)
+        );
 
     return (
         <div className={styles.menuControlsNames}>
@@ -263,9 +306,7 @@ function MenuControlsCityName({
                 {screenshot.cityName}
             </div>
 
-            {/* screenshot.creator should always be defined in this context, but
-                we use "?." just in case */}
-            {screenshot.creator?.creatorName && (
+            <div className={styles.menuControlsNamesCreator}>
                 <LocalizedString
                     id='HallOfFame.Common.CITY_BY'
                     fallback={'by {CREATOR_NAME}'}
@@ -274,7 +315,35 @@ function MenuControlsCityName({
                         CREATOR_NAME: screenshot.creator.creatorName ?? ''
                     }}
                 />
-            )}
+
+                {modSettings.showCreatorSocials && (
+                    <div className={styles.menuControlsNamesCreatorSocials}>
+                        {supportedSocials.map(link => (
+                            <Tooltip
+                                key={link.platform}
+                                tooltip={link.description}
+                                direction='down'>
+                                <Button
+                                    className={
+                                        styles.menuControlsNamesCreatorSocialsButton
+                                    }
+                                    variant='round'
+                                    tinted={true}
+                                    src={socialPlatforms[link.platform].logo}
+                                    style={{
+                                        // @ts-expect-error
+                                        '--brand-color':
+                                            socialPlatforms[link.platform].color
+                                    }}
+                                    onSelect={() =>
+                                        openSocialLink(modSettings, link)
+                                    }
+                                />
+                            </Tooltip>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
@@ -551,7 +620,11 @@ function MenuControlsFavoriteButton({
                 />
             }>
             <MenuButton
-                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonFavorite} ${screenshot.isFavorite ? styles.menuControlsSectionButtonsButtonFavoriteFavorited : ''} ${activeClass}`}
+                className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonFavorite} ${
+                    screenshot.isFavorite
+                        ? styles.menuControlsSectionButtonsButtonFavoriteFavorited
+                        : ''
+                } ${activeClass}`}
                 src={loveChirperSrc}
                 tinted={false}
                 onSelect={favoriteScreenshot}
@@ -645,6 +718,17 @@ function MenuButtonTooltip({
 
 function openModSettings(tab: string): void {
     trigger('hallOfFame', 'openModSettings', tab);
+}
+
+function openSocialLink(
+    modSettings: ModSettings,
+    link: CreatorSocialLink
+): void {
+    const url = modSettings.baseUrl + link.link;
+
+    link.platform == 'paradoxMods' && link.username
+        ? trigger('hallOfFame', 'openCreatorPage', link.username, url)
+        : trigger('hallOfFame', 'openWebPage', url);
 }
 
 function previousScreenshot(): void {
