@@ -317,16 +317,15 @@ public sealed class Settings : ModSetting, IJsonWritable {
     [UsedImplicitly]
     public bool LoadScreenshot {
         // ReSharper disable once ValueParameterNotUsed
-        set {
-            if (this.ScreenshotToLoad is null) {
-                return;
-            }
+        set => this.DoLoadScreenshot();
+    }
 
-            var world = Unity.Entities.World.All[0];
-
-            world.GetOrCreateSystemManaged<Systems.MenuUISystem>()
-                .LoadScreenshotById(this.ScreenshotToLoad);
-        }
+    [SettingsUIButton]
+    [SettingsUISection(Settings.GroupDevelopment)]
+    [UsedImplicitly]
+    public bool DumpTranslations {
+        // ReSharper disable once ValueParameterNotUsed
+        set => this.DoDumpTranslations();
     }
 
     #endif
@@ -610,6 +609,40 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     #if DEBUG
+    private void DoLoadScreenshot() {
+        if (this.ScreenshotToLoad is null) {
+            return;
+        }
+
+        var world = Unity.Entities.World.All[0];
+
+        world.GetOrCreateSystemManaged<Systems.MenuUISystem>()
+            .LoadScreenshotById(this.ScreenshotToLoad);
+    }
+
+    private void DoDumpTranslations() {
+        var localizationManager = GameManager.instance.localizationManager;
+        var originalLocale = localizationManager.activeLocaleId;
+
+        foreach (var locale in localizationManager.GetSupportedLocales()) {
+            localizationManager.SetActiveLocale(locale);
+
+            var strings = localizationManager.activeDictionary.entries
+                .OrderBy(kv => kv.Key)
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
+
+            var json = Colossal.Json.JSON.Dump(strings);
+
+            var filePath = Path.Combine(
+                Application.persistentDataPath,
+                $"locale-dictionary-{locale}.json");
+
+            File.WriteAllText(filePath, json);
+        }
+
+        localizationManager.SetActiveLocale(originalLocale);
+    }
+
     private sealed class DevDictionarySource : Colossal.IDictionarySource {
         public IEnumerable<KeyValuePair<string, string>> ReadEntries(
             IList<Colossal.IDictionaryEntryError> errors,
@@ -624,6 +657,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
                 }, {
                     "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]",
                     "Load Screenshot"
+                }, {
+                    "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
+                    "Dump Locales as JSON"
                 }
             };
 
