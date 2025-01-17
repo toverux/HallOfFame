@@ -59,19 +59,15 @@ it!
 Next to your username when displaying one of your pictures, Hall of Fame can
 display buttons leading to your other social media accounts.
 
+The following platforms are supported: Paradox Mods, YouTube, Twitch, Discord
+(invite link) and Reddit (username).
+
+Your channel/account must contain a fair amount of C:S 2 content to be eligible
+of course.
+
 To link your social media to your HoF creator account, you must contact me (via
 any medium, best is Discord, you can also use halloffame at mtq.io) and provide
 me with your links.
-The following platforms are supported:
-
-- Paradox Mods creator account (opens directly in-game or in the browser)
-- YouTube channel
-- Twitch channel
-- Discord (invite link)
-- Reddit user
-
-Of course, your channel/account must contain a fair amount of C:S 2 content to
-be relevant, I will approve or deny your request at my discretion.
 
 ### Post-processing and other mods
 

@@ -63,19 +63,15 @@ it!
 Next to your username when displaying one of your pictures, Hall of Fame can
 display buttons leading to your other social media accounts.
 
+The following platforms are supported: Paradox Mods, YouTube, Twitch, Discord
+(invite link) and Reddit (username).
+
+Your channel/account must contain a fair amount of C:S 2 content to be eligible
+of course.
+
 To link your social media to your HoF creator account, you must contact me (via
 any medium, best is Discord, you can also use halloffame at mtq.io) and provide
 me with your links.
-The following platforms are supported:
-
-- Paradox Mods creator account (opens directly in-game or in the browser)
-- YouTube channel
-- Twitch channel
-- Discord (invite link)
-- Reddit user
-
-Of course, your channel/account must contain a fair amount of C:S 2 content to
-be relevant, I will approve or deny your request at my discretion.
 
 ### Post-processing and other mods
 
@@ -166,28 +162,11 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.8.0" />
+  <ModVersion Value="1.8.1" />
   <GameVersion Value="1.2.*" />
   <Dependency Id="74417" DisplayName="Unified Icon Library" />
   <Dependency Id="75426" DisplayName="I18n EveryWhere" />
-  <ChangeLog>**Linking social media platforms!**
-
-Next to your username when displaying one of your pictures, Hall of Fame can now
-display buttons leading to your other social media accounts.
-
-To link your social media to your HoF creator account, you must contact me (via
-any medium, best is Discord, you can also use halloffame at mtq.io) and provide
-me with your links.
-The following platforms are supported:
-
-- Paradox Mods creator account (opens directly in-game or in the browser)
-- YouTube channel
-- Twitch channel
-- Discord (invite link)
-- Reddit user
-
-Of course, your channel/account must contain a fair amount of C:S 2 content to
-be relevant.</ChangeLog>
+  <ChangeLog>Localization update.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
