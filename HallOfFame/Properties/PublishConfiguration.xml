@@ -164,9 +164,13 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.8.2" />
+  <ModVersion Value="1.9.0" />
   <GameVersion Value="1.2.*" />
-  <ChangeLog>Localization update.</ChangeLog>
+  <ChangeLog>The mod is now fully standalone, meaning the following dependencies are no longer needed:
+- I18n Everywhere
+- Unified Icon Library
+
+If you installed those mods just for Hall of Fame, you can remove them safely.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
