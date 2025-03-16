@@ -64,7 +64,6 @@
   "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "Wyślij swoje miasto do Hall of Fame! Zdjęcie zostanie zrobione, ale będziesz mógł wyświetlić jego podgląd przed przesłaniem.",
   "Menu.NOTIFICATION_TITLE[HallOfFame.CreatorStats]": "Twoje statystyki Hall of Fame",
   "Menu.NOTIFICATION_DESCRIPTION[HallOfFame.CreatorStats]": "Opublikowałeś {SCREENSHOTS_COUNT} obraz(ów) i otrzymałeś {FAVORITES_COUNT} polub. na {VIEWS_COUNT} wyś.!",
-  "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.YourProfile]": "Twój profil",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.KeyBindings]": "Sterowanie",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "Preferencje zawartości",
