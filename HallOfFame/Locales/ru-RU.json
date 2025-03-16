@@ -51,7 +51,6 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]": "Загрузка завершена!",
   "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "Добавьте свой город в Hall of Fame! Ваша фотография будет сделана, и у вас будет возможность увидеть её перед загрузкой.",
   "Menu.NOTIFICATION_TITLE[HallOfFame.CreatorStats]": "Ваша статистка в Hall of Fame",
-  "Options.SECTION[HallOfFame.HallOfFame.Mod]": "Hall of Fame",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.YourProfile]": "Ваш профиль",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "Предпочтения контента",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Advanced]": "Дополнительные настройки",
