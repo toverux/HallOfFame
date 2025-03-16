@@ -29,7 +29,8 @@ Special thanks to:
 - The Cities: Skylines Modding Discord community in general for their help and
   kind support.
 - **[Chamëleon TBN](https://linktr.ee/chameleon_tbn)** for providing some icons
-  the mod uses.
+  the mod uses and algernon for the
+  [Unified Icon Library](https://github.com/algernon-A/UnifiedIconLibrary).
 - **CloverPie, Danil.V.L, Hendrix, Jojodaisuke, Konsi, Prophedt, TheBusStop,
   ThemisC2, Tigon Ologdring**, for having tested the mod and uploaded the first
   content so we have beautiful images on launch.

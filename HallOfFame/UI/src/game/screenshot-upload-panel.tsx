@@ -12,7 +12,7 @@ import {
     useEffect,
     useMemo
 } from 'react';
-import cloudArrowUpSolidSrc from '../icons/cloud-arrow-up-solid.svg';
+import cloudArrowUpSolidSrc from '../icons/fontawesome/cloud-arrow-up-solid.svg';
 import {
     type ModSettings,
     createSingletonHook,

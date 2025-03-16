@@ -10,13 +10,16 @@ import {
 import { Button, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import type { CreatorSocialLink, Screenshot } from '../common';
-import discordBrandsSolid from '../icons/discord-brands-solid.svg';
-import ellipsisSolidSrc from '../icons/ellipsis-solid.svg';
-import flagSolidSrc from '../icons/flag-solid.svg';
+import discordBrandsSolid from '../icons/fontawesome/discord-brands-solid.svg';
+import ellipsisSolidSrc from '../icons/fontawesome/ellipsis-solid.svg';
+import flagSolidSrc from '../icons/fontawesome/flag-solid.svg';
+import redditBrandsSolid from '../icons/fontawesome/reddit-brands-solid.svg';
+import twitchBrandsSolid from '../icons/fontawesome/twitch-brands-solid.svg';
+import youtubeBrandsSolid from '../icons/fontawesome/youtube-brands-solid.svg';
 import loveChirperSrc from '../icons/love-chirper.png';
-import redditBrandsSolid from '../icons/reddit-brands-solid.svg';
-import twitchBrandsSolid from '../icons/twitch-brands-solid.svg';
-import youtubeBrandsSolid from '../icons/youtube-brands-solid.svg';
+import doubleArrowRightTriangleSrc from '../icons/uil/colored/double-arrow-right-triangle.svg';
+import eyeClosedSrc from '../icons/uil/colored/eye-closed.svg';
+import eyeOpenSrc from '../icons/uil/colored/eye-open.svg';
 import {
     type ModSettings,
     type ProxyBinding,
@@ -415,7 +418,7 @@ function MenuControlsScreenshotLabels({
                         />
                     }>
                     <span>
-                        <img src='coui://uil/Colored/EyeOpen.svg' />
+                        <img src={eyeOpenSrc} />
                         {formatBigNumber(screenshot.viewsCount, translate)}
                     </span>
                 </Tooltip>
@@ -463,7 +466,7 @@ function MenuControlsNextButton({
             )}>
             <MenuButton
                 className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonNext} ${activeClass}`}
-                src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
+                src={doubleArrowRightTriangleSrc}
                 tinted={isLoading}
                 disabled={isLoading}
                 {...snappyOnSelect(nextScreenshot)}
@@ -509,7 +512,7 @@ function MenuControlsPreviousButton({
             )}>
             <MenuButton
                 className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonPrevious} ${activeClass}`}
-                src='coui://uil/Colored/DoubleArrowRightTriangle.svg'
+                src={doubleArrowRightTriangleSrc}
                 tinted={disabled}
                 disabled={disabled}
                 {...snappyOnSelect(previousScreenshot)}
@@ -550,11 +553,7 @@ function MenuControlsToggleMenuVisibilityButton({
             )}>
             <MenuButton
                 className={`${styles.menuControlsSectionButtonsButton} ${activeClass}`}
-                src={
-                    isMenuVisible
-                        ? 'coui://uil/Colored/EyeOpen.svg'
-                        : 'coui://uil/Colored/EyeClosed.svg'
-                }
+                src={isMenuVisible ? eyeOpenSrc : eyeClosedSrc}
                 tinted={false}
                 {...snappyOnSelect(toggleMenuVisibility, selectSound)}
             />

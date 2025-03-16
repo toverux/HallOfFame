@@ -7,11 +7,6 @@
     // by eyeballing.
     margin-right: calc(25rem + 1em - 2rem) !important;
 
-    > [class*="icon"] {
-        //noinspection CssUnknownTarget
-        mask-image: url(coui://uil/Standard/SharePicture.svg);
-    }
-
     span {
         position: absolute;
         display: block;

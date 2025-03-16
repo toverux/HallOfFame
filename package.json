@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "packageManager": "bun@1.2.4",
+  "packageManager": "bun@1.2.5",
   "engines": {
     "bun": ">=1.2.0",
     "node": ">=22.0.0"

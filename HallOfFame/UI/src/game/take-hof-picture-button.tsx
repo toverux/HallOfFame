@@ -2,6 +2,7 @@
 import { useLocalization } from 'cs2/l10n';
 import { Tooltip } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
+import sharePictureSrc from '../icons/uil/standard/share-picture.svg';
 import { logError } from '../utils';
 import * as styles from './take-hof-picture-button.module.scss';
 
@@ -35,9 +36,9 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 
         button.classList.add(styles.screenshotButton);
 
-        // Neutralize the vanilla mask image, let our CSS take over.
+        // Replace button icon with our share picture icon.
         if (button.firstElementChild instanceof HTMLElement) {
-            button.firstElementChild.style.maskImage = '';
+            button.firstElementChild.style.maskImage = sharePictureSrc;
         }
 
         // Adds the side label to the button, the original button has no text.

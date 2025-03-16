@@ -128,7 +128,8 @@ Donations are very welcome and will help keep the service running.
 
 - **The Cities: Skylines Modding Discord community** in general for their help
   and kind support.
-- **Chamëleon (@chameleon_tbn)** for creating some UI icons for the mod.
+- **Chamëleon (@chameleon_tbn)** for creating some UI icons for the mod and
+  algernon for exposing them in the Unified Icon Library.
 - **Bad Peanut** for the Hearth Chirper icon.
 - **b00tyaddict, CloverPie, Danil.V.L, Hendrix, Jason_Stephen, Jojodaisuke,
   Konsi, obelix, Prophedt, TheBusStop, ThemisC2, Tigon Ologdring**, valuable
@@ -139,6 +140,7 @@ Donations are very welcome and will help keep the service running.
   elGendo87 (Spanish),
   Finn (Dutch),
   Fuchs23 (German),
+  Hendrix_ (German)
   karmel68 (Polish),
   Konsi (German),
   RilkeXS (Chinese Simplified),
