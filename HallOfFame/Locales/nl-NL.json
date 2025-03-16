@@ -48,8 +48,6 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingToggleMenu]": "Menu UI in-/uitschakelen",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingLike]": "Vind-ik-leuk",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingLike]": "Sneltoets om een schermafbeelding leuk te vinden.",
-  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.TrendingScreenshotWeight]": "Trending",
-  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.RecentScreenshotWeight]": "Recent",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.RandomScreenshotWeight]": "Willekeurig",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotResolution]": "Resolutie Schermafbeelding",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotResolution]": "Resolutie van de afbeeldingen getoond door Hall of Fame.\nDe mod neemt altijd een afbeelding van 4K+, ongeacht de resolutie die de persoon heeft gebruikt om een afbeelding te verzenden (supersampling).\nOp deze manier kunt u de resolutie kiezen waarin u de afbeeldingen wilt bekijken.\nGebruik 4K als u een scherm beter dan 1920×1080 hebt, of een betere beeldkwaliteit wilt, en als je geen gebrek hebt aan internetsnelheid of zelfs RAM-geheugen.",
