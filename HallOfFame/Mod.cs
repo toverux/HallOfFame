@@ -23,6 +23,7 @@ public sealed class Mod : IMod {
     /// <exception cref="NullReferenceException">
     /// If the mod has not been loaded yet.
     /// </exception>
+    // ReSharper disable once UnusedMember.Global
     public static Mod Instance =>
         Mod.instanceValue ??
         throw new NullReferenceException(
@@ -55,7 +56,10 @@ public sealed class Mod : IMod {
     public void OnLoad(UpdateSystem updateSystem) {
         try {
             // Create directories for settings and data.
-            this.CreateDirectories();
+            Mod.CreateDirectories();
+
+            // Set up locales.
+            LocaleLoader.Setup();
 
             // Migration from previous versions.
             // Does not error if the file does not exist.
@@ -107,26 +111,15 @@ public sealed class Mod : IMod {
     }
 
     public void OnDispose() {
-        // Run dispose logic on the next frame because systems are destroyed
-        // after IMods are disposed, so this can cause null references for our
-        // systems while they're living their last moments.
-        GameManager.instance.RegisterUpdater(() => {
-            // Unregister settings UI
-            if (this.settingsValue is not null) {
-                this.settingsValue.UnregisterInOptionsUI();
-                this.settingsValue = null;
-            }
-
-            // Remove our custom coui:// host.
-            UIManager.defaultUISystem.RemoveHostLocation("halloffame");
-
-            Mod.instanceValue = null;
-
-            Mod.Log.Info($"Mod: {nameof(this.OnDispose)} complete.");
-        });
+        // Nothing particular to do here.
+        // There is no need to clean up things like localization, the host
+        // location, event listeners, etc., as you can't just unload and reload
+        // a mod, disposing only happens when quitting the game, so here we
+        // only need to clean up things that are observable after the process
+        // exited.
     }
 
-    private void CreateDirectories() {
+    private static void CreateDirectories() {
         // No need to check if they exist, CreateDirectory does it for us.
         Directory.CreateDirectory(Mod.GameScreenshotsPath);
         Directory.CreateDirectory(Mod.ModSettingsPath);

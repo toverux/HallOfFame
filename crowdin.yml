@@ -1,3 +1,3 @@
 files:
-  - source: /HallOfFame/lang/en-US.json
-    translation: /HallOfFame/lang/%locale%.json
+  - source: /HallOfFame/Locales/en-US.json
+    translation: /HallOfFame/Locales/%locale%.json
