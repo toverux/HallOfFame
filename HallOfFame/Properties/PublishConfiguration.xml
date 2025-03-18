@@ -164,13 +164,15 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.9.0" />
+  <ModVersion Value="1.9.1" />
   <GameVersion Value="1.2.*" />
-  <ChangeLog>The mod is now fully standalone, meaning the following dependencies are no longer needed:
-- I18n Everywhere
-- Unified Icon Library
+  <ChangeLog>Compatibility for patch 1.2.5f1.
 
-If you installed those mods just for Hall of Fame, you can remove them safely.</ChangeLog>
+As you have probably noticed, the game now shows a rotating slideshow of 7 images behind the main menu.
+
+- Hall of Fame had to be modified to perform a transparent takeover on the Vanilla system.
+- The Vanilla slideshow system is immediately disabled (and not just hidden) to avoid consuming resources.
+- The fade-in transition time Hall of Fame uses between image has been reduced from 1.5s to 0.75s to match Vanilla's timing, for a more consistent feeling.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
