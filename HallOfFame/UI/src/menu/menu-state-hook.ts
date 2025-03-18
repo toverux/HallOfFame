@@ -1,4 +1,4 @@
-﻿import { bindValue, useValue } from 'cs2/api';
+import { bindValue, useValue } from 'cs2/api';
 import type { LocalizedString } from 'cs2/l10n';
 import type { Dispatch } from 'react';
 import type { Screenshot } from '../common';
@@ -6,11 +6,10 @@ import { createSingletonHook, useModSettings } from '../utils';
 
 interface ReadonlyMenuState {
     /**
-     * Current image to display, derived from `hallOfFame.menu.defaultImageUri`
-     * binding or (depending on quality setting) {@link screenshot.imageUrlFHD}
-     * or {@link screenshot.imageUrl4K}.
+     * Current image to display, depending on quality setting,
+     * {@link screenshot.imageUrlFHD} or {@link screenshot.imageUrl4K}.
      */
-    readonly imageUri: string;
+    readonly imageUri: string | null;
 
     /**
      * Whether a previous screenshot is available to display.
@@ -70,8 +69,6 @@ interface SettableMenuState {
      */
     readonly isReadyForNextImage: boolean;
 }
-
-const vanillaDefaultImageUri = 'Media/Menu/Background2.jpg';
 
 const hasPreviousScreenshot$ = bindValue<boolean>(
     'hallOfFame.menu',
@@ -133,7 +130,7 @@ export function useHofMenuState(): [
             ? settings.screenshotResolution == 'fhd'
                 ? screenshot.imageUrlFHD
                 : screenshot.imageUrl4K
-            : vanillaDefaultImageUri,
+            : null,
         screenshot,
         error,
         isSaving

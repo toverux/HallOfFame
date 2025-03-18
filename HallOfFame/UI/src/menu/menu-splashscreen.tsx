@@ -1,6 +1,12 @@
-﻿import { type ReactElement, useEffect, useState } from 'react';
+import { type ReactElement, useEffect, useState } from 'react';
+import { getClassesModule, selector } from '../utils';
 import * as styles from './menu-splashscreen.module.scss';
 import { useHofMenuState } from './menu-state-hook';
+
+const coMenuUiBackdropsStyles = getClassesModule(
+    'game-ui/menu/components/menu-ui-backdrops/menu-ui-backdrops.module.scss',
+    ['backdropImage']
+);
 
 /**
  * Component that displays the splashscreen image on the main menu.
@@ -19,9 +25,11 @@ export function MenuSplashscreen(): ReactElement {
     const [menuState, setMenuState] = useHofMenuState();
 
     // The current image displayed on the splashscreen.
-    // Initialized with the image available at startup, so there is not fade-in
-    // animation for the first image.
-    const [displayedImage, setDisplayedImage] = useState(menuState.imageUri);
+    // Initialized at the start with the current Vanilla slideshow image so
+    // there is a transparent takeover of HoF on the Vanilla system.
+    const [displayedImage, setDisplayedImage] = useState(
+        menuState.imageUri ?? getCurrentSlideshowImageSrc()
+    );
 
     const [incomingImage, setIncomingImage] = useState<string>();
 
@@ -42,7 +50,7 @@ export function MenuSplashscreen(): ReactElement {
     useEffect(() => {
         // Condition mostly to avoid fading of the default background... over
         // the default background.
-        if (menuState.imageUri != displayedImage) {
+        if (menuState.imageUri && menuState.imageUri != displayedImage) {
             setIncomingImage(menuState.imageUri);
         }
     }, [displayedImage, menuState.imageUri]);
@@ -90,4 +98,30 @@ export function MenuSplashscreen(): ReactElement {
         setIncomingImage(undefined);
         setIsAnimatingFadeIn(false);
     }
+}
+
+/**
+ * Called once when initializing the mod's menu UI, at this time the Vanilla
+ * backdrop image element is still present (it is destroyed by our module
+ * override - see folder's index.tsx - but will only disappear on the next
+ * render cycle).
+ * So we retrieve the image currently shown by the Vanilla slideshow to ensure
+ * a smooth transition between Vanilla and the mod backgrounds.
+ */
+function getCurrentSlideshowImageSrc(): string | null {
+    const backdropImageEl = document.querySelector(
+        selector(coMenuUiBackdropsStyles.backdropImage)
+    );
+
+    // This should not happen in principle, but be safe and fail gracefully.
+    if (!(backdropImageEl instanceof HTMLElement)) {
+        return null;
+    }
+
+    // Here too, we shouldn't get a null result but again, fail gracefully.
+    return (
+        backdropImageEl.style.backgroundImage
+            // biome-ignore lint/performance/useTopLevelRegex: called only once
+            ?.match(/^url\(["']?(.*?)["']?\)$/)?.[1] || null
+    );
 }

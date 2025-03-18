@@ -8,6 +8,17 @@ import { MenuSplashscreen } from './menu-splashscreen';
 import * as splashscreenStyles from './menu-splashscreen.module.scss';
 
 export const register: ModRegistrar = moduleRegistry => {
+    moduleRegistry.override(
+        'game-ui/menu/components/menu-ui-backdrops/menu-ui-backdrops.tsx',
+        'MenuUIBackdrops',
+        () => null
+    );
+
+    moduleRegistry.extend(
+        'game-ui/menu/components/menu-ui.module.scss',
+        splashscreenStyles
+    );
+
     moduleRegistry.extend(
         'game-ui/menu/components/menu-ui.tsx',
         'MenuUI',
@@ -29,10 +40,5 @@ export const register: ModRegistrar = moduleRegistry => {
                 </MasterScreenPortal>
             );
         }
-    );
-
-    moduleRegistry.extend(
-        'game-ui/menu/components/menu-ui.module.scss',
-        splashscreenStyles
     );
 };

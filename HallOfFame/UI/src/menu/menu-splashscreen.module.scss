@@ -19,7 +19,8 @@
     background-repeat: no-repeat no-repeat;
 
     &.splashscreen-fade-in {
-        animation: fadeIn 1.5s;
+        // Use same timing as vanilla class base_iEQ for backdrop images.
+        animation: fadeIn ease .75s;
 
         @keyframes fadeIn {
             from {
