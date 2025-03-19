@@ -1,12 +1,14 @@
 import type { ModRegistrar } from 'cs2/modding';
 import { register as registerOnGame } from './game';
 import { register as registerOnMenu } from './menu';
+import { register as registerOnOverlay } from './overlay';
 import { logError } from './utils';
 
 const register: ModRegistrar = moduleRegistry => {
     try {
         registerOnMenu(moduleRegistry);
         registerOnGame(moduleRegistry);
+        registerOnOverlay(moduleRegistry);
     } catch (error) {
         return logError(error, true);
     }
