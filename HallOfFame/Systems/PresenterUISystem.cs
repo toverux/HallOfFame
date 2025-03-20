@@ -15,10 +15,11 @@ using HallOfFame.Utils;
 namespace HallOfFame.Systems;
 
 /// <summary>
-/// System responsible for handling the Hall of Fame UI on the game's main menu.
+/// System in charge of handling the presentation of community images and the
+/// various interactions that come with it (next, prev, fav, etc.).
 /// </summary>
-internal sealed partial class MenuUISystem : UISystemBase {
-    private const string BindingGroup = "hallOfFame.menu";
+internal sealed partial class PresenterUISystem : UISystemBase {
+    private const string BindingGroup = "hallOfFame.presenter";
 
     private ImagePreloaderUISystem imagePreloaderUISystem = null!;
 
@@ -80,29 +81,29 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
             // VALUE BINDINGS
             this.hasPreviousScreenshotBinding = new GetterValueBinding<bool>(
-                MenuUISystem.BindingGroup, "hasPreviousScreenshot",
+                PresenterUISystem.BindingGroup, "hasPreviousScreenshot",
                 () => this.currentScreenshotIndex > 0);
 
             this.forcedRefreshIndexBinding = new ValueBinding<int>(
-                MenuUISystem.BindingGroup, "forcedRefreshIndex",
+                PresenterUISystem.BindingGroup, "forcedRefreshIndex",
                 1);
 
             this.isRefreshingBinding = new ValueBinding<bool>(
-                MenuUISystem.BindingGroup, "isRefreshing",
+                PresenterUISystem.BindingGroup, "isRefreshing",
                 false);
 
             this.screenshotBinding = new ValueBinding<Screenshot?>(
-                MenuUISystem.BindingGroup, "screenshot",
+                PresenterUISystem.BindingGroup, "screenshot",
                 null,
                 new ValueWriter<Screenshot?>().Nullable());
 
             this.errorBinding = new ValueBinding<LocalizedString?>(
-                MenuUISystem.BindingGroup, "error",
+                PresenterUISystem.BindingGroup, "error",
                 null,
                 new ValueWriter<LocalizedString>().Nullable());
 
             this.isSavingBinding = new ValueBinding<bool>(
-                MenuUISystem.BindingGroup, "isSaving",
+                PresenterUISystem.BindingGroup, "isSaving",
                 false);
 
             this.AddBinding(this.hasPreviousScreenshotBinding);
@@ -114,19 +115,19 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
             // INPUT ACTION BINDINGS
             this.previousScreenshotInputActionBinding = new InputActionBinding(
-                MenuUISystem.BindingGroup, "previousScreenshotInputAction",
+                PresenterUISystem.BindingGroup, "previousScreenshotInputAction",
                 Mod.Settings.KeyBindingPrevious);
 
             this.nextScreenshotInputActionBinding = new InputActionBinding(
-                MenuUISystem.BindingGroup, "nextScreenshotInputAction",
+                PresenterUISystem.BindingGroup, "nextScreenshotInputAction",
                 Mod.Settings.KeyBindingNext);
 
             this.likeScreenshotInputActionBinding = new InputActionBinding(
-                MenuUISystem.BindingGroup, "likeScreenshotInputAction",
+                PresenterUISystem.BindingGroup, "likeScreenshotInputAction",
                 Mod.Settings.KeyBindingLike);
 
             this.toggleMenuInputActionBinding = new InputActionBinding(
-                MenuUISystem.BindingGroup, "toggleMenuInputAction",
+                PresenterUISystem.BindingGroup, "toggleMenuInputAction",
                 Mod.Settings.KeyBindingToggleMenu);
 
             this.AddBinding(this.previousScreenshotInputActionBinding);
@@ -136,23 +137,23 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
             // TRIGGER BINDINGS
             this.previousScreenshotBinding = new TriggerBinding(
-                MenuUISystem.BindingGroup, "previousScreenshot",
+                PresenterUISystem.BindingGroup, "previousScreenshot",
                 this.PreviousScreenshot);
 
             this.nextScreenshotBinding = new TriggerBinding(
-                MenuUISystem.BindingGroup, "nextScreenshot",
+                PresenterUISystem.BindingGroup, "nextScreenshot",
                 this.NextScreenshot);
 
             this.favoriteScreenshotBinding = new TriggerBinding(
-                MenuUISystem.BindingGroup, "favoriteScreenshot",
+                PresenterUISystem.BindingGroup, "favoriteScreenshot",
                 this.FavoriteScreenshot);
 
             this.saveScreenshotBinding = new TriggerBinding(
-                MenuUISystem.BindingGroup, "saveScreenshot",
+                PresenterUISystem.BindingGroup, "saveScreenshot",
                 this.SaveScreenshot);
 
             this.reportScreenshotBinding = new TriggerBinding(
-                MenuUISystem.BindingGroup, "reportScreenshot",
+                PresenterUISystem.BindingGroup, "reportScreenshot",
                 this.ReportScreenshot);
 
             this.AddBinding(this.previousScreenshotBinding);
@@ -555,7 +556,7 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
         var dialog = new ConfirmationDialog(
             new LocalizedString(
-                "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[Title]",
+                "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
                 "Report screenshot {CITY_NAME} by {AUTHOR_NAME}?",
                 new Dictionary<string, ILocElement> {
                     {
@@ -568,10 +569,10 @@ internal sealed partial class MenuUISystem : UISystemBase {
                     }
                 }),
             LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[Message]",
+                "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]",
                 "Report this screenshot to the moderation team?"),
             LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.MenuUI.CONFIRM_REPORT_DIALOG[ConfirmAction]",
+                "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]",
                 "Report screenshot"),
             LocalizedString.IdWithFallback(
                 "Common.ACTION[Cancel]",
@@ -592,10 +593,10 @@ internal sealed partial class MenuUISystem : UISystemBase {
 
                 var successDialog = new MessageDialog(
                     LocalizedString.IdWithFallback(
-                        "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Title]",
+                        "HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]",
                         "Thank you"),
                     LocalizedString.IdWithFallback(
-                        "HallOfFame.Systems.MenuUI.REPORT_SUCCESS_DIALOG[Message]",
+                        "HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]",
                         "The screenshot has been reported to the moderation team."),
                     LocalizedString.IdWithFallback(
                         "Common.CLOSE",

@@ -71,36 +71,36 @@ interface SettableMenuState {
 }
 
 const hasPreviousScreenshot$ = bindValue<boolean>(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'hasPreviousScreenshot',
     false
 );
 
 const forcedRefreshIndex$ = bindValue<number>(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'forcedRefreshIndex',
     0
 );
 
 const isRefreshing$ = bindValue<boolean>(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'isRefreshing',
     false
 );
 
 const screenshot$ = bindValue<Screenshot | null>(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'screenshot',
     null
 );
 
 const error$ = bindValue<LocalizedString | null>(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'error',
     null
 );
 
-const isSaving$ = bindValue<boolean>('hallOfFame.menu', 'isSaving', false);
+const isSaving$ = bindValue<boolean>('hallOfFame.presenter', 'isSaving', false);
 
 const useSingletonMenuState = createSingletonHook<SettableMenuState>({
     isMenuVisible: true,

@@ -26,11 +26,10 @@ using Object = UnityEngine.Object;
 namespace HallOfFame.Systems;
 
 /// <summary>
-/// System responsible for handling the Hall of Fame in-game UI, notably the
-/// screenshot taking.
+/// UI System responsible for taking and uploading screenshots.
 /// </summary>
-internal sealed partial class GameUISystem : UISystemBase {
-    private const string BindingGroup = "hallOfFame.game";
+internal sealed partial class CaptureUISystem : UISystemBase {
+    private const string BindingGroup = "hallOfFame.capture";
 
     /// <summary>
     /// File path of the latest screenshot taken.
@@ -114,31 +113,31 @@ internal sealed partial class GameUISystem : UISystemBase {
                 this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
 
             this.cityNameBinding = new GetterValueBinding<string>(
-                GameUISystem.BindingGroup, "cityName",
+                CaptureUISystem.BindingGroup, "cityName",
                 this.GetCityName);
 
             this.screenshotSnapshotBinding =
                 new GetterValueBinding<ScreenshotSnapshot?>(
-                    GameUISystem.BindingGroup, "screenshotSnapshot",
+                    CaptureUISystem.BindingGroup, "screenshotSnapshot",
                     () => this.CurrentScreenshot,
                     new ValueWriter<ScreenshotSnapshot>().Nullable());
 
             this.uploadProgressBinding =
                 new GetterValueBinding<UploadProgress?>(
-                    GameUISystem.BindingGroup, "uploadProgress",
+                    CaptureUISystem.BindingGroup, "uploadProgress",
                     () => this.uploadProgress,
                     new ValueWriter<UploadProgress>().Nullable());
 
             this.takeScreenshotBinding = new TriggerBinding(
-                GameUISystem.BindingGroup, "takeScreenshot",
+                CaptureUISystem.BindingGroup, "takeScreenshot",
                 this.TakeScreenshot);
 
             this.clearScreenshotBinding = new TriggerBinding(
-                GameUISystem.BindingGroup, "clearScreenshot",
+                CaptureUISystem.BindingGroup, "clearScreenshot",
                 this.ClearScreenshot);
 
             this.uploadScreenshotBinding = new TriggerBinding(
-                GameUISystem.BindingGroup, "uploadScreenshot",
+                CaptureUISystem.BindingGroup, "uploadScreenshot",
                 this.UploadScreenshot);
 
             this.AddUpdateBinding(this.cityNameBinding);
@@ -347,10 +346,10 @@ internal sealed partial class GameUISystem : UISystemBase {
         // Prepare full size and preview images in a background thread.
         await Task.Run(() => {
             File.WriteAllBytes(
-                GameUISystem.ScreenshotPreviewFilePath, jpgPreviewBytes);
+                CaptureUISystem.ScreenshotPreviewFilePath, jpgPreviewBytes);
 
             File.WriteAllBytes(
-                GameUISystem.ScreenshotFilePath, pngScreenshotBytes);
+                CaptureUISystem.ScreenshotFilePath, pngScreenshotBytes);
 
             this.WriteLocalScreenshot(pngScreenshotBytes);
         });
@@ -383,8 +382,8 @@ internal sealed partial class GameUISystem : UISystemBase {
         }
 
         try {
-            File.Delete(GameUISystem.ScreenshotFilePath);
-            File.Delete(GameUISystem.ScreenshotPreviewFilePath);
+            File.Delete(CaptureUISystem.ScreenshotFilePath);
+            File.Delete(CaptureUISystem.ScreenshotPreviewFilePath);
         }
         catch (Exception ex) {
             Mod.Log.ErrorRecoverable(ex);
@@ -455,7 +454,7 @@ internal sealed partial class GameUISystem : UISystemBase {
             this.uploadProgress = null;
 
             ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
-                localizedTitle = "HallOfFame.Systems.GameUI.UPLOAD_ERROR",
+                localizedTitle = "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR",
                 localizedMessage = ex.GetUserFriendlyMessage(),
                 actions = ErrorDialog.Actions.None
             });
@@ -508,13 +507,13 @@ internal sealed partial class GameUISystem : UISystemBase {
 
         var dialog = new ConfirmationDialog(
             LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[Title]",
+                "HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[Title]",
                 "Choose a Creator Name"),
             LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[Message]",
+                "HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[Message]",
                 "To be able to upload a picture, you must first choose a Creator Name in the mod settings."),
             LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.GameUI.SET_CREATOR_NAME_DIALOG[ConfirmAction]",
+                "HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[ConfirmAction]",
                 "Open Mod Settings"),
             LocalizedString.IdWithFallback(
                 "Common.ACTION[Cancel]",
@@ -657,11 +656,11 @@ internal sealed partial class GameUISystem : UISystemBase {
         internal byte[] ImageBytes { get; } = imageBytes;
 
         internal string PreviewImageUri =>
-            $"coui://halloffame/{Path.GetFileName(GameUISystem.ScreenshotPreviewFilePath)}" +
+            $"coui://halloffame/{Path.GetFileName(CaptureUISystem.ScreenshotPreviewFilePath)}" +
             $"?v={this.currentVersion}";
 
         private string ImageUri =>
-            $"coui://halloffame/{Path.GetFileName(GameUISystem.ScreenshotFilePath)}" +
+            $"coui://halloffame/{Path.GetFileName(CaptureUISystem.ScreenshotFilePath)}" +
             $"?v={this.currentVersion}";
 
         public void Write(IJsonWriter writer) {

@@ -1,7 +1,7 @@
 import type { ModRegistrar } from 'cs2/modding';
-import { register as registerOnGame } from './game';
-import { register as registerOnMenu } from './menu';
-import { register as registerOnOverlay } from './overlay';
+import { register as registerOnGame } from './area-game';
+import { register as registerOnMenu } from './area-menu';
+import { register as registerOnOverlay } from './area-overlay';
 import { logError } from './utils';
 
 const register: ModRegistrar = moduleRegistry => {

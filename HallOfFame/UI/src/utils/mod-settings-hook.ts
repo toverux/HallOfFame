@@ -10,7 +10,7 @@ export interface ModSettings {
     readonly baseUrl: string;
 }
 
-const settings$ = bindValue<ModSettings>('hallOfFame', 'settings', {
+const settings$ = bindValue<ModSettings>('hallOfFame.common', 'settings', {
     creatorName: '',
     creatorIdClue: '',
     showCreatorSocials: true,

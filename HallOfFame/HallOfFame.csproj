@@ -21,7 +21,7 @@
     <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets"/>
 
     <ItemGroup>
-        <EmbeddedResource Include="Locales\*.json" />
+        <EmbeddedResource Include="Locales\*.json"/>
     </ItemGroup>
 
     <ItemGroup>

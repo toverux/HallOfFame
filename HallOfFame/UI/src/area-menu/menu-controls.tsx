@@ -33,22 +33,22 @@ import { useHofMenuState } from './menu-state-hook';
 let lastForcedRefreshIndex = 0;
 
 const previousScreenshotInputAction = bindInputAction(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'previousScreenshotInputAction'
 );
 
 const nextScreenshotInputAction = bindInputAction(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'nextScreenshotInputAction'
 );
 
 const likeScreenshotInputAction = bindInputAction(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'likeScreenshotInputAction'
 );
 
 const toggleMenuInputAction = bindInputAction(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'toggleMenuInputAction'
 );
 
@@ -716,7 +716,7 @@ function MenuButtonTooltip({
 }
 
 function openModSettings(tab: string): void {
-    trigger('hallOfFame', 'openModSettings', tab);
+    trigger('hallOfFame.common', 'openModSettings', tab);
 }
 
 function openSocialLink(
@@ -726,28 +726,28 @@ function openSocialLink(
     const url = modSettings.baseUrl + link.link;
 
     link.platform == 'paradoxMods' && link.username
-        ? trigger('hallOfFame', 'openCreatorPage', link.username, url)
-        : trigger('hallOfFame', 'openWebPage', url);
+        ? trigger('hallOfFame.common', 'openCreatorPage', link.username, url)
+        : trigger('hallOfFame.common', 'openWebPage', url);
 }
 
 function previousScreenshot(): void {
-    trigger('hallOfFame.menu', 'previousScreenshot');
+    trigger('hallOfFame.presenter', 'previousScreenshot');
 }
 
 function nextScreenshot(): void {
-    trigger('hallOfFame.menu', 'nextScreenshot');
+    trigger('hallOfFame.presenter', 'nextScreenshot');
 }
 
 function saveScreenshot(): void {
-    trigger('hallOfFame.menu', 'saveScreenshot');
+    trigger('hallOfFame.presenter', 'saveScreenshot');
 }
 
 function reportScreenshot(): void {
-    trigger('hallOfFame.menu', 'reportScreenshot');
+    trigger('hallOfFame.presenter', 'reportScreenshot');
 }
 
 function favoriteScreenshot(): void {
-    trigger('hallOfFame.menu', 'favoriteScreenshot');
+    trigger('hallOfFame.presenter', 'favoriteScreenshot');
 }
 
 function locElementToReactNode(

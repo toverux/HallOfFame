@@ -638,7 +638,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
         var world = Unity.Entities.World.All[0];
 
-        world.GetOrCreateSystemManaged<Systems.MenuUISystem>()
+        world.GetOrCreateSystemManaged<Systems.PresenterUISystem>()
             .LoadScreenshotById(this.ScreenshotToLoad!);
 
         this.ScreenshotToLoad = null;

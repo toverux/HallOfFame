@@ -13,7 +13,11 @@ using HallOfFame.Utils;
 
 namespace HallOfFame.Systems;
 
-internal sealed partial class MenuNotificationSystem : GameSystemBase {
+/// <summary>
+/// System in charge of retrieving the creator's stats and displaying a standard
+/// notification with those stats when the mod starts.
+/// </summary>
+internal sealed partial class StatsNotificationSystem : GameSystemBase {
     private NotificationUISystem? notificationUISystem;
 
     private bool notificationShownOrLoading;
@@ -128,9 +132,9 @@ internal sealed partial class MenuNotificationSystem : GameSystemBase {
     private void ShowStatsDialog(CreatorStats stats) {
         var successDialog = new MessageDialog(
             LocalizedString.Id(
-                "HallOfFame.Systems.MenuNotification.STATS_DIALOG[Title]"),
+                "HallOfFame.Systems.StatsNotification.STATS_DIALOG[Title]"),
             new LocalizedString(
-                "HallOfFame.Systems.MenuNotification.STATS_DIALOG[Message]",
+                "HallOfFame.Systems.StatsNotification.STATS_DIALOG[Message]",
                 "",
                 new Dictionary<string, ILocElement> {
                     {

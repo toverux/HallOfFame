@@ -8,8 +8,7 @@ internal static partial class HttpQueries {
     /// <summary>
     /// Marks the given <see cref="Screenshot"/> as viewed.
     /// </summary>
-    internal static async Task<View> MarkScreenshotViewed(
-        string screenshotId) {
+    internal static async Task<View> MarkScreenshotViewed(string screenshotId) {
         using var request = new UnityWebRequest(
             HttpQueries.PrependApiUrl($"/screenshots/{screenshotId}/views"),
             "POST");

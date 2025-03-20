@@ -10,7 +10,7 @@ const logoScreenStyles = getClassesModule(
 );
 
 const screenshot$ = bindValue<Screenshot | null>(
-    'hallOfFame.menu',
+    'hallOfFame.presenter',
     'screenshot',
     null
 );

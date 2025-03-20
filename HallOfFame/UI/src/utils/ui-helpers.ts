@@ -35,5 +35,5 @@ export function logError(error: unknown, fatal = false): void {
 
     const errorString = error instanceof Error ? error.stack : String(error);
 
-    trigger('hallOfFame', 'logJavaScriptError', fatal, errorString);
+    trigger('hallOfFame.common', 'logJavaScriptError', fatal, errorString);
 }

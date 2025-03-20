@@ -17,8 +17,11 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Systems;
 
-internal sealed partial class GlobalUISystem : UISystemBase {
-    private const string BindingGroup = "hallOfFame";
+/// <summary>
+/// UI System providing utilities used by various features of the mod.
+/// </summary>
+internal sealed partial class CommonUISystem : UISystemBase {
+    private const string BindingGroup = "hallOfFame.common";
 
     private readonly LocalizationManager localizationManager =
         GameManager.instance.localizationManager;
@@ -45,28 +48,28 @@ internal sealed partial class GlobalUISystem : UISystemBase {
             this.Enabled = false;
 
             this.localeBinding = new GetterValueBinding<string>(
-                GlobalUISystem.BindingGroup, "locale",
+                CommonUISystem.BindingGroup, "locale",
                 () => this.localizationManager.activeLocaleId);
 
             this.settingsBinding = new GetterValueBinding<Settings>(
-                GlobalUISystem.BindingGroup, "settings",
+                CommonUISystem.BindingGroup, "settings",
                 () => Mod.Settings,
                 comparer: new FakeSettingComparer());
 
             this.openModSettingsBinding = new TriggerBinding<string>(
-                GlobalUISystem.BindingGroup, "openModSettings",
+                CommonUISystem.BindingGroup, "openModSettings",
                 this.OpenModSettings);
 
             this.openWebPageBinding = new TriggerBinding<string>(
-                GlobalUISystem.BindingGroup, "openWebPage",
+                CommonUISystem.BindingGroup, "openWebPage",
                 Application.OpenURL);
 
             this.openCreatorPageBinding = new TriggerBinding<string, string>(
-                GlobalUISystem.BindingGroup, "openCreatorPage",
+                CommonUISystem.BindingGroup, "openCreatorPage",
                 this.OpenCreatorPage);
 
             this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
-                GlobalUISystem.BindingGroup, "logJavaScriptError",
+                CommonUISystem.BindingGroup, "logJavaScriptError",
                 this.LogJavaScriptError);
 
             this.AddBinding(this.localeBinding);
@@ -134,12 +137,12 @@ internal sealed partial class GlobalUISystem : UISystemBase {
         var dialog = new ConfirmationDialog(
             title: null,
             message: LocalizedString.Id(
-                "HallOfFame.Systems.GlobalUI.OPEN_PDX_MODS_DIALOG[Message]"),
+                "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[Message]"),
             confirmAction: LocalizedString.Id(
-                "HallOfFame.Systems.GlobalUI.OPEN_PDX_MODS_DIALOG[OpenInBrowserAction]"),
+                "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInBrowserAction]"),
             cancelAction: null,
             otherActions: LocalizedString.Id(
-                "HallOfFame.Systems.GlobalUI.OPEN_PDX_MODS_DIALOG[OpenInGameAction]"));
+                "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInGameAction]"));
 
         GameManager.instance.userInterface.appBindings
             .ShowConfirmationDialog(dialog, OnConfirmOrCancel);

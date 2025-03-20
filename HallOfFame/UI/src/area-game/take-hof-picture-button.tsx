@@ -64,5 +64,5 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 }
 
 function takePicture(): void {
-    trigger('hallOfFame.game', 'takeScreenshot');
+    trigger('hallOfFame.capture', 'takeScreenshot');
 }

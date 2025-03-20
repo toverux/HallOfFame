@@ -61,16 +61,16 @@ const coMainScreenStyles = getClassesModule(
     ['centerPanelLayout']
 );
 
-const cityName$ = bindValue<string>('hallOfFame.game', 'cityName');
+const cityName$ = bindValue<string>('hallOfFame.capture', 'cityName');
 
 const screenshotSnapshot$ = bindValue<JsonScreenshotSnapshot | null>(
-    'hallOfFame.game',
+    'hallOfFame.capture',
     'screenshotSnapshot',
     null
 );
 
 const uploadProgress$ = bindValue<JsonUploadProgress | null>(
-    'hallOfFame.game',
+    'hallOfFame.capture',
     'uploadProgress',
     null
 );
@@ -585,9 +585,9 @@ function showFullscreenImage(src: string): void {
 }
 
 function discardScreenshot(): void {
-    trigger('hallOfFame.game', 'clearScreenshot');
+    trigger('hallOfFame.capture', 'clearScreenshot');
 }
 
 function uploadScreenshot(): void {
-    trigger('hallOfFame.game', 'uploadScreenshot');
+    trigger('hallOfFame.capture', 'uploadScreenshot');
 }
