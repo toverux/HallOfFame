@@ -26,6 +26,7 @@ namespace HallOfFame;
 [FileLocation($"ModsSettings/{nameof(HallOfFame)}/{nameof(HallOfFame)}")]
 [SettingsUIShowGroupName(
     Settings.GroupYourProfile,
+    Settings.GroupUIPreferences,
     Settings.GroupKeyBindings,
     Settings.GroupContentPreferences,
     Settings.GroupAdvanced,
@@ -41,6 +42,8 @@ namespace HallOfFame;
     nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
 public sealed class Settings : ModSetting, IJsonWritable {
     private const string GroupYourProfile = "YourProfile";
+
+    private const string GroupUIPreferences = "UIPreferences";
 
     private const string GroupKeyBindings = "KeyBindings";
 
@@ -116,6 +119,37 @@ public sealed class Settings : ModSetting, IJsonWritable {
     // We could use a private setter to set the text but then the game won't
     // interpret our property as an Option entry, it has to be getter-only.
     public LocalizedString LoginStatus => this.loginStatusValue;
+
+    /// <summary>
+    /// Whether to enable HoF on the main menu UI.
+    /// It can be useful to disable the mod temporarily or when you only want to
+    /// use its other features.
+    /// </summary>
+    [SettingsUISection(Settings.GroupUIPreferences)]
+    public bool EnableMainMenuSlideshow { get; set; }
+
+    /// <summary>
+    /// Whether to replace the vanilla background image in the loading screen
+    /// with the last image HoF loaded.
+    /// </summary>
+    [SettingsUISection(Settings.GroupUIPreferences)]
+    [SettingsUIDisableByCondition(
+        typeof(Settings),
+        nameof(Settings.EnableMainMenuSlideshow),
+        invert: true)]
+    public bool EnableLoadingScreenBackground { get; set; }
+
+    /// <summary>
+    /// Whether to show creators' social links in the main menu UI.
+    /// </summary>
+    [SettingsUISection(Settings.GroupUIPreferences)]
+    public bool ShowCreatorSocials { get; set; }
+
+    /// <summary>
+    /// Whether to show the view count of screenshots in the main menu UI.
+    /// </summary>
+    [SettingsUISection(Settings.GroupUIPreferences)]
+    public bool ShowViewCount { get; set; }
 
     [SettingsUISection(Settings.GroupKeyBindings)]
     [SettingsUIKeyboardBinding(
@@ -193,18 +227,6 @@ public sealed class Settings : ModSetting, IJsonWritable {
     [UsedImplicitly]
     public string OtherContentPreferences =>
         string.Empty; // The actual text comes from the translations files.
-
-    /// <summary>
-    /// Whether to show creators' social links in the main menu UI.
-    /// </summary>
-    [SettingsUISection(Settings.GroupContentPreferences)]
-    public bool ShowCreatorSocials { get; set; }
-
-    /// <summary>
-    /// Whether to show the view count of screenshots in the main menu UI.
-    /// </summary>
-    [SettingsUISection(Settings.GroupContentPreferences)]
-    public bool ShowViewCount { get; set; }
 
     /// <summary>
     /// Minimum time in days before a screenshot the user has already seen is
@@ -386,14 +408,17 @@ public sealed class Settings : ModSetting, IJsonWritable {
             ? userName.Substring(1)
             : userName;
 
+        this.EnableMainMenuSlideshow = true;
+        this.EnableLoadingScreenBackground = true;
+        this.ShowCreatorSocials = true;
+        this.ShowViewCount = false;
+
         this.TrendingScreenshotWeight = 10;
         this.RecentScreenshotWeight = 5;
         this.ArcheologistScreenshotWeight = 5;
         this.RandomScreenshotWeight = 2;
         this.SupporterScreenshotWeight = 2;
 
-        this.ShowCreatorSocials = true;
-        this.ShowViewCount = false;
         this.ViewMaxAge = 60;
         this.ScreenshotResolution = "fhd";
 
@@ -616,6 +641,12 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
         writer.PropertyName("creatorIdClue");
         writer.Write(this.MaskedCreatorID?.Split('-')[0]);
+
+        writer.PropertyName("enableMainMenuSlideshow");
+        writer.Write(this.EnableMainMenuSlideshow);
+
+        writer.PropertyName("enableLoadingScreenBackground");
+        writer.Write(this.EnableLoadingScreenBackground);
 
         writer.PropertyName("showCreatorSocials");
         writer.Write(this.ShowCreatorSocials);
