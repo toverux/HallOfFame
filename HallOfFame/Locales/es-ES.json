@@ -116,13 +116,13 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Restablecer Ajustes",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Restablecer todos los ajustes de mod a sus valores por defecto (excepto el ID de Creador que no se tocará).",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Chat y Soporte en Discord",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Este es un enlace de invitación para unirse al servidor de Discord de Cities: Skylines Modding, para solicitar ayuda y hablar.\nEl canal preferido es pdxm-mods-published › Hall of Fame.\nAbre: https://discord.gg/HTav7ARPs2",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Este es un enlace de invitación para unirse al servidor de Discord de Cities: Skylines Modding, para solicitar ayuda y hablar.\nEl canal preferido es pdxm-mods-published › Hall of Fame.\nAbre <discord.gg/HTav7ARPs2>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "Donar <3 en PayPal o Ko-fi",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "Hall of Fame tiene un costo mensual de servidor y almacenamiento de imágenes.\n¡Para hacer el mod viable a plazo, las donaciones serán muy apreciadas!\nCualquier donación mayor o igual a $10 (o una aproximación en tu moneda) te garantizará el estado de \"Supporter\" (deja un mensaje con tu Nombre de Crador al donar), lo que incrementara ligeramente tu cantidad de vistas.\nEste es un link de PayPal; también puedes encontrarme en Ko-fi: https://ko-fi.com/toverux\nAbre: https://paypal.me/MorganTouverey",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "Hall of Fame tiene un costo mensual de servidor y almacenamiento de imágenes.\n¡Para hacer el mod viable a plazo, las donaciones serán muy apreciadas!\nCualquier donación mayor o igual a $10 (o una aproximación en tu moneda) te garantizará el estado de \"Supporter\" (deja un mensaje con tu Nombre de Crador al donar), lo que incrementara ligeramente tu cantidad de vistas.\nEste es un link de PayPal; también puedes encontrarme en Ko-fi: <ko-fi.com/toverux>\nAbre: <paypal.me/MorganTouverey>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "Traducciones en Crowdin",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "Contribuye en la traducción del mod en Crowdin.\nAbre: https://crowdin.com/project/halloffame-cs2",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "Contribuye en la traducción del mod en Crowdin.\nAbre <crowdin.com/project/halloffame-cs2>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "Hoja de Ruta y Solicitud de Características",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "¡Accede a nuestra tabla de comentarios y solicitudes de características para proponer ideas o características de voto!\nAbre: https://feedback.halloffame.cs2.mtq.io",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "¡Accede a nuestra tabla de comentarios y solicitudes de características para proponer ideas o características de voto!\nAbre <feedback.halloffame.cs2.mtq.io>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "Código fuente en Github",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "Acceda al código fuente del mod en GitHub.\nAbre: https://github.com/toverux/HallOfFame"
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "Acceda al código fuente del mod en GitHub.\nAbre <github.com/toverux/HallOfFame>"
 }

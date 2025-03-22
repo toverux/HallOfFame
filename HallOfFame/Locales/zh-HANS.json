@@ -116,13 +116,13 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "重置设置",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "重置此模组的所有设置（创建者 ID 将保持不变）。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "在 Discord 上聊天和寻求帮助",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "这是加入 Cities: Skylines Modding 的 Discord 服务器的邀请链接，用于寻求帮助和聊天。\n首选频道是 pdxm-mods-published › Hall of Fame。\n链接：https://discord.gg/HTav7ARPs2",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "这是加入 Cities: Skylines Modding 的 Discord 服务器的邀请链接，用于寻求帮助和聊天。\n首选频道是 pdxm-mods-published › Hall of Fame。\n链接：<discord.gg/HTav7ARPs2>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "在 PayPal 或 Ko-fi 上捐款 <3",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "“城市画廊”每月需要支付服务器和存储费用。\n为了使此模型能够长期使用，非常感谢您的捐赠！\n任何捐赠 ≥ 10 美元（或您货币的近似值）都会授予您“赞助者”身份（捐赠时请留下您的创作者名称），这将略微增加您的截图曝光次数。\n这是一个 PayPal 链接；您也可以在 Ko-fi 上找到我：https://ko-fi.com/toverux\n链接：https://paypal.me/MorganTouverey",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "“城市画廊”每月需要支付服务器和存储费用。\n为了使此模型能够长期使用，非常感谢您的捐赠！\n任何捐赠 ≥ 10 美元（或您货币的近似值）都会授予您“赞助者”身份（捐赠时请留下您的创作者名称），这将略微增加您的截图曝光次数。\n这是一个 PayPal 链接；您也可以在 Ko-fi 上找到我：<ko-fi.com/toverux>\n链接：<paypal.me/MorganTouverey>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "在 Crowdin 上进行翻译",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "为 Crowdin 上的模组翻译做出贡献。\n链接：https://crowdin.com/project/halloffame-cs2",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "为 Crowdin 上的模组翻译做出贡献。\n链接：<crowdin.com/project/halloffame-cs2>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "路线图和新功能请求",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "访问我们的反馈和新功能请求面板，提出您的想法或对想要的功能进行投票！\n链接：https://feedback.halloffame.cs2.mtq.io",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "访问我们的反馈和新功能请求面板，提出您的想法或对想要的功能进行投票！\n链接：<feedback.halloffame.cs2.mtq.io>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "GitHub 上的源代码",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "在 GitHub 上访问此模组的源代码。\n链接：https://github.com/toverux/HallOfFame"
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "在 GitHub 上访问此模组的源代码。\n链接：<github.com/toverux/HallOfFame>"
 }

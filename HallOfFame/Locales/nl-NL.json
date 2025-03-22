@@ -59,11 +59,11 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hal van Fame server",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Instellingen resetten",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Chat & Ondersteuning op Discord",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Dit is een uitnodigingslink om deel te nemen aan de Cities: Skylines Modding Discord server, voor ondersteuningsaanvragen en om te chatten.\nHet voorkeurskanaal is pdxm-mods-gepubliceerd › Hall of Fame.\nOpent: https://discord.gg/HTav7ARPs2",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Dit is een uitnodigingslink om deel te nemen aan de Cities: Skylines Modding Discord server, voor ondersteuningsaanvragen en om te chatten.\nHet voorkeurskanaal is pdxm-mods-gepubliceerd › Hall of Fame.\nOpent <discord.gg/HTav7ARPs2>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "Doneer <3 op PayPal of Ko-fi",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CrowdinLink]": "Vertaling in Crowdin",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "Vooruitzicht & Functies aanvragen",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "Toegang tot onze feedback en functie aanvraag pagina om ideeën of suggesties voor te stellen!\nOpent: https://feedback.halloffame.cs2.mtq.io",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.UserFeedbackLink]": "Toegang tot onze feedback en functie aanvraag pagina om ideeën of suggesties voor te stellen!\nOpent <feedback.halloffame.cs2.mtq.io>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "Broncode op GitHub",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "Krijg toegang tot de broncode van de mod via GitHub.\nOpent: https://github.com/toverux/HallOfFame"
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.GithubLink]": "Krijg toegang tot de broncode van de mod via GitHub.\nOpent <github.com/toverux/HallOfFame>"
 }
