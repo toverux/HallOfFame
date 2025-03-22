@@ -268,6 +268,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     [SettingsUIButton]
+    [SettingsUIButtonGroup("Links")]
     [SettingsUISection(Settings.GroupLinks)]
     [UsedImplicitly]
     public bool DiscordLink {
@@ -276,6 +277,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     [SettingsUIButton]
+    [SettingsUIButtonGroup("Links")]
     [SettingsUISection(Settings.GroupLinks)]
     [UsedImplicitly]
     public bool DonateLink {
@@ -284,6 +286,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     [SettingsUIButton]
+    [SettingsUIButtonGroup("Links")]
     [SettingsUISection(Settings.GroupLinks)]
     [UsedImplicitly]
     public bool CrowdinLink {
@@ -293,6 +296,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     [SettingsUIButton]
+    [SettingsUIButtonGroup("Links")]
     [SettingsUISection(Settings.GroupLinks)]
     [UsedImplicitly]
     public bool UserFeedbackLink {
@@ -301,6 +305,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     }
 
     [SettingsUIButton]
+    [SettingsUIButtonGroup("Links")]
     [SettingsUISection(Settings.GroupLinks)]
     [UsedImplicitly]
     public bool GithubLink {
