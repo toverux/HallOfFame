@@ -472,7 +472,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         return;
 
         async Task StartUpdateProcessingProgress(CancellationToken ct) {
-            const float processingTimeSeconds = 3f;
+            const float processingTimeSeconds = 8f;
 
             var startTime = DateTime.Now;
 
