@@ -1,14 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Colossal;
+using Colossal.PSI.Common;
+using Colossal.PSI.PdxSdk;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
 using Game.City;
+using Game.Rendering;
 using Game.SceneFlow;
 using Game.Settings;
 using Game.Simulation;
@@ -49,6 +53,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     private CityConfigurationSystem? cityConfigurationSystem;
 
+    private PhotoModeRenderSystem? photoModeRenderSystem;
+
     private ImagePreloaderUISystem? imagePreloaderUISystem;
 
     private EntityQuery milestoneLevelQuery;
@@ -65,6 +71,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     private TriggerBinding clearScreenshotBinding = null!;
 
     private TriggerBinding uploadScreenshotBinding = null!;
+
+    private int[]? activeModIdsCache;
 
     /// <summary>
     /// Current screenshot snapshot.
@@ -105,6 +113,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
             this.cityConfigurationSystem =
                 this.World.GetOrCreateSystemManaged<CityConfigurationSystem>();
+
+            this.photoModeRenderSystem =
+                this.World.GetOrCreateSystemManaged<PhotoModeRenderSystem>();
 
             this.imagePreloaderUISystem =
                 this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
@@ -193,6 +204,59 @@ internal sealed partial class CaptureUISystem : UISystemBase {
                 .GetComponentData<Population>(this.citySystem.City)
                 .m_Population
             : 0;
+    }
+
+    /// <summary>
+    /// Get the Paradox Mods IDs for the enabled mods.
+    /// </summary>
+    private async Task<int[]> GetActiveModIds() {
+        if (this.activeModIdsCache is not null) {
+            return this.activeModIdsCache;
+        }
+
+        try {
+            var pdxSdk =
+                PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
+
+            // This will return null if the player is not logged-in or in other
+            // error cases.
+            var mods = await pdxSdk.GetModsInActivePlayset() ?? [];
+
+            return this.activeModIdsCache = mods.Select(mod => mod.Id)
+                // Ignore Hall of Fame
+                .Where(id => id != 90641)
+                .ToArray();
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
+
+            return [];
+        }
+    }
+
+    /// <summary>
+    /// Saves the values used by the photo mode render system to a dictionary of
+    /// property ID => value (always a float).
+    /// That is enough info to restore them later!
+    /// </summary>
+    private IDictionary<string, float> GetPhotoModePropertiesSnapshot() {
+        try {
+            if (this.photoModeRenderSystem is null) {
+                return new Dictionary<string, float>();
+            }
+
+            return this.photoModeRenderSystem.photoModeProperties.Values
+                .Where(prop =>
+                    prop.getValue is not null &&
+                    prop.isEnabled is not null &&
+                    prop.isEnabled())
+                .ToDictionary(prop => prop.id, prop => prop.getValue());
+        }
+        catch (Exception ex) {
+            Mod.Log.ErrorRecoverable(ex);
+
+            return new Dictionary<string, float>();
+        }
     }
 
     /// <summary>
@@ -361,7 +425,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
             imageSize: new Vector2Int(width, height),
             wasGlobalIlluminationDisabled:
             previousGIValue && Mod.Settings.DisableGlobalIllumination,
-            areSettingsTopQuality: this.AreSettingsTopQuality());
+            areSettingsTopQuality: this.AreSettingsTopQuality(),
+            renderSettings: this.GetPhotoModePropertiesSnapshot(),
+            modIds: await this.GetActiveModIds());
 
         // Preload the preview image in cache before updating the UI.
         await this.imagePreloaderUISystem!
@@ -412,6 +478,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
                 this.GetCityName(),
                 this.CurrentScreenshot.Value.AchievedMilestone,
                 this.CurrentScreenshot.Value.Population,
+                this.CurrentScreenshot.Value.ModIds,
+                this.CurrentScreenshot.Value.RenderSettings,
                 this.CurrentScreenshot.Value.ImageBytes,
                 progressHandler: (upload, download) => {
                     // Case 1: The request is being sent.
@@ -638,7 +706,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         byte[] imageBytes,
         Vector2Int imageSize,
         bool wasGlobalIlluminationDisabled,
-        bool areSettingsTopQuality) : IJsonWritable {
+        bool areSettingsTopQuality,
+        IDictionary<string, float> renderSettings,
+        int[] modIds) : IJsonWritable {
         /// <summary>
         /// As we use the same file name for each new screenshot, this is a
         /// refresh counter appended to the URL of the image as a query
@@ -654,6 +724,11 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         internal int Population { get; } = population;
 
         internal byte[] ImageBytes { get; } = imageBytes;
+
+        internal IDictionary<string, float> RenderSettings { get; } =
+            renderSettings;
+
+        internal int[] ModIds { get; } = modIds;
 
         internal string PreviewImageUri =>
             $"coui://halloffame/{Path.GetFileName(CaptureUISystem.ScreenshotPreviewFilePath)}" +

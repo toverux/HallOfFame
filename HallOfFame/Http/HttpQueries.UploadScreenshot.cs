@@ -15,6 +15,8 @@ internal static partial class HttpQueries {
         string cityName,
         int cityMilestone,
         int cityPopulation,
+        IEnumerable<int> modIds,
+        IDictionary<string, float> renderSettings,
         byte[] screenshotData,
         ProgressHandler? progressHandler = null) {
         var metadata = new Dictionary<string, string> {
@@ -30,6 +32,8 @@ internal static partial class HttpQueries {
         multipart.AddField("cityName", cityName);
         multipart.AddField("cityMilestone", cityMilestone);
         multipart.AddField("cityPopulation", cityPopulation);
+        multipart.AddField("modIds", string.Join(",", modIds));
+        multipart.AddField("renderSettings", JSON.Dump(renderSettings));
         multipart.AddField("metadata", JSON.Dump(metadata));
         multipart.AddBinaryData("screenshot", screenshotData, "screenshot.png");
 
