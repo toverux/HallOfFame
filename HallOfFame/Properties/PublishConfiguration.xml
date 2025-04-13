@@ -165,15 +165,16 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="1.9.1" />
+  <ModVersion Value="1.10.0" />
   <GameVersion Value="1.2.*" />
-  <ChangeLog>Compatibility for patch 1.2.5f1.
+  <ChangeLog>**New features:**
 
-As you have probably noticed, the game now shows a rotating slideshow of 7 images behind the main menu.
-
-- Hall of Fame had to be modified to perform a transparent takeover on the Vanilla system.
-- The Vanilla slideshow system is immediately disabled (and not just hidden) to avoid consuming resources.
-- The fade-in transition time Hall of Fame uses between image has been reduced from 1.5s to 0.75s to match Vanilla's timing, for a more consistent feeling.</ChangeLog>
+- Hall of Fame will now collect the list of enabled mods and photo mode render settings used when taking a screenshot.
+  This will in a future release allow users to check out what mods and photo settings you used for your picture.
+- It is now possible to disable Hall of Fame in the main menu, allowing you to only use its screenshotting feature.
+- The latest image that was loaded is now also shown in the save loading screen as well.
+  There is an opt-out option to disable this behavior.
+- Minor UI improvements.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
