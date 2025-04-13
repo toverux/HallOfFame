@@ -17,40 +17,36 @@ const ignoreResolveErrorsFor = new Set<string>();
  *                   and runtime type safety.
  */
 export function getClassesModule<const TClassNames extends readonly string[]>(
-    module: string,
-    classNames: TClassNames
+  module: string,
+  classNames: TClassNames
 ): { [Class in TClassNames[number]]: string } {
-    let classes: Record<string, string>;
+  let classes: Record<string, string>;
 
-    try {
-        classes = getModule(module, 'classes');
-    } catch {
-        classes = {};
+  try {
+    classes = getModule(module, 'classes');
+  } catch {
+    classes = {};
 
-        if (!ignoreResolveErrorsFor.has(module)) {
-            logError(new Error(`Could not find module "${module}".`));
+    if (!ignoreResolveErrorsFor.has(module)) {
+      logError(new Error(`Could not find module "${module}".`));
 
-            ignoreResolveErrorsFor.add(module);
-        }
+      ignoreResolveErrorsFor.add(module);
     }
+  }
 
-    for (const className of classNames) {
-        if (!(className in classes)) {
-            classes[className] = `${className}_missing`;
+  for (const className of classNames) {
+    if (!(className in classes)) {
+      classes[className] = `${className}_missing`;
 
-            if (!ignoreResolveErrorsFor.has(module + className)) {
-                logError(
-                    new Error(
-                        `Could not find class "${className}" in module "${module}".`
-                    )
-                );
+      if (!ignoreResolveErrorsFor.has(module + className)) {
+        logError(new Error(`Could not find class "${className}" in module "${module}".`));
 
-                ignoreResolveErrorsFor.add(module + className);
-            }
-        }
+        ignoreResolveErrorsFor.add(module + className);
+      }
     }
+  }
 
-    return classes as ReturnType<typeof getClassesModule<TClassNames>>;
+  return classes as ReturnType<typeof getClassesModule<TClassNames>>;
 }
 
 /**
@@ -66,42 +62,34 @@ export function getClassesModule<const TClassNames extends readonly string[]>(
  * @param fallback   Fallback value to use if the export is missing or invalid.
  */
 export function getModuleExport<TExport>(
-    module: string,
-    exportName: string,
-    guard: (value: unknown) => value is TExport,
-    fallback: TExport
+  module: string,
+  exportName: string,
+  guard: (value: unknown) => value is TExport,
+  fallback: TExport
 ): TExport {
-    try {
-        const exported = getModule(module, exportName);
+  try {
+    const exported = getModule(module, exportName);
 
-        if (guard(exported)) {
-            return exported;
-        }
-
-        if (!ignoreResolveErrorsFor.has(module)) {
-            logError(
-                new Error(
-                    `Export "${exportName}" in module "${module}" did not pass type guard.`
-                )
-            );
-
-            ignoreResolveErrorsFor.add(module);
-        }
-
-        return fallback;
-    } catch {
-        if (!ignoreResolveErrorsFor.has(module)) {
-            logError(
-                new Error(
-                    `Could not find export "${exportName}" in module "${module}".`
-                )
-            );
-
-            ignoreResolveErrorsFor.add(module);
-        }
-
-        return fallback;
+    if (guard(exported)) {
+      return exported;
     }
+
+    if (!ignoreResolveErrorsFor.has(module)) {
+      logError(new Error(`Export "${exportName}" in module "${module}" did not pass type guard.`));
+
+      ignoreResolveErrorsFor.add(module);
+    }
+
+    return fallback;
+  } catch {
+    if (!ignoreResolveErrorsFor.has(module)) {
+      logError(new Error(`Could not find export "${exportName}" in module "${module}".`));
+
+      ignoreResolveErrorsFor.add(module);
+    }
+
+    return fallback;
+  }
 }
 
 /**
@@ -109,6 +97,6 @@ export function getModuleExport<TExport>(
  * "class1 class2 class3" -> ".class1.class2.class3".
  */
 export function selector(classNames: string): string {
-    // biome-ignore lint/style/useTemplate: intent clearer like that
-    return `.` + classNames.replaceAll(' ', '.');
+  // biome-ignore lint/style/useTemplate: intent clearer like that
+  return `.` + classNames.replaceAll(' ', '.');
 }

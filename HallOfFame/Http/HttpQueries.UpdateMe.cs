@@ -7,19 +7,19 @@ using UnityEngine.Networking;
 namespace HallOfFame.Http;
 
 internal static partial class HttpQueries {
-    internal static async Task<Creator> UpdateMe() {
-        var payload = new Dictionary<string, object> {
-            { "modSettings", Mod.Settings }
-        };
+  internal static async Task<Creator> UpdateMe() {
+    var payload = new Dictionary<string, object> {
+      { "modSettings", Mod.Settings }
+    };
 
-        using var request = UnityWebRequest.Put(
-            HttpQueries.PrependApiUrl("/creators/me"),
-            JSON.Dump(payload));
+    using var request = UnityWebRequest.Put(
+      HttpQueries.PrependApiUrl("/creators/me"),
+      JSON.Dump(payload));
 
-        request.SetRequestHeader("Content-Type", "application/json");
+    request.SetRequestHeader("Content-Type", "application/json");
 
-        await HttpQueries.SendRequest(request);
+    await HttpQueries.SendRequest(request);
 
-        return HttpQueries.ParseResponse<Creator>(request);
-    }
+    return HttpQueries.ParseResponse<Creator>(request);
+  }
 }

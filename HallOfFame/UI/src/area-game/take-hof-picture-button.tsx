@@ -17,52 +17,46 @@ import * as styles from './take-hof-picture-button.module.scss';
  * with no way to change the text either.
  */
 export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
-    const { translate } = useLocalization();
+  const { translate } = useLocalization();
 
-    // A neutral element just needed to put the HTML of the button somewhere.
-    const spanRef = useRef<HTMLElement>(null);
+  // A neutral element just needed to put the HTML of the button somewhere.
+  const spanRef = useRef<HTMLElement>(null);
 
-    // This runs once when the DOM is loaded, with the spanRef element having
-    // the template HTML of the Take Photo button. We modify it according to
-    // our needs.
-    useEffect(() => {
-        // Retrieve button element, and add our custom class to it.
-        const button = spanRef.current?.firstElementChild;
-        if (!(button instanceof HTMLButtonElement)) {
-            return logError(
-                new Error(`Expected template HTML to be a <button>.`)
-            );
-        }
+  // This runs once when the DOM is loaded, with the spanRef element having
+  // the template HTML of the Take Photo button. We modify it according to
+  // our needs.
+  useEffect(() => {
+    // Retrieve button element, and add our custom class to it.
+    const button = spanRef.current?.firstElementChild;
+    if (!(button instanceof HTMLButtonElement)) {
+      return logError(new Error(`Expected template HTML to be a <button>.`));
+    }
 
-        button.classList.add(styles.screenshotButton);
+    button.classList.add(styles.screenshotButton);
 
-        // Replace button icon with our share picture icon.
-        if (button.firstElementChild instanceof HTMLElement) {
-            button.firstElementChild.style.maskImage = sharePictureSrc;
-        }
+    // Replace button icon with our share picture icon.
+    if (button.firstElementChild instanceof HTMLElement) {
+      button.firstElementChild.style.maskImage = sharePictureSrc;
+    }
 
-        // Adds the side label to the button, the original button has no text.
-        const text = document.createElement('span');
-        text.innerHTML = 'HoF';
+    // Adds the side label to the button, the original button has no text.
+    const text = document.createElement('span');
+    text.innerHTML = 'HoF';
 
-        button.appendChild(text);
-    }, []);
+    button.appendChild(text);
+  }, []);
 
-    return (
-        <Tooltip
-            tooltip={translate(
-                'HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP',
-                `Take a screenshot with Hall of Fame`
-            )}>
-            <span
-                ref={spanRef}
-                onClick={takePicture}
-                dangerouslySetInnerHTML={{ __html: html }}
-            />
-        </Tooltip>
-    );
+  return (
+    <Tooltip
+      tooltip={translate(
+        'HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP',
+        `Take a screenshot with Hall of Fame`
+      )}>
+      <span ref={spanRef} onClick={takePicture} dangerouslySetInnerHTML={{ __html: html }} />
+    </Tooltip>
+  );
 }
 
 function takePicture(): void {
-    trigger('hallOfFame.capture', 'takeScreenshot');
+  trigger('hallOfFame.capture', 'takeScreenshot');
 }

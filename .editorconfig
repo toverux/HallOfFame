@@ -4,13 +4,14 @@
 charset = utf-8
 end_of_line = crlf
 indent_style = space
-indent_size = 4
+indent_size = 4 # default to 4 for compat with other tools but override with 2 for most file types
 trim_trailing_whitespace = true
 insert_final_newline = true
-max_line_length = 80
+max_line_length = 100
 
 [*.cs]
+indent_size = 2
 charset = utf-8-bom # Visual Studio does not like UTF-8 without BOM
 
-[*.{json,yml}]
+[*.{md,js,json,ts,tsx,scss}]
 indent_size = 2

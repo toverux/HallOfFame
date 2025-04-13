@@ -86,14 +86,9 @@
   "formatter": {
     "lineEnding": "lf",
     "indentStyle": "space",
-    "indentWidth": 4,
-    "lineWidth": 80,
+    "indentWidth": 2,
+    "lineWidth": 100,
     "formatWithErrors": true
-  },
-  "json": {
-    "formatter": {
-      "indentWidth": 2
-    }
   },
   "javascript": {
     "formatter": {

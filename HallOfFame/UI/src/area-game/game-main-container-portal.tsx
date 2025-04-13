@@ -5,8 +5,8 @@ import { getClassesModule, logError, selector } from '../utils';
 import { ScreenshotUploadPanel } from './screenshot-upload-panel';
 
 const coMainScreenStyles = getClassesModule(
-    'game-ui/game/components/game-main-screen.module.scss',
-    ['mainContainer']
+  'game-ui/game/components/game-main-screen.module.scss',
+  ['mainContainer']
 );
 
 /**
@@ -19,31 +19,25 @@ const coMainScreenStyles = getClassesModule(
  * which is not directly exposed as a module.
  */
 export function GameMainContainerPortal(): ReactElement {
-    const [portalTargetEl, setPortalTargetEl] = useState<Element>();
+  const [portalTargetEl, setPortalTargetEl] = useState<Element>();
 
-    // This will be executed once when our host is ready, i.e. when the
-    // .main-container has been created in the DOM.
-    useEffect(() => {
-        const mainContainerSelector = selector(
-            coMainScreenStyles.mainContainer
-        );
+  // This will be executed once when our host is ready, i.e. when the
+  // .main-container has been created in the DOM.
+  useEffect(() => {
+    const mainContainerSelector = selector(coMainScreenStyles.mainContainer);
 
-        const mainContainerEl = document.querySelector(mainContainerSelector);
+    const mainContainerEl = document.querySelector(mainContainerSelector);
 
-        if (!(mainContainerEl instanceof Element)) {
-            return logError(
-                new Error(stripIndent`
+    if (!(mainContainerEl instanceof Element)) {
+      return logError(
+        new Error(stripIndent`
                     Could not locate Main Container div
                     (using selector "${mainContainerSelector}")`)
-            );
-        }
+      );
+    }
 
-        setPortalTargetEl(mainContainerEl);
-    }, []);
+    setPortalTargetEl(mainContainerEl);
+  }, []);
 
-    return portalTargetEl ? (
-        createPortal(<ScreenshotUploadPanel />, portalTargetEl)
-    ) : (
-        <></>
-    );
+  return portalTargetEl ? createPortal(<ScreenshotUploadPanel />, portalTargetEl) : <></>;
 }

@@ -12,18 +12,13 @@ import type { DOMAttributes } from 'react';
  * games, as the difference is really noticeable and pleasant.
  */
 export function snappyOnSelect(handler: () => void, sound?: `${UISound}`) {
-    return {
-        onMouseDown(): void {
-            handler();
+  return {
+    onMouseDown(): void {
+      handler();
 
-            trigger(
-                'audio',
-                'playSound',
-                sound ?? ('select-item' satisfies `${UISound}`),
-                1
-            );
-        }
-    } satisfies DOMAttributes<Element>;
+      trigger('audio', 'playSound', sound ?? ('select-item' satisfies `${UISound}`), 1);
+    }
+  } satisfies DOMAttributes<Element>;
 }
 
 /**
@@ -31,9 +26,9 @@ export function snappyOnSelect(handler: () => void, sound?: `${UISound}`) {
  * UI log.
  */
 export function logError(error: unknown, fatal = false): void {
-    console.error(error);
+  console.error(error);
 
-    const errorString = error instanceof Error ? error.stack : String(error);
+  const errorString = error instanceof Error ? error.stack : String(error);
 
-    trigger('hallOfFame.common', 'logJavaScriptError', fatal, errorString);
+  trigger('hallOfFame.common', 'logJavaScriptError', fatal, errorString);
 }

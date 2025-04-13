@@ -19,177 +19,177 @@ namespace HallOfFame.Systems;
 /// various interactions that come with it (next, prev, fav, etc.).
 /// </summary>
 internal sealed partial class PresenterUISystem : UISystemBase {
-    private const string BindingGroup = "hallOfFame.presenter";
+  private const string BindingGroup = "hallOfFame.presenter";
 
-    private ImagePreloaderUISystem imagePreloaderUISystem = null!;
+  private ImagePreloaderUISystem imagePreloaderUISystem = null!;
 
-    private GetterValueBinding<bool> hasPreviousScreenshotBinding = null!;
+  private GetterValueBinding<bool> hasPreviousScreenshotBinding = null!;
 
-    private ValueBinding<int> forcedRefreshIndexBinding = null!;
+  private ValueBinding<int> forcedRefreshIndexBinding = null!;
 
-    private ValueBinding<bool> isRefreshingBinding = null!;
+  private ValueBinding<bool> isRefreshingBinding = null!;
 
-    private ValueBinding<Screenshot?> screenshotBinding = null!;
+  private ValueBinding<Screenshot?> screenshotBinding = null!;
 
-    private ValueBinding<LocalizedString?> errorBinding = null!;
+  private ValueBinding<LocalizedString?> errorBinding = null!;
 
-    private ValueBinding<bool> isSavingBinding = null!;
+  private ValueBinding<bool> isSavingBinding = null!;
 
-    private InputActionBinding previousScreenshotInputActionBinding = null!;
+  private InputActionBinding previousScreenshotInputActionBinding = null!;
 
-    private InputActionBinding nextScreenshotInputActionBinding = null!;
+  private InputActionBinding nextScreenshotInputActionBinding = null!;
 
-    private InputActionBinding likeScreenshotInputActionBinding = null!;
+  private InputActionBinding likeScreenshotInputActionBinding = null!;
 
-    private InputActionBinding toggleMenuInputActionBinding = null!;
+  private InputActionBinding toggleMenuInputActionBinding = null!;
 
-    private TriggerBinding previousScreenshotBinding = null!;
+  private TriggerBinding previousScreenshotBinding = null!;
 
-    private TriggerBinding nextScreenshotBinding = null!;
+  private TriggerBinding nextScreenshotBinding = null!;
 
-    private TriggerBinding favoriteScreenshotBinding = null!;
+  private TriggerBinding favoriteScreenshotBinding = null!;
 
-    private TriggerBinding saveScreenshotBinding = null!;
+  private TriggerBinding saveScreenshotBinding = null!;
 
-    private TriggerBinding reportScreenshotBinding = null!;
+  private TriggerBinding reportScreenshotBinding = null!;
 
-    private readonly IList<Screenshot> screenshotsQueue =
-        new List<Screenshot>();
+  private readonly IList<Screenshot> screenshotsQueue =
+    new List<Screenshot>();
 
-    private int currentScreenshotIndex = -1;
+  private int currentScreenshotIndex = -1;
 
-    /// <summary>
-    /// Indicates the previous game mode to refresh the screenshot when the user
-    /// returns to the main menu.
-    /// Note: it is initialized with <see cref="GameMode.MainMenu"/> and not the
-    /// default value, it is intentional.
-    /// </summary>
-    private GameMode previousGameMode = GameMode.MainMenu;
+  /// <summary>
+  /// Indicates the previous game mode to refresh the screenshot when the user
+  /// returns to the main menu.
+  /// Note: it is initialized with <see cref="GameMode.MainMenu"/> and not the
+  /// default value, it is intentional.
+  /// </summary>
+  private GameMode previousGameMode = GameMode.MainMenu;
 
-    private bool isTogglingFavorite;
+  private bool isTogglingFavorite;
 
-    protected override void OnCreate() {
-        base.OnCreate();
+  protected override void OnCreate() {
+    base.OnCreate();
 
-        try {
-            // No need to OnUpdate as there are no bindings that require it,
-            // they are manually updated when needed.
-            this.Enabled = false;
+    try {
+      // No need to OnUpdate as there are no bindings that require it,
+      // they are manually updated when needed.
+      this.Enabled = false;
 
-            this.imagePreloaderUISystem =
-                this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
+      this.imagePreloaderUISystem =
+        this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
 
-            // VALUE BINDINGS
-            this.hasPreviousScreenshotBinding = new GetterValueBinding<bool>(
-                PresenterUISystem.BindingGroup, "hasPreviousScreenshot",
-                () => this.currentScreenshotIndex > 0);
+      // VALUE BINDINGS
+      this.hasPreviousScreenshotBinding = new GetterValueBinding<bool>(
+        PresenterUISystem.BindingGroup, "hasPreviousScreenshot",
+        () => this.currentScreenshotIndex > 0);
 
-            this.forcedRefreshIndexBinding = new ValueBinding<int>(
-                PresenterUISystem.BindingGroup, "forcedRefreshIndex",
-                1);
+      this.forcedRefreshIndexBinding = new ValueBinding<int>(
+        PresenterUISystem.BindingGroup, "forcedRefreshIndex",
+        1);
 
-            this.isRefreshingBinding = new ValueBinding<bool>(
-                PresenterUISystem.BindingGroup, "isRefreshing",
-                false);
+      this.isRefreshingBinding = new ValueBinding<bool>(
+        PresenterUISystem.BindingGroup, "isRefreshing",
+        false);
 
-            this.screenshotBinding = new ValueBinding<Screenshot?>(
-                PresenterUISystem.BindingGroup, "screenshot",
-                null,
-                new ValueWriter<Screenshot?>().Nullable());
+      this.screenshotBinding = new ValueBinding<Screenshot?>(
+        PresenterUISystem.BindingGroup, "screenshot",
+        null,
+        new ValueWriter<Screenshot?>().Nullable());
 
-            this.errorBinding = new ValueBinding<LocalizedString?>(
-                PresenterUISystem.BindingGroup, "error",
-                null,
-                new ValueWriter<LocalizedString>().Nullable());
+      this.errorBinding = new ValueBinding<LocalizedString?>(
+        PresenterUISystem.BindingGroup, "error",
+        null,
+        new ValueWriter<LocalizedString>().Nullable());
 
-            this.isSavingBinding = new ValueBinding<bool>(
-                PresenterUISystem.BindingGroup, "isSaving",
-                false);
+      this.isSavingBinding = new ValueBinding<bool>(
+        PresenterUISystem.BindingGroup, "isSaving",
+        false);
 
-            this.AddBinding(this.hasPreviousScreenshotBinding);
-            this.AddBinding(this.forcedRefreshIndexBinding);
-            this.AddBinding(this.isRefreshingBinding);
-            this.AddBinding(this.screenshotBinding);
-            this.AddBinding(this.errorBinding);
-            this.AddBinding(this.isSavingBinding);
+      this.AddBinding(this.hasPreviousScreenshotBinding);
+      this.AddBinding(this.forcedRefreshIndexBinding);
+      this.AddBinding(this.isRefreshingBinding);
+      this.AddBinding(this.screenshotBinding);
+      this.AddBinding(this.errorBinding);
+      this.AddBinding(this.isSavingBinding);
 
-            // INPUT ACTION BINDINGS
-            this.previousScreenshotInputActionBinding = new InputActionBinding(
-                PresenterUISystem.BindingGroup, "previousScreenshotInputAction",
-                Mod.Settings.KeyBindingPrevious);
+      // INPUT ACTION BINDINGS
+      this.previousScreenshotInputActionBinding = new InputActionBinding(
+        PresenterUISystem.BindingGroup, "previousScreenshotInputAction",
+        Mod.Settings.KeyBindingPrevious);
 
-            this.nextScreenshotInputActionBinding = new InputActionBinding(
-                PresenterUISystem.BindingGroup, "nextScreenshotInputAction",
-                Mod.Settings.KeyBindingNext);
+      this.nextScreenshotInputActionBinding = new InputActionBinding(
+        PresenterUISystem.BindingGroup, "nextScreenshotInputAction",
+        Mod.Settings.KeyBindingNext);
 
-            this.likeScreenshotInputActionBinding = new InputActionBinding(
-                PresenterUISystem.BindingGroup, "likeScreenshotInputAction",
-                Mod.Settings.KeyBindingLike);
+      this.likeScreenshotInputActionBinding = new InputActionBinding(
+        PresenterUISystem.BindingGroup, "likeScreenshotInputAction",
+        Mod.Settings.KeyBindingLike);
 
-            this.toggleMenuInputActionBinding = new InputActionBinding(
-                PresenterUISystem.BindingGroup, "toggleMenuInputAction",
-                Mod.Settings.KeyBindingToggleMenu);
+      this.toggleMenuInputActionBinding = new InputActionBinding(
+        PresenterUISystem.BindingGroup, "toggleMenuInputAction",
+        Mod.Settings.KeyBindingToggleMenu);
 
-            this.AddBinding(this.previousScreenshotInputActionBinding);
-            this.AddBinding(this.nextScreenshotInputActionBinding);
-            this.AddBinding(this.likeScreenshotInputActionBinding);
-            this.AddBinding(this.toggleMenuInputActionBinding);
+      this.AddBinding(this.previousScreenshotInputActionBinding);
+      this.AddBinding(this.nextScreenshotInputActionBinding);
+      this.AddBinding(this.likeScreenshotInputActionBinding);
+      this.AddBinding(this.toggleMenuInputActionBinding);
 
-            // TRIGGER BINDINGS
-            this.previousScreenshotBinding = new TriggerBinding(
-                PresenterUISystem.BindingGroup, "previousScreenshot",
-                this.PreviousScreenshot);
+      // TRIGGER BINDINGS
+      this.previousScreenshotBinding = new TriggerBinding(
+        PresenterUISystem.BindingGroup, "previousScreenshot",
+        this.PreviousScreenshot);
 
-            this.nextScreenshotBinding = new TriggerBinding(
-                PresenterUISystem.BindingGroup, "nextScreenshot",
-                this.NextScreenshot);
+      this.nextScreenshotBinding = new TriggerBinding(
+        PresenterUISystem.BindingGroup, "nextScreenshot",
+        this.NextScreenshot);
 
-            this.favoriteScreenshotBinding = new TriggerBinding(
-                PresenterUISystem.BindingGroup, "favoriteScreenshot",
-                this.FavoriteScreenshot);
+      this.favoriteScreenshotBinding = new TriggerBinding(
+        PresenterUISystem.BindingGroup, "favoriteScreenshot",
+        this.FavoriteScreenshot);
 
-            this.saveScreenshotBinding = new TriggerBinding(
-                PresenterUISystem.BindingGroup, "saveScreenshot",
-                this.SaveScreenshot);
+      this.saveScreenshotBinding = new TriggerBinding(
+        PresenterUISystem.BindingGroup, "saveScreenshot",
+        this.SaveScreenshot);
 
-            this.reportScreenshotBinding = new TriggerBinding(
-                PresenterUISystem.BindingGroup, "reportScreenshot",
-                this.ReportScreenshot);
+      this.reportScreenshotBinding = new TriggerBinding(
+        PresenterUISystem.BindingGroup, "reportScreenshot",
+        this.ReportScreenshot);
 
-            this.AddBinding(this.previousScreenshotBinding);
-            this.AddBinding(this.nextScreenshotBinding);
-            this.AddBinding(this.favoriteScreenshotBinding);
-            this.AddBinding(this.saveScreenshotBinding);
-            this.AddBinding(this.reportScreenshotBinding);
-        }
-        catch (Exception ex) {
-            Mod.Log.ErrorFatal(ex);
-        }
+      this.AddBinding(this.previousScreenshotBinding);
+      this.AddBinding(this.nextScreenshotBinding);
+      this.AddBinding(this.favoriteScreenshotBinding);
+      this.AddBinding(this.saveScreenshotBinding);
+      this.AddBinding(this.reportScreenshotBinding);
+    }
+    catch (Exception ex) {
+      Mod.Log.ErrorFatal(ex);
+    }
+  }
+
+  /// <summary>
+  /// Lifecycle method used for changing the current screenshot when the user
+  /// returns to the main menu.
+  /// </summary>
+  protected override void OnGameLoadingComplete(
+    Purpose purpose,
+    GameMode mode) {
+    // The condition serves two purposes:
+    // 1. Call NextScreenshot when the user returns to the main menu from
+    //    another game mode.
+    // 2. Avoid potentially repeating the NextScreenshot call when the game
+    //    boots and mods are initialized before the first game mode is set,
+    //    this happens rarely, but it's possible.
+    if (mode is GameMode.MainMenu &&
+        this.previousGameMode is not GameMode.MainMenu) {
+      this.forcedRefreshIndexBinding.Update(
+        this.forcedRefreshIndexBinding.value + 1);
     }
 
-    /// <summary>
-    /// Lifecycle method used for changing the current screenshot when the user
-    /// returns to the main menu.
-    /// </summary>
-    protected override void OnGameLoadingComplete(
-        Purpose purpose,
-        GameMode mode) {
-        // The condition serves two purposes:
-        // 1. Call NextScreenshot when the user returns to the main menu from
-        //    another game mode.
-        // 2. Avoid potentially repeating the NextScreenshot call when the game
-        //    boots and mods are initialized before the first game mode is set,
-        //    this happens rarely, but it's possible.
-        if (mode is GameMode.MainMenu &&
-            this.previousGameMode is not GameMode.MainMenu) {
-            this.forcedRefreshIndexBinding.Update(
-                this.forcedRefreshIndexBinding.value + 1);
-        }
+    this.previousGameMode = mode;
+  }
 
-        this.previousGameMode = mode;
-    }
-
-    #if DEBUG
+  #if DEBUG
     /// <summary>
     /// Debug/development method to load a screenshot by its ID.
     /// Does not use the queue system.
@@ -214,416 +214,416 @@ internal sealed partial class PresenterUISystem : UISystemBase {
             this.isRefreshingBinding.Update(false);
         }
     }
-    #endif
+  #endif
 
-    /// <summary>
-    /// Switches the current screenshot to the previous if there is one
-    /// (<see cref="screenshotsQueue"/>).
-    /// The method is `async void` because it is designed to be called in a
-    /// fire-and-forget manner, and it must be designed to never throw.
-    /// </summary>
-    // ReSharper disable once AsyncVoidMethod
-    private async void PreviousScreenshot() {
-        if (this.isRefreshingBinding.value) {
-            return;
-        }
-
-        if (this.currentScreenshotIndex <= 0) {
-            Mod.Log.ErrorSilent(
-                $"Menu: {nameof(this.PreviousScreenshot)}: " +
-                $"Cannot go back, already at the first screenshot.");
-
-            return;
-        }
-
-        this.isRefreshingBinding.Update(true);
-
-        var screenshot = this.screenshotsQueue[--this.currentScreenshotIndex];
-
-        // We still need to make sure the image is preloaded, because these
-        // images aren't kept long in cohtml's cache; if the user clicks
-        // Previous a few times this is necessary.
-        screenshot =
-            await this.LoadScreenshot(screenshot: screenshot, preload: false);
-
-        // There was an error when preloading the previous image.
-        if (screenshot is not null) {
-            this.screenshotBinding.Update(screenshot);
-            this.hasPreviousScreenshotBinding.Update();
-        }
-
-        Mod.Log.Info(
-            $"Menu: {nameof(this.PreviousScreenshot)}: Displaying {screenshot} " +
-            $"(queue idx {this.currentScreenshotIndex}/" +
-            $"{this.screenshotsQueue.Count - 1}).");
-
-        this.isRefreshingBinding.Update(false);
+  /// <summary>
+  /// Switches the current screenshot to the previous if there is one
+  /// (<see cref="screenshotsQueue"/>).
+  /// The method is `async void` because it is designed to be called in a
+  /// fire-and-forget manner, and it must be designed to never throw.
+  /// </summary>
+  // ReSharper disable once AsyncVoidMethod
+  private async void PreviousScreenshot() {
+    if (this.isRefreshingBinding.value) {
+      return;
     }
 
-    /// <summary>
-    /// Switches the current screenshot to the next if there is one
-    /// (<see cref="screenshotsQueue"/>), otherwise it loads a new one.
-    /// Then it preloads the next screenshot again in the background.
-    /// The method is `async void` because it is designed to be called in a
-    /// fire-and-forget manner, and it should be designed to never throw.
-    /// </summary>
+    if (this.currentScreenshotIndex <= 0) {
+      Mod.Log.ErrorSilent(
+        $"Menu: {nameof(this.PreviousScreenshot)}: " +
+        $"Cannot go back, already at the first screenshot.");
+
+      return;
+    }
+
+    this.isRefreshingBinding.Update(true);
+
+    var screenshot = this.screenshotsQueue[--this.currentScreenshotIndex];
+
+    // We still need to make sure the image is preloaded, because these
+    // images aren't kept long in cohtml's cache; if the user clicks
+    // Previous a few times this is necessary.
+    screenshot =
+      await this.LoadScreenshot(screenshot: screenshot, preload: false);
+
+    // There was an error when preloading the previous image.
+    if (screenshot is not null) {
+      this.screenshotBinding.Update(screenshot);
+      this.hasPreviousScreenshotBinding.Update();
+    }
+
+    Mod.Log.Info(
+      $"Menu: {nameof(this.PreviousScreenshot)}: Displaying {screenshot} " +
+      $"(queue idx {this.currentScreenshotIndex}/" +
+      $"{this.screenshotsQueue.Count - 1}).");
+
+    this.isRefreshingBinding.Update(false);
+  }
+
+  /// <summary>
+  /// Switches the current screenshot to the next if there is one
+  /// (<see cref="screenshotsQueue"/>), otherwise it loads a new one.
+  /// Then it preloads the next screenshot again in the background.
+  /// The method is `async void` because it is designed to be called in a
+  /// fire-and-forget manner, and it should be designed to never throw.
+  /// </summary>
+  // ReSharper disable once AsyncVoidMethod
+  private async void NextScreenshot() {
+    if (this.isRefreshingBinding.value) {
+      return;
+    }
+
+    this.isRefreshingBinding.Update(true);
+
+    Screenshot? screenshot;
+
+    // If there is a preloaded screenshot next in queue, set it as the
+    // current screenshot.
+    // This happens when the user first clicks "Next".
+    if (this.screenshotsQueue.Count - 1 > this.currentScreenshotIndex) {
+      screenshot = this.screenshotsQueue[++this.currentScreenshotIndex];
+    }
+
+    // Otherwise, load a new screenshot, add it to the queue, and set it as
+    // the current screenshot.
+    // This happens when the first image is loaded, or when there was an
+    // error preloading the next image in the previous NextScreenshot call.
+    else {
+      screenshot = await this.LoadScreenshot(preload: false);
+
+      if (screenshot is not null) {
+        this.screenshotsQueue.Add(screenshot);
+        this.currentScreenshotIndex++;
+      }
+    }
+
+    // There was an error, don't preload the next image, but leave the
+    // previous screenshot displayed. Reset the refresh state.
+    // The error binding is already updated by LoadScreenshot().
+    if (screenshot is null) {
+      this.isRefreshingBinding.Update(false);
+
+      return;
+    }
+
+    // The screenshot was successfully loaded, update the screenshot being
+    // displayed and asynchronously preload the next one.
+    this.screenshotBinding.Update(screenshot);
+    this.hasPreviousScreenshotBinding.Update();
+
+    Mod.Log.Info(
+      $"Menu: {nameof(this.NextScreenshot)}: Displaying {screenshot} " +
+      $"(queue idx {this.currentScreenshotIndex}/" +
+      $"{this.screenshotsQueue.Count - 1}).");
+
+    if (this.currentScreenshotIndex < this.screenshotsQueue.Count - 1) {
+      // If we are not at the end of the queue (the user clicked previous
+      // once or more), we're done as we have next screenshots in stock,
+      // so we don't have to preload the next one.
+      this.isRefreshingBinding.Update(false);
+    }
+    else {
+      // If we are viewing the last screenshot in the queue, prepare the
+      // next one in the background.
+      PreloadNextScreenshot();
+
+      // It also means the current screenshot was just viewed.
+      MarkViewed();
+    }
+
+    return;
+
+    // Fire-and-forget async method that should be designed to never throw.
     // ReSharper disable once AsyncVoidMethod
-    private async void NextScreenshot() {
-        if (this.isRefreshingBinding.value) {
-            return;
-        }
-
-        this.isRefreshingBinding.Update(true);
-
-        Screenshot? screenshot;
-
-        // If there is a preloaded screenshot next in queue, set it as the
-        // current screenshot.
-        // This happens when the user first clicks "Next".
-        if (this.screenshotsQueue.Count - 1 > this.currentScreenshotIndex) {
-            screenshot = this.screenshotsQueue[++this.currentScreenshotIndex];
-        }
-
-        // Otherwise, load a new screenshot, add it to the queue, and set it as
-        // the current screenshot.
-        // This happens when the first image is loaded, or when there was an
-        // error preloading the next image in the previous NextScreenshot call.
-        else {
-            screenshot = await this.LoadScreenshot(preload: false);
-
-            if (screenshot is not null) {
-                this.screenshotsQueue.Add(screenshot);
-                this.currentScreenshotIndex++;
-            }
-        }
-
-        // There was an error, don't preload the next image, but leave the
-        // previous screenshot displayed. Reset the refresh state.
-        // The error binding is already updated by LoadScreenshot().
-        if (screenshot is null) {
-            this.isRefreshingBinding.Update(false);
-
-            return;
-        }
-
-        // The screenshot was successfully loaded, update the screenshot being
-        // displayed and asynchronously preload the next one.
-        this.screenshotBinding.Update(screenshot);
-        this.hasPreviousScreenshotBinding.Update();
-
-        Mod.Log.Info(
-            $"Menu: {nameof(this.NextScreenshot)}: Displaying {screenshot} " +
-            $"(queue idx {this.currentScreenshotIndex}/" +
-            $"{this.screenshotsQueue.Count - 1}).");
-
-        if (this.currentScreenshotIndex < this.screenshotsQueue.Count - 1) {
-            // If we are not at the end of the queue (the user clicked previous
-            // once or more), we're done as we have next screenshots in stock,
-            // so we don't have to preload the next one.
-            this.isRefreshingBinding.Update(false);
-        }
-        else {
-            // If we are viewing the last screenshot in the queue, prepare the
-            // next one in the background.
-            PreloadNextScreenshot();
-
-            // It also means the current screenshot was just viewed.
-            MarkViewed();
-        }
-
-        return;
-
-        // Fire-and-forget async method that should be designed to never throw.
-        // ReSharper disable once AsyncVoidMethod
-        async void PreloadNextScreenshot() {
-            // Variable used below to avoid infinite loops when there is only
-            // one screenshot in database (that can happen during development).
-            #if DEBUG
+    async void PreloadNextScreenshot() {
+      // Variable used below to avoid infinite loops when there is only
+      // one screenshot in database (that can happen during development).
+      #if DEBUG
             var iterations = 0;
-            #endif
+      #endif
 
-            Screenshot? nextScreenshot;
+      Screenshot? nextScreenshot;
 
-            // The loop is a workaround to avoid loading the same screenshot
-            // twice if the server returns the same screenshot twice (or more).
-            // This should be extremely rare, only happening in dev mode with a
-            // small number of screenshots and the random algorithm without
-            // views taken into account because all screenshots have been seen.
-            // The check is cheap, and it's more complex to implement
-            // server-side, so let's do that frontend-side.
-            do {
-                nextScreenshot = await this.LoadScreenshot(preload: true);
-            } while (
-                #if DEBUG
+      // The loop is a workaround to avoid loading the same screenshot
+      // twice if the server returns the same screenshot twice (or more).
+      // This should be extremely rare, only happening in dev mode with a
+      // small number of screenshots and the random algorithm without
+      // views taken into account because all screenshots have been seen.
+      // The check is cheap, and it's more complex to implement
+      // server-side, so let's do that frontend-side.
+      do {
+        nextScreenshot = await this.LoadScreenshot(preload: true);
+      } while (
+        #if DEBUG
                 iterations++ < 20 &&
-                #endif
-                nextScreenshot is not null &&
-                nextScreenshot.Id ==
-                this.screenshotBinding.value?.Id);
+        #endif
+        nextScreenshot is not null &&
+        nextScreenshot.Id ==
+        this.screenshotBinding.value?.Id);
 
-            if (nextScreenshot is not null) {
-                this.screenshotsQueue.Add(nextScreenshot);
+      if (nextScreenshot is not null) {
+        this.screenshotsQueue.Add(nextScreenshot);
 
-                // Trim queue if it's more than 20 screenshots long.
-                if (this.screenshotsQueue.Count > 20) {
-                    this.screenshotsQueue.RemoveAt(0);
-                    this.currentScreenshotIndex--; // Adjust index.
-                }
-            }
-
-            // Release the refresh lock.
-            // If any code above is susceptible to throw, ensure this is called
-            // inside a finally block.
-            this.isRefreshingBinding.Update(false);
+        // Trim queue if it's more than 20 screenshots long.
+        if (this.screenshotsQueue.Count > 20) {
+          this.screenshotsQueue.RemoveAt(0);
+          this.currentScreenshotIndex--; // Adjust index.
         }
+      }
 
-        // Fire-and-forget async method that should be designed to never throw.
-        async void MarkViewed() {
-            try {
-                await HttpQueries.MarkScreenshotViewed(screenshot.Id);
-            }
-            catch (Exception ex) {
-                Mod.Log.ErrorSilent(ex);
-            }
-        }
+      // Release the refresh lock.
+      // If any code above is susceptible to throw, ensure this is called
+      // inside a finally block.
+      this.isRefreshingBinding.Update(false);
     }
 
-    /// <summary>
-    /// Loads a new screenshot from the server and preloads the image in the UI,
-    /// also is responsible to handle all errors.
-    /// </summary>
-    /// <param name="preload">
-    /// If true, network errors will be logged, but not displayed, as it is a
-    /// non-critical background operation.<br/>
-    /// It is the responsibility of the caller to handle the fact that the
-    /// preloading failed, and ex. retry a classic loading operation the next
-    /// time the user refreshes the image.
-    /// </param>
-    /// <param name="screenshot">
-    /// The screenshot to preload, if null, a new one will be fetched from the
-    /// server.
-    /// </param>
-    /// <returns>
-    /// A <see cref="Screenshot"/> if the API call *and* image were successful,
-    /// null if there was an error.
-    /// </returns>
-    private async Task<Screenshot?> LoadScreenshot(
-        bool preload,
-        Screenshot? screenshot = null) {
-        try {
-            screenshot ??= await HttpQueries.GetRandomScreenshotWeighted();
+    // Fire-and-forget async method that should be designed to never throw.
+    async void MarkViewed() {
+      try {
+        await HttpQueries.MarkScreenshotViewed(screenshot.Id);
+      }
+      catch (Exception ex) {
+        Mod.Log.ErrorSilent(ex);
+      }
+    }
+  }
 
-            var imageUrl = Mod.Settings.ScreenshotResolution switch {
-                "fhd" => screenshot.ImageUrlFHD,
-                "4k" => screenshot.ImageUrl4K,
-                var resolution => throw new InvalidOperationException(
-                    $"Unknown screenshot resolution: {resolution}.")
-            };
+  /// <summary>
+  /// Loads a new screenshot from the server and preloads the image in the UI,
+  /// also is responsible to handle all errors.
+  /// </summary>
+  /// <param name="preload">
+  /// If true, network errors will be logged, but not displayed, as it is a
+  /// non-critical background operation.<br/>
+  /// It is the responsibility of the caller to handle the fact that the
+  /// preloading failed, and ex. retry a classic loading operation the next
+  /// time the user refreshes the image.
+  /// </param>
+  /// <param name="screenshot">
+  /// The screenshot to preload, if null, a new one will be fetched from the
+  /// server.
+  /// </param>
+  /// <returns>
+  /// A <see cref="Screenshot"/> if the API call *and* image were successful,
+  /// null if there was an error.
+  /// </returns>
+  private async Task<Screenshot?> LoadScreenshot(
+    bool preload,
+    Screenshot? screenshot = null) {
+    try {
+      screenshot ??= await HttpQueries.GetRandomScreenshotWeighted();
 
-            await this.imagePreloaderUISystem.Preload(imageUrl);
+      var imageUrl = Mod.Settings.ScreenshotResolution switch {
+        "fhd" => screenshot.ImageUrlFHD,
+        "4k" => screenshot.ImageUrl4K,
+        var resolution => throw new InvalidOperationException(
+          $"Unknown screenshot resolution: {resolution}.")
+      };
 
-            if (!preload) {
-                this.errorBinding.Update(null);
-            }
+      await this.imagePreloaderUISystem.Preload(imageUrl);
 
-            Mod.Log.Info(
-                $"Menu: {(preload ? "Preloaded" : "Loaded")} {screenshot} " +
-                $"({imageUrl}, algo={screenshot.Algorithm}).");
+      if (!preload) {
+        this.errorBinding.Update(null);
+      }
 
-            return screenshot;
-        }
-        catch (Exception ex) when (preload) {
-            Mod.Log.ErrorSilent(ex);
+      Mod.Log.Info(
+        $"Menu: {(preload ? "Preloaded" : "Loaded")} {screenshot} " +
+        $"({imageUrl}, algo={screenshot.Algorithm}).");
 
-            return null;
-        }
-        catch (Exception ex) when (this.IsNetworkError(ex)) {
-            this.errorBinding.Update(ex.GetUserFriendlyMessage());
+      return screenshot;
+    }
+    catch (Exception ex) when (preload) {
+      Mod.Log.ErrorSilent(ex);
 
-            return null;
-        }
-        catch (Exception ex) {
-            Mod.Log.ErrorRecoverable(ex);
+      return null;
+    }
+    catch (Exception ex) when (this.IsNetworkError(ex)) {
+      this.errorBinding.Update(ex.GetUserFriendlyMessage());
 
-            return null;
-        }
+      return null;
+    }
+    catch (Exception ex) {
+      Mod.Log.ErrorRecoverable(ex);
+
+      return null;
+    }
+  }
+
+  /// <summary>
+  /// Toggle the favorite status of the current screenshot, with an optimistic
+  /// UI update.
+  /// The method is `async void` because it is designed to be called in a
+  /// fire-and-forget manner, and it should be designed to never throw.
+  /// </summary>
+  // ReSharper disable once AsyncVoidMethod
+  private async void FavoriteScreenshot() {
+    if (this.isTogglingFavorite ||
+        this.isRefreshingBinding.value ||
+        this.screenshotBinding.value is null) {
+      return;
     }
 
-    /// <summary>
-    /// Toggle the favorite status of the current screenshot, with an optimistic
-    /// UI update.
-    /// The method is `async void` because it is designed to be called in a
-    /// fire-and-forget manner, and it should be designed to never throw.
-    /// </summary>
-    // ReSharper disable once AsyncVoidMethod
-    private async void FavoriteScreenshot() {
-        if (this.isTogglingFavorite ||
-            this.isRefreshingBinding.value ||
-            this.screenshotBinding.value is null) {
-            return;
-        }
+    this.isTogglingFavorite = true;
 
-        this.isTogglingFavorite = true;
+    var prevScreenshot = this.screenshotBinding.value;
 
-        var prevScreenshot = this.screenshotBinding.value;
+    var updatedScreenshot = prevScreenshot with {
+      IsFavorite = !prevScreenshot.IsFavorite,
+      FavoritesCount = prevScreenshot.FavoritesCount +
+                       (prevScreenshot.IsFavorite ? -1 : 1)
+    };
 
-        var updatedScreenshot = prevScreenshot with {
-            IsFavorite = !prevScreenshot.IsFavorite,
-            FavoritesCount = prevScreenshot.FavoritesCount +
-                             (prevScreenshot.IsFavorite ? -1 : 1)
-        };
+    // Replace current screenshot with the liked one.
+    this.screenshotsQueue[this.currentScreenshotIndex] = updatedScreenshot;
+    this.screenshotBinding.Update(updatedScreenshot);
 
-        // Replace current screenshot with the liked one.
-        this.screenshotsQueue[this.currentScreenshotIndex] = updatedScreenshot;
-        this.screenshotBinding.Update(updatedScreenshot);
+    try {
+      await HttpQueries.FavoriteScreenshot(
+        updatedScreenshot.Id,
+        favorite: updatedScreenshot.IsFavorite);
+    }
+    catch (HttpException ex) {
+      ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+        localizedTitle = "HallOfFame.Common.OOPS",
+        localizedMessage = ex.GetUserFriendlyMessage(),
+        actions = ErrorDialog.Actions.None
+      });
 
-        try {
-            await HttpQueries.FavoriteScreenshot(
-                updatedScreenshot.Id,
-                favorite: updatedScreenshot.IsFavorite);
-        }
-        catch (HttpException ex) {
-            ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
-                localizedTitle = "HallOfFame.Common.OOPS",
-                localizedMessage = ex.GetUserFriendlyMessage(),
-                actions = ErrorDialog.Actions.None
-            });
+      // Revert the optimistic UI update.
+      this.screenshotsQueue[this.currentScreenshotIndex] = prevScreenshot;
+      this.screenshotBinding.Update(prevScreenshot);
+    }
+    catch (Exception ex) {
+      Mod.Log.ErrorRecoverable(ex);
+    }
+    finally {
+      this.isTogglingFavorite = false;
+    }
+  }
 
-            // Revert the optimistic UI update.
-            this.screenshotsQueue[this.currentScreenshotIndex] = prevScreenshot;
-            this.screenshotBinding.Update(prevScreenshot);
-        }
-        catch (Exception ex) {
-            Mod.Log.ErrorRecoverable(ex);
-        }
-        finally {
-            this.isTogglingFavorite = false;
-        }
+  /// <summary>
+  /// Saves the current screenshot 4K image to the disk, to the path specified
+  /// in the mod settings.
+  /// The method is `async void` because it is designed to be called in a
+  /// fire-and-forget manner, and it should be designed to never throw.
+  /// </summary>
+  // ReSharper disable once AsyncVoidMethod
+  private async void SaveScreenshot() {
+    var screenshot = this.screenshotBinding.value;
+
+    if (this.isSavingBinding.value || screenshot is null) {
+      return;
     }
 
-    /// <summary>
-    /// Saves the current screenshot 4K image to the disk, to the path specified
-    /// in the mod settings.
-    /// The method is `async void` because it is designed to be called in a
-    /// fire-and-forget manner, and it should be designed to never throw.
-    /// </summary>
-    // ReSharper disable once AsyncVoidMethod
-    private async void SaveScreenshot() {
-        var screenshot = this.screenshotBinding.value;
+    try {
+      this.isSavingBinding.Update(true);
 
-        if (this.isSavingBinding.value || screenshot is null) {
-            return;
-        }
+      var imageBytes =
+        await HttpQueries.DownloadImage(screenshot.ImageUrl4K);
 
-        try {
-            this.isSavingBinding.Update(true);
+      var directory = Mod.Settings.CreatorsScreenshotSaveDirectory;
 
-            var imageBytes =
-                await HttpQueries.DownloadImage(screenshot.ImageUrl4K);
+      var filePath = Path.Combine(
+        Mod.Settings.CreatorsScreenshotSaveDirectory,
+        $"{screenshot.Creator?.CreatorName} - " +
+        $"{screenshot.CityName} - " +
+        $"{screenshot.CreatedAt.ToLocalTime():yyyy.MM.dd HH.mm.ss}.jpg");
 
-            var directory = Mod.Settings.CreatorsScreenshotSaveDirectory;
+      await Task.Run(() => {
+        Directory.CreateDirectory(directory);
+        File.WriteAllBytes(filePath, imageBytes);
+      });
 
-            var filePath = Path.Combine(
-                Mod.Settings.CreatorsScreenshotSaveDirectory,
-                $"{screenshot.Creator?.CreatorName} - " +
-                $"{screenshot.CityName} - " +
-                $"{screenshot.CreatedAt.ToLocalTime():yyyy.MM.dd HH.mm.ss}.jpg");
+      Mod.Log.Info($"Menu: Saved {screenshot} image to {filePath}.");
+    }
+    catch (Exception ex) when (this.IsNetworkError(ex)) {
+      Mod.Log.Error(ex.GetUserFriendlyMessage());
+    }
+    catch (Exception ex) {
+      Mod.Log.ErrorRecoverable(ex);
+    }
+    finally {
+      this.isSavingBinding.Update(false);
+    }
+  }
 
-            await Task.Run(() => {
-                Directory.CreateDirectory(directory);
-                File.WriteAllBytes(filePath, imageBytes);
-            });
+  private void ReportScreenshot() {
+    var screenshot = this.screenshotBinding.value;
 
-            Mod.Log.Info($"Menu: Saved {screenshot} image to {filePath}.");
-        }
-        catch (Exception ex) when (this.IsNetworkError(ex)) {
-            Mod.Log.Error(ex.GetUserFriendlyMessage());
-        }
-        catch (Exception ex) {
-            Mod.Log.ErrorRecoverable(ex);
-        }
-        finally {
-            this.isSavingBinding.Update(false);
-        }
+    if (screenshot is null) {
+      throw new ArgumentNullException(nameof(this.screenshotBinding));
     }
 
-    private void ReportScreenshot() {
-        var screenshot = this.screenshotBinding.value;
+    var dialog = new ConfirmationDialog(
+      new LocalizedString(
+        "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
+        "Report screenshot {CITY_NAME} by {AUTHOR_NAME}?",
+        new Dictionary<string, ILocElement> {
+          {
+            "CITY_NAME",
+            LocalizedString.Value(screenshot.CityName)
+          }, {
+            "AUTHOR_NAME",
+            LocalizedString.Value(screenshot.Creator
+              ?.CreatorName)
+          }
+        }),
+      LocalizedString.IdWithFallback(
+        "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]",
+        "Report this screenshot to the moderation team?"),
+      LocalizedString.IdWithFallback(
+        "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]",
+        "Report screenshot"),
+      LocalizedString.IdWithFallback(
+        "Common.ACTION[Cancel]",
+        "Cancel"));
 
-        if (screenshot is null) {
-            throw new ArgumentNullException(nameof(this.screenshotBinding));
+    GameManager.instance.userInterface.appBindings
+      .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
+
+    return;
+
+    async void OnConfirmOrCancel(int choice) {
+      try {
+        if (choice is not 0) {
+          return;
         }
 
-        var dialog = new ConfirmationDialog(
-            new LocalizedString(
-                "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
-                "Report screenshot {CITY_NAME} by {AUTHOR_NAME}?",
-                new Dictionary<string, ILocElement> {
-                    {
-                        "CITY_NAME",
-                        LocalizedString.Value(screenshot.CityName)
-                    }, {
-                        "AUTHOR_NAME",
-                        LocalizedString.Value(screenshot.Creator
-                            ?.CreatorName)
-                    }
-                }),
-            LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]",
-                "Report this screenshot to the moderation team?"),
-            LocalizedString.IdWithFallback(
-                "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]",
-                "Report screenshot"),
-            LocalizedString.IdWithFallback(
-                "Common.ACTION[Cancel]",
-                "Cancel"));
+        await HttpQueries.ReportScreenshot(screenshot.Id);
+
+        var successDialog = new MessageDialog(
+          LocalizedString.IdWithFallback(
+            "HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]",
+            "Thank you"),
+          LocalizedString.IdWithFallback(
+            "HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]",
+            "The screenshot has been reported to the moderation team."),
+          LocalizedString.IdWithFallback(
+            "Common.CLOSE",
+            "Close"));
 
         GameManager.instance.userInterface.appBindings
-            .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
+          .ShowMessageDialog(successDialog, _ => { });
 
-        return;
-
-        async void OnConfirmOrCancel(int choice) {
-            try {
-                if (choice is not 0) {
-                    return;
-                }
-
-                await HttpQueries.ReportScreenshot(screenshot.Id);
-
-                var successDialog = new MessageDialog(
-                    LocalizedString.IdWithFallback(
-                        "HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]",
-                        "Thank you"),
-                    LocalizedString.IdWithFallback(
-                        "HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]",
-                        "The screenshot has been reported to the moderation team."),
-                    LocalizedString.IdWithFallback(
-                        "Common.CLOSE",
-                        "Close"));
-
-                GameManager.instance.userInterface.appBindings
-                    .ShowMessageDialog(successDialog, _ => { });
-
-                this.forcedRefreshIndexBinding.Update(
-                    this.forcedRefreshIndexBinding.value + 1);
-            }
-            catch (HttpException ex) {
-                ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
-                    localizedTitle = "HallOfFame.Common.OOPS",
-                    localizedMessage = ex.GetUserFriendlyMessage(),
-                    actions = ErrorDialog.Actions.None
-                });
-            }
-            catch (Exception ex) {
-                Mod.Log.ErrorRecoverable(ex);
-            }
-        }
+        this.forcedRefreshIndexBinding.Update(
+          this.forcedRefreshIndexBinding.value + 1);
+      }
+      catch (HttpException ex) {
+        ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+          localizedTitle = "HallOfFame.Common.OOPS",
+          localizedMessage = ex.GetUserFriendlyMessage(),
+          actions = ErrorDialog.Actions.None
+        });
+      }
+      catch (Exception ex) {
+        Mod.Log.ErrorRecoverable(ex);
+      }
     }
+  }
 
-    private bool IsNetworkError(Exception ex) {
-        return ex
-            is HttpException
-            or ImagePreloaderUISystem.ImagePreloadFailedException;
-    }
+  private bool IsNetworkError(Exception ex) {
+    return ex
+      is HttpException
+      or ImagePreloaderUISystem.ImagePreloadFailedException;
+  }
 }

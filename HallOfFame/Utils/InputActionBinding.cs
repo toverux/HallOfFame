@@ -23,92 +23,92 @@ namespace HallOfFame.Utils;
 /// </para>
 /// </summary>
 internal class InputActionBinding : CompositeBinding {
-    internal InputActionBinding(
-        string group,
-        string name,
-        ProxyBinding binding) {
-        var action = InputManager.instance.FindAction(binding);
+  internal InputActionBinding(
+    string group,
+    string name,
+    ProxyBinding binding) {
+    var action = InputManager.instance.FindAction(binding);
 
-        var bindingBinding = new BindingValueBinding(
-            group, $"{name}.binding", binding);
+    var bindingBinding = new BindingValueBinding(
+      group, $"{name}.binding", binding);
 
-        var actionPhaseBinding = new ActionPhaseValueBinding(
-            group, $"{name}.phase", action);
+    var actionPhaseBinding = new ActionPhaseValueBinding(
+      group, $"{name}.phase", action);
 
-        this.AddBinding(bindingBinding);
-        this.AddBinding(actionPhaseBinding);
+    this.AddBinding(bindingBinding);
+    this.AddBinding(actionPhaseBinding);
+  }
+
+  /// <summary>
+  /// Value binding for the current binding configuration.
+  /// Contrarily to the <see cref="ProxyAction"/>, a
+  /// <see cref="ProxyBinding"/> instance is recreated each time the user
+  /// reconfigures the input binding.
+  /// This binding takes the initial binding instance and tracks the changes
+  /// to update the current binding instance.
+  /// </summary>
+  internal class BindingValueBinding : ValueBinding<ProxyBinding> {
+    private readonly ProxyBinding.Watcher watcher;
+
+    internal BindingValueBinding(
+      string group,
+      string name,
+      ProxyBinding binding)
+      : base(
+        group, name, binding,
+        comparer: new AlwaysFalseEqualityComparer<ProxyBinding>()) {
+      this.watcher = new ProxyBinding.Watcher(binding, this.Update);
     }
 
-    /// <summary>
-    /// Value binding for the current binding configuration.
-    /// Contrarily to the <see cref="ProxyAction"/>, a
-    /// <see cref="ProxyBinding"/> instance is recreated each time the user
-    /// reconfigures the input binding.
-    /// This binding takes the initial binding instance and tracks the changes
-    /// to update the current binding instance.
-    /// </summary>
-    internal class BindingValueBinding : ValueBinding<ProxyBinding> {
-        private readonly ProxyBinding.Watcher watcher;
+    ~BindingValueBinding() {
+      this.watcher.Dispose();
+    }
+  }
 
-        internal BindingValueBinding(
-            string group,
-            string name,
-            ProxyBinding binding)
-            : base(
-                group, name, binding,
-                comparer: new AlwaysFalseEqualityComparer<ProxyBinding>()) {
-            this.watcher = new ProxyBinding.Watcher(binding, this.Update);
-        }
+  /// <summary>
+  /// Value binding for the current action phase.
+  /// This binding enables and disables the related <see cref="ProxyAction"/>
+  /// depending on whether the binding is being subscribed or not.
+  /// It reflects the current action's phase as its value.
+  /// </summary>
+  internal class ActionPhaseValueBinding : ValueBinding<InputActionPhase> {
+    private readonly ProxyAction action;
 
-        ~BindingValueBinding() {
-            this.watcher.Dispose();
-        }
+    internal ActionPhaseValueBinding(
+      string group,
+      string name,
+      ProxyAction action) : base(group, name, InputActionPhase.Waiting,
+      new EnumNameWriter<InputActionPhase>()) {
+      this.action = action;
+      this.action.onInteraction += this.OnActionInteraction;
     }
 
-    /// <summary>
-    /// Value binding for the current action phase.
-    /// This binding enables and disables the related <see cref="ProxyAction"/>
-    /// depending on whether the binding is being subscribed or not.
-    /// It reflects the current action's phase as its value.
-    /// </summary>
-    internal class ActionPhaseValueBinding : ValueBinding<InputActionPhase> {
-        private readonly ProxyAction action;
-
-        internal ActionPhaseValueBinding(
-            string group,
-            string name,
-            ProxyAction action) : base(group, name, InputActionPhase.Waiting,
-            new EnumNameWriter<InputActionPhase>()) {
-            this.action = action;
-            this.action.onInteraction += this.OnActionInteraction;
-        }
-
-        ~ActionPhaseValueBinding() {
-            this.action.onInteraction -= this.OnActionInteraction;
-        }
-
-        protected override void OnSubscribe() {
-            base.OnSubscribe();
-
-            this.action.shouldBeEnabled = true;
-        }
-
-        protected override void OnUnsubscribe() {
-            base.OnUnsubscribe();
-
-            this.action.shouldBeEnabled = this.active;
-        }
-
-        public override void Detach() {
-            base.Detach();
-
-            this.action.shouldBeEnabled = false;
-        }
-
-        private void OnActionInteraction(
-            ProxyAction _,
-            InputActionPhase phase) {
-            this.Update(phase);
-        }
+    ~ActionPhaseValueBinding() {
+      this.action.onInteraction -= this.OnActionInteraction;
     }
+
+    protected override void OnSubscribe() {
+      base.OnSubscribe();
+
+      this.action.shouldBeEnabled = true;
+    }
+
+    protected override void OnUnsubscribe() {
+      base.OnUnsubscribe();
+
+      this.action.shouldBeEnabled = this.active;
+    }
+
+    public override void Detach() {
+      base.Detach();
+
+      this.action.shouldBeEnabled = false;
+    }
+
+    private void OnActionInteraction(
+      ProxyAction _,
+      InputActionPhase phase) {
+      this.Update(phase);
+    }
+  }
 }

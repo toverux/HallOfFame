@@ -1,8 +1,5 @@
 {
-  "include": [
-    "src/**/*",
-    "../../node_modules/@csmodding/urbandevkit/cs2-types"
-  ],
+  "include": ["src/**/*", "../../node_modules/@csmodding/urbandevkit/cs2-types"],
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",

@@ -1,17 +1,17 @@
 ﻿.screenshot-button {
-    position: relative;
-    display: block;
-    // Override vanilla margin to make room for the 90° rotated HoF side label.
-    // 25rem is the original margin, we add 1em as a basis.
-    // We do not want to be exact actually, this is the kind of thing to adjust
-    // by eyeballing.
-    margin-right: calc(25rem + 1em - 2rem) !important;
+  position: relative;
+  display: block;
+  // Override vanilla margin to make room for the 90° rotated HoF side label.
+  // 25rem is the original margin, we add 1em as a basis.
+  // We do not want to be exact actually, this is the kind of thing to adjust
+  // by eyeballing.
+  margin-right: calc(25rem + 1em - 2rem) !important;
 
-    span {
-        position: absolute;
-        display: block;
-        height: 32rem;
-        left: 1.6em;
-        transform: rotate(90deg);
-    }
+  span {
+    position: absolute;
+    display: block;
+    height: 32rem;
+    left: 1.6em;
+    transform: rotate(90deg);
+  }
 }

@@ -1,4 +1,10 @@
+post-checkout:
+  commands:
+    configure-git:
+      run: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
 pre-commit:
+  parallel: true
   commands:
     tsc:
       glob: "*.{ts,tsx,js,json}"

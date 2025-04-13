@@ -1,27 +1,27 @@
 ﻿.splashscreen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 
-    // background-image is set dynamically.
-    background-position-x: 50%;
-    background-position-y: 50%;
-    background-size: cover;
-    background-repeat: no-repeat no-repeat;
+  // background-image is set dynamically.
+  background-position-x: 50%;
+  background-position-y: 50%;
+  background-size: cover;
+  background-repeat: no-repeat no-repeat;
 
-    &.splashscreen-fade-in {
-        // Use same timing as vanilla class base_iEQ for backdrop images.
-        animation: fadeIn ease .75s;
+  &.splashscreen-fade-in {
+    // Use same timing as vanilla class base_iEQ for backdrop images.
+    animation: fadeIn ease .75s;
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
     }
+  }
 }

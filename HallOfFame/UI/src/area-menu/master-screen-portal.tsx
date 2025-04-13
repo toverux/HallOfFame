@@ -6,22 +6,23 @@ import { MenuControls } from './menu-controls';
 import { useHofMenuState } from './menu-state-hook';
 
 const coFpsDisplayStyles = getClassesModule(
-    'game-ui/debug/components/fps-display/fps-display.module.scss',
-    ['fpsDisplay']
+  'game-ui/debug/components/fps-display/fps-display.module.scss',
+  ['fpsDisplay']
 );
 
-const coMenuUiStyles = getClassesModule(
-    'game-ui/menu/components/menu-ui.module.scss',
-    ['corner', 'menuUi', 'version']
-);
+const coMenuUiStyles = getClassesModule('game-ui/menu/components/menu-ui.module.scss', [
+  'corner',
+  'menuUi',
+  'version'
+]);
 
 const coMainMenuScreenStyles = getClassesModule(
-    'game-ui/menu/components/main-menu-screen/main-menu-screen.module.scss',
-    ['column', 'logo']
+  'game-ui/menu/components/main-menu-screen/main-menu-screen.module.scss',
+  ['column', 'logo']
 );
 
 interface Props {
-    readonly children: ReactNode;
+  readonly children: ReactNode;
 }
 
 /**
@@ -33,79 +34,76 @@ interface Props {
  * It also handles toggling the game UI (except our controls).
  */
 export function MasterScreenPortal({ children }: Props): ReactNode {
-    const [menuState] = useHofMenuState();
+  const [menuState] = useHofMenuState();
 
-    const [portalTargetEl, setPortalTargetEl] = useState<Element>();
+  const [portalTargetEl, setPortalTargetEl] = useState<Element>();
 
-    const menuControlsColumn = useRef<Element>();
+  const menuControlsColumn = useRef<Element>();
 
-    // Finds the first column div in the Master Screen (when not in pause mode)
-    // and mounts the menu controls portal there.
-    useEffect(() => {
-        const menuUiSelector = selector(coMenuUiStyles.menuUi);
-        const menuUiEl = document.querySelector(menuUiSelector);
+  // Finds the first column div in the Master Screen (when not in pause mode)
+  // and mounts the menu controls portal there.
+  useEffect(() => {
+    const menuUiSelector = selector(coMenuUiStyles.menuUi);
+    const menuUiEl = document.querySelector(menuUiSelector);
 
-        // We this element does not exist, we are in-game with the pause menu,
-        // we don't display a background image here, so bail out.
-        // Yes, there's no vanilla binding to check if we're in-game (well there
-        // is something similar, but the main screen menu being displayed in
-        // game or not is the same state), we could set up one but this is
-        // quicker and is very likely robust enough.
-        if (!(menuUiEl instanceof Element)) {
-            return;
-        }
+    // We this element does not exist, we are in-game with the pause menu,
+    // we don't display a background image here, so bail out.
+    // Yes, there's no vanilla binding to check if we're in-game (well there
+    // is something similar, but the main screen menu being displayed in
+    // game or not is the same state), we could set up one but this is
+    // quicker and is very likely robust enough.
+    if (!(menuUiEl instanceof Element)) {
+      return;
+    }
 
-        const columnSelector = `${menuUiSelector} ${selector(
-            coMainMenuScreenStyles.column
-        )}`;
+    const columnSelector = `${menuUiSelector} ${selector(coMainMenuScreenStyles.column)}`;
 
-        menuControlsColumn.current =
-            document.querySelector(columnSelector) ?? undefined;
+    menuControlsColumn.current = document.querySelector(columnSelector) ?? undefined;
 
-        if (!(menuControlsColumn.current instanceof HTMLElement)) {
-            return logError(
-                new Error(stripIndent`
+    if (!(menuControlsColumn.current instanceof HTMLElement)) {
+      return logError(
+        new Error(stripIndent`
                     Could not locate Master Screen's first column div
                     (using selector "${columnSelector}")`)
-            );
-        }
+      );
+    }
 
-        menuControlsColumn.current.style.justifyContent = 'flex-end';
+    menuControlsColumn.current.style.justifyContent = 'flex-end';
 
-        setPortalTargetEl(menuControlsColumn.current);
-    }, []);
+    setPortalTargetEl(menuControlsColumn.current);
+  }, []);
 
-    // Handles menu visibility.
-    useEffect(() => {
-        // Ignore if we're not set up in this menu.
-        if (!menuControlsColumn.current) {
-            return;
-        }
+  // Handles menu visibility.
+  useEffect(() => {
+    // Ignore if we're not set up in this menu.
+    if (!menuControlsColumn.current) {
+      return;
+    }
 
-        const elementsToHide = document.querySelectorAll(
-            [
-                selector(coFpsDisplayStyles.fpsDisplay),
-                selector(coMainMenuScreenStyles.column),
-                selector(coMainMenuScreenStyles.logo),
-                selector(coMenuUiStyles.corner),
-                selector(coMenuUiStyles.version)
-            ].join(',')
-        );
-
-        // Hide all columns except the one with the menu controls.
-        const visibility = menuState.isMenuVisible ? 'visible' : 'hidden';
-
-        for (const element of elementsToHide) {
-            if (element != menuControlsColumn.current) {
-                (element as HTMLElement).style.visibility = visibility;
-            }
-        }
-    }, [menuState.isMenuVisible]);
-
-    return (
-        <>
-            {children}
-            {portalTargetEl && createPortal(<MenuControls />, portalTargetEl)}
-        </>
+    const elementsToHide = document.querySelectorAll(
+      [
+        selector(coFpsDisplayStyles.fpsDisplay),
+        selector(coMainMenuScreenStyles.column),
+        selector(coMainMenuScreenStyles.logo),
+        selector(coMenuUiStyles.corner),
+        selector(coMenuUiStyles.version)
+      ].join(',')
     );
+
+    // Hide all columns except the one with the menu controls.
+    const visibility = menuState.isMenuVisible ? 'visible' : 'hidden';
+
+    for (const element of elementsToHide) {
+      if (element != menuControlsColumn.current) {
+        (element as HTMLElement).style.visibility = visibility;
+      }
+    }
+  }, [menuState.isMenuVisible]);
+
+  return (
+    <>
+      {children}
+      {portalTargetEl && createPortal(<MenuControls />, portalTargetEl)}
+    </>
+  );
 }

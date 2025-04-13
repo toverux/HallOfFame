@@ -5,15 +5,15 @@ import { register as registerOnOverlay } from './area-overlay';
 import { logError } from './utils';
 
 const register: ModRegistrar = moduleRegistry => {
-    try {
-        registerOnMenu(moduleRegistry);
-        registerOnGame(moduleRegistry);
-        registerOnOverlay(moduleRegistry);
-    } catch (error) {
-        return logError(error, true);
-    }
+  try {
+    registerOnMenu(moduleRegistry);
+    registerOnGame(moduleRegistry);
+    registerOnOverlay(moduleRegistry);
+  } catch (error) {
+    return logError(error, true);
+  }
 
-    console.info(`HoF: Successfully registered all modules.`);
+  console.info(`HoF: Successfully registered all modules.`);
 };
 
 // noinspection JSUnusedGlobalSymbols

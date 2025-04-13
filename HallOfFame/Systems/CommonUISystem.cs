@@ -21,206 +21,206 @@ namespace HallOfFame.Systems;
 /// UI System providing utilities used by various features of the mod.
 /// </summary>
 internal sealed partial class CommonUISystem : UISystemBase {
-    private const string BindingGroup = "hallOfFame.common";
+  private const string BindingGroup = "hallOfFame.common";
 
-    private readonly LocalizationManager localizationManager =
-        GameManager.instance.localizationManager;
+  private readonly LocalizationManager localizationManager =
+    GameManager.instance.localizationManager;
 
-    private TriggerBinding<string> openModSettingsBinding = null!;
+  private TriggerBinding<string> openModSettingsBinding = null!;
 
-    private TriggerBinding<string> openWebPageBinding = null!;
+  private TriggerBinding<string> openWebPageBinding = null!;
 
-    private TriggerBinding<string, string>
-        openCreatorPageBinding = null!;
+  private TriggerBinding<string, string>
+    openCreatorPageBinding = null!;
 
-    private TriggerBinding<bool, string> logJavaScriptErrorBinding = null!;
+  private TriggerBinding<bool, string> logJavaScriptErrorBinding = null!;
 
-    private GetterValueBinding<string> localeBinding = null!;
+  private GetterValueBinding<string> localeBinding = null!;
 
-    private GetterValueBinding<Settings> settingsBinding = null!;
+  private GetterValueBinding<Settings> settingsBinding = null!;
 
-    protected override void OnCreate() {
-        base.OnCreate();
+  protected override void OnCreate() {
+    base.OnCreate();
 
-        try {
-            // No need to OnUpdate as there are no bindings that require it,
-            // they are manually updated when needed.
-            this.Enabled = false;
+    try {
+      // No need to OnUpdate as there are no bindings that require it,
+      // they are manually updated when needed.
+      this.Enabled = false;
 
-            this.localeBinding = new GetterValueBinding<string>(
-                CommonUISystem.BindingGroup, "locale",
-                () => this.localizationManager.activeLocaleId);
+      this.localeBinding = new GetterValueBinding<string>(
+        CommonUISystem.BindingGroup, "locale",
+        () => this.localizationManager.activeLocaleId);
 
-            this.settingsBinding = new GetterValueBinding<Settings>(
-                CommonUISystem.BindingGroup, "settings",
-                () => Mod.Settings,
-                comparer: new FakeSettingComparer());
+      this.settingsBinding = new GetterValueBinding<Settings>(
+        CommonUISystem.BindingGroup, "settings",
+        () => Mod.Settings,
+        comparer: new FakeSettingComparer());
 
-            this.openModSettingsBinding = new TriggerBinding<string>(
-                CommonUISystem.BindingGroup, "openModSettings",
-                this.OpenModSettings);
+      this.openModSettingsBinding = new TriggerBinding<string>(
+        CommonUISystem.BindingGroup, "openModSettings",
+        this.OpenModSettings);
 
-            this.openWebPageBinding = new TriggerBinding<string>(
-                CommonUISystem.BindingGroup, "openWebPage",
-                Application.OpenURL);
+      this.openWebPageBinding = new TriggerBinding<string>(
+        CommonUISystem.BindingGroup, "openWebPage",
+        Application.OpenURL);
 
-            this.openCreatorPageBinding = new TriggerBinding<string, string>(
-                CommonUISystem.BindingGroup, "openCreatorPage",
-                this.OpenCreatorPage);
+      this.openCreatorPageBinding = new TriggerBinding<string, string>(
+        CommonUISystem.BindingGroup, "openCreatorPage",
+        this.OpenCreatorPage);
 
-            this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
-                CommonUISystem.BindingGroup, "logJavaScriptError",
-                this.LogJavaScriptError);
+      this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
+        CommonUISystem.BindingGroup, "logJavaScriptError",
+        this.LogJavaScriptError);
 
-            this.AddBinding(this.localeBinding);
-            this.AddBinding(this.settingsBinding);
-            this.AddBinding(this.openModSettingsBinding);
-            this.AddBinding(this.openWebPageBinding);
-            this.AddBinding(this.openCreatorPageBinding);
-            this.AddBinding(this.logJavaScriptErrorBinding);
+      this.AddBinding(this.localeBinding);
+      this.AddBinding(this.settingsBinding);
+      this.AddBinding(this.openModSettingsBinding);
+      this.AddBinding(this.openWebPageBinding);
+      this.AddBinding(this.openCreatorPageBinding);
+      this.AddBinding(this.logJavaScriptErrorBinding);
 
-            this.localizationManager.onActiveDictionaryChanged +=
-                this.OnActiveDictionaryChanged;
+      this.localizationManager.onActiveDictionaryChanged +=
+        this.OnActiveDictionaryChanged;
 
-            Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
-        }
-        catch (Exception ex) {
-            Mod.Log.ErrorFatal(ex);
-        }
+      Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
     }
-
-    protected override void OnDestroy() {
-        base.OnDestroy();
-
-        this.localizationManager.onActiveDictionaryChanged -=
-            this.OnActiveDictionaryChanged;
-
-        Mod.Settings.onSettingsApplied -= this.OnSettingsApplied;
+    catch (Exception ex) {
+      Mod.Log.ErrorFatal(ex);
     }
+  }
 
-    private void OnActiveDictionaryChanged() {
-        this.localeBinding.Update();
-    }
+  protected override void OnDestroy() {
+    base.OnDestroy();
 
-    private void OnSettingsApplied(Setting setting) {
-        this.settingsBinding.Update();
-    }
+    this.localizationManager.onActiveDictionaryChanged -=
+      this.OnActiveDictionaryChanged;
 
-    /// <summary>
-    /// Opens the mod settings page at the specified section.
-    /// </summary>
-    private void OpenModSettings(string section) {
-        var optionsUISystem =
-            this.World.GetOrCreateSystemManaged<OptionsUISystem>();
+    Mod.Settings.onSettingsApplied -= this.OnSettingsApplied;
+  }
 
-        optionsUISystem.OpenPage(
-            "HallOfFame.HallOfFame.Mod",
-            $"HallOfFame.HallOfFame.Mod.{section}",
-            false);
-    }
+  private void OnActiveDictionaryChanged() {
+    this.localeBinding.Update();
+  }
 
-    /// <summary>
-    /// Opens the in-game Paradox Mods Creator page UI for the given username.
-    /// </summary>
-    private void OpenCreatorPage(string username, string url) {
-        switch (Mod.Settings.PrefersOpeningPdxModsInBrowser) {
-            case true:
-                OpenCreatorPageInBrowser();
+  private void OnSettingsApplied(Setting setting) {
+    this.settingsBinding.Update();
+  }
 
-                return;
-            case false:
-                OpenCreatorPageInGame();
+  /// <summary>
+  /// Opens the mod settings page at the specified section.
+  /// </summary>
+  private void OpenModSettings(string section) {
+    var optionsUISystem =
+      this.World.GetOrCreateSystemManaged<OptionsUISystem>();
 
-                return;
-        }
+    optionsUISystem.OpenPage(
+      "HallOfFame.HallOfFame.Mod",
+      $"HallOfFame.HallOfFame.Mod.{section}",
+      false);
+  }
 
-        var dialog = new ConfirmationDialog(
-            title: null,
-            message: LocalizedString.Id(
-                "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[Message]"),
-            confirmAction: LocalizedString.Id(
-                "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInBrowserAction]"),
-            cancelAction: null,
-            otherActions: LocalizedString.Id(
-                "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInGameAction]"));
-
-        GameManager.instance.userInterface.appBindings
-            .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
+  /// <summary>
+  /// Opens the in-game Paradox Mods Creator page UI for the given username.
+  /// </summary>
+  private void OpenCreatorPage(string username, string url) {
+    switch (Mod.Settings.PrefersOpeningPdxModsInBrowser) {
+      case true:
+        OpenCreatorPageInBrowser();
 
         return;
+      case false:
+        OpenCreatorPageInGame();
 
-        void OnConfirmOrCancel(int choice) {
-            Mod.Settings.PrefersOpeningPdxModsInBrowser = choice is 0;
-            Mod.Settings.ApplyAndSave();
-
-            switch (choice) {
-                case 0:
-                    Application.OpenURL(url);
-
-                    break;
-                case 2:
-                    OpenCreatorPageInGame();
-
-                    break;
-            }
-        }
-
-        void OpenCreatorPageInBrowser() {
-            Application.OpenURL(url);
-        }
-
-        void OpenCreatorPageInGame() {
-            try {
-                var sdk =
-                    PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
-
-                // Get method "private void ShowModsUI(Action<ModsUIView> showAction)"
-                var showModsUi = sdk.GetType().GetMethod(
-                    "ShowModsUI",
-                    BindingFlags.Instance | BindingFlags.NonPublic,
-                    null, CallingConventions.Any,
-                    [typeof(Action<ModsUIView>)], []);
-
-                showModsUi?.Invoke(sdk, [
-                    (ModsUIView view) =>
-                        view.Show(ModsUIScreen.Creator, username)
-                ]);
-
-                // Send a GET request to our server so that the click count is
-                // still incremented.
-                // We don't care about the result, success or not.
-                UnityWebRequest.Get(url).SendWebRequest();
-            }
-            catch (Exception ex) {
-                Mod.Log.ErrorRecoverable(ex);
-
-                Application.OpenURL(url);
-            }
-        }
+        return;
     }
 
-    /// <summary>
-    /// Shows an error sent from JavaScript.
-    /// </summary>
-    private void LogJavaScriptError(bool isFatal, string error) {
-        var @base = "HallOfFame.Common.BASE_ERROR".Translate();
+    var dialog = new ConfirmationDialog(
+      title: null,
+      message: LocalizedString.Id(
+        "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[Message]"),
+      confirmAction: LocalizedString.Id(
+        "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInBrowserAction]"),
+      cancelAction: null,
+      otherActions: LocalizedString.Id(
+        "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInGameAction]"));
 
-        var gravity = isFatal
-            ? "HallOfFame.Common.FATAL_ERROR".Translate()
-            : "HallOfFame.Common.RECOVERABLE_ERROR".Translate();
+    GameManager.instance.userInterface.appBindings
+      .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
 
-        ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
-            localizedMessage = $"{@base} \n{gravity}",
-            errorDetails = error
-        });
+    return;
 
-        Mod.Log.ErrorSilent(error);
+    void OnConfirmOrCancel(int choice) {
+      Mod.Settings.PrefersOpeningPdxModsInBrowser = choice is 0;
+      Mod.Settings.ApplyAndSave();
+
+      switch (choice) {
+        case 0:
+          Application.OpenURL(url);
+
+          break;
+        case 2:
+          OpenCreatorPageInGame();
+
+          break;
+      }
     }
 
-    private class FakeSettingComparer : EqualityComparer<Settings> {
-        public override bool Equals(Settings x, Settings y) => false;
-
-        public override int GetHashCode(Settings settings) =>
-            settings.GetHashCode();
+    void OpenCreatorPageInBrowser() {
+      Application.OpenURL(url);
     }
+
+    void OpenCreatorPageInGame() {
+      try {
+        var sdk =
+          PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
+
+        // Get method "private void ShowModsUI(Action<ModsUIView> showAction)"
+        var showModsUi = sdk.GetType().GetMethod(
+          "ShowModsUI",
+          BindingFlags.Instance | BindingFlags.NonPublic,
+          null, CallingConventions.Any,
+          [typeof(Action<ModsUIView>)], []);
+
+        showModsUi?.Invoke(sdk, [
+          (ModsUIView view) =>
+            view.Show(ModsUIScreen.Creator, username)
+        ]);
+
+        // Send a GET request to our server so that the click count is
+        // still incremented.
+        // We don't care about the result, success or not.
+        UnityWebRequest.Get(url).SendWebRequest();
+      }
+      catch (Exception ex) {
+        Mod.Log.ErrorRecoverable(ex);
+
+        Application.OpenURL(url);
+      }
+    }
+  }
+
+  /// <summary>
+  /// Shows an error sent from JavaScript.
+  /// </summary>
+  private void LogJavaScriptError(bool isFatal, string error) {
+    var @base = "HallOfFame.Common.BASE_ERROR".Translate();
+
+    var gravity = isFatal
+      ? "HallOfFame.Common.FATAL_ERROR".Translate()
+      : "HallOfFame.Common.RECOVERABLE_ERROR".Translate();
+
+    ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+      localizedMessage = $"{@base} \n{gravity}",
+      errorDetails = error
+    });
+
+    Mod.Log.ErrorSilent(error);
+  }
+
+  private class FakeSettingComparer : EqualityComparer<Settings> {
+    public override bool Equals(Settings x, Settings y) => false;
+
+    public override int GetHashCode(Settings settings) =>
+      settings.GetHashCode();
+  }
 }

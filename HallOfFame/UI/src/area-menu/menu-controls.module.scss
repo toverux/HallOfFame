@@ -2,341 +2,341 @@
 @use '../common';
 
 .menu-controls-container {
-    --button-size: 65rem;
-    --buttons-gap: 30rem;
+  --button-size: 65rem;
+  --buttons-gap: 30rem;
 
-    position: relative;
+  position: relative;
 
-    .menu-controls {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        left: 0;
+  .menu-controls {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
 
-        &-apply-buttons-offset {
-            left: calc(var(--button-size) * -1 + 5rem);
-        }
+    &-apply-buttons-offset {
+      left: calc(var(--button-size) * -1 + 5rem);
     }
+  }
 }
 
 .menu-controls {
-    // Can't mix a CSS variable with alpha in this version of CSS, so we
-    // have to copy the value here.
-    $vanilla-accent-color-dark: #1e83aa;
+  // Can't mix a CSS variable with alpha in this version of CSS, so we
+  // have to copy the value here.
+  $vanilla-accent-color-dark: #1e83aa;
 
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+  color: white;
+
+  @include common.fade-in(.3s);
+
+  &-error {
+    margin-right: 8rem;
     display: flex;
     flex-direction: column;
-    line-height: 1.35;
-    color: white;
+    border-radius: 12rem;
+    background-color: color.change($vanilla-accent-color-dark, $alpha: 0.55);
+    backdrop-filter: var(--menuBlur);
+    padding: 15rem;
+    font-size: var(--fontSizeL);
 
-    @include common.fade-in(.3s);
+    &-header {
+      margin-bottom: 15rem;
+      display: flex;
 
-    &-error {
-        margin-right: 8rem;
+      &-image {
+        flex: 1 1 40%;
+        max-width: 150rem;
+        margin-right: 15rem;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      &-text {
+        flex: 1 1;
         display: flex;
         flex-direction: column;
-        border-radius: 12rem;
-        background-color: color.change($vanilla-accent-color-dark, $alpha: 0.55);
-        backdrop-filter: var(--menuBlur);
-        padding: 15rem;
-        font-size: var(--fontSizeL);
+        font-size: 130%;
 
-        &-header {
-            margin-bottom: 15rem;
-            display: flex;
-
-            &-image {
-                flex: 1 1 40%;
-                max-width: 150rem;
-                margin-right: 15rem;
-                background-size: contain;
-                background-repeat: no-repeat;
-                background-position: center;
-            }
-
-            &-text {
-                flex: 1 1;
-                display: flex;
-                flex-direction: column;
-                font-size: 130%;
-
-                strong {
-                    font-size: 130%;
-                }
-            }
+        strong {
+          font-size: 130%;
         }
-
-        &-gameplay-not-affected {
-            margin-top: 10rem;
-            font-size: var(--fontSizeXL);
-        }
-
-        button {
-            align-self: flex-start;
-            margin: 15rem 0 0;
-            // Override Vanilla padding-left change on hover.
-            // Also set padding-right to make sure it matches padding-left.
-            padding-left: 15rem !important;
-            padding-right: 15rem !important;
-        }
+      }
     }
 
-    &-section {
+    &-gameplay-not-affected {
+      margin-top: 10rem;
+      font-size: var(--fontSizeXL);
+    }
+
+    button {
+      align-self: flex-start;
+      margin: 15rem 0 0;
+      // Override Vanilla padding-left change on hover.
+      // Also set padding-right to make sure it matches padding-left.
+      padding-left: 15rem !important;
+      padding-right: 15rem !important;
+    }
+  }
+
+  &-section {
+    display: flex;
+
+    &-screenshot-labels {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      // Makes sense here + avoids a bug in cohtml's layout engine.
+      align-items: flex-start;
+
+      span {
+        margin-right: 15rem;
+        margin-bottom: 15rem;
+
+        // Normally we would not have to use a hardcoded height here, but this
+        // circumvents a cohtml layout bug where images have trouble stretching
+        // to the height of this container (and that depended on the flex
+        // configuration of the parents too, so this seems to be the most robust
+        // way to deal with it).
+        height: 40rem;
         display: flex;
+        align-items: center;
+        @include common.border-radius(25rem);
+        backdrop-filter: contrast(80%) blur(25px);
+        padding: 0 12rem;
 
-        &-screenshot-labels {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: wrap;
-            // Makes sense here + avoids a bug in cohtml's layout engine.
-            align-items: flex-start;
+        // This circumvents a rare bug where a span element can collapse
+        // in a random way, a bug in cohtml's layout engine.
+        white-space: nowrap;
 
-            span {
-                margin-right: 15rem;
-                margin-bottom: 15rem;
-
-                // Normally we would not have to use a hardcoded height here, but this
-                // circumvents a cohtml layout bug where images have trouble stretching
-                // to the height of this container (and that depended on the flex
-                // configuration of the parents too, so this seems to be the most robust
-                // way to deal with it).
-                height: 40rem;
-                display: flex;
-                align-items: center;
-                @include common.border-radius(25rem);
-                backdrop-filter: contrast(80%) blur(25px);
-                padding: 0 12rem;
-
-                // This circumvents a rare bug where a span element can collapse
-                // in a random way, a bug in cohtml's layout engine.
-                white-space: nowrap;
-
-                img {
-                    width: 22rem;
-                    height: 100%;
-                    margin-right: 10rem;
-                    filter: drop-shadow(0 1rem .4rem var(--panelColorNormal));
-                }
-            }
+        img {
+          width: 22rem;
+          height: 100%;
+          margin-right: 10rem;
+          filter: drop-shadow(0 1rem .4rem var(--panelColorNormal));
         }
-
-        &-buttons {
-            z-index: 1;
-
-            flex-grow: 0;
-            flex-shrink: 0;
-            flex-basis: var(--button-size);
-
-            &-button-tooltip {
-                display: flex;
-                flex-direction: column;
-
-                [class*="hint"] {
-                    font-size: .8em;
-                    margin-top: 5rem;
-                }
-            }
-
-            &-button {
-                margin-top: 8rem;
-                margin-bottom: 8rem;
-
-                width: var(--button-size);
-                height: var(--button-size);
-                display: flex;
-                border-radius: 50%;
-                justify-content: center;
-                padding: 0 !important; // override vanilla hover padding
-                backdrop-filter: brightness(80%) contrast(90%) blur(25px);
-
-                &[disabled], &[disabled]:hover {
-                    background-color: rgba(16, 19, 29, .2) !important;
-                }
-
-                &-active {
-                    // Class set when the related action is performed via
-                    // keypress and not via the button.
-                    // Values taken from the vanilla :active button style.
-                    background-color: var(--menuActiveColorBright);
-                }
-
-                [class*="label"] {
-                    display: none;
-                }
-
-                [class*="icon"] {
-                    margin: 0;
-                    transition: all .1s ease-in-out;
-                }
-
-                &-previous [class*="icon"] {
-                    // The X translation is a slight visual adjustment to make
-                    // the icon appear better centered.
-                    transform: translateX(-2rem) rotate(180deg);
-                }
-
-                &-next [class*="icon"] {
-                    // Same as for previous icon.
-                    transform: translateX(2rem);
-                }
-
-                &-favorite {
-                    transition: all .1s ease-in-out;
-
-                    [class*="icon"] {
-                        width: calc(var(--button-size) - 30rem);
-                        height: calc(var(--button-size) - 30rem);
-                        transition: transform .15s ease-in-out;
-                    }
-
-                    &:hover [class*="icon"], &-favorited [class*="icon"] {
-                        transform: rotate(-10deg) scale(1.6) translateX(3rem);
-                    }
-
-                    &:active [class*="icon"] {
-                        transform: rotate(-5deg) scale(1.45) translateX(3rem);
-                    }
-
-                    &-favorited {
-                        // importants are for overriding :hover styles.
-                        box-shadow: 0 0 0 2rem #e25570 !important;
-                        background-color: #e25570aa !important;
-                        color: var(--menuText1Normal) !important;
-
-                        &:active {
-                            background-color: #e25570cc !important;
-                        }
-
-                        &-active {
-                            background-color: #e25570cc !important;
-                        }
-                    }
-                }
-            }
-        }
-
-        &-content {
-            flex: 1 1 auto;
-            align-self: center;
-            display: flex;
-            flex-direction: column;
-            margin-left: var(--buttons-gap);
-        }
-
-        &-other-actions &-content {
-            flex-direction: row;
-
-            @include common.fade-out-slide-out(-60rem, $duration: .2s);
-
-            &-slide-in {
-                @include common.fade-in-slide-in(-60rem, $duration: .2s);
-            }
-
-            button {
-                flex: 0 1 auto;
-                height: 40rem;
-                margin-top: 0;
-                margin-right: 15rem;
-                border-radius: 20rem;
-                padding: 0 20rem;
-                text-transform: initial;
-                font-size: 1em;
-
-                [class*="icon"] {
-                    width: 18rem;
-                    height: 18rem;
-                    margin-right: 10rem;
-                }
-            }
-
-            &-button-save-spin [class*="icon"] {
-                animation: spin 1s linear infinite;
-
-                @keyframes spin {
-                    from {
-                        transform: rotate(0deg);
-                    }
-                    to {
-                        transform: rotate(360deg);
-                    }
-                }
-            }
-
-            &-button-settings {
-                width: 40rem;
-                margin-right: 0 !important;
-                display: flex;
-                justify-content: center;
-                padding: 0 !important;
-
-                [class*="icon"] {
-                    width: 25rem !important;
-                    height: 25rem !important;
-                    margin-right: 0 !important;
-                }
-
-                [class*="label"] {
-                    display: none;
-                }
-            }
-        }
+      }
     }
 
-    &-names {
+    &-buttons {
+      z-index: 1;
+
+      flex-grow: 0;
+      flex-shrink: 0;
+      flex-basis: var(--button-size);
+
+      &-button-tooltip {
         display: flex;
         flex-direction: column;
-        margin-bottom: 25rem;
-        text-shadow: 1rem 1rem 4rem var(--panelColorDark);
-        font-size: calc(35rem * var(--fontScale));
 
-        &-city {
-            font-size: calc(45rem * var(--fontScale));
+        [class*="hint"] {
+          font-size: .8em;
+          margin-top: 5rem;
+        }
+      }
+
+      &-button {
+        margin-top: 8rem;
+        margin-bottom: 8rem;
+
+        width: var(--button-size);
+        height: var(--button-size);
+        display: flex;
+        border-radius: 50%;
+        justify-content: center;
+        padding: 0 !important; // override vanilla hover padding
+        backdrop-filter: brightness(80%) contrast(90%) blur(25px);
+
+        &[disabled], &[disabled]:hover {
+          background-color: rgba(16, 19, 29, .2) !important;
         }
 
-        &-creator {
-            display: flex;
-            flex-wrap: wrap;
+        &-active {
+          // Class set when the related action is performed via
+          // keypress and not via the button.
+          // Values taken from the vanilla :active button style.
+          background-color: var(--menuActiveColorBright);
+        }
 
-            &-socials {
-                display: flex;
-                align-items: center;
-                margin-left: 5px;
+        [class*="label"] {
+          display: none;
+        }
 
-                &-button {
-                    width: 1.2em;
-                    height: 1.2em;
-                    margin-right: 2px;
+        [class*="icon"] {
+          margin: 0;
+          transition: all .1s ease-in-out;
+        }
 
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
+        &-previous [class*="icon"] {
+          // The X translation is a slight visual adjustment to make
+          // the icon appear better centered.
+          transform: translateX(-2rem) rotate(180deg);
+        }
 
-                    &:hover {
-                        background-color: var(--brand-color);
+        &-next [class*="icon"] {
+          // Same as for previous icon.
+          transform: translateX(2rem);
+        }
 
-                        [class*="icon"] {
-                            filter: none;
-                        }
-                    }
+        &-favorite {
+          transition: all .1s ease-in-out;
 
-                    [class*="icon"] {
-                        width: 70%;
-                        height: 70%;
-                        // Copied from the city/creator name text but made less prominent.
-                        filter: drop-shadow(0rem 0rem 3rem var(--panelColorDark));
-                    }
-                }
+          [class*="icon"] {
+            width: calc(var(--button-size) - 30rem);
+            height: calc(var(--button-size) - 30rem);
+            transition: transform .15s ease-in-out;
+          }
+
+          &:hover [class*="icon"], &-favorited [class*="icon"] {
+            transform: rotate(-10deg) scale(1.6) translateX(3rem);
+          }
+
+          &:active [class*="icon"] {
+            transform: rotate(-5deg) scale(1.45) translateX(3rem);
+          }
+
+          &-favorited {
+            // importants are for overriding :hover styles.
+            box-shadow: 0 0 0 2rem #e25570 !important;
+            background-color: #e25570aa !important;
+            color: var(--menuText1Normal) !important;
+
+            &:active {
+              background-color: #e25570cc !important;
             }
+
+            &-active {
+              background-color: #e25570cc !important;
+            }
+          }
         }
+      }
     }
 
-    &-favorite-count {
-        display: inline;
-        text-shadow: 1rem 1rem 4rem var(--panelColorDark);
-        font-size: calc(30rem * var(--fontScale));
-
-        &-number {
-            font-weight: bold;
-        }
+    &-content {
+      flex: 1 1 auto;
+      align-self: center;
+      display: flex;
+      flex-direction: column;
+      margin-left: var(--buttons-gap);
     }
+
+    &-other-actions &-content {
+      flex-direction: row;
+
+      @include common.fade-out-slide-out(-60rem, $duration: .2s);
+
+      &-slide-in {
+        @include common.fade-in-slide-in(-60rem, $duration: .2s);
+      }
+
+      button {
+        flex: 0 1 auto;
+        height: 40rem;
+        margin-top: 0;
+        margin-right: 15rem;
+        border-radius: 20rem;
+        padding: 0 20rem;
+        text-transform: initial;
+        font-size: 1em;
+
+        [class*="icon"] {
+          width: 18rem;
+          height: 18rem;
+          margin-right: 10rem;
+        }
+      }
+
+      &-button-save-spin [class*="icon"] {
+        animation: spin 1s linear infinite;
+
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      }
+
+      &-button-settings {
+        width: 40rem;
+        margin-right: 0 !important;
+        display: flex;
+        justify-content: center;
+        padding: 0 !important;
+
+        [class*="icon"] {
+          width: 25rem !important;
+          height: 25rem !important;
+          margin-right: 0 !important;
+        }
+
+        [class*="label"] {
+          display: none;
+        }
+      }
+    }
+  }
+
+  &-names {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 25rem;
+    text-shadow: 1rem 1rem 4rem var(--panelColorDark);
+    font-size: calc(35rem * var(--fontScale));
+
+    &-city {
+      font-size: calc(45rem * var(--fontScale));
+    }
+
+    &-creator {
+      display: flex;
+      flex-wrap: wrap;
+
+      &-socials {
+        display: flex;
+        align-items: center;
+        margin-left: 5px;
+
+        &-button {
+          width: 1.2em;
+          height: 1.2em;
+          margin-right: 2px;
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          &:hover {
+            background-color: var(--brand-color);
+
+            [class*="icon"] {
+              filter: none;
+            }
+          }
+
+          [class*="icon"] {
+            width: 70%;
+            height: 70%;
+            // Copied from the city/creator name text but made less prominent.
+            filter: drop-shadow(0rem 0rem 3rem var(--panelColorDark));
+          }
+        }
+      }
+    }
+  }
+
+  &-favorite-count {
+    display: inline;
+    text-shadow: 1rem 1rem 4rem var(--panelColorDark);
+    font-size: calc(30rem * var(--fontScale));
+
+    &-number {
+      font-weight: bold;
+    }
+  }
 }

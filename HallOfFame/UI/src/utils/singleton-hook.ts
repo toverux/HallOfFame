@@ -14,32 +14,32 @@
  * }
  */
 export function createSingletonHook<T>(initialValue: T) {
-    let sharedValue: T = initialValue;
+  let sharedValue: T = initialValue;
 
-    const listeners = new Set<(value: T) => void>();
+  const listeners = new Set<(value: T) => void>();
 
-    function notifyListeners(): void {
-        for (const listener of listeners) {
-            listener(sharedValue);
-        }
+  function notifyListeners(): void {
+    for (const listener of listeners) {
+      listener(sharedValue);
+    }
+  }
+
+  return function useSingleton() {
+    const [value, setValue] = useState<T>(sharedValue);
+
+    useEffect(() => {
+      const listener = (newValue: T) => setValue(newValue);
+
+      listeners.add(listener);
+
+      return () => void listeners.delete(listener);
+    }, []);
+
+    function updateValue(newValue: T): void {
+      sharedValue = newValue;
+      notifyListeners();
     }
 
-    return function useSingleton() {
-        const [value, setValue] = useState<T>(sharedValue);
-
-        useEffect(() => {
-            const listener = (newValue: T) => setValue(newValue);
-
-            listeners.add(listener);
-
-            return () => void listeners.delete(listener);
-        }, []);
-
-        function updateValue(newValue: T): void {
-            sharedValue = newValue;
-            notifyListeners();
-        }
-
-        return [value, updateValue] as const;
-    };
+    return [value, updateValue] as const;
+  };
 }
