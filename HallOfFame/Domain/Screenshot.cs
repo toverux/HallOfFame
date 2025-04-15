@@ -23,6 +23,27 @@ internal record Screenshot : IJsonWritable {
     set;
   } = "Unknown [Error]";
 
+  [DecodeAlias("cityNameLocale")]
+  internal string? CityNameLocale {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
+  [DecodeAlias("cityNameLatinized")]
+  internal string? CityNameLatinized {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
+  [DecodeAlias("cityNameTranslated")]
+  internal string? CityNameTranslated {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
   [DecodeAlias("cityMilestone")]
   internal int CityMilestone {
     get;
@@ -138,6 +159,15 @@ internal record Screenshot : IJsonWritable {
 
     writer.PropertyName("cityName");
     writer.Write(this.CityName);
+
+    writer.PropertyName("cityNameLocale");
+    writer.Write(this.CityNameLocale);
+
+    writer.PropertyName("cityNameLatinized");
+    writer.Write(this.CityNameLatinized);
+
+    writer.PropertyName("cityNameTranslated");
+    writer.Write(this.CityNameTranslated);
 
     writer.PropertyName("cityMilestone");
     writer.Write(this.CityMilestone);

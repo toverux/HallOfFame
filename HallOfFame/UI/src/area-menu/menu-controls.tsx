@@ -1,4 +1,4 @@
-import { trigger } from 'cs2/api';
+import { bindValue, trigger, useValue } from 'cs2/api';
 import { ControlIcons } from 'cs2/input';
 import {
   type LocElement,
@@ -32,6 +32,8 @@ import { useHofMenuState } from './menu-state-hook';
 
 let lastForcedRefreshIndex = 0;
 
+const locale$ = bindValue<string>('hallOfFame.common', 'locale', 'en-US');
+
 const previousScreenshotInputAction = bindInputAction(
   'hallOfFame.presenter',
   'previousScreenshotInputAction'
@@ -51,25 +53,14 @@ const toggleMenuInputAction = bindInputAction('hallOfFame.presenter', 'toggleMen
 
 const socialPlatforms: Record<
   CreatorSocialLink['platform'],
-  {
-    logo: string;
-    color: string;
-  }
+  { logo: string; color: string; order: number }
 > = {
-  paradoxMods: { logo: 'Media/Glyphs/ParadoxMods.svg', color: '#5abe41' },
-  discordServer: { logo: discordBrandsSolid, color: '#5865F2' },
-  reddit: { logo: redditBrandsSolid, color: '#FF4500' },
-  twitch: { logo: twitchBrandsSolid, color: '#8956FB' },
-  youtube: { logo: youtubeBrandsSolid, color: '#FF0000' }
+  paradoxMods: { logo: 'Media/Glyphs/ParadoxMods.svg', color: '#5abe41', order: 0 },
+  youtube: { logo: youtubeBrandsSolid, color: '#FF0000', order: 1 },
+  twitch: { logo: twitchBrandsSolid, color: '#8956FB', order: 2 },
+  discordServer: { logo: discordBrandsSolid, color: '#5865F2', order: 3 },
+  reddit: { logo: redditBrandsSolid, color: '#FF4500', order: 4 }
 };
-
-const socialPlatformsOrder: readonly CreatorSocialLink['platform'][] = [
-  'paradoxMods',
-  'youtube',
-  'twitch',
-  'discordServer',
-  'reddit'
-];
 
 /**
  * Component that renders the menu controls and city/creator information.
@@ -239,12 +230,19 @@ export function MenuControlsContent(): ReactElement {
   );
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: that's okay but yeah
 function MenuControlsCityName({
   screenshot
 }: Readonly<{
   screenshot: Screenshot;
 }>): ReactElement | null {
+  const { translate } = useLocalization();
+
+  const gameLocale = useValue(locale$);
+
   const modSettings = useModSettings();
+
+  const [showTranslations, setShowTranslations] = useState(false);
 
   if (!screenshot.creator) {
     // This will not happen - unless we have a broken ObjectId reference.
@@ -253,25 +251,88 @@ function MenuControlsCityName({
     return null;
   }
 
+  const isCityNameTranslated =
+    modSettings.namesTranslationMode != 'disabled' &&
+    !!screenshot.cityNameLocale &&
+    !gameLocale.startsWith(screenshot.cityNameLocale);
+
+  const isCreatorNameTranslated =
+    modSettings.namesTranslationMode != 'disabled' &&
+    !!screenshot.creator.creatorNameLocale &&
+    !gameLocale.startsWith(screenshot.creator.creatorNameLocale);
+
+  const cityName = isCityNameTranslated
+    ? modSettings.namesTranslationMode == 'transliterate'
+      ? screenshot.cityNameLatinized
+      : screenshot.cityNameTranslated
+    : screenshot.cityName;
+
+  const creatorName = isCreatorNameTranslated
+    ? modSettings.namesTranslationMode == 'transliterate'
+      ? screenshot.creator.creatorNameLatinized
+      : screenshot.creator.creatorNameTranslated
+    : screenshot.creator.creatorName;
+
   const supportedSocials = screenshot.creator.social
     .filter(link => link.platform in socialPlatforms)
-    .sort(
-      (a, b) => socialPlatformsOrder.indexOf(a.platform) - socialPlatformsOrder.indexOf(b.platform)
-    );
+    .sort((a, b) => socialPlatforms[a.platform].order - socialPlatforms[b.platform].order);
 
   return (
     <div className={styles.menuControlsNames}>
-      <div className={styles.menuControlsNamesCity}>{screenshot.cityName}</div>
+      {(isCityNameTranslated || isCreatorNameTranslated) && (
+        <div
+          className={styles.menuControlsNamesTranslatedHint}
+          onMouseEnter={() => setShowTranslations(true)}
+          onMouseLeave={() => setShowTranslations(false)}>
+          <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>
+            <path
+              fill='white'
+              d='m190 230 57 58-21 51-72-73-85 85-36-37 84-84-22-22c-14-14-26-33-33-54h56c4 7 8 13 13 18l23 23 22-23c16-16 29-48 29-70H0V51h128V0h51v51h128v51h-51c0 36-19 81-43 106l-23 22zm98 205-32 77h-51l128-307h51l128 307h-51l-32-77H288zm21-51h99l-49-118-50 118z'
+            />
+          </svg>
+          {translate('HallOfFame.UI.Menu.MenuControls.TRANSLATED')}
+        </div>
+      )}
+
+      <div className={styles.menuControlsNamesCity}>
+        <Tooltip
+          direction='right'
+          disabled={!isCityNameTranslated}
+          forceVisible={showTranslations && isCityNameTranslated}
+          tooltip={
+            <div className={styles.menuControlsNamesTranslatedTooltip}>
+              <strong>{screenshot.cityName}</strong>
+              {modSettings.namesTranslationMode == 'translate'
+                ? screenshot.cityNameLatinized
+                : screenshot.cityNameTranslated}
+            </div>
+          }>
+          <span>{cityName}</span>
+        </Tooltip>
+      </div>
 
       <div className={styles.menuControlsNamesCreator}>
-        <LocalizedString
-          id='HallOfFame.Common.CITY_BY'
-          fallback={'by {CREATOR_NAME}'}
-          args={{
-            // biome-ignore lint/style/useNamingConvention: i18n convention
-            CREATOR_NAME: screenshot.creator.creatorName ?? ''
-          }}
-        />
+        <Tooltip
+          direction={isCityNameTranslated ? 'down' : 'right'}
+          disabled={!isCreatorNameTranslated}
+          forceVisible={showTranslations && isCreatorNameTranslated}
+          tooltip={
+            <div className={styles.menuControlsNamesTranslatedTooltip}>
+              <strong>{screenshot.creator.creatorName}</strong>
+              {modSettings.namesTranslationMode == 'translate'
+                ? screenshot.creator.creatorNameLatinized
+                : screenshot.creator.creatorNameTranslated}
+            </div>
+          }>
+          <span>
+            <LocalizedString
+              id='HallOfFame.Common.CITY_BY'
+              fallback={'by {CREATOR_NAME}'}
+              // biome-ignore lint/style/useNamingConvention: i18n convention
+              args={{ CREATOR_NAME: creatorName || 'anonymous' }}
+            />
+          </span>
+        </Tooltip>
 
         {modSettings.showCreatorSocials && (
           <div className={styles.menuControlsNamesCreatorSocials}>

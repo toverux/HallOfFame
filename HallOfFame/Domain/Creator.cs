@@ -23,6 +23,27 @@ internal record Creator : IJsonWritable {
     set;
   } = "Unknown [Error]";
 
+  [DecodeAlias("creatorNameLocale")]
+  internal string? CreatorNameLocale {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
+  [DecodeAlias("creatorNameLatinized")]
+  internal string? CreatorNameLatinized {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
+  [DecodeAlias("creatorNameTranslated")]
+  internal string? CreatorNameTranslated {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
   [DecodeAlias("social")]
   // ReSharper disable once CollectionNeverUpdated.Global
   internal Dictionary<string, CreatorSocialLink> Social {
@@ -44,6 +65,15 @@ internal record Creator : IJsonWritable {
 
     writer.PropertyName("creatorName");
     writer.Write(this.CreatorName);
+
+    writer.PropertyName("creatorNameLocale");
+    writer.Write(this.CreatorNameLocale);
+
+    writer.PropertyName("creatorNameLatinized");
+    writer.Write(this.CreatorNameLatinized);
+
+    writer.PropertyName("creatorNameTranslated");
+    writer.Write(this.CreatorNameTranslated);
 
     writer.PropertyName("social");
     writer.ArrayBegin(this.Social.Count);

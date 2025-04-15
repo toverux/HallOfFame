@@ -289,7 +289,32 @@
     text-shadow: 1rem 1rem 4rem var(--panelColorDark);
     font-size: calc(35rem * var(--fontScale));
 
+    &-translated-hint {
+      display: flex;
+      opacity: .7;
+      font-size: var(--fontSizeL);
+      filter: drop-shadow(1rem 1rem 1rem var(--panelColorDark));
+      transition: opacity .2s ease-in-out;
+
+      &:hover {
+        opacity: 1;
+      }
+
+      svg {
+        width: 20rem;
+        height: 20rem;
+        margin-right: 8rem;
+      }
+    }
+
+    &-translated-tooltip {
+      display: flex;
+      flex-direction: column;
+      font-size: calc(25rem * var(--fontScale));
+    }
+
     &-city {
+      display: flex;
       font-size: calc(45rem * var(--fontScale));
     }
 

@@ -58,9 +58,26 @@ public sealed class Settings : ModSetting, IJsonWritable {
   private static readonly PdxSdkPlatform PdxSdk =
     PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
 
+  // Needs to be getter method to be read by the game.
   private static DropdownItem<string>[] ResolutionDropdownItems => [
     new() { value = "fhd", displayName = "Full HD" },
     new() { value = "4k", displayName = "4K" }
+  ];
+
+  // Needs to be getter method to be read by the game.
+  private DropdownItem<string>[] TranslationModeDropdownItems => [
+    new() {
+      value = "translate",
+      displayName = this.GetOptionLabelLocaleID("TranslationMode.Translate")
+    },
+    new() {
+      value = "transliterate",
+      displayName = this.GetOptionLabelLocaleID("TranslationMode.Transliterate")
+    },
+    new() {
+      value = "disabled",
+      displayName = this.GetOptionLabelLocaleID("TranslationMode.Disabled")
+    }
   ];
 
   /// <summary>
@@ -150,6 +167,15 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// </summary>
   [SettingsUISection(Settings.GroupUIPreferences)]
   public bool ShowViewCount { get; set; }
+
+  /// <summary>
+  /// Translation mode for city and creator names.
+  /// </summary>
+  [SettingsUISection(Settings.GroupUIPreferences)]
+  [SettingsUIDropdown(
+    typeof(Settings),
+    nameof(Settings.TranslationModeDropdownItems))]
+  public string NamesTranslationMode { get; set; } = null!;
 
   [SettingsUISection(Settings.GroupKeyBindings)]
   [SettingsUIKeyboardBinding(
@@ -336,29 +362,29 @@ public sealed class Settings : ModSetting, IJsonWritable {
   }
 
   #if DEBUG
-    [SettingsUISection(Settings.GroupDevelopment)]
-    [SettingsUITextInput]
-    public string? ScreenshotToLoad {
-        get;
-        [UsedImplicitly]
-        set;
-    }
-
-    [SettingsUIButton]
-    [SettingsUISection(Settings.GroupDevelopment)]
+  [SettingsUISection(Settings.GroupDevelopment)]
+  [SettingsUITextInput]
+  public string? ScreenshotToLoad {
+    get;
     [UsedImplicitly]
-    public bool LoadScreenshot {
-        // ReSharper disable once ValueParameterNotUsed
-        set => this.DoLoadScreenshot();
-    }
+    set;
+  }
 
-    [SettingsUIButton]
-    [SettingsUISection(Settings.GroupDevelopment)]
-    [UsedImplicitly]
-    public bool DumpTranslations {
-        // ReSharper disable once ValueParameterNotUsed
-        set => this.DoDumpTranslations();
-    }
+  [SettingsUIButton]
+  [SettingsUISection(Settings.GroupDevelopment)]
+  [UsedImplicitly]
+  public bool LoadScreenshot {
+    // ReSharper disable once ValueParameterNotUsed
+    set => this.DoLoadScreenshot();
+  }
+
+  [SettingsUIButton]
+  [SettingsUISection(Settings.GroupDevelopment)]
+  [UsedImplicitly]
+  public bool DumpTranslations {
+    // ReSharper disable once ValueParameterNotUsed
+    set => this.DoDumpTranslations();
+  }
 
   #endif
 
@@ -420,6 +446,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     this.ViewMaxAge = 60;
     this.ScreenshotResolution = "fhd";
+    this.NamesTranslationMode = "translate";
 
     this.CreatorsScreenshotSaveDirectory = Path.GetFullPath(
       Path.Combine(Mod.GameScreenshotsPath, "Hall Of Fame Creators"));
@@ -437,8 +464,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// </summary>
   public void Initialize() {
     #if DEBUG
-        GameManager.instance.localizationManager.AddSource(
-            "en-US", new DevDictionarySource());
+    GameManager.instance.localizationManager.AddSource(
+      "en-US", new DevDictionarySource());
     #endif
 
     this.InitializeCreatorId();
@@ -653,6 +680,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
     writer.PropertyName("showViewCount");
     writer.Write(this.ShowViewCount);
 
+    writer.PropertyName("namesTranslationMode");
+    writer.Write(this.NamesTranslationMode);
+
     writer.PropertyName("screenshotResolution");
     writer.Write(this.ScreenshotResolution);
 
@@ -666,64 +696,64 @@ public sealed class Settings : ModSetting, IJsonWritable {
   }
 
   #if DEBUG
-    private void DoLoadScreenshot() {
-        if (string.IsNullOrWhiteSpace(this.ScreenshotToLoad)) {
-            return;
-        }
-
-        var world = Unity.Entities.World.All[0];
-
-        world.GetOrCreateSystemManaged<Systems.PresenterUISystem>()
-            .LoadScreenshotById(this.ScreenshotToLoad!);
-
-        this.ScreenshotToLoad = null;
+  private void DoLoadScreenshot() {
+    if (string.IsNullOrWhiteSpace(this.ScreenshotToLoad)) {
+      return;
     }
 
-    private void DoDumpTranslations() {
-        var localizationManager = GameManager.instance.localizationManager;
-        var originalLocale = localizationManager.activeLocaleId;
+    var world = Unity.Entities.World.All[0];
 
-        foreach (var locale in localizationManager.GetSupportedLocales()) {
-            localizationManager.SetActiveLocale(locale);
+    world.GetOrCreateSystemManaged<Systems.PresenterUISystem>()
+      .LoadScreenshotById(this.ScreenshotToLoad!);
 
-            var strings = localizationManager.activeDictionary.entries
-                .OrderBy(kv => kv.Key)
-                .ToDictionary(kv => kv.Key, kv => kv.Value);
+    this.ScreenshotToLoad = null;
+  }
 
-            var json = Colossal.Json.JSON.Dump(strings);
+  private void DoDumpTranslations() {
+    var localizationManager = GameManager.instance.localizationManager;
+    var originalLocale = localizationManager.activeLocaleId;
 
-            var filePath = Path.Combine(
-                Application.persistentDataPath,
-                $"locale-dictionary-{locale}.json");
+    foreach (var locale in localizationManager.GetSupportedLocales()) {
+      localizationManager.SetActiveLocale(locale);
 
-            File.WriteAllText(filePath, json);
-        }
+      var strings = localizationManager.activeDictionary.entries
+        .OrderBy(kv => kv.Key)
+        .ToDictionary(kv => kv.Key, kv => kv.Value);
 
-        localizationManager.SetActiveLocale(originalLocale);
+      var json = Colossal.Json.JSON.Dump(strings);
+
+      var filePath = Path.Combine(
+        Application.persistentDataPath,
+        $"locale-dictionary-{locale}.json");
+
+      File.WriteAllText(filePath, json);
     }
 
-    private sealed class DevDictionarySource : Colossal.IDictionarySource {
-        public IEnumerable<KeyValuePair<string, string>> ReadEntries(
-            IList<Colossal.IDictionaryEntryError> errors,
-            Dictionary<string, int> indexCounts) =>
-            new Dictionary<string, string> {
-                {
-                    "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]",
-                    "{ Development }"
-                }, {
-                    "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]",
-                    "Screenshot ID"
-                }, {
-                    "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]",
-                    "Load Screenshot"
-                }, {
-                    "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
-                    "Dump Locales as JSON"
-                }
-            };
+    localizationManager.SetActiveLocale(originalLocale);
+  }
 
-        public void Unload() {
+  private sealed class DevDictionarySource : Colossal.IDictionarySource {
+    public IEnumerable<KeyValuePair<string, string>> ReadEntries(
+      IList<Colossal.IDictionaryEntryError> errors,
+      Dictionary<string, int> indexCounts) =>
+      new Dictionary<string, string> {
+        {
+          "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]",
+          "{ Development }"
+        }, {
+          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]",
+          "Screenshot ID"
+        }, {
+          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]",
+          "Load Screenshot"
+        }, {
+          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
+          "Dump Locales as JSON"
         }
+      };
+
+    public void Unload() {
     }
+  }
   #endif
 }

@@ -8,6 +8,7 @@ export interface ModSettings {
   readonly showCreatorSocials: boolean;
   readonly showViewCount: boolean;
   readonly screenshotResolution: 'fhd' | '4k';
+  readonly namesTranslationMode: 'disabled' | 'transliterate' | 'translate';
   readonly creatorsScreenshotSaveDirectory: string;
   readonly baseUrl: string;
 }
@@ -20,6 +21,7 @@ const settings$ = bindValue<ModSettings>('hallOfFame.common', 'settings', {
   showCreatorSocials: true,
   showViewCount: false,
   screenshotResolution: 'fhd',
+  namesTranslationMode: 'translate',
   creatorsScreenshotSaveDirectory: '',
   baseUrl: ''
 });

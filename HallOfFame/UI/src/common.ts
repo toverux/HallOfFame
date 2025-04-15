@@ -3,6 +3,12 @@
 
   readonly creatorName: string;
 
+  readonly creatorNameLocale: string | null;
+
+  readonly creatorNameLatinized: string | null;
+
+  readonly creatorNameTranslated: string | null;
+
   readonly social: readonly CreatorSocialLink[];
 }
 
@@ -21,6 +27,12 @@ export interface Screenshot {
   readonly id: string;
 
   readonly cityName: string;
+
+  readonly cityNameLocale: string | null;
+
+  readonly cityNameLatinized: string | null;
+
+  readonly cityNameTranslated: string | null;
 
   readonly cityMilestone: number;
 
