@@ -113,7 +113,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
               this.LocalizeNumber(stats.FavoritesCount)
             }
           }),
-        thumbnail: "Media/Game/Icons/Trophy.svg",
+        thumbnail: "coui://ui-mods/images/stats-notification.svg",
         onClicked: () => {
           this.ShowStatsDialog(stats);
 
