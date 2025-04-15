@@ -3,6 +3,8 @@ import { type Localization, LocalizedNumber, LocalizedString, useLocalization } 
 import { Button, Icon } from 'cs2/ui';
 import { type CSSProperties, type ReactElement, useEffect, useMemo } from 'react';
 import cloudArrowUpSolidSrc from '../icons/fontawesome/cloud-arrow-up-solid.svg';
+import populationSrc from '../icons/paradox/population.svg';
+import trophySrc from '../icons/paradox/trophy.svg';
 import {
   type ModSettings,
   createSingletonHook,
@@ -301,11 +303,11 @@ function ScreenshotUploadPanelContentCityInfo({
       </span>
       <div style={{ flex: 1 }} />
       <span>
-        <img src='Media/Game/Icons/Trophy.svg' />
+        <img src={trophySrc} />
         {translate(`Progression.MILESTONE_NAME:${screenshotSnapshot.achievedMilestone}`)}
       </span>
       <span>
-        <img src='Media/Game/Icons/Population.svg' />
+        <img src={populationSrc} />
         <LocalizedNumber value={screenshotSnapshot.population} />
       </span>
     </div>

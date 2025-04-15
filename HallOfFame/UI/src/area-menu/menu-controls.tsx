@@ -17,6 +17,9 @@ import redditBrandsSolid from '../icons/fontawesome/reddit-brands-solid.svg';
 import twitchBrandsSolid from '../icons/fontawesome/twitch-brands-solid.svg';
 import youtubeBrandsSolid from '../icons/fontawesome/youtube-brands-solid.svg';
 import loveChirperSrc from '../icons/love-chirper.png';
+import naturalResourcesSrc from '../icons/paradox/natural-resources.svg';
+import populationSrc from '../icons/paradox/population.svg';
+import trophySrc from '../icons/paradox/trophy.svg';
 import doubleArrowRightTriangleSrc from '../icons/uil/colored/double-arrow-right-triangle.svg';
 import eyeClosedSrc from '../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../icons/uil/colored/eye-open.svg';
@@ -379,7 +382,7 @@ function MenuControlsScreenshotLabels({
     <div className={styles.menuControlsSectionScreenshotLabels}>
       {isPristineWilderness ? (
         <span>
-          <img src='Media/Game/Icons/NaturalResources.svg' />
+          <img src={naturalResourcesSrc} />
           {translate(
             `HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]`,
             `Pristine wilderness`
@@ -388,12 +391,12 @@ function MenuControlsScreenshotLabels({
       ) : (
         <>
           <span>
-            <img src='Media/Game/Icons/Trophy.svg' />
+            <img src={trophySrc} />
             {translate(`Progression.MILESTONE_NAME:${screenshot.cityMilestone}`, `???`)}
           </span>
 
           <span>
-            <img src='Media/Game/Icons/Population.svg' />
+            <img src={populationSrc} />
             {formatBigNumber(screenshot.cityPopulation, translate)}
           </span>
         </>
