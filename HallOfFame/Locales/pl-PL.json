@@ -28,7 +28,7 @@
   "HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]": "Twoje zgłoszenie zostało wysłane, a zrzut ekranu został ukryty i oczekuje na sprawdzenie.\nDziękujemy za pomoc w utrzymywaniu Hall of Fame jako godnego miejsca!",
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "W Hall of Fame doszło do małego wypadku sieciowego :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Rozgrywka nie jest zagrożona i rozpoczęcie gry jest całkowicie bezpieczne.",
-  "HallOfFame.UI.Menu.MenuControls.TRANSLATED": "Tłumaczenie",
+  "HallOfFame.UI.Menu.MenuControls.TRANSLATED": "Przetłumaczono",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Zero]": "polubień",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]": "polubienie",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]": "polubień",
