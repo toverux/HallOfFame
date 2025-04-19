@@ -283,6 +283,7 @@
   }
 
   &-names {
+    position: relative; // to position-absolute translated hint.
     display: flex;
     flex-direction: column;
     margin-bottom: 25rem;
@@ -290,9 +291,11 @@
     font-size: calc(35rem * var(--fontScale));
 
     &-translated-hint {
+      position: absolute;
+      top: -1.2em; // same as line-height
       display: flex;
       opacity: .7;
-      font-size: var(--fontSizeL);
+      font-size: var(--fontSizeM);
       filter: drop-shadow(1rem 1rem 1rem var(--panelColorDark));
       transition: opacity .2s ease-in-out;
 
@@ -301,8 +304,8 @@
       }
 
       svg {
-        width: 20rem;
-        height: 20rem;
+        width: 1.2em; // same as line-height
+        height: 1.2em; // same as line-height
         margin-right: 8rem;
       }
     }
