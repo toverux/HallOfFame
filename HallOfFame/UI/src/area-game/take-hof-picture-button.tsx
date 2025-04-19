@@ -36,7 +36,7 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 
     // Replace button icon with our share picture icon.
     if (button.firstElementChild instanceof HTMLElement) {
-      button.firstElementChild.style.maskImage = sharePictureSrc;
+      button.firstElementChild.style.maskImage = `url(${sharePictureSrc})`;
     }
 
     // Adds the side label to the button, the original button has no text.
