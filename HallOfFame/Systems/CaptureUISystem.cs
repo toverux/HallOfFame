@@ -88,7 +88,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       // Optimization: only enable live bindings when a screenshot is
       // being displayed/uploaded.
       // Run on next frame to let the UI update one last time.
-      GameManager.instance.RegisterUpdater(() => this.Enabled = value is not null);
+      GameManager.instance.RegisterUpdater(() => {
+        this.Enabled = value is not null;
+      });
     }
   }
 
