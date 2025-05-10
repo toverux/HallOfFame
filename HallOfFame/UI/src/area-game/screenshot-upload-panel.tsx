@@ -203,13 +203,9 @@ function ScreenshotUploadPanelImage({
       {ratioPreviewInfo.type != 'equal' && (
         <DescriptionTooltip
           direction='down'
-          title={translate(
-            'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE',
-            '16:9 Aspect Ratio Preview'
-          )}
+          title={translate('HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE')}
           description={translate(
-            'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION',
-            'The border shows you how your image will be cropped on the most common aspect ratio.'
+            'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION'
           )}>
           <div
             className={`${styles.screenshotUploadPanelImageRatioPreview} ${uploadProgress ? styles.screenshotUploadPanelImageHidden : ''}`}
@@ -295,7 +291,6 @@ function ScreenshotUploadPanelContentCityInfo({
         {!creatorNameIsEmpty && (
           <LocalizedString
             id='HallOfFame.Common.CITY_BY'
-            fallback={'by {CREATOR_NAME}'}
             // biome-ignore lint/style/useNamingConvention: i18n convention
             args={{ CREATOR_NAME: settings.creatorName }}
           />
@@ -327,42 +322,29 @@ function ScreenshotUploadPanelContentOthers({
     <>
       {creatorNameIsEmpty && (
         <div className={styles.screenshotUploadPanelWarning}>
-          {translate(
-            'HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY',
-            `You must set your Creator Name in the mod settings to upload a picture.`
-          )}
+          {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY')}
         </div>
       )}
 
       {!screenshotSnapshot.areSettingsTopQuality && (
         <div className={styles.screenshotUploadPanelWarning}>
-          {translate(
-            'HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY',
-            `Your graphics settings are not set to the highest quality.`
-          )}
+          {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY')}
         </div>
       )}
 
       <div className={styles.screenshotUploadPanelContent}>
         {screenshotSnapshot.wasGlobalIlluminationDisabled && (
           <p>
-            {translate(
-              'HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED',
-              `Global Illumination was disabled when taking the screenshot, see mod options for more info.`
-            )}
+            {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED')}
           </p>
         )}
         <p>
           {translate(
-            'HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY',
-            `You can update your creator name or city name without closing this window.`
+            'HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY'
           )}
         </p>
         <p style={{ margin: 0 }}>
-          {translate(
-            'HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED',
-            `Uploaded content is moderated, any abuse will result in a permanent ban.`
-          )}
+          {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED')}
         </p>
       </div>
     </>
@@ -389,7 +371,6 @@ function ScreenshotUploadPanelFooter({
       <span className={styles.screenshotUploadPanelFooterCreatorId}>
         <LocalizedString
           id='HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID'
-          fallback='Creator ID: {CREATOR_ID}'
           // biome-ignore lint/style/useNamingConvention: i18n convention
           args={{ CREATOR_ID: settings.creatorIdClue }}
         />
@@ -421,8 +402,8 @@ function ScreenshotUploadPanelFooter({
             />
 
             {isUploading
-              ? translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING', 'Uploading…')
-              : translate('HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE', 'Upload')}
+              ? translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING')
+              : translate('HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE')}
           </Button>
         </>
       )}
@@ -446,12 +427,8 @@ function ScreenshotUploadPanelFooter({
 function getCongratulation(translate: Localization['translate']): string {
   // biome-ignore lint/style/noNonNullAssertion: we have fallback.
   const congratulations = translate(
-    'HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS',
-    'Nice shot!'
-  )!
-    // Each message is separated by a newline.
-    .split('\n')
-    .filter(translation => !translation.startsWith('//'));
+    'HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS'
+  )!.split('\n'); // A newline separates each message.
 
   // biome-ignore lint/style/noNonNullAssertion: always has at least 1 element.
   return congratulations[Math.floor(Math.random() * congratulations.length)]!;
@@ -500,31 +477,19 @@ function getUploadProgressHintText(
   uploadProgress: JsonUploadProgress
 ): string | null {
   if (uploadProgress.uploadProgress == 0) {
-    return translate(
-      'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Waiting]',
-      'Please wait…'
-    );
+    return translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Waiting]');
   }
 
   if (uploadProgress.uploadProgress > 0 && uploadProgress.processingProgress == 0) {
-    return translate(
-      'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Uploading]',
-      'Uploading…'
-    );
+    return translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Uploading]');
   }
 
   if (uploadProgress.processingProgress > 0 && !uploadProgress.isComplete) {
-    return translate(
-      'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]',
-      'Processing…'
-    );
+    return translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]');
   }
 
   if (uploadProgress.isComplete) {
-    return translate(
-      'HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]',
-      'Upload complete!'
-    );
+    return translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]');
   }
 
   return null;

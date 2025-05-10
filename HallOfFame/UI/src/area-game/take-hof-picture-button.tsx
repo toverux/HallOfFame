@@ -47,11 +47,7 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
   }, []);
 
   return (
-    <Tooltip
-      tooltip={translate(
-        'HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP',
-        `Take a screenshot with Hall of Fame`
-      )}>
+    <Tooltip tooltip={translate('HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP')}>
       <span ref={spanRef} onClick={takePicture} dangerouslySetInnerHTML={{ __html: html }} />
     </Tooltip>
   );

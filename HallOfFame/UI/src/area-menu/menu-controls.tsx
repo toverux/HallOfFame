@@ -330,7 +330,6 @@ function MenuControlsCityName({
           <span>
             <LocalizedString
               id='HallOfFame.Common.CITY_BY'
-              fallback={'by {CREATOR_NAME}'}
               // biome-ignore lint/style/useNamingConvention: i18n convention
               args={{ CREATOR_NAME: creatorName || 'anonymous' }}
             />
@@ -383,10 +382,7 @@ function MenuControlsScreenshotLabels({
       {isPristineWilderness ? (
         <span>
           <img src={naturalResourcesSrc} />
-          {translate(
-            `HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]`,
-            `Pristine wilderness`
-          )}
+          {translate(`HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]`)}
         </span>
       ) : (
         <>
@@ -407,7 +403,6 @@ function MenuControlsScreenshotLabels({
           tooltip={
             <LocalizedString
               id='HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]'
-              fallback='{NUMBER} views ({VIEWS_PER_DAY} views/day)'
               args={{
                 // biome-ignore lint/style/useNamingConvention: i18n convention
                 NUMBER: <LocalizedNumber value={screenshot.viewsCount} />,
@@ -579,7 +574,6 @@ function MenuControlsFavoriteButton({
                   ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Singular]'
                   : 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Plural]'
           }
-          fallback={screenshot.isFavorite ? 'Unfavorite this image' : 'Favorite this image'}
           args={{
             // biome-ignore lint/style/useNamingConvention: i18n convention
             NUMBER: <LocalizedNumber value={screenshot.favoritesCount} />,
