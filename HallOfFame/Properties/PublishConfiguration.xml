@@ -165,16 +165,14 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2025.4.1" />
+  <ModVersion Value="2025.4.2" />
   <GameVersion Value="1.2.*" />
-  <ChangeLog>**Changes;**
-- Avoid layout shift when displaying the "Translated" hint and make that text a bit smaller.
-- Localization updates.
-
-**Bug fixes:**
-- Fixed the screenshot upload panel misbehaving (not closing or not giving feedback about the upload).
-  This caused some players to upload many times the same image. Do not report those images — I will take action to "merge" them.
-- Fixed the HoF "take picture" button not having the correct icon.</ChangeLog>
+  <ChangeLog>**Changes:**
+- Change the threshold screenshots are considered "recent" from 3 to 7 days.
+- Default "Archeologist" algorithm weight reduced from 5 to 2.
+  Archeologist presents oldest, least liked pictures first.
+- Minor fixes and internal improvements.
+- Translations updates.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />

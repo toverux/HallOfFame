@@ -1,8 +1,6 @@
-﻿**Changes;**
-- Avoid layout shift when displaying the "Translated" hint and make that text a bit smaller.
-- Localization updates.
-
-**Bug fixes:**
-- Fixed the screenshot upload panel misbehaving (not closing or not giving feedback about the upload).
-  This caused some players to upload many times the same image. Do not report those images — I will take action to "merge" them.
-- Fixed the HoF "take picture" button not having the correct icon.
+﻿**Changes:**
+- Change the threshold screenshots are considered "recent" from 3 to 7 days.
+- Default "Archeologist" algorithm weight reduced from 5 to 2.
+  Archeologist presents oldest, least liked pictures first.
+- Minor fixes and internal improvements.
+- Translations updates.
