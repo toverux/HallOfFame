@@ -120,6 +120,7 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreateLocalScreenshot]": "Zapisz plik zrzutu ekranu lokalnie",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreateLocalScreenshot]": "Zapisz kopię zrzutu ekranu wykonanego z Hall of Fame w folderze zrzutów ekranu gry.\nBędą one w rozdzielczości 4K+, w przeciwieństwie do zrzutów ekranu z gry podstawowej.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Serwer Hall of Fame",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Adres serwera Hall of Fame. Nie powinieneś go zmienić, chyba że pracujesz nad modem lub korzystasz z alternatywnego serwera.\nMożesz użyć „test.halloffame.cs2.mtq.io” do przetestowania moda na sandboxowej bazie danych.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Zresetuj ustawienia",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Zresetuj wszystkie ustawienia modyfikacji do wartości domyślnych (z wyjątkiem ID twórcy, które pozostanie niezmienione).",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Czat i wsparcie na Discord",
