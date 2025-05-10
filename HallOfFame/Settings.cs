@@ -440,7 +440,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     this.TrendingScreenshotWeight = 10;
     this.RecentScreenshotWeight = 5;
-    this.ArcheologistScreenshotWeight = 5;
+    this.ArcheologistScreenshotWeight = 2;
     this.RandomScreenshotWeight = 2;
     this.SupporterScreenshotWeight = 2;
 
