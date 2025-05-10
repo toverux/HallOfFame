@@ -84,6 +84,7 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreateLocalScreenshot]": "Сохраните локальный файл изображения",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreateLocalScreenshot]": "Сохранить копию изображения, сделанного с помощью Hall of Fame, в папке скриншотов игры.\nВ отличие от скриншотов из игры, они будут в разрешении 4K+.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Сервер Hall of Fame",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Адрес сервера Hall of Fame. Его не следует изменять, если вы не занимаетесь разработкой мода или не используете альтернативный сервер.\nВы можете использовать «test.halloffame.cs2.mtq.io» для тестирования мода на базе данных sandbox.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Сброс настроек",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Сбросьте все настройки мода к их значениям по умолчанию (кроме идентификатора автора, который останется нетронутым).",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Чат и поддержка в Discord",
