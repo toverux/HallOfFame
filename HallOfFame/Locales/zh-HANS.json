@@ -119,6 +119,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorsScreenshotSaveDirectory]": "从主菜单下载图片的文件夹位置。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreateLocalScreenshot]": "保存本地截图文件",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreateLocalScreenshot]": "把“城市画廊”模组截取图片的副本保存在游戏的截图文件夹中。\n与游戏截图相反，该模组会始终拍摄 4K+分辨率的图像 。",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DisableGlobalIllumination]": "禁用 “{KEY=Options.OPTION[SSGIQualitySettings]}”",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "“城市画廊”模组服务器",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "这是“城市画廊”模组服务器的地址。除非您正在开发此模组或使用其他服务器，否则不应更改地址。\n您可以使用“test.halloffame.cs2.mtq.io”在沙盒数据库上测试此模组。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "重置设置",
