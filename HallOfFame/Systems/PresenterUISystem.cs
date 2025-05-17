@@ -190,30 +190,30 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   #if DEBUG
-    /// <summary>
-    /// Debug/development method to load a screenshot by its ID.
-    /// Does not use the queue system.
-    /// </summary>
-    internal async void LoadScreenshotById(string screenshotId) {
-        try {
-            this.isRefreshingBinding.Update(true);
+  /// <summary>
+  /// Debug/development method to load a screenshot by its ID.
+  /// Does not use the queue system.
+  /// </summary>
+  internal async void LoadScreenshotById(string screenshotId) {
+    try {
+      this.isRefreshingBinding.Update(true);
 
-            var screenshot = await HttpQueries.GetScreenshot(screenshotId);
+      var screenshot = await HttpQueries.GetScreenshot(screenshotId);
 
-            screenshot = await this.LoadScreenshot(
-                screenshot: screenshot, preload: false);
+      screenshot = await this.LoadScreenshot(
+        screenshot: screenshot, preload: false);
 
-            if (screenshot is not null) {
-                this.screenshotBinding.Update(screenshot);
-            }
-        }
-        catch (Exception ex) {
-            Mod.Log.ErrorRecoverable(ex);
-        }
-        finally {
-            this.isRefreshingBinding.Update(false);
-        }
+      if (screenshot is not null) {
+        this.screenshotBinding.Update(screenshot);
+      }
     }
+    catch (Exception ex) {
+      Mod.Log.ErrorRecoverable(ex);
+    }
+    finally {
+      this.isRefreshingBinding.Update(false);
+    }
+  }
   #endif
 
   /// <summary>
@@ -339,7 +339,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       // Variable used below to avoid infinite loops when there is only
       // one screenshot in database (that can happen during development).
       #if DEBUG
-            var iterations = 0;
+      var iterations = 0;
       #endif
 
       Screenshot? nextScreenshot;
@@ -355,7 +355,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         nextScreenshot = await this.LoadScreenshot(preload: true);
       } while (
         #if DEBUG
-                iterations++ < 20 &&
+        iterations++ < 20 &&
         #endif
         nextScreenshot is not null &&
         nextScreenshot.Id ==
