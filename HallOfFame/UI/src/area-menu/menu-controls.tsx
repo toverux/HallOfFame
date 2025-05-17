@@ -233,7 +233,7 @@ export function MenuControlsContent(): ReactElement {
   );
 }
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: that's okay but yeah
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: that's okay, but yeah
 function MenuControlsCityName({
   screenshot
 }: Readonly<{
@@ -369,9 +369,8 @@ function MenuControlsScreenshotLabels({
 }>): ReactElement {
   const { translate } = useLocalization();
 
-  // Do not show the pop/milestone labels if this is an empty map screenshot,
-  // which is likely when the pop is 0 and the milestone is 0 (Founding) or 20
-  // (Megalopolis, i.e. creative mode).
+  // Do not show the pop/milestone labels if this is an empty map screenshot, which is likely when
+  // the pop is 0 and the milestone is 0 (Founding) or 20 (Megalopolis, i.e., creative mode).
   const isPristineWilderness =
     screenshot.cityPopulation == 0 &&
     (screenshot.cityMilestone == 0 || screenshot.cityMilestone == 20);
@@ -437,8 +436,8 @@ function MenuControlsNextButton({
   const { useInputBinding, useInputPhase, useOnInputPerformed } = nextScreenshotInputAction;
 
   useOnInputPerformed(
-    // setTimeout is used to give time to the key press .*active class to
-    // show briefly before [disabled] is set.
+    // setTimeout is used to give time to the key press .*active class to show briefly before
+    // [disabled] is set.
     () => !disabled && (setTimeout(nextScreenshot), true),
     'select-item'
   );
@@ -478,8 +477,8 @@ function MenuControlsPreviousButton({
   const { useInputBinding, useInputPhase, useOnInputPerformed } = previousScreenshotInputAction;
 
   useOnInputPerformed(
-    // setTimeout is used to give time to the key press .*active class to
-    // show briefly before [disabled] is set.
+    // setTimeout is used to give time to the key press .*active class to show briefly before
+    // [disabled] is set.
     () => !disabled && (setTimeout(previousScreenshot), true),
     'select-item'
   );

@@ -22,8 +22,7 @@ internal static class LocalizationExtensions {
   }
 
   /// <summary>
-  /// Same as <see cref="Translate(string)"/> but with variables
-  /// interpolation.
+  /// Same as <see cref="Translate(string)"/> but with variable interpolation.
   /// </summary>
   /// <param name="key">
   /// A key that points to a string that
@@ -35,9 +34,9 @@ internal static class LocalizationExtensions {
   }
 
   /// <summary>
-  /// Gets a user-friendly message from an exception, if the exception type
-  /// is explicitly supported in the translation dictionary, that is if there
-  /// is a "HallOfFame.Common.ERROR_MESSAGE[Exception.Full.Type.Name]" key.
+  /// Gets a user-friendly message from an exception if the exception type is explicitly supported
+  /// in the translation dictionary, that is if there is a
+  /// "HallOfFame.Common.ERROR_MESSAGE[Exception.Full.Type.Name]" key.
   /// <br/>
   /// The fallback value is defined to the exception message.
   /// </summary>

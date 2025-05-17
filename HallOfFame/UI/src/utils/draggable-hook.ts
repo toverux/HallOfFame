@@ -8,8 +8,8 @@ import {
 } from 'react';
 
 /**
- * Provides a simple draggable behavior for an element (the whole element is
- * draggable, there is no handle to move another target element).
+ * Provides a simple draggable behavior for an element (the whole element is draggable, there is no
+ * handle to move another target element).
  *
  * @returns Props that should be passed to the element to make draggable.
  */
@@ -57,8 +57,8 @@ export function useDraggable(): { readonly onMouseDown: MouseEventHandler } {
     state.x += event.movementX;
     state.y += event.movementY;
 
-    // translate() would be more appropriate in theory, in a normal browser,
-    // but here at low FPS I found left/top to work better.
+    // translate() would be more appropriate in theory, in a normal browser, but here at low FPS I
+    // found left/top to work better.
     state.element.style.left = `${state.x}px`;
     state.element.style.top = `${state.y}px`;
   }, []);

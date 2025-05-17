@@ -6,8 +6,8 @@ import { createSingletonHook, useModSettings } from '../utils';
 
 interface ReadonlyMenuState {
   /**
-   * Current image to display, depending on quality setting,
-   * {@link screenshot.imageUrlFHD} or {@link screenshot.imageUrl4K}.
+   * Current image to display, depending on quality setting, {@link screenshot.imageUrlFHD} or
+   * {@link screenshot.imageUrl4K}.
    */
   readonly imageUri: string | null;
 
@@ -19,16 +19,14 @@ interface ReadonlyMenuState {
   readonly hasPreviousScreenshot: boolean;
 
   /**
-   * Index of the current refresh cycle. Used to force the UI to request a new
-   * screenshot.
+   * Index of the current refresh cycle. Used to force the UI to request a new screenshot.
    *
    * @default 0
    */
   readonly forcedRefreshIndex: number;
 
   /**
-   * Whether a new screenshot is being loaded and/or a screenshot image is
-   * being preloaded.
+   * Whether a new screenshot is being loaded and/or a screenshot image is being preloaded.
    *
    * @default false
    */
@@ -40,13 +38,12 @@ interface ReadonlyMenuState {
   readonly screenshot: Screenshot | null;
 
   /**
-   * Error that occurred while loading the screenshot, API request or image
-   * preloading included.
+   * Error that occurred while loading the screenshot, API request or image preloading included.
    */
   readonly error: LocalizedString | null;
 
   /**
-   * Whether a save image to disk operation is going on.
+   * Whether a save-image-to-disk operation is going on.
    */
   readonly isSaving: boolean;
 }
@@ -63,9 +60,8 @@ interface SettableMenuState {
    * Whether the UI is ready to display a new image, that includes:
    * - The current image has been fully loaded.
    * - The next image has been fully preloaded.
-   * - The current image has finished its fade-in animation (so there are no
-   *   "jumps" in the animation and there is no need for the user to be able
-   *   to hit Next every .5 seconds).
+   * - The current image has finished its fade-in animation (so there are no "jumps" in the
+   *   animation, and there is no need for the user to be able to hit Next every .5 seconds).
    */
   readonly isReadyForNextImage: boolean;
 }

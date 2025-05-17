@@ -3,8 +3,8 @@
 // - Auto code reformat with Biome, renamed a few variables.
 // - Migrated to ESM (require => import, import.meta.dirname => import.meta.dirname, etc).
 // - Removed custom CSSPresencePlugin.
-// - Change css-loader to ignore resolving static game images (Media/...) and
-//   leave them as-is (`options.url.filter`).
+// - Change css-loader to ignore resolving static game images (Media/...) and leave them as-is
+//   (`options.url.filter`).
 // - Change css-loader to add "hof-" prefix to CSS modules class names.
 //   This can help debugging and other mods to target our classes.
 

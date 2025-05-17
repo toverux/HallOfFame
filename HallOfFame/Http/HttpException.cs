@@ -11,8 +11,7 @@ internal abstract class HttpException(
   Exception? inner = null)
   : Exception(HttpException.ReformatMessage(requestId, message), inner) {
   /// <summary>
-  /// Reformat the message to include the request ID (removes period, add
-  /// request ID, add period).
+  /// Reformat the message to include the request ID (removes period, add request ID, add period).
   /// </summary>
   private static string ReformatMessage(string requestId, string message) {
     return $"{message.TrimEnd('.')} (log request ID #{requestId}).";
@@ -46,8 +45,8 @@ internal sealed class HttpUserException(
 
 /// <summary>
 /// Class for a mod-server compatibility error (HTTP status code 404).
-/// A 404 error in the context of the mod is indeed the sign that the mod and
-/// server do not use the same version of the API, as it is scoped to "/api/vX".
+/// A 404 error in the context of the mod is indeed the sign that the mod and server do not use the
+/// same version of the API, as it is scoped to "/api/vX".
 /// </summary>
 internal sealed class HttpUserCompatibilityException(
   string requestId,

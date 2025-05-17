@@ -17,8 +17,8 @@ namespace HallOfFame;
 [UsedImplicitly]
 public sealed class Mod : IMod {
   /// <summary>
-  /// A little more than a singleton, it is set only when the mod has
-  /// successfully finished its <see cref="OnLoad"/> and reset when disposed.
+  /// A little more than a singleton, it is set only when the mod has successfully finished its
+  /// <see cref="OnLoad"/> and reset when disposed.
   /// </summary>
   /// <exception cref="NullReferenceException">
   /// If the mod has not been loaded yet.
@@ -83,9 +83,9 @@ public sealed class Mod : IMod {
         "halloffame",
         Mod.ModDataPath,
 
-        // True by default, but it makes the whole UI reload when an
-        // image changes with --uiDeveloperMode. But we don't desire
-        // that for this host, whether in dev mode or not.
+        // True by default, but it makes the whole UI reload when an image changes with
+        // --uiDeveloperMode.
+        // But we don't desire that for this host, whether in dev mode or not.
         shouldWatch: false);
 
       // Initialize subsystems.
@@ -101,22 +101,15 @@ public sealed class Mod : IMod {
       Mod.Log.Info($"Mod: {nameof(this.OnLoad)} complete.");
     }
     catch (Exception ex) {
-      // We have to delay this to the next frame because it uses
-      // translations and I18n EveryWhere might not be ready just yet.
-      // Especially in development where we can't change load order.
-      // All mods OnLoad()s are executed in the same frame, so this is
-      // deterministic.
-      GameManager.instance.RegisterUpdater(() => Mod.Log.ErrorFatal(ex));
+      Mod.Log.ErrorFatal(ex);
     }
   }
 
   public void OnDispose() {
     // Nothing particular to do here.
-    // There is no need to clean up things like localization, the host
-    // location, event listeners, etc., as you can't just unload and reload
-    // a mod, disposing only happens when quitting the game, so here we
-    // only need to clean up things that are observable after the process
-    // exited.
+    // There is no need to clean up things like localization, the host location, event listeners,
+    // etc., as you can't just unload and reload a mod, disposing only happens when quitting the
+    // game, so here we only need to clean up things that are observable after the process exited.
   }
 
   private static void CreateDirectories() {

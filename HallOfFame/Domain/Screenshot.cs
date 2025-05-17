@@ -132,8 +132,8 @@ internal record Screenshot : IJsonWritable {
   }
 
   /// <summary>
-  /// Non-inherent property of screenshot only set on the "get screenshot with
-  /// weighted algorithms" endpoint.
+  /// Non-inherent property of a screenshot only set on the "get screenshot with weighted
+  /// algorithms" endpoint.
   /// </summary>
   [DecodeAlias("__algorithm")]
   internal string Algorithm {
@@ -149,8 +149,8 @@ internal record Screenshot : IJsonWritable {
     $"Screenshot #{this.Id} {this.CityName} by {this.Creator?.CreatorName}";
 
   public void Write(IJsonWriter writer) {
-    // Type name does not support polymorphism, so we need to include all
-    // object shape changes in the type name.
+    // Type name does not support polymorphism, so we need to include all object shape changes in
+    // the type name.
     writer.TypeBegin(
       $"{this.GetType().FullName}?Creator={this.Creator is not null}");
 

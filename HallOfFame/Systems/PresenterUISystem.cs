@@ -15,8 +15,8 @@ using HallOfFame.Utils;
 namespace HallOfFame.Systems;
 
 /// <summary>
-/// System in charge of handling the presentation of community images and the
-/// various interactions that come with it (next, prev, fav, etc.).
+/// System in charge of handling the presentation of community images and the various interactions
+/// that come with it (next, prev, fav, etc.).
 /// </summary>
 internal sealed partial class PresenterUISystem : UISystemBase {
   private const string BindingGroup = "hallOfFame.presenter";
@@ -59,10 +59,10 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   private int currentScreenshotIndex = -1;
 
   /// <summary>
-  /// Indicates the previous game mode to refresh the screenshot when the user
-  /// returns to the main menu.
-  /// Note: it is initialized with <see cref="GameMode.MainMenu"/> and not the
-  /// default value, it is intentional.
+  /// Indicates the previous game mode to refresh the screenshot when the user returns to the main
+  /// menu.
+  /// Note: it is initialized with <see cref="GameMode.MainMenu"/> and not the default value, it is
+  /// intentional.
   /// </summary>
   private GameMode previousGameMode = GameMode.MainMenu;
 
@@ -72,8 +72,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     base.OnCreate();
 
     try {
-      // No need to OnUpdate as there are no bindings that require it,
-      // they are manually updated when needed.
+      // No need to OnUpdate as there are no bindings that require it, they are manually updated
+      // when needed.
       this.Enabled = false;
 
       this.imagePreloaderUISystem =
@@ -168,18 +168,17 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Lifecycle method used for changing the current screenshot when the user
-  /// returns to the main menu.
+  /// Lifecycle method used for changing the current screenshot when the user returns to the main
+  /// menu.
   /// </summary>
   protected override void OnGameLoadingComplete(
     Purpose purpose,
     GameMode mode) {
     // The condition serves two purposes:
-    // 1. Call NextScreenshot when the user returns to the main menu from
-    //    another game mode.
-    // 2. Avoid potentially repeating the NextScreenshot call when the game
-    //    boots and mods are initialized before the first game mode is set,
-    //    this happens rarely, but it's possible.
+    // 1. Call NextScreenshot when the user returns to the main menu from another game mode.
+    // 2. Avoid potentially repeating the NextScreenshot call when the game boots and mods are
+    //    initialized before the first game mode is set, this rarely happens, but it's possible.
+    //    Note: in later versions of the game, this seems extremely unlikely in normal setups.
     if (mode is GameMode.MainMenu &&
         this.previousGameMode is not GameMode.MainMenu) {
       this.forcedRefreshIndexBinding.Update(
@@ -219,8 +218,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// <summary>
   /// Switches the current screenshot to the previous if there is one
   /// (<see cref="screenshotsQueue"/>).
-  /// The method is `async void` because it is designed to be called in a
-  /// fire-and-forget manner, and it must be designed to never throw.
+  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
+  /// and it must be designed to never throw.
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
   private async void PreviousScreenshot() {
@@ -240,9 +239,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
     var screenshot = this.screenshotsQueue[--this.currentScreenshotIndex];
 
-    // We still need to make sure the image is preloaded, because these
-    // images aren't kept long in cohtml's cache; if the user clicks
-    // Previous a few times this is necessary.
+    // We still need to make sure the image is preloaded, because these images aren't kept long in
+    // cohtml's cache; if the user clicks 'Previous' a few times, this is necessary.
     screenshot =
       await this.LoadScreenshot(screenshot: screenshot, preload: false);
 
@@ -261,11 +259,11 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Switches the current screenshot to the next if there is one
-  /// (<see cref="screenshotsQueue"/>), otherwise it loads a new one.
+  /// Switches the current screenshot to the next if there is one (<see cref="screenshotsQueue"/>),
+  /// otherwise it loads a new one.
   /// Then it preloads the next screenshot again in the background.
-  /// The method is `async void` because it is designed to be called in a
-  /// fire-and-forget manner, and it should be designed to never throw.
+  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
+  /// and it should be designed to never throw.
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
   private async void NextScreenshot() {
@@ -277,17 +275,15 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
     Screenshot? screenshot;
 
-    // If there is a preloaded screenshot next in queue, set it as the
-    // current screenshot.
+    // If there is a preloaded screenshot next in the queue, set it as the current screenshot.
     // This happens when the user first clicks "Next".
     if (this.screenshotsQueue.Count - 1 > this.currentScreenshotIndex) {
       screenshot = this.screenshotsQueue[++this.currentScreenshotIndex];
     }
 
-    // Otherwise, load a new screenshot, add it to the queue, and set it as
-    // the current screenshot.
-    // This happens when the first image is loaded, or when there was an
-    // error preloading the next image in the previous NextScreenshot call.
+    // Otherwise, load a new screenshot, add it to the queue, and set it as the current screenshot.
+    // This happens when the first image is loaded, or when there was an error preloading the next
+    // image in the previous NextScreenshot call.
     else {
       screenshot = await this.LoadScreenshot(preload: false);
 
@@ -297,8 +293,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       }
     }
 
-    // There was an error, don't preload the next image, but leave the
-    // previous screenshot displayed. Reset the refresh state.
+    // There was an error, don't preload the next image, but leave the previous screenshot
+    // displayed. Reset the refresh state.
     // The error binding is already updated by LoadScreenshot().
     if (screenshot is null) {
       this.isRefreshingBinding.Update(false);
@@ -306,8 +302,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       return;
     }
 
-    // The screenshot was successfully loaded, update the screenshot being
-    // displayed and asynchronously preload the next one.
+    // The screenshot was successfully loaded, update the screenshot being displayed and
+    // asynchronously preload the next one.
     this.screenshotBinding.Update(screenshot);
     this.hasPreviousScreenshotBinding.Update();
 
@@ -317,16 +313,13 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       $"{this.screenshotsQueue.Count - 1}).");
 
     if (this.currentScreenshotIndex < this.screenshotsQueue.Count - 1) {
-      // If we are not at the end of the queue (the user clicked previous
-      // once or more), we're done as we have next screenshots in stock,
-      // so we don't have to preload the next one.
+      // If we are not at the end of the queue (the user clicked previous once or more), we're done
+      // as we have the next screenshots in stock, so we don't have to preload the next one.
       this.isRefreshingBinding.Update(false);
     }
     else {
-      // If we are viewing the last screenshot in the queue, prepare the
-      // next one in the background.
+      // If we are viewing the last screenshot in the queue, prepare the next one in the background.
       PreloadNextScreenshot();
-
       // It also means the current screenshot was just viewed.
       MarkViewed();
     }
@@ -336,21 +329,20 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     // Fire-and-forget async method that should be designed to never throw.
     // ReSharper disable once AsyncVoidMethod
     async void PreloadNextScreenshot() {
-      // Variable used below to avoid infinite loops when there is only
-      // one screenshot in database (that can happen during development).
+      // Variable used below to avoid infinite loops when there is only one screenshot in the
+      // database (that can happen during development).
       #if DEBUG
       var iterations = 0;
       #endif
 
       Screenshot? nextScreenshot;
 
-      // The loop is a workaround to avoid loading the same screenshot
-      // twice if the server returns the same screenshot twice (or more).
-      // This should be extremely rare, only happening in dev mode with a
-      // small number of screenshots and the random algorithm without
-      // views taken into account because all screenshots have been seen.
-      // The check is cheap, and it's more complex to implement
-      // server-side, so let's do that frontend-side.
+      // The loop is a workaround to avoid loading the same screenshot twice if the server returns
+      // the same screenshot twice (or more).
+      // This should be extremely rare, only happening in dev mode with a small number of
+      // screenshots and the random algorithm without views taken into account because all
+      // screenshots have been seen.
+      // The check is cheap, and it's more complex to implement server-side, so let's do that here.
       do {
         nextScreenshot = await this.LoadScreenshot(preload: true);
       } while (
@@ -389,23 +381,21 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Loads a new screenshot from the server and preloads the image in the UI,
-  /// also is responsible to handle all errors.
+  /// Loads a new screenshot from the server and preloads the image in the UI, also is responsible
+  /// to handle all errors.
   /// </summary>
   /// <param name="preload">
-  /// If true, network errors will be logged, but not displayed, as it is a
-  /// non-critical background operation.<br/>
-  /// It is the responsibility of the caller to handle the fact that the
-  /// preloading failed, and ex. retry a classic loading operation the next
-  /// time the user refreshes the image.
+  /// If true, network errors will be logged, but not displayed, as it is a non-critical background
+  /// operation.<br/>
+  /// It is the responsibility of the caller to handle the fact that the preloading failed, and, for
+  /// example, retry a classic loading operation the next time the user refreshes the image.
   /// </param>
   /// <param name="screenshot">
-  /// The screenshot to preload, if null, a new one will be fetched from the
-  /// server.
+  /// The screenshot to preload, if null, a new one will be fetched from the server.
   /// </param>
   /// <returns>
-  /// A <see cref="Screenshot"/> if the API call *and* image were successful,
-  /// null if there was an error.
+  /// A <see cref="Screenshot"/> if the API call *and* image were successful, null if there was an
+  /// error.
   /// </returns>
   private async Task<Screenshot?> LoadScreenshot(
     bool preload,
@@ -450,10 +440,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Toggle the favorite status of the current screenshot, with an optimistic
-  /// UI update.
-  /// The method is `async void` because it is designed to be called in a
-  /// fire-and-forget manner, and it should be designed to never throw.
+  /// Toggle the favorite status of the current screenshot, with an optimistic UI update.
+  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
+  /// and it should be designed to never throw.
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
   private async void FavoriteScreenshot() {
@@ -473,7 +462,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
                        (prevScreenshot.IsFavorite ? -1 : 1)
     };
 
-    // Replace current screenshot with the liked one.
+    // Replace the current screenshot with the liked one.
     this.screenshotsQueue[this.currentScreenshotIndex] = updatedScreenshot;
     this.screenshotBinding.Update(updatedScreenshot);
 
@@ -502,10 +491,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Saves the current screenshot 4K image to the disk, to the path specified
-  /// in the mod settings.
-  /// The method is `async void` because it is designed to be called in a
-  /// fire-and-forget manner, and it should be designed to never throw.
+  /// Saves the current screenshot 4K image to the disk, to the path specified in the mod settings.
+  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
+  /// and it should be designed to never throw.
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
   private async void SaveScreenshot() {
@@ -559,24 +547,12 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
         "Report screenshot {CITY_NAME} by {AUTHOR_NAME}?",
         new Dictionary<string, ILocElement> {
-          {
-            "CITY_NAME",
-            LocalizedString.Value(screenshot.CityName)
-          }, {
-            "AUTHOR_NAME",
-            LocalizedString.Value(screenshot.Creator
-              ?.CreatorName)
-          }
+          { "CITY_NAME", LocalizedString.Value(screenshot.CityName) },
+          { "AUTHOR_NAME", LocalizedString.Value(screenshot.Creator?.CreatorName) }
         }),
-      LocalizedString.IdWithFallback(
-        "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]",
-        "Report this screenshot to the moderation team?"),
-      LocalizedString.IdWithFallback(
-        "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]",
-        "Report screenshot"),
-      LocalizedString.IdWithFallback(
-        "Common.ACTION[Cancel]",
-        "Cancel"));
+      LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]"),
+      LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]"),
+      LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel"));
 
     GameManager.instance.userInterface.appBindings
       .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
@@ -592,15 +568,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         await HttpQueries.ReportScreenshot(screenshot.Id);
 
         var successDialog = new MessageDialog(
-          LocalizedString.IdWithFallback(
-            "HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]",
-            "Thank you"),
-          LocalizedString.IdWithFallback(
-            "HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]",
-            "The screenshot has been reported to the moderation team."),
-          LocalizedString.IdWithFallback(
-            "Common.CLOSE",
-            "Close"));
+          LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]"),
+          LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]"),
+          LocalizedString.IdWithFallback("Common.CLOSE", "Close"));
 
         GameManager.instance.userInterface.appBindings
           .ShowMessageDialog(successDialog, _ => { });

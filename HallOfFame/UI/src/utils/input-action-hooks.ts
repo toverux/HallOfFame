@@ -42,13 +42,12 @@ export function bindInputAction(group: string, name: string) {
   }
 
   /**
-   * Triggers the {@link handler} when the input action is performed (key
-   * pressed, not key released).
+   * Triggers the {@link handler} when the input action is performed (key pressed, not key
+   * released).
    *
    * @param handler The function to call when the input action is performed.
-   *                It can return a boolean to indicate if the sound should be
-   *                played or not. If it returns `undefined`, the sound will
-   *                be played.
+   *                It can return a boolean to indicate if the sound should be played or not.
+   *                If it returns `undefined`, the sound will be played.
    * @param sound   The sound to play when the input action is performed.
    */
   function useOnInputPerformed(

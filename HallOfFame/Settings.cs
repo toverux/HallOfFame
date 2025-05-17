@@ -81,39 +81,36 @@ public sealed class Settings : ModSetting, IJsonWritable {
   ];
 
   /// <summary>
-  /// The unique identifier of the creator, used to identify and authorize
-  /// them. Similar in use to an API key.
-  /// The default is the Paradox account UUID ("GUID"), which is actually
-  /// private.
-  /// If not available, a random UUID is generated the first time the mod is
-  /// run and this value isn't set.
+  /// The unique identifier of the creator, used to identify and authorize them.
+  /// Similar in use to an API key.
+  /// The default is the Paradox account UUID ("GUID"), which is actually private.
+  /// If not available, a random UUID is generated the first time the mod is run and this value
+  /// isn't set.
   /// </summary>
   [SettingsUIHidden]
   public string? CreatorID { get; set; }
 
   /// <summary>
-  /// Stores whether the <see cref="CreatorID"/> was acquired from the Paradox
-  /// account or generated locally, communicated to the server for possible
-  /// future use.
+  /// Stores whether the <see cref="CreatorID"/> was acquired from the Paradox account or generated
+  /// locally, communicated to the server for possible future use.
   /// </summary>
   [SettingsUIHidden]
   public bool IsParadoxAccountID { get; set; }
 
   /// <summary>
   /// Creator username.
-  /// Although the UI asks the user to set one when uploading an image,
-  /// just because it's nicer, it is not mandatory and can be left null/empty.
-  /// Its default value is the "current platform" username, which at the
-  /// moment will only be a Steam username if Steam is used, in other cases it
-  /// will be null and in any cases the user can change it anytime.
+  /// Although the UI asks the user to set one when uploading an image, just because it's nicer,
+  /// it is not mandatory and can be left null/empty.
+  /// Its default value is the "current platform" username, which at the moment will only be a Steam
+  /// username if Steam is used, in other cases it will be null, and in any cases the user can
+  /// change it anytime.
   /// </summary>
   [SettingsUISection(Settings.GroupYourProfile)]
   [SettingsUITextInput]
   public string? CreatorName { get; set; }
 
   /// <summary>
-  /// Masked Creator ID, only the first segment is shown in the Options UI,
-  /// and it is not editable.
+  /// Masked Creator ID, only the first segment is shown in the Options UI, and it is not editable.
   /// </summary>
   [SettingsUISection(Settings.GroupYourProfile)]
   public string? MaskedCreatorID => this.CreatorID is null
@@ -125,29 +122,27 @@ public sealed class Settings : ModSetting, IJsonWritable {
         : new string('*', segment.Length)));
 
   /// <summary>
-  /// Live account status text ("logged in as X", "invalid username", that
-  /// kind of things).
-  /// Updated by <see cref="UpdateCreator"/> on mod load and creator name
-  /// change.
+  /// Live account status text ("logged in as X", "invalid username", that kind of things).
+  /// Updated by <see cref="UpdateCreator"/> on mod load and creator name change.
   /// </summary>
   [SettingsUISection(Settings.GroupYourProfile)]
   [UsedImplicitly]
   // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
-  // We could use a private setter to set the text but then the game won't
-  // interpret our property as an Option entry, it has to be getter-only.
+  // We could use a private setter to set the text but then the game won't interpret our property as
+  // an Option entry, it has to be getter-only.
   public LocalizedString LoginStatus => this.loginStatusValue;
 
   /// <summary>
   /// Whether to enable HoF on the main menu UI.
-  /// It can be useful to disable the mod temporarily or when you only want to
-  /// use its other features.
+  /// It can be useful to disable the mod temporarily or when you only want to use its other
+  /// features.
   /// </summary>
   [SettingsUISection(Settings.GroupUIPreferences)]
   public bool EnableMainMenuSlideshow { get; set; }
 
   /// <summary>
-  /// Whether to replace the vanilla background image in the loading screen
-  /// with the last image HoF loaded.
+  /// Whether to replace the vanilla background image in the loading screen with the last image that
+  /// HoF loaded.
   /// </summary>
   [SettingsUISection(Settings.GroupUIPreferences)]
   [SettingsUIDisableByCondition(
@@ -208,7 +203,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUIMultilineText]
   [UsedImplicitly]
   public string WeightsDescription =>
-    string.Empty; // The actual text comes from the translations files.
+    string.Empty; // The actual text comes from the translation file.
 
   /// <summary>
   /// Weight of the trending screenshot selection algorithm.
@@ -252,11 +247,11 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUIMultilineText]
   [UsedImplicitly]
   public string OtherContentPreferences =>
-    string.Empty; // The actual text comes from the translations files.
+    string.Empty; // The actual text comes from the translation files.
 
   /// <summary>
-  /// Minimum time in days before a screenshot the user has already seen is
-  /// eligible to be shown again.
+  /// The minimum time in days before a screenshot the user has already seen is eligible to be shown
+  /// again.
   /// </summary>
   [SettingsUISection(Settings.GroupContentPreferences)]
   [SettingsUISlider(min = 0, max = 365, step = 5)]
@@ -279,16 +274,15 @@ public sealed class Settings : ModSetting, IJsonWritable {
   public string CreatorsScreenshotSaveDirectory { get; set; } = null!;
 
   /// <summary>
-  /// Whether to create a PNG file of the screenshot when it is taken, like
-  /// the vanilla screenshot feature.
+  /// Whether to create a PNG file of the screenshot when it is taken, like the vanilla screenshot
+  /// feature.
   /// </summary>
   [SettingsUISection(Settings.GroupAdvanced)]
   public bool CreateLocalScreenshot { get; set; }
 
   /// <summary>
-  /// Whether to disable global illumination (while the screenshot is taken)
-  /// due to the grainy picture bug that happens on most (?) setups and is
-  /// hideous, especially with supersampling.
+  /// Whether to disable global illumination (while the screenshot is taken) due to the grainy
+  /// picture bug that happens on most (?) setups and is hideous, especially with supersampling.
   /// </summary>
   [SettingsUISection(Settings.GroupAdvanced)]
   [SettingsUIHideByCondition(
@@ -408,24 +402,22 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// <summary>
   /// <para>
   /// Applies default values to the settings if it's not already done inline.
-  /// Do NOT move properties initialization out from this method, as it's used
-  /// to restore default values.
+  /// Do NOT move the properties' initialization out from this method, as it's used to restore
+  /// default values.
   /// </para>
   /// <para>
-  /// Note: the only thing we won't touch here is the Creator ID stuff, as it
-  /// is supposed to stay permanent even if the user resets their settings
-  /// using our reset button.
+  /// Note: the only thing we won't touch here is the Creator ID stuff, as it is supposed to stay
+  /// permanent even if the user resets their settings using our reset button.
   /// </para>
   /// </summary>
   public override void SetDefaults() {
     // Set the default creator name with the current platform username.
-    // The "platform username" is something that comes from Steam or Xbox
-    // GamePass, and not the Paradox account username.
-    // Even if there existed a fallback to the Paradox username, a Paradox
-    // account does not necessarily have a username attached to it, so users
-    // only logged in via Paradox (standalone) will have no username set by
-    // default and will be asked to set it in the mod's settings when they
-    // first upload a screenshot.
+    // The "platform username" comes from Steam or Xbox GamePass, and not the Paradox account
+    // username.
+    // Even if there existed a fallback to the Paradox username, a Paradox account does not
+    // necessarily have a username attached to it, so users only logged in via Paradox (standalone)
+    // will have no username set by default and will be asked to set it in the mod's settings when
+    // they first upload a screenshot.
     var userName = PlatformManager.instance.userName;
 
     // Strip leading # from username, Xbox accounts have it.
@@ -459,8 +451,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
   }
 
   /// <summary>
-  /// Method to call on the Settings instance that is actually used by the
-  /// Options panel (i.e. not the defaults reference instance).
+  /// Method to call on the Settings instance that is actually used by the Options panel (i.e., not
+  /// the default settings reference instance).
   /// </summary>
   public void Initialize() {
     #if DEBUG
@@ -490,10 +482,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
     SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
 
   /// <summary>
-  /// Initializes <see cref="CreatorID"/>, <see cref="IsParadoxAccountID"/>
-  /// and <see cref="MaskedCreatorID"/> with the Paradox account ID, or a
-  /// fallback locally-generated ID if the user is not logged in or an error
-  /// occurs.
+  /// Initializes <see cref="CreatorID"/>, <see cref="IsParadoxAccountID"/> and
+  /// <see cref="MaskedCreatorID"/> with the Paradox account ID, or a locally generated fallback ID
+  /// if the user is not logged in or an error occurs.
   /// Shows a warning dialog if the user is not logged in.
   /// </summary>
   private void InitializeCreatorId() {
@@ -504,11 +495,10 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     // Try to get and store the Paradox account ID.
     // Why store it?
-    // 1. If the user once plays without Internet connection or server
-    //    failure, we'll still have the previously-used ID.
-    // 2. If for some reason the user change the Paradox account they use,
-    //    it doesn't mean they want to change their Hall of Fame account,
-    //    so we keep the old ID.
+    // 1. If the user once plays without Internet connection or server failure, we'll still have the
+    //    ID used previously.
+    // 2. If for some reason the user changes the Paradox account they use, it doesn't mean they
+    //    want to change their Hall of Fame account, so we keep the old ID.
     // 3. It's more explicit and transparent to the user.
     try {
       this.CreatorID = typeof(PdxSdkPlatform)
@@ -529,8 +519,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         $"Settings: Acquired Paradox account ID {this.MaskedCreatorID}.");
     }
 
-    // If the user is not logged in, or the operation failed in an
-    // unexpected way, we generate a random ID.
+    // If the user is not logged in, or the operation failed unexpectedly, we generate a random ID.
     catch (Exception ex) {
       this.CreatorID = Guid.NewGuid().ToString();
       this.IsParadoxAccountID = false;
@@ -546,44 +535,31 @@ public sealed class Settings : ModSetting, IJsonWritable {
   }
 
   /// <summary>
-  /// Show a warning dialog to the user warning them that they are not using
-  /// their Paradox account ID.
+  /// Show a warning dialog to the user warning them that they are not using their Paradox account
+  /// ID.
   /// </summary>
   private void ShowNoParadoxConnectionWarningDialog() {
-    // We also delay the dialog so localization files are loaded, as this
-    // code can be run before I18n EveryWhere is loaded.
-    GameManager.instance.RegisterUpdater(() => {
-      ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
-        severity = ErrorDialog.Severity.Warning,
-        localizedTitle = LocalizedString.IdWithFallback(
-          "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]",
-          "Welcome to Hall of Fame!"),
-        localizedMessage = LocalizedString.IdWithFallback(
-          "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Message]",
-          """
-          Hall of Fame could not use your Paradox account ID as you do not appear to be logged in.
-          A random Creator ID was generated for you.
-          """),
-        actions = ErrorDialog.Actions.None
-      });
+    ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+      severity = ErrorDialog.Severity.Warning,
+      localizedTitle = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]"),
+      localizedMessage = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Message]"),
+      actions = ErrorDialog.Actions.None
     });
   }
 
   /// <summary>
-  /// Checks and/or updates the account name with the server and reflect the
-  /// status in the Options UI (success or errors if there are any problems,
-  /// ex. an incorrect username).
+  /// Checks and/or updates the account name with the server and reflect the status in the Options
+  /// UI (success or errors if there are any problems, ex. an incorrect username).
   /// </summary>
   /// <param name="nameOnly">
   /// If true, only update the name, not other info (currently: mod settings).
   /// </param>
   /// <param name="silent">
-  /// Whether to update the login status text with loading/success/error
-  /// messages.
+  /// Whether to update the login status text with loading/success/error messages.
   /// </param>
   /// <param name="debounce">
-  /// Whether to debounce the method if it's called multiple times in a short
-  /// period (keystrokes while typing username).
+  /// Whether to debounce the method if it's called multiple times in a short period (keystrokes
+  /// while typing username).
   /// </param>
   // ReSharper disable once AsyncVoidMethod
   private async void UpdateCreator(
@@ -597,8 +573,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     if (!silent) {
       // Show a loading message while we're fetching the status.
-      this.loginStatusValue = LocalizedString.IdWithFallback(
-        "HallOfFame.Common.LOADING", "Loading…");
+      this.loginStatusValue = LocalizedString.Id("HallOfFame.Common.LOADING");
     }
 
     try {
@@ -614,7 +589,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         ? await HttpQueries.GetMe()
         : await HttpQueries.UpdateMe();
 
-      // Stop if the operation was cancelled while we were fetching data.
+      // Stop if the operation was canceled while we were fetching data.
       thisCts.Token.ThrowIfCancellationRequested();
 
       // Update the login status text with a success message.
@@ -629,15 +604,12 @@ public sealed class Settings : ModSetting, IJsonWritable {
             ? "Anonymously logged in."
             : "Logged in as {CREATOR_NAME}.",
           new Dictionary<string, ILocElement> {
-            {
-              "CREATOR_NAME",
-              LocalizedString.Value(creator.CreatorName)
-            }
+            { "CREATOR_NAME", LocalizedString.Value(creator.CreatorName) }
           });
       }
     }
     catch (Exception ex) {
-      // Stop if the Task.Delay or the network request was cancelled.
+      // Stop if the Task.Delay or the network request was canceled.
       if (ex is OperationCanceledException) {
         return;
       }

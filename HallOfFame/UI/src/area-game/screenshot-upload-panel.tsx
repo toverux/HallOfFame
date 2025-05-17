@@ -126,8 +126,8 @@ function ScreenshotUploadPanelHeader({
 
   // Change the congratulation message every time a screenshot is taken.
   // Congratulation messages are stored in one string, separated by newlines.
-  // useMemo() with imageUri is used to change the message when the state
-  // type and image URI actually change.
+  // useMemo() with imageUri is used to change the message when the state type and image URI
+  // actually change.
   // biome-ignore lint/correctness/useExhaustiveDependencies: explained above.
   const congratulation = useMemo(
     () => getCongratulation(translate),
@@ -167,17 +167,16 @@ function ScreenshotUploadPanelImage({
     [screenshotSnapshot]
   );
 
-  // This useEffect is used to display the success image after the upload is
-  // complete, but only after some time so the progress circles have finished
-  // animating.
+  // This useEffect is used to display the success image after the upload is complete, but only
+  // after some time so the progress circles have finished animating.
   // biome-ignore lint/correctness/useExhaustiveDependencies: ignore setSuccessImageUri
   useEffect(() => {
     // Normal/in progress state, hide the success image.
     if (!uploadProgress?.isComplete) {
       setSuccessImageUri(undefined);
     }
-    // Upload is complete and success image is not shown yet, display it
-    // after the progress animation is done.
+    // Upload is complete, and the success image is not shown yet, display it after the progress
+    // animation is done.
     else if (uploadProgress.isComplete && !successImageUri) {
       setTimeout(() => {
         setSuccessImageUri(getRandomUploadSuccessImage());
@@ -241,8 +240,8 @@ function ScreenshotUploadPanelImage({
                 src={successImageUri}
                 width={loadingProgressVanillaProps.size}
                 height={loadingProgressVanillaProps.size}
-                // This class which is applied to <LoadingProgress /> by
-                // the game can be reused as-is for the image.
+                // This class, which is applied to <LoadingProgress /> by the game, can be reused
+                // as-is for the image.
                 className={coLoadingStyles.progress}
               />
             ) : (
@@ -435,9 +434,8 @@ function getCongratulation(translate: Localization['translate']): string {
 }
 
 /**
- * Computes the type and style of the ratio preview overlay on the image,
- * helping the user to understand how the image will be cropped on the most
- * common aspect ratio, 16:9.
+ * Computes the type and style of the ratio preview overlay on the image, helping the user to
+ * understand how the image will be cropped on the most common aspect ratio, 16:9.
  */
 function getRatioPreviewInfo(screenshot: JsonScreenshotSnapshot) {
   const mostCommonRatio = 16 / 9;
@@ -469,8 +467,8 @@ function getRandomUploadSuccessImage(): string {
 }
 
 /**
- * Gets the hint text for the upload progress depending on the state of
- * {@link uploadProgress} (pending, uploading, processing).
+ * Gets the hint text for the upload progress depending on the state of {@link uploadProgress}
+ * (pending, uploading, processing).
  */
 function getUploadProgressHintText(
   translate: Localization['translate'],

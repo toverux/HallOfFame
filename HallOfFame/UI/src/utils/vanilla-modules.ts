@@ -5,16 +5,16 @@ import { logError } from './ui-helpers';
 const ignoreResolveErrorsFor = new Set<string>();
 
 /**
- * Resolve a Vanilla scoped class name (ex. "vanilla-name_k91") from an exposed
- * scss module, ensuring the desired class(es) are indeed in that module,
- * ensuring type safety and correct error handling.
- * A missing module or class will show an error in the UI the first time it
- * fails to resolve, then it will be ignored to avoid spamming the user.
- * A missing class will resolve in the resulting map with a "_missing" suffix.
+ * Resolve a scoped Vanilla class name (ex. "vanilla-name_k91") from an exposed scss module,
+ * ensuring the desired class(es) are indeed in that module, hence ensuring type safety and correct
+ * error handling.
+ * A missing module or class will show an error in the UI the first time it fails to resolve, then
+ * it will be ignored to avoid spamming the user.
+ * A missing class will be resolved in the resulting map with a "_missing" suffix.
  *
  * @param module     Path of the vanilla module.
- * @param classNames Classes to ensure are in the module, ensuring compilation
- *                   and runtime type safety.
+ * @param classNames Classes to ensure are in the module, ensuring compilation and runtime
+ *                   type-safety.
  */
 export function getClassesModule<const TClassNames extends readonly string[]>(
   module: string,
@@ -50,10 +50,9 @@ export function getClassesModule<const TClassNames extends readonly string[]>(
 }
 
 /**
- * Resolve a Vanilla module export, ensuring the export exists and is of the
- * correct type.
- * A missing module or export will show an error in the UI the first time it
- * fails to resolve, then it will be ignored to avoid spamming the user.
+ * Resolve a Vanilla module export, ensuring the export exists and is of the correct type.
+ * A missing module or export will show an error in the UI the first time it fails to resolve, then
+ * it will be ignored to avoid spamming the user.
  * A missing export will resolve to the provided fallback value.
  *
  * @param module     Path of the vanilla module.

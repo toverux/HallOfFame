@@ -1,8 +1,8 @@
 ﻿import { useEffect, useState } from 'react';
 
 /**
- * A function to make a shareable useState-like hook that shares its value and
- * updates with all components using the same instance.
+ * A function to make a shareable useState-like hook that shares its value and updates with all
+ * components using the same instance.
  *
  * @link https://stackoverflow.com/questions/57602715/react-custom-hooks-fetch-data-globally-and-share-across-components/61449641#61449641
  *

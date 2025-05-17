@@ -10,11 +10,10 @@ namespace HallOfFame.Systems;
 
 /// <summary>
 /// This system is responsible for preloading images in the cohtml cache.
-/// This is used so screenshots can be preloaded and displayed instantly when
-/// needed.
-/// This could be done frontend-side (it was originally done that way), but it
-/// meant duplicating most of the loading and error logic on both sides, leading
-/// to a lot of spaghetti reconciliation code.
+/// This is used so screenshots can be preloaded and displayed instantly when needed.
+/// This could be done frontend-side (it was originally done that way), but it meant duplicating
+/// most of the loading and error logic on both sides, leading to a lot of spaghetti reconciliation
+/// code.
 /// </summary>
 internal sealed partial class ImagePreloaderUISystem : UISystemBase {
   private const string BindingGroup = "hallOfFame.imagePreloader";
@@ -79,10 +78,10 @@ internal sealed partial class ImagePreloaderUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Preloads an image in the cohtml "browser" cache, so it can be displayed
-  /// instantly next time it's requested for display.
-  /// Wraps <see cref="DoPreload"/> to queue successive preloads (this is just
-  /// to be safe, as of now this was not technically needed).
+  /// Preloads an image in the cohtml "browser" cache, so it can be displayed instantly the next
+  /// time it's requested for display.
+  /// Wraps <see cref="DoPreload"/> to queue successive preloads (this is just to be safe, as of now
+  /// this was not technically needed).
   /// </summary>
   /// <exception cref="ImagePreloadFailedException">
   /// When cohtml failed to load the image (Image.onerror).
@@ -106,9 +105,8 @@ internal sealed partial class ImagePreloaderUISystem : UISystemBase {
       return;
     }
 
-    // If the binding is not connected on the frontend side, it means the
-    // client script was not installed: either the game just launched or
-    // the UI was hot-reloaded in dev mode.
+    // If the binding is not connected on the frontend side, it means the client script was not
+    // installed: either the game just launched or the UI was hot-reloaded in dev mode.
     if (!this.urlToPreloadBinding.active) {
       // This will synchronously connect the binding, so no need to wait.
       GameManager.instance.userInterface.view.View.ExecuteScript(

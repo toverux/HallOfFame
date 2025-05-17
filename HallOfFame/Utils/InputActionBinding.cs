@@ -8,18 +8,17 @@ namespace HallOfFame.Utils;
 
 /// <summary>
 /// <para>
-/// Composite binding that holds an input binding configuration
-/// (<see cref="ProxyBinding"/>) and its related action's phase (i.e. is the
-/// related <see cref="ProxyAction"/> being performed, see
+/// Composite binding that holds an input binding configuration (<see cref="ProxyBinding"/>) and its
+/// related action's phase (i.e., is the related <see cref="ProxyAction"/> being performed, see
 /// <see cref="InputActionPhase"/>).
 /// </para>
 /// <para>
-/// The <see cref="ProxyAction"/> is enabled when the action binding is
-/// subscribed to, making the action entirely frontend-driven.
+/// The <see cref="ProxyAction"/> is enabled when the action binding is subscribed to, making the
+/// action entirely frontend-driven.
 /// </para>
 /// <para>
-/// The binding is exposed through the ".binding" suffix, and the action phase
-/// through the ".phase" suffix, appended to the name passed in the constructor.
+/// The binding is exposed through the ".binding" suffix, and the action phase through the ".phase"
+/// suffix, appended to the name passed in the constructor.
 /// </para>
 /// </summary>
 internal class InputActionBinding : CompositeBinding {
@@ -41,11 +40,10 @@ internal class InputActionBinding : CompositeBinding {
 
   /// <summary>
   /// Value binding for the current binding configuration.
-  /// Contrarily to the <see cref="ProxyAction"/>, a
-  /// <see cref="ProxyBinding"/> instance is recreated each time the user
-  /// reconfigures the input binding.
-  /// This binding takes the initial binding instance and tracks the changes
-  /// to update the current binding instance.
+  /// Contrarily to the <see cref="ProxyAction"/>, a <see cref="ProxyBinding"/> instance is
+  /// recreated each time the user reconfigures the input binding.
+  /// This binding takes the initial binding instance and tracks the changes to update the current
+  /// binding instance.
   /// </summary>
   internal class BindingValueBinding : ValueBinding<ProxyBinding> {
     private readonly ProxyBinding.Watcher watcher;
@@ -67,8 +65,8 @@ internal class InputActionBinding : CompositeBinding {
 
   /// <summary>
   /// Value binding for the current action phase.
-  /// This binding enables and disables the related <see cref="ProxyAction"/>
-  /// depending on whether the binding is being subscribed or not.
+  /// This binding enables and disables the related <see cref="ProxyAction"/> depending on whether
+  /// the binding is being subscribed or not.
   /// It reflects the current action's phase as its value.
   /// </summary>
   internal class ActionPhaseValueBinding : ValueBinding<InputActionPhase> {

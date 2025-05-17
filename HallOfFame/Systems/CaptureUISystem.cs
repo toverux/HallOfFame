@@ -43,7 +43,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     Path.Combine(Mod.ModDataPath, "screenshot.jpg");
 
   /// <summary>
-  /// File path of the preview of the latest screenshot taken.
+  /// File path for the preview of the latest screenshot taken.
   /// For file-serving purposes only.
   /// </summary>
   private static readonly string ScreenshotPreviewFilePath =
@@ -85,12 +85,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
       this.uploadProgress = null;
 
-      // Optimization: only enable live bindings when a screenshot is
-      // being displayed/uploaded.
-      // Run on next frame to let the UI update one last time.
-      GameManager.instance.RegisterUpdater(() => {
-        this.Enabled = value is not null;
-      });
+      // Optimization: only enable live bindings when a screenshot is being displayed/uploaded.
+      // Run on the next frame to let the UI update one last time.
+      GameManager.instance.RegisterUpdater(() => { this.Enabled = value is not null; });
     }
   }
 
@@ -167,9 +164,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     Purpose purpose,
     GameMode mode) {
     if (this.CurrentScreenshot is not null) {
-      // Clear the screenshot when the game state changes, ex. the user
-      // exits to the main menu. Otherwise, the screenshot dialog would
-      // appear when the user reopens a game.
+      // Clear the screenshot when the game state changes, for example, when the user exits to the
+      // main menu. Otherwise, the screenshot dialog would appear when the user reopens a game.
       this.ClearScreenshot();
     }
   }
@@ -218,12 +214,11 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       var pdxSdk =
         PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
 
-      // This will return null if the player is not logged-in or in other
-      // error cases.
+      // This will return null if the player is not logged in or in other error cases.
       var mods = await pdxSdk.GetModsInActivePlayset() ?? [];
 
       return this.activeModIdsCache = mods.Select(mod => mod.Id)
-        // Ignore Hall of Fame
+        // Ignore Hall of Fame's ID
         .Where(id => id != 90641)
         .ToArray();
     }
@@ -235,8 +230,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Saves the values used by the photo mode render system to a dictionary of
-  /// property ID => value (always a float).
+  /// Saves the values used by the photo mode render system to a dictionary of property ID => value
+  /// (always a float).
   /// That is enough info to restore them later!
   /// </summary>
   private IDictionary<string, float> GetPhotoModePropertiesSnapshot() {
@@ -261,13 +256,12 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   /// <summary>
   /// Take a screenshot and prepare it for upload.
-  /// If the user has not set a creator name, a dialog will be shown to prompt
-  /// the user to set one and the method will not proceed.
+  /// If the user has not set a creator name, a dialog will be shown to prompt the user to set one
+  /// and the method will not proceed.
   /// </summary>
   private async void TakeScreenshot() {
-    // This bricks the current game session if this throws, so we will
-    // handle exceptions properly here, as there is a non-zero chance of
-    // failure in this section (notably due to I/O).
+    // This bricks the current game session if this throws, so we will handle exceptions properly
+    // here, as there is a non-zero chance of failure in this section (notably due to I/O).
     try {
       // Early exit if the user has not set a creator name.
       if (this.CheckShouldSetCreatorName()) {
@@ -294,34 +288,32 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     // Take a supersize screenshot that is *at least* 2160 pixels (4K).
     // Height is better than width because of widescreen monitors.
-    // The server will decide the final resolution, i.e. rescale to 2160p if
-    // the resulting image is bigger.
+    // The server will decide the final resolution, i.e., rescale to 2160p if the resulting image is
+    // bigger.
     var scaleFactor = (int)Math.Ceiling(2160d / Screen.height);
 
     var camera = Camera.main!;
 
-    // Disable DLSS, causes grainy pictures or artifacts with some setups
-    // + we already do actual supersampling.
+    // Disable DLSS, causes grainy pictures or artifacts with some setups, also we already do actual
+    // supersampling.
     var cameraData = camera.GetComponent<HDAdditionalCameraData>();
     var previousDlssValue = cameraData.allowDeepLearningSuperSampling;
     cameraData.allowDeepLearningSuperSampling = false;
 
-    // Disable Unity dynamic resolution upscaling, it's a low quality
-    // profile.
+    // Disable Unity dynamic resolution upscaling, it's a low-quality profile.
     var dynResSettings = SharedSettings.instance.graphics
       .GetQualitySetting<DynamicResolutionScaleSettings>();
 
     var previousDynResLevel = dynResSettings.GetLevel();
 
     if (dynResSettings.GetLevel() != QualitySetting.Level.High) {
-      // "High" actually means "Disabled" as disabling this option yields
-      // the best quality.
+      // "High" actually means "Disabled" as disabling this option yields the best quality.
       dynResSettings.SetLevel(QualitySetting.Level.High, apply: false);
       dynResSettings.Apply();
     }
 
-    // Disable global illumination as it causes a LOT of grain in CS2's
-    // implementation of GI, on some NVIDIA (?) GPUs.
+    // Disable global illumination as it causes a LOT of grain in CS2's implementation of GI, on
+    // most NVIDIA GPUs.
     var globalIllumination = SharedSettings.instance.graphics
       .GetVolumeOverride<GlobalIllumination>();
 
@@ -332,12 +324,11 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     }
 
     // Let time for some graphics settings to apply.
-    // When testing only DynamicResolutionScaleSettings needed this, but in
-    // any case it's not a bad idea.
+    // When testing, only DynamicResolutionScaleSettings needed this, but in any case it's not a bad
+    // idea.
     await Task.Yield();
 
-    // Create a RenderTexture with the supersize resolution, and ask the
-    // camera to render to it.
+    // Create a RenderTexture with the supersize resolution and ask the camera to render to it.
     var width = Screen.width * scaleFactor;
     var height = Screen.height * scaleFactor;
     var renderTexture = new RenderTexture(width, height, 24);
@@ -345,17 +336,14 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     camera.targetTexture = renderTexture;
 
     // Proceed with the rendering.
-    // Calling Render() multiple times is useful to let the GPU accumulate
-    // data for a cleaner and sharper image: this helps loading more
-    // accurate geometry and lets the antialiasing do its job over multiple
-    // frames too.
-    // You can test it on mountain ranges in the distance for example, it's
-    // quite effective.
+    // Calling Render() multiple times is useful to let the GPU accumulate data for a cleaner and
+    // sharper image: this helps load more accurate geometry and lets the antialiasing do its job
+    // over multiple frames too.
+    // You can test it on mountain ranges in the distance, for example, it's quite effective.
     // Typical values are 1, 2, 4 or 8 cycles.
-    // 8 cycles is probably almost overkill, 4 would do the job well, but
-    // I've seen some minor improvements after 4 cycles (it has diminishing
-    // returns). 8 is at the limit of what's acceptable in terms of
-    // performance too.
+    // Eight cycles is probably almost overkill, four would do the job well, but I've seen some
+    // minor improvements after 4 cycles (it has diminishing returns).
+    // Eight is at the limit of what's acceptable in terms of performance too.
     for (var i = 0; i < 8; i++) {
       camera.Render();
     }
@@ -392,8 +380,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     await Task.Yield();
 
     // Encode the Texture2D to a PNG byte array.
-    // Note: image encoding cannot be done in a background thread
-    // because Unity requires it to be done on the main thread.
+    // Note: image encoding cannot be done in a background thread because Unity requires it to be
+    // done on the main thread.
     var pngScreenshotBytes = screenshotTexture.EncodeToPNG();
 
     // Create a light preview image.
@@ -429,7 +417,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       renderSettings: this.GetPhotoModePropertiesSnapshot(),
       modIds: await this.GetActiveModIds());
 
-    // Preload the preview image in cache before updating the UI.
+    // Preload the preview image in the cache before updating the UI.
     await this.imagePreloaderUISystem!
       .Preload(screenshotSnapshot.PreviewImageUri);
 
@@ -488,28 +476,25 @@ internal sealed partial class CaptureUISystem : UISystemBase {
             this.uploadProgress = new UploadProgress(upload, 0);
           }
 
-          // Case 2: The request has been sent and we are waiting for
-          // the response.
+          // Case 2: The request has been sent, and we are waiting for the response.
           // The condition must ensure this runs only once.
           else if (upload >= 1 && processingUpdatesCts is null) {
             // Mark upload as done and start 'processing' progress.
-            // Processing progress is a guess, as of now the server
-            // does not stream back progress, so it is based on time
-            // elapsed.
+            // Processing progress is a guess, as of now the server does not stream back progress,
+            // so it is based on time elapsed.
             this.uploadProgress = new UploadProgress(1, 0);
 
             processingUpdatesCts = new CancellationTokenSource();
 
-            // This task will update the processing progress
-            // asynchronously until we cancel it, or it reaches 90%
-            // progress, then it will stop by itself.
+            // This task will update the processing progress asynchronously until we cancel it, or
+            // it reaches 90% progress, then it will stop by itself.
             _ = StartUpdateProcessingProgress(
               processingUpdatesCts.Token);
           }
 
           // Case 3: The response has been fully received.
-          // This is handled in the rest of the method so we ensure
-          // the progress is set to 100% at the end.
+          // This is handled in the rest of the method, so we ensure the progress is set to 100% at
+          // the end.
         });
 
       // Set progress to done.
@@ -574,18 +559,10 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     }
 
     var dialog = new ConfirmationDialog(
-      LocalizedString.IdWithFallback(
-        "HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[Title]",
-        "Choose a Creator Name"),
-      LocalizedString.IdWithFallback(
-        "HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[Message]",
-        "To be able to upload a picture, you must first choose a Creator Name in the mod settings."),
-      LocalizedString.IdWithFallback(
-        "HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[ConfirmAction]",
-        "Open Mod Settings"),
-      LocalizedString.IdWithFallback(
-        "Common.ACTION[Cancel]",
-        "Cancel"));
+      LocalizedString.Id("HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[Title]"),
+      LocalizedString.Id("HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[Message]"),
+      LocalizedString.Id("HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[ConfirmAction]"),
+      LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel"));
 
     GameManager.instance.userInterface.appBindings
       .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
@@ -613,11 +590,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Verifies that all graphics settings are set to the highest possible
-  /// quality.
-  /// Ignores Global Illumination and Dynamic Resolution Scale settings as
-  /// they are overridden during the screenshot process because they cause
-  /// issues.
+  /// Verifies that all graphics settings are set to the highest possible quality.
+  /// Ignores Global Illumination and Dynamic Resolution Scale settings as they are overridden
+  /// during the screenshot process because they cause issues.
   /// </summary>
   private bool AreSettingsTopQuality() => SharedSettings.instance.graphics
     .qualitySettings
@@ -633,7 +608,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     });
 
   /// <summary>
-  /// Simply play a sound.
+  /// Play a sound.
   /// </summary>
   private void PlaySound(string sound) {
     try {
@@ -656,9 +631,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     }
 
     // We will mimic the vanilla screenshot naming scheme.
-    // The game uses a ScreenUtility class that increments a private
-    // counter, we read it via reflection and increment it just like
-    // the game does.
+    // The game uses a ScreenUtility class that increments a private counter, we read it via
+    // reflection and increment it just like the game does.
     var fieldInfo = typeof(ScreenUtility).GetField(
       "m_Count", BindingFlags.NonPublic | BindingFlags.Static);
 
@@ -694,10 +668,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   /// <summary>
   /// Snapshot of the latest screenshot.
-  /// Stores the state of the current screenshot and accompanying info that we
-  /// don't want to update in real-time after the screenshot is taken (other
-  /// info like city name and username have their own separated binding as
-  /// we want to allow the user to change them on the fly).
+  /// Stores the state of the current screenshot and accompanying info that we don't want to update
+  /// in real-time after the screenshot is taken (other info like city name and username have their
+  /// own separated binding as we want to allow the user to change them on the fly).
   /// Serialized to JSON for displaying in the UI.
   /// </summary>
   private readonly struct ScreenshotSnapshot(
@@ -710,9 +683,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     IDictionary<string, float> renderSettings,
     int[] modIds) : IJsonWritable {
     /// <summary>
-    /// As we use the same file name for each new screenshot, this is a
-    /// refresh counter appended to the URL of the image as a query
-    /// parameter for cache busting.
+    /// As we use the same file name for each new screenshot, this is a refresh counter appended to
+    /// the URL of the image as a query parameter for cache busting.
     /// </summary>
     private static int latestVersion;
 

@@ -1,4 +1,3 @@
-import { stripIndent } from 'common-tags';
 import { bindValue, useValue } from 'cs2/api';
 import { type ReactNode, useEffect } from 'react';
 import type { Screenshot } from '../common';
@@ -15,9 +14,9 @@ interface Props {
 }
 
 /**
- * This component wraps the loading screen overlay (the one with a spinner and
- * the gameplay hints), and changes its background image with the latest image
- * HoF loaded, if any, otherwise leaves it untouched.
+ * This component wraps the loading screen overlay (the one with a spinner and the gameplay hints),
+ * and changes its background image with the latest image HoF loaded, if any, otherwise leaves it
+ * untouched.
  */
 export function LogoScreenWrapper({ children }: Props): ReactNode {
   const settings = useModSettings();
@@ -37,9 +36,7 @@ export function LogoScreenWrapper({ children }: Props): ReactNode {
 
     if (!(logoScreenEl instanceof HTMLElement)) {
       return logError(
-        new Error(stripIndent`
-                    Could not locate loading screen element
-                    (using selector "${logoScreenEl}")`)
+        new Error(`Could not locate loading screen element (using selector "${logoScreenEl}")`)
       );
     }
 

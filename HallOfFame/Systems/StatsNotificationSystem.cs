@@ -14,8 +14,8 @@ using HallOfFame.Utils;
 namespace HallOfFame.Systems;
 
 /// <summary>
-/// System in charge of retrieving the creator's stats and displaying a standard
-/// notification with those stats when the mod starts.
+/// System in charge of retrieving the creator's stats and displaying a standard notification with
+/// those stats when the mod starts.
 /// </summary>
 internal sealed partial class StatsNotificationSystem : GameSystemBase {
   private NotificationUISystem? notificationUISystem;
@@ -36,8 +36,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
       this.thousandsSeparator = "Common.THOUSANDS_SEPARATOR".Translate(
         fallback: NumberFormatInfo.InvariantInfo.NumberGroupSeparator);
 
-      // If the mod loaded *after* the main menu has already loaded, show
-      // the notification.
+      // If the mod loaded *after* the main menu has already loaded, show the notification.
       if (GameManager.instance.gameMode is GameMode.MainMenu) {
         this.LoadAndShowNotification();
       }
@@ -51,8 +50,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
     base.OnGamePreload(purpose, mode);
 
     if (mode is not GameMode.MainMenu) {
-      this.notificationUISystem?.RemoveNotification(
-        identifier: "HallOfFame.CreatorStats");
+      this.notificationUISystem?.RemoveNotification("HallOfFame.CreatorStats");
     }
   }
 
@@ -72,8 +70,8 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
 
   /// <summary>
   /// Load the creator stats and display a notification with the stats.
-  /// The method is `async void` because it is designed to be called in a
-  /// fire-and-forget manner, and it should be designed to never throw.
+  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
+  /// and it should be designed to never throw.
   /// </summary>
   private async void LoadAndShowNotification() {
     try {
@@ -102,23 +100,15 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
           "Menu.NOTIFICATION_DESCRIPTION[HallOfFame.CreatorStats]",
           "",
           new Dictionary<string, ILocElement> {
-            {
-              "SCREENSHOTS_COUNT",
-              this.LocalizeNumber(stats.ScreenshotsCount)
-            }, {
-              "VIEWS_COUNT",
-              this.LocalizeNumber(stats.ViewsCount)
-            }, {
-              "FAVORITES_COUNT",
-              this.LocalizeNumber(stats.FavoritesCount)
-            }
+            { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
+            { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
+            { "FAVORITES_COUNT", this.LocalizeNumber(stats.FavoritesCount) }
           }),
         thumbnail: "coui://ui-mods/images/stats-notification.svg",
         onClicked: () => {
           this.ShowStatsDialog(stats);
 
-          this.notificationUISystem.RemoveNotification(
-            "HallOfFame.CreatorStats");
+          this.notificationUISystem.RemoveNotification("HallOfFame.CreatorStats");
         });
     }
     catch (HttpException ex) {
@@ -131,36 +121,21 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
 
   private void ShowStatsDialog(CreatorStats stats) {
     var successDialog = new MessageDialog(
-      LocalizedString.Id(
-        "HallOfFame.Systems.StatsNotification.STATS_DIALOG[Title]"),
+      LocalizedString.Id("HallOfFame.Systems.StatsNotification.STATS_DIALOG[Title]"),
       new LocalizedString(
         "HallOfFame.Systems.StatsNotification.STATS_DIALOG[Message]",
         "",
         new Dictionary<string, ILocElement> {
-          {
-            "SCREENSHOTS_COUNT",
-            this.LocalizeNumber(stats.ScreenshotsCount)
-          }, {
-            "VIEWS_COUNT",
-            this.LocalizeNumber(stats.ViewsCount)
-          }, {
-            "FAVORITES_COUNT",
-            this.LocalizeNumber(stats.FavoritesCount)
-          }, {
-            "TOTAL_CREATORS_COUNT",
-            this.LocalizeNumber(stats.AllCreatorsCount)
-          }, {
-            "TOTAL_SCREENSHOTS_COUNT",
-            this.LocalizeNumber(stats.AllScreenshotsCount)
-          }, {
-            "TOTAL_VIEWS_COUNT",
-            this.LocalizeNumber(stats.AllViewsCount)
-          }
+          { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
+          { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
+          { "FAVORITES_COUNT", this.LocalizeNumber(stats.FavoritesCount) },
+          { "TOTAL_CREATORS_COUNT", this.LocalizeNumber(stats.AllCreatorsCount) },
+          { "TOTAL_SCREENSHOTS_COUNT", this.LocalizeNumber(stats.AllScreenshotsCount) },
+          { "TOTAL_VIEWS_COUNT", this.LocalizeNumber(stats.AllViewsCount) }
         }),
-      LocalizedString.Id("Common.CLOSE"));
+      LocalizedString.IdWithFallback("Common.CLOSE", "Close"));
 
-    GameManager.instance.userInterface.appBindings
-      .ShowMessageDialog(successDialog, _ => { });
+    GameManager.instance.userInterface.appBindings.ShowMessageDialog(successDialog, _ => { });
   }
 
   private LocalizedString LocalizeNumber(int number) {

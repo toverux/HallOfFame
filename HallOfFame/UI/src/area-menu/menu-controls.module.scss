@@ -20,8 +20,7 @@
 }
 
 .menu-controls {
-  // Can't mix a CSS variable with alpha in this version of CSS, so we
-  // have to copy the value here.
+  // Can't mix a CSS variable with alpha in this version of CSS, so we have to copy the value here.
   $vanilla-accent-color-dark: #1e83aa;
 
   display: flex;
@@ -95,11 +94,10 @@
         margin-right: 15rem;
         margin-bottom: 15rem;
 
-        // Normally we would not have to use a hardcoded height here, but this
-        // circumvents a cohtml layout bug where images have trouble stretching
-        // to the height of this container (and that depended on the flex
-        // configuration of the parents too, so this seems to be the most robust
-        // way to deal with it).
+        // Normally we would not have to use a hardcoded height here, but this circumvents a cohtml
+        // layout bug where images have trouble stretching to the height of this container (and that
+        // depended on the flex configuration of the parents too, so this seems to be the most
+        // robust way to deal with it).
         height: 40rem;
         display: flex;
         align-items: center;
@@ -107,8 +105,8 @@
         backdrop-filter: contrast(80%) blur(25px);
         padding: 0 12rem;
 
-        // This circumvents a rare bug where a span element can collapse
-        // in a random way, a bug in cohtml's layout engine.
+        // This circumvents a rare bug where a span element can collapse in a random way, a bug in
+        // cohtml's layout engine.
         white-space: nowrap;
 
         img {
@@ -154,8 +152,7 @@
         }
 
         &-active {
-          // Class set when the related action is performed via
-          // keypress and not via the button.
+          // Class set when the related action is performed via keypress and not via the button.
           // Values taken from the vanilla :active button style.
           background-color: var(--menuActiveColorBright);
         }
@@ -170,8 +167,8 @@
         }
 
         &-previous [class*="icon"] {
-          // The X translation is a slight visual adjustment to make
-          // the icon appear better centered.
+          // The X translation is a slight visual adjustment to make the icon appear better
+          // centered.
           transform: translateX(-2rem) rotate(180deg);
         }
 

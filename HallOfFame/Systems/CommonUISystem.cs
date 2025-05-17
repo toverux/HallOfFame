@@ -43,8 +43,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
     base.OnCreate();
 
     try {
-      // No need to OnUpdate as there are no bindings that require it,
-      // they are manually updated when needed.
+      // No need to OnUpdate as there are no bindings that require it, they are manually updated
+      // when needed.
       this.Enabled = false;
 
       this.localeBinding = new GetterValueBinding<string>(
@@ -136,8 +136,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
     var dialog = new ConfirmationDialog(
       title: null,
-      message: LocalizedString.Id(
-        "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[Message]"),
+      message: LocalizedString.Id("HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[Message]"),
       confirmAction: LocalizedString.Id(
         "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInBrowserAction]"),
       cancelAction: null,
@@ -174,7 +173,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
         var sdk =
           PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
 
-        // Get method "private void ShowModsUI(Action<ModsUIView> showAction)"
+        // Get the method "private void ShowModsUI(Action<ModsUIView> showAction)"
         var showModsUi = sdk.GetType().GetMethod(
           "ShowModsUI",
           BindingFlags.Instance | BindingFlags.NonPublic,
@@ -186,8 +185,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
             view.Show(ModsUIScreen.Creator, username)
         ]);
 
-        // Send a GET request to our server so that the click count is
-        // still incremented.
+        // Send a GET request to our server so that the click count is still incremented.
         // We don't care about the result, success or not.
         UnityWebRequest.Get(url).SendWebRequest();
       }

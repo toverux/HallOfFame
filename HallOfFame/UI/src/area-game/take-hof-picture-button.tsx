@@ -8,13 +8,12 @@ import * as styles from './take-hof-picture-button.module.scss';
 
 /**
  * Component that displays the HoF Take Photo button in the photo mode panel.
- * Takes the Vanilla Take Photo button HTML as a template and modifies it to
- * our needs. We mainly needed to create a dedicated component and the whole
- * portal thing for this button instead of just a few DOM patches in order to be
- * able to use our own defined <Tooltip> on it. About that, it's also that just
- * cloning the Vanilla button node was working very well, except for the tooltip
- * that was the one from the Vanilla button, and displayed in the wrong place,
- * with no way to change the text either.
+ * Takes the Vanilla Take Photo button HTML as a template and modifies it to our needs.
+ * We mainly needed to create a dedicated component and the whole portal thing for this button
+ * instead of just a few DOM patches, to be able to use our own defined <Tooltip> on it.
+ * About that, it's also that just cloning the Vanilla button node was working very well, except for
+ * the tooltip that was the one from the Vanilla button, and displayed in the wrong place, with no
+ * way to change the text either.
  */
 export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
   const { translate } = useLocalization();
@@ -22,11 +21,10 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
   // A neutral element just needed to put the HTML of the button somewhere.
   const spanRef = useRef<HTMLElement>(null);
 
-  // This runs once when the DOM is loaded, with the spanRef element having
-  // the template HTML of the Take Photo button. We modify it according to
-  // our needs.
+  // This runs once when the DOM is loaded, with the spanRef element having the template HTML of the
+  // Take Photo button. We modify it according to our needs.
   useEffect(() => {
-    // Retrieve button element, and add our custom class to it.
+    // Retrieve the button element and add our custom class to it.
     const button = spanRef.current?.firstElementChild;
     if (!(button instanceof HTMLButtonElement)) {
       return logError(new Error(`Expected template HTML to be a <button>.`));
@@ -34,7 +32,7 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 
     button.classList.add(styles.screenshotButton);
 
-    // Replace button icon with our share picture icon.
+    // Replace the button icon with our share picture icon.
     if (button.firstElementChild instanceof HTMLElement) {
       button.firstElementChild.style.maskImage = `url(${sharePictureSrc})`;
     }

@@ -6,8 +6,7 @@ namespace HallOfFame.Utils;
 internal static class LogExtensions {
   /// <summary>
   /// Logs an unexpected but probably recoverable exception.
-  /// As we set <see cref="ILog.showsErrorsInUI"/> to true this will be shown
-  /// to the user.
+  /// As we set <see cref="ILog.showsErrorsInUI"/> to true this will be shown to the user.
   /// We warn them that they can probably safely continue to play.
   /// </summary>
   internal static void ErrorRecoverable(this ILog log, Exception ex) {
@@ -18,8 +17,8 @@ internal static class LogExtensions {
   }
 
   /// <summary>
-  /// Same as <see cref="ErrorRecoverable"/> but for fatal errors, i.e. errors
-  /// that we don't know what side effects they might have.
+  /// Same as <see cref="ErrorRecoverable"/> but for fatal errors, i.e., errors that we don't know
+  /// what side effects they might have.
   /// </summary>
   internal static void ErrorFatal(this ILog log, Exception ex) {
     var @base = "HallOfFame.Common.BASE_ERROR".Translate();
