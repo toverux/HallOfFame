@@ -40,6 +40,14 @@ is welcome, there is no downvote and no moderation based on skill.
 suggest/upvote features:
 https://feedback.halloffame.cs2.mtq.io
 
+## Troubleshooting
+
+A few users might encounter a crash on startup when using Hall of Fame, which is due to a bug in the
+game’s UI engine when many mods initialize at the same time.
+
+Follow this guide to understand and workaround the problem:
+https://github.com/toverux/HallOfFame/wiki/Hall-of-Fame-crashes-on-startup
+
 ## Rules
 
 ### Should I be a pro-detailer to share my screenshots?

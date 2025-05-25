@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Version>2025.4.2</Version>
-        <FileVersion>2025.4.2</FileVersion>
+        <Version>2025.5.0</Version>
+        <FileVersion>2025.5.0</FileVersion>
 
         <OutputType>Library</OutputType>
         <!-- According to @Wayz and @tdw_village on Discord, C# 9 is the highest version supported by Burst. -->
