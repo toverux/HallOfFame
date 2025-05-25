@@ -81,6 +81,8 @@
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Connecté en anonyme",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Activer dans le menu principal",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Vous pouvez désactiver Hall of Fame dans le menu principal et toujours utiliser ses autres fonctionnalités.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "Charger à la demande",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "Si <{KEY=Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]}> est désactivé, vous pouvez utiliser ce raccourci pour charger Hall of Fame à la demande.\nCela est utile pour les personnes ne souhaitant pas activer cette partie du mod de manière permanente, ou bien pour les personnes ayant des problèmes de crash quand beaucoup de mods chargent au démarrage.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Image sur l’écran de chargement",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Hall of Fame montrera la dernière image qu’il a chargé dans le menu de chargement d’une sauvegarde ou au retour au menu.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "Afficher les réseaux sociaux des créateurs",

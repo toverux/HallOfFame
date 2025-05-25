@@ -5,12 +5,15 @@ using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
+using Game.Input;
 using Game.SceneFlow;
+using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
 using HallOfFame.Domain;
 using HallOfFame.Http;
 using HallOfFame.Utils;
+using UnityEngine.InputSystem;
 
 namespace HallOfFame.Systems;
 
@@ -22,6 +25,12 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   private const string BindingGroup = "hallOfFame.presenter";
 
   private ImagePreloaderUISystem imagePreloaderUISystem = null!;
+
+  private bool forceEnableMainMenuSlideshow;
+
+  private ProxyAction forceEnableMainMenuSlideshowAction = null!;
+
+  private GetterValueBinding<bool> enableMainMenuSlideshowBinding = null!;
 
   private GetterValueBinding<bool> hasPreviousScreenshotBinding = null!;
 
@@ -79,7 +88,14 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.imagePreloaderUISystem =
         this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
 
+      this.forceEnableMainMenuSlideshowAction =
+        Mod.Settings.GetAction(nameof(Settings.KeyBindingForceEnableMainMenuSlideshow));
+
       // VALUE BINDINGS
+      this.enableMainMenuSlideshowBinding = new GetterValueBinding<bool>(
+        PresenterUISystem.BindingGroup, "enableMainMenuSlideshow",
+        () => this.forceEnableMainMenuSlideshow || Mod.Settings.EnableMainMenuSlideshow);
+
       this.hasPreviousScreenshotBinding = new GetterValueBinding<bool>(
         PresenterUISystem.BindingGroup, "hasPreviousScreenshot",
         () => this.currentScreenshotIndex > 0);
@@ -106,6 +122,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         PresenterUISystem.BindingGroup, "isSaving",
         false);
 
+      this.AddBinding(this.enableMainMenuSlideshowBinding);
       this.AddBinding(this.hasPreviousScreenshotBinding);
       this.AddBinding(this.forcedRefreshIndexBinding);
       this.AddBinding(this.isRefreshingBinding);
@@ -161,31 +178,46 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.AddBinding(this.favoriteScreenshotBinding);
       this.AddBinding(this.saveScreenshotBinding);
       this.AddBinding(this.reportScreenshotBinding);
+
+      // Wire force-enable main menu slideshow.
+      Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
+
+      this.forceEnableMainMenuSlideshowAction.onInteraction +=
+        this.OnForceEnableMainMenuSlideshowInteraction;
+
+      this.EnableOrDisableEnableMainMenuSlideshowAction();
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
     }
   }
 
+  protected override void OnDestroy() {
+    base.OnDestroy();
+
+    Mod.Settings.onSettingsApplied -= this.OnSettingsApplied;
+
+    this.forceEnableMainMenuSlideshowAction.onInteraction -=
+      this.OnForceEnableMainMenuSlideshowInteraction;
+  }
+
   /// <summary>
   /// Lifecycle method used for changing the current screenshot when the user returns to the main
   /// menu.
   /// </summary>
-  protected override void OnGameLoadingComplete(
-    Purpose purpose,
-    GameMode mode) {
+  protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode) {
     // The condition serves two purposes:
     // 1. Call NextScreenshot when the user returns to the main menu from another game mode.
     // 2. Avoid potentially repeating the NextScreenshot call when the game boots and mods are
     //    initialized before the first game mode is set, this rarely happens, but it's possible.
     //    Note: in later versions of the game, this seems extremely unlikely in normal setups.
-    if (mode is GameMode.MainMenu &&
-        this.previousGameMode is not GameMode.MainMenu) {
-      this.forcedRefreshIndexBinding.Update(
-        this.forcedRefreshIndexBinding.value + 1);
+    if (mode is GameMode.MainMenu && this.previousGameMode is not GameMode.MainMenu) {
+      this.forcedRefreshIndexBinding.Update(this.forcedRefreshIndexBinding.value + 1);
     }
 
     this.previousGameMode = mode;
+
+    this.EnableOrDisableEnableMainMenuSlideshowAction();
   }
 
   #if DEBUG
@@ -199,8 +231,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
       var screenshot = await HttpQueries.GetScreenshot(screenshotId);
 
-      screenshot = await this.LoadScreenshot(
-        screenshot: screenshot, preload: false);
+      screenshot = await this.LoadScreenshot(screenshot: screenshot, preload: false);
 
       if (screenshot is not null) {
         this.screenshotBinding.Update(screenshot);
@@ -214,6 +245,23 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     }
   }
   #endif
+
+  private void OnSettingsApplied(Setting _) {
+    this.enableMainMenuSlideshowBinding.Update();
+  }
+
+  private void OnForceEnableMainMenuSlideshowInteraction(ProxyAction _, InputActionPhase phase) {
+    if (phase is InputActionPhase.Performed) {
+      this.forceEnableMainMenuSlideshow ^= true;
+      this.enableMainMenuSlideshowBinding.Update();
+    }
+  }
+
+  private void EnableOrDisableEnableMainMenuSlideshowAction() {
+    this.forceEnableMainMenuSlideshowAction.shouldBeEnabled =
+      Mod.Settings.EnableMainMenuSlideshow is false &&
+      GameManager.instance.gameMode is GameMode.MainMenu;
+  }
 
   /// <summary>
   /// Switches the current screenshot to the previous if there is one
@@ -241,8 +289,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
     // We still need to make sure the image is preloaded, because these images aren't kept long in
     // cohtml's cache; if the user clicks 'Previous' a few times, this is necessary.
-    screenshot =
-      await this.LoadScreenshot(screenshot: screenshot, preload: false);
+    screenshot = await this.LoadScreenshot(screenshot: screenshot, preload: false);
 
     // There was an error when preloading the previous image.
     if (screenshot is not null) {
@@ -575,8 +622,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         GameManager.instance.userInterface.appBindings
           .ShowMessageDialog(successDialog, _ => { });
 
-        this.forcedRefreshIndexBinding.Update(
-          this.forcedRefreshIndexBinding.value + 1);
+        this.forcedRefreshIndexBinding.Update(this.forcedRefreshIndexBinding.value + 1);
       }
       catch (HttpException ex) {
         ErrorDialogManager.ShowErrorDialog(new ErrorDialog {

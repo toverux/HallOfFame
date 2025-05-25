@@ -81,6 +81,8 @@
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Anonymously logged in",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Enable main menu integration",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "You can disable Hall of Fame’s slideshow on the main menu and still keep the other features.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "Load on-demand",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "If <{KEY=Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]}> is disabled, you may use this hotkey to load Hall of Fame on-demand.\nThis is useful for people who don’t want this part of the mod enabled at all times, or people who have crash issues when too much mods load on startup.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Show latest image on the loading screen",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Whether Hall of Fame will show the last image it loaded on the loading screen when loading a save or returning to the main menu.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "Show creators’ social links",

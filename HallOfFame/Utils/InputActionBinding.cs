@@ -103,9 +103,7 @@ internal class InputActionBinding : CompositeBinding {
       this.action.shouldBeEnabled = false;
     }
 
-    private void OnActionInteraction(
-      ProxyAction _,
-      InputActionPhase phase) {
+    private void OnActionInteraction(ProxyAction _, InputActionPhase phase) {
       this.Update(phase);
     }
   }

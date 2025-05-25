@@ -33,6 +33,8 @@ namespace HallOfFame;
   Settings.GroupLinks,
   Settings.GroupDevelopment)]
 [SettingsUIKeyboardAction(
+  nameof(Settings.KeyBindingForceEnableMainMenuSlideshow), Usages.kMenuUsage)]
+[SettingsUIKeyboardAction(
   nameof(Settings.KeyBindingPrevious), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(
   nameof(Settings.KeyBindingNext), Usages.kMenuUsage)]
@@ -139,6 +141,19 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// </summary>
   [SettingsUISection(Settings.GroupUIPreferences)]
   public bool EnableMainMenuSlideshow { get; set; }
+
+  /// <summary>
+  /// Hotkey to force-enable the main menu slideshow if <see cref="EnableMainMenuSlideshow"/> is
+  /// disabled.
+  /// </summary>
+  [SettingsUISection(Settings.GroupUIPreferences)]
+  [SettingsUIKeyboardBinding(
+    BindingKeyboard.H,
+    nameof(Settings.KeyBindingForceEnableMainMenuSlideshow))]
+  [SettingsUIDisableByCondition(
+    typeof(Settings),
+    nameof(Settings.EnableMainMenuSlideshow))]
+  public ProxyBinding KeyBindingForceEnableMainMenuSlideshow { get; set; }
 
   /// <summary>
   /// Whether to replace the vanilla background image in the loading screen with the last image that
@@ -639,9 +654,6 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     writer.PropertyName("creatorIdClue");
     writer.Write(this.MaskedCreatorID?.Split('-')[0]);
-
-    writer.PropertyName("enableMainMenuSlideshow");
-    writer.Write(this.EnableMainMenuSlideshow);
 
     writer.PropertyName("enableLoadingScreenBackground");
     writer.Write(this.EnableLoadingScreenBackground);

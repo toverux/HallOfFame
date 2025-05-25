@@ -3,7 +3,6 @@ import { bindValue, useValue } from 'cs2/api';
 export interface ModSettings {
   readonly creatorName: string;
   readonly creatorIdClue: string;
-  readonly enableMainMenuSlideshow: boolean;
   readonly enableLoadingScreenBackground: boolean;
   readonly showCreatorSocials: boolean;
   readonly showViewCount: boolean;
@@ -16,7 +15,6 @@ export interface ModSettings {
 const settings$ = bindValue<ModSettings>('hallOfFame.common', 'settings', {
   creatorName: '',
   creatorIdClue: '',
-  enableMainMenuSlideshow: true,
   enableLoadingScreenBackground: true,
   showCreatorSocials: true,
   showViewCount: false,

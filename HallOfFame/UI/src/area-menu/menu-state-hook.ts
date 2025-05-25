@@ -5,6 +5,8 @@ import type { Screenshot } from '../common';
 import { createSingletonHook, useModSettings } from '../utils';
 
 interface ReadonlyMenuState {
+  readonly isSlideshowEnabled: boolean;
+
   /**
    * Current image to display, depending on quality setting, {@link screenshot.imageUrlFHD} or
    * {@link screenshot.imageUrl4K}.
@@ -66,6 +68,12 @@ interface SettableMenuState {
   readonly isReadyForNextImage: boolean;
 }
 
+const enableMainMenuSlideshow$ = bindValue<boolean>(
+  'hallOfFame.presenter',
+  'enableMainMenuSlideshow',
+  true
+);
+
 const hasPreviousScreenshot$ = bindValue<boolean>(
   'hallOfFame.presenter',
   'hasPreviousScreenshot',
@@ -94,6 +102,7 @@ export function useHofMenuState(): [
   const settings = useModSettings();
   const [settableMenuState, setMenuState] = useSingletonMenuState();
 
+  const enableMainMenuSlideshow = useValue(enableMainMenuSlideshow$);
   const hasPreviousScreenshot = useValue(hasPreviousScreenshot$);
   const isRefreshing = useValue(isRefreshing$);
   const forcedRefreshIndex = useValue(forcedRefreshIndex$);
@@ -103,6 +112,7 @@ export function useHofMenuState(): [
 
   const menuState: ReadonlyMenuState & SettableMenuState = {
     ...settableMenuState,
+    isSlideshowEnabled: enableMainMenuSlideshow,
     hasPreviousScreenshot,
     forcedRefreshIndex,
     isRefreshing,
