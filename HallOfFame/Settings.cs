@@ -604,6 +604,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
         ? await HttpQueries.GetMe()
         : await HttpQueries.UpdateMe();
 
+      Mod.Log.Info($"Logged in as {creator.CreatorName}. Your Public Creator ID is {creator.Id}.");
+
       // Stop if the operation was canceled while we were fetching data.
       thisCts.Token.ThrowIfCancellationRequested();
 
