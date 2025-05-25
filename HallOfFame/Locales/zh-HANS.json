@@ -81,6 +81,7 @@
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  匿名登录",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "整合到主菜单里",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "您可以在主菜单上禁用“城市画廊”的幻灯片，但仍保留其他功能。",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "按需加载",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "在载入界面上显示最新图片",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "“城市画廊”将在载入存档或返回主菜单时显示其加载的最后一张图像。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "显示创建者的社交媒体链接",
