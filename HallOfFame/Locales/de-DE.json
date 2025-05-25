@@ -81,6 +81,8 @@
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Anonym angemeldet",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Integration im Hauptmenü aktivieren",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Du kannst die Slideshow von Hall of Fame im Hauptmenü deaktivieren und trotzdem die anderen Funktionen behalten.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "Nur bei Bedarf laden",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "Wenn <{KEY=Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]}> deaktiviert ist, kannst du diesen Hotkey verwenden, um Hall of Fame bei Bedarf zu laden.\nDies ist nützlich für Leute, die diesen Teil der Mod nicht jederzeit aktivieren möchten oder Leute, die Absturzprobleme haben, wenn zu viele Mods beim Start geladen werden.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Aktuelles Bild auf dem Ladebildschirm anzeigen",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Ob Hall of Fame das letzte Bild, welches es gelanden hat, auf dem Ladebildschirm anzeigt. (z.B. beim Laden eines Spielstands oder bei der Rückkehr zum Hauptmenü)",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "Soziale Links der Ersteller anzeigen",
