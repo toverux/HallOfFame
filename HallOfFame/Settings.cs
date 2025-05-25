@@ -100,6 +100,14 @@ public sealed class Settings : ModSetting, IJsonWritable {
   public bool IsParadoxAccountID { get; set; }
 
   /// <summary>
+  /// Text explaining the algorithms' weight selection mechanism.
+  /// </summary>
+  [SettingsUIMultilineText(icon: "coui://ui-mods/images/cs2-lightbulb.svg")]
+  [UsedImplicitly]
+  public string AdvancedSettingsDescription =>
+    string.Empty; // The actual text comes from the translation file.
+
+  /// <summary>
   /// Creator username.
   /// Although the UI asks the user to set one when uploading an image, just because it's nicer,
   /// it is not mandatory and can be left null/empty.
@@ -153,6 +161,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUIDisableByCondition(
     typeof(Settings),
     nameof(Settings.EnableMainMenuSlideshow))]
+  [SettingsUIAdvanced]
   public ProxyBinding KeyBindingForceEnableMainMenuSlideshow { get; set; }
 
   /// <summary>
@@ -164,18 +173,21 @@ public sealed class Settings : ModSetting, IJsonWritable {
     typeof(Settings),
     nameof(Settings.EnableMainMenuSlideshow),
     invert: true)]
+  [SettingsUIAdvanced]
   public bool EnableLoadingScreenBackground { get; set; }
 
   /// <summary>
   /// Whether to show creators' social links in the main menu UI.
   /// </summary>
   [SettingsUISection(Settings.GroupUIPreferences)]
+  [SettingsUIAdvanced]
   public bool ShowCreatorSocials { get; set; }
 
   /// <summary>
   /// Whether to show the view count of screenshots in the main menu UI.
   /// </summary>
   [SettingsUISection(Settings.GroupUIPreferences)]
+  [SettingsUIAdvanced]
   public bool ShowViewCount { get; set; }
 
   /// <summary>
@@ -304,6 +316,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     typeof(Settings),
     nameof(Settings.IsNvidiaGpu),
     invert: true)]
+  [SettingsUIAdvanced]
   public bool DisableGlobalIllumination { get; set; }
 
   /// <summary>
@@ -311,6 +324,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// </summary>
   [SettingsUISection(Settings.GroupAdvanced)]
   [SettingsUITextInput]
+  [SettingsUIAdvanced]
   public string BaseUrl { get; set; } = null!;
 
   [SettingsUIButton]
