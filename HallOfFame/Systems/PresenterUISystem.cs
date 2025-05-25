@@ -248,6 +248,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private void OnSettingsApplied(Setting _) {
     this.enableMainMenuSlideshowBinding.Update();
+    this.EnableOrDisableEnableMainMenuSlideshowAction();
   }
 
   private void OnForceEnableMainMenuSlideshowInteraction(ProxyAction _, InputActionPhase phase) {
