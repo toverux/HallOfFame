@@ -72,6 +72,7 @@
   "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "Préférences de contenu",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Advanced]": "Paramètres avancés",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Links]": "Liens",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.AdvancedSettingsDescription]": "Cliquez sur « {KEY=Common.ACTION[Show Advanced]} » pour plus d’options de customisation !",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Nom de créateur",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Votre pseudo de créateur, sera affiché avec vos photos.\nVous pouvez le changer sans problème du moment que vous conservez le même Creator ID, votre nom d’utilisateur sera mis à jour sur le serveur immédiatement ainsi que sur toutes vos photos déjà envoyées.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "Identifiant (Creator ID)",
