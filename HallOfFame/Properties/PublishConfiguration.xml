@@ -154,13 +154,9 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2025.5.0" />
+  <ModVersion Value="2025.5.1" />
   <GameVersion Value="1.2.*" />
-  <ChangeLog>**New features:**
-- If you have disabled Hall of Fame integration in the main menu, you can now override it and load Hall of Fame on-demand (without changing the option's value) by pressing the "H" key while being on the main menu.
-  This is mostly intended for users that have crashes with Hall of Fame on startup, now these users can load this part of the mod when the game reaches a more stable state.
-- As the number of options is growing, some options are now only shown when you use the "Show Advanced" options button.
-- Your public creator ID is now logged on startup. The public creator ID can be used with Hall of Fame's API for you to build custom integrations.</ChangeLog>
+  <ChangeLog>Localization updates.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
