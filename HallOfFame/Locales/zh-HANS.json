@@ -72,6 +72,7 @@
   "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "内容偏好",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Advanced]": "高级设置",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Links]": "链接",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.AdvancedSettingsDescription]": "点击 “{KEY=Common.ACTION[Show Advanced]}” 获取更多自定义选项！",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "创作者名称",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "您的创作者名称将显示在您的截图旁边。\n只要您的创作者 ID 保持不变，您就可以随时更改创作者名称，并且服务器会立即更新您的创作者名称和所有已上传的作品。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "创作者 ID",
