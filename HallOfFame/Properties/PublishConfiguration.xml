@@ -154,9 +154,11 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2025.5.1" />
+  <ModVersion Value="2025.5.2" />
   <GameVersion Value="1.3.*" />
-  <ChangeLog>Localization updates.</ChangeLog>
+  <ChangeLog>- Compatibility with game update 1.3.3f1.
+- Minor UI improvements.
+- Localization updates.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />

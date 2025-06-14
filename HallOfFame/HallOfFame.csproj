@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Version>2025.5.1</Version>
-        <FileVersion>2025.5.1</FileVersion>
+        <Version>2025.5.2</Version>
+        <FileVersion>2025.5.2</FileVersion>
 
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release</Configurations>
@@ -21,7 +21,7 @@
         <!-- As I do not need Burst in Hall of Fame (no hot path), using C# 12 is fine. -->
         <LangVersion>12</LangVersion>
     </PropertyGroup>
-    
+
     <ItemGroup>
         <EmbeddedResource Include="Locales\*.json"/>
     </ItemGroup>
