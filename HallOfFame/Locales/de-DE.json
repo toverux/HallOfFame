@@ -72,6 +72,7 @@
   "Options.GROUP[HallOfFame.HallOfFame.Mod.ContentPreferences]": "Inhaltseinstellungen",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Advanced]": "Erweiterte Einstellungen",
   "Options.GROUP[HallOfFame.HallOfFame.Mod.Links]": "Links",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.AdvancedSettingsDescription]": "Klicke auf \"{KEY=Common.ACTION[Show Advanced]}\" für weitere Einstellungsmöglichkeiten!",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Creator-Name",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreatorName]": "Dein Creator-Name wird neben deinen Screenshots angezeigt.\nDu kannst ihn jederzeit ändern, solange deine Creator-ID gleich bleibt. Dein Name wird für alle früheren Uploads aktualisiert und sofort auf dem Server aktualisiert.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.MaskedCreatorID]": "Creator-ID",
