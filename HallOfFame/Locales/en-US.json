@@ -50,6 +50,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\nHall of Fame material!\nShare this masterpiece?\nStunning view!\nNice shot!\nA picture worth sharing!\nSnapshot of glory!\nFrame this memory!\nShow the community!\nThis one’s a keeper!\nVery nice skyline!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "16:9 Aspect Ratio Preview.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 is by far the most common aspect ratio. This rectangle shows you how your image will be cropped on such screens, so you can ensure all the important details are in it.",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.MAXIMIZE_TOOLTIP": "Maximise image (click to close the preview)",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Your Creator Name is currently empty. You must set it in the mod settings to upload a picture.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY": "Your graphics settings are lower than High. We recommend setting them to High while you are taking screenshots!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "Global Illumination was disabled for the screenshot, see mod options for more information.",
