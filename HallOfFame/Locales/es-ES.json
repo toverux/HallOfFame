@@ -50,6 +50,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "¡Material para una muestra!\n¿Compartir esta obra de arte?\n¡Maravillosa vista!\n¡Gran toma!\n¡Esto vale la pena mostrarlo!\n¡Captura gloriosa!\n¡Está para enmarcar!\n¡Muéstrala a la comunidad!\n¡Muy buena toma!\n¿A caso eres fotógrafo profesional?\n¡Esta imagen esta de pelos!\n¡Que vista!\n¡Realmente impresionante!\n¡Es grandiosa!\n¡Que maravilla!\n¡Deberías dedicarte a esto!\n¡Es una obra maestra!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Vista previa en proporción 16:9.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "La proporción 16:9 es por mucho la más común. Este rectángulo muestra como tu imagen será recortada en tales pantallas, así puedes asegurarte que todos los detalles importantes quepan en estas.",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.MAXIMIZE_TOOLTIP": "Maximizar imagen (haga clic para cerrar la vista previa)",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Tu Nombre de Creador está vacío. Debes configurarlo en los ajustes del mod para cargar una imagen.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY": "Tu configuración gráfica es inferior a Alta. ¡Recomendamos establecerla en Alta al tomar una captura de pantalla!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "La Iluminación Global fue desactivada para tomar la captura de pantalla, ve las opciones del mod para más información.",
