@@ -217,7 +217,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       // This will return null if the player is not logged in or in other error cases.
       var mods = await pdxSdk.GetModsInActivePlayset() ?? [];
 
-      return this.activeModIdsCache = mods.Select(mod => mod.Id)
+      return this.activeModIdsCache = mods
+        .Select(mod => mod.id)
         // Ignore Hall of Fame's ID
         .Where(id => id != 90641)
         .ToArray();

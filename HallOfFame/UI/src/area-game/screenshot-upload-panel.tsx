@@ -45,7 +45,7 @@ const coFixedRatioImageStyles = getClassesModule(
 
 const coLoadingStyles = getClassesModule(
   'game-ui/overlay/logo-screen/loading/loading.module.scss',
-  ['hint', 'progress']
+  ['progress']
 );
 
 const coMainScreenStyles = getClassesModule(
@@ -78,7 +78,7 @@ export function ScreenshotUploadPanel(): ReactElement {
   const screenshotSnapshot = useValue(screenshotSnapshot$);
   const uploadProgress = useValue(uploadProgress$);
 
-  // Show panel when there is a screenshot to upload.
+  // Show the panel when there is a screenshot to upload.
   if (!screenshotSnapshot) {
     return <></>;
   }
@@ -255,7 +255,7 @@ function ScreenshotUploadPanelImage({
               />
             )}
 
-            <div className={coLoadingStyles.hint}>
+            <div className={styles.screenshotUploadPanelImageUploadProgressContentHint}>
               {getUploadProgressHintText(translate, uploadProgress)}
             </div>
           </div>

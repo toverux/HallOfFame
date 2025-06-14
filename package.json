@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "packageManager": "bun@1.2.15",
+  "packageManager": "bun@1.2.16",
   "engines": {
     "bun": ">=1.2.0",
     "node": ">=22.0.0"
@@ -15,7 +15,7 @@
     "dev": "webpack --config HallOfFame/UI/webpack.config.js --progress --watch"
   },
   "dependencies": {
-    "@csmodding/urbandevkit": "^0.1.2",
+    "@csmodding/urbandevkit": "^0.2.0",
     "classnames": "^2.5.1",
     "common-tags": "^1.8.2",
     "react": "^18.3.1",
@@ -29,7 +29,7 @@
     "css-loader": "^7.1.2",
     "lefthook": "^1.11.13",
     "mini-css-extract-plugin": "^2.9.2",
-    "sass": "~1.87.0",
+    "sass": "~1.89.2",
     "sass-loader": "^16.0.5",
     "terser-webpack-plugin": "^5.3.14",
     "ts-loader": "^9.5.2",
@@ -39,6 +39,6 @@
   },
   "trustedDependencies": ["@biomejs/biome", "lefthook"],
   "optionalDependencies": {
-    "sass-embedded": "~1.87.0"
+    "sass-embedded": "~1.89.2"
   }
 }

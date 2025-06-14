@@ -7,7 +7,6 @@ using Colossal.PSI.Environment;
 using Colossal.UI;
 using Game;
 using Game.Modding;
-using Game.SceneFlow;
 using HallOfFame.Systems;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
@@ -92,7 +91,7 @@ public sealed class Mod : IMod {
       updateSystem.UpdateAt<StatsNotificationSystem>(SystemUpdatePhase.MainLoop);
       updateSystem.UpdateAt<CommonUISystem>(SystemUpdatePhase.UIUpdate);
       updateSystem.UpdateAt<PresenterUISystem>(SystemUpdatePhase.UIUpdate);
-      updateSystem.UpdateAt<CaptureUISystem>(SystemUpdatePhase.UIUpdate);
+      updateSystem.UpdateAt<Systems.CaptureUISystem>(SystemUpdatePhase.UIUpdate);
 
       Mod.Log.Info($"Mod: {nameof(this.OnLoad)} complete.");
     }
