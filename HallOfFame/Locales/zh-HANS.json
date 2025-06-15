@@ -50,6 +50,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "名画素材！\n分享此杰作？\n令人惊叹的景色！\n好拍！\n独乐乐不如众乐乐！\n辉煌瞬间！\n将这段美好定格！\n快让大伙看看！\n别让这张溜走了！\n壮丽天际线！",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "16:9 宽高比预览。",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 是目前最常见的宽高比。此矩形显示了截图在此类屏幕上的裁剪方式，因此您可以确保所有重要细节都包含在内。",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.MAXIMIZE_TOOLTIP": "最大化图像（点击关闭预览）",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "您的创作者名称目前为空。您必须在模组设置中设置一个名称才能上传截图。",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY": "您的画面设置低于“高”。我们建议您在截图时将其设置为“高”！",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "截图时会禁用全局光影 (SSGI)，请查看模组选项以了解更多信息。",
