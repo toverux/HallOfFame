@@ -1,11 +1,20 @@
 @use "../common";
 
-// We reuse vanilla class .center-panel-layout and add this one in complement.
-.screenshot-upload-panel-layout {
-  // Put ourselves behind other game panels - our panel is persistent and we're not that important.
-  z-index: -1;
+.screenshot-upload-panel-container {
+  // We should be on top except if other mods add content.
+  // In that case we will take precedence with z-index 1 if they are at 0.
+  // We do not put a higher number to let mods that think they really should be at the top do that.
+  z-index: 1;
 
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: flex;
   align-items: center;
+  justify-content: center;
 }
 
 .screenshot-upload-panel {
@@ -24,14 +33,6 @@
 
   @include common.border-radius(20rem);
   @include common.scale-in-ver-center;
-
-  // Small visual adjustment for 1080p screens which are a bit small to display the dialog, which is
-  // not exactly centered vertically as we use the space dedicated to standard panels.
-  // On 1080p screens, this can make the top of the dialog touch the top of the screen, which is not
-  // very aesthetic, so we add a bit of margin to make it look better.
-  @media (max-height: 1080px) {
-    margin-top: 100rem;
-  }
 
   &-header, &-content, &-warning, &-footer {
     padding: 20rem 30rem;

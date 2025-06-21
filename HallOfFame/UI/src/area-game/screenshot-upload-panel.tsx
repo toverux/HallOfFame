@@ -48,11 +48,6 @@ const coLoadingStyles = getClassesModule(
   ['progress']
 );
 
-const coMainScreenStyles = getClassesModule(
-  'game-ui/game/components/game-main-screen.module.scss',
-  ['centerPanelLayout']
-);
-
 const cityName$ = bindValue<string>('hallOfFame.capture', 'cityName');
 
 const screenshotSnapshot$ = bindValue<JsonScreenshotSnapshot | null>(
@@ -86,8 +81,7 @@ export function ScreenshotUploadPanel(): ReactElement {
   const creatorNameIsEmpty = !settings.creatorName.trim();
 
   return (
-    <div
-      className={`${coMainScreenStyles.centerPanelLayout} ${styles.screenshotUploadPanelLayout}`}>
+    <div className={styles.screenshotUploadPanelContainer}>
       <div className={styles.screenshotUploadPanel} {...draggable}>
         <ScreenshotUploadPanelHeader screenshotSnapshot={screenshotSnapshot} />
 

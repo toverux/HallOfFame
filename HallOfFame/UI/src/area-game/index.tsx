@@ -3,11 +3,11 @@
  */
 
 import type { ModRegistrar } from 'cs2/modding';
-import { GameMainContainerPortal } from './game-main-container-portal';
 import { PhotoModePanelPortal } from './photo-mode-panel-portal';
+import { ScreenshotUploadPanel } from './screenshot-upload-panel';
 
 export const register: ModRegistrar = moduleRegistry => {
-  moduleRegistry.append('Game', GameMainContainerPortal);
+  moduleRegistry.append('Game', ScreenshotUploadPanel);
 
   moduleRegistry.extend(
     'game-ui/game/components/photo-mode/photo-mode-panel.tsx',
