@@ -154,10 +154,10 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2025.5.2" />
+  <ModVersion Value="2025.5.3" />
   <GameVersion Value="1.3.*" />
-  <ChangeLog>- Compatibility with game update 1.3.3f1.
-- Minor UI improvements.
+  <ChangeLog>- Fixed the upload panel not being interactable.
+- The upload panel will now show on top of elements it used to be behind from (ex. info views, bottom bar...).
 - Localization updates.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />

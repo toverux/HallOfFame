@@ -1,3 +1,3 @@
-﻿- Compatibility with game update 1.3.3f1.
-- Minor UI improvements.
+﻿- Fixed the upload panel not being interactable.
+- The upload panel will now show on top of elements it used to be behind from (ex. info views, bottom bar...).
 - Localization updates.
