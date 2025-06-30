@@ -1,10 +1,10 @@
 import { bindValue, trigger, useValue } from 'cs2/api';
 import { ControlIcons } from 'cs2/input';
 import {
-  type LocElement,
   type Localization,
   LocalizedNumber,
   LocalizedString,
+  type LocElement,
   useLocalization
 } from 'cs2/l10n';
 import { Button, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
@@ -23,10 +23,11 @@ import trophySrc from '../icons/paradox/trophy.svg';
 import doubleArrowRightTriangleSrc from '../icons/uil/colored/double-arrow-right-triangle.svg';
 import eyeClosedSrc from '../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../icons/uil/colored/eye-open.svg';
+import { iconsole } from '../iconsole';
 import {
+  bindInputAction,
   type ModSettings,
   type ProxyBinding,
-  bindInputAction,
   snappyOnSelect,
   useModSettings
 } from '../utils';
@@ -106,6 +107,7 @@ export function MenuControlsContent(): ReactElement {
   }
 
   if (!menuState.screenshot) {
+    // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
     return <></>;
   }
 
@@ -183,7 +185,7 @@ export function MenuControlsContent(): ReactElement {
             direction='down'
             tooltip={
               <LocalizedString
-                id={'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Save]'}
+                id='HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Save]'
                 args={{
                   // biome-ignore lint/style/useNamingConvention: i18n convention
                   DIRECTORY: modSettings.creatorsScreenshotSaveDirectory
@@ -249,19 +251,19 @@ function MenuControlsCityName({
 
   if (!screenshot.creator) {
     // This will not happen - unless we have a broken ObjectId reference.
-    console.warn(`HoF: No creator information for screenshot ${screenshot.id}`);
+    iconsole.warn(`HoF: No creator information for screenshot ${screenshot.id}`);
 
     return null;
   }
 
   const isCityNameTranslated =
     modSettings.namesTranslationMode != 'disabled' &&
-    !!screenshot.cityNameLocale &&
+    screenshot.cityNameLocale != null &&
     !gameLocale.startsWith(screenshot.cityNameLocale);
 
   const isCreatorNameTranslated =
     modSettings.namesTranslationMode != 'disabled' &&
-    !!screenshot.creator.creatorNameLocale &&
+    screenshot.creator.creatorNameLocale != null &&
     !gameLocale.startsWith(screenshot.creator.creatorNameLocale);
 
   const cityName = isCityNameTranslated
@@ -704,6 +706,7 @@ function locElementToReactNode(
   return element?.__Type == 'Game.UI.Localization.LocalizedString' ? (
     <LocalizedString id={element.id} fallback={element.value} />
   ) : (
+    // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
     <>{fallback}</>
   );
 }

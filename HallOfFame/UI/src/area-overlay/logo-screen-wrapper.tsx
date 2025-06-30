@@ -23,7 +23,6 @@ export function LogoScreenWrapper({ children }: Props): ReactNode {
   const screenshot = useValue(screenshot$);
 
   // When the component is mounted, immediately apply the new background.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: no need to run more than once
   useEffect(() => {
     if (!screenshot) {
       return;

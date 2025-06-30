@@ -2,6 +2,7 @@ import type { ModRegistrar } from 'cs2/modding';
 import { register as registerOnGame } from './area-game';
 import { register as registerOnMenu } from './area-menu';
 import { register as registerOnOverlay } from './area-overlay';
+import { iconsole } from './iconsole';
 import { logError } from './utils';
 
 // Bundle icons in the build to be used by the C# backend.
@@ -18,7 +19,7 @@ const register: ModRegistrar = moduleRegistry => {
     return logError(error, true);
   }
 
-  console.info(`HoF: Successfully registered all modules.`);
+  iconsole.info(`HoF: Successfully registered all modules.`);
 };
 
 // noinspection JSUnusedGlobalSymbols

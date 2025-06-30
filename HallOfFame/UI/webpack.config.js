@@ -1,14 +1,20 @@
-// File originally by Colossal Order.
-// Changes made:
-// - Auto code reformat with Biome, renamed a few variables.
-// - Migrated to ESM (require => import, import.meta.dirname => import.meta.dirname, etc).
-// - Removed custom CSSPresencePlugin.
-// - Change css-loader to ignore resolving static game images (Media/...) and leave them as-is
-//   (`options.url.filter`).
-// - Change css-loader to add "hof-" prefix to CSS modules class names.
-//   This can help debugging and other mods to target our classes.
+/**
+ * File originally by Colossal Order.
+ * Changes made:
+ * - Auto code reformat with Biome, renamed a few variables.
+ * - Migrated to ESM (require => import, import.meta.dirname => import.meta.dirname, etc).
+ * - Removed custom CSSPresencePlugin.
+ * - Change css-loader to ignore resolving static game images (Media/...) and leave them as-is
+ *   (`options.url.filter`).
+ * - Change css-loader to add "hof-" prefix to CSS modules class names.
+ *   This can help debugging and other mods to target our classes.
+ */
+
+/** biome-ignore-all lint/correctness/noNodejsModules: webpack config */
+/** biome-ignore-all lint/style/noProcessEnv: webpack config */
 
 import * as path from 'node:path';
+import * as process from 'node:process';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import mod from './mod.json' with { type: 'json' };
@@ -127,8 +133,11 @@ export default {
       apply(compiler) {
         let runCount = 0;
         compiler.hooks.done.tap('AfterDonePlugin', stats => {
+          // biome-ignore lint/suspicious/noConsole: intended
           console.info(stats.toString({ colors: true }));
+          // biome-ignore lint/suspicious/noConsole: intended
           console.info(`\n🔨 ${runCount++ ? 'Updated' : 'Built'} ${mod.id}`);
+          // biome-ignore lint/suspicious/noConsole: intended
           console.info(`   ${gray(outputDir)}\n`);
         });
       }

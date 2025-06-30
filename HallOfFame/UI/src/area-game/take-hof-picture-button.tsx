@@ -46,6 +46,7 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 
   return (
     <Tooltip tooltip={translate('HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP')}>
+      {/** biome-ignore lint/security/noDangerouslySetInnerHtml: not text from a user */}
       <span ref={spanRef} onClick={takePicture} dangerouslySetInnerHTML={{ __html: html }} />
     </Tooltip>
   );

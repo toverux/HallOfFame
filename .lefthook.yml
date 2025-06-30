@@ -11,4 +11,4 @@ pre-commit:
       run: bun --bun tsc --p HallOfFame/UI --noEmit
     biome:
       glob: "*.{ts,tsx,js,json}"
-      run: bun biome check --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      run: bun biome check --error-on-warnings --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}

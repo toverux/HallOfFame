@@ -14,6 +14,7 @@ export const register: ModRegistrar = moduleRegistry => {
     MenuUIBackdrops => props => {
       const [{ isSlideshowEnabled }] = useHofMenuState();
 
+      // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
       return isSlideshowEnabled ? <></> : <MenuUIBackdrops {...props} />;
     }
   );

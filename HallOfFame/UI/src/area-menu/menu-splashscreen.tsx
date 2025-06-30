@@ -36,7 +36,6 @@ export function MenuSplashscreen(): ReactElement {
 
   // When the menu is refreshing or the fade-in animation is in progress, we disable the ability to
   // show the next image.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: by design + avoid effect loop
   useEffect(() => {
     setMenuState({
       ...menuState,

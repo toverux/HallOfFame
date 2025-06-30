@@ -57,7 +57,6 @@ export function bindInputAction(group: string, name: string) {
   ) {
     const phase = useInputPhase();
 
-    // biome-ignore lint/correctness/useExhaustiveDependencies: just want to trigger on phase changes
     useEffect(() => {
       if (phase == 'Performed') {
         const playSound = handler() ?? true;

@@ -6,9 +6,9 @@ import cloudArrowUpSolidSrc from '../icons/fontawesome/cloud-arrow-up-solid.svg'
 import populationSrc from '../icons/paradox/population.svg';
 import trophySrc from '../icons/paradox/trophy.svg';
 import {
-  type ModSettings,
   createSingletonHook,
   getClassesModule,
+  type ModSettings,
   useDraggable,
   useModSettings
 } from '../utils';
@@ -75,6 +75,7 @@ export function ScreenshotUploadPanel(): ReactElement {
 
   // Show the panel when there is a screenshot to upload.
   if (!screenshotSnapshot) {
+    // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
     return <></>;
   }
 
@@ -122,7 +123,6 @@ function ScreenshotUploadPanelHeader({
   // Congratulation messages are stored in one string, separated by newlines.
   // useMemo() with imageUri is used to change the message when the state type and image URI
   // actually change.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: explained above.
   const congratulation = useMemo(
     () => getCongratulation(translate),
     [translate, screenshotSnapshot.imageUri]
@@ -136,7 +136,7 @@ function ScreenshotUploadPanelHeader({
         variant='round'
         className={styles.screenshotUploadPanelHeaderClose}
         onSelect={discardScreenshot}
-        selectSound={'close-menu'}>
+        selectSound='close-menu'>
         <Icon src='Media/Glyphs/Close.svg' />
       </Button>
     </div>
@@ -163,7 +163,6 @@ function ScreenshotUploadPanelImage({
 
   // This useEffect is used to display the success image after the upload is complete, but only
   // after some time so the progress circles have finished animating.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: ignore setSuccessImageUri
   useEffect(() => {
     // Normal/in progress state, hide the success image.
     if (!uploadProgress?.isComplete) {
@@ -357,9 +356,9 @@ function ScreenshotUploadPanelFooter({
 }>): ReactElement {
   const { translate } = useLocalization();
 
-  const isUploading = !!uploadProgress && !uploadProgress.isComplete;
+  const isUploading = uploadProgress != null && !uploadProgress.isComplete;
   const isIdleOrUploading = !uploadProgress?.isComplete;
-  const isDoneUploading = !!uploadProgress?.isComplete;
+  const isDoneUploading = uploadProgress?.isComplete == true;
 
   return (
     <div className={styles.screenshotUploadPanelFooter}>

@@ -1,6 +1,7 @@
 ﻿import { trigger } from 'cs2/api';
 import type { UISound } from 'cs2/ui';
 import type { DOMAttributes } from 'react';
+import { iconsole } from '../iconsole';
 
 /**
  * Based on a hot take from John Carmack, see
@@ -24,7 +25,7 @@ export function snappyOnSelect(handler: () => void, sound?: `${UISound}`) {
  * Shows an error dialog and logs the error in the mod's logs instead of just in UI logs.
  */
 export function logError(error: unknown, fatal = false): void {
-  console.error(error);
+  iconsole.error(error);
 
   const errorString = error instanceof Error ? error.stack : String(error);
 
