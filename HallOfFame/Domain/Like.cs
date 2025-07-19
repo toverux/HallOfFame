@@ -5,9 +5,9 @@ using JetBrains.Annotations;
 
 namespace HallOfFame.Domain;
 
-[DebuggerDisplay("Favorite #{Id} on Screenshot #{ScreenshotId}")]
+[DebuggerDisplay("Like #{Id} on Screenshot #{ScreenshotId}")]
 [UsedImplicitly]
-internal record Favorite : IJsonWritable {
+internal record Like : IJsonWritable {
   [DecodeAlias("id")]
   internal string Id {
     get;
@@ -23,7 +23,7 @@ internal record Favorite : IJsonWritable {
   } = string.Empty;
 
   public override string ToString() =>
-    $"Favorite #{this.Id} on Screenshot #{this.ScreenshotId}";
+    $"Like #{this.Id} on Screenshot #{this.ScreenshotId}";
 
   public void Write(IJsonWriter writer) {
     writer.TypeBegin(this.GetType().FullName);

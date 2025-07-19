@@ -177,7 +177,7 @@
           transform: translateX(2rem);
         }
 
-        &-favorite {
+        &-like {
           transition: all .1s ease-in-out;
 
           [class*="icon"] {
@@ -186,7 +186,7 @@
             transition: transform .15s ease-in-out;
           }
 
-          &:hover [class*="icon"], &-favorited [class*="icon"] {
+          &:hover [class*="icon"], &-liked [class*="icon"] {
             transform: rotate(-10deg) scale(1.6) translateX(3rem);
           }
 
@@ -194,7 +194,7 @@
             transform: rotate(-5deg) scale(1.45) translateX(3rem);
           }
 
-          &-favorited {
+          &-liked {
             // importants are for overriding :hover styles.
             box-shadow: 0 0 0 2rem #e25570 !important;
             background-color: #e25570aa !important;
@@ -355,7 +355,7 @@
     }
   }
 
-  &-favorite-count {
+  &-likes-count {
     display: inline;
     text-shadow: 1rem 1rem 4rem var(--panelColorDark);
     font-size: calc(30rem * var(--fontScale));

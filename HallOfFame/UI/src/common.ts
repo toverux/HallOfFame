@@ -48,13 +48,13 @@ export interface Screenshot {
 
   readonly createdAtFormattedDistance: string;
 
-  readonly favoritesCount: number;
+  readonly likesCount: number;
 
   readonly viewsCount: number;
 
   readonly likingPercentage: number;
 
-  readonly isFavorite: boolean;
+  readonly isLiked: boolean;
 
   readonly creator?: Creator | undefined;
 }

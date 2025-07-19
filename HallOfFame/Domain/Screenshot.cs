@@ -94,7 +94,7 @@ internal record Screenshot : IJsonWritable {
   } = string.Empty;
 
   [DecodeAlias("favoritesCount")]
-  internal int FavoritesCount {
+  internal int LikesCount {
     get;
     [UsedImplicitly]
     set;
@@ -118,7 +118,7 @@ internal record Screenshot : IJsonWritable {
   /// Non-inherent property of screenshot only set on some endpoints.
   /// </summary>
   [DecodeAlias("__favorited")]
-  internal bool IsFavorite {
+  internal bool IsLiked {
     get;
     [UsedImplicitly]
     set;
@@ -183,8 +183,8 @@ internal record Screenshot : IJsonWritable {
     writer.PropertyName("createdAtFormattedDistance");
     writer.Write(this.CreatedAtFormattedDistance);
 
-    writer.PropertyName("favoritesCount");
-    writer.Write(this.FavoritesCount);
+    writer.PropertyName("likesCount");
+    writer.Write(this.LikesCount);
 
     writer.PropertyName("viewsCount");
     writer.Write(this.ViewsCount);
@@ -192,8 +192,8 @@ internal record Screenshot : IJsonWritable {
     writer.PropertyName("likingPercentage");
     writer.Write(this.LikingPercentage);
 
-    writer.PropertyName("isFavorite");
-    writer.Write(this.IsFavorite);
+    writer.PropertyName("isLiked");
+    writer.Write(this.IsLiked);
 
     if (this.Creator is not null) {
       writer.PropertyName("creator");

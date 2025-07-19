@@ -19,7 +19,7 @@ namespace HallOfFame.Systems;
 
 /// <summary>
 /// System in charge of handling the presentation of community images and the various interactions
-/// that come with it (next, prev, fav, etc.).
+/// that come with it (next, prev, like, etc.).
 /// </summary>
 internal sealed partial class PresenterUISystem : UISystemBase {
   private const string BindingGroup = "hallOfFame.presenter";
@@ -56,7 +56,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private TriggerBinding nextScreenshotBinding = null!;
 
-  private TriggerBinding favoriteScreenshotBinding = null!;
+  private TriggerBinding likeScreenshotBinding = null!;
 
   private TriggerBinding saveScreenshotBinding = null!;
 
@@ -75,7 +75,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// </summary>
   private GameMode previousGameMode = GameMode.MainMenu;
 
-  private bool isTogglingFavorite;
+  private bool isTogglingLike;
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -161,9 +161,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         PresenterUISystem.BindingGroup, "nextScreenshot",
         this.NextScreenshot);
 
-      this.favoriteScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup, "favoriteScreenshot",
-        this.FavoriteScreenshot);
+      this.likeScreenshotBinding = new TriggerBinding(
+        PresenterUISystem.BindingGroup, "likeScreenshot",
+        this.LikeScreenshot);
 
       this.saveScreenshotBinding = new TriggerBinding(
         PresenterUISystem.BindingGroup, "saveScreenshot",
@@ -175,7 +175,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
       this.AddBinding(this.previousScreenshotBinding);
       this.AddBinding(this.nextScreenshotBinding);
-      this.AddBinding(this.favoriteScreenshotBinding);
+      this.AddBinding(this.likeScreenshotBinding);
       this.AddBinding(this.saveScreenshotBinding);
       this.AddBinding(this.reportScreenshotBinding);
 
@@ -488,26 +488,25 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Toggle the favorite status of the current screenshot, with an optimistic UI update.
+  /// Toggle the liked status of the current screenshot, with an optimistic UI update.
   /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
   /// and it should be designed to never throw.
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
-  private async void FavoriteScreenshot() {
-    if (this.isTogglingFavorite ||
+  private async void LikeScreenshot() {
+    if (this.isTogglingLike ||
         this.isRefreshingBinding.value ||
         this.screenshotBinding.value is null) {
       return;
     }
 
-    this.isTogglingFavorite = true;
+    this.isTogglingLike = true;
 
     var prevScreenshot = this.screenshotBinding.value;
 
     var updatedScreenshot = prevScreenshot with {
-      IsFavorite = !prevScreenshot.IsFavorite,
-      FavoritesCount = prevScreenshot.FavoritesCount +
-                       (prevScreenshot.IsFavorite ? -1 : 1)
+      IsLiked = !prevScreenshot.IsLiked,
+      LikesCount = prevScreenshot.LikesCount + (prevScreenshot.IsLiked ? -1 : 1)
     };
 
     // Replace the current screenshot with the liked one.
@@ -515,9 +514,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.screenshotBinding.Update(updatedScreenshot);
 
     try {
-      await HttpQueries.FavoriteScreenshot(
+      await HttpQueries.LikeScreenshot(
         updatedScreenshot.Id,
-        favorite: updatedScreenshot.IsFavorite);
+        liked: updatedScreenshot.IsLiked);
     }
     catch (HttpException ex) {
       ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
@@ -534,7 +533,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       Mod.Log.ErrorRecoverable(ex);
     }
     finally {
-      this.isTogglingFavorite = false;
+      this.isTogglingLike = false;
     }
   }
 
@@ -554,8 +553,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     try {
       this.isSavingBinding.Update(true);
 
-      var imageBytes =
-        await HttpQueries.DownloadImage(screenshot.ImageUrl4K);
+      var imageBytes = await HttpQueries.DownloadImage(screenshot.ImageUrl4K);
 
       var directory = Mod.Settings.CreatorsScreenshotSaveDirectory;
 

@@ -6,14 +6,14 @@ namespace HallOfFame.Http;
 
 internal static partial class HttpQueries {
   /// <summary>
-  /// Marks the given <see cref="Screenshot"/> as viewed.
+  /// Marks the given <see cref="Screenshot"/> as liked.
   /// </summary>
-  internal static async Task<View> FavoriteScreenshot(
+  internal static async Task<View> LikeScreenshot(
     string screenshotId,
-    bool favorite) {
-    var method = favorite ? "POST" : "DELETE";
+    bool liked) {
+    var method = liked ? "POST" : "DELETE";
 
-    var uri = favorite
+    var uri = liked
       ? $"/screenshots/{screenshotId}/favorites"
       : $"/screenshots/{screenshotId}/favorites/mine";
 

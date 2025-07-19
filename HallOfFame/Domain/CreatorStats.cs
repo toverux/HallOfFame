@@ -42,7 +42,7 @@ internal record CreatorStats : IJsonWritable {
   }
 
   [DecodeAlias("favoritesCount")]
-  internal int FavoritesCount {
+  internal int LikesCount {
     get;
     [UsedImplicitly]
     set;
@@ -57,8 +57,8 @@ internal record CreatorStats : IJsonWritable {
     writer.PropertyName("viewsCount");
     writer.Write(this.ViewsCount);
 
-    writer.PropertyName("favoritesCount");
-    writer.Write(this.FavoritesCount);
+    writer.PropertyName("likesCount");
+    writer.Write(this.LikesCount);
 
     writer.TypeEnd();
   }

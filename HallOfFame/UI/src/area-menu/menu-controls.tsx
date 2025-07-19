@@ -147,20 +147,20 @@ export function MenuControlsContent(): ReactElement {
 
       <div className={styles.menuControlsSection}>
         <div className={styles.menuControlsSectionButtons}>
-          <MenuControlsFavoriteButton screenshot={menuState.screenshot} />
+          <MenuControlsLikeButton screenshot={menuState.screenshot} />
         </div>
 
-        <div className={`${styles.menuControlsSectionContent} ${styles.menuControlsFavoriteCount}`}>
-          <span className={styles.menuControlsFavoriteCountNumber}>
-            {menuState.screenshot.favoritesCount < 1000
-              ? menuState.screenshot.favoritesCount
-              : `${(menuState.screenshot.favoritesCount / 1000).toFixed(1)} k`}
+        <div className={`${styles.menuControlsSectionContent} ${styles.menuControlsLikesCount}`}>
+          <span className={styles.menuControlsLikesCountNumber}>
+            {menuState.screenshot.likesCount < 1000
+              ? menuState.screenshot.likesCount
+              : `${(menuState.screenshot.likesCount / 1000).toFixed(1)} k`}
           </span>
           &thinsp;
           {translate(
-            menuState.screenshot.favoritesCount == 0
+            menuState.screenshot.likesCount == 0
               ? 'HallOfFame.UI.Menu.MenuControls.N_LIKES[Zero]'
-              : menuState.screenshot.favoritesCount == 1
+              : menuState.screenshot.likesCount == 1
                 ? 'HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]'
                 : 'HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]'
           )}
@@ -536,24 +536,24 @@ function MenuControlsToggleMenuVisibilityButton({
   );
 }
 
-function MenuControlsFavoriteButton({
+function MenuControlsLikeButton({
   screenshot
 }: Readonly<{
   screenshot: Screenshot;
 }>): ReactElement {
-  const selectSound = screenshot.isFavorite ? 'chirp-event' : 'xp-event';
+  const selectSound = screenshot.isLiked ? 'chirp-event' : 'xp-event';
 
   const { useInputBinding, useInputPhase, useOnInputPerformed } = likeScreenshotInputAction;
 
-  useOnInputPerformed(favoriteScreenshot, selectSound);
+  useOnInputPerformed(likeScreenshot, selectSound);
 
   const binding = useInputBinding();
   const phase = useInputPhase();
 
   const activeClass =
     phase == 'Performed'
-      ? screenshot.isFavorite
-        ? styles.menuControlsSectionButtonsButtonFavoriteFavoritedActive
+      ? screenshot.isLiked
+        ? styles.menuControlsSectionButtonsButtonLikeLikedActive
         : styles.menuControlsSectionButtonsButtonActive
       : '';
 
@@ -563,29 +563,29 @@ function MenuControlsFavoriteButton({
       tooltip={
         <LocalizedString
           id={
-            screenshot.isFavorite
-              ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Unfavorite]'
-              : screenshot.favoritesCount == 0
-                ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Zero]'
-                : screenshot.favoritesCount == 1
-                  ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Singular]'
-                  : 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Favorite Plural]'
+            screenshot.isLiked
+              ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Remove Like]'
+              : screenshot.likesCount == 0
+                ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Like Zero]'
+                : screenshot.likesCount == 1
+                  ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Like Singular]'
+                  : 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Like Plural]'
           }
           args={{
             // biome-ignore lint/style/useNamingConvention: i18n convention
-            NUMBER: <LocalizedNumber value={screenshot.favoritesCount} />,
+            NUMBER: <LocalizedNumber value={screenshot.likesCount} />,
             // biome-ignore lint/style/useNamingConvention: i18n convention
             LIKING_PERCENTAGE: <LocalizedNumber value={screenshot.likingPercentage} />
           }}
         />
       }>
       <MenuButton
-        className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonFavorite} ${
-          screenshot.isFavorite ? styles.menuControlsSectionButtonsButtonFavoriteFavorited : ''
+        className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonLike} ${
+          screenshot.isLiked ? styles.menuControlsSectionButtonsButtonLikeLiked : ''
         } ${activeClass}`}
         src={loveChirperSrc}
         tinted={false}
-        onSelect={favoriteScreenshot}
+        onSelect={likeScreenshot}
         selectSound={selectSound}
       />
     </MenuButtonTooltip>
@@ -691,8 +691,8 @@ function reportScreenshot(): void {
   trigger('hallOfFame.presenter', 'reportScreenshot');
 }
 
-function favoriteScreenshot(): void {
-  trigger('hallOfFame.presenter', 'favoriteScreenshot');
+function likeScreenshot(): void {
+  trigger('hallOfFame.presenter', 'likeScreenshot');
 }
 
 function locElementToReactNode(

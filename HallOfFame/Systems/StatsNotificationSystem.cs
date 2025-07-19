@@ -89,7 +89,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
 
       var stats = await HttpQueries.GetCreatorStats();
 
-      if (stats.FavoritesCount < 2) {
+      if (stats.LikesCount < 2) {
         return;
       }
 
@@ -102,7 +102,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
           new Dictionary<string, ILocElement> {
             { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
             { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
-            { "FAVORITES_COUNT", this.LocalizeNumber(stats.FavoritesCount) }
+            { "LIKES_COUNT", this.LocalizeNumber(stats.LikesCount) }
           }),
         thumbnail: "coui://ui-mods/images/stats-notification.svg",
         onClicked: () => {
@@ -128,7 +128,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
         new Dictionary<string, ILocElement> {
           { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
           { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
-          { "FAVORITES_COUNT", this.LocalizeNumber(stats.FavoritesCount) },
+          { "LIKES_COUNT", this.LocalizeNumber(stats.LikesCount) },
           { "TOTAL_CREATORS_COUNT", this.LocalizeNumber(stats.AllCreatorsCount) },
           { "TOTAL_SCREENSHOTS_COUNT", this.LocalizeNumber(stats.AllScreenshotsCount) },
           { "TOTAL_VIEWS_COUNT", this.LocalizeNumber(stats.AllViewsCount) }
