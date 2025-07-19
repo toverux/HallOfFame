@@ -1,13 +1,13 @@
 {
   "type": "module",
-  "packageManager": "bun@1.2.17",
+  "packageManager": "bun@1.2.19",
   "engines": {
     "bun": ">=1.2.0",
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "// When making changes in scripts check out if .lefthook.yml should be synched (`bun lefthook install`)": "",
-    "pm:update": "bunx npm-check-updates -i && bun update",
+    "pm:update": "mise self-update && mise up --interactive --bump && mise exec bun -- bunx npm-check-updates -i && mise exec bun -- bun update",
     "check": "bun --bun tsc --p HallOfFame/UI --noEmit && biome check --fix",
     "// Cannot 'bun --bun' webpack yet: https://github.com/oven-sh/bun/issues/10768": "",
     "// When we can bunify (or replace) webpack, use 'bun --bun --smol' to consume less memory, it's useful with CS2 in the background...": "",
@@ -22,20 +22,20 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "~2.0.6",
-    "@toverux/blanc-hopital": "^1.0.1",
+    "@biomejs/biome": "~2.1.2",
+    "@toverux/blanc-hopital": "^1.1.0",
     "@types/common-tags": "^1.8.4",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "css-loader": "^7.1.2",
-    "lefthook": "^1.11.14",
+    "lefthook": "^1.12.2",
     "mini-css-extract-plugin": "^2.9.2",
     "sass": "~1.89.2",
     "sass-loader": "^16.0.5",
     "terser-webpack-plugin": "^5.3.14",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",
-    "webpack": "^5.99.9",
+    "webpack": "^5.100.2",
     "webpack-cli": "^6.0.1"
   },
   "trustedDependencies": ["@biomejs/biome", "lefthook"],

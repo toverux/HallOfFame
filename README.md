@@ -54,10 +54,13 @@ Special thanks to:
 
 ### Installation
 
-- Standard CS2 modding toolchain;
-- [Bun](https://bun.sh) as a replacement for Node in the build toolchain.
-- `bun i` to install UI mod dependencies.
-- Recommended: enable `--developerMode --uiDeveloperMode` as game launch options.
+1. Standard CS2 modding toolchain;
+2. (Recommended) Install [mise-en-place](https://mise.jdx.dev) for per-project Node.js & Bun
+   version management. Without mise, just match the required versions specified in `mise.toml`.
+   For now, Node is still and only needed alongside Bun to run Webpack
+   (https://github.com/oven-sh/bun/issues/10768).
+3. `bun i` to install UI mod dependencies.
+4. Recommended: enable `--developerMode --uiDeveloperMode` as game launch options.
 
 Here's a game launch command to also skip the launcher in Steam:
 
