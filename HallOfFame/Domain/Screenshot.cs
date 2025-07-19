@@ -100,13 +100,6 @@ internal record Screenshot : IJsonWritable {
     set;
   }
 
-  [DecodeAlias("favoritesPerDay")]
-  internal double FavoritesPerDay {
-    get;
-    [UsedImplicitly]
-    set;
-  }
-
   [DecodeAlias("viewsCount")]
   internal int ViewsCount {
     get;
@@ -114,8 +107,8 @@ internal record Screenshot : IJsonWritable {
     set;
   }
 
-  [DecodeAlias("viewsPerDay")]
-  internal double ViewsPerDay {
+  [DecodeAlias("favoritingPercentage")]
+  internal int LikingPercentage {
     get;
     [UsedImplicitly]
     set;
@@ -193,14 +186,11 @@ internal record Screenshot : IJsonWritable {
     writer.PropertyName("favoritesCount");
     writer.Write(this.FavoritesCount);
 
-    writer.PropertyName("favoritesPerDay");
-    writer.Write(this.FavoritesPerDay);
-
     writer.PropertyName("viewsCount");
     writer.Write(this.ViewsCount);
 
-    writer.PropertyName("viewsPerDay");
-    writer.Write(this.ViewsPerDay);
+    writer.PropertyName("likingPercentage");
+    writer.Write(this.LikingPercentage);
 
     writer.PropertyName("isFavorite");
     writer.Write(this.IsFavorite);

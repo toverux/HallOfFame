@@ -1,4 +1,4 @@
-﻿export interface Creator {
+export interface Creator {
   readonly id: string;
 
   readonly creatorName: string;
@@ -50,11 +50,9 @@ export interface Screenshot {
 
   readonly favoritesCount: number;
 
-  readonly favoritesPerDay: number;
-
   readonly viewsCount: number;
 
-  readonly viewsPerDay: number;
+  readonly likingPercentage: number;
 
   readonly isFavorite: boolean;
 

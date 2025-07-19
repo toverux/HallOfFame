@@ -33,7 +33,7 @@
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]": "点赞",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]": "点赞",
   "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "原初荒野",
-  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "已浏览 {NUMBER} 次（ {VIEWS_PER_DAY} 次/天）",
+  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "已浏览 {NUMBER} 次",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Save]": "保存",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Report]": "举报",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "重试",

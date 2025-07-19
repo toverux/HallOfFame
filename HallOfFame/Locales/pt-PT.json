@@ -33,7 +33,7 @@
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]": "gosto",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]": "gostos",
   "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "Natureza intacta",
-  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Visto {NUMBER} vezes ({VIEWS_PER_DAY} visualizações/dia)",
+  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Visto {NUMBER} vezes",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Save]": "Guardar",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Report]": "Denunciar",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Tentar novamente",

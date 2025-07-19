@@ -404,12 +404,8 @@ function MenuControlsScreenshotLabels({
           tooltip={
             <LocalizedString
               id='HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]'
-              args={{
-                // biome-ignore lint/style/useNamingConvention: i18n convention
-                NUMBER: <LocalizedNumber value={screenshot.viewsCount} />,
-                // biome-ignore lint/style/useNamingConvention: i18n convention
-                VIEWS_PER_DAY: <LocalizedNumber value={screenshot.viewsPerDay} />
-              }}
+              // biome-ignore lint/style/useNamingConvention: i18n convention
+              args={{ NUMBER: <LocalizedNumber value={screenshot.viewsCount} /> }}
             />
           }>
           <span>
@@ -579,7 +575,7 @@ function MenuControlsFavoriteButton({
             // biome-ignore lint/style/useNamingConvention: i18n convention
             NUMBER: <LocalizedNumber value={screenshot.favoritesCount} />,
             // biome-ignore lint/style/useNamingConvention: i18n convention
-            FAVORITES_PER_DAY: <LocalizedNumber value={screenshot.favoritesPerDay} />
+            LIKING_PERCENTAGE: <LocalizedNumber value={screenshot.likingPercentage} />
           }}
         />
       }>

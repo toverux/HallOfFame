@@ -29,7 +29,7 @@
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]": "curtida",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]": "curtidas",
   "HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]": "Natureza intocada",
-  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Visualizado {NUMBER} vezes ({VIEWS_PER_DAY} visualizações/dia)",
+  "HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]": "Visualizado {NUMBER} vezes",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Report]": "Reportar",
   "HallOfFame.UI.Menu.MenuControls.ACTION[Retry]": "Tentar novamente",
   "HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]": "Mostrar imagem anterior",
