@@ -44,13 +44,13 @@ internal record Creator : IJsonWritable {
     set;
   }
 
-  [DecodeAlias("social")]
+  [DecodeAlias("socials")]
   // ReSharper disable once CollectionNeverUpdated.Global
-  internal Dictionary<string, CreatorSocialLink> Social {
+  internal CreatorSocialLink[] Socials {
     get;
     [UsedImplicitly]
     set;
-  } = new();
+  } = [];
 
   public override string ToString() =>
     $"Creator #{this.Id} {this.CreatorName}";
@@ -75,23 +75,17 @@ internal record Creator : IJsonWritable {
     writer.PropertyName("creatorNameTranslated");
     writer.Write(this.CreatorNameTranslated);
 
-    writer.PropertyName("social");
-    writer.ArrayBegin(this.Social.Count);
+    writer.PropertyName("socials");
+    writer.ArrayBegin(this.Socials.Length);
 
-    foreach (var kvp in this.Social) {
+    foreach (var entry in this.Socials) {
       writer.TypeBegin($"{typeName}/CreatorSocialLink");
 
       writer.PropertyName("platform");
-      writer.Write(kvp.Key);
-
-      writer.PropertyName("description");
-      writer.Write(kvp.Value.Description);
+      writer.Write(entry.Platform);
 
       writer.PropertyName("link");
-      writer.Write(kvp.Value.Link);
-
-      writer.PropertyName("username");
-      writer.Write(kvp.Value.Username);
+      writer.Write(entry.Link);
 
       writer.TypeEnd();
     }
@@ -102,8 +96,8 @@ internal record Creator : IJsonWritable {
   }
 
   internal record CreatorSocialLink {
-    [DecodeAlias("description")]
-    internal string Description {
+    [DecodeAlias("Platform")]
+    internal string Platform {
       get;
       [UsedImplicitly]
       set;
@@ -115,12 +109,5 @@ internal record Creator : IJsonWritable {
       [UsedImplicitly]
       set;
     } = "Unknown [Error]";
-
-    [DecodeAlias("username")]
-    internal string? Username {
-      get;
-      [UsedImplicitly]
-      set;
-    }
   }
 }

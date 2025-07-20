@@ -1,3 +1,11 @@
+﻿export const supportedSocialPlatforms = [
+  'citiescollective',
+  'paradoxmods',
+  'discord',
+  'youtube',
+  'twitch'
+] as const;
+
 export interface Creator {
   readonly id: string;
 
@@ -9,18 +17,13 @@ export interface Creator {
 
   readonly creatorNameTranslated: string | null;
 
-  readonly social: readonly CreatorSocialLink[];
+  readonly socials: readonly CreatorSocialLink[];
 }
 
 export interface CreatorSocialLink {
-  readonly platform: 'discordServer' | 'paradoxMods' | 'reddit' | 'twitch' | 'youtube';
-
-  readonly description: string;
+  readonly platform: (typeof supportedSocialPlatforms)[number];
 
   readonly link: string;
-
-  /** Only for Paradox Mods, Reddit. */
-  readonly username: string | null;
 }
 
 export interface Screenshot {

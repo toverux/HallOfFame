@@ -322,10 +322,15 @@
       display: flex;
       flex-wrap: wrap;
 
+      &-by {
+        margin-right: 5px + 5px /* for the visual fix below */;
+      }
+
       &-socials {
+        // Visual fix for when the social icons wrap to a new line
+        margin-left: -5px;
         display: flex;
         align-items: center;
-        margin-left: 5px;
 
         &-button {
           width: 1.2em;

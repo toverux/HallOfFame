@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Colossal.Localization;
 using Colossal.PSI.Common;
 using Colossal.PSI.PdxSdk;
@@ -30,8 +31,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
   private TriggerBinding<string> openWebPageBinding = null!;
 
-  private TriggerBinding<string, string>
-    openCreatorPageBinding = null!;
+  private TriggerBinding<string> openCreatorPageBinding = null!;
 
   private TriggerBinding<bool, string> logJavaScriptErrorBinding = null!;
 
@@ -64,7 +64,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
         CommonUISystem.BindingGroup, "openWebPage",
         Application.OpenURL);
 
-      this.openCreatorPageBinding = new TriggerBinding<string, string>(
+      this.openCreatorPageBinding = new TriggerBinding<string>(
         CommonUISystem.BindingGroup, "openCreatorPage",
         this.OpenCreatorPage);
 
@@ -122,7 +122,15 @@ internal sealed partial class CommonUISystem : UISystemBase {
   /// <summary>
   /// Opens the in-game Paradox Mods Creator page UI for the given username.
   /// </summary>
-  private void OpenCreatorPage(string username, string url) {
+  private void OpenCreatorPage(string url) {
+    var username = Regex.Match(url, "/authors/(?<author>[^/?#]+)").Groups["author"]?.Value;
+
+    if (username is null) {
+      Mod.Log.Warn($"Could not extract Paradox Mods username from URL {url}");
+
+      OpenCreatorPageInBrowser();
+    }
+
     switch (Mod.Settings.PrefersOpeningPdxModsInBrowser) {
       case true:
         OpenCreatorPageInBrowser();
@@ -170,8 +178,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
     void OpenCreatorPageInGame() {
       try {
-        var sdk =
-          PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
+        var sdk = PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
 
         // Get the method "private void ShowModsUI(Action<ModsUIView> showAction)"
         var showModsUi = sdk.GetType().GetMethod(
@@ -181,8 +188,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
           [typeof(Action<ModsUIView>)], []);
 
         showModsUi?.Invoke(sdk, [
-          (ModsUIView view) =>
-            view.Show(ModsUIScreen.Creator, username)
+          (ModsUIView view) => view.Show(ModsUIScreen.Creator, username)
         ]);
 
         // Send a GET request to our server so that the click count is still incremented.

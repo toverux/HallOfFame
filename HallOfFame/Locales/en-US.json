@@ -29,6 +29,7 @@
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "Hall of Fame’s had a little network traffic accident :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Gameplay is not affected and it is absolutely safe to launch a game.",
   "HallOfFame.UI.Menu.MenuControls.TRANSLATED": "Translated",
+  "HallOfFame.UI.Menu.MenuControls.FIND_CREATOR_X_ON_Y_TOOLTIP": "Find {CREATOR_NAME} on {SOCIAL_PLATFORM}",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Zero]": "likes",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]": "like",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]": "likes",

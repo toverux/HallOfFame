@@ -9,11 +9,11 @@ import {
 } from 'cs2/l10n';
 import { Button, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
-import type { CreatorSocialLink, Screenshot } from '../common';
+import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../common';
+import citiesCollectiveIconSrc from '../icons/citiescollective-icon.svg';
 import discordBrandsSolid from '../icons/fontawesome/discord-brands-solid.svg';
 import ellipsisSolidSrc from '../icons/fontawesome/ellipsis-solid.svg';
 import flagSolidSrc from '../icons/fontawesome/flag-solid.svg';
-import redditBrandsSolid from '../icons/fontawesome/reddit-brands-solid.svg';
 import twitchBrandsSolid from '../icons/fontawesome/twitch-brands-solid.svg';
 import youtubeBrandsSolid from '../icons/fontawesome/youtube-brands-solid.svg';
 import loveChirperSrc from '../icons/love-chirper.png';
@@ -55,15 +55,14 @@ const likeScreenshotInputAction = bindInputAction(
 
 const toggleMenuInputAction = bindInputAction('hallOfFame.presenter', 'toggleMenuInputAction');
 
-const socialPlatforms: Record<
-  CreatorSocialLink['platform'],
-  { logo: string; color: string; order: number }
-> = {
-  paradoxMods: { logo: 'Media/Glyphs/ParadoxMods.svg', color: '#5abe41', order: 0 },
-  youtube: { logo: youtubeBrandsSolid, color: '#FF0000', order: 1 },
-  twitch: { logo: twitchBrandsSolid, color: '#8956FB', order: 2 },
-  discordServer: { logo: discordBrandsSolid, color: '#5865F2', order: 3 },
-  reddit: { logo: redditBrandsSolid, color: '#FF4500', order: 4 }
+const socialPlatforms: {
+  [K in CreatorSocialLink['platform']]: Readonly<{ name: string; logo: string; color: string }>;
+} = {
+  citiescollective: { name: 'Cities Collective', logo: citiesCollectiveIconSrc, color: '#000000' },
+  discord: { name: 'Discord', logo: discordBrandsSolid, color: '#5865F2' },
+  paradoxmods: { name: 'Paradox Mods', logo: 'Media/Glyphs/ParadoxMods.svg', color: '#5abe41' },
+  twitch: { name: 'Twitch', logo: twitchBrandsSolid, color: '#8956FB' },
+  youtube: { name: 'YouTube', logo: youtubeBrandsSolid, color: '#FF0000' }
 };
 
 /**
@@ -186,10 +185,8 @@ export function MenuControlsContent(): ReactElement {
             tooltip={
               <LocalizedString
                 id='HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Save]'
-                args={{
-                  // biome-ignore lint/style/useNamingConvention: i18n convention
-                  DIRECTORY: modSettings.creatorsScreenshotSaveDirectory
-                }}
+                // biome-ignore lint/style/useNamingConvention: i18n convention
+                args={{ DIRECTORY: modSettings.creatorsScreenshotSaveDirectory }}
               />
             }>
             <Button
@@ -272,15 +269,19 @@ function MenuControlsCityName({
       : screenshot.cityNameTranslated
     : screenshot.cityName;
 
-  const creatorName = isCreatorNameTranslated
-    ? modSettings.namesTranslationMode == 'transliterate'
-      ? screenshot.creator.creatorNameLatinized
-      : screenshot.creator.creatorNameTranslated
-    : screenshot.creator.creatorName;
+  const creatorName =
+    (isCreatorNameTranslated
+      ? modSettings.namesTranslationMode == 'transliterate'
+        ? screenshot.creator.creatorNameLatinized
+        : screenshot.creator.creatorNameTranslated
+      : screenshot.creator.creatorName) || 'anonymous';
 
-  const supportedSocials = screenshot.creator.social
-    .filter(link => link.platform in socialPlatforms)
-    .sort((a, b) => socialPlatforms[a.platform].order - socialPlatforms[b.platform].order);
+  const supportedSocials = screenshot.creator.socials
+    .filter(link => supportedSocialPlatforms.includes(link.platform))
+    .sort(
+      (a, b) =>
+        supportedSocialPlatforms.indexOf(a.platform) - supportedSocialPlatforms.indexOf(b.platform)
+    );
 
   return (
     <div className={styles.menuControlsNames}>
@@ -329,11 +330,11 @@ function MenuControlsCityName({
                 : screenshot.creator.creatorNameTranslated}
             </div>
           }>
-          <span>
+          <span className={styles.menuControlsNamesCreatorBy}>
             <LocalizedString
               id='HallOfFame.Common.CITY_BY'
               // biome-ignore lint/style/useNamingConvention: i18n convention
-              args={{ CREATOR_NAME: creatorName || 'anonymous' }}
+              args={{ CREATOR_NAME: creatorName }}
             />
           </span>
         </Tooltip>
@@ -341,17 +342,28 @@ function MenuControlsCityName({
         {modSettings.showCreatorSocials && (
           <div className={styles.menuControlsNamesCreatorSocials}>
             {supportedSocials.map(link => (
-              <Tooltip key={link.platform} tooltip={link.description} direction='down'>
+              <Tooltip
+                key={link.platform}
+                tooltip={
+                  <LocalizedString
+                    id='HallOfFame.UI.Menu.MenuControls.FIND_CREATOR_X_ON_Y_TOOLTIP'
+                    args={{
+                      // biome-ignore lint/style/useNamingConvention: i18n convention
+                      CREATOR_NAME: creatorName,
+                      // biome-ignore lint/style/useNamingConvention: i18n convention
+                      SOCIAL_PLATFORM: socialPlatforms[link.platform].name
+                    }}
+                  />
+                }
+                direction='down'>
                 <Button
                   className={styles.menuControlsNamesCreatorSocialsButton}
                   variant='round'
                   tinted={true}
                   src={socialPlatforms[link.platform].logo}
-                  style={{
-                    // @ts-expect-error
-                    '--brand-color': socialPlatforms[link.platform].color
-                  }}
-                  onSelect={() => openSocialLink(modSettings, link)}
+                  // @ts-expect-error
+                  style={{ '--brand-color': socialPlatforms[link.platform].color }}
+                  onSelect={() => openSocialLink(link)}
                 />
               </Tooltip>
             ))}
@@ -667,12 +679,10 @@ function openModSettings(tab: string): void {
   trigger('hallOfFame.common', 'openModSettings', tab);
 }
 
-function openSocialLink(modSettings: ModSettings, link: CreatorSocialLink): void {
-  const url = modSettings.baseUrl + link.link;
-
-  link.platform == 'paradoxMods' && link.username
-    ? trigger('hallOfFame.common', 'openCreatorPage', link.username, url)
-    : trigger('hallOfFame.common', 'openWebPage', url);
+function openSocialLink({ platform, link }: CreatorSocialLink): void {
+  platform == 'paradoxmods'
+    ? trigger('hallOfFame.common', 'openCreatorPage', link)
+    : trigger('hallOfFame.common', 'openWebPage', link);
 }
 
 function previousScreenshot(): void {
