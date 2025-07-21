@@ -29,6 +29,7 @@
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "“城市画廊”模组遇到了一点网络交通事故 :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "此错误不影响游戏，可以安全载入。",
   "HallOfFame.UI.Menu.MenuControls.TRANSLATED": "翻译",
+  "HallOfFame.UI.Menu.MenuControls.FIND_CREATOR_X_ON_Y_TOOLTIP": "在 {SOCIAL_PLATFORM} 上查找 {CREATOR_NAME}",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Zero]": "点赞",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]": "点赞",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]": "点赞",
