@@ -28,7 +28,6 @@ import trophySrc from '../icons/paradox/trophy.svg';
 import doubleArrowRightTriangleSrc from '../icons/uil/colored/double-arrow-right-triangle.svg';
 import eyeClosedSrc from '../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../icons/uil/colored/eye-open.svg';
-import { iconsole } from '../iconsole';
 import {
   bindInputAction,
   type ModSettings,
@@ -250,13 +249,6 @@ function MenuControlsCityName({
   const modSettings = useModSettings();
 
   const [showTranslations, setShowTranslations] = useState(false);
-
-  if (!screenshot.creator) {
-    // This will not happen - unless we have a broken ObjectId reference.
-    iconsole.warn(`HoF: No creator information for screenshot ${screenshot.id}`);
-
-    return null;
-  }
 
   const isCityNameTranslated =
     modSettings.namesTranslationMode != 'disabled' &&
@@ -714,8 +706,8 @@ function openSocialLink({ platform, link }: CreatorSocialLink): void {
     : trigger('hallOfFame.common', 'openWebPage', link);
 }
 
-function openCitiesCollectiveCityPage(cityPageUrl: string, creator?: Creator): void {
-  const creatorPageUrl = creator?.socials.find(link => link.platform == 'citiescollective')?.link;
+function openCitiesCollectiveCityPage(cityPageUrl: string, creator: Creator): void {
+  const creatorPageUrl = creator.socials.find(link => link.platform == 'citiescollective')?.link;
 
   trigger('hallOfFame.common', 'openCitiesCollectiveCityPage', cityPageUrl, creatorPageUrl ?? null);
 }

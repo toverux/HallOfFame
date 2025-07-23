@@ -61,5 +61,5 @@ export interface Screenshot {
 
   readonly citiesCollectiveUrl: string | null;
 
-  readonly creator?: Creator | undefined;
+  readonly creator: Creator;
 }
