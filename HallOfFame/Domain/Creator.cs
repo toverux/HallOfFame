@@ -96,7 +96,7 @@ internal record Creator : IJsonWritable {
   }
 
   internal record CreatorSocialLink {
-    [DecodeAlias("Platform")]
+    [DecodeAlias("platform")]
     internal string Platform {
       get;
       [UsedImplicitly]

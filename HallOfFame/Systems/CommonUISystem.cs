@@ -33,6 +33,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
   private TriggerBinding<string> openCreatorPageBinding = null!;
 
+  private TriggerBinding<string, string?> openCitiesCollectiveCityPageBinding = null!;
+
   private TriggerBinding<bool, string> logJavaScriptErrorBinding = null!;
 
   private GetterValueBinding<string> localeBinding = null!;
@@ -68,6 +70,10 @@ internal sealed partial class CommonUISystem : UISystemBase {
         CommonUISystem.BindingGroup, "openCreatorPage",
         this.OpenCreatorPage);
 
+      this.openCitiesCollectiveCityPageBinding = new TriggerBinding<string, string?>(
+        CommonUISystem.BindingGroup, "openCitiesCollectiveCityPage",
+        this.OpenCitiesCollectiveCityPage);
+
       this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
         CommonUISystem.BindingGroup, "logJavaScriptError",
         this.LogJavaScriptError);
@@ -77,6 +83,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
       this.AddBinding(this.openModSettingsBinding);
       this.AddBinding(this.openWebPageBinding);
       this.AddBinding(this.openCreatorPageBinding);
+      this.AddBinding(this.openCitiesCollectiveCityPageBinding);
       this.AddBinding(this.logJavaScriptErrorBinding);
 
       this.localizationManager.onActiveDictionaryChanged +=
@@ -120,7 +127,9 @@ internal sealed partial class CommonUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Opens the in-game Paradox Mods Creator page UI for the given username.
+  /// Opens the creator page from a URL, either in the in-game Paradox Mods Creator page UI or in
+  /// the browser depending on the user's choice.
+  /// Even if the page is opened in-game, the click is registered on the server.
   /// </summary>
   private void OpenCreatorPage(string url) {
     var username = Regex.Match(url, "/authors/(?<author>[^/?#]+)").Groups["author"]?.Value;
@@ -200,6 +209,19 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
         Application.OpenURL(url);
       }
+    }
+  }
+
+  /// <summary>
+  /// Opens a city page on Cities Collective, and registers the click on the server.
+  /// </summary>
+  private void OpenCitiesCollectiveCityPage(string cityPageUrl, string? creatorPageUrl) {
+    Application.OpenURL(cityPageUrl);
+
+    if (creatorPageUrl is not null) {
+      // Send a GET request to our server so that the click count is still incremented.
+      // We don't care about the result, success or not.
+      UnityWebRequest.Get(creatorPageUrl).SendWebRequest();
     }
   }
 

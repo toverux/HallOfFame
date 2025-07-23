@@ -7,9 +7,14 @@ import {
   type LocElement,
   useLocalization
 } from 'cs2/l10n';
-import { Button, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
+import { Button, Icon, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
-import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../common';
+import {
+  type Creator,
+  type CreatorSocialLink,
+  type Screenshot,
+  supportedSocialPlatforms
+} from '../common';
 import citiesCollectiveIconSrc from '../icons/citiescollective-icon.svg';
 import discordBrandsSolid from '../icons/fontawesome/discord-brands-solid.svg';
 import ellipsisSolidSrc from '../icons/fontawesome/ellipsis-solid.svg';
@@ -393,19 +398,25 @@ function MenuControlsScreenshotLabels({
   return (
     <div className={styles.menuControlsSectionScreenshotLabels}>
       {isPristineWilderness ? (
-        <span>
-          <img src={naturalResourcesSrc} />
+        <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+          <img
+            src={naturalResourcesSrc}
+            className={styles.menuControlsSectionScreenshotLabelsLabelIcon}
+          />
           {translate(`HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]`)}
         </span>
       ) : (
         <>
-          <span>
-            <img src={trophySrc} />
+          <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+            <img src={trophySrc} className={styles.menuControlsSectionScreenshotLabelsLabelIcon} />
             {translate(`Progression.MILESTONE_NAME:${screenshot.cityMilestone}`, `???`)}
           </span>
 
-          <span>
-            <img src={populationSrc} />
+          <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+            <img
+              src={populationSrc}
+              className={styles.menuControlsSectionScreenshotLabelsLabelIcon}
+            />
             {formatBigNumber(screenshot.cityPopulation, translate)}
           </span>
         </>
@@ -420,16 +431,34 @@ function MenuControlsScreenshotLabels({
               args={{ NUMBER: <LocalizedNumber value={screenshot.viewsCount} /> }}
             />
           }>
-          <span>
-            <img src={eyeOpenSrc} />
+          <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+            <img src={eyeOpenSrc} className={styles.menuControlsSectionScreenshotLabelsLabelIcon} />
             {formatBigNumber(screenshot.viewsCount, translate)}
           </span>
         </Tooltip>
       )}
 
       <Tooltip tooltip={screenshot.createdAtFormatted}>
-        <span>{screenshot.createdAtFormattedDistance}</span>
+        <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+          {screenshot.createdAtFormattedDistance}
+        </span>
       </Tooltip>
+
+      {screenshot.citiesCollectiveUrl && (
+        <Tooltip
+          tooltip={translate('HallOfFame.UI.Menu.MenuControls.OPEN_IN_CITIES_COLLECTIVE_TOOLTIP')}
+          direction='down'>
+          <Button
+            className={`${styles.menuControlsSectionScreenshotLabelsLabel} ${styles.menuControlsSectionScreenshotLabelsLabelCitiesCollective}`}
+            onSelect={() =>
+              // biome-ignore lint/style/noNonNullAssertion: checked above & cannot change.
+              openCitiesCollectiveCityPage(screenshot.citiesCollectiveUrl!, screenshot.creator)
+            }>
+            <Icon src={citiesCollectiveIconSrc} tinted={true} />
+            citiescollective.space
+          </Button>
+        </Tooltip>
+      )}
     </div>
   );
 }
@@ -683,6 +712,12 @@ function openSocialLink({ platform, link }: CreatorSocialLink): void {
   platform == 'paradoxmods'
     ? trigger('hallOfFame.common', 'openCreatorPage', link)
     : trigger('hallOfFame.common', 'openWebPage', link);
+}
+
+function openCitiesCollectiveCityPage(cityPageUrl: string, creator?: Creator): void {
+  const creatorPageUrl = creator?.socials.find(link => link.platform == 'citiescollective')?.link;
+
+  trigger('hallOfFame.common', 'openCitiesCollectiveCityPage', cityPageUrl, creatorPageUrl ?? null);
 }
 
 function previousScreenshot(): void {

@@ -59,5 +59,7 @@ export interface Screenshot {
 
   readonly isLiked: boolean;
 
+  readonly citiesCollectiveUrl: string | null;
+
   readonly creator?: Creator | undefined;
 }
