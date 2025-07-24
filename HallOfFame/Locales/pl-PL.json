@@ -29,6 +29,7 @@
   "HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE": "W Hall of Fame doszło do małego wypadku sieciowego :'(",
   "HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED": "Rozgrywka nie jest zagrożona i rozpoczęcie gry jest całkowicie bezpieczne.",
   "HallOfFame.UI.Menu.MenuControls.TRANSLATED": "Przetłumaczono",
+  "HallOfFame.UI.Menu.MenuControls.FIND_CREATOR_X_ON_Y_TOOLTIP": "Znajdź {CREATOR_NAME} na {SOCIAL_PLATFORM}",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Zero]": "polubień",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Singular]": "polubienie",
   "HallOfFame.UI.Menu.MenuControls.N_LIKES[Plural]": "polubień",
