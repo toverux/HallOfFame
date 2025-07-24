@@ -436,7 +436,7 @@ function MenuControlsScreenshotLabels({
         </span>
       </Tooltip>
 
-      {screenshot.citiesCollectiveUrl && (
+      {modSettings.showCreatorSocials && screenshot.citiesCollectiveUrl && (
         <Tooltip
           tooltip={translate('HallOfFame.UI.Menu.MenuControls.OPEN_IN_CITIES_COLLECTIVE_TOOLTIP')}
           direction='down'>
