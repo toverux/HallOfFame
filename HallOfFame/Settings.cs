@@ -45,6 +45,8 @@ namespace HallOfFame;
 public sealed class Settings : ModSetting, IJsonWritable {
   private const string GroupYourProfile = "YourProfile";
 
+  private const string GroupCitiesCollective = "CitiesCollective";
+
   private const string GroupUIPreferences = "UIPreferences";
 
   private const string GroupKeyBindings = "KeyBindings";
@@ -141,6 +143,35 @@ public sealed class Settings : ModSetting, IJsonWritable {
   // We could use a private setter to set the text but then the game won't interpret our property as
   // an Option entry, it has to be getter-only.
   public LocalizedString LoginStatus => this.loginStatusValue;
+
+  [SettingsUISection(Settings.GroupCitiesCollective)]
+  [SettingsUIMultilineText(icon: "coui://ui-mods/images/citiescollective-icon.svg")]
+  [UsedImplicitly]
+  public string CitiesCollectiveTitle => string.Empty;
+
+  [SettingsUISection(Settings.GroupCitiesCollective)]
+  [SettingsUIMultilineText]
+  [UsedImplicitly]
+  public string CitiesCollectiveDescription =>
+    string.Empty; // The actual text comes from the translation file.
+
+  [SettingsUISection(Settings.GroupCitiesCollective)]
+  [SettingsUIButton]
+  [SettingsUIButtonGroup("CitiesCollective")]
+  [UsedImplicitly]
+  public bool CopyCreatorID {
+    // ReSharper disable once ValueParameterNotUsed
+    set => GUIUtility.systemCopyBuffer = this.CreatorID;
+  }
+
+  [SettingsUISection(Settings.GroupCitiesCollective)]
+  [SettingsUIButton]
+  [SettingsUIButtonGroup("CitiesCollective")]
+  [UsedImplicitly]
+  public bool OpenCitiesCollective {
+    // ReSharper disable once ValueParameterNotUsed
+    set => Application.OpenURL("https://citiescollective.space");
+  }
 
   /// <summary>
   /// Whether to enable HoF on the main menu UI.
