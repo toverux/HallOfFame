@@ -83,7 +83,6 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.LoginStatus]": "Ceci montre le statut de votre compte sur le serveur Hall of Fame.",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  Connecté en tant que « {CREATOR_NAME} »",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Connecté en anonyme",
-  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CitiesCollectiveTitle]": "Cities Collective x Hall of Fame",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CitiesCollectiveDescription]": "Cities Collective est une plateforme pour les créateurs de Cities: Skylines II, vous permettant de partager vos sauvegardes et d’échanger avec d’autres créateurs, et plus encore !\nVous pouvez lier votre compte au Hall of Fame pour que vos images apparaissent sur le site web ! Pour cela, inscrivez/connectez-vous sur le site et allez dans votre tableau de bord pour lier votre compte Hall of Fame en utilisant votre ID de créateur.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copier le Creator ID",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copiez votre ID de créateur dans le presse-papiers pour l’utiliser dans Cities Collective ou avec l’API du Hall of Fame.\n<NE LE PARTAGEZ AVEC PERSONNE>, sauf les mainteneurs de Cities Collective ou de Hall of Fame si vous rencontrez un problème.",
