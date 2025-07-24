@@ -1,5 +1,7 @@
 ﻿# Hall of Fame for Cities: Skylines II
 
+**Share screenshots and admire other creators’ work, all in-game!**
+
 ## What does it do?
 
 If you’re in one of those situations, all you need is the mod!
@@ -14,39 +16,15 @@ If you’re in one of those situations, all you need is the mod!
 
 This mod allows players to take and upload 4K screenshots of their city and share them with the
 community.
-Images can then be viewed by other players as a background image in the main menu, with information
-about the creator, the city name, and controls to refresh the image, like, or hide the menu UI to
-better see the image, to name a few features.
 
-Hall of Fame then makes sure that no city falls into oblivion by displaying each uploaded image as
-often as possible.
+Images can then be viewed and liked by other players as a background image in the main menu, and on
+the web thanks to our integration with **Cities Collective (https://citiescollective.space)**!
+
+Hall of Fame also makes sure that no city falls into oblivion by displaying each uploaded image as
+often as possible!
 
 The likes and trending screenshots mechanisms still allow the best creators to shine, but everyone
 is welcome, there is no downvote and no moderation based on skill.
-
-## Features
-
-- Supersampling all screenshots you make to **4K** resolution even if you play at a lower
-  resolution, and makes better renders than the game’s native screenshot tool.
-- Have pictures displayed in the main menu, with various information about the city, author, etc.
-- Give a like to the pictures you appreciate and see popular pictures.
-- Toggle menu UI visibility to admire the pictures (like a slideshow).
-- Fine-tune how the algorithm chooses screenshots that are presented to you (recent screenshots,
-  trending, ancient and forgotten, etc.).
-- Make screenshots and upload them via a dedicated interface, all in-game.
-- Choose between Full HD and 4K resolution for pictures shown in the main menu.
-
-**Much more to come!** See our feedback and feature requests board to follow the development and
-suggest/upvote features:
-https://feedback.halloffame.cs2.mtq.io
-
-## Troubleshooting
-
-A few users might encounter a crash on startup when using Hall of Fame, which is due to a bug in the
-game’s UI engine when many mods initialize at the same time.
-
-Follow this guide to understand and workaround the problem:
-https://github.com/toverux/HallOfFame/wiki/Hall-of-Fame-crashes-on-startup
 
 ## Rules
 
@@ -62,13 +40,14 @@ Don’t be shy, let us remember your city — if you wanna share it, we wanna se
 Next to your username when displaying one of your pictures, Hall of Fame can display buttons leading
 to your other social media accounts.
 
-The following platforms are supported: Paradox Mods, YouTube, Twitch, Discord (invite link) and
-Reddit (username).
+To link your social media accounts by yourself, you need to register/login to Cities Collective
+(https://citiescollective.space), then set your social accounts in your dashboard.
 
-Your channel/account must contain a fair amount of C:S 2 content to be eligible, of course.
+Then, link your CC account with Hall of Fame (follow instructions on the site or in the mod’s
+settings) — they will now appear automatically on your Hall of Fame pictures!
 
-To link your social media to your HoF creator account, you must contact me (via any medium, best is
-Discord, you can also use halloffame at mtq.io) and provide me with your links.
+Alternatively, if you do not want to create a CC account, you can contact me directly to set them up
+manually.
 
 ### Post-processing and other mods
 
@@ -97,6 +76,9 @@ You can join the Cities: Skylines Modding Discord server and join us in the dedi
 **pdxm-mods-published › Hall of Fame**.
 
 Bug reports with useful reproduction steps and/or logs are also very welcome on GitHub!
+
+For other requests or if you do not have a Discord account, you can reach me at
+**halloffame at mtq.io**.
 
 ### Feedback and Feature requests
 
