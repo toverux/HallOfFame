@@ -83,6 +83,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.LoginStatus]": "这是您在“城市画廊”服务器上的账户状态。",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  以 “{CREATOR_NAME}” 账号登录",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  匿名登录",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "复制创作者 ID",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "整合到主菜单里",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "您可以在主菜单上禁用“城市画廊”的幻灯片，但仍保留其他功能。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "按需加载",
