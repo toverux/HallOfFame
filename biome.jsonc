@@ -18,21 +18,19 @@
   "linter": {
     "domains": {
       "next": "none",
+      "qwik": "none",
       "solid": "none",
-      "test": "none"
+      "test": "none",
+      "vue": "none"
     },
     "rules": {
       // Those rules do not make sense in a CS2 mod.
       "a11y": "off",
       "correctness": {
         // Here we are forced to disable it until the rule supports exceptions for "cs2/*" imports.
-        "noUndeclaredDependencies": "off"
-      },
-      "nursery": {
-        // Same reason as { a11y: "off" }.
-        "noNoninteractiveElementInteractions": "off",
-        // Should be disabled by { solid: "none" } but is not, possibly because it is a nursery rule?
-        "useForComponent": "off",
+        "noUndeclaredDependencies": "off",
+        // We don't use extensions for imports.
+        "useImportExtensions": "off",
         // False-positives with <LocalizedString>'s [id] prop, and we don't use ids anyway.
         "useUniqueElementIds": "off"
       },

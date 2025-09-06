@@ -81,6 +81,7 @@ export function MenuControls(): ReactElement {
   );
 }
 
+// biome-ignore lint/complexity/noExcessiveLinesPerFunction: splitting further would make it too complex.
 export function MenuControlsContent(): ReactElement {
   const { translate } = useLocalization();
 
@@ -236,7 +237,8 @@ export function MenuControlsContent(): ReactElement {
   );
 }
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: that's okay, but yeah
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: that's okay, but yeah.
+// biome-ignore lint/complexity/noExcessiveLinesPerFunction: splitting would make it too complex.
 function MenuControlsCityName({
   screenshot
 }: Readonly<{

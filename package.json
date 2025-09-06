@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "packageManager": "bun@1.2.19",
+  "packageManager": "bun@1.2.21",
   "engines": {
     "bun": ">=1.2.0",
     "node": ">=24.0.0"
@@ -22,24 +22,24 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "~2.1.2",
-    "@toverux/blanc-hopital": "^1.1.0",
+    "@biomejs/biome": "~2.2.3",
+    "@toverux/blanc-hopital": "^2.0.0",
     "@types/common-tags": "^1.8.4",
-    "@types/react": "^18.3.23",
+    "@types/react": "^18.3.24",
     "@types/react-dom": "^18.3.7",
     "css-loader": "^7.1.2",
-    "lefthook": "^1.12.2",
-    "mini-css-extract-plugin": "^2.9.2",
-    "sass": "~1.89.2",
+    "lefthook": "^1.12.3",
+    "mini-css-extract-plugin": "^2.9.4",
+    "sass": "~1.92.1",
     "sass-loader": "^16.0.5",
     "terser-webpack-plugin": "^5.3.14",
-    "ts-loader": "^9.5.2",
-    "typescript": "^5.8.3",
-    "webpack": "^5.100.2",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.2",
+    "webpack": "^5.101.3",
     "webpack-cli": "^6.0.1"
   },
   "trustedDependencies": ["@biomejs/biome", "lefthook"],
   "optionalDependencies": {
-    "sass-embedded": "~1.89.2"
+    "sass-embedded": "~1.92.1"
   }
 }

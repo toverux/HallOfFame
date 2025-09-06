@@ -16,6 +16,7 @@ interface LoadingProgressProps {
 
 /**
  * Those are values used by vanilla for the loading screens.
+ * @public
  */
 export const loadingProgressVanillaProps = {
   size: 128,
@@ -26,6 +27,7 @@ export const loadingProgressVanillaProps = {
 
 /**
  * Loading circles that are displayed on the loading screens.
+ * @public
  */
 export const LoadingProgress = getModuleExport<FC<LoadingProgressProps>>(
   'game-ui/overlay/logo-screen/loading/loading-progress.tsx',

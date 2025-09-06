@@ -8,6 +8,7 @@ interface DescriptionTooltipProps extends Omit<TooltipProps, 'tooltip'> {
   readonly content?: ReactNode;
 }
 
+/** @public */
 export const DescriptionTooltip = getModuleExport<FC<DescriptionTooltipProps>>(
   'game-ui/common/tooltip/description-tooltip/description-tooltip.tsx',
   'DescriptionTooltip',
