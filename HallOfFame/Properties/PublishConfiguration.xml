@@ -135,11 +135,17 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2025.6.0" />
+  <ModVersion Value="2025.7.0" />
   <GameVersion Value="1.3.*" />
-  <ChangeLog>**Removed Cities Collective support**
+  <ChangeLog>**Removed Cities Collective support:**
 
-The website has been abandoned by its author and all data has been lost.</ChangeLog>
+The website has been abandoned by its author and all data has been lost.
+
+**Other changes:**
+
+- The view count label in the menu now displays the unique view count. The tooltip shows both.
+- The creator stats dialog (opened via the startup notification) now also displays the unique view count.
+- Localization updates.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
