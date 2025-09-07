@@ -84,7 +84,6 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Показывать последнее изображение на экране загрузки",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Hall of Fame будет показывать последнее изображение на загрузочном экране при загрузке сохранения или возврате в главное меню.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "Отображать социальные сети авторов",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "Отображать ссылки на социальные сети авторов при просмотре скриншотов.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowViewCount]": "Отображать количество просмотров",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ShowViewCount]": "Отображать количество просмотров (рядом с этапом развития, населением и прочим).\nУчтите, что если вы часто видите одно и то же число, это из-за алгоритмов, которые стараются сбалансировать просмотры между скриншотами с низкими просмотрами.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.NamesTranslationMode]": "Режим перевода имен и названий",
