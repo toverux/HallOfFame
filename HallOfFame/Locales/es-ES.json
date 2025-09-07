@@ -88,7 +88,6 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Mostrar la última imagen en la pantalla de carga",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableLoadingScreenBackground]": "Hall of Fame mostrará la última imagen que cargó en la pantalla de carga al cargar un juego salvado o volver al menú principal.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "Mostrar enlaces de redes sociales de creadores",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ShowCreatorSocials]": "Al ver capturas de pantalla, mostrar botones para las cuentas de redes sociales del creador.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ShowViewCount]": "Mostrar contador de vistas en el menú",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ShowViewCount]": "Mostrar el número de vistas que una captura de pantalla ha recibido en las etiquetas de captura de pantalla (junto con el hito de la ciudad, población, etc.).\nTen en cuenta que si a menudo ves el mismo número, es solo por los algoritmos que intentan equilibrar las vistas entre las distintas capturas de pantalla.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.NamesTranslationMode]": "Modo de traducción de nombres",
