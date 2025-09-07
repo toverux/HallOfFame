@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Colossal.UI.Binding;
+﻿using Colossal.UI.Binding;
 using Game.Input;
 using UnityEngine.InputSystem;
 
