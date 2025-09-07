@@ -49,6 +49,8 @@ export interface Screenshot {
 
   readonly viewsCount: number;
 
+  readonly uniqueViewsCount: number;
+
   readonly likingPercentage: number;
 
   readonly isLiked: boolean;

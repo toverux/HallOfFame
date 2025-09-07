@@ -107,6 +107,13 @@ internal record Screenshot : IJsonWritable {
     set;
   }
 
+  [DecodeAlias("uniqueViewsCount")]
+  internal int UniqueViewsCount {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
   [DecodeAlias("favoritingPercentage")]
   internal int LikingPercentage {
     get;
@@ -188,6 +195,9 @@ internal record Screenshot : IJsonWritable {
 
     writer.PropertyName("viewsCount");
     writer.Write(this.ViewsCount);
+
+    writer.PropertyName("uniqueViewsCount");
+    writer.Write(this.UniqueViewsCount);
 
     writer.PropertyName("likingPercentage");
     writer.Write(this.LikingPercentage);

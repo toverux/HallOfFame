@@ -128,6 +128,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
         new Dictionary<string, ILocElement> {
           { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
           { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
+          { "UNIQUE_VIEWS_COUNT", this.LocalizeNumber(stats.UniqueViewsCount) },
           { "LIKES_COUNT", this.LocalizeNumber(stats.LikesCount) },
           { "TOTAL_CREATORS_COUNT", this.LocalizeNumber(stats.AllCreatorsCount) },
           { "TOTAL_SCREENSHOTS_COUNT", this.LocalizeNumber(stats.AllScreenshotsCount) },

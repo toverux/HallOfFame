@@ -414,13 +414,17 @@ function MenuControlsScreenshotLabels({
           tooltip={
             <LocalizedString
               id='HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]'
-              // biome-ignore lint/style/useNamingConvention: i18n convention
-              args={{ NUMBER: <LocalizedNumber value={screenshot.viewsCount} /> }}
+              args={{
+                // biome-ignore lint/style/useNamingConvention: i18n convention
+                VIEWS_COUNT: <LocalizedNumber value={screenshot.viewsCount} />,
+                // biome-ignore lint/style/useNamingConvention: i18n convention
+                UNIQUE_VIEWS_COUNT: <LocalizedNumber value={screenshot.uniqueViewsCount} />
+              }}
             />
           }>
           <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
             <img src={eyeOpenSrc} className={styles.menuControlsSectionScreenshotLabelsLabelIcon} />
-            {formatBigNumber(screenshot.viewsCount, translate)}
+            {formatBigNumber(screenshot.uniqueViewsCount, translate)}
           </span>
         </Tooltip>
       )}

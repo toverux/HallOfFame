@@ -41,6 +41,13 @@ internal record CreatorStats : IJsonWritable {
     set;
   }
 
+  [DecodeAlias("uniqueViewsCount")]
+  internal int UniqueViewsCount {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
   [DecodeAlias("favoritesCount")]
   internal int LikesCount {
     get;
