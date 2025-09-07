@@ -114,13 +114,6 @@ internal record Screenshot : IJsonWritable {
     set;
   }
 
-  [DecodeAlias("citiesCollectiveUrl")]
-  internal string? CitiesCollectiveUrl {
-    get;
-    [UsedImplicitly]
-    set;
-  }
-
   /// <summary>
   /// Non-inherent property of screenshot only set on some endpoints.
   /// </summary>
@@ -201,9 +194,6 @@ internal record Screenshot : IJsonWritable {
 
     writer.PropertyName("isLiked");
     writer.Write(this.IsLiked);
-
-    writer.PropertyName("citiesCollectiveUrl");
-    writer.Write(this.CitiesCollectiveUrl);
 
     if (this.Creator is not null) {
       writer.PropertyName("creator");

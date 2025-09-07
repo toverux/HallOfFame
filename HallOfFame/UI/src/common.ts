@@ -1,10 +1,4 @@
-﻿export const supportedSocialPlatforms = [
-  'citiescollective',
-  'paradoxmods',
-  'discord',
-  'youtube',
-  'twitch'
-] as const;
+﻿export const supportedSocialPlatforms = ['paradoxmods', 'discord', 'youtube', 'twitch'] as const;
 
 export interface Creator {
   readonly id: string;
@@ -58,8 +52,6 @@ export interface Screenshot {
   readonly likingPercentage: number;
 
   readonly isLiked: boolean;
-
-  readonly citiesCollectiveUrl: string | null;
 
   readonly creator: Creator;
 }

@@ -17,11 +17,11 @@ If you’re in one of those situations, all you need is the mod!
 This mod allows players to take and upload 4K screenshots of their city and share them with the
 community.
 
-Images can then be viewed and liked by other players as a background image in the main menu, and on
-the web thanks to our integration with **Cities Collective (https://citiescollective.space)**!
+Images can then be viewed and liked by other players as a background image in the main menu, and
+hopefully soon enough, on the web!
 
-Hall of Fame also makes sure that no city falls into oblivion by displaying each uploaded image as
-often as possible!
+Hall of Fame also makes sure no city falls into oblivion by displaying each uploaded image as often
+as possible!
 
 The likes and trending screenshots mechanisms still allow the best creators to shine, but everyone
 is welcome, there is no downvote and no moderation based on skill.
@@ -40,14 +40,13 @@ Don’t be shy, let us remember your city — if you wanna share it, we wanna se
 Next to your username when displaying one of your pictures, Hall of Fame can display buttons leading
 to your other social media accounts.
 
-To link your social media accounts by yourself, you need to register/login to Cities Collective
-(https://citiescollective.space), then set your social accounts in your dashboard.
+The following platforms are supported: Paradox Mods, YouTube, Twitch and Discord (invite link),
+others can be added on demand if the platform is popular enough.
 
-Then, link your CC account with Hall of Fame (follow instructions on the site or in the mod’s
-settings) — they will now appear automatically on your Hall of Fame pictures!
+Your channel/account must contain a fair amount of C:S 2 content to be eligible, of course.
 
-Alternatively, if you do not want to create a CC account, you can contact me directly to set them up
-manually.
+To link your social media to your HoF creator account, you need to contact me (via any medium, best
+is Discord, you can also use halloffame at mtq.io) and provide me with your username and links.
 
 ### Post-processing and other mods
 
@@ -75,7 +74,7 @@ It will be immediately unlisted and reviewed by a human.
 You can join the Cities: Skylines Modding Discord server and join us in the dedicated thread
 **pdxm-mods-published › Hall of Fame**.
 
-Bug reports with useful reproduction steps and/or logs are also very welcome on GitHub!
+Bug reports with useful reproduction steps and logs are also very welcome on GitHub!
 
 For other requests or if you do not have a Discord account, you can reach me at
 **halloffame at mtq.io**.
@@ -107,7 +106,7 @@ Donations are very welcome and will help keep the service running.
 - **Bad Peanut** for the Hearth Chirper icon.
 - **b00tyaddict, CloverPie, Danil.V.L, Hendrix, Jason_Stephen, Jojodaisuke, Konsi, obelix, Prophedt,
   TheBusStop, ThemisC2, Tigon Ologdring**, valuable community members who, in one way or the other,
-  provided a lot of help, feedback, support, and enthusiasm.
+  provided a lot of help, feedback, support and enthusiasm.
 - **Translators:**
   baka-gourd (Chinese Simplified),
   elGendo87 (Spanish),

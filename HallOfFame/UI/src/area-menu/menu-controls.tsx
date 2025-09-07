@@ -7,15 +7,9 @@ import {
   type LocElement,
   useLocalization
 } from 'cs2/l10n';
-import { Button, Icon, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
+import { Button, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
-import {
-  type Creator,
-  type CreatorSocialLink,
-  type Screenshot,
-  supportedSocialPlatforms
-} from '../common';
-import citiesCollectiveIconSrc from '../icons/citiescollective-icon.svg';
+import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../common';
 import discordBrandsSolid from '../icons/fontawesome/discord-brands-solid.svg';
 import ellipsisSolidSrc from '../icons/fontawesome/ellipsis-solid.svg';
 import flagSolidSrc from '../icons/fontawesome/flag-solid.svg';
@@ -62,7 +56,6 @@ const toggleMenuInputAction = bindInputAction('hallOfFame.presenter', 'toggleMen
 const socialPlatforms: {
   [K in CreatorSocialLink['platform']]: Readonly<{ name: string; logo: string; color: string }>;
 } = {
-  citiescollective: { name: 'Cities Collective', logo: citiesCollectiveIconSrc, color: '#000000' },
   discord: { name: 'Discord', logo: discordBrandsSolid, color: '#5865F2' },
   paradoxmods: { name: 'Paradox Mods', logo: 'Media/Glyphs/ParadoxMods.svg', color: '#5abe41' },
   twitch: { name: 'Twitch', logo: twitchBrandsSolid, color: '#8956FB' },
@@ -437,22 +430,6 @@ function MenuControlsScreenshotLabels({
           {screenshot.createdAtFormattedDistance}
         </span>
       </Tooltip>
-
-      {modSettings.showCreatorSocials && screenshot.citiesCollectiveUrl && (
-        <Tooltip
-          tooltip={translate('HallOfFame.UI.Menu.MenuControls.OPEN_IN_CITIES_COLLECTIVE_TOOLTIP')}
-          direction='down'>
-          <Button
-            className={`${styles.menuControlsSectionScreenshotLabelsLabel} ${styles.menuControlsSectionScreenshotLabelsLabelCitiesCollective}`}
-            onSelect={() =>
-              // biome-ignore lint/style/noNonNullAssertion: checked above & cannot change.
-              openCitiesCollectiveCityPage(screenshot.citiesCollectiveUrl!, screenshot.creator)
-            }>
-            <Icon src={citiesCollectiveIconSrc} tinted={true} />
-            citiescollective.space
-          </Button>
-        </Tooltip>
-      )}
     </div>
   );
 }
@@ -706,12 +683,6 @@ function openSocialLink({ platform, link }: CreatorSocialLink): void {
   platform == 'paradoxmods'
     ? trigger('hallOfFame.common', 'openCreatorPage', link)
     : trigger('hallOfFame.common', 'openWebPage', link);
-}
-
-function openCitiesCollectiveCityPage(cityPageUrl: string, creator: Creator): void {
-  const creatorPageUrl = creator.socials.find(link => link.platform == 'citiescollective')?.link;
-
-  trigger('hallOfFame.common', 'openCitiesCollectiveCityPage', cityPageUrl, creatorPageUrl ?? null);
 }
 
 function previousScreenshot(): void {

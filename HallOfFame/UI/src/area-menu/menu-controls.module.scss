@@ -115,44 +115,6 @@
           margin-right: 10rem;
           filter: drop-shadow(0 1rem .4rem var(--panelColorNormal));
         }
-
-        &-cities-collective {
-          $background-color-light: rgba(219, 39, 119, 0.5);
-          $background-color-dark: rgba(147, 51, 234, 0.5);
-
-          // Resets of <Button> style.
-          background: none;
-          border: none;
-          color: white;
-
-          img {
-            width: 22rem;
-            height: 100%;
-          }
-
-          &:hover {
-            background: linear-gradient(
-              -45deg,
-              $background-color-dark 30%,
-              $background-color-light 50%,
-              $background-color-dark 70%
-            );
-            background-size: 300%;
-            background-position-x: 100%;
-            animation: shimmer 4s infinite ease-in-out;
-            box-shadow: 0 0 0 1rem $background-color-dark inset;
-
-            @keyframes shimmer {
-              to {
-                background-position-x: 0;
-              }
-            }
-          }
-
-          &:active {
-            background-color: $background-color-dark;
-          }
-        }
       }
     }
 

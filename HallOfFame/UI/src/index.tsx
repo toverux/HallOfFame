@@ -9,7 +9,6 @@ import { logError } from './utils';
 // Ex. resulting URL: `coui://ui-mods/images/stats-notification.svg`
 import './icons/stats-notification.svg';
 import './icons/cs2-lightbulb.svg';
-import './icons/citiescollective-icon.svg';
 
 const register: ModRegistrar = moduleRegistry => {
   try {

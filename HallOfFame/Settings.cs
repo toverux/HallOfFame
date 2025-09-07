@@ -11,7 +11,6 @@ using Colossal.PSI.PdxSdk;
 using Colossal.UI.Binding;
 using Game.Input;
 using Game.Modding;
-using Game.SceneFlow;
 using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
@@ -44,8 +43,6 @@ namespace HallOfFame;
   nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
 public sealed class Settings : ModSetting, IJsonWritable {
   private const string GroupYourProfile = "YourProfile";
-
-  private const string GroupCitiesCollective = "CitiesCollective";
 
   private const string GroupUIPreferences = "UIPreferences";
 
@@ -144,33 +141,12 @@ public sealed class Settings : ModSetting, IJsonWritable {
   // an Option entry, it has to be getter-only.
   public LocalizedString LoginStatus => this.loginStatusValue;
 
-  [SettingsUISection(Settings.GroupCitiesCollective)]
-  [SettingsUIMultilineText(icon: "coui://ui-mods/images/citiescollective-icon.svg")]
-  [UsedImplicitly]
-  public string CitiesCollectiveTitle => string.Empty;
-
-  [SettingsUISection(Settings.GroupCitiesCollective)]
-  [SettingsUIMultilineText]
-  [UsedImplicitly]
-  public string CitiesCollectiveDescription =>
-    string.Empty; // The actual text comes from the translation file.
-
-  [SettingsUISection(Settings.GroupCitiesCollective)]
+  [SettingsUISection(Settings.GroupYourProfile)]
   [SettingsUIButton]
-  [SettingsUIButtonGroup("CitiesCollective")]
   [UsedImplicitly]
   public bool CopyCreatorID {
     // ReSharper disable once ValueParameterNotUsed
     set => GUIUtility.systemCopyBuffer = this.CreatorID;
-  }
-
-  [SettingsUISection(Settings.GroupCitiesCollective)]
-  [SettingsUIButton]
-  [SettingsUIButtonGroup("CitiesCollective")]
-  [UsedImplicitly]
-  public bool OpenCitiesCollective {
-    // ReSharper disable once ValueParameterNotUsed
-    set => Application.OpenURL("https://citiescollective.space");
   }
 
   /// <summary>
