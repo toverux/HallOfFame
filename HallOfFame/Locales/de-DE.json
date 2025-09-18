@@ -83,6 +83,7 @@
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  Angemeldet als „{CREATOR_NAME}“",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Anonym angemeldet",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Creator-ID kopieren",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Kopiere deine Creator ID in die Zwischenablage.\n<Halte sie privat> — Teile sie nur mit dem Autor von Hall of Fame, um Unterstützung zu erhalten oder mit vertrauenswürdigen Drittanbieterdiensten, welche in Hall of Fame integriert sind.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Integration im Hauptmenü aktivieren",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Du kannst die Slideshow von Hall of Fame im Hauptmenü deaktivieren und trotzdem die anderen Funktionen behalten.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "Nur bei Bedarf laden",
