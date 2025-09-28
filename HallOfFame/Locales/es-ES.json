@@ -83,7 +83,7 @@
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  Sesión iniciada como “{CREATOR_NAME}”",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Sesión anónima iniciada",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copiar ID de Creador",
-  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copia tu ID de creador en el portapapeles.\n<Mantenlo en Privado> — solo compártelo con el autor de Hall of Fame para soporte, o con servicios de terceros fiables que se integran con Hall of Fame.",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copia tu ID de creador en el portapapeles.\n<Mantenlo en privado> — solo compártelo con el autor de Hall of Fame para soporte, o con servicios de terceros fiables que se integran con Hall of Fame.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Habilitar integración del menú principal",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Puedes desactivar la presentación de diapositivas de Hall of Fame en el menú principal y aun así mantener las otras características.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingForceEnableMainMenuSlideshow]": "Cargar bajo demanda",
