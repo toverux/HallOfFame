@@ -11,6 +11,7 @@ using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Menu;
+using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using PDX.ModsUI;
 using UnityEngine;
@@ -215,7 +216,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
       ? "HallOfFame.Common.FATAL_ERROR".Translate()
       : "HallOfFame.Common.RECOVERABLE_ERROR".Translate();
 
-    ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+    ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
       localizedMessage = $"{@base} \n{gravity}",
       errorDetails = error
     });

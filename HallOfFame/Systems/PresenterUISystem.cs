@@ -12,6 +12,7 @@ using Game.UI;
 using Game.UI.Localization;
 using HallOfFame.Domain;
 using HallOfFame.Http;
+using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using UnityEngine.InputSystem;
 
@@ -519,10 +520,10 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         liked: updatedScreenshot.IsLiked);
     }
     catch (HttpException ex) {
-      ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+      ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
         localizedTitle = "HallOfFame.Common.OOPS",
         localizedMessage = ex.GetUserFriendlyMessage(),
-        actions = ErrorDialog.Actions.None
+        actions = ErrorDialog.ActionBits.Continue
       });
 
       // Revert the optimistic UI update.
@@ -624,10 +625,10 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         this.forcedRefreshIndexBinding.Update(this.forcedRefreshIndexBinding.value + 1);
       }
       catch (HttpException ex) {
-        ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+        ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
           localizedTitle = "HallOfFame.Common.OOPS",
           localizedMessage = ex.GetUserFriendlyMessage(),
-          actions = ErrorDialog.Actions.None
+          actions = ErrorDialog.ActionBits.Continue
         });
       }
       catch (Exception ex) {

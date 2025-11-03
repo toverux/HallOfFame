@@ -11,11 +11,13 @@ using Colossal.PSI.PdxSdk;
 using Colossal.UI.Binding;
 using Game.Input;
 using Game.Modding;
+using Game.SceneFlow;
 using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Widgets;
 using HallOfFame.Http;
+using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -575,11 +577,11 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// ID.
   /// </summary>
   private void ShowNoParadoxConnectionWarningDialog() {
-    ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+    ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
       severity = ErrorDialog.Severity.Warning,
       localizedTitle = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]"),
       localizedMessage = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Message]"),
-      actions = ErrorDialog.Actions.None
+      actions = ErrorDialog.ActionBits.Continue
     });
   }
 

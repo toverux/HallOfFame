@@ -21,6 +21,7 @@ using Game.UI.InGame;
 using Game.UI.Localization;
 using Game.UI.Menu;
 using HallOfFame.Http;
+using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using Unity.Entities;
 using UnityEngine;
@@ -507,10 +508,10 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       // Reset progress state.
       this.uploadProgress = null;
 
-      ErrorDialogManager.ShowErrorDialog(new ErrorDialog {
+      ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
         localizedTitle = "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR",
         localizedMessage = ex.GetUserFriendlyMessage(),
-        actions = ErrorDialog.Actions.None
+        actions = ErrorDialog.ActionBits.Continue
       });
     }
     catch (Exception ex) {
