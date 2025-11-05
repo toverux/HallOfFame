@@ -6,27 +6,33 @@ using HallOfFame.Utils;
 
 namespace HallOfFame.Reflection;
 
-public static class ErrorDialogManagerAccessor {
+internal static class ErrorDialogManagerAccessor {
   /// <summary>
   /// Instance of the error dialog manager, will be null if there was an error retrieving its
   /// instance through reflection.
   /// </summary>
-  public static ErrorDialogManager? Instance { get; }
+  internal static ErrorDialogManager? Instance { get; }
 
   static ErrorDialogManagerAccessor() {
     var appBindings = GameManager.instance.userInterface.appBindings;
 
-    var errorDialogManager = typeof(AppBindings)
+    ErrorDialogManagerAccessor.Instance = typeof(AppBindings)
       .GetField(
         "m_ErrorDialogManager",
         BindingFlags.NonPublic | BindingFlags.Instance)
       ?.GetValue(appBindings) as ErrorDialogManager;
 
-    if (errorDialogManager is null) {
+    if (ErrorDialogManagerAccessor.Instance is null) {
       Mod.Log.ErrorRecoverable(
-        new Exception($"Failed to get an instance of {nameof(ErrorDialogManagerAccessor)}."));
+        new Exception("Failed to get an instance of ErrorDialogManagerAccessor."));
     }
+    else {
+      Mod.Log.Info(
+        $"{nameof(ErrorDialogManagerAccessor)}: Acquired AppBindings.m_ErrorDialogManager");
+    }
+  }
 
-    ErrorDialogManagerAccessor.Instance = errorDialogManager;
+  public static void Init() {
+    // Just a method to force-initialize the static constructor.
   }
 }

@@ -62,9 +62,6 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
   private const string GroupDevelopment = "Development";
 
-  private static readonly PdxSdkPlatform PdxSdk =
-    PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
-
   // Needs to be getter method to be read by the game.
   private static DropdownItem<string>[] ResolutionDropdownItems => [
     new() { value = "fhd", displayName = "Full HD" },
@@ -537,17 +534,13 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     // Try to get and store the Paradox account ID.
     // Why store it?
-    // 1. If the user once plays without Internet connection or server failure, we'll still have the
-    //    ID used previously.
+    // 1. If the user once plays without an internet connection or server failure, we'll still have
+    //    the ID used previously.
     // 2. If for some reason the user changes the Paradox account they use, it doesn't mean they
     //    want to change their Hall of Fame account, so we keep the old ID.
-    // 3. It's more explicit and transparent to the user.
+    // 3. It is more explicit and transparent to the user.
     try {
-      this.CreatorID = typeof(PdxSdkPlatform)
-        .GetField(
-          "m_AccountUserId",
-          BindingFlags.NonPublic | BindingFlags.Instance)
-        ?.GetValue(Settings.PdxSdk) as string;
+      this.CreatorID = PdxSdkPlatformProxy.AccountUserId;
 
       if (this.CreatorID is null) {
         this.ShowNoParadoxConnectionWarningDialog();

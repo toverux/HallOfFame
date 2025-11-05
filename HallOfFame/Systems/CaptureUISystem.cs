@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Colossal;
 using Colossal.PSI.Common;
 using Colossal.PSI.PdxSdk;
 using Colossal.Serialization.Entities;
@@ -633,18 +631,11 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     }
 
     // We will mimic the vanilla screenshot naming scheme.
-    // The game uses a ScreenUtility class that increments a private counter, we read it via
-    // reflection and increment it just like the game does.
-    var fieldInfo = typeof(ScreenUtility).GetField(
-      "m_Count", BindingFlags.NonPublic | BindingFlags.Static);
-
-    var count = (int)(fieldInfo?.GetValue(null) ?? 0);
-
-    fieldInfo?.SetValue(null, count++);
-
+    // The game uses a ScreenUtility class, which increments a private counter we read through our
+    // proxy, and we should use the same naming scheme.
     var fileName = Path.Combine(
       Mod.GameScreenshotsPath,
-      $"{DateTime.Now:dd-MMMM-HH-mm-ss}-{count:00}.png");
+      $"{DateTime.Now:dd-MMMM-HH-mm-ss}-{ScreenUtilityProxy.Count++:00}.png");
 
     File.WriteAllBytes(fileName, pngScreenshotBytes);
   }

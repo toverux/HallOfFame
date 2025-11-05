@@ -10,6 +10,9 @@ using Game.Modding;
 using HallOfFame.Systems;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
+#if DEBUG
+using HallOfFame.Reflection;
+#endif
 
 namespace HallOfFame;
 
@@ -55,6 +58,13 @@ public sealed class Mod : IMod {
   private Settings? settingsValue;
 
   public void OnLoad(UpdateSystem updateSystem) {
+    #if DEBUG
+    // In debug mode, eagerly check reflection hacks are working.
+    ErrorDialogManagerAccessor.Init();
+    PdxSdkPlatformProxy.Init();
+    ScreenUtilityProxy.Init();
+    #endif
+
     try {
       // Create directories for settings and data.
       Mod.CreateDirectories();
