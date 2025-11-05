@@ -2,16 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
-using Colossal.PSI.PdxSdk;
 using Colossal.UI.Binding;
 using Game.Input;
 using Game.Modding;
-using Game.SceneFlow;
 using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
@@ -21,6 +18,13 @@ using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
+#if DEBUG
+using Colossal;
+using Colossal.Json;
+using Game.SceneFlow;
+using HallOfFame.Systems;
+using Unity.Entities;
+#endif
 
 namespace HallOfFame;
 
@@ -554,7 +558,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
       this.IsParadoxAccountID = true;
 
       Mod.Log.Info(
-        $"Settings: Acquired Paradox account ID {this.MaskedCreatorID}.");
+        $"{nameof(Settings)}: Acquired Paradox account ID {this.MaskedCreatorID}.");
     }
 
     // If the user is not logged in, or the operation failed unexpectedly, we generate a random ID.
@@ -627,7 +631,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
         ? await HttpQueries.GetMe()
         : await HttpQueries.UpdateMe();
 
-      Mod.Log.Info($"Logged in as {creator.CreatorName}. Your Public Creator ID is {creator.Id}.");
+      Mod.Log.Info(
+        $"{nameof(Settings)}: Logged in as {creator.CreatorName}. " +
+        $"Your Public Creator ID is {creator.Id}.");
 
       // Stop if the operation was canceled while we were fetching data.
       thisCts.Token.ThrowIfCancellationRequested();
@@ -710,9 +716,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
       return;
     }
 
-    var world = Unity.Entities.World.All[0];
+    var world = World.All[0];
 
-    world.GetOrCreateSystemManaged<Systems.PresenterUISystem>()
+    world.GetOrCreateSystemManaged<PresenterUISystem>()
       .LoadScreenshotById(this.ScreenshotToLoad!);
 
     this.ScreenshotToLoad = null;
@@ -729,7 +735,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         .OrderBy(kv => kv.Key)
         .ToDictionary(kv => kv.Key, kv => kv.Value);
 
-      var json = Colossal.Json.JSON.Dump(strings);
+      var json = JSON.Dump(strings);
 
       var filePath = Path.Combine(
         Application.persistentDataPath,
@@ -741,9 +747,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
     localizationManager.SetActiveLocale(originalLocale);
   }
 
-  private sealed class DevDictionarySource : Colossal.IDictionarySource {
+  private sealed class DevDictionarySource : IDictionarySource {
     public IEnumerable<KeyValuePair<string, string>> ReadEntries(
-      IList<Colossal.IDictionaryEntryError> errors,
+      IList<IDictionaryEntryError> errors,
       Dictionary<string, int> indexCounts) =>
       new Dictionary<string, string> {
         {

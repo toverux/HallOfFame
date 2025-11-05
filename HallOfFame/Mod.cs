@@ -46,7 +46,9 @@ public sealed class Mod : IMod {
     Path.Combine(EnvPath.kUserDataPath, "ModsData", nameof(HallOfFame));
 
   internal static ILog Log { get; } =
-    LogManager.GetLogger(nameof(HallOfFame)).SetShowsErrorsInUI(true);
+    LogManager.GetLogger(nameof(HallOfFame))
+      .SetShowsErrorsInUI(true)
+      .SetEffectiveness(Level.All);
 
   private static Mod? instanceValue;
 
@@ -93,7 +95,7 @@ public sealed class Mod : IMod {
       updateSystem.UpdateAt<PresenterUISystem>(SystemUpdatePhase.UIUpdate);
       updateSystem.UpdateAt<Systems.CaptureUISystem>(SystemUpdatePhase.UIUpdate);
 
-      Mod.Log.Info($"Mod: {nameof(this.OnLoad)} complete.");
+      Mod.Log.Verbose($"{nameof(Mod)}: {nameof(this.OnLoad)} complete.");
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);

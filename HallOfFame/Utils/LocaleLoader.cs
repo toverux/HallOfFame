@@ -64,7 +64,7 @@ internal static class LocaleLoader {
 
     GameManager.instance.localizationManager.AddSource(localeId, source);
 
-    Mod.Log.Info($"LocaleLoader: Loaded locale {localeId}.");
+    Mod.Log.Verbose($"{nameof(LocaleLoader)}: Loaded locale {localeId}.");
   }
 
   /// <summary>
@@ -85,7 +85,7 @@ internal static class LocaleLoader {
     // Oops, we do not support this one.
     if (resourceName is null) {
       Mod.Log.Info(
-        $"LocaleLoader: Skipping locale {localeId}, it is not supported by HoF.");
+        $"{nameof(LocaleLoader)}: Skipping locale {localeId}, it is not supported by HoF.");
     }
 
     // Load locale resource and parse JSON.

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -299,8 +299,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.hasPreviousScreenshotBinding.Update();
     }
 
-    Mod.Log.Info(
-      $"Menu: {nameof(this.PreviousScreenshot)}: Displaying {screenshot} " +
+    Mod.Log.Verbose(
+      $"{nameof(PresenterUISystem)}: {nameof(this.PreviousScreenshot)}: Displaying {screenshot} " +
       $"(queue idx {this.currentScreenshotIndex}/" +
       $"{this.screenshotsQueue.Count - 1}).");
 
@@ -356,8 +356,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.screenshotBinding.Update(screenshot);
     this.hasPreviousScreenshotBinding.Update();
 
-    Mod.Log.Info(
-      $"Menu: {nameof(this.NextScreenshot)}: Displaying {screenshot} " +
+    Mod.Log.Verbose(
+      $"{nameof(PresenterUISystem)}: {nameof(this.NextScreenshot)}: Displaying {screenshot} " +
       $"(queue idx {this.currentScreenshotIndex}/" +
       $"{this.screenshotsQueue.Count - 1}).");
 
@@ -465,8 +465,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         this.errorBinding.Update(null);
       }
 
-      Mod.Log.Info(
-        $"Menu: {(preload ? "Preloaded" : "Loaded")} {screenshot} " +
+      Mod.Log.Verbose(
+        $"{nameof(PresenterUISystem)}: {(preload ? "Preloaded" : "Loaded")} {screenshot} " +
         $"({imageUrl}, algo={screenshot.Algorithm}).");
 
       return screenshot;
@@ -569,7 +569,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         File.WriteAllBytes(filePath, imageBytes);
       });
 
-      Mod.Log.Info($"Menu: Saved {screenshot} image to {filePath}.");
+      Mod.Log.Info($"{nameof(PresenterUISystem)}: Saved {screenshot} image to {filePath}.");
     }
     catch (Exception ex) when (this.IsNetworkError(ex)) {
       Mod.Log.Error(ex.GetUserFriendlyMessage());

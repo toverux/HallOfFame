@@ -502,7 +502,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       // Set progress to done.
       this.uploadProgress = new UploadProgress(1, 1);
 
-      Mod.Log.Info($"Game: Screenshot uploaded, ID #{screenshot.Id}.");
+      Mod.Log.Info($"{nameof(CaptureUISystem)}: Screenshot uploaded, ID #{screenshot.Id}.");
     }
     catch (HttpException ex) {
       // Reset progress state.

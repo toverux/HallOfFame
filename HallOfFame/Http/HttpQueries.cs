@@ -48,7 +48,7 @@ internal static partial class HttpQueries {
 
     HttpQueries.RequestIdsMap.Add(request, requestId);
 
-    Mod.Log.Info(
+    Mod.Log.Verbose(
       $"HTTP: Sending request #{requestId} {request.method} {request.url}");
 
     Task? trackerTask = null;
@@ -63,7 +63,7 @@ internal static partial class HttpQueries {
       await trackerTask;
     }
 
-    Mod.Log.Info(
+    Mod.Log.Verbose(
       $"HTTP: Request #{requestId} completed ({request.responseCode}).");
 
     return;
