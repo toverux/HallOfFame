@@ -1,3 +1,14 @@
 [tools]
-bun = "1.3.1"
-node = "25.1.0"
+bun = "1.3.3"
+node = "25.2.1"
+
+[tasks."deps:upgrade"]
+description = "Upgrades mise-en-place, proposes upgrades for tools managed by mise, and proposes upgrades for package.json dependencies."
+run = [
+    "mise self-update",
+    "mise up --interactive --bump",
+    # using `mise exec bun` makes sure bun is found if a bun upgrade was just made
+    "mise exec bun -- bun update --interactive",
+    # make sure transitive dependencies are updated & deduplicated
+    "mise exec bun -- bun update"
+]
