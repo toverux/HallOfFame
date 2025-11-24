@@ -7,7 +7,7 @@ import {
   type LocElement,
   useLocalization
 } from 'cs2/l10n';
-import { Button, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
+import { Button, MenuButton, Tooltip, type TooltipProps, type UISound } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../common';
 import discordBrandsSolid from '../icons/fontawesome/discord-brands-solid.svg';
@@ -24,6 +24,7 @@ import eyeClosedSrc from '../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../icons/uil/colored/eye-open.svg';
 import {
   bindInputAction,
+  type InputActionPhase,
   type ModSettings,
   type ProxyBinding,
   snappyOnSelect,
@@ -447,17 +448,18 @@ function MenuControlsNextButton({
 
   const { translate } = useLocalization();
 
-  const { useInputBinding, useInputPhase, useOnInputPerformed } = nextScreenshotInputAction;
+  const { useInputBinding, useInputPhase } = nextScreenshotInputAction;
 
-  useOnInputPerformed(
+  const binding = useInputBinding();
+  const phase = useInputPhase();
+
+  useMenuControlsInputAction(
+    phase,
     // setTimeout is used to give time to the key press .*active class to show briefly before
     // [disabled] is set.
     () => !disabled && (setTimeout(nextScreenshot), true),
     'select-item'
   );
-
-  const binding = useInputBinding();
-  const phase = useInputPhase();
 
   const activeClass =
     phase == 'Performed' && !disabled ? styles.menuControlsSectionButtonsButtonActive : '';
@@ -488,17 +490,18 @@ function MenuControlsPreviousButton({
 
   const { translate } = useLocalization();
 
-  const { useInputBinding, useInputPhase, useOnInputPerformed } = previousScreenshotInputAction;
+  const { useInputBinding, useInputPhase } = previousScreenshotInputAction;
 
-  useOnInputPerformed(
+  const binding = useInputBinding();
+  const phase = useInputPhase();
+
+  useMenuControlsInputAction(
+    phase,
     // setTimeout is used to give time to the key press .*active class to show briefly before
     // [disabled] is set.
     () => !disabled && (setTimeout(previousScreenshot), true),
     'select-item'
   );
-
-  const binding = useInputBinding();
-  const phase = useInputPhase();
 
   const activeClass =
     phase == 'Performed' && !disabled ? styles.menuControlsSectionButtonsButtonActive : '';
@@ -529,12 +532,12 @@ function MenuControlsToggleMenuVisibilityButton({
 
   const { translate } = useLocalization();
 
-  const { useInputBinding, useInputPhase, useOnInputPerformed } = toggleMenuInputAction;
-
-  useOnInputPerformed(toggleMenuVisibility, selectSound);
+  const { useInputBinding, useInputPhase } = toggleMenuInputAction;
 
   const binding = useInputBinding();
   const phase = useInputPhase();
+
+  useMenuControlsInputAction(phase, toggleMenuVisibility, selectSound);
 
   const activeClass = phase == 'Performed' ? styles.menuControlsSectionButtonsButtonActive : '';
 
@@ -559,12 +562,12 @@ function MenuControlsLikeButton({
 }>): ReactElement {
   const selectSound = screenshot.isLiked ? 'chirp-event' : 'xp-event';
 
-  const { useInputBinding, useInputPhase, useOnInputPerformed } = likeScreenshotInputAction;
-
-  useOnInputPerformed(likeScreenshot, selectSound);
+  const { useInputBinding, useInputPhase } = likeScreenshotInputAction;
 
   const binding = useInputBinding();
   const phase = useInputPhase();
+
+  useMenuControlsInputAction(phase, likeScreenshot, selectSound);
 
   const activeClass =
     phase == 'Performed'
@@ -677,6 +680,44 @@ function MenuButtonTooltip({
       {children}
     </Tooltip>
   );
+}
+
+/**
+ * Triggers the {@link handler} when the input is executed (key down AND key up).
+ * The handler returns a boolean indicating whether the handler has executed the action (was ready
+ * to do so).
+ * If the handler returns `false`, it will be called again on key up.
+ * Returning void (`undefined`) is equivalent to returning `true`.
+ *
+ * This is a very specific implementation whose sole role is to provide a good UX for the behavior
+ * of the main menu control buttons.
+ *
+ * @param phase   The current input action phase.
+ * @param handler The function to call when the input action is performed (key down) AND canceled
+ *                (key up).
+ * @param sound   The sound to play when the handler returned `true`.
+ */
+function useMenuControlsInputAction(
+  phase: InputActionPhase,
+  // biome-ignore lint/suspicious/noConfusingVoidType: it's really how I want it to be here.
+  handler: () => boolean | undefined | void,
+  sound?: `${UISound}`
+) {
+  const [replayOnCanceled, setReplayOnCanceled] = useState(false);
+
+  useEffect(() => {
+    // Performed = keydown
+    // Canceled = keyup
+    if (phase == 'Performed' || (phase == 'Canceled' && replayOnCanceled)) {
+      const ready = handler() ?? true;
+
+      setReplayOnCanceled(phase == 'Performed' && !ready);
+
+      if (ready && sound) {
+        trigger('audio', 'playSound', sound, 1);
+      }
+    }
+  }, [phase]);
 }
 
 function openModSettings(tab: string): void {
