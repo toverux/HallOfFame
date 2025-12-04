@@ -1,3 +1,1 @@
-﻿- Minor UI improvement so previous/next screenshot buttons work when pressed while loading but released afterward. Before, it *felt* like some key presses were ignored.
-- Bump supported game version to 1.4 so users do not have a warning.
-- Minor localization updates.
+﻿Compatibility for game update 1.5.2f1.

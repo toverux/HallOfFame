@@ -135,11 +135,9 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2025.7.2" />
+  <ModVersion Value="2025.7.3" />
   <GameVersion Value="1.4.*" />
-  <ChangeLog>- Minor UI improvement so previous/next screenshot buttons work when pressed while loading but released afterward. Before, it *felt* like some key presses were ignored.
-- Bump supported game version to 1.4 so users do not have a warning.
-- Minor localization updates.</ChangeLog>
+  <ChangeLog>Compatibility for game update 1.5.2f1.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
