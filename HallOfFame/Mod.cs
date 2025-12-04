@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using Colossal;
 using Colossal.IO.AssetDatabase;
 using Colossal.Logging;
 using Colossal.PSI.Environment;
@@ -40,7 +39,7 @@ public sealed class Mod : IMod {
       $"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
   internal static string GameScreenshotsPath { get; } =
-    Path.Combine(EnvPath.kUserDataPath, ScreenUtility.kScreenshotDirectory);
+    Path.Combine(EnvPath.kUserDataPath, "Screenshots");
 
   internal static string ModSettingsPath { get; } =
     Path.Combine(EnvPath.kUserDataPath, "ModsSettings", nameof(HallOfFame));

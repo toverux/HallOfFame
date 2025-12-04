@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Colossal.Core;
 using Colossal.PSI.Common;
 using Colossal.PSI.PdxSdk;
 using Colossal.Serialization.Entities;
@@ -86,7 +87,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
       // Optimization: only enable live bindings when a screenshot is being displayed/uploaded.
       // Run on the next frame to let the UI update one last time.
-      GameManager.instance.RegisterUpdater(() => { this.Enabled = value is not null; });
+      MainThreadDispatcher.RegisterUpdater(() => { this.Enabled = value is not null; });
     }
   }
 
