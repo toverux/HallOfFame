@@ -22,8 +22,9 @@ internal record Like : IJsonWritable {
     set;
   } = string.Empty;
 
-  public override string ToString() =>
-    $"Like #{this.Id} on Screenshot #{this.ScreenshotId}";
+  public override string ToString() {
+    return $"Like #{this.Id} on Screenshot #{this.ScreenshotId}";
+  }
 
   public void Write(IJsonWriter writer) {
     writer.TypeBegin(this.GetType().FullName);

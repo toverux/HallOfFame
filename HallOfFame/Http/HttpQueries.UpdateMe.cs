@@ -8,13 +8,12 @@ namespace HallOfFame.Http;
 
 internal static partial class HttpQueries {
   internal static async Task<Creator> UpdateMe() {
-    var payload = new Dictionary<string, object> {
-      { "modSettings", Mod.Settings }
-    };
+    var payload = new Dictionary<string, object> { { "modSettings", Mod.Settings } };
 
     using var request = UnityWebRequest.Put(
       HttpQueries.PrependApiUrl("/creators/me"),
-      JSON.Dump(payload));
+      JSON.Dump(payload)
+    );
 
     request.SetRequestHeader("Content-Type", "application/json");
 

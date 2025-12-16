@@ -33,7 +33,8 @@ internal static class PdxSdkPlatformProxy {
 
     if (PdxSdkPlatformProxy.PdxSdk is null) {
       Mod.Log.ErrorRecoverable(
-        new Exception("Failed to get an instance of PdxSdkPlatform PSI instance."));
+        new Exception("Failed to get an instance of PdxSdkPlatform PSI instance.")
+      );
 
       return;
     }
@@ -42,11 +43,13 @@ internal static class PdxSdkPlatformProxy {
 
     PdxSdkPlatformProxy.AccountUserIdField = typeof(PdxSdkPlatform).GetField(
       "m_AccountUserId",
-      BindingFlags.NonPublic | BindingFlags.Instance);
+      BindingFlags.NonPublic | BindingFlags.Instance
+    );
 
     if (PdxSdkPlatformProxy.AccountUserIdField is null) {
       Mod.Log.ErrorRecoverable(
-        new Exception("Failed to find field m_AccountUserId in PdxSdkPlatform."));
+        new Exception("Failed to find field m_AccountUserId in PdxSdkPlatform.")
+      );
     }
     else {
       Mod.Log.Verbose($"{nameof(PdxSdkPlatformProxy)}: Acquired PdxSdkPlatform.m_AccountUserId");
@@ -55,16 +58,21 @@ internal static class PdxSdkPlatformProxy {
     PdxSdkPlatformProxy.ShowModsUIMethod = typeof(PdxSdkPlatform).GetMethod(
       "ShowModsUI",
       BindingFlags.Instance | BindingFlags.NonPublic,
-      null, CallingConventions.Any,
-      [typeof(Action<ModsUIView>)], []);
+      null,
+      CallingConventions.Any,
+      [typeof(Action<ModsUIView>)],
+      []
+    );
 
     if (PdxSdkPlatformProxy.ShowModsUIMethod is null) {
       Mod.Log.ErrorRecoverable(
-        new Exception("Failed to find method ShowModsUI in PdxSdkPlatform."));
+        new Exception("Failed to find method ShowModsUI in PdxSdkPlatform.")
+      );
     }
     else {
       Mod.Log.Verbose(
-        $"{nameof(PdxSdkPlatformProxy)}: Acquired PdxSdkPlatform.ShowModsUI(Action<ModsUIView>)");
+        $"{nameof(PdxSdkPlatformProxy)}: Acquired PdxSdkPlatform.ShowModsUI(Action<ModsUIView>)"
+      );
     }
   }
 

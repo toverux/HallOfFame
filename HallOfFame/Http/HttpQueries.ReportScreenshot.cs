@@ -12,7 +12,8 @@ internal static partial class HttpQueries {
     ReportScreenshot(string screenshotId) {
     using var request = new UnityWebRequest(
       HttpQueries.PrependApiUrl($"/screenshots/{screenshotId}/reports"),
-      "POST");
+      "POST"
+    );
 
     await HttpQueries.SendRequest(request);
 

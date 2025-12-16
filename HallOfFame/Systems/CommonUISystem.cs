@@ -46,29 +46,41 @@ internal sealed partial class CommonUISystem : UISystemBase {
       this.Enabled = false;
 
       this.localeBinding = new GetterValueBinding<string>(
-        CommonUISystem.BindingGroup, "locale",
-        () => this.localizationManager.activeLocaleId);
+        CommonUISystem.BindingGroup,
+        "locale",
+        () => this.localizationManager.activeLocaleId
+      );
 
       this.settingsBinding = new GetterValueBinding<Settings>(
-        CommonUISystem.BindingGroup, "settings",
+        CommonUISystem.BindingGroup,
+        "settings",
         () => Mod.Settings,
-        comparer: new FakeSettingComparer());
+        comparer: new FakeSettingComparer()
+      );
 
       this.openModSettingsBinding = new TriggerBinding<string>(
-        CommonUISystem.BindingGroup, "openModSettings",
-        this.OpenModSettings);
+        CommonUISystem.BindingGroup,
+        "openModSettings",
+        this.OpenModSettings
+      );
 
       this.openWebPageBinding = new TriggerBinding<string>(
-        CommonUISystem.BindingGroup, "openWebPage",
-        Application.OpenURL);
+        CommonUISystem.BindingGroup,
+        "openWebPage",
+        Application.OpenURL
+      );
 
       this.openCreatorPageBinding = new TriggerBinding<string>(
-        CommonUISystem.BindingGroup, "openCreatorPage",
-        this.OpenCreatorPage);
+        CommonUISystem.BindingGroup,
+        "openCreatorPage",
+        this.OpenCreatorPage
+      );
 
       this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
-        CommonUISystem.BindingGroup, "logJavaScriptError",
-        this.LogJavaScriptError);
+        CommonUISystem.BindingGroup,
+        "logJavaScriptError",
+        this.LogJavaScriptError
+      );
 
       this.AddBinding(this.localeBinding);
       this.AddBinding(this.settingsBinding);
@@ -114,7 +126,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
     optionsUISystem.OpenPage(
       "HallOfFame.HallOfFame.Mod",
       $"HallOfFame.HallOfFame.Mod.{section}",
-      false);
+      false
+    );
   }
 
   /// <summary>
@@ -143,13 +156,12 @@ internal sealed partial class CommonUISystem : UISystemBase {
     }
 
     var dialog = new ConfirmationDialog(
-      title: null,
-      message: LocalizedString.Id("HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[Message]"),
-      confirmAction: LocalizedString.Id(
-        "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInBrowserAction]"),
-      cancelAction: null,
-      otherActions: LocalizedString.Id(
-        "HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInGameAction]"));
+      null,
+      LocalizedString.Id("HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[Message]"),
+      LocalizedString.Id("HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInBrowserAction]"),
+      null,
+      LocalizedString.Id("HallOfFame.Systems.CommonUI.OPEN_PDX_MODS_DIALOG[OpenInGameAction]")
+    );
 
     GameManager.instance.userInterface.appBindings
       .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
@@ -202,18 +214,20 @@ internal sealed partial class CommonUISystem : UISystemBase {
       ? "HallOfFame.Common.FATAL_ERROR".Translate()
       : "HallOfFame.Common.RECOVERABLE_ERROR".Translate();
 
-    ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
-      localizedMessage = $"{@base} \n{gravity}",
-      errorDetails = error
-    });
+    ErrorDialogManagerAccessor.Instance?.ShowError(
+      new ErrorDialog { localizedMessage = $"{@base} \n{gravity}", errorDetails = error }
+    );
 
     Mod.Log.ErrorSilent(error);
   }
 
   private class FakeSettingComparer : EqualityComparer<Settings> {
-    public override bool Equals(Settings x, Settings y) => false;
+    public override bool Equals(Settings x, Settings y) {
+      return false;
+    }
 
-    public override int GetHashCode(Settings settings) =>
-      settings.GetHashCode();
+    public override int GetHashCode(Settings settings) {
+      return settings.GetHashCode();
+    }
   }
 }

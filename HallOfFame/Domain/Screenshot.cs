@@ -145,14 +145,14 @@ internal record Screenshot : IJsonWritable {
   [DecodeAlias("creator")]
   internal Creator? Creator { get; set; }
 
-  public override string ToString() =>
-    $"Screenshot #{this.Id} {this.CityName} by {this.Creator?.CreatorName}";
+  public override string ToString() {
+    return $"Screenshot #{this.Id} {this.CityName} by {this.Creator?.CreatorName}";
+  }
 
   public void Write(IJsonWriter writer) {
     // Type name does not support polymorphism, so we need to include all object shape changes in
     // the type name.
-    writer.TypeBegin(
-      $"{this.GetType().FullName}?Creator={this.Creator is not null}");
+    writer.TypeBegin($"{this.GetType().FullName}?Creator={this.Creator is not null}");
 
     writer.PropertyName("id");
     writer.Write(this.Id);

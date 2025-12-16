@@ -43,7 +43,8 @@ internal static class LogExtensions {
   /// <inheritdoc cref="ErrorSilent(ILog,Exception)"/>
   internal static void ErrorSilent(
     this ILog log,
-    object message) {
+    object message
+  ) {
     var prevShowsErrorsInUI = log.showsErrorsInUI;
     log.showsErrorsInUI = false;
 
@@ -56,7 +57,8 @@ internal static class LogExtensions {
   internal static void ErrorSilent(
     this ILog log,
     Exception ex,
-    object message) {
+    object message
+  ) {
     var prevShowsErrorsInUI = log.showsErrorsInUI;
     log.showsErrorsInUI = false;
 

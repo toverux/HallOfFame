@@ -22,8 +22,9 @@ internal record View : IJsonWritable {
     set;
   } = string.Empty;
 
-  public override string ToString() =>
-    $"View #{this.Id} on Screenshot #{this.ScreenshotId}";
+  public override string ToString() {
+    return $"View #{this.Id} on Screenshot #{this.ScreenshotId}";
+  }
 
   public void Write(IJsonWriter writer) {
     writer.TypeBegin(this.GetType().FullName);

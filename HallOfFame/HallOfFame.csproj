@@ -11,8 +11,8 @@
     </PropertyGroup>
 
     <!--Imports must be after PropertyGroup block-->
-    <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props"/>
-    <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets"/>
+    <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
+    <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
 
     <!-- Override LangVersion set by Mod.props -->
     <PropertyGroup>
@@ -23,7 +23,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="Locales\*.json"/>
+        <EmbeddedResource Include="Locales\*.json" />
     </ItemGroup>
 
     <ItemGroup>
@@ -121,17 +121,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="$(ModPropsFile)" Link="Properties\Mod.props"/>
-        <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets"/>
+        <None Include="$(ModPropsFile)" Link="Properties\Mod.props" />
+        <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
     </ItemGroup>
 
     <Target Name="SetupAttributes" BeforeTargets="BeforeBuild">
-        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/LongDescription.md))" Query="//LongDescription"/>
-        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/ChangeLog.md))" Query="//ChangeLog"/>
-        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$(Version)" Query="//ModVersion/@Value"/>
+        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/LongDescription.md))" Query="//LongDescription" />
+        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/ChangeLog.md))" Query="//ChangeLog" />
+        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$(Version)" Query="//ModVersion/@Value" />
     </Target>
 
     <Target Name="BuildUI" AfterTargets="AfterBuild">
-        <Exec Command="bun run build" WorkingDirectory="$(SolutionDir)"/>
+        <Exec Command="bun run build" WorkingDirectory="$(SolutionDir)" />
     </Target>
 </Project>

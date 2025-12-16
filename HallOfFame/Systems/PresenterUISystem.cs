@@ -94,34 +94,48 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
       // VALUE BINDINGS
       this.enableMainMenuSlideshowBinding = new GetterValueBinding<bool>(
-        PresenterUISystem.BindingGroup, "enableMainMenuSlideshow",
-        () => this.forceEnableMainMenuSlideshow || Mod.Settings.EnableMainMenuSlideshow);
+        PresenterUISystem.BindingGroup,
+        "enableMainMenuSlideshow",
+        () => this.forceEnableMainMenuSlideshow || Mod.Settings.EnableMainMenuSlideshow
+      );
 
       this.hasPreviousScreenshotBinding = new GetterValueBinding<bool>(
-        PresenterUISystem.BindingGroup, "hasPreviousScreenshot",
-        () => this.currentScreenshotIndex > 0);
+        PresenterUISystem.BindingGroup,
+        "hasPreviousScreenshot",
+        () => this.currentScreenshotIndex > 0
+      );
 
       this.forcedRefreshIndexBinding = new ValueBinding<int>(
-        PresenterUISystem.BindingGroup, "forcedRefreshIndex",
-        1);
+        PresenterUISystem.BindingGroup,
+        "forcedRefreshIndex",
+        1
+      );
 
       this.isRefreshingBinding = new ValueBinding<bool>(
-        PresenterUISystem.BindingGroup, "isRefreshing",
-        false);
+        PresenterUISystem.BindingGroup,
+        "isRefreshing",
+        false
+      );
 
       this.screenshotBinding = new ValueBinding<Screenshot?>(
-        PresenterUISystem.BindingGroup, "screenshot",
+        PresenterUISystem.BindingGroup,
+        "screenshot",
         null,
-        new ValueWriter<Screenshot?>().Nullable());
+        new ValueWriter<Screenshot?>().Nullable()
+      );
 
       this.errorBinding = new ValueBinding<LocalizedString?>(
-        PresenterUISystem.BindingGroup, "error",
+        PresenterUISystem.BindingGroup,
+        "error",
         null,
-        new ValueWriter<LocalizedString>().Nullable());
+        new ValueWriter<LocalizedString>().Nullable()
+      );
 
       this.isSavingBinding = new ValueBinding<bool>(
-        PresenterUISystem.BindingGroup, "isSaving",
-        false);
+        PresenterUISystem.BindingGroup,
+        "isSaving",
+        false
+      );
 
       this.AddBinding(this.enableMainMenuSlideshowBinding);
       this.AddBinding(this.hasPreviousScreenshotBinding);
@@ -133,20 +147,28 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
       // INPUT ACTION BINDINGS
       this.previousScreenshotInputActionBinding = new InputActionBinding(
-        PresenterUISystem.BindingGroup, "previousScreenshotInputAction",
-        Mod.Settings.KeyBindingPrevious);
+        PresenterUISystem.BindingGroup,
+        "previousScreenshotInputAction",
+        Mod.Settings.KeyBindingPrevious
+      );
 
       this.nextScreenshotInputActionBinding = new InputActionBinding(
-        PresenterUISystem.BindingGroup, "nextScreenshotInputAction",
-        Mod.Settings.KeyBindingNext);
+        PresenterUISystem.BindingGroup,
+        "nextScreenshotInputAction",
+        Mod.Settings.KeyBindingNext
+      );
 
       this.likeScreenshotInputActionBinding = new InputActionBinding(
-        PresenterUISystem.BindingGroup, "likeScreenshotInputAction",
-        Mod.Settings.KeyBindingLike);
+        PresenterUISystem.BindingGroup,
+        "likeScreenshotInputAction",
+        Mod.Settings.KeyBindingLike
+      );
 
       this.toggleMenuInputActionBinding = new InputActionBinding(
-        PresenterUISystem.BindingGroup, "toggleMenuInputAction",
-        Mod.Settings.KeyBindingToggleMenu);
+        PresenterUISystem.BindingGroup,
+        "toggleMenuInputAction",
+        Mod.Settings.KeyBindingToggleMenu
+      );
 
       this.AddBinding(this.previousScreenshotInputActionBinding);
       this.AddBinding(this.nextScreenshotInputActionBinding);
@@ -155,24 +177,34 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
       // TRIGGER BINDINGS
       this.previousScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup, "previousScreenshot",
-        this.PreviousScreenshot);
+        PresenterUISystem.BindingGroup,
+        "previousScreenshot",
+        this.PreviousScreenshot
+      );
 
       this.nextScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup, "nextScreenshot",
-        this.NextScreenshot);
+        PresenterUISystem.BindingGroup,
+        "nextScreenshot",
+        this.NextScreenshot
+      );
 
       this.likeScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup, "likeScreenshot",
-        this.LikeScreenshot);
+        PresenterUISystem.BindingGroup,
+        "likeScreenshot",
+        this.LikeScreenshot
+      );
 
       this.saveScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup, "saveScreenshot",
-        this.SaveScreenshot);
+        PresenterUISystem.BindingGroup,
+        "saveScreenshot",
+        this.SaveScreenshot
+      );
 
       this.reportScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup, "reportScreenshot",
-        this.ReportScreenshot);
+        PresenterUISystem.BindingGroup,
+        "reportScreenshot",
+        this.ReportScreenshot
+      );
 
       this.AddBinding(this.previousScreenshotBinding);
       this.AddBinding(this.nextScreenshotBinding);
@@ -221,7 +253,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.EnableOrDisableEnableMainMenuSlideshowAction();
   }
 
-  #if DEBUG
+#if DEBUG
   /// <summary>
   /// Debug/development method to load a screenshot by its ID.
   /// Does not use the queue system.
@@ -245,7 +277,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.isRefreshingBinding.Update(false);
     }
   }
-  #endif
+#endif
 
   private void OnSettingsApplied(Setting _) {
     this.enableMainMenuSlideshowBinding.Update();
@@ -280,7 +312,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     if (this.currentScreenshotIndex <= 0) {
       Mod.Log.ErrorSilent(
         $"Menu: {nameof(this.PreviousScreenshot)}: " +
-        $"Cannot go back, already at the first screenshot.");
+        $"Cannot go back, already at the first screenshot."
+      );
 
       return;
     }
@@ -302,7 +335,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     Mod.Log.Verbose(
       $"{nameof(PresenterUISystem)}: {nameof(this.PreviousScreenshot)}: Displaying {screenshot} " +
       $"(queue idx {this.currentScreenshotIndex}/" +
-      $"{this.screenshotsQueue.Count - 1}).");
+      $"{this.screenshotsQueue.Count - 1})."
+    );
 
     this.isRefreshingBinding.Update(false);
   }
@@ -334,7 +368,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     // This happens when the first image is loaded, or when there was an error preloading the next
     // image in the previous NextScreenshot call.
     else {
-      screenshot = await this.LoadScreenshot(preload: false);
+      screenshot = await this.LoadScreenshot(false);
 
       if (screenshot is not null) {
         this.screenshotsQueue.Add(screenshot);
@@ -359,7 +393,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     Mod.Log.Verbose(
       $"{nameof(PresenterUISystem)}: {nameof(this.NextScreenshot)}: Displaying {screenshot} " +
       $"(queue idx {this.currentScreenshotIndex}/" +
-      $"{this.screenshotsQueue.Count - 1}).");
+      $"{this.screenshotsQueue.Count - 1})."
+    );
 
     if (this.currentScreenshotIndex < this.screenshotsQueue.Count - 1) {
       // If we are not at the end of the queue (the user clicked previous once or more), we're done
@@ -380,9 +415,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     async void PreloadNextScreenshot() {
       // Variable used below to avoid infinite loops when there is only one screenshot in the
       // database (that can happen during development).
-      #if DEBUG
+#if DEBUG
       var iterations = 0;
-      #endif
+#endif
 
       Screenshot? nextScreenshot;
 
@@ -393,11 +428,11 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       // screenshots have been seen.
       // The check is cheap, and it's more complex to implement server-side, so let's do that here.
       do {
-        nextScreenshot = await this.LoadScreenshot(preload: true);
+        nextScreenshot = await this.LoadScreenshot(true);
       } while (
-        #if DEBUG
+#if DEBUG
         iterations++ < 20 &&
-        #endif
+#endif
         nextScreenshot is not null &&
         nextScreenshot.Id ==
         this.screenshotBinding.value?.Id);
@@ -448,7 +483,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// </returns>
   private async Task<Screenshot?> LoadScreenshot(
     bool preload,
-    Screenshot? screenshot = null) {
+    Screenshot? screenshot = null
+  ) {
     try {
       screenshot ??= await HttpQueries.GetRandomScreenshotWeighted();
 
@@ -456,7 +492,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         "fhd" => screenshot.ImageUrlFHD,
         "4k" => screenshot.ImageUrl4K,
         var resolution => throw new InvalidOperationException(
-          $"Unknown screenshot resolution: {resolution}.")
+          $"Unknown screenshot resolution: {resolution}."
+        )
       };
 
       await this.imagePreloaderUISystem.Preload(imageUrl);
@@ -467,7 +504,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
       Mod.Log.Verbose(
         $"{nameof(PresenterUISystem)}: {(preload ? "Preloaded" : "Loaded")} {screenshot} " +
-        $"({imageUrl}, algo={screenshot.Algorithm}).");
+        $"({imageUrl}, algo={screenshot.Algorithm})."
+      );
 
       return screenshot;
     }
@@ -517,14 +555,17 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     try {
       await HttpQueries.LikeScreenshot(
         updatedScreenshot.Id,
-        liked: updatedScreenshot.IsLiked);
+        updatedScreenshot.IsLiked
+      );
     }
     catch (HttpException ex) {
-      ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
-        localizedTitle = "HallOfFame.Common.OOPS",
-        localizedMessage = ex.GetUserFriendlyMessage(),
-        actions = ErrorDialog.ActionBits.Continue
-      });
+      ErrorDialogManagerAccessor.Instance?.ShowError(
+        new ErrorDialog {
+          localizedTitle = "HallOfFame.Common.OOPS",
+          localizedMessage = ex.GetUserFriendlyMessage(),
+          actions = ErrorDialog.ActionBits.Continue
+        }
+      );
 
       // Revert the optimistic UI update.
       this.screenshotsQueue[this.currentScreenshotIndex] = prevScreenshot;
@@ -562,12 +603,14 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         Mod.Settings.CreatorsScreenshotSaveDirectory,
         $"{screenshot.Creator?.CreatorName} - " +
         $"{screenshot.CityName} - " +
-        $"{screenshot.CreatedAt.ToLocalTime():yyyy.MM.dd HH.mm.ss}.jpg");
+        $"{screenshot.CreatedAt.ToLocalTime():yyyy.MM.dd HH.mm.ss}.jpg"
+      );
 
       await Task.Run(() => {
-        Directory.CreateDirectory(directory);
-        File.WriteAllBytes(filePath, imageBytes);
-      });
+          Directory.CreateDirectory(directory);
+          File.WriteAllBytes(filePath, imageBytes);
+        }
+      );
 
       Mod.Log.Info($"{nameof(PresenterUISystem)}: Saved {screenshot} image to {filePath}.");
     }
@@ -596,10 +639,12 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         new Dictionary<string, ILocElement> {
           { "CITY_NAME", LocalizedString.Value(screenshot.CityName) },
           { "AUTHOR_NAME", LocalizedString.Value(screenshot.Creator?.CreatorName) }
-        }),
+        }
+      ),
       LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]"),
       LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]"),
-      LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel"));
+      LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel")
+    );
 
     GameManager.instance.userInterface.appBindings
       .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
@@ -617,7 +662,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         var successDialog = new MessageDialog(
           LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]"),
           LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]"),
-          LocalizedString.IdWithFallback("Common.CLOSE", "Close"));
+          LocalizedString.IdWithFallback("Common.CLOSE", "Close")
+        );
 
         GameManager.instance.userInterface.appBindings
           .ShowMessageDialog(successDialog, _ => { });
@@ -625,11 +671,13 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         this.forcedRefreshIndexBinding.Update(this.forcedRefreshIndexBinding.value + 1);
       }
       catch (HttpException ex) {
-        ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
-          localizedTitle = "HallOfFame.Common.OOPS",
-          localizedMessage = ex.GetUserFriendlyMessage(),
-          actions = ErrorDialog.ActionBits.Continue
-        });
+        ErrorDialogManagerAccessor.Instance?.ShowError(
+          new ErrorDialog {
+            localizedTitle = "HallOfFame.Common.OOPS",
+            localizedMessage = ex.GetUserFriendlyMessage(),
+            actions = ErrorDialog.ActionBits.Continue
+          }
+        );
       }
       catch (Exception ex) {
         Mod.Log.ErrorRecoverable(ex);

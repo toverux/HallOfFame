@@ -44,8 +44,7 @@ internal static class LocalizationExtensions {
     return new LocalizedString(
       $"HallOfFame.Common.ERROR_MESSAGE[{ex.GetType().FullName}]",
       ex.Message,
-      new Dictionary<string, ILocElement> {
-        { "ERROR_MESSAGE", LocalizedString.Value(ex.Message) }
-      });
+      new Dictionary<string, ILocElement> { { "ERROR_MESSAGE", LocalizedString.Value(ex.Message) } }
+    );
   }
 }

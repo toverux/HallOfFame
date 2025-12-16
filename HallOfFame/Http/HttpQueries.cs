@@ -14,7 +14,8 @@ namespace HallOfFame.Http;
 internal static partial class HttpQueries {
   internal delegate void ProgressHandler(
     float uploadProgress,
-    float downloadProgress);
+    float downloadProgress
+  );
 
   private const string BaseApiPath = "/api/v1";
 
@@ -31,12 +32,14 @@ internal static partial class HttpQueries {
   private static readonly ConditionalWeakTable<UnityWebRequest, string>
     RequestIdsMap = new();
 
-  private static string PrependApiUrl(string path) =>
-    $"{Mod.Settings.BaseUrlWithScheme}{HttpQueries.BaseApiPath}{path}";
+  private static string PrependApiUrl(string path) {
+    return $"{Mod.Settings.BaseUrlWithScheme}{HttpQueries.BaseApiPath}{path}";
+  }
 
   private static async Task SendRequest(
     UnityWebRequest request,
-    ProgressHandler? progressHandler = null) {
+    ProgressHandler? progressHandler = null
+  ) {
     // When using directly the UnityWebRequest constructor directly, for example, when making POST
     // requests with an empty body, the download handler is not set, which prevents us from reading
     // the response.
@@ -48,8 +51,7 @@ internal static partial class HttpQueries {
 
     HttpQueries.RequestIdsMap.Add(request, requestId);
 
-    Mod.Log.Verbose(
-      $"HTTP: Sending request #{requestId} {request.method} {request.url}");
+    Mod.Log.Verbose($"HTTP: Sending request #{requestId} {request.method} {request.url}");
 
     Task? trackerTask = null;
 
@@ -63,8 +65,7 @@ internal static partial class HttpQueries {
       await trackerTask;
     }
 
-    Mod.Log.Verbose(
-      $"HTTP: Request #{requestId} completed ({request.responseCode}).");
+    Mod.Log.Verbose($"HTTP: Request #{requestId} completed ({request.responseCode}).");
 
     return;
 
@@ -114,11 +115,13 @@ internal static partial class HttpQueries {
       $"name={creatorName}" +
       $"&id={Mod.Settings.CreatorID}" +
       $"&provider={provider}" +
-      $"&hwid={HttpQueries.HardwareId}");
+      $"&hwid={HttpQueries.HardwareId}"
+    );
 
     request.SetRequestHeader(
       "Accept-Language",
-      GameManager.instance.localizationManager.activeLocaleId);
+      GameManager.instance.localizationManager.activeLocaleId
+    );
 
     request.SetRequestHeader(
       "X-Timezone-Offset",
@@ -127,7 +130,8 @@ internal static partial class HttpQueries {
         // For some reason `.Minutes` (int of full minutes) is always 0.
         // But UTC offsets are always full minutes, so this is fine.
         .TotalMinutes
-        .ToString(CultureInfo.InvariantCulture));
+        .ToString(CultureInfo.InvariantCulture)
+    );
   }
 
   private static T ParseResponse<T>(UnityWebRequest request) where T : new() {
@@ -135,8 +139,7 @@ internal static partial class HttpQueries {
     requestId ??= "?";
 
     if (!request.isDone) {
-      throw new InvalidOperationException(
-        $"Request #{requestId} is not done.");
+      throw new InvalidOperationException($"Request #{requestId} is not done.");
     }
 
     try {
@@ -175,14 +178,16 @@ internal static partial class HttpQueries {
       if (request.result is not UnityWebRequest.Result.ProtocolError) {
         Mod.Log.ErrorSilent(
           ex,
-          $"HTTP: Error sending request #{requestId}.");
+          $"HTTP: Error sending request #{requestId}."
+        );
       }
 
       // If this is an HTTP error, log the response body as well.
       if (request.result is UnityWebRequest.Result.ProtocolError) {
         Mod.Log.ErrorSilent(
           $"HTTP: Error response {request.responseCode} " +
-          $"for request #{requestId}: {request.downloadHandler.text}");
+          $"for request #{requestId}: {request.downloadHandler.text}"
+        );
       }
 
       throw;
@@ -221,7 +226,9 @@ internal static partial class HttpQueries {
       throw new HttpNetworkException(
         requestId,
         $"Failed to parse JSON response into {typeof(T).FullName}: " +
-        ex.Message, ex);
+        ex.Message,
+        ex
+      );
     }
   }
 

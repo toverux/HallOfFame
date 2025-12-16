@@ -8,8 +8,8 @@ namespace HallOfFame.Http;
 internal abstract class HttpException(
   string requestId,
   string message,
-  Exception? inner = null)
-  : Exception(HttpException.ReformatMessage(requestId, message), inner) {
+  Exception? inner = null
+) : Exception(HttpException.ReformatMessage(requestId, message), inner) {
   /// <summary>
   /// Reformat the message to include the request ID (removes period, add request ID, add period).
   /// </summary>
@@ -24,24 +24,24 @@ internal abstract class HttpException(
 internal sealed class HttpNetworkException(
   string requestId,
   string message,
-  Exception? inner = null)
-  : HttpException(requestId, message, inner);
+  Exception? inner = null
+) : HttpException(requestId, message, inner);
 
 /// <summary>
 /// Class for an internal server error (HTTP status code 500+).
 /// </summary>
 internal sealed class HttpServerException(
   string requestId,
-  HttpQueries.JsonError error)
-  : HttpException(requestId, error.Message);
+  HttpQueries.JsonError error
+) : HttpException(requestId, error.Message);
 
 /// <summary>
 /// Class for an user error (HTTP status code 400-499).
 /// </summary>
 internal sealed class HttpUserException(
   string requestId,
-  HttpQueries.JsonError error)
-  : HttpException(requestId, error.Message);
+  HttpQueries.JsonError error
+) : HttpException(requestId, error.Message);
 
 /// <summary>
 /// Class for a mod-server compatibility error (HTTP status code 404).
@@ -50,6 +50,5 @@ internal sealed class HttpUserException(
 /// </summary>
 internal sealed class HttpUserCompatibilityException(
   string requestId,
-  HttpQueries.JsonError error)
-  : HttpException(requestId, error.Message) {
-}
+  HttpQueries.JsonError error
+) : HttpException(requestId, error.Message);

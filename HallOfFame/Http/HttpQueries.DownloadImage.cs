@@ -21,7 +21,8 @@ internal static partial class HttpQueries {
       $"HTTP: Downloading {url} failed ({request.responseCode}): " +
       (string.IsNullOrEmpty(request.downloadHandler.text)
         ? request.error
-        : request.downloadHandler.text));
+        : request.downloadHandler.text)
+    );
 
     throw new HttpNetworkException(requestId, request.error);
   }

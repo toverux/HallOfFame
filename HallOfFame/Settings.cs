@@ -36,17 +36,28 @@ namespace HallOfFame;
   Settings.GroupContentPreferences,
   Settings.GroupAdvanced,
   Settings.GroupLinks,
-  Settings.GroupDevelopment)]
+  Settings.GroupDevelopment
+)]
 [SettingsUIKeyboardAction(
-  nameof(Settings.KeyBindingForceEnableMainMenuSlideshow), Usages.kMenuUsage)]
+  nameof(Settings.KeyBindingForceEnableMainMenuSlideshow),
+  Usages.kMenuUsage
+)]
 [SettingsUIKeyboardAction(
-  nameof(Settings.KeyBindingPrevious), Usages.kMenuUsage)]
+  nameof(Settings.KeyBindingPrevious),
+  Usages.kMenuUsage
+)]
 [SettingsUIKeyboardAction(
-  nameof(Settings.KeyBindingNext), Usages.kMenuUsage)]
+  nameof(Settings.KeyBindingNext),
+  Usages.kMenuUsage
+)]
 [SettingsUIKeyboardAction(
-  nameof(Settings.KeyBindingLike), Usages.kMenuUsage)]
+  nameof(Settings.KeyBindingLike),
+  Usages.kMenuUsage
+)]
 [SettingsUIKeyboardAction(
-  nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
+  nameof(Settings.KeyBindingToggleMenu),
+  Usages.kMenuUsage
+)]
 public sealed class Settings : ModSetting, IJsonWritable {
   private const string GroupYourProfile = "YourProfile";
 
@@ -71,16 +82,14 @@ public sealed class Settings : ModSetting, IJsonWritable {
   // Needs to be getter method to be read by the game.
   private DropdownItem<string>[] TranslationModeDropdownItems => [
     new() {
-      value = "translate",
-      displayName = this.GetOptionLabelLocaleID("TranslationMode.Translate")
+      value = "translate", displayName = this.GetOptionLabelLocaleID("TranslationMode.Translate")
     },
     new() {
       value = "transliterate",
       displayName = this.GetOptionLabelLocaleID("TranslationMode.Transliterate")
     },
     new() {
-      value = "disabled",
-      displayName = this.GetOptionLabelLocaleID("TranslationMode.Disabled")
+      value = "disabled", displayName = this.GetOptionLabelLocaleID("TranslationMode.Disabled")
     }
   ];
 
@@ -104,7 +113,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// <summary>
   /// Text explaining the algorithms' weight selection mechanism.
   /// </summary>
-  [SettingsUIMultilineText(icon: "coui://ui-mods/images/cs2-lightbulb.svg")]
+  [SettingsUIMultilineText("coui://ui-mods/images/cs2-lightbulb.svg")]
   [UsedImplicitly]
   public string AdvancedSettingsDescription =>
     string.Empty; // The actual text comes from the translation file.
@@ -127,11 +136,16 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUISection(Settings.GroupYourProfile)]
   public string? MaskedCreatorID => this.CreatorID is null
     ? null
-    : string.Join("-", this.CreatorID
-      .Split('-')
-      .Select((segment, index) => index == 0
-        ? segment
-        : new string('*', segment.Length)));
+    : string.Join(
+      "-",
+      this
+        .CreatorID
+        .Split('-')
+        .Select((segment, index) => index == 0
+          ? segment
+          : new string('*', segment.Length)
+        )
+    );
 
   /// <summary>
   /// Live account status text ("logged in as X", "invalid username", that kind of things).
@@ -167,10 +181,12 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUISection(Settings.GroupUIPreferences)]
   [SettingsUIKeyboardBinding(
     BindingKeyboard.H,
-    nameof(Settings.KeyBindingForceEnableMainMenuSlideshow))]
+    nameof(Settings.KeyBindingForceEnableMainMenuSlideshow)
+  )]
   [SettingsUIDisableByCondition(
     typeof(Settings),
-    nameof(Settings.EnableMainMenuSlideshow))]
+    nameof(Settings.EnableMainMenuSlideshow)
+  )]
   [SettingsUIAdvanced]
   public ProxyBinding KeyBindingForceEnableMainMenuSlideshow { get; set; }
 
@@ -182,7 +198,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUIDisableByCondition(
     typeof(Settings),
     nameof(Settings.EnableMainMenuSlideshow),
-    invert: true)]
+    true
+  )]
   [SettingsUIAdvanced]
   public bool EnableLoadingScreenBackground { get; set; }
 
@@ -206,31 +223,36 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUISection(Settings.GroupUIPreferences)]
   [SettingsUIDropdown(
     typeof(Settings),
-    nameof(Settings.TranslationModeDropdownItems))]
+    nameof(Settings.TranslationModeDropdownItems)
+  )]
   public string NamesTranslationMode { get; set; } = null!;
 
   [SettingsUISection(Settings.GroupKeyBindings)]
   [SettingsUIKeyboardBinding(
     BindingKeyboard.LeftArrow,
-    nameof(Settings.KeyBindingPrevious))]
+    nameof(Settings.KeyBindingPrevious)
+  )]
   public ProxyBinding KeyBindingPrevious { get; set; }
 
   [SettingsUISection(Settings.GroupKeyBindings)]
   [SettingsUIKeyboardBinding(
     BindingKeyboard.RightArrow,
-    nameof(Settings.KeyBindingNext))]
+    nameof(Settings.KeyBindingNext)
+  )]
   public ProxyBinding KeyBindingNext { get; set; }
 
   [SettingsUISection(Settings.GroupKeyBindings)]
   [SettingsUIKeyboardBinding(
     BindingKeyboard.L,
-    nameof(Settings.KeyBindingLike))]
+    nameof(Settings.KeyBindingLike)
+  )]
   public ProxyBinding KeyBindingLike { get; set; }
 
   [SettingsUISection(Settings.GroupKeyBindings)]
   [SettingsUIKeyboardBinding(
     BindingKeyboard.Space,
-    nameof(Settings.KeyBindingToggleMenu))]
+    nameof(Settings.KeyBindingToggleMenu)
+  )]
   public ProxyBinding KeyBindingToggleMenu { get; set; }
 
   /// <summary>
@@ -300,7 +322,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUISection(Settings.GroupContentPreferences)]
   [SettingsUIDropdown(
     typeof(Settings),
-    nameof(Settings.ResolutionDropdownItems))]
+    nameof(Settings.ResolutionDropdownItems)
+  )]
   public string ScreenshotResolution { get; set; } = null!;
 
   /// <summary>
@@ -325,7 +348,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUIHideByCondition(
     typeof(Settings),
     nameof(Settings.IsNvidiaGpu),
-    invert: true)]
+    true
+  )]
   [SettingsUIAdvanced]
   public bool DisableGlobalIllumination { get; set; }
 
@@ -394,7 +418,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     set => Application.OpenURL("https://github.com/toverux/HallOfFame");
   }
 
-  #if DEBUG
+#if DEBUG
   [SettingsUISection(Settings.GroupDevelopment)]
   [SettingsUITextInput]
   public string? ScreenshotToLoad {
@@ -419,7 +443,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     set => this.DoDumpTranslations();
   }
 
-  #endif
+#endif
 
   [SettingsUIHidden]
   public bool? PrefersOpeningPdxModsInBrowser { get; set; }
@@ -480,7 +504,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
     this.NamesTranslationMode = "translate";
 
     this.CreatorsScreenshotSaveDirectory = Path.GetFullPath(
-      Path.Combine(Mod.GameScreenshotsPath, "Hall Of Fame Creators"));
+      Path.Combine(Mod.GameScreenshotsPath, "Hall Of Fame Creators")
+    );
 
     this.CreateLocalScreenshot = true;
     this.DisableGlobalIllumination = Settings.IsNvidiaGpu();
@@ -494,31 +519,35 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// the default settings reference instance).
   /// </summary>
   public void Initialize() {
-    #if DEBUG
+#if DEBUG
     GameManager.instance.localizationManager.AddSource(
-      "en-US", new DevDictionarySource());
-    #endif
+      "en-US",
+      new DevDictionarySource()
+    );
+#endif
 
     this.InitializeCreatorId();
 
     // Update the login status when the mod is being loaded.
-    this.UpdateCreator(nameOnly: false, silent: false, debounce: false);
+    this.UpdateCreator(false, false, false);
 
     // Update the login status when the Creator Name is changed.
     var prevCreatorName = this.CreatorName;
 
     this.onSettingsApplied += _ => {
       this.UpdateCreator(
-        nameOnly: prevCreatorName != this.CreatorName,
-        silent: prevCreatorName == this.CreatorName,
-        debounce: true);
+        prevCreatorName != this.CreatorName,
+        prevCreatorName == this.CreatorName,
+        true
+      );
 
       prevCreatorName = this.CreatorName;
     };
   }
 
-  private static bool IsNvidiaGpu() =>
-    SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
+  private static bool IsNvidiaGpu() {
+    return SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
+  }
 
   /// <summary>
   /// Initializes <see cref="CreatorID"/>, <see cref="IsParadoxAccountID"/> and
@@ -550,8 +579,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
       this.IsParadoxAccountID = true;
 
-      Mod.Log.Info(
-        $"{nameof(Settings)}: Acquired Paradox account ID {this.MaskedCreatorID}.");
+      Mod.Log.Info($"{nameof(Settings)}: Acquired Paradox account ID {this.MaskedCreatorID}.");
     }
 
     // If the user is not logged in, or the operation failed unexpectedly, we generate a random ID.
@@ -562,7 +590,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
       Mod.Log.Warn(
         ex,
         $"Settings: Could not acquire Paradox account ID, using a " +
-        $"random ID as a fallback ({this.MaskedCreatorID}).");
+        $"random ID as a fallback ({this.MaskedCreatorID})."
+      );
     }
 
     // Explicitly save the settings so they're written to disk asap.
@@ -574,12 +603,14 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// ID.
   /// </summary>
   private void ShowNoParadoxConnectionWarningDialog() {
-    ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
-      severity = ErrorDialog.Severity.Warning,
-      localizedTitle = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]"),
-      localizedMessage = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Message]"),
-      actions = ErrorDialog.ActionBits.Continue
-    });
+    ErrorDialogManagerAccessor.Instance?.ShowError(
+      new ErrorDialog {
+        severity = ErrorDialog.Severity.Warning,
+        localizedTitle = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]"),
+        localizedMessage = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Message]"),
+        actions = ErrorDialog.ActionBits.Continue
+      }
+    );
   }
 
   /// <summary>
@@ -600,21 +631,24 @@ public sealed class Settings : ModSetting, IJsonWritable {
   private async void UpdateCreator(
     bool nameOnly,
     bool silent,
-    bool debounce) {
+    bool debounce
+  ) {
     // Cancel any ongoing update.
     this.updateLoginStatusCts?.Cancel();
 
     var thisCts = this.updateLoginStatusCts = new CancellationTokenSource();
 
-    if (!silent) {
+    if (!silent)
       // Show a loading message while we're fetching the status.
+    {
       this.loginStatusValue = LocalizedString.Id("HallOfFame.Common.LOADING");
     }
 
     try {
-      if (debounce) {
+      if (debounce)
         // Apply a delay to debounce the method if it's called multiple
         // times in a short period (keystrokes while typing username).
+      {
         await Task.Delay(500, thisCts.Token);
       }
 
@@ -626,7 +660,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
       Mod.Log.Info(
         $"{nameof(Settings)}: Logged in as {creator.CreatorName}. " +
-        $"Your Public Creator ID is {creator.Id}.");
+        $"Your Public Creator ID is {creator.Id}."
+      );
 
       // Stop if the operation was canceled while we were fetching data.
       thisCts.Token.ThrowIfCancellationRequested();
@@ -644,7 +679,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
             : "Logged in as {CREATOR_NAME}.",
           new Dictionary<string, ILocElement> {
             { "CREATOR_NAME", LocalizedString.Value(creator.CreatorName) }
-          });
+          }
+        );
       }
     }
     catch (Exception ex) {
@@ -656,8 +692,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
       if (silent) {
         Mod.Log.ErrorSilent(ex, "Settings: Failed to update creator.");
       }
-      else {
+      else
         // Update the login status text with an error message.
+      {
         this.loginStatusValue = ex.GetUserFriendlyMessage();
       }
     }
@@ -703,7 +740,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     writer.TypeEnd();
   }
 
-  #if DEBUG
+#if DEBUG
   private void DoLoadScreenshot() {
     if (string.IsNullOrWhiteSpace(this.ScreenshotToLoad)) {
       return;
@@ -711,7 +748,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     var world = World.All[0];
 
-    world.GetOrCreateSystemManaged<PresenterUISystem>()
+    world
+      .GetOrCreateSystemManaged<PresenterUISystem>()
       .LoadScreenshotById(this.ScreenshotToLoad!);
 
     this.ScreenshotToLoad = null;
@@ -724,7 +762,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
     foreach (var locale in localizationManager.GetSupportedLocales()) {
       localizationManager.SetActiveLocale(locale);
 
-      var strings = localizationManager.activeDictionary.entries
+      var strings = localizationManager
+        .activeDictionary.entries
         .OrderBy(kv => kv.Key)
         .ToDictionary(kv => kv.Key, kv => kv.Value);
 
@@ -732,7 +771,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
       var filePath = Path.Combine(
         Application.persistentDataPath,
-        $"locale-dictionary-{locale}.json");
+        $"locale-dictionary-{locale}.json"
+      );
 
       File.WriteAllText(filePath, json);
     }
@@ -743,25 +783,20 @@ public sealed class Settings : ModSetting, IJsonWritable {
   private sealed class DevDictionarySource : IDictionarySource {
     public IEnumerable<KeyValuePair<string, string>> ReadEntries(
       IList<IDictionaryEntryError> errors,
-      Dictionary<string, int> indexCounts) =>
-      new Dictionary<string, string> {
-        {
-          "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]",
-          "{ Development }"
-        }, {
-          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]",
-          "Screenshot ID"
-        }, {
-          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]",
-          "Load Screenshot"
-        }, {
+      Dictionary<string, int> indexCounts
+    ) {
+      return new Dictionary<string, string> {
+        { "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]", "{ Development }" },
+        { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]", "Screenshot ID" },
+        { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]", "Load Screenshot" }, {
           "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
           "Dump Locales as JSON"
         }
       };
+    }
 
     public void Unload() {
     }
   }
-  #endif
+#endif
 }

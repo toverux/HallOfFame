@@ -10,15 +10,15 @@ internal static partial class HttpQueries {
   /// </summary>
   internal static async Task<View> LikeScreenshot(
     string screenshotId,
-    bool liked) {
+    bool liked
+  ) {
     var method = liked ? "POST" : "DELETE";
 
     var uri = liked
       ? $"/screenshots/{screenshotId}/favorites"
       : $"/screenshots/{screenshotId}/favorites/mine";
 
-    using var request = new UnityWebRequest(
-      HttpQueries.PrependApiUrl(uri), method);
+    using var request = new UnityWebRequest(HttpQueries.PrependApiUrl(uri), method);
 
     await HttpQueries.SendRequest(request);
 

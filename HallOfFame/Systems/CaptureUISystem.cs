@@ -121,32 +121,44 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
 
       this.cityNameBinding = new GetterValueBinding<string>(
-        CaptureUISystem.BindingGroup, "cityName",
-        this.GetCityName);
+        CaptureUISystem.BindingGroup,
+        "cityName",
+        this.GetCityName
+      );
 
       this.screenshotSnapshotBinding =
         new GetterValueBinding<ScreenshotSnapshot?>(
-          CaptureUISystem.BindingGroup, "screenshotSnapshot",
+          CaptureUISystem.BindingGroup,
+          "screenshotSnapshot",
           () => this.CurrentScreenshot,
-          new ValueWriter<ScreenshotSnapshot>().Nullable());
+          new ValueWriter<ScreenshotSnapshot>().Nullable()
+        );
 
       this.uploadProgressBinding =
         new GetterValueBinding<UploadProgress?>(
-          CaptureUISystem.BindingGroup, "uploadProgress",
+          CaptureUISystem.BindingGroup,
+          "uploadProgress",
           () => this.uploadProgress,
-          new ValueWriter<UploadProgress>().Nullable());
+          new ValueWriter<UploadProgress>().Nullable()
+        );
 
       this.takeScreenshotBinding = new TriggerBinding(
-        CaptureUISystem.BindingGroup, "takeScreenshot",
-        this.TakeScreenshot);
+        CaptureUISystem.BindingGroup,
+        "takeScreenshot",
+        this.TakeScreenshot
+      );
 
       this.clearScreenshotBinding = new TriggerBinding(
-        CaptureUISystem.BindingGroup, "clearScreenshot",
-        this.ClearScreenshot);
+        CaptureUISystem.BindingGroup,
+        "clearScreenshot",
+        this.ClearScreenshot
+      );
 
       this.uploadScreenshotBinding = new TriggerBinding(
-        CaptureUISystem.BindingGroup, "uploadScreenshot",
-        this.UploadScreenshot);
+        CaptureUISystem.BindingGroup,
+        "uploadScreenshot",
+        this.UploadScreenshot
+      );
 
       this.AddUpdateBinding(this.cityNameBinding);
       this.AddUpdateBinding(this.screenshotSnapshotBinding);
@@ -162,7 +174,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   protected override void OnGameLoadingComplete(
     Purpose purpose,
-    GameMode mode) {
+    GameMode mode
+  ) {
     if (this.CurrentScreenshot is not null) {
       // Clear the screenshot when the game state changes, for example, when the user exits to the
       // main menu. Otherwise, the screenshot dialog would appear when the user reopens a game.
@@ -184,7 +197,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     return this.milestoneLevelQuery.IsEmptyIgnoreFilter
       ? 0
       : this.milestoneLevelQuery
-        .GetSingleton<MilestoneLevel>().m_AchievedMilestone;
+        .GetSingleton<MilestoneLevel>()
+        .m_AchievedMilestone;
   }
 
   /// <summary>
@@ -245,7 +259,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         .Where(prop =>
           prop.getValue is not null &&
           prop.isEnabled is not null &&
-          prop.isEnabled())
+          prop.isEnabled()
+        )
         .ToDictionary(prop => prop.id, prop => prop.getValue());
     }
     catch (Exception ex) {
@@ -309,7 +324,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     if (dynResSettings.GetLevel() != QualitySetting.Level.High) {
       // "High" actually means "Disabled" as disabling this option yields the best quality.
-      dynResSettings.SetLevel(QualitySetting.Level.High, apply: false);
+      dynResSettings.SetLevel(QualitySetting.Level.High, false);
       dynResSettings.Apply();
     }
 
@@ -363,7 +378,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     // Reset dynamic resolution
     if (dynResSettings.GetLevel() != previousDynResLevel) {
-      dynResSettings.SetLevel(previousDynResLevel, apply: false);
+      dynResSettings.SetLevel(previousDynResLevel, false);
       dynResSettings.Apply();
     }
 
@@ -386,10 +401,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     var pngScreenshotBytes = screenshotTexture.EncodeToPNG();
 
     // Create a light preview image.
-    var previewTexture = this.Resize(
-      screenshotTexture, Screen.width / 2, Screen.height / 2);
+    var previewTexture = this.Resize(screenshotTexture, Screen.width / 2, Screen.height / 2);
 
-    var jpgPreviewBytes = previewTexture.EncodeToJPG(quality: 80);
+    var jpgPreviewBytes = previewTexture.EncodeToJPG(80);
 
     // Clean up the textures after usage.
     Object.DestroyImmediate(renderTexture);
@@ -398,25 +412,24 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     // Prepare full size and preview images in a background thread.
     await Task.Run(() => {
-      File.WriteAllBytes(
-        CaptureUISystem.ScreenshotPreviewFilePath, jpgPreviewBytes);
+        File.WriteAllBytes(CaptureUISystem.ScreenshotPreviewFilePath, jpgPreviewBytes);
 
-      File.WriteAllBytes(
-        CaptureUISystem.ScreenshotFilePath, pngScreenshotBytes);
+        File.WriteAllBytes(CaptureUISystem.ScreenshotFilePath, pngScreenshotBytes);
 
-      this.WriteLocalScreenshot(pngScreenshotBytes);
-    });
+        this.WriteLocalScreenshot(pngScreenshotBytes);
+      }
+    );
 
     var screenshotSnapshot = new ScreenshotSnapshot(
-      achievedMilestone: this.GetAchievedMilestone(),
-      population: this.GetPopulation(),
-      imageBytes: pngScreenshotBytes,
-      imageSize: new Vector2Int(width, height),
-      wasGlobalIlluminationDisabled:
+      this.GetAchievedMilestone(),
+      this.GetPopulation(),
+      pngScreenshotBytes,
+      new Vector2Int(width, height),
       previousGIValue && Mod.Settings.DisableGlobalIllumination,
-      areSettingsTopQuality: this.AreSettingsTopQuality(),
-      renderSettings: this.GetPhotoModePropertiesSnapshot(),
-      modIds: await this.GetActiveModIds());
+      this.AreSettingsTopQuality(),
+      this.GetPhotoModePropertiesSnapshot(),
+      await this.GetActiveModIds()
+    );
 
     // Preload the preview image in the cache before updating the UI.
     await this.imagePreloaderUISystem!
@@ -431,7 +444,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     if (this.CurrentScreenshot is null) {
       Mod.Log.Warn(
         $"Game: Call to {nameof(this.ClearScreenshot)} " +
-        $"with no active screenshot.");
+        $"with no active screenshot."
+      );
 
       return;
     }
@@ -453,7 +467,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     if (this.CurrentScreenshot is null) {
       Mod.Log.Warn(
         $"Game: Call to {nameof(this.ClearScreenshot)} " +
-        $"with no active screenshot.");
+        $"with no active screenshot."
+      );
 
       return;
     }
@@ -470,7 +485,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         this.CurrentScreenshot.Value.ModIds,
         this.CurrentScreenshot.Value.RenderSettings,
         this.CurrentScreenshot.Value.ImageBytes,
-        progressHandler: (upload, download) => {
+        (upload, download) => {
           // Case 1: The request is being sent.
           if (upload < 1) {
             // Set progress to the current upload progress.
@@ -489,14 +504,14 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
             // This task will update the processing progress asynchronously until we cancel it, or
             // it reaches 90% progress, then it will stop by itself.
-            _ = StartUpdateProcessingProgress(
-              processingUpdatesCts.Token);
+            _ = StartUpdateProcessingProgress(processingUpdatesCts.Token);
           }
 
           // Case 3: The response has been fully received.
           // This is handled in the rest of the method, so we ensure the progress is set to 100% at
           // the end.
-        });
+        }
+      );
 
       // Set progress to done.
       this.uploadProgress = new UploadProgress(1, 1);
@@ -507,11 +522,13 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       // Reset progress state.
       this.uploadProgress = null;
 
-      ErrorDialogManagerAccessor.Instance?.ShowError(new ErrorDialog {
-        localizedTitle = "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR",
-        localizedMessage = ex.GetUserFriendlyMessage(),
-        actions = ErrorDialog.ActionBits.Continue
-      });
+      ErrorDialogManagerAccessor.Instance?.ShowError(
+        new ErrorDialog {
+          localizedTitle = "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR",
+          localizedMessage = ex.GetUserFriendlyMessage(),
+          actions = ErrorDialog.ActionBits.Continue
+        }
+      );
     }
     catch (Exception ex) {
       // Reset progress state.
@@ -534,8 +551,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         var elapsedSeconds =
           (float)(DateTime.Now - startTime).TotalSeconds;
 
-        var progress = Math.Min(
-          elapsedSeconds / processingTimeSeconds, .9f);
+        var progress = Math.Min(elapsedSeconds / processingTimeSeconds, .9f);
 
         this.uploadProgress = new UploadProgress(1, progress);
 
@@ -563,7 +579,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       LocalizedString.Id("HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[Title]"),
       LocalizedString.Id("HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[Message]"),
       LocalizedString.Id("HallOfFame.Systems.CaptureUI.SET_CREATOR_NAME_DIALOG[ConfirmAction]"),
-      LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel"));
+      LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel")
+    );
 
     GameManager.instance.userInterface.appBindings
       .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
@@ -586,7 +603,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       optionsUISystem.OpenPage(
         "HallOfFame.HallOfFame.Mod",
         "HallOfFame.HallOfFame.Mod.General",
-        false);
+        false
+      );
     }
   }
 
@@ -595,18 +613,22 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// Ignores Global Illumination and Dynamic Resolution Scale settings as they are overridden
   /// during the screenshot process because they cause issues.
   /// </summary>
-  private bool AreSettingsTopQuality() => SharedSettings.instance.graphics
-    .qualitySettings
-    .Where(settings => settings
-      is not SSGIQualitySettings
-      and not DynamicResolutionScaleSettings)
-    .All(settings => {
-      var highestLevel = settings
-        .EnumerateAvailableLevels()
-        .Last(level => level != QualitySetting.Level.Custom);
+  private bool AreSettingsTopQuality() {
+    return SharedSettings.instance.graphics
+      .qualitySettings
+      .Where(settings => settings
+        is not SSGIQualitySettings
+        and not DynamicResolutionScaleSettings
+      )
+      .All(settings => {
+          var highestLevel = settings
+            .EnumerateAvailableLevels()
+            .Last(level => level != QualitySetting.Level.Custom);
 
-      return settings.GetLevel() >= highestLevel;
-    });
+          return settings.GetLevel() >= highestLevel;
+        }
+      );
+  }
 
   /// <summary>
   /// Play a sound.
@@ -636,7 +658,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     // proxy, and we should use the same naming scheme.
     var fileName = Path.Combine(
       Mod.GameScreenshotsPath,
-      $"{DateTime.Now:dd-MMMM-HH-mm-ss}-{ScreenUtilityProxy.Count++:00}.png");
+      $"{DateTime.Now:dd-MMMM-HH-mm-ss}-{ScreenUtilityProxy.Count++:00}.png"
+    );
 
     File.WriteAllBytes(fileName, pngScreenshotBytes);
   }
@@ -675,7 +698,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     bool wasGlobalIlluminationDisabled,
     bool areSettingsTopQuality,
     IDictionary<string, float> renderSettings,
-    int[] modIds) : IJsonWritable {
+    int[] modIds
+  ) : IJsonWritable {
     /// <summary>
     /// As we use the same file name for each new screenshot, this is a refresh counter appended to
     /// the URL of the image as a query parameter for cache busting.
@@ -740,7 +764,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   private readonly struct UploadProgress(
     float uploadProgress,
-    float processingProgress) : IJsonWritable {
+    float processingProgress
+  ) : IJsonWritable {
     public void Write(IJsonWriter writer) {
       writer.TypeBegin(this.GetType().FullName);
 

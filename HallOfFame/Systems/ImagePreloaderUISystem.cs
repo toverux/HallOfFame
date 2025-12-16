@@ -55,18 +55,24 @@ internal sealed partial class ImagePreloaderUISystem : UISystemBase {
       this.Enabled = false;
 
       this.urlToPreloadBinding = new ValueBinding<string>(
-        ImagePreloaderUISystem.BindingGroup, "urlToPreload",
-        string.Empty);
+        ImagePreloaderUISystem.BindingGroup,
+        "urlToPreload",
+        string.Empty
+      );
 
       this.onLoadBinding = new TriggerBinding(
-        ImagePreloaderUISystem.BindingGroup, "onLoad",
-        () => this.preloadCompletionSource?.SetResult(null));
+        ImagePreloaderUISystem.BindingGroup,
+        "onLoad",
+        () => this.preloadCompletionSource?.SetResult(null)
+      );
 
       this.onErrorBinding = new TriggerBinding(
-        ImagePreloaderUISystem.BindingGroup, "onError",
+        ImagePreloaderUISystem.BindingGroup,
+        "onError",
         () => this.preloadCompletionSource?.SetException(
-          new ImagePreloadFailedException(
-            this.urlToPreloadBinding.value)));
+          new ImagePreloadFailedException(this.urlToPreloadBinding.value)
+        )
+      );
 
       this.AddBinding(this.urlToPreloadBinding);
       this.AddBinding(this.onLoadBinding);
@@ -110,11 +116,11 @@ internal sealed partial class ImagePreloaderUISystem : UISystemBase {
     if (!this.urlToPreloadBinding.active) {
       // This will synchronously connect the binding, so no need to wait.
       GameManager.instance.userInterface.view.View.ExecuteScript(
-        ImagePreloaderUISystem.PreloadScript);
+        ImagePreloaderUISystem.PreloadScript
+      );
 
       if (!this.urlToPreloadBinding.active) {
-        throw new Exception(
-          "Failed to install the image preloader script.");
+        throw new Exception("Failed to install the image preloader script.");
       }
     }
 

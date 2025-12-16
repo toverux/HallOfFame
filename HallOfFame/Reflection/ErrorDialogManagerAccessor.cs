@@ -19,16 +19,19 @@ internal static class ErrorDialogManagerAccessor {
     ErrorDialogManagerAccessor.Instance = typeof(AppBindings)
       .GetField(
         "m_ErrorDialogManager",
-        BindingFlags.NonPublic | BindingFlags.Instance)
+        BindingFlags.NonPublic | BindingFlags.Instance
+      )
       ?.GetValue(appBindings) as ErrorDialogManager;
 
     if (ErrorDialogManagerAccessor.Instance is null) {
       Mod.Log.ErrorRecoverable(
-        new Exception("Failed to get an instance of ErrorDialogManagerAccessor."));
+        new Exception("Failed to get an instance of ErrorDialogManagerAccessor.")
+      );
     }
     else {
       Mod.Log.Info(
-        $"{nameof(ErrorDialogManagerAccessor)}: Acquired AppBindings.m_ErrorDialogManager");
+        $"{nameof(ErrorDialogManagerAccessor)}: Acquired AppBindings.m_ErrorDialogManager"
+      );
     }
   }
 

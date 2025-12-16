@@ -57,7 +57,8 @@ internal static class LocaleLoader {
     // Manual patches.
     processedLocaleDictionary.Add(
       "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoginStatus]",
-      string.Empty);
+      string.Empty
+    );
 
     // Register the locale dictionary.
     var source = new MemorySource(processedLocaleDictionary);
@@ -80,12 +81,14 @@ internal static class LocaleLoader {
       .GetManifestResourceNames()
       .FirstOrDefault(name =>
         name.ToLowerInvariant()
-          .EndsWith(localeId.ToLowerInvariant() + ".json"));
+          .EndsWith(localeId.ToLowerInvariant() + ".json")
+      );
 
     // Oops, we do not support this one.
     if (resourceName is null) {
       Mod.Log.Info(
-        $"{nameof(LocaleLoader)}: Skipping locale {localeId}, it is not supported by HoF.");
+        $"{nameof(LocaleLoader)}: Skipping locale {localeId}, it is not supported by HoF."
+      );
     }
 
     // Load locale resource and parse JSON.
@@ -94,15 +97,13 @@ internal static class LocaleLoader {
     using var reader = new StreamReader(resourceStream, Encoding.UTF8);
 
     var localeDictionary =
-      JSON.MakeInto<Dictionary<string, string>>(
-        JSON.Load(reader.ReadToEnd()));
+      JSON.MakeInto<Dictionary<string, string>>(JSON.Load(reader.ReadToEnd()));
 
     if (localeDictionary is not null) {
       return localeDictionary;
     }
 
-    Mod.Log.ErrorSilent(
-      $"LocaleLoader: Failed to parse resource file {resourceName}.");
+    Mod.Log.ErrorSilent($"LocaleLoader: Failed to parse resource file {resourceName}.");
 
     return new Dictionary<string, string>();
   }
@@ -113,7 +114,8 @@ internal static class LocaleLoader {
   /// Does not modify the source dictionary.
   /// </summary>
   private static Dictionary<string, string> PostprocessLocaleDictionary(
-    Dictionary<string, string> dictionary) {
+    Dictionary<string, string> dictionary
+  ) {
     var gameDictionary = GameManager.instance.localizationManager.activeDictionary;
 
     var interpolatedDictionary = new Dictionary<string, string>(dictionary);
@@ -123,15 +125,18 @@ internal static class LocaleLoader {
       var value = LocaleLoader.CommentPattern.Replace(entry.Value, string.Empty);
 
       // Replace {KEY=...} with the value of the key in either the current or game dictionary.
-      value = LocaleLoader.InterpolationPattern.Replace(value, match => {
-        var key = match.Groups[1].Value;
+      value = LocaleLoader.InterpolationPattern.Replace(
+        value,
+        match => {
+          var key = match.Groups[1].Value;
 
-        return interpolatedDictionary.TryGetValue(key, out var replacement)
-          ? replacement
-          : gameDictionary.TryGetValue(key, out var gameReplacement)
-            ? gameReplacement
-            : key;
-      });
+          return interpolatedDictionary.TryGetValue(key, out var replacement)
+            ? replacement
+            : gameDictionary.TryGetValue(key, out var gameReplacement)
+              ? gameReplacement
+              : key;
+        }
+      );
 
       interpolatedDictionary[entry.Key] = value;
     }

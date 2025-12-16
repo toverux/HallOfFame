@@ -23,14 +23,13 @@ internal class InputActionBinding : CompositeBinding {
   internal InputActionBinding(
     string group,
     string name,
-    ProxyBinding binding) {
+    ProxyBinding binding
+  ) {
     var action = InputManager.instance.FindAction(binding);
 
-    var bindingBinding = new BindingValueBinding(
-      group, $"{name}.binding", binding);
+    var bindingBinding = new BindingValueBinding(group, $"{name}.binding", binding);
 
-    var actionPhaseBinding = new ActionPhaseValueBinding(
-      group, $"{name}.phase", action);
+    var actionPhaseBinding = new ActionPhaseValueBinding(group, $"{name}.phase", action);
 
     this.AddBinding(bindingBinding);
     this.AddBinding(actionPhaseBinding);
@@ -49,10 +48,14 @@ internal class InputActionBinding : CompositeBinding {
     internal BindingValueBinding(
       string group,
       string name,
-      ProxyBinding binding)
+      ProxyBinding binding
+    )
       : base(
-        group, name, binding,
-        comparer: new AlwaysFalseEqualityComparer<ProxyBinding>()) {
+        group,
+        name,
+        binding,
+        comparer: new AlwaysFalseEqualityComparer<ProxyBinding>()
+      ) {
       this.watcher = new ProxyBinding.Watcher(binding, this.Update);
     }
 
@@ -73,8 +76,13 @@ internal class InputActionBinding : CompositeBinding {
     internal ActionPhaseValueBinding(
       string group,
       string name,
-      ProxyAction action) : base(group, name, InputActionPhase.Waiting,
-      new EnumNameWriter<InputActionPhase>()) {
+      ProxyAction action
+    ) : base(
+      group,
+      name,
+      InputActionPhase.Waiting,
+      new EnumNameWriter<InputActionPhase>()
+    ) {
       this.action = action;
       this.action.onInteraction += this.OnActionInteraction;
     }

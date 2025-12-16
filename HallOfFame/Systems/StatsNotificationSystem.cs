@@ -34,7 +34,8 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
         this.World.GetOrCreateSystemManaged<NotificationUISystem>();
 
       this.thousandsSeparator = "Common.THOUSANDS_SEPARATOR".Translate(
-        fallback: NumberFormatInfo.InvariantInfo.NumberGroupSeparator);
+        NumberFormatInfo.InvariantInfo.NumberGroupSeparator
+      );
 
       // If the mod loaded *after* the main menu has already loaded, show the notification.
       if (GameManager.instance.gameMode is GameMode.MainMenu) {
@@ -56,7 +57,8 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
 
   protected override void OnGameLoadingComplete(
     Purpose purpose,
-    GameMode mode) {
+    GameMode mode
+  ) {
     base.OnGameLoadingComplete(purpose, mode);
 
     if (mode is GameMode.MainMenu) {
@@ -94,22 +96,24 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
       }
 
       this.notificationUISystem.AddOrUpdateNotification(
-        identifier: "HallOfFame.CreatorStats",
-        title: "Menu.NOTIFICATION_TITLE[HallOfFame.CreatorStats]",
-        text: new LocalizedString(
+        "HallOfFame.CreatorStats",
+        "Menu.NOTIFICATION_TITLE[HallOfFame.CreatorStats]",
+        new LocalizedString(
           "Menu.NOTIFICATION_DESCRIPTION[HallOfFame.CreatorStats]",
           "",
           new Dictionary<string, ILocElement> {
             { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
             { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
             { "LIKES_COUNT", this.LocalizeNumber(stats.LikesCount) }
-          }),
-        thumbnail: "coui://ui-mods/images/stats-notification.svg",
+          }
+        ),
+        "coui://ui-mods/images/stats-notification.svg",
         onClicked: () => {
           this.ShowStatsDialog(stats);
 
           this.notificationUISystem.RemoveNotification("HallOfFame.CreatorStats");
-        });
+        }
+      );
     }
     catch (HttpException ex) {
       Mod.Log.ErrorSilent(ex);
@@ -133,8 +137,10 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
           { "TOTAL_CREATORS_COUNT", this.LocalizeNumber(stats.AllCreatorsCount) },
           { "TOTAL_SCREENSHOTS_COUNT", this.LocalizeNumber(stats.AllScreenshotsCount) },
           { "TOTAL_VIEWS_COUNT", this.LocalizeNumber(stats.AllViewsCount) }
-        }),
-      LocalizedString.IdWithFallback("Common.CLOSE", "Close"));
+        }
+      ),
+      LocalizedString.IdWithFallback("Common.CLOSE", "Close")
+    );
 
     GameManager.instance.userInterface.appBindings.ShowMessageDialog(successDialog, _ => { });
   }
@@ -144,7 +150,8 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
       .ToString("N0", CultureInfo.InvariantCulture)
       .Replace(
         NumberFormatInfo.InvariantInfo.NumberGroupSeparator,
-        this.thousandsSeparator);
+        this.thousandsSeparator
+      );
 
     return LocalizedString.Value(numberStr);
   }

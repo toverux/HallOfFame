@@ -51,8 +51,9 @@ internal record Creator : IJsonWritable {
     set;
   } = [];
 
-  public override string ToString() =>
-    $"Creator #{this.Id} {this.CreatorName}";
+  public override string ToString() {
+    return $"Creator #{this.Id} {this.CreatorName}";
+  }
 
   public void Write(IJsonWriter writer) {
     var typeName = this.GetType().FullName;

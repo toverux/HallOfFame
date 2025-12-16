@@ -18,5 +18,5 @@ max_line_length = 999999999
 indent_size = 2
 charset = utf-8-bom # Visual Studio does not like UTF-8 without BOM
 
-[*.{md,js,json,ts,tsx,scss}]
+[*.{md,toml,yml,js,json,ts,tsx,scss}]
 indent_size = 2

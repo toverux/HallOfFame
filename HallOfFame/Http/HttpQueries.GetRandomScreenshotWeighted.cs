@@ -18,7 +18,9 @@ internal static partial class HttpQueries {
         $"&recent={Mod.Settings.RecentScreenshotWeight}" +
         $"&archeologist={Mod.Settings.ArcheologistScreenshotWeight}" +
         $"&supporter={Mod.Settings.SupporterScreenshotWeight}" +
-        $"&viewMaxAge={Mod.Settings.ViewMaxAge}"));
+        $"&viewMaxAge={Mod.Settings.ViewMaxAge}"
+      )
+    );
 
     await HttpQueries.SendRequest(request);
 

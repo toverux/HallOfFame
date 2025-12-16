@@ -27,16 +27,14 @@ public sealed class Mod : IMod {
   // ReSharper disable once UnusedMember.Global
   public static Mod Instance =>
     Mod.instanceValue ??
-    throw new NullReferenceException(
-      $"Mod {nameof(Mod.OnLoad)}() was not called yet.");
+    throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
   /// <exception cref="NullReferenceException">
   /// If the mod settings have not been loaded yet.
   /// </exception>
   public static Settings Settings =>
     Mod.instanceValue?.settingsValue ??
-    throw new NullReferenceException(
-      $"Mod {nameof(Mod.OnLoad)}() was not called yet.");
+    throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
   internal static string GameScreenshotsPath { get; } =
     Path.Combine(EnvPath.kUserDataPath, "Screenshots");
@@ -57,12 +55,12 @@ public sealed class Mod : IMod {
   private Settings? settingsValue;
 
   public void OnLoad(UpdateSystem updateSystem) {
-    #if DEBUG
+#if DEBUG
     // In debug mode, eagerly check reflection hacks are working.
     ErrorDialogManagerAccessor.Init();
     PdxSdkPlatformProxy.Init();
     ScreenUtilityProxy.Init();
-    #endif
+#endif
 
     try {
       // Create directories for settings and data.
@@ -80,8 +78,7 @@ public sealed class Mod : IMod {
       this.settingsValue.RegisterInOptionsUI();
       this.settingsValue.RegisterKeyBindings();
 
-      AssetDatabase.global.LoadSettings(
-        nameof(HallOfFame), this.settingsValue, new Settings(this));
+      AssetDatabase.global.LoadSettings(nameof(HallOfFame), this.settingsValue, new Settings(this));
 
       // Set singleton instance only when OnLoad is likely to complete.
       Mod.instanceValue = this;
@@ -96,7 +93,8 @@ public sealed class Mod : IMod {
         // True by default, but it makes the whole UI reload when an image changes with
         // --uiDeveloperMode.
         // But we don't desire that for this host, whether in dev mode or not.
-        shouldWatch: false);
+        false
+      );
 
       // Initialize subsystems.
       updateSystem.UpdateAt<StatsNotificationSystem>(SystemUpdatePhase.MainLoop);

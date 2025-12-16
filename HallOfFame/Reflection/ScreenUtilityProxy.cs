@@ -20,11 +20,11 @@ internal static class ScreenUtilityProxy {
   static ScreenUtilityProxy() {
     ScreenUtilityProxy.CountField = typeof(ScreenUtility).GetField(
       "m_Count",
-      BindingFlags.NonPublic | BindingFlags.Static);
+      BindingFlags.NonPublic | BindingFlags.Static
+    );
 
     if (ScreenUtilityProxy.CountField is null) {
-      Mod.Log.ErrorRecoverable(
-        new Exception("Failed to find field m_Count in ScreenUtility."));
+      Mod.Log.ErrorRecoverable(new Exception("Failed to find field m_Count in ScreenUtility."));
     }
     else {
       Mod.Log.Verbose($"{nameof(ScreenUtilityProxy)}: Acquired ScreenUtility.m_Count");

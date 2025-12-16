@@ -18,7 +18,8 @@ internal static partial class HttpQueries {
     IEnumerable<int> modIds,
     IDictionary<string, float> renderSettings,
     byte[] screenshotData,
-    ProgressHandler? progressHandler = null) {
+    ProgressHandler? progressHandler = null
+  ) {
     var metadata = new Dictionary<string, string> {
       { "platform", Application.platform.ToString() },
       { "cpu", SystemInfo.processorType },
@@ -39,7 +40,8 @@ internal static partial class HttpQueries {
 
     using var request = UnityWebRequest.Post(
       HttpQueries.PrependApiUrl("/screenshots"),
-      multipart);
+      multipart
+    );
 
     await HttpQueries.SendRequest(request, progressHandler);
 
