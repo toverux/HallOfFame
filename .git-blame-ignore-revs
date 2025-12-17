@@ -3,3 +3,6 @@
 
 # style: switch to 2-spaces indent & 100 line-length
 5cf568d02fb330b96ec478feaca9fc09135f1e4e
+
+# style: evolve the C# codestyle to be more consistent with JS
+46c5f38899aff11df52591fe4770adb0cd2997e4
