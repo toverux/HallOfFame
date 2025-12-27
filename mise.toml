@@ -1,5 +1,5 @@
 [tools]
-bun = "1.3.3"
+bun = "1.3.5"
 node = "25.2.1"
 
 [tasks."deps:upgrade"]
