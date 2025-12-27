@@ -12,7 +12,8 @@ internal static class LocalizationExtensions {
 
   /// <summary>
   /// One-off translation from a key.
-  /// If the key is not found in the dictionary, it is returned as is.
+  /// If the key is not found in the dictionary and a fallback is not provided, the key is returned
+  /// as is.
   /// </summary>
   internal static string Translate(this string key, string? fallback = null) {
     return LocalizationExtensions.LocalizationDictionary

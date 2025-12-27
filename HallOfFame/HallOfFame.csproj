@@ -33,6 +33,9 @@
         <Reference Include="Game">
             <Private>false</Private>
         </Reference>
+        <Reference Include="Colossal.AssetPipeline">
+            <Private>false</Private>
+        </Reference>
         <Reference Include="Colossal.Collections">
             <Private>false</Private>
         </Reference>

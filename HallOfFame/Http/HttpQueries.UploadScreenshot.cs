@@ -15,6 +15,7 @@ internal static partial class HttpQueries {
     string cityName,
     int cityMilestone,
     int cityPopulation,
+    string? mapName,
     IEnumerable<int> modIds,
     IDictionary<string, float> renderSettings,
     byte[] screenshotData,
@@ -33,9 +34,15 @@ internal static partial class HttpQueries {
     multipart.AddField("cityName", cityName);
     multipart.AddField("cityMilestone", cityMilestone);
     multipart.AddField("cityPopulation", cityPopulation);
+
+    if (mapName is not null) {
+      multipart.AddField("mapName", mapName);
+    }
+
     multipart.AddField("modIds", string.Join(",", modIds));
     multipart.AddField("renderSettings", JSON.Dump(renderSettings));
     multipart.AddField("metadata", JSON.Dump(metadata));
+
     multipart.AddBinaryData("screenshot", screenshotData, "screenshot.png");
 
     using var request = UnityWebRequest.Post(

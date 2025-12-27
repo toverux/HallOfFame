@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Colossal.Core;
+using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
 using Colossal.PSI.PdxSdk;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
+using Game.Assets;
 using Game.City;
 using Game.Rendering;
 using Game.SceneFlow;
@@ -105,20 +107,12 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       // Re-enabled when there is an active screenshot.
       this.Enabled = false;
 
-      this.citySystem =
-        this.World.GetOrCreateSystemManaged<CitySystem>();
+      this.citySystem = this.World.GetOrCreateSystemManaged<CitySystem>();
+      this.cityConfigurationSystem = this.World.GetOrCreateSystemManaged<CityConfigurationSystem>();
+      this.photoModeRenderSystem = this.World.GetOrCreateSystemManaged<PhotoModeRenderSystem>();
+      this.imagePreloaderUISystem = this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
 
-      this.cityConfigurationSystem =
-        this.World.GetOrCreateSystemManaged<CityConfigurationSystem>();
-
-      this.photoModeRenderSystem =
-        this.World.GetOrCreateSystemManaged<PhotoModeRenderSystem>();
-
-      this.imagePreloaderUISystem =
-        this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
-
-      this.milestoneLevelQuery =
-        this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
+      this.milestoneLevelQuery = this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
 
       this.cityNameBinding = new GetterValueBinding<string>(
         CaptureUISystem.BindingGroup,
@@ -184,6 +178,28 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   }
 
   /// <summary>
+  /// Get the name of the map that was used to create this save.
+  /// </summary>
+  private string? GetMapName() {
+    var mapMetadataSystem = this.World.GetOrCreateSystemManaged<MapMetadataSystem>();
+
+    var mapName = mapMetadataSystem.mapName;
+
+    // In some unclear circumstances (I reproduce this on an old save), this can be null.
+    // (This is also annotated with [CanBeNull]).
+    if (mapName is null) {
+      return null;
+    }
+
+    // The dictionary contains not only Vanilla map names but also map names from mods.
+    // Ex. A mod will have a mapName "DunedinNewZealandReleaseFINAL" (its save name), and this will
+    // be loaded as `Maps.MAP_TITLE[DunedinNewZealandReleaseFINAL]` = "Dunedin, New Zealand".
+    // If the map mod was removed, though, the map display name is lost, and we use mapName
+    // (so "DunedinNewZealandReleaseFINAL") as a fallback value.
+    return $"Maps.MAP_TITLE[{mapName}]".Translate(mapName);
+  }
+
+  /// <summary>
   /// Get the name of the city.
   /// </summary>
   private string GetCityName() {
@@ -225,8 +241,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     }
 
     try {
-      var pdxSdk =
-        PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
+      var pdxSdk = PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
 
       // This will return null if the player is not logged in or in other error cases.
       var mods = await pdxSdk.GetModsInActivePlayset() ?? [];
@@ -296,7 +311,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   }
 
   private async Task DoTakeScreenshot() {
-    this.PlaySound("select-item");
+    CaptureUISystem.PlaySound("select-item");
 
     // Hide the UI, otherwise it will be captured in the screenshot.
     GameManager.instance.userInterface.view.enabled = false;
@@ -310,8 +325,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     var camera = Camera.main!;
 
-    // Disable DLSS, causes grainy pictures or artifacts with some setups, also we already do actual
-    // supersampling.
+    // Disable DLSS, causes grainy pictures or artifacts with some setups -- also, we already do
+    // actual supersampling.
     var cameraData = camera.GetComponent<HDAdditionalCameraData>();
     var previousDlssValue = cameraData.allowDeepLearningSuperSampling;
     cameraData.allowDeepLearningSuperSampling = false;
@@ -367,8 +382,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     // Now, read the RenderTexture to a Texture2D.
     RenderTexture.active = renderTexture;
 
-    var screenshotTexture =
-      new Texture2D(width, height, TextureFormat.RGB24, false);
+    var screenshotTexture = new Texture2D(width, height, TextureFormat.RGB24, false);
 
     screenshotTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
     screenshotTexture.Apply();
@@ -401,7 +415,11 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     var pngScreenshotBytes = screenshotTexture.EncodeToPNG();
 
     // Create a light preview image.
-    var previewTexture = this.Resize(screenshotTexture, Screen.width / 2, Screen.height / 2);
+    var previewTexture = CaptureUISystem.Resize(
+      screenshotTexture,
+      Screen.width / 2,
+      Screen.height / 2
+    );
 
     var jpgPreviewBytes = previewTexture.EncodeToJPG(80);
 
@@ -413,39 +431,35 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     // Prepare full size and preview images in a background thread.
     await Task.Run(() => {
         File.WriteAllBytes(CaptureUISystem.ScreenshotPreviewFilePath, jpgPreviewBytes);
-
         File.WriteAllBytes(CaptureUISystem.ScreenshotFilePath, pngScreenshotBytes);
 
-        this.WriteLocalScreenshot(pngScreenshotBytes);
+        CaptureUISystem.WriteLocalScreenshot(pngScreenshotBytes);
       }
     );
 
     var screenshotSnapshot = new ScreenshotSnapshot(
       this.GetAchievedMilestone(),
       this.GetPopulation(),
+      this.GetMapName(),
       pngScreenshotBytes,
       new Vector2Int(width, height),
       previousGIValue && Mod.Settings.DisableGlobalIllumination,
-      this.AreSettingsTopQuality(),
+      CaptureUISystem.AreSettingsTopQuality(),
       this.GetPhotoModePropertiesSnapshot(),
       await this.GetActiveModIds()
     );
 
     // Preload the preview image in the cache before updating the UI.
-    await this.imagePreloaderUISystem!
-      .Preload(screenshotSnapshot.PreviewImageUri);
+    await this.imagePreloaderUISystem!.Preload(screenshotSnapshot.PreviewImageUri);
 
     this.CurrentScreenshot = screenshotSnapshot;
 
-    this.PlaySound("take-photo");
+    CaptureUISystem.PlaySound("take-photo");
   }
 
   private void ClearScreenshot() {
     if (this.CurrentScreenshot is null) {
-      Mod.Log.Warn(
-        $"Game: Call to {nameof(this.ClearScreenshot)} " +
-        $"with no active screenshot."
-      );
+      Mod.Log.Warn($"Game: Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
 
       return;
     }
@@ -465,10 +479,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   // ReSharper disable once AsyncVoidMethod
   private async void UploadScreenshot() {
     if (this.CurrentScreenshot is null) {
-      Mod.Log.Warn(
-        $"Game: Call to {nameof(this.ClearScreenshot)} " +
-        $"with no active screenshot."
-      );
+      Mod.Log.Warn($"Game: Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
 
       return;
     }
@@ -482,6 +493,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         this.GetCityName(),
         this.CurrentScreenshot.Value.AchievedMilestone,
         this.CurrentScreenshot.Value.Population,
+        this.CurrentScreenshot.Value.MapName,
         this.CurrentScreenshot.Value.ModIds,
         this.CurrentScreenshot.Value.RenderSettings,
         this.CurrentScreenshot.Value.ImageBytes,
@@ -548,8 +560,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       var startTime = DateTime.Now;
 
       while (!ct.IsCancellationRequested) {
-        var elapsedSeconds =
-          (float)(DateTime.Now - startTime).TotalSeconds;
+        var elapsedSeconds = (float)(DateTime.Now - startTime).TotalSeconds;
 
         var progress = Math.Min(elapsedSeconds / processingTimeSeconds, .9f);
 
@@ -565,9 +576,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Checks if the user has set a creator name in the mod settings, if not a
-  /// dialog will be shown to prompt the user to set one and direct them to
-  /// the settings.
+  /// Checks if the user has set a creator name in the mod settings, if not, a dialog will be shown
+  /// to prompt the user to set one and direct them to the settings.
   /// </summary>
   /// <returns>Whether the user must go set their Creator Name.</returns>
   private bool CheckShouldSetCreatorName() {
@@ -592,11 +602,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         return;
       }
 
-      var gamePanelUISystem =
-        this.World.GetOrCreateSystemManaged<GamePanelUISystem>();
-
-      var optionsUISystem =
-        this.World.GetOrCreateSystemManaged<OptionsUISystem>();
+      var gamePanelUISystem = this.World.GetOrCreateSystemManaged<GamePanelUISystem>();
+      var optionsUISystem = this.World.GetOrCreateSystemManaged<OptionsUISystem>();
 
       gamePanelUISystem.ClosePanel(typeof(PhotoModePanel).FullName);
 
@@ -613,7 +620,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// Ignores Global Illumination and Dynamic Resolution Scale settings as they are overridden
   /// during the screenshot process because they cause issues.
   /// </summary>
-  private bool AreSettingsTopQuality() {
+  private static bool AreSettingsTopQuality() {
     return SharedSettings.instance.graphics
       .qualitySettings
       .Where(settings => settings
@@ -633,7 +640,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// <summary>
   /// Play a sound.
   /// </summary>
-  private void PlaySound(string sound) {
+  private static void PlaySound(string sound) {
     try {
       // ReSharper disable once Unity.UnknownResource
       var sounds = Resources.Load<UISoundCollection>("Audio/UI Sounds");
@@ -648,7 +655,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// Write the screenshot to the local screenshot directory, if enabled.
   /// It mimics the vanilla screenshot naming scheme.
   /// </summary>
-  private void WriteLocalScreenshot(byte[] pngScreenshotBytes) {
+  private static void WriteLocalScreenshot(byte[] pngScreenshotBytes) {
     if (!Mod.Settings.CreateLocalScreenshot) {
       return;
     }
@@ -667,7 +674,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// <summary>
   /// Resize a Texture2D to a new width and height.
   /// </summary>
-  private Texture2D Resize(Texture2D texture2D, int width, int height) {
+  private static Texture2D Resize(Texture2D texture2D, int width, int height) {
     var rt = new RenderTexture(width, height, 24);
     RenderTexture.active = rt;
 
@@ -686,13 +693,15 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// <summary>
   /// Snapshot of the latest screenshot.
   /// Stores the state of the current screenshot and accompanying info that we don't want to update
-  /// in real-time after the screenshot is taken (other info like city name and username have their
-  /// own separated binding as we want to allow the user to change them on the fly).
-  /// Serialized to JSON for displaying in the UI.
+  /// in real-time after the screenshot is taken. Other info like city name and username have their
+  /// own separated binding as we want to allow the user to change them on the fly after the
+  /// screenshot is taken.
+  /// Serializable to JSON for displaying in the UI.
   /// </summary>
   private readonly struct ScreenshotSnapshot(
     int achievedMilestone,
     int population,
+    string? mapName,
     byte[] imageBytes,
     Vector2Int imageSize,
     bool wasGlobalIlluminationDisabled,
@@ -713,6 +722,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     internal int Population { get; } = population;
 
+    internal string? MapName { get; } = mapName;
+
     internal byte[] ImageBytes { get; } = imageBytes;
 
     internal IDictionary<string, float> RenderSettings { get; } =
@@ -730,6 +741,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     public void Write(IJsonWriter writer) {
       writer.TypeBegin(this.GetType().FullName);
+
+      writer.PropertyName("mapName");
+      writer.Write(this.MapName);
 
       writer.PropertyName("achievedMilestone");
       writer.Write(this.AchievedMilestone);
