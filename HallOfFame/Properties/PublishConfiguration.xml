@@ -135,9 +135,9 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2025.7.4" />
+  <ModVersion Value="2025.7.5" />
   <GameVersion Value="1.5.*" />
-  <ChangeLog>Compatibility for game update 1.5.2f1.</ChangeLog>
+  <ChangeLog>- The map name used to create a city is now sent when uploading a screenshot, so that it can be displayed in the future along other information.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
