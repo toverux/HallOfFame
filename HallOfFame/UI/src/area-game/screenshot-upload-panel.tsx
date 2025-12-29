@@ -1,12 +1,13 @@
 import { bindValue, trigger, useValue } from 'cs2/api';
 import { type Localization, LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { Button, Icon, Tooltip } from 'cs2/ui';
-import { type CSSProperties, type ReactElement, useEffect, useMemo } from 'react';
+import { type CSSProperties, type ReactElement, useEffect, useMemo, useRef } from 'react';
 import cloudArrowUpSolidSrc from '../icons/fontawesome/cloud-arrow-up-solid.svg';
 import populationSrc from '../icons/paradox/population.svg';
 import trophySrc from '../icons/paradox/trophy.svg';
 import {
   createSingletonHook,
+  type DraggableProps,
   getClassesModule,
   type ModSettings,
   useDraggable,
@@ -68,7 +69,8 @@ const uploadProgress$ = bindValue<JsonUploadProgress | null>(
 export function ScreenshotUploadPanel(): ReactElement {
   const settings = useModSettings();
 
-  const draggable = useDraggable();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const draggable = useDraggable(panelRef);
 
   const screenshotSnapshot = useValue(screenshotSnapshot$);
   const uploadProgress = useValue(uploadProgress$);
@@ -83,8 +85,11 @@ export function ScreenshotUploadPanel(): ReactElement {
 
   return (
     <div className={styles.screenshotUploadPanelContainer}>
-      <div className={styles.screenshotUploadPanel} {...draggable}>
-        <ScreenshotUploadPanelHeader screenshotSnapshot={screenshotSnapshot} />
+      <div ref={panelRef} className={styles.screenshotUploadPanel}>
+        <ScreenshotUploadPanelHeader
+          screenshotSnapshot={screenshotSnapshot}
+          draggable={draggable}
+        />
 
         <ScreenshotUploadPanelImage
           screenshotSnapshot={screenshotSnapshot}
@@ -106,6 +111,7 @@ export function ScreenshotUploadPanel(): ReactElement {
           settings={settings}
           creatorNameIsEmpty={creatorNameIsEmpty}
           uploadProgress={uploadProgress}
+          draggable={draggable}
         />
       </div>
     </div>
@@ -113,9 +119,11 @@ export function ScreenshotUploadPanel(): ReactElement {
 }
 
 function ScreenshotUploadPanelHeader({
-  screenshotSnapshot
+  screenshotSnapshot,
+  draggable
 }: Readonly<{
   screenshotSnapshot: JsonScreenshotSnapshot;
+  draggable: DraggableProps;
 }>): ReactElement {
   const { translate } = useLocalization();
 
@@ -129,7 +137,7 @@ function ScreenshotUploadPanelHeader({
   );
 
   return (
-    <div className={styles.screenshotUploadPanelHeader}>
+    <div className={styles.screenshotUploadPanelHeader} {...draggable}>
       {congratulation}
 
       <Button
@@ -348,11 +356,13 @@ function ScreenshotUploadPanelContentOthers({
 function ScreenshotUploadPanelFooter({
   settings,
   creatorNameIsEmpty,
-  uploadProgress
+  uploadProgress,
+  draggable
 }: Readonly<{
   settings: ModSettings;
   creatorNameIsEmpty: boolean;
   uploadProgress: JsonUploadProgress | null;
+  draggable: DraggableProps;
 }>): ReactElement {
   const { translate } = useLocalization();
 
@@ -361,7 +371,7 @@ function ScreenshotUploadPanelFooter({
   const isDoneUploading = uploadProgress?.isComplete == true;
 
   return (
-    <div className={styles.screenshotUploadPanelFooter}>
+    <div className={styles.screenshotUploadPanelFooter} {...draggable}>
       <span className={styles.screenshotUploadPanelFooterCreatorId}>
         <LocalizedString
           id='HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID'

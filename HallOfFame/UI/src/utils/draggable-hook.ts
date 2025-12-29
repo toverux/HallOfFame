@@ -1,51 +1,65 @@
 import {
   type MouseEventHandler,
   type MouseEvent as ReactMouseEvent,
+  type RefObject,
   useCallback,
   useEffect,
   useRef,
   useState
 } from 'react';
 
+export interface DraggableProps {
+  readonly onMouseDown: MouseEventHandler;
+}
+
 /**
- * Provides a simple draggable behavior for an element (the whole element is draggable, there is no
- * handle to move another target element).
+ * Provides a draggable behavior for an element.
  *
- * @returns Props that should be passed to the element to make draggable.
+ * @param targetRef Reference to the element that should be moved when this element is dragged.
+ *
+ * @returns Props that should be passed to the handle element to make the target draggable.
  */
-export function useDraggable(): { readonly onMouseDown: MouseEventHandler } {
+export function useDraggable(targetRef: RefObject<HTMLElement | null>): DraggableProps {
   const [isDragging, setIsDragging] = useState(false);
 
   // Maintains the state of the draggable element.
   const draggableState = useRef({
-    element: undefined as HTMLElement | undefined,
+    element: null as HTMLElement | null,
     x: 0,
     y: 0
   });
 
   // Start dragging the element when the user mouses down on the element.
-  const onMouseDown = useCallback((event: ReactMouseEvent) => {
-    // Do not start dragging if the user clicked on a button.
-    let maybeButton: EventTarget | null = event.target;
-    while (maybeButton) {
-      if (maybeButton instanceof HTMLButtonElement) {
+  const onMouseDown = useCallback(
+    (event: ReactMouseEvent) => {
+      // Do not start dragging if the user clicked on a button.
+      let maybeButton: EventTarget | null = event.target;
+      while (maybeButton) {
+        if (maybeButton instanceof HTMLButtonElement) {
+          return;
+        }
+
+        maybeButton = maybeButton instanceof HTMLElement ? maybeButton.parentElement : null;
+      }
+
+      const element = targetRef.current;
+      if (!element) {
         return;
       }
 
-      maybeButton = maybeButton instanceof HTMLElement ? maybeButton.parentElement : null;
-    }
+      const { current: state } = draggableState;
 
-    const { current: state } = draggableState;
+      // If the element changed, reset the offset to 0, 0.
+      if (state.element != element) {
+        state.x = state.y = 0;
+      }
 
-    // If the element changed, reset the offset to 0, 0.
-    if (state.element != event.currentTarget) {
-      state.x = state.y = 0;
-    }
+      state.element = element;
 
-    state.element = event.currentTarget as HTMLElement;
-
-    setIsDragging(true);
-  }, []);
+      setIsDragging(true);
+    },
+    [targetRef]
+  );
 
   // Move the element when the user moves the mouse, just applying delta.
   const onMouseMove = useCallback((event: MouseEvent) => {
