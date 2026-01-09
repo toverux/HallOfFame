@@ -59,7 +59,6 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_LABEL": "Je présente un asset ou une map",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_DESCRIPTION": "Cochez ceci si vous souhaitez montrer comment vous avez utilisé un asset de Paradox Mods. Vous n’avez pas besoin d’être l’auteur de l’asset. L’asset mis en avant doit être le sujet principal de votre photo.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_SELECT_ASSET": "Sélectionnez un asset…",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_LABEL": "Description",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_DESCRIPTION": "Écrivez quelque chose à propos de votre image si vous le souhaitez. L’histoire de votre ville, vos techniques de detailing, un poème, ce que vous voulez. Vous pouvez utiliser une syntaxe Markdown basique pour la mise en forme (pas de liens, pas d’images).",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Votre nom de créateur n’a pas été défini. Rendez-vous dans les paramètres du mod pour le définir et pouvoir téléverser une photo.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY": "Vos paramètres graphiques ne sont pas au maximum. Nous vous recommandons de les augmenter pendant les prises de vue !",
