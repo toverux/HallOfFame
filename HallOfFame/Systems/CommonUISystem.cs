@@ -37,6 +37,18 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
   private GetterValueBinding<Settings> settingsBinding = null!;
 
+  internal void SaveScreenshotPreferences(
+    bool shareModIds,
+    bool shareRenderSettings,
+    string? description
+  ) {
+    Mod.Settings.SavedShareModIdsPreference = shareModIds;
+    Mod.Settings.SavedShareRenderSettingsPreference = shareRenderSettings;
+    Mod.Settings.SavedScreenshotDescription = description;
+
+    this.settingsBinding.Update();
+  }
+
   protected override void OnCreate() {
     base.OnCreate();
 
@@ -222,12 +234,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
   }
 
   private class FakeSettingComparer : EqualityComparer<Settings> {
-    public override bool Equals(Settings x, Settings y) {
-      return false;
-    }
+    public override bool Equals(Settings x, Settings y) => false;
 
-    public override int GetHashCode(Settings settings) {
-      return settings.GetHashCode();
-    }
+    public override int GetHashCode(Settings settings) => settings.GetHashCode();
   }
 }

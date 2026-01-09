@@ -42,22 +42,10 @@ namespace HallOfFame;
   nameof(Settings.KeyBindingForceEnableMainMenuSlideshow),
   Usages.kMenuUsage
 )]
-[SettingsUIKeyboardAction(
-  nameof(Settings.KeyBindingPrevious),
-  Usages.kMenuUsage
-)]
-[SettingsUIKeyboardAction(
-  nameof(Settings.KeyBindingNext),
-  Usages.kMenuUsage
-)]
-[SettingsUIKeyboardAction(
-  nameof(Settings.KeyBindingLike),
-  Usages.kMenuUsage
-)]
-[SettingsUIKeyboardAction(
-  nameof(Settings.KeyBindingToggleMenu),
-  Usages.kMenuUsage
-)]
+[SettingsUIKeyboardAction(nameof(Settings.KeyBindingPrevious), Usages.kMenuUsage)]
+[SettingsUIKeyboardAction(nameof(Settings.KeyBindingNext), Usages.kMenuUsage)]
+[SettingsUIKeyboardAction(nameof(Settings.KeyBindingLike), Usages.kMenuUsage)]
+[SettingsUIKeyboardAction(nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
 public sealed class Settings : ModSetting, IJsonWritable {
   private const string GroupYourProfile = "YourProfile";
 
@@ -418,7 +406,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     set => Application.OpenURL("https://github.com/toverux/HallOfFame");
   }
 
-#if DEBUG
+  #if DEBUG
   [SettingsUISection(Settings.GroupDevelopment)]
   [SettingsUITextInput]
   public string? ScreenshotToLoad {
@@ -442,11 +430,36 @@ public sealed class Settings : ModSetting, IJsonWritable {
     // ReSharper disable once ValueParameterNotUsed
     set => this.DoDumpTranslations();
   }
+  #endif
 
-#endif
-
+  /// <summary>
+  /// When the user clicks a Paradox Mods link for the first time, they are asked if they want to
+  /// open it in the ingame UI or in the default browser. That preference is then saved.
+  /// </summary>
   [SettingsUIHidden]
   public bool? PrefersOpeningPdxModsInBrowser { get; set; }
+
+  /// <summary>
+  /// The latest value the user selected for the "Share playset" option in the upload panel.
+  /// It is restored when it opens.
+  /// </summary>
+  [SettingsUIHidden]
+  public bool SavedShareModIdsPreference { get; set; }
+
+  /// <summary>
+  /// The latest value the user selected for the "Share photo mode settings" option in the upload
+  /// panel.
+  /// It is restored when it opens.
+  /// </summary>
+  [SettingsUIHidden]
+  public bool SavedShareRenderSettingsPreference { get; set; }
+
+  /// <summary>
+  /// The latest description the user typed in the upload panel.
+  /// It is restored when it opens.
+  /// </summary>
+  [SettingsUIHidden]
+  public string? SavedScreenshotDescription { get; set; }
 
   internal string BaseUrlWithScheme => this.BaseUrl.StartsWith("http")
     ? $"{this.BaseUrl}"
@@ -478,7 +491,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     // The "platform username" comes from Steam or Xbox GamePass, and not the Paradox account
     // username.
     // Even if there existed a fallback to the Paradox username, a Paradox account does not
-    // necessarily have a username attached to it, so users only logged in via Paradox (standalone)
+    // necessarily have a username attached to it. Users only logged in via Paradox (standalone)
     // will have no username set by default and will be asked to set it in the mod's settings when
     // they first upload a screenshot.
     var userName = PlatformManager.instance.userName;
@@ -512,6 +525,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
     this.BaseUrl = "halloffame.cs2.mtq.io";
 
     this.PrefersOpeningPdxModsInBrowser = null;
+    this.SavedShareModIdsPreference = true;
+    this.SavedShareRenderSettingsPreference = true;
+    this.SavedScreenshotDescription = string.Empty;
   }
 
   /// <summary>
@@ -519,12 +535,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// the default settings reference instance).
   /// </summary>
   public void Initialize() {
-#if DEBUG
-    GameManager.instance.localizationManager.AddSource(
-      "en-US",
-      new DevDictionarySource()
-    );
-#endif
+    #if DEBUG
+    GameManager.instance.localizationManager.AddSource("en-US", new DevDictionarySource());
+    #endif
 
     this.InitializeCreatorId();
 
@@ -545,9 +558,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     };
   }
 
-  private static bool IsNvidiaGpu() {
-    return SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
-  }
+  private static bool IsNvidiaGpu() => SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
 
   /// <summary>
   /// Initializes <see cref="CreatorID"/>, <see cref="IsParadoxAccountID"/> and
@@ -713,9 +724,6 @@ public sealed class Settings : ModSetting, IJsonWritable {
     writer.PropertyName("creatorName");
     writer.Write(this.CreatorName);
 
-    writer.PropertyName("creatorIdClue");
-    writer.Write(this.MaskedCreatorID?.Split('-')[0]);
-
     writer.PropertyName("enableLoadingScreenBackground");
     writer.Write(this.EnableLoadingScreenBackground);
 
@@ -737,10 +745,19 @@ public sealed class Settings : ModSetting, IJsonWritable {
     writer.PropertyName("baseUrl");
     writer.Write(this.BaseUrlWithScheme);
 
+    writer.PropertyName("savedShareModIdsPreference");
+    writer.Write(this.SavedShareModIdsPreference);
+
+    writer.PropertyName("savedShareRenderSettingsPreference");
+    writer.Write(this.SavedShareRenderSettingsPreference);
+
+    writer.PropertyName("savedScreenshotDescription");
+    writer.Write(this.SavedScreenshotDescription);
+
     writer.TypeEnd();
   }
 
-#if DEBUG
+  #if DEBUG
   private void DoLoadScreenshot() {
     if (string.IsNullOrWhiteSpace(this.ScreenshotToLoad)) {
       return;
@@ -784,19 +801,17 @@ public sealed class Settings : ModSetting, IJsonWritable {
     public IEnumerable<KeyValuePair<string, string>> ReadEntries(
       IList<IDictionaryEntryError> errors,
       Dictionary<string, int> indexCounts
-    ) {
-      return new Dictionary<string, string> {
-        { "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]", "{ Development }" },
-        { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]", "Screenshot ID" },
-        { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]", "Load Screenshot" }, {
-          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
-          "Dump Locales as JSON"
-        }
-      };
-    }
+    ) => new Dictionary<string, string> {
+      { "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]", "{ Development }" },
+      { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]", "Screenshot ID" },
+      { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]", "Load Screenshot" }, {
+        "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
+        "Dump Locales as JSON"
+      }
+    };
 
     public void Unload() {
     }
   }
-#endif
+  #endif
 }

@@ -5,13 +5,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Colossal.Core;
-using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
 using Colossal.PSI.PdxSdk;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
-using Game.Assets;
 using Game.City;
 using Game.Rendering;
 using Game.SceneFlow;
@@ -28,6 +26,7 @@ using Unity.Entities;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 using Object = UnityEngine.Object;
+using ValueType = cohtml.Net.ValueType;
 
 namespace HallOfFame.Systems;
 
@@ -61,6 +60,13 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   private EntityQuery milestoneLevelQuery;
 
+  /// <summary>
+  /// Asset mods list for the dropdown allowing to pick a showcased mod.
+  /// It is lazily hydrated once in <see cref="DoTakeScreenshot"/> when a screenshot is first taken,
+  /// before the upload panel is presented.
+  /// </summary>
+  private ValueBinding<Colossal.PSI.Common.Mod[]?> assetModsBinding = null!;
+
   private GetterValueBinding<string> cityNameBinding = null!;
 
   private GetterValueBinding<ScreenshotSnapshot?> screenshotSnapshotBinding =
@@ -72,9 +78,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   private TriggerBinding clearScreenshotBinding = null!;
 
-  private TriggerBinding uploadScreenshotBinding = null!;
+  private TriggerBinding<ScreenshotInfoFormValue> uploadScreenshotBinding = null!;
 
-  private int[]? activeModIdsCache;
+  private Colossal.PSI.Common.Mod[]? activeModsCache;
 
   /// <summary>
   /// Current screenshot snapshot.
@@ -114,6 +120,13 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
       this.milestoneLevelQuery = this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
 
+      this.assetModsBinding = new ValueBinding<Colossal.PSI.Common.Mod[]?>(
+        CaptureUISystem.BindingGroup,
+        "assetMods",
+        null,
+        new ListWriter<Colossal.PSI.Common.Mod>(new ModValueWriter()).Nullable()
+      );
+
       this.cityNameBinding = new GetterValueBinding<string>(
         CaptureUISystem.BindingGroup,
         "cityName",
@@ -148,12 +161,13 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         this.ClearScreenshot
       );
 
-      this.uploadScreenshotBinding = new TriggerBinding(
+      this.uploadScreenshotBinding = new TriggerBinding<ScreenshotInfoFormValue>(
         CaptureUISystem.BindingGroup,
         "uploadScreenshot",
         this.UploadScreenshot
       );
 
+      this.AddBinding(this.assetModsBinding);
       this.AddUpdateBinding(this.cityNameBinding);
       this.AddUpdateBinding(this.screenshotSnapshotBinding);
       this.AddUpdateBinding(this.uploadProgressBinding);
@@ -170,6 +184,10 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     Purpose purpose,
     GameMode mode
   ) {
+    // Clear cache when the game state changes, so ex. if a user leaves to Paradox Mods and installs
+    // a mod, it will be picked up if they reopen a save just after.
+    this.activeModsCache = null;
+
     if (this.CurrentScreenshot is not null) {
       // Clear the screenshot when the game state changes, for example, when the user exits to the
       // main menu. Otherwise, the screenshot dialog would appear when the user reopens a game.
@@ -202,42 +220,37 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// <summary>
   /// Get the name of the city.
   /// </summary>
-  private string GetCityName() {
-    return this.cityConfigurationSystem?.cityName ?? string.Empty;
-  }
+  private string GetCityName() => this.cityConfigurationSystem?.cityName ?? string.Empty;
 
   /// <summary>
   /// Get the current achieved milestone level.
   /// </summary>
-  private int GetAchievedMilestone() {
-    return this.milestoneLevelQuery.IsEmptyIgnoreFilter
+  private int GetAchievedMilestone() =>
+    this.milestoneLevelQuery.IsEmptyIgnoreFilter
       ? 0
       : this.milestoneLevelQuery
         .GetSingleton<MilestoneLevel>()
         .m_AchievedMilestone;
-  }
 
   /// <summary>
   /// Get the current population of the city.
   /// </summary>
-  private int GetPopulation() {
-    if (this.citySystem is null) {
-      return 0;
-    }
-
-    return this.EntityManager.HasComponent<Population>(this.citySystem.City)
-      ? this.EntityManager
-        .GetComponentData<Population>(this.citySystem.City)
-        .m_Population
-      : 0;
-  }
+  private int GetPopulation() =>
+    this.citySystem is null
+      ? 0
+      : this.EntityManager.HasComponent<Population>(this.citySystem.City)
+        ? this.EntityManager
+          .GetComponentData<Population>(this.citySystem.City)
+          .m_Population
+        : 0;
 
   /// <summary>
-  /// Get the Paradox Mods IDs for the enabled mods.
+  /// Get the mods from the current playset.
+  /// It DOES NOT return HoF among the list.
   /// </summary>
-  private async Task<int[]> GetActiveModIds() {
-    if (this.activeModIdsCache is not null) {
-      return this.activeModIdsCache;
+  private async Task<Colossal.PSI.Common.Mod[]> GetActiveMods() {
+    if (this.activeModsCache is not null) {
+      return this.activeModsCache;
     }
 
     try {
@@ -246,10 +259,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       // This will return null if the player is not logged in or in other error cases.
       var mods = await pdxSdk.GetModsInActivePlayset() ?? [];
 
-      return this.activeModIdsCache = mods
-        .Select(mod => mod.id)
+      return this.activeModsCache = mods
         // Ignore Hall of Fame's ID
-        .Where(id => id != 90641)
+        .Where(mod => mod.id != 90641)
         .ToArray();
     }
     catch (Exception ex) {
@@ -437,6 +449,20 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       }
     );
 
+    // Collect playset.
+    var mods = await this.GetActiveMods();
+    var modIds = mods.Select(mod => mod.id).ToArray();
+
+    // If the asset mods value binding is not set yet, initialize it.
+    if (this.assetModsBinding.value is null) {
+      var assetMods = mods
+        .Where(mod => mod.tags.Contains("Prefab") || mod.tags.Contains("Map"))
+        .OrderBy(mod => mod.displayName)
+        .ToArray();
+
+      this.assetModsBinding.Update(assetMods);
+    }
+
     var screenshotSnapshot = new ScreenshotSnapshot(
       this.GetAchievedMilestone(),
       this.GetPopulation(),
@@ -446,7 +472,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       previousGIValue && Mod.Settings.DisableGlobalIllumination,
       CaptureUISystem.AreSettingsTopQuality(),
       this.GetPhotoModePropertiesSnapshot(),
-      await this.GetActiveModIds()
+      modIds
     );
 
     // Preload the preview image in the cache before updating the UI.
@@ -477,12 +503,19 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   }
 
   // ReSharper disable once AsyncVoidMethod
-  private async void UploadScreenshot() {
+  private async void UploadScreenshot(ScreenshotInfoFormValue formValue) {
     if (this.CurrentScreenshot is null) {
       Mod.Log.Warn($"Game: Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
 
       return;
     }
+
+    this.World.GetOrCreateSystemManaged<CommonUISystem>()
+      .SaveScreenshotPreferences(
+        formValue.ShareModIds,
+        formValue.ShareRenderSettings,
+        formValue.Description
+      );
 
     CancellationTokenSource? processingUpdatesCts = null;
 
@@ -490,38 +523,45 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.uploadProgress = new UploadProgress(0, 0);
 
       var screenshot = await HttpQueries.UploadScreenshot(
-        this.GetCityName(),
-        this.CurrentScreenshot.Value.AchievedMilestone,
-        this.CurrentScreenshot.Value.Population,
-        this.CurrentScreenshot.Value.MapName,
-        this.CurrentScreenshot.Value.ModIds,
-        this.CurrentScreenshot.Value.RenderSettings,
-        this.CurrentScreenshot.Value.ImageBytes,
-        (upload, download) => {
-          // Case 1: The request is being sent.
-          if (upload < 1) {
-            // Set progress to the current upload progress.
-            this.uploadProgress = new UploadProgress(upload, 0);
+        new HttpQueries.UploadScreenshotParams {
+          CityName = this.GetCityName(),
+          CityMilestone = this.CurrentScreenshot.Value.AchievedMilestone,
+          CityPopulation = this.CurrentScreenshot.Value.Population,
+          MapName = this.CurrentScreenshot.Value.MapName,
+          ShowcasedModId = formValue.ShowcasedModId,
+          Description = formValue.Description,
+          ShareModIds = formValue.ShareModIds,
+          ModIds = this.CurrentScreenshot.Value.ModIds,
+          ShareRenderSettings = formValue.ShareRenderSettings,
+          RenderSettings = this.CurrentScreenshot.Value.RenderSettings,
+          ScreenshotData = this.CurrentScreenshot.Value.ImageBytes,
+          UploadProgressHandler = (upload, download) => {
+            // Case 1: The request is being sent.
+            if (upload < 1) {
+              // Set progress to the current upload progress.
+              this.uploadProgress = new UploadProgress(upload, 0);
+            }
+
+            // Case 2: The request has been sent, and we are waiting for the response.
+            // The condition must ensure this runs only once.
+            else if (upload >= 1 && processingUpdatesCts is null) {
+              // Mark upload as done and start 'processing' progress.
+              // Processing progress is a guess, as of now the server does not stream back progress,
+              // so it is based on time elapsed.
+              this.uploadProgress = new UploadProgress(1, 0);
+
+              processingUpdatesCts = new CancellationTokenSource();
+
+              // This task will update the processing progress asynchronously until we cancel it, or
+              // it reaches 90% progress, then it will stop by itself.
+              _ = StartUpdateProcessingProgress(processingUpdatesCts.Token);
+            }
+
+            // Case 3: The response has been fully received.
+            // This is handled in the rest of the method, so we ensure the progress is set to 100%
+            // at
+            // the end.
           }
-
-          // Case 2: The request has been sent, and we are waiting for the response.
-          // The condition must ensure this runs only once.
-          else if (upload >= 1 && processingUpdatesCts is null) {
-            // Mark upload as done and start 'processing' progress.
-            // Processing progress is a guess, as of now the server does not stream back progress,
-            // so it is based on time elapsed.
-            this.uploadProgress = new UploadProgress(1, 0);
-
-            processingUpdatesCts = new CancellationTokenSource();
-
-            // This task will update the processing progress asynchronously until we cancel it, or
-            // it reaches 90% progress, then it will stop by itself.
-            _ = StartUpdateProcessingProgress(processingUpdatesCts.Token);
-          }
-
-          // Case 3: The response has been fully received.
-          // This is handled in the rest of the method, so we ensure the progress is set to 100% at
-          // the end.
         }
       );
 
@@ -796,6 +836,44 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       writer.Write(processingProgress);
 
       writer.TypeEnd();
+    }
+  }
+
+  // ReSharper disable once ClassNeverInstantiated.Local
+  private sealed record ScreenshotInfoFormValue : IJsonReadable {
+    internal bool ShareModIds;
+
+    internal bool ShareRenderSettings;
+
+    internal int? ShowcasedModId;
+
+    internal string? Description;
+
+    public void Read(IJsonReader reader) {
+      reader.ReadMapBegin();
+
+      reader.ReadProperty("shareModIds");
+      reader.Read(out this.ShareModIds);
+
+      reader.ReadProperty("shareRenderSettings");
+      reader.Read(out this.ShareRenderSettings);
+
+      reader.ReadProperty("showcasedModId");
+
+      var showcasedModIdValueType = reader.PeekValueType();
+
+      if (showcasedModIdValueType is ValueType.Null) {
+        reader.SkipValue();
+      }
+      else {
+        reader.Read(out int showcasedModId);
+        this.ShowcasedModId = showcasedModId;
+      }
+
+      reader.ReadProperty("description");
+      reader.Read(out this.Description);
+
+      reader.ReadMapEnd();
     }
   }
 }

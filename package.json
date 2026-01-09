@@ -5,19 +5,24 @@
     "node": ">=24.0.0"
   },
   "scripts": {
-    "// When making changes in scripts check out if .lefthook.yml should be synched (`bun lefthook install`)": "",
+    "// When making changes in scripts check out if .lefthook.yml should be synced (`bun lefthook install`)": "",
     "check": "bun --bun tsc --p HallOfFame/UI --noEmit && biome check --fix",
     "// Cannot 'bun --bun' webpack yet: https://github.com/oven-sh/bun/issues/10768": "",
     "// When we can bunify (or replace) webpack, use 'bun --bun --smol' to consume less memory, it's useful with CS2 in the background...": "",
     "build": "webpack --config HallOfFame/UI/webpack.config.js --progress",
     "dev": "webpack --config HallOfFame/UI/webpack.config.js --progress --watch"
   },
+  "// about dependencies housekeeping": {
+    "react, react-dom": "Pinned to the version the game uses, we cannot change it.",
+    "sass, sass-embedded": "Do not upgrade past 1.78.x, it's the last version that does not implicitly convert colors to CSS4 colors, which can't be parsed by cohtml."
+  },
   "dependencies": {
     "@csmodding/urbandevkit": "^0.2.1",
     "classnames": "^2.5.1",
     "common-tags": "^1.8.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-use": "^17.6.0"
   },
   "devDependencies": {
     "@biomejs/biome": "~2.3.10",
@@ -28,7 +33,7 @@
     "css-loader": "^7.1.2",
     "lefthook": "^2.0.13",
     "mini-css-extract-plugin": "^2.9.4",
-    "sass": "~1.97.1",
+    "sass": "~1.78.0",
     "sass-loader": "^16.0.6",
     "terser-webpack-plugin": "^5.3.16",
     "ts-loader": "^9.5.4",
@@ -38,6 +43,6 @@
   },
   "trustedDependencies": ["@biomejs/biome", "lefthook"],
   "optionalDependencies": {
-    "sass-embedded": "~1.97.1"
+    "sass-embedded": "~1.78.0"
   }
 }

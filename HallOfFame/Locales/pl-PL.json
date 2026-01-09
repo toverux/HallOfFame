@@ -57,7 +57,6 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "Ogólne rozświetlenie zostało wyłączone dla zrzutu ekranu, aby uzyskać więcej informacji, zobacz opcje moda.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "Możesz zmienić nazwę twórcy w opcjach moda lub nazwę miasta bez zamykania tego okna.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "Przesłane treści są moderowane i wszelkie nadużycia, w tym kradzież tożsamości, spowoduje trwałe zablokowanie Twojego konta i adresu IP.",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "ID twórcy: {CREATOR_ID}",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE": "Udostępnij",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING": "Przesyłanie…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Waiting]": "Proszę czekać…",

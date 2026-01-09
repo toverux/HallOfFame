@@ -6,7 +6,8 @@ const coLoadingStyles = getClassesModule(
   ['progress']
 );
 
-interface LoadingProgressProps {
+/** @public */
+export interface LoadingProgressProps {
   size: number;
   lineWidth: number;
   progress: [number, number, number];

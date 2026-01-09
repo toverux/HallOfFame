@@ -57,7 +57,6 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "„Allgemeine Lichtqualität“ wurde für den Screenshot deaktiviert, siehe Mod-Optionen für weitere Informationen.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "Du kannst deinen Creator-Namen in den Mod-Optionen oder den Namen der Stadt ändern, ohne dieses Fenster zu schließen.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "Hochgeladene Inhalte werden moderiert und jeder Missbrauch einschließlich Identitätsdiebstahl führt zu einem permanenten Bann deines Accounts und deiner IP-Adresse.",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "Creator-ID: {CREATOR_ID}",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE": "Teilen",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING": "Wird hochgeladen…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Waiting]": "Bitte warten…",

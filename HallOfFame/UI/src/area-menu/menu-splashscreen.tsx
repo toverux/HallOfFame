@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { type ReactElement, useEffect, useState } from 'react';
 import { getClassesModule, selector } from '../utils';
 import * as styles from './menu-splashscreen.module.scss';
@@ -71,7 +72,7 @@ export function MenuSplashscreen(): ReactElement {
       {incomingImage && (
         <div
           key={incomingImage}
-          className={`${styles.splashscreen} ${styles.splashscreenFadeIn}`}
+          className={classNames(styles.splashscreen, styles.splashscreenFadeIn)}
           style={{ backgroundImage: `url(${incomingImage})` }}
           onAnimationStart={handleIncomingImageAnimationStart}
           onAnimationEnd={handleIncomingImageAnimationEnd}
@@ -105,7 +106,7 @@ export function MenuSplashscreen(): ReactElement {
 function getCurrentSlideshowImageSrc(): string | null {
   const backdropImageEl = document.querySelector(selector(coMenuUiBackdropsStyles.backdropImage));
 
-  // This should not happen in principle, but be safe and fail gracefully.
+  // This should not happen in principle but be safe and fail gracefully.
   if (!(backdropImageEl instanceof HTMLElement)) {
     return null;
   }

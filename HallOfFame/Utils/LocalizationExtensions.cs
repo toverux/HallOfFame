@@ -15,12 +15,11 @@ internal static class LocalizationExtensions {
   /// If the key is not found in the dictionary and a fallback is not provided, the key is returned
   /// as is.
   /// </summary>
-  internal static string Translate(this string key, string? fallback = null) {
-    return LocalizationExtensions.LocalizationDictionary
+  internal static string Translate(this string key, string? fallback = null) =>
+    LocalizationExtensions.LocalizationDictionary
       .TryGetValue(key, out var value)
       ? value
       : fallback ?? key;
-  }
 
   /// <summary>
   /// Same as <see cref="Translate(string)"/> but with variable interpolation.
@@ -30,9 +29,8 @@ internal static class LocalizationExtensions {
   /// <see cref="string.Format(string,object[])"/> can format.
   /// </param>
   /// <param name="args">Values to interpolate</param>
-  internal static string Translate(this string key, params object[] args) {
-    return string.Format(key.Translate(), args);
-  }
+  internal static string Translate(this string key, params object[] args) =>
+    string.Format(key.Translate(), args);
 
   /// <summary>
   /// Gets a user-friendly message from an exception if the exception type is explicitly supported
@@ -41,11 +39,9 @@ internal static class LocalizationExtensions {
   /// <br/>
   /// The fallback value is defined to the exception message.
   /// </summary>
-  internal static LocalizedString GetUserFriendlyMessage(this Exception ex) {
-    return new LocalizedString(
-      $"HallOfFame.Common.ERROR_MESSAGE[{ex.GetType().FullName}]",
-      ex.Message,
-      new Dictionary<string, ILocElement> { { "ERROR_MESSAGE", LocalizedString.Value(ex.Message) } }
-    );
-  }
+  internal static LocalizedString GetUserFriendlyMessage(this Exception ex) => new(
+    $"HallOfFame.Common.ERROR_MESSAGE[{ex.GetType().FullName}]",
+    ex.Message,
+    new Dictionary<string, ILocElement> { { "ERROR_MESSAGE", LocalizedString.Value(ex.Message) } }
+  );
 }

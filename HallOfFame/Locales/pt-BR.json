@@ -49,7 +49,6 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "A Iluminação Global foi desativada para a captura de tela, veja as opções do mod para mais informações.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "Você pode mudar seu Nome de Criador nas opções do mod ou o nome da cidade sem fechar esta janela.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "O conteúdo carregado é moderado e qualquer abuso, incluindo roubo de identidade, resultará em um banimento permanente da sua conta e endereço IP.",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "ID de Criador: {CREATOR_ID}",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE": "Compartilhar",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING": "Carregando…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Waiting]": "Por favor, aguarde…",

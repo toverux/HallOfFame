@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { bindValue, trigger, useValue } from 'cs2/api';
 import { ControlIcons } from 'cs2/input';
 import {
@@ -27,6 +28,7 @@ import {
   type InputActionPhase,
   type ModSettings,
   type ProxyBinding,
+  playSound,
   snappyOnSelect,
   useModSettings
 } from '../utils';
@@ -111,7 +113,7 @@ export function MenuControlsContent(): ReactElement {
 
   return (
     <div
-      className={`${styles.menuControls} ${styles.menuControlsApplyButtonsOffset}`}
+      className={classNames(styles.menuControls, styles.menuControlsApplyButtonsOffset)}
       onMouseLeave={() => setShowOtherActions(false)}>
       <div className={styles.menuControlsSection}>
         <div className={styles.menuControlsSectionButtons} style={{ alignSelf: 'flex-end' }}>
@@ -148,7 +150,8 @@ export function MenuControlsContent(): ReactElement {
           <MenuControlsLikeButton screenshot={menuState.screenshot} />
         </div>
 
-        <div className={`${styles.menuControlsSectionContent} ${styles.menuControlsLikesCount}`}>
+        <div
+          className={classNames(styles.menuControlsSectionContent, styles.menuControlsLikesCount)}>
           <span className={styles.menuControlsLikesCountNumber}>
             {menuState.screenshot.likesCount < 1000
               ? menuState.screenshot.likesCount
@@ -165,7 +168,8 @@ export function MenuControlsContent(): ReactElement {
         </div>
       </div>
 
-      <div className={`${styles.menuControlsSection} ${styles.menuControlsSectionOtherActions}`}>
+      <div
+        className={classNames(styles.menuControlsSection, styles.menuControlsSectionOtherActions)}>
         <div className={styles.menuControlsSectionButtons}>
           <MenuButton
             className={styles.menuControlsSectionButtonsButton}
@@ -176,9 +180,9 @@ export function MenuControlsContent(): ReactElement {
         </div>
 
         <div
-          className={`${styles.menuControlsSectionContent} ${
-            showMoreActions ? styles.menuControlsSectionContentSlideIn : ''
-          }`}>
+          className={classNames(styles.menuControlsSectionContent, {
+            [styles.menuControlsSectionContentSlideIn]: showMoreActions
+          })}>
           <Tooltip
             direction='down'
             tooltip={
@@ -469,7 +473,11 @@ function MenuControlsNextButton({
       binding={binding}
       tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]')}>
       <MenuButton
-        className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonNext} ${activeClass}`}
+        className={classNames(
+          styles.menuControlsSectionButtonsButton,
+          styles.menuControlsSectionButtonsButtonNext,
+          activeClass
+        )}
         src={doubleArrowRightTriangleSrc}
         tinted={isLoading}
         disabled={isLoading}
@@ -511,7 +519,11 @@ function MenuControlsPreviousButton({
       binding={binding}
       tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]')}>
       <MenuButton
-        className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonPrevious} ${activeClass}`}
+        className={classNames(
+          styles.menuControlsSectionButtonsButton,
+          styles.menuControlsSectionButtonsButtonPrevious,
+          activeClass
+        )}
         src={doubleArrowRightTriangleSrc}
         tinted={disabled}
         disabled={disabled}
@@ -546,7 +558,7 @@ function MenuControlsToggleMenuVisibilityButton({
       binding={binding}
       tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]')}>
       <MenuButton
-        className={`${styles.menuControlsSectionButtonsButton} ${activeClass}`}
+        className={classNames(styles.menuControlsSectionButtonsButton, activeClass)}
         src={isMenuVisible ? eyeOpenSrc : eyeClosedSrc}
         tinted={false}
         {...snappyOnSelect(toggleMenuVisibility, selectSound)}
@@ -599,9 +611,14 @@ function MenuControlsLikeButton({
         />
       }>
       <MenuButton
-        className={`${styles.menuControlsSectionButtonsButton} ${styles.menuControlsSectionButtonsButtonLike} ${
-          screenshot.isLiked ? styles.menuControlsSectionButtonsButtonLikeLiked : ''
-        } ${activeClass}`}
+        className={classNames(
+          styles.menuControlsSectionButtonsButton,
+          styles.menuControlsSectionButtonsButtonLike,
+          {
+            [styles.menuControlsSectionButtonsButtonLikeLiked]: screenshot.isLiked
+          },
+          activeClass
+        )}
         src={loveChirperSrc}
         tinted={false}
         onSelect={likeScreenshot}
@@ -625,9 +642,7 @@ function MenuControlsError({
       <div className={styles.menuControlsErrorHeader}>
         <div
           className={styles.menuControlsErrorHeaderImage}
-          style={{
-            backgroundImage: 'url(Media/Game/Icons/AdvisorTrafficAccident.svg)'
-          }}
+          style={{ backgroundImage: 'url(Media/Game/Icons/AdvisorTrafficAccident.svg)' }}
         />
         <div className={styles.menuControlsErrorHeaderText}>
           <strong>{translate('HallOfFame.Common.OOPS')}</strong>
@@ -714,7 +729,7 @@ function useMenuControlsInputAction(
       setReplayOnCanceled(phase == 'Performed' && !ready);
 
       if (ready && sound) {
-        trigger('audio', 'playSound', sound, 1);
+        playSound(sound);
       }
     }
   }, [phase]);

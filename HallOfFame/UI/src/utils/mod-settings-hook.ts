@@ -1,8 +1,8 @@
 import { bindValue, useValue } from 'cs2/api';
 
+/** See C# `HallOfFame.Settings` class for documentation. */
 export interface ModSettings {
   readonly creatorName: string;
-  readonly creatorIdClue: string;
   readonly enableLoadingScreenBackground: boolean;
   readonly showCreatorSocials: boolean;
   readonly showViewCount: boolean;
@@ -10,18 +10,23 @@ export interface ModSettings {
   readonly namesTranslationMode: 'disabled' | 'transliterate' | 'translate';
   readonly creatorsScreenshotSaveDirectory: string;
   readonly baseUrl: string;
+  readonly savedShareModIdsPreference: boolean;
+  readonly savedShareRenderSettingsPreference: boolean;
+  readonly savedScreenshotDescription: string;
 }
 
 const settings$ = bindValue<ModSettings>('hallOfFame.common', 'settings', {
   creatorName: '',
-  creatorIdClue: '',
   enableLoadingScreenBackground: true,
   showCreatorSocials: true,
   showViewCount: false,
   screenshotResolution: 'fhd',
   namesTranslationMode: 'translate',
   creatorsScreenshotSaveDirectory: '',
-  baseUrl: ''
+  baseUrl: '',
+  savedShareModIdsPreference: true,
+  savedShareRenderSettingsPreference: true,
+  savedScreenshotDescription: ''
 });
 
 export function useModSettings(): ModSettings {

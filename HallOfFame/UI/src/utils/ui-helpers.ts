@@ -4,6 +4,13 @@ import type { DOMAttributes } from 'react';
 import { iconsole } from '../iconsole';
 
 /**
+ * Plays a Vanilla sound.
+ */
+export function playSound(sound: `${UISound}`, volume = 1): void {
+  trigger('audio', 'playSound', sound, volume);
+}
+
+/**
  * Based on a hot take from John Carmack, see
  * {@link https://x.com/ID_AA_Carmack/status/1787850053912064005} or
  * {@link https://www.youtube.com/watch?v=yaMGtiPckAQ}.
@@ -15,8 +22,7 @@ export function snappyOnSelect(handler: () => void, sound?: `${UISound}`) {
   return {
     onMouseDown(): void {
       handler();
-
-      trigger('audio', 'playSound', sound ?? ('select-item' satisfies `${UISound}`), 1);
+      playSound(sound ?? 'select-item');
     }
   } satisfies DOMAttributes<Element>;
 }

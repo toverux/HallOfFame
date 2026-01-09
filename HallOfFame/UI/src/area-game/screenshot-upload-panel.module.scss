@@ -1,4 +1,8 @@
+@use 'sass:color';
 @use "../common";
+
+// Vanilla's --panelColorDark, without opacity.
+$co-panel-color-dark: rgb(24, 33, 51);
 
 .screenshot-upload-panel-container {
   // We should be on top except if other mods add content.
@@ -18,10 +22,12 @@
 }
 
 .screenshot-upload-panel {
+  $separator-shadow-color: color.adjust($co-panel-color-dark, $alpha: -0.8);
+
   pointer-events: auto;
   position: relative;
 
-  width: calc(var(--centerPanelWidth) / 1.5);
+  width: var(--centerPanelWidth);
 
   display: flex;
   flex-direction: column;
@@ -31,11 +37,86 @@
   box-shadow: 0 0 20rem rgba(0, 0, 0, 0.6);
   backdrop-filter: var(--panelBlur);
 
+  font-size: var(--fontSizeL);
+
   @include common.border-radius(20rem);
   @include common.scale-in-ver-center;
 
   &-header, &-content, &-warning, &-footer {
-    padding: 20rem 30rem;
+    padding: 20rem;
+  }
+
+  &-panes {
+    position: relative; // for absolute positioning of upload progress overlay.
+    display: flex;
+    flex-direction: row;
+
+    &-image {
+      flex: 0 1 60%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &-info {
+      flex: 1 1;
+
+      position: relative;
+      display: flex;
+      flex-direction: column;
+
+      box-shadow: -1px 0 0 $separator-shadow-color;
+    }
+  }
+
+  &-upload-progress {
+    z-index: 1;
+
+    animation: appear 1s ease-in-out;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: color.adjust($co-panel-color-dark, $alpha: -0.5);
+    backdrop-filter: var(--panelBlur);
+    color: white;
+
+    &-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      transition: transform .3s cubic-bezier(.47, 1.64, .41, .8);
+
+      &-upload-success {
+        transform: scale(1.3, 1.3);
+      }
+
+      &-hint {
+        font-size: calc(20rem * var(--fontScale) + 8rem);
+        filter: drop-shadow(0rem 0rem 3rem var(--panelColorDark));
+      }
+    }
+
+    @keyframes appear {
+      from {
+        background-color: transparent;
+        backdrop-filter: blur(0);
+      }
+      to {
+        background-color: color.adjust($co-panel-color-dark, $alpha: -0.5);
+        // "5px" below was originally var(--panelBlur) but this caused random crashes to desktop
+        // at mod load due to a bug in cohtml engine.
+        backdrop-filter: blur(5px);
+      }
+    }
   }
 
   &-header {
@@ -44,7 +125,11 @@
     justify-content: space-between;
     align-items: center;
 
-    font-size: calc(35rem * var(--fontScale));
+    // For box-shadow to be visible.
+    z-index: 1;
+    box-shadow: 0 1px 0 $separator-shadow-color;
+
+    font-size: calc(28rem * var(--fontScale));
 
     &-close {
       padding: 10rem;
@@ -55,7 +140,7 @@
     }
   }
 
-  &-header, &-content {
+  &-header, &-city-info, &-panes-info {
     background-color: var(--menuFocusedColor);
     color: var(--menuText1Inverted);
   }
@@ -117,65 +202,188 @@
         opacity: .8;
       }
     }
+  }
 
-    &-upload-progress {
-      animation: appear 1s ease-in-out;
+  &-content {
+    > p {
+      margin-bottom: 8rem;
+    }
+  }
 
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
+  &-form {
+    $control-border: 2rem solid transparent;
+    $control-border-color: #61a0b9;
+    $control-border-radius: 5rem; // vanilla is 3rem
+    $control-background-color: color.adjust($co-panel-color-dark, $alpha: -0.9);
+    $control-background-color-focused: rgba(255, 255, 255, .4);
 
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background-color: rgba(24, 33, 51, .5);
-      backdrop-filter: var(--panelBlur);
-      color: white;
+    padding: 10rem;
 
-      &-content {
+    // This class is injected alongside the Vanilla class.
+    &-checkbox-toggle {
+      width: 26rem;
+      height: 26rem;
+      //noinspection CssReplaceWithShorthandSafely
+      border: $control-border;
+      //noinspection CssReplaceWithShorthandSafely
+      border-color: color.adjust($co-panel-color-dark, $alpha: -0.7);
+      border-radius: $control-border-radius;
+
+      // Impossible to also make &.checked work so we use &-field-checked below.
+      &:hover, &:focus {
+        background-color: $control-background-color-focused;
+      }
+
+      // This class is injected alongside the Vanilla class.
+      &-checkmark {
+        background-color: $control-border-color; // sets mask image color
+      }
+    }
+
+    &-field-checked &-checkbox-toggle {
+      border-color: $control-border-color;
+      background-color: $control-background-color-focused;
+    }
+
+    &-field:hover &-checkbox-toggle {
+      border-color: $control-border-color;
+      background-color: $control-background-color-focused;
+    }
+
+    // This class is injected alongside the Vanilla class.
+    &-dropdown-toggle {
+      padding: 0 10rem;
+      border: $control-border;
+      border-radius: $control-border-radius;
+      background-color: $control-background-color;
+
+      &:hover, &:focus {
+        border-color: $control-border-color;
+        background-color: $control-background-color-focused;
+      }
+
+      // This class is injected alongside the Vanilla class.
+      &-item {
+        height: 50px;
         display: flex;
-        flex-direction: column;
-        justify-content: center;
         align-items: center;
+        font-size: var(--fontSizeXL);
 
-        transition: transform .3s cubic-bezier(.47, 1.64, .41, .8);
-
-        &-upload-success {
-          transform: scale(1.3, 1.3);
-        }
-
-        &-hint {
-          font-size: calc(20rem * var(--fontScale) + 8rem);
-          filter: drop-shadow(0rem 0rem 3rem var(--panelColorDark));
+        &-image {
+          width: 40rem;
+          height: 40rem;
+          margin-right: 10rem;
+          border-radius: 5rem;
+          background-color: lightgrey;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
         }
       }
 
-      @keyframes appear {
-        from {
-          background-color: rgba(24, 33, 51, 0);
-          backdrop-filter: blur(0);
+      // An item NOT in the popup menu but 'adopted' by the toggle to show the current value.
+      &-preview-item {
+        pointer-events: none; // suppress hover effect, the toggle takes pointer events.
+        padding: 0; // the toggle already has padding.
+      }
+    }
+
+    &-field-invalid &-dropdown-toggle {
+      // var(--warningColor) but it does not work here so, hardcoding.
+      border-color: #ffa42d !important;
+      animation: pop-out .3s common.$default-timing-function;
+
+      @keyframes pop-out {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+      }
+    }
+
+    // This class is injected alongside the Vanilla class.
+    &-dropdown-popup {
+      // So that the dropdown menu, attached to the same root as the panel, appears on top.
+      z-index: 1;
+      --scrollbarColor: 24, 33, 51;
+    }
+
+    &-textarea-wrapper {
+      display: flex;
+      flex-direction: column;
+
+      textarea {
+        position: relative;
+        width: auto;
+        border: $control-border;
+        border-radius: $control-border-radius;
+        padding: 10rem;
+        background-color: $control-background-color;
+
+        &:hover, &:focus {
+          border-color: $control-border-color;
+          background-color: $control-background-color-focused;
         }
-        to {
-          background-color: rgba(24, 33, 51, 0.5);
-          // "5px" below was originally var(--panelBlur) but this caused random crashes to desktop
-          // at mod load due to a bug in cohtml engine.
-          backdrop-filter: blur(5px);
+      }
+
+      &-controls {
+        margin-top: 10rem;
+        display: flex; // Workaround cohtml breaking text nodes into two lines.
+        align-items: center;
+        font-size: var(--fontSizeS);
+        color: var(--menuText1Disabled);
+
+        &-button {
+          border: $control-border;
+          border-radius: $control-border-radius;
+          padding: 1rem 5rem;
+          background-color: $control-background-color;
+
+          &:hover {
+            border-color: $control-border-color;
+            background-color: $control-background-color-focused;
+          }
+        }
+      }
+    }
+
+    &-field {
+      margin-bottom: 10rem;
+      border-radius: 4rem;
+      padding: 10rem;
+      font-weight: bold;
+
+      &:hover {
+        background-color: color.adjust($co-panel-color-dark, $alpha: -0.9);
+      }
+
+      label small {
+        font-weight: normal;
+      }
+
+      &-inline {
+        display: flex;
+        flex-direction: row;
+
+        > :nth-child(2) {
+          flex: 1 1 auto;
+          margin-left: 10rem;
+        }
+      }
+
+      &-block {
+        display: flex;
+        flex-direction: column;
+
+        > :nth-child(1) {
+          margin-bottom: 10rem;
         }
       }
     }
   }
 
-  &-content p {
-    margin-bottom: 8rem;
-  }
-
   &-city-info {
     display: flex;
     flex-direction: row;
-    border-bottom: 1px solid rgb(170, 170, 170);
     font-size: calc(20rem * var(--fontScale));
 
     span {
@@ -187,7 +395,7 @@
 
         strong {
           margin-right: 10rem;
-          font-size: calc(30rem * var(--fontScale));
+          font-size: calc(28rem * var(--fontScale));
           font-weight: normal;
         }
       }
@@ -201,28 +409,34 @@
     }
   }
 
+  &-screenshot-info-scrollable {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    [class^="content"] {
+      min-height: 100%;
+    }
+  }
+
   &-warning {
     background-color: var(--warningColor);
-    font-size: var(--fontSizeL);
   }
 
   &-footer {
     display: flex;
     flex-direction: row;
+    justify-content: flex-end;
     align-items: center;
     background-color: var(--panelColorDark);
-
-    &-creator-id {
-      color: var(--menuText1Normal);
-      opacity: .5;
-      text-transform: uppercase;
-    }
 
     &-button {
       margin-left: 20rem;
       padding: 10rem 20rem;
 
-      &.cancel {
+      &-cancel {
         background-color: transparent;
 
         &:hover, &:active {
@@ -242,7 +456,23 @@
   }
 }
 
-//noinspection CssReplaceWithShorthandSafely
+// Applied on the panel's scrollable container and on the dropdown popup scrollable, which is not
+// contained in the panel, so this needs to be higher scope.
+.scrollable-track-customization {
+  [class^="track"] {
+    background-color: color.adjust($co-panel-color-dark, $alpha: -0.85);
+
+    [class^="thumb"] {
+      transition: background-color .1s ease-in-out;
+      background-color: color.adjust($co-panel-color-dark, $alpha: -0.85);
+    }
+  }
+
+  &:hover [class^="track"] [class^="thumb"] {
+    background-color: color.adjust($co-panel-color-dark, $alpha: -0.6);
+  }
+}
+
 .fullscreen-image {
   position: fixed;
   top: 0;

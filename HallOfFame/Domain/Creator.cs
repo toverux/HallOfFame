@@ -13,14 +13,14 @@ internal record Creator : IJsonWritable {
     get;
     [UsedImplicitly]
     set;
-  } = "Unknown [Error]";
+  } = string.Empty;
 
   [DecodeAlias("creatorName")]
   internal string CreatorName {
     get;
     [UsedImplicitly]
     set;
-  } = "Unknown [Error]";
+  } = string.Empty;
 
   [DecodeAlias("creatorNameLocale")]
   internal string? CreatorNameLocale {
@@ -51,9 +51,7 @@ internal record Creator : IJsonWritable {
     set;
   } = [];
 
-  public override string ToString() {
-    return $"Creator #{this.Id} {this.CreatorName}";
-  }
+  public override string ToString() => $"Creator #{this.Id} {this.CreatorName}";
 
   public void Write(IJsonWriter writer) {
     var typeName = this.GetType().FullName;
@@ -101,13 +99,13 @@ internal record Creator : IJsonWritable {
       get;
       [UsedImplicitly]
       set;
-    } = "Unknown [Error]";
+    } = string.Empty;
 
     [DecodeAlias("link")]
     internal string Link {
       get;
       [UsedImplicitly]
       set;
-    } = "Unknown [Error]";
+    } = string.Empty;
   }
 }

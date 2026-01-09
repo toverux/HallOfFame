@@ -57,7 +57,6 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "Глобальное освещение было отключено для скриншота, см. опции мода для получения дополнительной информации.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "Вы можете изменить свой никнейм в настройках мода или название города, не закрывая это окно.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "Загружаемый контент проходит модерацию, и любое злоупотребление, включая кражу личных данных, приведет к постоянному блокированию вашей учетной записи и IP-адреса.",
-  "HallOfFame.UI.Game.ScreenshotUploadPanel.YOUR_CREATOR_ID": "ID автора: {CREATOR_ID}",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE": "Поделиться",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING": "Загрузка…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Waiting]": "Пожалуйста, подождите…",

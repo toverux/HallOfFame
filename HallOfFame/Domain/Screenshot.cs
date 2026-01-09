@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Colossal.Json;
 using Colossal.UI.Binding;
@@ -14,14 +15,14 @@ internal record Screenshot : IJsonWritable {
     get;
     [UsedImplicitly]
     set;
-  } = "Unknown [Error]";
+  } = string.Empty;
 
   [DecodeAlias("cityName")]
   internal string CityName {
     get;
     [UsedImplicitly]
     set;
-  } = "Unknown [Error]";
+  } = string.Empty;
 
   [DecodeAlias("cityNameLocale")]
   internal string? CityNameLocale {
@@ -49,14 +50,28 @@ internal record Screenshot : IJsonWritable {
     get;
     [UsedImplicitly]
     set;
-  } = 1;
+  }
 
   [DecodeAlias("cityPopulation")]
   internal int CityPopulation {
     get;
     [UsedImplicitly]
     set;
-  } = 0;
+  }
+
+  [DecodeAlias("mapName")]
+  internal string MapName {
+    get;
+    [UsedImplicitly]
+    set;
+  } = string.Empty;
+
+  [DecodeAlias("description")]
+  internal string Description {
+    get;
+    [UsedImplicitly]
+    set;
+  } = string.Empty;
 
   [DecodeAlias("imageUrlFHD")]
   internal string ImageUrlFHD {
@@ -71,6 +86,21 @@ internal record Screenshot : IJsonWritable {
     [UsedImplicitly]
     set;
   } = string.Empty;
+
+  [DecodeAlias("shareRenderSettings")]
+  internal bool ShareRenderSettings {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
+  [DecodeAlias("renderSettings")]
+  // ReSharper disable once CollectionNeverUpdated.Global
+  internal Dictionary<string, string> RenderSettings {
+    get;
+    [UsedImplicitly]
+    set;
+  } = new();
 
   [DecodeAlias("createdAt")]
   internal DateTime CreatedAt {
@@ -143,16 +173,30 @@ internal record Screenshot : IJsonWritable {
   } = string.Empty;
 
   [DecodeAlias("creator")]
-  internal Creator? Creator { get; set; }
-
-  public override string ToString() {
-    return $"Screenshot #{this.Id} {this.CityName} by {this.Creator?.CreatorName}";
+  internal Creator? Creator {
+    get;
+    [UsedImplicitly]
+    set;
   }
+
+  [DecodeAlias("showcasedMod")]
+  internal Mod? ShowcasedMod {
+    get;
+    [UsedImplicitly]
+    set;
+  }
+
+  public override string ToString() =>
+    $"Screenshot #{this.Id} {this.CityName} by {this.Creator?.CreatorName}";
 
   public void Write(IJsonWriter writer) {
     // Type name does not support polymorphism, so we need to include all object shape changes in
     // the type name.
-    writer.TypeBegin($"{this.GetType().FullName}?Creator={this.Creator is not null}");
+    writer.TypeBegin(
+      $"{this.GetType().FullName}" +
+      $"?Creator={this.Creator is not null}" +
+      $"&ShowcasedMod={this.ShowcasedMod is not null}"
+    );
 
     writer.PropertyName("id");
     writer.Write(this.Id);
@@ -175,11 +219,23 @@ internal record Screenshot : IJsonWritable {
     writer.PropertyName("cityPopulation");
     writer.Write(this.CityPopulation);
 
+    writer.PropertyName("mapName");
+    writer.Write(this.MapName);
+
+    writer.PropertyName("description");
+    writer.Write(this.Description);
+
     writer.PropertyName("imageUrlFHD");
     writer.Write(this.ImageUrlFHD);
 
     writer.PropertyName("imageUrl4K");
     writer.Write(this.ImageUrl4K);
+
+    writer.PropertyName("shareRenderSettings");
+    writer.Write(this.ShareRenderSettings);
+
+    writer.PropertyName("renderSettings");
+    writer.Write(this.RenderSettings);
 
     writer.PropertyName("createdAt");
     writer.Write(this.CreatedAt.ToLocalTime().ToString("o"));
@@ -208,6 +264,11 @@ internal record Screenshot : IJsonWritable {
     if (this.Creator is not null) {
       writer.PropertyName("creator");
       this.Creator.Write(writer);
+    }
+
+    if (this.ShowcasedMod is not null) {
+      writer.PropertyName("showcasedMod");
+      this.ShowcasedMod.Write(writer);
     }
 
     writer.TypeEnd();

@@ -685,9 +685,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     }
   }
 
-  private bool IsNetworkError(Exception ex) {
-    return ex
+  private bool IsNetworkError(Exception ex) =>
+    ex
       is HttpException
       or ImagePreloaderUISystem.ImagePreloadFailedException;
-  }
 }

@@ -45,6 +45,9 @@
         <Reference Include="Colossal.Logging">
             <Private>false</Private>
         </Reference>
+        <Reference Include="Colossal.Mathematics">
+            <Private>false</Private>
+        </Reference>
         <Reference Include="Colossal.IO.AssetDatabase">
             <Private>false</Private>
         </Reference>
@@ -121,6 +124,10 @@
 
     <ItemGroup>
         <PackageReference Include="CS2-ModdingTools" Version="1.0.5" />
+        <PackageReference Include="PolySharp" Version="1.15.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>

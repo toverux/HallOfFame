@@ -2,7 +2,8 @@ import type { TooltipProps } from 'cs2/ui';
 import type { FC, ReactNode } from 'react';
 import { getModuleExport } from '../../../../../utils';
 
-interface DescriptionTooltipProps extends Omit<TooltipProps, 'tooltip'> {
+/** @public */
+export interface DescriptionTooltipProps extends Omit<TooltipProps, 'tooltip'> {
   readonly title: string | null;
   readonly description: string | null;
   readonly content?: ReactNode;
