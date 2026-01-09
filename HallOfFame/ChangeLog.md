@@ -1,1 +1,1 @@
-﻿- The map name used to create a city is now sent when uploading a screenshot, so that it can be displayed in the future along other information.
+﻿Localization updates for Russian.
