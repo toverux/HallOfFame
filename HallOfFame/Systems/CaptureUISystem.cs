@@ -254,10 +254,10 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     }
 
     try {
-      var pdxSdk = PlatformManager.instance.GetPSI<PdxSdkPlatform>("PdxSdk");
+      var pdxSdk = PdxSdkPlatformProxy.PdxSdk;
 
       // This will return null if the player is not logged in or in other error cases.
-      var mods = await pdxSdk.GetModsInActivePlayset() ?? [];
+      var mods = pdxSdk is not null ? await pdxSdk.GetModsInActivePlayset() ?? [] : [];
 
       return this.activeModsCache = mods
         // Ignore Hall of Fame's ID

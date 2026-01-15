@@ -12,9 +12,9 @@ namespace HallOfFame.Reflection;
 /// </summary>
 internal static class PdxSdkPlatformProxy {
   /// <summary>
-  /// Paradox SDK instance, will be null if it was not found.
+  /// Paradox SDK instance, it will be null if it was not found.
   /// </summary>
-  private static readonly PdxSdkPlatform? PdxSdk;
+  internal static readonly PdxSdkPlatform? PdxSdk;
 
   /// <summary>
   /// Field accessor for <c>PdxSdkPlatform.m_AccountUserId</c>.
@@ -85,7 +85,9 @@ internal static class PdxSdkPlatformProxy {
   /// Null if there was an issue reading the private field, or if the user is not logged in.
   /// </summary>
   internal static string? AccountUserId =>
-    PdxSdkPlatformProxy.AccountUserIdField?.GetValue(PdxSdkPlatformProxy.PdxSdk) as string;
+    PdxSdkPlatformProxy.PdxSdk is not null
+      ? PdxSdkPlatformProxy.AccountUserIdField?.GetValue(PdxSdkPlatformProxy.PdxSdk) as string
+      : null;
 
   /// <summary>
   /// Calls the private <c>ShowModsUI(Action&lt;ModsUIView&gt;)</c> method.
