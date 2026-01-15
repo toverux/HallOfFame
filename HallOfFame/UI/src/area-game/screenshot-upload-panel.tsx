@@ -543,7 +543,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
           />
 
           <label>
-            {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PLAYSET_LABEL')}
+            {`${translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PLAYSET_LABEL')} β`}
             <br />
             <small>
               {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PLAYSET_DESCRIPTION')}
@@ -569,9 +569,9 @@ function ScreenshotUploadPanelContentScreenshotInfo({
           />
 
           <label>
-            {translate(
+            {`${translate(
               'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PHOTO_MODE_SETTINGS_LABEL'
-            )}
+            )} β`}
             <br />
             <small>
               {translate(
@@ -662,7 +662,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
           style={{ margin: 0 }}
           onMouseEnter={playHoverSound}>
           <label>
-            {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_LABEL')}
+            {`${translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_LABEL')} β`}
             <br />
             <small>
               {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_DESCRIPTION')}
@@ -714,6 +714,9 @@ function ScreenshotUploadPanelContentScreenshotInfo({
       <div style={{ flex: 1 }} />
 
       <div className={styles.screenshotUploadPanelContent}>
+        <p>
+          {`β ${translate('HallOfFame.UI.Game.ScreenshotUploadPanel.PARTIALLY_IMPLEMENTED_FEATURES')}`}
+        </p>
         {screenshotSnapshot.wasGlobalIlluminationDisabled && (
           <p>
             {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED')}

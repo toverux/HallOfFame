@@ -65,6 +65,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_DESCRIPTION": "Write something about your picture if you desire so. The story of your city, detailing techniques you’ve used, a poem, anything. You can use basic markdown syntax for formatting (no links, no images).",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Your Creator Name is currently empty. You must set it in the mod settings to upload a picture.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY": "Your graphics settings are lower than High. We recommend setting them to High while you are taking screenshots!",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.PARTIALLY_IMPLEMENTED_FEATURES": "Playset and photo mode sharing as well as the description field are partially implemented; your choices and information will be saved but are not yet displayed to other players.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED": "Global Illumination was disabled for the screenshot, see mod options for more information.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY": "You can change your Creator name in mod options or the name of the city without closing this window.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.MESSAGE_MODERATED": "Uploaded content is moderated and any abuse will result in a permanent ban of your account and IP address.",
