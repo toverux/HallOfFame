@@ -192,6 +192,13 @@ public sealed class Settings : ModSetting, IJsonWritable {
   public bool EnableLoadingScreenBackground { get; set; }
 
   /// <summary>
+  /// Whether to show the featured asset info block in the main menu UI.
+  /// </summary>
+  [SettingsUISection(Settings.GroupUIPreferences)]
+  [SettingsUIAdvanced]
+  public bool ShowFeaturedAsset { get; set; }
+
+  /// <summary>
   /// Whether to show creators' social links in the main menu UI.
   /// </summary>
   [SettingsUISection(Settings.GroupUIPreferences)]
@@ -434,10 +441,10 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
   /// <summary>
   /// When the user clicks a Paradox Mods link for the first time, they are asked if they want to
-  /// open it in the ingame UI or in the default browser. That preference is then saved.
+  /// open it in the in-game UI or in the default browser. That preference is then saved.
   /// </summary>
   [SettingsUIHidden]
-  public bool? PrefersOpeningPdxModsInBrowser { get; set; }
+  public string ParadoxModsBrowsingPreference { get; set; } = null!;
 
   /// <summary>
   /// The latest value the user selected for the "Share playset" option in the upload panel.
@@ -497,12 +504,11 @@ public sealed class Settings : ModSetting, IJsonWritable {
     var userName = PlatformManager.instance.userName;
 
     // Strip leading # from username, Xbox accounts have it.
-    this.CreatorName = userName.StartsWith("#")
-      ? userName.Substring(1)
-      : userName;
+    this.CreatorName = userName.StartsWith("#") ? userName[1..] : userName;
 
     this.EnableMainMenuSlideshow = true;
     this.EnableLoadingScreenBackground = true;
+    this.ShowFeaturedAsset = true;
     this.ShowCreatorSocials = true;
     this.ShowViewCount = false;
 
@@ -524,7 +530,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     this.DisableGlobalIllumination = Settings.IsNvidiaGpu();
     this.BaseUrl = "halloffame.cs2.mtq.io";
 
-    this.PrefersOpeningPdxModsInBrowser = null;
+    this.ParadoxModsBrowsingPreference = "undefined";
     this.SavedShareModIdsPreference = true;
     this.SavedShareRenderSettingsPreference = true;
     this.SavedScreenshotDescription = string.Empty;
@@ -728,6 +734,9 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     writer.PropertyName("enableLoadingScreenBackground");
     writer.Write(this.EnableLoadingScreenBackground);
+
+    writer.PropertyName("showFeaturedAsset");
+    writer.Write(this.ShowFeaturedAsset);
 
     writer.PropertyName("showCreatorSocials");
     writer.Write(this.ShowCreatorSocials);

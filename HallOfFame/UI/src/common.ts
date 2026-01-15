@@ -44,11 +44,13 @@ export interface Screenshot {
 }
 
 /** Serialization of C# `HallOfFame.Domain.Mod` */
-interface Mod {
-  readonly id: string;
+export interface Mod {
+  readonly id: number;
+  readonly paradoxModId: number;
   readonly name: string;
   readonly authorName: string;
   readonly shortDescription: string;
   readonly thumbnailUrl: string;
   readonly subscribersCount: number;
+  readonly tags: readonly string[];
 }

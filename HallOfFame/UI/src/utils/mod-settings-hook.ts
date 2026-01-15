@@ -4,6 +4,7 @@ import { bindValue, useValue } from 'cs2/api';
 export interface ModSettings {
   readonly creatorName: string;
   readonly enableLoadingScreenBackground: boolean;
+  readonly showFeaturedAsset: boolean;
   readonly showCreatorSocials: boolean;
   readonly showViewCount: boolean;
   readonly screenshotResolution: 'fhd' | '4k';
@@ -18,6 +19,7 @@ export interface ModSettings {
 const settings$ = bindValue<ModSettings>('hallOfFame.common', 'settings', {
   creatorName: '',
   enableLoadingScreenBackground: true,
+  showFeaturedAsset: true,
   showCreatorSocials: true,
   showViewCount: false,
   screenshotResolution: 'fhd',

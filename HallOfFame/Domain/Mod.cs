@@ -1,4 +1,5 @@
-﻿using Colossal.Json;
+﻿using System;
+using Colossal.Json;
 using Colossal.UI.Binding;
 using JetBrains.Annotations;
 
@@ -55,6 +56,13 @@ internal record Mod : IJsonWritable {
     set;
   }
 
+  [DecodeAlias("tags")]
+  internal string[] Tags {
+    get;
+    [UsedImplicitly]
+    set;
+  } = [];
+
   public override string ToString() =>
     $"Mod #{this.Id} (Paradox ID={this.ParadoxModId}) {this.Name} by {this.AuthorName}";
 
@@ -81,6 +89,9 @@ internal record Mod : IJsonWritable {
 
     writer.PropertyName("subscribersCount");
     writer.Write(this.SubscribersCount);
+
+    writer.PropertyName("tags");
+    writer.Write(this.Tags);
 
     writer.TypeEnd();
   }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using Colossal.Localization;
 using Colossal.UI.Binding;
 using Game.SceneFlow;
@@ -8,6 +7,7 @@ using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Menu;
+using HallOfFame.Http;
 using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using PDX.ModsUI;
@@ -28,6 +28,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
   private TriggerBinding<string> openModSettingsBinding = null!;
 
   private TriggerBinding<string> openWebPageBinding = null!;
+
+  private TriggerBinding<int> openModPageBinding = null!;
 
   private TriggerBinding<string> openCreatorPageBinding = null!;
 
@@ -82,6 +84,12 @@ internal sealed partial class CommonUISystem : UISystemBase {
         Application.OpenURL
       );
 
+      this.openModPageBinding = new TriggerBinding<int>(
+        CommonUISystem.BindingGroup,
+        "openModPage",
+        this.OpenModPage
+      );
+
       this.openCreatorPageBinding = new TriggerBinding<string>(
         CommonUISystem.BindingGroup,
         "openCreatorPage",
@@ -98,6 +106,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
       this.AddBinding(this.settingsBinding);
       this.AddBinding(this.openModSettingsBinding);
       this.AddBinding(this.openWebPageBinding);
+      this.AddBinding(this.openModPageBinding);
       this.AddBinding(this.openCreatorPageBinding);
       this.AddBinding(this.logJavaScriptErrorBinding);
 
@@ -114,8 +123,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
   protected override void OnDestroy() {
     base.OnDestroy();
 
-    this.localizationManager.onActiveDictionaryChanged -=
-      this.OnActiveDictionaryChanged;
+    this.localizationManager.onActiveDictionaryChanged -= this.OnActiveDictionaryChanged;
 
     Mod.Settings.onSettingsApplied -= this.OnSettingsApplied;
   }
@@ -143,26 +151,55 @@ internal sealed partial class CommonUISystem : UISystemBase {
   }
 
   /// <summary>
+  /// Opens a mod's page from an ID, either in the in-game Paradox Mods UI or in the browser
+  /// depending on the user's choice.
+  /// Even if the page is opened in-game, the click is registered on the server.
+  /// </summary>
+  private void OpenModPage(int modId) {
+    var url = $"https://mods.paradoxplaza.com/mods/{modId}/Any";
+
+    this.OpenParadoxModsPage(
+      url,
+      () => {
+        PdxSdkPlatformProxy.ShowModsUI(view => view.Show(ModsUIScreen.ModDetails, modId));
+
+        // Send a GET request to our server so that the click count is still incremented.
+        // We don't care about the result, success or not.
+        UnityWebRequest.Get(url).SendWebRequest();
+      }
+    );
+  }
+
+  /// <summary>
   /// Opens the creator page from a URL, either in the in-game Paradox Mods Creator page UI or in
   /// the browser depending on the user's choice.
   /// Even if the page is opened in-game, the click is registered on the server.
   /// </summary>
   private void OpenCreatorPage(string url) {
-    var username = Regex.Match(url, "/authors/(?<author>[^/?#]+)").Groups["author"]?.Value;
+    this.OpenParadoxModsPage(
+      url,
+      async void () => {
+        try {
+          // Resolves the username and increments the click count.
+          var username = await HttpQueries.ResolveParadoxModsUsername(url);
 
-    if (username is null) {
-      Mod.Log.Warn($"Could not extract Paradox Mods username from URL {url}");
+          PdxSdkPlatformProxy.ShowModsUI(view => view.Show(ModsUIScreen.Creator, username));
+        }
+        catch (Exception ex) {
+          Mod.Log.ErrorRecoverable(ex);
+        }
+      }
+    );
+  }
 
-      OpenCreatorPageInBrowser();
-    }
-
-    switch (Mod.Settings.PrefersOpeningPdxModsInBrowser) {
-      case true:
-        OpenCreatorPageInBrowser();
+  private void OpenParadoxModsPage(string url, Action openInGame) {
+    switch (Mod.Settings.ParadoxModsBrowsingPreference) {
+      case "browser":
+        Application.OpenURL(url);
 
         return;
-      case false:
-        OpenCreatorPageInGame();
+      case "in-game":
+        OpenInGame();
 
         return;
     }
@@ -180,33 +217,29 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
     return;
 
+    // Choice 0 is browser, 1 is cancel, 2 is Paradox Mods in-game UI.
     void OnConfirmOrCancel(int choice) {
-      Mod.Settings.PrefersOpeningPdxModsInBrowser = choice is 0;
+      Mod.Settings.ParadoxModsBrowsingPreference = choice is 0 ? "browser" : "in-game";
       Mod.Settings.ApplyAndSave();
 
-      switch (choice) {
-        case 0:
-          Application.OpenURL(url);
-
-          break;
-        case 2:
-          OpenCreatorPageInGame();
-
-          break;
+      // ReSharper disable once ConvertIfStatementToSwitchStatement
+      if (choice is 0) {
+        Application.OpenURL(url);
+      }
+      else if (choice is 2) {
+        OpenInGame();
       }
     }
 
-    void OpenCreatorPageInBrowser() {
-      Application.OpenURL(url);
-    }
+    void OpenInGame() {
+      if (PdxSdkPlatformProxy.PdxSdk is null) {
+        Application.OpenURL(url);
 
-    void OpenCreatorPageInGame() {
+        return;
+      }
+
       try {
-        PdxSdkPlatformProxy.ShowModsUI(view => view.Show(ModsUIScreen.Creator, username));
-
-        // Send a GET request to our server so that the click count is still incremented.
-        // We don't care about the result, success or not.
-        UnityWebRequest.Get(url).SendWebRequest();
+        openInGame();
       }
       catch (Exception ex) {
         Mod.Log.ErrorRecoverable(ex);

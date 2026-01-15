@@ -8,9 +8,14 @@ import {
   type LocElement,
   useLocalization
 } from 'cs2/l10n';
-import { Button, MenuButton, Tooltip, type TooltipProps, type UISound } from 'cs2/ui';
+import { Button, Icon, MenuButton, Tooltip, type TooltipProps, type UISound } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
-import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../common';
+import {
+  type CreatorSocialLink,
+  type Mod,
+  type Screenshot,
+  supportedSocialPlatforms
+} from '../common';
 import discordBrandsSolid from '../icons/fontawesome/discord-brands-solid.svg';
 import ellipsisSolidSrc from '../icons/fontawesome/ellipsis-solid.svg';
 import flagSolidSrc from '../icons/fontawesome/flag-solid.svg';
@@ -115,6 +120,46 @@ export function MenuControlsContent(): ReactElement {
     <div
       className={classNames(styles.menuControls, styles.menuControlsApplyButtonsOffset)}
       onMouseLeave={() => setShowOtherActions(false)}>
+      {modSettings.showFeaturedAsset && menuState.screenshot.showcasedMod && (
+        <Button
+          variant='menu'
+          className={styles.menuControlsAssetButton}
+          // biome-ignore lint/style/noNonNullAssertion: will not be null here
+          onSelect={() => openModPage(menuState.screenshot!.showcasedMod!)}>
+          <div
+            className={styles.menuControlsAssetButtonThumbnail}
+            style={{ backgroundImage: `url(${menuState.screenshot.showcasedMod.thumbnailUrl})` }}
+          />
+
+          <section className={styles.menuControlsAssetButtonText}>
+            <span className={styles.menuControlsAssetButtonTextHeader}>
+              <Icon src='Media/Glyphs/ParadoxMods.svg' tinted={true} />
+              {menuState.screenshot.showcasedMod.tags.includes('Map')
+                ? translate('HallOfFame.UI.Menu.MenuControls.SHOWCASED_MAP')
+                : translate('HallOfFame.UI.Menu.MenuControls.SHOWCASED_ASSET')}
+            </span>
+
+            <span className={styles.menuControlsAssetButtonTextTitle}>
+              {menuState.screenshot.showcasedMod.name}
+            </span>
+
+            <span className={styles.menuControlsAssetButtonTextAuthor}>
+              <LocalizedString
+                id='HallOfFame.Common.CITY_BY'
+                // biome-ignore lint/style/useNamingConvention: i18n convention
+                args={{ CREATOR_NAME: menuState.screenshot.showcasedMod.authorName }}
+              />
+            </span>
+
+            {menuState.screenshot.showcasedMod.shortDescription && (
+              <span className={styles.menuControlsAssetButtonTextDescription}>
+                {menuState.screenshot.showcasedMod.shortDescription}
+              </span>
+            )}
+          </section>
+        </Button>
+      )}
+
       <div className={styles.menuControlsSection}>
         <div className={styles.menuControlsSectionButtons} style={{ alignSelf: 'flex-end' }}>
           <MenuControlsNextButton isLoading={!menuState.isReadyForNextImage} />
@@ -737,6 +782,10 @@ function useMenuControlsInputAction(
 
 function openModSettings(tab: string): void {
   trigger('hallOfFame.common', 'openModSettings', tab);
+}
+
+function openModPage(mod: Mod): void {
+  trigger('hallOfFame.common', 'openModPage', mod.paradoxModId);
 }
 
 function openSocialLink({ platform, link }: CreatorSocialLink): void {
