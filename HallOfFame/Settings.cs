@@ -530,11 +530,13 @@ public sealed class Settings : ModSetting, IJsonWritable {
     this.SavedScreenshotDescription = string.Empty;
   }
 
+  internal Settings Clone() => (Settings) this.MemberwiseClone();
+
   /// <summary>
   /// Method to call on the Settings instance that is actually used by the Options panel (i.e., not
   /// the default settings reference instance).
   /// </summary>
-  public void Initialize() {
+  internal void Initialize() {
     #if DEBUG
     GameManager.instance.localizationManager.AddSource("en-US", new DevDictionarySource());
     #endif

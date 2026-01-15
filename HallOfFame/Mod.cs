@@ -75,10 +75,12 @@ public sealed class Mod : IMod {
 
       // Register settings UI and load settings.
       this.settingsValue = new Settings(this);
+      var defaultSettings = this.settingsValue.Clone();
+
       this.settingsValue.RegisterInOptionsUI();
       this.settingsValue.RegisterKeyBindings();
 
-      AssetDatabase.global.LoadSettings(nameof(HallOfFame), this.settingsValue, new Settings(this));
+      AssetDatabase.global.LoadSettings(nameof(HallOfFame), this.settingsValue, defaultSettings);
 
       // Set singleton instance only when OnLoad is likely to complete.
       Mod.instanceValue = this;
