@@ -121,6 +121,7 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingLike]": "Polub",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.KeyBindingLike]": "Skrót klawiszowy do polubienia zrzutu ekranu.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.WeightsDescription]": "Dostosuj poniższe wagi, aby zmienić prawdopodobieństwo wybrania zrzutu ekranu przez każdy algorytm (szczegóły możesz zobaczyć w opisie suwaków).",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.PopularScreenshotWeight]": "Popularne",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.TrendingScreenshotWeight]": "Popularne",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.RecentScreenshotWeight]": "Najnowsze",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.RecentScreenshotWeight]": "Ostatnio opublikowane zrzuty ekranu (najwyżej kilka dni).\nZalecamy nie ustawiać na zero, aby dać szansę nowym twórcom i ich tworom!",
