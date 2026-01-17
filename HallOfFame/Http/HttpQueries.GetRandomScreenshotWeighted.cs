@@ -14,6 +14,7 @@ internal static partial class HttpQueries {
       HttpQueries.PrependApiUrl(
         $"/screenshots/weighted" +
         $"?random={Mod.Settings.RandomScreenshotWeight}" +
+        $"&popular={Mod.Settings.PopularScreenshotWeight}" +
         $"&trending={Mod.Settings.TrendingScreenshotWeight}" +
         $"&recent={Mod.Settings.RecentScreenshotWeight}" +
         $"&archeologist={Mod.Settings.ArcheologistScreenshotWeight}" +

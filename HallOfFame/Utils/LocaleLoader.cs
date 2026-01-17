@@ -51,14 +51,19 @@ internal static class LocaleLoader {
     // Load locale dictionary.
     var localeDictionary = LocaleLoader.LoadLocale(localeId);
 
-    // Remove comments and process interpolations in the dictionary.
-    var processedLocaleDictionary = LocaleLoader.PostprocessLocaleDictionary(localeDictionary);
+    // Manual patches -- strings that can't go into the JSON files.
+    localeDictionary.Add(
+      "HallOfFame.Common.SUPPORTERS",
+      "bilibili Jason Stephen, CloverPie, Danil.V.L, elGendo87, foxxy, Fuchs23, Ghost Hardware, Hendrix, Jojodaisuke, karmel68, Konsi, MayorCheeks, Prophedt, TheBusStop, ThemisC2"
+    );
 
-    // Manual patches.
-    processedLocaleDictionary.Add(
+    localeDictionary.Add(
       "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoginStatus]",
       string.Empty
     );
+
+    // Remove comments and process interpolations in the dictionary.
+    var processedLocaleDictionary = LocaleLoader.PostprocessLocaleDictionary(localeDictionary);
 
     // Register the locale dictionary.
     var source = new MemorySource(processedLocaleDictionary);
