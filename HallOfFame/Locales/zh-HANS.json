@@ -132,6 +132,7 @@
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.RandomScreenshotWeight]": "随机",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.RandomScreenshotWeight]": "完全随机选择截图！",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "首批支持者",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SupporterScreenshotWeight]": "感谢社区成员们提供的宝贵帮助、反馈、支持和热情 <3\n\n特别鸣谢：{KEY=HallOfFame.Common.SUPPORTERS}。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.OtherContentPreferences]": "其他内容偏好：",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ViewMaxAge]": "再次显示截图的最短时间（单位：天）",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ViewMaxAge]": "再次看到已看过的截图的最短时间。\n但是，由于性能原因，如果您浏览过大量的截图，则无法保证始终遵守此偏好。",
