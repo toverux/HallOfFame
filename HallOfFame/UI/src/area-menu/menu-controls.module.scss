@@ -81,6 +81,8 @@
   }
 
   &-asset-button {
+    align-self: flex-start;
+    max-width: 100%;
     height: auto;
     margin-bottom: 20rem;
 
@@ -111,8 +113,8 @@
       // Perfect size so that everything is perfectly aligned when the title is one line.
       // If it is more, or when hovering and the description is shown, the image is aligned to the
       // top.
-      width: 91rem;
-      height: 91rem;
+      width: 87rem;
+      height: 87rem;
 
       border-radius: 5rem; // Vanilla's --panelRadiusInner but using var() does not work here.
 
@@ -122,10 +124,11 @@
     }
 
     &-text {
-      flex: 1 1 auto;
+      flex: 0 1 auto;
 
       display: flex;
       flex-direction: column;
+      align-items: flex-start;
 
       &-header {
         margin-bottom: 5rem;
@@ -152,7 +155,7 @@
         margin-bottom: 5rem;
 
         line-height: 1.1;
-        font-size: calc(28rem * var(--fontScale));
+        font-size: var(--fontSizeXL);
         font-weight: bold;
       }
 
@@ -161,14 +164,16 @@
       }
 
       &-description {
-        // Height transition does not work to auto like in older browser, still, leave it in case
-        // this becomes supported.
-        transition: height, opacity .3s common.$default-timing-function;
+        transition: max-width, max-height, opacity .3s common.$default-timing-function;
+
+        // Hide, will transition to the natural size.
+        // Unlike in modern browsers we cannot animate width/height from 0 to auto so instead we use
+        // the old max-width/max-height trick.
+        max-width: 0;
+        max-height: 0;
 
         overflow: hidden;
-
         opacity: 0;
-        height: 0;
 
         font-size: var(--fontSizeS);
       }
@@ -185,9 +190,11 @@
     }
 
     &:hover &-text-description {
+      // Set a high bound for the width/height transition.
+      max-width: 1000rem;
+      max-height: 1000rem;
       margin-top: 10rem;
       opacity: 1;
-      height: auto;
     }
   }
 
