@@ -502,7 +502,9 @@ function ScreenshotUploadPanelContentScreenshotInfo({
             className={styles.screenshotUploadPanelFormDropdownToggleItemImage}
             style={{ backgroundImage: `url(${mod.thumbnailPath})` }}
           />
-          {mod.displayName}
+          <div className={styles.screenshotUploadPanelFormDropdownToggleItemText}>
+            {mod.displayName}
+          </div>
         </DropdownItem>
       )),
     [assetMods, patchFormValue]
@@ -634,7 +636,9 @@ function ScreenshotUploadPanelContentScreenshotInfo({
                         className={styles.screenshotUploadPanelFormDropdownToggleItemImage}
                         style={{ backgroundImage: `url(${formValue.showcasedMod.thumbnailPath})` }}
                       />
-                      {formValue.showcasedMod.displayName}
+                      <div className={styles.screenshotUploadPanelFormDropdownToggleItemText}>
+                        {formValue.showcasedMod.displayName}
+                      </div>
                     </div>
                   ) : (
                     <div

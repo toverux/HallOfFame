@@ -279,6 +279,13 @@ $co-panel-color-dark: rgb(24, 33, 51);
           background-position: center;
           background-repeat: no-repeat;
         }
+
+        &-text {
+          flex: 1 1;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
       }
 
       // An item NOT in the popup menu but 'adopted' by the toggle to show the current value.
@@ -302,9 +309,18 @@ $co-panel-color-dark: rgb(24, 33, 51);
 
     // This class is injected alongside the Vanilla class.
     &-dropdown-popup {
+      // Set a scrollbar color that looks like the panel's main scrollbar.
+      --scrollbarColor: 24, 33, 51;
+
       // So that the dropdown menu, attached to the same root as the panel, appears on top.
       z-index: 1;
-      --scrollbarColor: 24, 33, 51;
+
+      // This is a hack so that the dropdown does not expand too much, including overflowing the
+      // screen, for long asset names.
+      // However the actual applied width won't be zero, the game sets min-width so that the popup
+      // has at least the width of its parent input. This will take precedence over width: 0, but
+      // our width: 0 will prevent the popup from expanding further than that min-width.
+      width: 0;
     }
 
     &-textarea-wrapper {
