@@ -693,7 +693,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
                     onClick={() =>
                       patchFormValue({ description: settings.savedScreenshotDescription })
                     }>
-                    Restore latest description
+                    {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_RESTORE')}
                   </Button>
                 )}
 

@@ -63,6 +63,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_SELECT_ASSET": "Select an asset…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_LABEL": "Description",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_DESCRIPTION": "Write something about your picture if you desire so. The story of your city, detailing techniques you’ve used, a poem, anything. You can use basic markdown syntax for formatting (no links, no images).",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_RESTORE": "Restore latest description",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY": "Your Creator Name is currently empty. You must set it in the mod settings to upload a picture.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY": "Your graphics settings are lower than High. We recommend setting them to High while you are taking screenshots!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.PARTIALLY_IMPLEMENTED_FEATURES": "Playset and photo mode sharing as well as the description field are partially implemented; your choices and information will be saved but are not yet displayed to other players.",
