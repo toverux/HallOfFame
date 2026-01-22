@@ -146,8 +146,29 @@ public sealed class Settings : ModSetting, IJsonWritable {
   // an Option entry, it has to be getter-only.
   public LocalizedString LoginStatus => this.loginStatusValue;
 
+  /// <summary>
+  /// Opens https://viewer.halloffame.mtq.io on the Creator's profile page.
+  /// </summary>
   [SettingsUISection(Settings.GroupYourProfile)]
   [SettingsUIButton]
+  [SettingsUIButtonGroup("Profile")]
+  [UsedImplicitly]
+  public bool OpenWebViewer {
+    // ReSharper disable once ValueParameterNotUsed
+    set {
+      var creatorQuery = string.IsNullOrWhiteSpace(this.CreatorName)
+        ? this.CreatorID
+        : this.CreatorName;
+
+      Application.OpenURL(
+        $"https://viewer.halloffame.mtq.io/?creator={(creatorQuery)}&sortOrder=Descending"
+      );
+    }
+  }
+
+  [SettingsUISection(Settings.GroupYourProfile)]
+  [SettingsUIButton]
+  [SettingsUIButtonGroup("Profile")]
   [UsedImplicitly]
   public bool CopyCreatorID {
     // ReSharper disable once ValueParameterNotUsed

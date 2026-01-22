@@ -93,6 +93,8 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.LoginStatus]": "Ceci montre le statut de votre compte sur le serveur Hall of Fame.",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  Connecté en tant que « {CREATOR_NAME} »",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Connecté en anonyme",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.OpenWebViewer]": "Ouvrir votre galerie dans le Web Viewer",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.OpenWebViewer]": "Ouvrir votre galerie dans l’application Hall of Fame Web Viewer dans votre navigateur par défaut (<viewer.halloffame.mtq.io>). Cette application web est faite par <sparkly_foxxy ✿>.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copier le Creator ID",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copiez votre ID Créateur dans le presse-papiers.\n<Gardez-le privé> — ne le partagez qu’avec l’auteur de Hall of Fame pour du support, ou avec des services tiers de confiance intégrés à Hall of Fame.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Activer dans le menu principal",

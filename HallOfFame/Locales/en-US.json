@@ -93,6 +93,8 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.LoginStatus]": "This is your account status with the Hall of Fame server.",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  Logged in as “{CREATOR_NAME}”",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Anonymously logged in",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.OpenWebViewer]": "Open your gallery in the Web Viewer",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.OpenWebViewer]": "Open your gallery in the Hall of Fame Web Viewer in your default web browser (<viewer.halloffame.mtq.io>). This website is made by <sparkly_foxxy ✿>.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copy Creator ID",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Copy your Creator ID to the clipboard.\n<Keep it private> — only share it with Hall of Fame’s author for support, or with trusted third-party services that integrate with Hall of Fame.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Enable main menu integration",
