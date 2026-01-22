@@ -156,7 +156,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
   /// Even if the page is opened in-game, the click is registered on the server.
   /// </summary>
   private void OpenModPage(int modId) {
-    var url = $"https://mods.paradoxplaza.com/mods/{modId}/Any";
+    var url = $"{Mod.Settings.BaseUrlWithScheme}/api/v1/mods/{modId}";
 
     this.OpenParadoxModsPage(
       url,
