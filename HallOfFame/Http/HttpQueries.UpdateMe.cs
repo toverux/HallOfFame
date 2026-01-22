@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Colossal.Json;
+using Game.SceneFlow;
 using HallOfFame.Domain;
 using UnityEngine.Networking;
 
@@ -8,7 +9,10 @@ namespace HallOfFame.Http;
 
 internal static partial class HttpQueries {
   internal static async Task<Creator> UpdateMe() {
-    var payload = new Dictionary<string, object> { { "modSettings", Mod.Settings } };
+    var payload = new Dictionary<string, object> {
+      { "locale", GameManager.instance.localizationManager.activeLocaleId },
+      { "modSettings", Mod.Settings }
+    };
 
     using var request = UnityWebRequest.Put(
       HttpQueries.PrependApiUrl("/creators/me"),
