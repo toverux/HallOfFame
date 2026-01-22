@@ -1,13 +1,20 @@
-﻿**The screenshot metadata update!**
+﻿**New features and changes:**
 
-Restructured upload popup for attaching information about your screenshots:
-- Choose whether to share your photo mode settings,
-- Choose whether to share your mods playset,
-- Select a showcased asset or map, to demo how you used a Paradox Mods asset and make a little publicity for it, as an asset author or satisfied user!
-- Four thousand characters of Markdown description! Write the story of your city, explain detailing techniques you’ve used, a poem, anything.
+- **New gallery website, made by sparkly_foxxy: https://viewer.halloffame.mtq.io**. Check out your screenshots and other people's work on the web! A button has been added in the mod settings to open your gallery.
+- **Add the "Popular" screenshot selection algorithm.** This new algorithm chooses pictures that have a higher-than-median like to view ratio (which is about 9%). This will greatly help good screenshots that don't have an overwhelming number of likes resurface more.
 
-For this update, only the showcased asset/map will be shown in the Hall of Fame’s main menu carousel. \
-The description or photo mode settings and playset are not yet shown in the UI, but this will be implemented soon. \
-Allowing you to set them right now allows you to start adding more context to your screenshots.
+**Improvements:**
 
-In a second time, a mass editor will also allow you to edit your previous screenshots to add these fields if you wish.
+- New default screenshot selection algorithms weights are as follows (and as always, are configurable in the mod settings):
+  - Popular: 10
+  - Trending: 10
+  - Recent: 10
+  - Forgotten Ones: 0
+  - Random: 5
+  - Supporter: 1
+- Smaller showcased asset/map block that adapts to the size of the content and expands on hover.
+- Localization updates.
+
+**Bugfixes:**
+
+- Fixed text overflows in the asset selection dropdown.
