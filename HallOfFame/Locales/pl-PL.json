@@ -93,6 +93,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.LoginStatus]": "Status Twojego konta na serwerze Hall of Fame.",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]": "✓  Zalogowano jako „{CREATOR_NAME}”",
   "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]": "✓  Zalogowano jako anonim",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.OpenWebViewer]": "Otwórz swoją galerię w przeglądarce internetowej",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Skopiuj ID twórcy",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CopyCreatorID]": "Skopiuj swój ID twórcy do schowka.\n<Trzymaj go w prywatności> — udostępnij go tylko autorowi Hall of Fame w celu uzyskania wsparcia lub zaufanym usługom zewnętrznym, które wykorzystują integracje z Hall of Fame.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.EnableMainMenuSlideshow]": "Włącz integrację z menu głównym",
