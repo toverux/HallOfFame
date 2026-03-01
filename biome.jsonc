@@ -29,6 +29,8 @@
       "correctness": {
         // Here we are forced to disable it until the rule supports exceptions for "cs2/*" imports.
         "noUndeclaredDependencies": "off",
+        // Chokes on "cs2/*" and "node:*" imports, disabling until the rule supports exceptions.
+        "noUnresolvedImports": "off",
         // We don't use extensions for imports.
         "useImportExtensions": "off",
         // False-positives with <LocalizedString>'s [id] prop, and we don't use ids anyway.

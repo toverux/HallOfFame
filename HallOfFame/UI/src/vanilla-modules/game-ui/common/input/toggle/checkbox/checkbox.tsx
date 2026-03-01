@@ -44,5 +44,6 @@ export const Checkbox = getModuleExport<FC<CheckboxProps>>(
   'game-ui/common/input/toggle/checkbox/checkbox.tsx',
   'Checkbox',
   (value): value is FC<CheckboxProps> => typeof value == 'function',
+  // biome-ignore lint/style/noJsxLiterals: not the happy path at all, no need to translate.
   () => <>Error</>
 );

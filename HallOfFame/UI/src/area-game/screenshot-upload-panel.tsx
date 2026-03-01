@@ -375,6 +375,7 @@ function ScreenshotUploadPanelImage({
               [styles.screenshotUploadPanelImageHidden]: uploadProgress != null
             })}
             style={ratioPreviewInfo.style}>
+            {/** biome-ignore lint/style/noJsxLiterals: no need to translate this */}
             16:9
           </div>
         </DescriptionTooltip>
@@ -708,6 +709,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
 
                 <div style={{ flex: 1 }} />
 
+                {/** biome-ignore lint/style/noJsxLiterals: no need to translate this */}
                 <span>{formValue.description.length}&thinsp;/&thinsp;4000</span>
               </div>
             )}

@@ -202,6 +202,7 @@ export function MenuControlsContent(): ReactElement {
               ? menuState.screenshot.likesCount
               : `${(menuState.screenshot.likesCount / 1000).toFixed(1)} k`}
           </span>
+          {/** biome-ignore lint/style/noJsxLiterals: it's kinda okay */}
           &thinsp;
           {translate(
             menuState.screenshot.likesCount == 0
@@ -789,9 +790,11 @@ function openModPage(mod: Mod): void {
 }
 
 function openSocialLink({ platform, link }: CreatorSocialLink): void {
-  platform == 'paradoxmods'
-    ? trigger('hallOfFame.common', 'openCreatorPage', link)
-    : trigger('hallOfFame.common', 'openWebPage', link);
+  if (platform == 'paradoxmods') {
+    trigger('hallOfFame.common', 'openCreatorPage', link);
+  } else {
+    trigger('hallOfFame.common', 'openWebPage', link);
+  }
 }
 
 function previousScreenshot(): void {

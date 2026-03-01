@@ -2,7 +2,7 @@
  * File originally by Colossal Order.
  * Changes made:
  * - Auto code reformat with Biome, renamed a few variables.
- * - Migrated to ESM (require => import, import.meta.dirname => import.meta.dirname, etc).
+ * - Migrated to ESM (require => import, import.meta.dirname => import.meta.dirname, etc.).
  * - Removed custom CSSPresencePlugin.
  * - Change css-loader to ignore resolving static game images (Media/...) and leave them as-is
  *   (`options.url.filter`).
