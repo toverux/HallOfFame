@@ -1,8 +1,11 @@
+# style(cs): apply automatic reformat
+7909112c02b8493d2dc15c87e8dec878f8c7ea5c
+
+# style: evolve the C# codestyle to be more consistent with JS
+46c5f38899aff11df52591fe4770adb0cd2997e4
+
 # style: reformat comments for 100-chars line-length and fix some english
 5c38d59fabe984a0374e0cfa54e50ad4cf6010bc
 
 # style: switch to 2-spaces indent & 100 line-length
 5cf568d02fb330b96ec478feaca9fc09135f1e4e
-
-# style: evolve the C# codestyle to be more consistent with JS
-46c5f38899aff11df52591fe4770adb0cd2997e4
