@@ -5,8 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Colossal.Core;
-using Colossal.PSI.Common;
-using Colossal.PSI.PdxSdk;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
@@ -349,26 +347,30 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     var previousDynResLevel = dynResSettings.GetLevel();
 
-    if (dynResSettings.GetLevel() != QualitySetting.Level.High) {
-      // "High" actually means "Disabled" as disabling this option yields the best quality.
-      dynResSettings.SetLevel(QualitySetting.Level.High, false);
+    if (previousDynResLevel != QualitySetting.Level.High) {
+      // We pass "High", which actually means "Disabled" as disabling this option is the better
+      // quality setting.
+      // We pass "apply: false" because it performs ApplyAndSave() while we want just Apply() to
+      // restore the previous value just after the screenshot is taken.
+      dynResSettings.SetLevel(QualitySetting.Level.High, apply: false);
       dynResSettings.Apply();
     }
 
-    // Disable global illumination as it causes a LOT of grain in CS2's implementation of GI, on
+    // Disable global illumination as it causes a LOT of grain in CS2's implementation of SSGI, on
     // most NVIDIA GPUs.
-    var globalIllumination = SharedSettings.instance.graphics
-      .GetVolumeOverride<GlobalIllumination>();
+    var ssgiSettings = SharedSettings.instance.graphics
+      .GetQualitySetting<SSGIQualitySettings>();
 
-    var previousGIValue = globalIllumination.enable.value;
+    var previousSsgiQualityLevel = ssgiSettings.GetLevel();
 
     if (Mod.Settings.DisableGlobalIllumination) {
-      globalIllumination.enable.Override(false);
+      // We pass "apply: false" because it performs ApplyAndSave() while we want just Apply() to
+      // restore the previous value just after the screenshot is taken.
+      ssgiSettings.SetLevel(QualitySetting.Level.Disabled, apply: false);
+      ssgiSettings.Apply();
     }
 
-    // Let time for some graphics settings to apply.
-    // When testing, only DynamicResolutionScaleSettings needed this, but in any case it's not a bad
-    // idea.
+    // Yield to let graphics settings time to apply.
     await Task.Yield();
 
     // Create a RenderTexture with the supersize resolution and ask the camera to render to it.
@@ -408,9 +410,10 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       dynResSettings.Apply();
     }
 
-    // Reset GI
-    if (Mod.Settings.DisableGlobalIllumination) {
-      globalIllumination.enable.Override(previousGIValue);
+    // Reset SSGI
+    if (ssgiSettings.GetLevel() != previousSsgiQualityLevel) {
+      ssgiSettings.SetLevel(previousSsgiQualityLevel, false);
+      ssgiSettings.Apply();
     }
 
     // Reset the camera's target texture
@@ -463,13 +466,17 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.assetModsBinding.Update(assetMods);
     }
 
+    var wasGlobalIlluminationDisabled =
+      Mod.Settings.DisableGlobalIllumination &&
+      previousSsgiQualityLevel != QualitySetting.Level.Disabled;
+
     var screenshotSnapshot = new ScreenshotSnapshot(
       this.GetAchievedMilestone(),
       this.GetPopulation(),
       this.GetMapName(),
       pngScreenshotBytes,
       new Vector2Int(width, height),
-      previousGIValue && Mod.Settings.DisableGlobalIllumination,
+      wasGlobalIlluminationDisabled,
       CaptureUISystem.AreSettingsTopQuality(),
       this.GetPhotoModePropertiesSnapshot(),
       modIds
