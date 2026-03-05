@@ -10,16 +10,27 @@ namespace HallOfFame.Http;
 internal static partial class HttpQueries {
   internal sealed record UploadScreenshotParams {
     internal required string CityName { get; init; }
+
     internal required int CityMilestone { get; init; }
+
     internal required int CityPopulation { get; init; }
+
     internal required string? MapName { get; init; }
+
     internal required int? ShowcasedModId { get; init; }
+
     internal required string? Description { get; init; }
+
     internal required bool ShareModIds { get; init; }
+
     internal required IEnumerable<int> ModIds { get; init; }
+
     internal required bool ShareRenderSettings { get; init; }
+
     internal required IDictionary<string, float> RenderSettings { get; init; }
+
     internal required byte[] ScreenshotData { get; init; }
+
     internal required ProgressHandler? UploadProgressHandler { get; init; }
   }
 
@@ -43,13 +54,18 @@ internal static partial class HttpQueries {
 
     multipart.AddField("renderSettings", JSON.Dump(@params.RenderSettings));
 
-    multipart.AddField("metadata", JSON.Dump(new Dictionary<string, string> {
-      { "platform", Application.platform.ToString() },
-      { "cpu", SystemInfo.processorType },
-      { "gpuName", SystemInfo.graphicsDeviceName },
-      { "gpuVendor", SystemInfo.graphicsDeviceVendor },
-      { "gpuVersion", SystemInfo.graphicsDeviceVersion }
-    }));
+    multipart.AddField(
+      "metadata",
+      JSON.Dump(
+        new Dictionary<string, string> {
+          { "platform", Application.platform.ToString() },
+          { "cpu", SystemInfo.processorType },
+          { "gpuName", SystemInfo.graphicsDeviceName },
+          { "gpuVendor", SystemInfo.graphicsDeviceVendor },
+          { "gpuVersion", SystemInfo.graphicsDeviceVersion }
+        }
+      )
+    );
 
     if (@params.MapName is not null) {
       multipart.AddField("mapName", @params.MapName);

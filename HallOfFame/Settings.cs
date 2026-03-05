@@ -565,7 +565,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     this.SavedScreenshotDescription = string.Empty;
   }
 
-  internal Settings Clone() => (Settings) this.MemberwiseClone();
+  internal Settings Clone() => (Settings)this.MemberwiseClone();
 
   /// <summary>
   /// Method to call on the Settings instance that is actually used by the Options panel (i.e., not

@@ -253,7 +253,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.EnableOrDisableEnableMainMenuSlideshowAction();
   }
 
-#if DEBUG
+  #if DEBUG
   /// <summary>
   /// Debug/development method to load a screenshot by its ID.
   /// Does not use the queue system.
@@ -277,7 +277,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.isRefreshingBinding.Update(false);
     }
   }
-#endif
+  #endif
 
   private void OnSettingsApplied(Setting _) {
     this.enableMainMenuSlideshowBinding.Update();
@@ -415,9 +415,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     async void PreloadNextScreenshot() {
       // Variable used below to avoid infinite loops when there is only one screenshot in the
       // database (that can happen during development).
-#if DEBUG
+      #if DEBUG
       var iterations = 0;
-#endif
+      #endif
 
       Screenshot? nextScreenshot;
 
@@ -430,9 +430,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       do {
         nextScreenshot = await this.LoadScreenshot(true);
       } while (
-#if DEBUG
+        #if DEBUG
         iterations++ < 20 &&
-#endif
+        #endif
         nextScreenshot is not null &&
         nextScreenshot.Id ==
         this.screenshotBinding.value?.Id);

@@ -1,4 +1,3 @@
-﻿using System;
 using Colossal.Json;
 using Colossal.UI.Binding;
 using JetBrains.Annotations;
