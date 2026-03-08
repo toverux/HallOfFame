@@ -1,0 +1,37 @@
+// This file is a reference for the vanilla CSS variables we use.
+// For most variables, we will reference the original var() in order to react to changes (especially
+// useful for text sizes because it can be changed in the settings), but for some we copy the value
+// as of the latest checked game version.
+// This is notably useful to apply SASS transforms to colors, because Cohtml does not have the
+// advanced color manipulation functions of CSS4.
+// It can also happen that using var() does not work in some places with Cohtml, for some obscure
+// reason.
+// A comment is also appended to each variable to indicate the latest known value, it is useful to
+// compare what changed when a game update breaks the UI.
+
+$accent-color-dark: #1e83aa;
+$center-panel-width: var(--centerPanelWidth); // calc((1 + var(--fontScaleChange) / 3) * 1500rem)
+$font-scale: var(--fontScale); // depends on settings, 100% = 1.
+$font-size-l: var(--fontSizeL); // calc(14rem * var(--fontScale) + 4rem)
+$font-size-m: var(--fontSizeM); // calc(14rem * var(--fontScale) + 2rem + var(--fontScaleChange) * 1.05 * 14rem)
+$font-size-s: var(--fontSizeS); // calc(14rem * var(--fontScale) + var(--fontScaleChange) * 1.1 * 14rem)
+$font-size-xl: var(--fontSizeXL); // calc(14rem * var(--fontScale) + 6rem)
+$highlight-green: #41d880; // #41d880
+$menu-active-color-bright: var(--menuActiveColorBright); // white
+$menu-blur: var(--menuBlur); // brightness(60%) contrast(90%) blur(7px)
+$menu-focused-color: var(--menuFocusedColor); // rgba(255, 255, 255, 0.75)
+$menu-selected-color: var(--menuSelectedColor); // rgba(255, 255, 255, 0.9)
+$menu-text-1-disabled: var(--menuText1Disabled); // rgba(102, 102, 102, 0.8)
+$menu-text-1-inverted: var(--menuText1Inverted); // rgba(12, 26, 37, 0.8)
+$menu-text-1-normal: var(--menuText1Normal); // rgba(255, 255, 255, 0.8)
+$panel-blur: blur(5px); // blur(5px)
+$panel-color-dark: rgba(24, 33, 51, 1); // rgba(24, 33, 51, var(--panelOpacityDark:1))
+$panel-color-normal: var(--panelColorNormal); // rgba(42, 55, 83, var(--panelOpacityNormal:1))
+$panel-gradient-end: var(--panelGradientEnd); // var(--gradientDarkBlueEnd:rgba(39, 55, 78, var(--gradientOpacity:0.9)))
+$panel-gradient-start: var(--panelGradientStart); // var(--gradientDarkBlueStart:rgba(45, 79, 92, var(--gradientOpacity:0.9)))
+$text-color: var(--textColor); // var(--normalTextColor:#F0FBFF)
+$warning-color: #ffa42d; // #ffa42d
+$panel-gradient-middle: var(--panelGradientMiddle); // var(--gradientDarkBlueMiddle:rgba(41,62,80,var(--gradientOpacity:0.9)))
+
+// Game's "Legacy interface" vars
+$legacy-panel-color-dark: rgb(24, 33, 51, .6); // rgba(24, 33, 51, var(--panelOpacityDark))

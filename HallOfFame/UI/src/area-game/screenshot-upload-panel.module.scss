@@ -1,8 +1,6 @@
 @use 'sass:color';
-@use "../common";
-
-// Vanilla's --panelColorDark, without opacity.
-$co-panel-color-dark: rgb(24, 33, 51);
+@use '../common';
+@use '../vanilla-vars' as vanilla;
 
 .screenshot-upload-panel-container {
   // We should be on top except if other mods add content.
@@ -22,12 +20,12 @@ $co-panel-color-dark: rgb(24, 33, 51);
 }
 
 .screenshot-upload-panel {
-  $separator-shadow-color: color.adjust($co-panel-color-dark, $alpha: -0.8);
+  $separator-shadow-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.8);
 
   pointer-events: auto;
   position: relative;
 
-  width: var(--centerPanelWidth);
+  width: vanilla.$center-panel-width;
 
   display: flex;
   flex-direction: column;
@@ -35,11 +33,11 @@ $co-panel-color-dark: rgb(24, 33, 51);
 
   overflow: hidden;
   box-shadow: 0 0 20rem rgba(0, 0, 0, 0.6);
-  backdrop-filter: var(--panelBlur);
+  border-radius: 20rem;
+  backdrop-filter: vanilla.$panel-blur;
 
-  font-size: var(--fontSizeL);
+  font-size: vanilla.$font-size-l;
 
-  @include common.border-radius(20rem);
   @include common.scale-in-ver-center;
 
   &-header, &-content, &-warning, &-footer {
@@ -71,7 +69,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
   &-upload-progress {
     z-index: 1;
 
-    animation: appear 1s ease-in-out;
+    animation: appear 1s ease-in-out forwards;
 
     position: absolute;
     top: 0;
@@ -83,9 +81,24 @@ $co-panel-color-dark: rgb(24, 33, 51);
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: color.adjust($co-panel-color-dark, $alpha: -0.5);
-    backdrop-filter: var(--panelBlur);
-    color: white;
+    color: vanilla.$text-color;
+
+    // We use a dedicated block instead of settings the background color so we can reuse the Vanilla
+    // variable and react to theme changes while changing the color's opacity (through opacity on
+    // the block), since cohtml lacks CSS4 color() manipulation.
+    &-background-color {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: vanilla.$panel-color-dark;
+      opacity: .5;
+
+      @include common.on-new-ui {
+        background-color: vanilla.$panel-gradient-middle;
+      }
+    }
 
     &-content {
       display: flex;
@@ -100,21 +113,19 @@ $co-panel-color-dark: rgb(24, 33, 51);
       }
 
       &-hint {
-        font-size: calc(20rem * var(--fontScale) + 8rem);
-        filter: drop-shadow(0rem 0rem 3rem var(--panelColorDark));
+        font-size: calc(20rem * #{vanilla.$font-scale} + 8rem);
+        filter: drop-shadow(0rem 0rem 3rem #{vanilla.$panel-color-dark});
       }
     }
 
     @keyframes appear {
       from {
-        background-color: transparent;
+        opacity: 0;
         backdrop-filter: blur(0);
       }
       to {
-        background-color: color.adjust($co-panel-color-dark, $alpha: -0.5);
-        // "5px" below was originally var(--panelBlur) but this caused random crashes to desktop
-        // at mod load due to a bug in cohtml engine.
-        backdrop-filter: blur(5px);
+        opacity: 1;
+        backdrop-filter: vanilla.$panel-blur;
       }
     }
   }
@@ -129,7 +140,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
     z-index: 1;
     box-shadow: 0 1px 0 $separator-shadow-color;
 
-    font-size: calc(28rem * var(--fontScale));
+    font-size: calc(28rem * #{vanilla.$font-scale});
 
     &-close {
       padding: 10rem;
@@ -143,6 +154,13 @@ $co-panel-color-dark: rgb(24, 33, 51);
   &-header, &-city-info, &-panes-info {
     background-color: var(--menuFocusedColor);
     color: var(--menuText1Inverted);
+
+    @include common.on-new-ui {
+      // Those RGB colors are the ones used by Vanilla in right panels like the lifepath one or the
+      // event log. Vanilla does not use variables here.
+      background-color: rgba(236, 236, 236, .9);
+      color: rgb(80, 76, 83);
+    }
   }
 
   &-image {
@@ -192,7 +210,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
       border-radius: 8rem;
       padding: 12rem;
 
-      font-size: calc(25rem * var(--fontScale));
+      font-size: calc(25rem * #{vanilla.$font-scale});
       color: white;
 
       opacity: .2;
@@ -214,19 +232,19 @@ $co-panel-color-dark: rgb(24, 33, 51);
     $control-border: 2rem solid transparent;
     $control-border-color: #61a0b9;
     $control-border-radius: 5rem; // vanilla is 3rem
-    $control-background-color: color.adjust($co-panel-color-dark, $alpha: -0.9);
+    $control-background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
     $control-background-color-focused: rgba(255, 255, 255, .4);
 
     padding: 10rem;
 
     // This class is injected alongside the Vanilla class.
     &-checkbox-toggle {
-      width: 26rem;
-      height: 26rem;
+      width: calc(26rem * #{vanilla.$font-scale});
+      height: calc(26rem * #{vanilla.$font-scale});
       //noinspection CssReplaceWithShorthandSafely
       border: $control-border;
       //noinspection CssReplaceWithShorthandSafely
-      border-color: color.adjust($co-panel-color-dark, $alpha: -0.7);
+      border-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.7);
       border-radius: $control-border-radius;
 
       // Impossible to also make &.checked work so we use &-field-checked below.
@@ -267,7 +285,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
         height: 50px;
         display: flex;
         align-items: center;
-        font-size: var(--fontSizeXL);
+        font-size: vanilla.$font-size-xl;
 
         &-image {
           width: 40rem;
@@ -296,8 +314,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
     }
 
     &-field-invalid &-dropdown-toggle {
-      // var(--warningColor) but it does not work here so, hardcoding.
-      border-color: #ffa42d !important;
+      border-color: vanilla.$warning-color !important;
       animation: pop-out .3s common.$default-timing-function;
 
       @keyframes pop-out {
@@ -345,8 +362,8 @@ $co-panel-color-dark: rgb(24, 33, 51);
         margin-top: 10rem;
         display: flex; // Workaround cohtml breaking text nodes into two lines.
         align-items: center;
-        font-size: var(--fontSizeS);
-        color: var(--menuText1Disabled);
+        font-size: vanilla.$font-size-s;
+        color: vanilla.$menu-text-1-disabled;
 
         &-button {
           border: $control-border;
@@ -369,7 +386,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
       font-weight: bold;
 
       &:hover {
-        background-color: color.adjust($co-panel-color-dark, $alpha: -0.9);
+        background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
       }
 
       label small {
@@ -400,7 +417,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
   &-city-info {
     display: flex;
     flex-direction: row;
-    font-size: calc(20rem * var(--fontScale));
+    font-size: calc(20rem * #{vanilla.$font-scale});
 
     span {
       margin-left: 20rem;
@@ -411,7 +428,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
 
         strong {
           margin-right: 10rem;
-          font-size: calc(28rem * var(--fontScale));
+          font-size: calc(28rem * #{vanilla.$font-scale});
           font-weight: normal;
         }
       }
@@ -420,7 +437,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
         width: 35rem;
         height: 100%;
         margin-right: 10rem;
-        filter: drop-shadow(0 1rem .4rem var(--panelColorNormal));
+        filter: drop-shadow(0 1rem .4rem vanilla.$panel-color-normal);
       }
     }
   }
@@ -438,7 +455,7 @@ $co-panel-color-dark: rgb(24, 33, 51);
   }
 
   &-warning {
-    background-color: var(--warningColor);
+    background-color: vanilla.$warning-color;
   }
 
   &-footer {
@@ -446,26 +463,56 @@ $co-panel-color-dark: rgb(24, 33, 51);
     flex-direction: row;
     justify-content: flex-end;
     align-items: center;
-    background-color: var(--panelColorDark);
+    background-color: vanilla.$legacy-panel-color-dark;
+
+    @include common.on-new-ui {
+      background-image: linear-gradient(
+        #{vanilla.$panel-gradient-start},
+        #{vanilla.$panel-gradient-end}
+      );
+    }
 
     &-button {
       margin-left: 20rem;
+      display: flex;
+      align-items: center;
       padding: 10rem 20rem;
 
-      &-cancel {
-        background-color: transparent;
+      &[disabled] {
+        pointer-events: none;
+        filter: grayscale(1);
+      }
 
-        &:hover, &:active {
-          background-color: var(--menuFocusedColor);
-          color: var(--menuText1Inverted);
+      @include common.on-new-ui {
+        color: vanilla.$text-color;
+        background-color: color.adjust(vanilla.$highlight-green, $lightness: -15%);
+
+        &:hover {
+          background-color: color.adjust(vanilla.$highlight-green, $lightness: -10%);
         }
 
         &:active {
-          background-color: var(--menuSelectedColor);
+          background-color: color.adjust(vanilla.$highlight-green, $lightness: -20%);
+        }
+      }
+
+      &-cancel {
+        color: vanilla.$text-color;
+        background-color: transparent !important; // override higher specificity from .legacy-interface
+
+        &:hover, &:active {
+          background-color: vanilla.$menu-focused-color !important; // same override
+          color: vanilla.$menu-text-1-inverted;
+        }
+
+        &:active {
+          background-color: vanilla.$menu-selected-color;
         }
       }
 
       &-icon {
+        // Variable used by the vanilla icon class.
+        --size: calc(26rem * #{vanilla.$font-scale});
         margin-right: 10rem;
       }
     }
@@ -476,16 +523,16 @@ $co-panel-color-dark: rgb(24, 33, 51);
 // contained in the panel, so this needs to be higher scope.
 .scrollable-track-customization {
   [class^="track"] {
-    background-color: color.adjust($co-panel-color-dark, $alpha: -0.85);
+    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
 
     [class^="thumb"] {
       transition: background-color .1s ease-in-out;
-      background-color: color.adjust($co-panel-color-dark, $alpha: -0.85);
+      background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
     }
   }
 
   &:hover [class^="track"] [class^="thumb"] {
-    background-color: color.adjust($co-panel-color-dark, $alpha: -0.6);
+    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.6);
   }
 }
 

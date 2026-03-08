@@ -1,5 +1,6 @@
-﻿@use 'sass:color';
+@use 'sass:color';
 @use '../common';
+@use '../vanilla-vars' as vanilla;
 
 .menu-controls-container {
   --button-size: 65rem;
@@ -20,9 +21,6 @@
 }
 
 .menu-controls {
-  // Can't mix a CSS variable with alpha in this version of CSS, so we have to copy the value here.
-  $vanilla-accent-color-dark: #1e83aa;
-
   display: flex;
   flex-direction: column;
   line-height: 1.35;
@@ -35,10 +33,10 @@
     display: flex;
     flex-direction: column;
     border-radius: 12rem;
-    background-color: color.change($vanilla-accent-color-dark, $alpha: 0.55);
-    backdrop-filter: var(--menuBlur);
+    background-color: color.change(vanilla.$accent-color-dark, $alpha: 0.55);
+    backdrop-filter: vanilla.$menu-blur;
     padding: 15rem;
-    font-size: var(--fontSizeL);
+    font-size: vanilla.$font-size-l;
 
     &-header {
       margin-bottom: 15rem;
@@ -67,7 +65,7 @@
 
     &-gameplay-not-affected {
       margin-top: 10rem;
-      font-size: var(--fontSizeXL);
+      font-size: vanilla.$font-size-xl;
     }
 
     button {
@@ -116,7 +114,7 @@
       width: 87rem;
       height: 87rem;
 
-      border-radius: 5rem; // Vanilla's --panelRadiusInner but using var() does not work here.
+      border-radius: 5rem;
 
       background-position: center;
       background-size: cover;
@@ -136,7 +134,7 @@
         align-items: center;
 
         text-transform: uppercase;
-        font-size: var(--fontSizeS);
+        font-size: vanilla.$font-size-s;
         font-weight: bold;
 
         // Targets <Icon>.
@@ -155,12 +153,12 @@
         margin-bottom: 5rem;
 
         line-height: 1.1;
-        font-size: var(--fontSizeXL);
+        font-size: vanilla.$font-size-xl;
         font-weight: bold;
       }
 
       &-author {
-        font-size: var(--fontSizeL);
+        font-size: vanilla.$font-size-l;
       }
 
       &-description {
@@ -175,7 +173,7 @@
         overflow: hidden;
         opacity: 0;
 
-        font-size: var(--fontSizeS);
+        font-size: vanilla.$font-size-s;
       }
     }
 
@@ -186,7 +184,7 @@
     }
 
     &:hover &-text-header > [class*="icon"] > [class*="icon"] {
-      background-color: var(--menuText1Inverted);
+      background-color: vanilla.$menu-text-1-inverted;
     }
 
     &:hover &-text-description {
@@ -219,7 +217,7 @@
         height: 40rem;
         display: flex;
         align-items: center;
-        @include common.border-radius(25rem);
+        border-radius: 20rem;
         backdrop-filter: contrast(80%) blur(25px);
         padding: 0 12rem;
 
@@ -231,7 +229,7 @@
           width: 22rem;
           height: 100%;
           margin-right: 10rem;
-          filter: drop-shadow(0 1rem .4rem var(--panelColorNormal));
+          filter: drop-shadow(0 1rem .4rem #{vanilla.$panel-color-normal});
         }
       }
     }
@@ -272,7 +270,7 @@
         &-active {
           // Class set when the related action is performed via keypress and not via the button.
           // Values taken from the vanilla :active button style.
-          background-color: var(--menuActiveColorBright);
+          background-color: vanilla.$menu-active-color-bright;
         }
 
         [class*="label"] {
@@ -316,7 +314,7 @@
             // importants are for overriding :hover styles.
             box-shadow: 0 0 0 2rem #e25570 !important;
             background-color: #e25570aa !important;
-            color: var(--menuText1Normal) !important;
+            color: vanilla.$menu-text-1-normal !important;
 
             &:active {
               background-color: #e25570cc !important;
@@ -402,16 +400,16 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 25rem;
-    text-shadow: 1rem 1rem 4rem var(--panelColorDark);
-    font-size: calc(35rem * var(--fontScale));
+    text-shadow: 1rem 1rem 4rem vanilla.$panel-color-dark;
+    font-size: calc(35rem * #{vanilla.$font-scale});
 
     &-translated-hint {
       position: absolute;
       top: -1.2em; // same as line-height
       display: flex;
       opacity: .7;
-      font-size: var(--fontSizeM);
-      filter: drop-shadow(1rem 1rem 1rem var(--panelColorDark));
+      font-size: vanilla.$font-size-m;
+      filter: drop-shadow(1rem 1rem 1rem vanilla.$panel-color-dark);
       transition: opacity .2s ease-in-out;
 
       &:hover {
@@ -428,12 +426,12 @@
     &-translated-tooltip {
       display: flex;
       flex-direction: column;
-      font-size: calc(25rem * var(--fontScale));
+      font-size: calc(25rem * #{vanilla.$font-scale});
     }
 
     &-city {
       display: flex;
-      font-size: calc(45rem * var(--fontScale));
+      font-size: calc(45rem * #{vanilla.$font-scale});
     }
 
     &-creator {
@@ -471,7 +469,7 @@
             width: 70%;
             height: 70%;
             // Copied from the city/creator name text but made less prominent.
-            filter: drop-shadow(0rem 0rem 3rem var(--panelColorDark));
+            filter: drop-shadow(0rem 0rem 3rem vanilla.$panel-color-dark);
           }
         }
       }
@@ -480,8 +478,8 @@
 
   &-likes-count {
     display: inline;
-    text-shadow: 1rem 1rem 4rem var(--panelColorDark);
-    font-size: calc(30rem * var(--fontScale));
+    text-shadow: 1rem 1rem 4rem vanilla.$panel-color-dark;
+    font-size: calc(30rem * #{vanilla.$font-scale});
 
     &-number {
       font-weight: bold;

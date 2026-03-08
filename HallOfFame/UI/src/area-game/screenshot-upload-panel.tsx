@@ -299,6 +299,8 @@ function ScreenshotUploadProgress({
   // noinspection HtmlRequiredAltAttribute
   return (
     <div className={styles.screenshotUploadPanelUploadProgress}>
+      <div className={styles.screenshotUploadPanelUploadProgressBackgroundColor} />
+
       <div
         className={classNames(styles.screenshotUploadPanelUploadProgressContent, {
           [styles.screenshotUploadPanelUploadProgressContentUploadSuccess]: successImageUri != null
@@ -762,17 +764,19 @@ function ScreenshotUploadPanelFooter({
     <div className={styles.screenshotUploadPanelFooter} {...draggable}>
       {isIdleOrUploading && (
         <>
-          <Button
-            className={classNames(
-              styles.screenshotUploadPanelFooterButton,
-              styles.screenshotUploadPanelFooterButtonCancel
-            )}
-            variant='primary'
-            disabled={isUploading}
-            onSelect={discardScreenshot}
-            selectSound='close-panel'>
-            {translate('Common.ACTION[Cancel]', 'Cancel')}
-          </Button>
+          {!isUploading && (
+            <Button
+              className={classNames(
+                styles.screenshotUploadPanelFooterButton,
+                styles.screenshotUploadPanelFooterButtonCancel
+              )}
+              variant='primary'
+              disabled={isUploading}
+              onSelect={discardScreenshot}
+              selectSound='close-panel'>
+              {translate('Common.ACTION[Cancel]', 'Cancel')}
+            </Button>
+          )}
 
           <Button
             variant='primary'

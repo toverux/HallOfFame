@@ -1,16 +1,11 @@
-﻿// CoHTML engine does not support border-radius shorthand.
-@mixin border-radius($value) {
-  //noinspection CssReplaceWithShorthandSafely
-  border-top-right-radius: $value;
-  //noinspection CssReplaceWithShorthandSafely
-  border-top-left-radius: $value;
-  //noinspection CssReplaceWithShorthandSafely
-  border-bottom-right-radius: $value;
-  //noinspection CssReplaceWithShorthandSafely
-  border-bottom-left-radius: $value;
-}
+﻿$default-timing-function: cubic-bezier(.25, .46, .45, .94);
 
-$default-timing-function: cubic-bezier(.25, .46, .45, .94);
+// Applies the content passed in the mixin when the legacy UI is not enabled.
+@mixin on-new-ui {
+  @at-root :global(.overwrite-legacy) & {
+    @content;
+  }
+}
 
 @mixin fade-in(
   $duration: .5s,
