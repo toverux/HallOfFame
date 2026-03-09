@@ -548,7 +548,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     this.SupporterScreenshotWeight = 1;
 
     this.ViewMaxAge = 60;
-    this.ScreenshotResolution = "fhd";
+    this.ScreenshotResolution = Screen.width * Screen.height > 1920 * 1080 ? "4k" : "fhd";
     this.NamesTranslationMode = "translate";
 
     this.CreatorsScreenshotSaveDirectory = Path.GetFullPath(
