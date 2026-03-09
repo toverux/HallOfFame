@@ -595,7 +595,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
     };
   }
 
-  private static bool IsNvidiaGpu() => SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
+  internal static bool IsNvidiaGpu() =>
+    SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
 
   /// <summary>
   /// Initializes <see cref="CreatorID"/>, <see cref="IsParadoxAccountID"/> and
