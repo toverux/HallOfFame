@@ -135,28 +135,14 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2026.1.0" />
+  <ModVersion Value="2026.2.0" />
   <GameVersion Value="1.5.*" />
-  <ChangeLog>**New features and changes:**
-
-- **New gallery website, made by sparkly_foxxy: https://viewer.halloffame.mtq.io**. Check out your screenshots and other people's work on the web! A button has been added in the mod settings to open your gallery.
-- **Add the "Popular" screenshot selection algorithm.** This new algorithm chooses pictures that have a higher-than-median like to view ratio (which is about 9%). This will greatly help good screenshots that don't have an overwhelming number of likes resurface more.
-
-**Improvements:**
-
-- New default screenshot selection algorithms weights are as follows (and as always, are configurable in the mod settings):
-  - Popular: 10
-  - Trending: 10
-  - Recent: 10
-  - Forgotten Ones: 0
-  - Random: 5
-  - Supporter: 1
-- Smaller showcased asset/map block that adapts to the size of the content and expands on hover.
-- Localization updates.
-
-**Bugfixes:**
-
-- Fixed text overflows in the asset selection dropdown.</ChangeLog>
+  <ChangeLog>- Compatibility fix for game version 1.5.5f1 (you can take screenshots again).
+- Made a new theme for the upload panel, chose theme was slightly broken and off since the game introduced the new UI.
+- The upload panel uses legacy styles when the legacy game UI is enabled.
+- The mod will now default to 4K images if you have more than 1920×1020 pixels.
+- Slightly better support for text scales higher than 100%.
+- Introduced Korean translation (thanks @Solentis!).</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
