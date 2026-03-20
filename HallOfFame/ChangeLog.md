@@ -1,6 +1,1 @@
-﻿- Compatibility fix for game version 1.5.5f1 (you can take screenshots again).
-- Made a new theme for the upload panel, chose theme was slightly broken and off since the game introduced the new UI.
-- The upload panel uses legacy styles when the legacy game UI is enabled.
-- The mod will now default to 4K images if you have more than 1920×1020 pixels.
-- Slightly better support for text scales higher than 100%.
-- Introduced Korean translation (thanks @Solentis!).
+﻿- Localization updates to es-es, nl-nl and ko-kr.
