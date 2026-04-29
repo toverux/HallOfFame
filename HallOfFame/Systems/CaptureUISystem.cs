@@ -259,7 +259,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
       return this.activeModsCache = mods
         // Ignore Hall of Fame's ID
-        .Where(mod => mod.id != 90641)
+        .Where(mod => mod.id != "90641")
         .ToArray();
     }
     catch (Exception ex) {
@@ -754,7 +754,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     bool wasGlobalIlluminationDisabled,
     bool areSettingsTopQuality,
     IDictionary<string, float> renderSettings,
-    int[] modIds
+    string[] modIds
   ) : IJsonWritable {
     /// <summary>
     /// As we use the same file name for each new screenshot, this is a refresh counter appended to
@@ -762,8 +762,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     /// </summary>
     private static int latestVersion;
 
-    private readonly int currentVersion =
-      ScreenshotSnapshot.latestVersion++;
+    private readonly int currentVersion = ScreenshotSnapshot.latestVersion++;
 
     internal int AchievedMilestone { get; } = achievedMilestone;
 
@@ -776,7 +775,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     internal IDictionary<string, float> RenderSettings { get; } =
       renderSettings;
 
-    internal int[] ModIds { get; } = modIds;
+    internal string[] ModIds { get; } = modIds;
 
     internal string PreviewImageUri =>
       $"coui://halloffame/{Path.GetFileName(CaptureUISystem.ScreenshotPreviewFilePath)}" +

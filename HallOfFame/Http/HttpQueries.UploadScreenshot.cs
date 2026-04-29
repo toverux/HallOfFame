@@ -23,7 +23,7 @@ internal static partial class HttpQueries {
 
     internal required bool ShareModIds { get; init; }
 
-    internal required IEnumerable<int> ModIds { get; init; }
+    internal required IEnumerable<string> ModIds { get; init; }
 
     internal required bool ShareRenderSettings { get; init; }
 
