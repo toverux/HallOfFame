@@ -120,4 +120,4 @@ Donations are very welcome and will help keep the service running.
   Tiago Correia (Portuguese),
   toverux (French),
   y1ito4ka (Russian).
-- **ThemisC2** for his hum, *relentless* support to help me finally finish a personal project.
+- **ThemisC2** for his hum, _relentless_ support to help me finally finish a personal project.

@@ -92,7 +92,7 @@ Logs are situated in either:
 - Update `Version` and `FileVersion` in `HallOfFame/HallOfFame.csproj`;
 - Update `ModVersion` in `HallOfFame/Properties/PublishConfiguration.xml`;
 - Update `version` in `HallOfFame/UI/mod.json`;
-- Update `HallOfFame/ChangeLog.md` *with only what's changed since the last version*;
+- Update `HallOfFame/ChangeLog.md` _with only what's changed since the last version_;
 - Update `HallOfFame/LongDescription.md` if needed;
 - Run the `PublishNewVersion` publish configuration from the IDE or with
   `dotnet publish /p:ModPublisherCommand=NewVersion`;
