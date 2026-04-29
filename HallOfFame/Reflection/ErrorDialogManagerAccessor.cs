@@ -29,7 +29,7 @@ internal static class ErrorDialogManagerAccessor {
       );
     }
     else {
-      Mod.Log.Info(
+      Mod.Log.Verbose(
         $"{nameof(ErrorDialogManagerAccessor)}: Acquired AppBindings.m_ErrorDialogManager"
       );
     }
