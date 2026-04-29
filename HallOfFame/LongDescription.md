@@ -115,6 +115,7 @@ Donations are very welcome and will help keep the service running.
   Hendrix_ (German)
   karmel68 (Polish),
   Konsi (German),
+  Pectus Solentis (Korean),
   RilkeXS (Chinese Simplified),
   ThemisC2 (Italian),
   Tiago Correia (Portuguese),
