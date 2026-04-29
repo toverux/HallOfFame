@@ -1,1 +1,2 @@
-﻿- Localization updates to es-es, nl-nl and ko-kr.
+﻿- Small compatibility fix for game version 1.5.7f1 and PDX SDK 2.0 (error retrieving installed mods when taking a screenshot).
+- Localization update for ko-kr.

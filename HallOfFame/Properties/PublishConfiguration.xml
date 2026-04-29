@@ -136,9 +136,10 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Screenshot7.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2026.2.1" />
+  <ModVersion Value="2026.2.2" />
   <GameVersion Value="1.5.*" />
-  <ChangeLog>- Localization updates to es-es, nl-nl and ko-kr.</ChangeLog>
+  <ChangeLog>- Small compatibility fix for game version 1.5.7f1 and PDX SDK 2.0 (error retrieving installed mods when taking a screenshot).
+- Localization update for ko-kr.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
