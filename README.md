@@ -11,6 +11,14 @@ Screenshots are uploaded to a server and can be viewed by other players as a bac
 main menu, with information about the creator, the city name and controls to refresh the image,
 upvote or hide the UI to better see the image, to name a few features.
 
+**As of April 2026, Hall of Fame has registered:**
+- 👥 **13K** users tried the mod
+- ❤️ **120K** likes were given
+- ⬆️ **12K** screenshots were uploaded
+- 👀 **1.7M** image views
+
+See also: **[📈 live community statistics](https://metabase.mtq.io/public/dashboard/a74fc50f-8e69-43b7-bdba-7e5fc7420c1b?date_range=thisyear)**
+
 --------------
 
 <h3 align="center">
