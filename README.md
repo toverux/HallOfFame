@@ -29,11 +29,31 @@ The source code for the server is at
 --------------
 
 ![Hall of Fame Store Preview](HallOfFame/Properties/Preview_1.png)
-![Hall of Fame Store Preview](HallOfFame/Properties/Preview_2.png)
-![Hall of Fame Store Preview](HallOfFame/Properties/Preview_3.png)
-![Hall of Fame Store Preview](HallOfFame/Properties/Preview_4.png)
-![Hall of Fame Store Preview](HallOfFame/Properties/Preview_5.png)
-![Hall of Fame Store Preview](HallOfFame/Properties/Preview_6.png)
+
+<table>
+<tr>
+  <td>
+    <img src="HallOfFame/Properties/Preview_1.png" alt="Hall of Fame Store Preview 1">
+  </td>
+  <td>
+    <img src="HallOfFame/Properties/Preview_2.png" alt="Hall of Fame Store Preview 1">
+  </td>
+  <td>
+    <img src="HallOfFame/Properties/Preview_3.png" alt="Hall of Fame Store Preview 1">
+  </td>
+</tr>
+<tr>
+  <td>
+    <img src="HallOfFame/Properties/Preview_4.png" alt="Hall of Fame Store Preview 1">
+  </td>
+  <td>
+    <img src="HallOfFame/Properties/Preview_5.png" alt="Hall of Fame Store Preview 1">
+  </td>
+  <td>
+    <img src="HallOfFame/Properties/Preview_6.png" alt="Hall of Fame Store Preview 1">
+  </td>
+</tr>
+</table>
 
 ## Features & Roadmap
 
