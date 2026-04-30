@@ -11,10 +11,48 @@ Screenshots are uploaded to a server and can be viewed by other players as a bac
 main menu, with information about the creator, the city name and controls to refresh the image,
 upvote or hide the UI to better see the image, to name a few features.
 
-The source code for the server is at
-[toverux/HallOfFameServer](https://github.com/toverux/HallOfFameServer)
+--------------
 
-### Acknowledgements
+<h3 align="center">
+  <img align="center" alt="Paradox Mods Logo" src="HallOfFame/Properties/ParadoxModsCloud.svg" width="40">
+  &nbsp;
+  <a href="https://mods.paradoxplaza.com/mods/90641/Windows">
+    Find the mod on Paradox Mods
+  </a>
+</h3>
+
+<h4 align="center">
+The source code for the server is at
+<a href="https://github.com/toverux/HallOfFameServer">toverux/HallOfFameServer</a>
+</h4>
+
+--------------
+
+![Hall of Fame Store Preview](HallOfFame/Properties/Preview_1.png)
+![Hall of Fame Store Preview](HallOfFame/Properties/Preview_2.png)
+![Hall of Fame Store Preview](HallOfFame/Properties/Preview_3.png)
+![Hall of Fame Store Preview](HallOfFame/Properties/Preview_4.png)
+![Hall of Fame Store Preview](HallOfFame/Properties/Preview_5.png)
+![Hall of Fame Store Preview](HallOfFame/Properties/Preview_6.png)
+
+## Features & Roadmap
+
+**Notable features:**
+
+- Supersampling all screenshots you make to **4K** resolution even if you play at a lower
+  resolution, and makes better renders than the game’s native screenshot tool.
+- Have pictures displayed in the main menu, with various information about the city, author, etc.
+- Give a like to the pictures you appreciate and see popular pictures.
+- Toggle menu UI visibility to admire the pictures (like a slideshow).
+- Fine-tune how the algorithm chooses screenshots that are presented to you (recent screenshots,
+  trending, ancient and forgotten, etc.).
+- Make screenshots and upload them via a dedicated interface, all in-game.
+- Choose between Full HD and 4K resolution for pictures shown in the main menu.
+
+**Roadmap:** see our feedback & feature requests board here:
+[feedback.halloffame.cs2.mtq.io](https://feedback.halloffame.cs2.mtq.io)
+
+## Acknowledgements
 
 The mod is directly inspired from the homonymous mod for Factorio,
 [Hall of Fame](https://mods.factorio.com/mod/HallOfFame).
@@ -32,23 +70,6 @@ Special thanks to:
   Ologdring**, for having tested the mod and uploaded the first content, so we have beautiful images
   on launch.
 - **ThemisC2** for his hum, relentless support to help me finally finish a personal project.
-
-## Features & Roadmap
-
-**Notable features**:
-
-- Supersampling all screenshots you make to **4K** resolution even if you play at a lower
-  resolution, and makes better renders than the game’s native screenshot tool.
-- Have pictures displayed in the main menu, with various information about the city, author, etc.
-- Give a like to the pictures you appreciate and see popular pictures.
-- Toggle menu UI visibility to admire the pictures (like a slideshow).
-- Fine-tune how the algorithm chooses screenshots that are presented to you (recent screenshots,
-  trending, ancient and forgotten, etc.).
-- Make screenshots and upload them via a dedicated interface, all in-game.
-- Choose between Full HD and 4K resolution for pictures shown in the main menu.
-
-**Roadmap:** see our feedback & feature requests board here:
-[feedback.halloffame.cs2.mtq.io/](https://feedback.halloffame.cs2.mtq.io)
 
 ## Development
 
