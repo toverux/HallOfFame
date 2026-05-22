@@ -48,7 +48,7 @@ import * as styles from './screenshot-upload-panel.module.scss';
 
 /** From `Colossal.PSI.Common.Mod` */
 interface JsonMod {
-  readonly id: number;
+  readonly id: string;
   readonly displayName: string;
   readonly thumbnailPath: string;
 }

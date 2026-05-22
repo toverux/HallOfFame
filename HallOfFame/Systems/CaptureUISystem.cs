@@ -851,7 +851,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     internal bool ShareRenderSettings;
 
-    internal int? ShowcasedModId;
+    internal string? ShowcasedModId;
 
     internal string? Description;
 
@@ -872,7 +872,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         reader.SkipValue();
       }
       else {
-        reader.Read(out int showcasedModId);
+        reader.Read(out string showcasedModId);
         this.ShowcasedModId = showcasedModId;
       }
 

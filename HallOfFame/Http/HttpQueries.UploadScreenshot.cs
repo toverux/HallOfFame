@@ -17,7 +17,7 @@ internal static partial class HttpQueries {
 
     internal required string? MapName { get; init; }
 
-    internal required int? ShowcasedModId { get; init; }
+    internal required string? ShowcasedModId { get; init; }
 
     internal required string? Description { get; init; }
 
@@ -72,7 +72,7 @@ internal static partial class HttpQueries {
     }
 
     if (@params.ShowcasedModId is not null) {
-      multipart.AddField("showcasedModId", @params.ShowcasedModId.Value);
+      multipart.AddField("showcasedModId", @params.ShowcasedModId);
     }
 
     if (@params.Description is not null) {
