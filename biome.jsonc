@@ -7,7 +7,7 @@
     "@toverux/blanc-hopital/biome/vanilla"
   ],
   "files": {
-    "includes": ["**", "!package.json"]
+    "includes": ["**", "!**/*.md", "!package.json", "!HallOfFame/UI/vanilla-modules.source.js"]
   },
   "vcs": {
     "enabled": true,
