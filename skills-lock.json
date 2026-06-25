@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "skills": {
+    "ask-matt": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/ask-matt/SKILL.md",
+      "computedHash": "f4e28e0661d7133787329d250b458bb6b372aaa2f2f019c5c707c9b5a44b7612"
+    },
+    "codebase-design": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/codebase-design/SKILL.md",
+      "computedHash": "c20e6e42a3034e553b1919fe94cf0928f0ff3c693fd5df802998dce7a4724eaf"
+    },
+    "diagnosing-bugs": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/diagnosing-bugs/SKILL.md",
+      "computedHash": "c8743c51df3760039b2dcb8a5a61437da3128c6efb4c5381734a3f05403e9a84"
+    },
+    "grilling": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/grilling/SKILL.md",
+      "computedHash": "32f747941943e607b2dfc86a46b2284dd3e101332eafafd7569389efbe848f81"
+    },
+    "handoff": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/handoff/SKILL.md",
+      "computedHash": "b7c38b5061b73217e5478f9446fc403be17ce311d4c23a108cc37b5b4604fa37"
+    },
+    "improve-codebase-architecture": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
+      "computedHash": "4c4d2b6da48482c1a054aca0e09eafd61cdcbebe2bda10abd3f355bf5f6fc57c"
+    },
+    "prototype": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/prototype/SKILL.md",
+      "computedHash": "7bbb6ed6a73eb555026a79cc29e3ff9b26765637109f8974aba6c6f86cff85e6"
+    },
+    "tdd": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/tdd/SKILL.md",
+      "computedHash": "5d94c0930f58405485bbac1f7bb2dce7ed833702257912a63dcaf03c8e83d78e"
+    },
+    "writing-great-skills": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/writing-great-skills/SKILL.md",
+      "computedHash": "314351c66f43189bd033b35ef36fb7fd2ebcc5fd8bea8b2796632e98fe82ded7"
+    }
+  }
+}

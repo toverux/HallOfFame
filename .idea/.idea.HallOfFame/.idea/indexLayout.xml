@@ -6,6 +6,7 @@
       <Path>.gitattributes</Path>
       <Path>.gitignore</Path>
       <Path>.lefthook.yml</Path>
+      <Path>AGENTS.md</Path>
       <Path>README.md</Path>
       <Path>biome.jsonc</Path>
       <Path>crowdin.yml</Path>
