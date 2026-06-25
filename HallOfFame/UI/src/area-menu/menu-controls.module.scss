@@ -1,6 +1,6 @@
-@use 'sass:color';
-@use '../common';
-@use '../vanilla-vars' as vanilla;
+@use "sass:color";
+@use "../common";
+@use "../vanilla-vars" as vanilla;
 
 .menu-controls-container {
   --button-size: 65rem;
@@ -26,7 +26,7 @@
   line-height: 1.35;
   color: white;
 
-  @include common.fade-in(.3s);
+  @include common.fade-in(0.3s);
 
   &-error {
     margin-right: 8rem;
@@ -71,9 +71,9 @@
     button {
       align-self: flex-start;
       margin: 15rem 0 0;
-      // Override Vanilla padding-left change on hover.
-      // Also set padding-right to make sure it matches padding-left.
+      // biome-ignore lint/complexity/noImportantStyles: override vanilla padding-left change on hover.
       padding-left: 15rem !important;
+      // biome-ignore lint/complexity/noImportantStyles: same (also set padding-right to make sure it matches padding-left).
       padding-right: 15rem !important;
     }
   }
@@ -89,7 +89,8 @@
     align-items: flex-start;
 
     border-radius: 10rem;
-    padding: 20rem !important; // important to also override vanilla hover padding
+    // biome-ignore lint/complexity/noImportantStyles:  important to also override vanilla hover padding
+    padding: 20rem !important;
 
     line-height: 1.2;
     text-align: left;
@@ -162,7 +163,7 @@
       }
 
       &-description {
-        transition: max-width, max-height, opacity .3s common.$default-timing-function;
+        transition: max-width, max-height, opacity 0.3s common.$default-timing-function;
 
         // Hide, will transition to the natural size.
         // Unlike in modern browsers we cannot animate width/height from 0 to auto so instead we use
@@ -225,11 +226,12 @@
         // cohtml's layout engine.
         white-space: nowrap;
 
-        &-icon, & > [class*="icon"] {
+        &-icon,
+        & > [class*="icon"] {
           width: 22rem;
           height: 100%;
           margin-right: 10rem;
-          filter: drop-shadow(0 1rem .4rem #{vanilla.$panel-color-normal});
+          filter: drop-shadow(0 1rem 0.4rem #{vanilla.$panel-color-normal});
         }
       }
     }
@@ -246,7 +248,7 @@
         flex-direction: column;
 
         [class*="hint"] {
-          font-size: .8em;
+          font-size: 0.8em;
           margin-top: 5rem;
         }
       }
@@ -260,11 +262,14 @@
         display: flex;
         border-radius: 50%;
         justify-content: center;
-        padding: 0 !important; // override vanilla hover padding
+        // biome-ignore lint/complexity/noImportantStyles: override vanilla hover padding
+        padding: 0 !important;
         backdrop-filter: brightness(80%) contrast(90%) blur(25px);
 
-        &[disabled], &[disabled]:hover {
-          background-color: rgba(16, 19, 29, .2) !important;
+        &[disabled],
+        &[disabled]:hover {
+          // biome-ignore lint/complexity/noImportantStyles: I don't remember.
+          background-color: rgba(16, 19, 29, 0.2) !important;
         }
 
         &-active {
@@ -279,7 +284,7 @@
 
         [class*="icon"] {
           margin: 0;
-          transition: all .1s ease-in-out;
+          transition: all 0.1s ease-in-out;
         }
 
         &-previous [class*="icon"] {
@@ -294,15 +299,16 @@
         }
 
         &-like {
-          transition: all .1s ease-in-out;
+          transition: all 0.1s ease-in-out;
 
           [class*="icon"] {
             width: calc(var(--button-size) - 30rem);
             height: calc(var(--button-size) - 30rem);
-            transition: transform .15s ease-in-out;
+            transition: transform 0.15s ease-in-out;
           }
 
-          &:hover [class*="icon"], &-liked [class*="icon"] {
+          &:hover [class*="icon"],
+          &-liked [class*="icon"] {
             transform: rotate(-10deg) scale(1.6) translateX(3rem);
           }
 
@@ -311,18 +317,16 @@
           }
 
           &-liked {
-            // importants are for overriding :hover styles.
-            box-shadow: 0 0 0 2rem #e25570 !important;
-            background-color: #e25570aa !important;
+            // biome-ignore-start lint/complexity/noImportantStyles: importants are for overriding :hover styles.
+            box-shadow: 0 0 0 2rem rgb(226 85 112) !important;
+            background-color: rgba(226, 85, 112, 0.67) !important;
             color: vanilla.$menu-text-1-normal !important;
 
-            &:active {
-              background-color: #e25570cc !important;
-            }
-
+            &:active,
             &-active {
-              background-color: #e25570cc !important;
+              background-color: rgba(226, 85, 112, 0.8) !important;
             }
+            // biome-ignore-end lint/complexity/noImportantStyles: importants are for overriding :hover styles.
           }
         }
       }
@@ -339,10 +343,10 @@
     &-other-actions &-content {
       flex-direction: row;
 
-      @include common.fade-out-slide-out(-60rem, $duration: .2s);
+      @include common.fade-out-slide-out(-60rem, $duration: 0.2s);
 
       &-slide-in {
-        @include common.fade-in-slide-in(-60rem, $duration: .2s);
+        @include common.fade-in-slide-in(-60rem, $duration: 0.2s);
       }
 
       button {
@@ -377,14 +381,19 @@
 
       &-button-settings {
         width: 40rem;
+        // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
         margin-right: 0 !important;
         display: flex;
         justify-content: center;
+        // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
         padding: 0 !important;
 
         [class*="icon"] {
+          // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
           width: 25rem !important;
+          // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
           height: 25rem !important;
+          // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
           margin-right: 0 !important;
         }
 
@@ -407,10 +416,10 @@
       position: absolute;
       top: -1.2em; // same as line-height
       display: flex;
-      opacity: .7;
+      opacity: 0.7;
       font-size: vanilla.$font-size-m;
       filter: drop-shadow(1rem 1rem 1rem vanilla.$panel-color-dark);
-      transition: opacity .2s ease-in-out;
+      transition: opacity 0.2s ease-in-out;
 
       &:hover {
         opacity: 1;

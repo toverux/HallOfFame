@@ -1,3 +1,4 @@
+// biome-ignore lint/style/noExcessiveLinesPerFile: it is a big file, but unsure if I want to split it.
 import classNames from 'classnames';
 import { bindValue, trigger, useValue } from 'cs2/api';
 import { FocusSymbol } from 'cs2/input';
@@ -14,6 +15,7 @@ import {
 } from 'cs2/ui';
 import {
   type CSSProperties,
+  memo,
   type ReactElement,
   useCallback,
   useEffect,
@@ -22,9 +24,11 @@ import {
   useState
 } from 'react';
 import { useSetState } from 'react-use';
+// biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import cloudArrowUpSolidSrc from '../icons/fontawesome/cloud-arrow-up-solid.svg';
 import populationSrc from '../icons/paradox/population.svg';
 import trophySrc from '../icons/paradox/trophy.svg';
+// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
 import {
   createSingletonHook,
   type DraggableProps,
@@ -240,7 +244,7 @@ export function ScreenshotUploadPanel(): ReactElement {
   );
 }
 
-function ScreenshotUploadPanelHeader({
+const ScreenshotUploadPanelHeader = memo(function ScreenshotUploadPanelHeaderBase({
   screenshotSnapshot,
   draggable
 }: Readonly<{
@@ -271,9 +275,9 @@ function ScreenshotUploadPanelHeader({
       </Button>
     </div>
   );
-}
+});
 
-function ScreenshotUploadProgress({
+const ScreenshotUploadProgress = memo(function ScreenshotUploadProgressBase({
   uploadProgress
 }: Readonly<{ uploadProgress: JsonUploadProgress }>): ReactElement {
   const { translate } = useLocalization();
@@ -284,7 +288,7 @@ function ScreenshotUploadProgress({
   // after some time so the progress circles have finished animating.
   useEffect(() => {
     // Normal/in progress state, hide the success image.
-    if (!uploadProgress?.isComplete) {
+    if (!uploadProgress.isComplete) {
       setSuccessImageUri(undefined);
     }
     // Upload is complete, and the success image is not shown yet, display it after the progress
@@ -331,9 +335,9 @@ function ScreenshotUploadProgress({
       </div>
     </div>
   );
-}
+});
 
-function ScreenshotUploadPanelImage({
+const ScreenshotUploadPanelImage = memo(function ScreenshotUploadPanelImageBase({
   screenshotSnapshot,
   uploadProgress
 }: Readonly<{
@@ -345,6 +349,11 @@ function ScreenshotUploadPanelImage({
   const ratioPreviewInfo = useMemo(
     () => screenshotSnapshot && getRatioPreviewInfo(screenshotSnapshot),
     [screenshotSnapshot]
+  );
+
+  const showImageFullscreen = useCallback(
+    () => showFullscreenImage(screenshotSnapshot.imageUri),
+    [screenshotSnapshot.imageUri]
   );
 
   // noinspection HtmlRequiredAltAttribute
@@ -387,7 +396,7 @@ function ScreenshotUploadPanelImage({
         <Button
           variant='round'
           selectSound='open-panel'
-          onSelect={() => showFullscreenImage(screenshotSnapshot.imageUri)}
+          onSelect={showImageFullscreen}
           className={classNames(styles.screenshotUploadPanelImageMagnifyButton, {
             [styles.screenshotUploadPanelImageHidden]: uploadProgress != null
           })}>
@@ -399,59 +408,65 @@ function ScreenshotUploadPanelImage({
       </Tooltip>
     </div>
   );
-}
+});
 
-function ScreenshotUploadPanelContentCityInfo({
-  settings,
-  screenshotSnapshot,
-  creatorNameIsEmpty
-}: Readonly<{
-  settings: ModSettings;
-  screenshotSnapshot: JsonScreenshotSnapshot;
-  creatorNameIsEmpty: boolean;
-}>): ReactElement {
-  const { translate } = useLocalization();
+const ScreenshotUploadPanelContentCityInfo = memo(
+  function ScreenshotUploadPanelContentCityInfoBase({
+    settings,
+    screenshotSnapshot,
+    creatorNameIsEmpty
+  }: Readonly<{
+    settings: ModSettings;
+    screenshotSnapshot: JsonScreenshotSnapshot;
+    creatorNameIsEmpty: boolean;
+  }>): ReactElement {
+    const { translate } = useLocalization();
 
-  const cityName =
-    useValue(cityName$) ||
-    // biome-ignore lint/style/noNonNullAssertion: translation controlled by us.
-    translate('HallOfFame.Common.DEFAULT_CITY_NAME')!;
+    const cityName =
+      useValue(cityName$) ||
+      // biome-ignore lint/style/noNonNullAssertion: translation controlled by us.
+      translate('HallOfFame.Common.DEFAULT_CITY_NAME')!;
 
-  // noinspection HtmlRequiredAltAttribute
-  return (
-    <div
-      className={classNames(
-        styles.screenshotUploadPanelContent,
-        styles.screenshotUploadPanelCityInfo
-      )}>
-      <span className={styles.screenshotUploadPanelCityInfoName}>
-        <strong>{cityName}</strong>
-        {!creatorNameIsEmpty && (
-          <LocalizedString
-            id='HallOfFame.Common.CITY_BY'
-            // biome-ignore lint/style/useNamingConvention: i18n convention
-            args={{ CREATOR_NAME: settings.creatorName }}
-          />
-        )}
-      </span>
+    // noinspection HtmlRequiredAltAttribute
+    return (
+      <div
+        className={classNames(
+          styles.screenshotUploadPanelContent,
+          styles.screenshotUploadPanelCityInfo
+        )}>
+        <span className={styles.screenshotUploadPanelCityInfoName}>
+          <strong>{cityName}</strong>
+          {!creatorNameIsEmpty && (
+            <LocalizedString
+              id='HallOfFame.Common.CITY_BY'
+              // biome-ignore lint/style/useNamingConvention: i18n convention
+              args={{ CREATOR_NAME: settings.creatorName }}
+            />
+          )}
+        </span>
 
-      <div style={{ flex: 1 }} />
+        <div style={{ flex: 1 }} />
 
-      <span>
-        <img src={trophySrc} />
-        {translate(`Progression.MILESTONE_NAME:${screenshotSnapshot.achievedMilestone}`)}
-      </span>
+        <span>
+          <img src={trophySrc} />
+          {translate(`Progression.MILESTONE_NAME:${screenshotSnapshot.achievedMilestone}`)}
+        </span>
 
-      <span>
-        <img src={populationSrc} />
-        <LocalizedNumber value={screenshotSnapshot.population} />
-      </span>
-    </div>
-  );
-}
+        <span>
+          <img src={populationSrc} />
+          <LocalizedNumber value={screenshotSnapshot.population} />
+        </span>
+      </div>
+    );
+  }
+);
+
+const ScreenshotUploadPanelContentScreenshotInfo = memo(
+  ScreenshotUploadPanelContentScreenshotInfoBase
+);
 
 // biome-ignore lint/complexity/noExcessiveLinesPerFunction: form template makes it long, but it's simple
-function ScreenshotUploadPanelContentScreenshotInfo({
+function ScreenshotUploadPanelContentScreenshotInfoBase({
   settings,
   creatorNameIsEmpty,
   screenshotSnapshot,
@@ -471,6 +486,38 @@ function ScreenshotUploadPanelContentScreenshotInfo({
   const scrollController = useScrollController?.();
 
   const playHoverSound = useCallback(() => playSound('hover-item'), []);
+
+  const selectShowcasedMod = useCallback(
+    (selectedMod: JsonMod) =>
+      patchFormValue({ isShowcasingAsset: true, showcasedMod: selectedMod }),
+    [patchFormValue]
+  );
+
+  const handleShareModIdsChange = useCallback(
+    (checked: boolean) => patchFormValue({ shareModIds: checked }),
+    [patchFormValue]
+  );
+
+  const handleShareRenderSettingsChange = useCallback(
+    (checked: boolean) => patchFormValue({ shareRenderSettings: checked }),
+    [patchFormValue]
+  );
+
+  const handleShowcasingAssetChange = useCallback(
+    (checked: boolean) =>
+      patchFormValue({
+        isShowcasingAsset: checked,
+        showcasedMod: checked ? formValue.showcasedMod : undefined
+      }),
+    [patchFormValue, formValue.showcasedMod]
+  );
+
+  const restoreSavedDescription = useCallback(
+    () => patchFormValue({ description: settings.savedScreenshotDescription }),
+    [patchFormValue, settings.savedScreenshotDescription]
+  );
+
+  const clearDescription = useCallback(() => patchFormValue({ description: '' }), [patchFormValue]);
 
   const textareaContainerRef = useRef<HTMLDivElement>(null);
 
@@ -498,9 +545,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
           key={mod.id}
           value={mod}
           focusKey={new FocusSymbol(`mod-${mod.id}`)}
-          onChange={selectedMod =>
-            patchFormValue({ isShowcasingAsset: true, showcasedMod: selectedMod })
-          }>
+          onChange={selectShowcasedMod}>
           <div
             className={styles.screenshotUploadPanelFormDropdownToggleItemImage}
             style={{ backgroundImage: `url(${mod.thumbnailPath})` }}
@@ -510,7 +555,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
           </div>
         </DropdownItem>
       )),
-    [assetMods, patchFormValue]
+    [assetMods, selectShowcasedMod]
   );
 
   // noinspection HtmlRequiredAltAttribute
@@ -538,13 +583,14 @@ function ScreenshotUploadPanelContentScreenshotInfo({
             { [styles.screenshotUploadPanelFormFieldChecked]: formValue.shareModIds }
           )}
           onMouseEnter={playHoverSound}
+          // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
           onClick={() => (
             patchFormValue({ shareModIds: !formValue.shareModIds }), playSound('select-toggle')
           )}>
           <Checkbox
             theme={checkboxTheme}
             checked={formValue.shareModIds}
-            onChange={checked => patchFormValue({ shareModIds: checked })}
+            onChange={handleShareModIdsChange}
           />
 
           <label>
@@ -563,6 +609,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
             { [styles.screenshotUploadPanelFormFieldChecked]: formValue.shareRenderSettings }
           )}
           onMouseEnter={playHoverSound}
+          // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
           onClick={() => (
             patchFormValue({ shareRenderSettings: !formValue.shareRenderSettings }),
             playSound('select-toggle')
@@ -570,7 +617,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
           <Checkbox
             theme={checkboxTheme}
             checked={formValue.shareRenderSettings}
-            onChange={checked => patchFormValue({ shareRenderSettings: checked })}
+            onChange={handleShareRenderSettingsChange}
           />
 
           <label>
@@ -598,6 +645,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
               }
             )}
             onMouseEnter={playHoverSound}
+            // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
             onClick={() => (
               patchFormValue({
                 isShowcasingAsset: !formValue.isShowcasingAsset,
@@ -608,12 +656,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
             <Checkbox
               theme={checkboxTheme}
               checked={formValue.isShowcasingAsset}
-              onChange={checked =>
-                patchFormValue({
-                  isShowcasingAsset: checked,
-                  showcasedMod: checked ? formValue.showcasedMod : undefined
-                })
-              }
+              onChange={handleShowcasingAssetChange}
             />
 
             <div className={styles.screenshotUploadPanelFormFieldBlock}>
@@ -681,8 +724,11 @@ function ScreenshotUploadPanelContentScreenshotInfo({
               rows={textareaFocused || formValue.description.length > 0 ? 5 : 1}
               maxLength={4000}
               value={formValue.description}
+              // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
               onFocus={() => setTextareaFocused(true)}
+              // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
               onBlur={() => setTextareaFocused(false)}
+              // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
               onChange={event => patchFormValue({ description: event.target.value })}
             />
 
@@ -692,10 +738,9 @@ function ScreenshotUploadPanelContentScreenshotInfo({
                   <Button
                     variant='default'
                     className={styles.screenshotUploadPanelFormTextareaWrapperControlsButton}
+                    // biome-ignore lint/performance/noJsxPropsBind: trivial preventDefault handler, not worth extracting
                     onMouseDown={event => event.preventDefault()}
-                    onClick={() =>
-                      patchFormValue({ description: settings.savedScreenshotDescription })
-                    }>
+                    onClick={restoreSavedDescription}>
                     {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_RESTORE')}
                   </Button>
                 )}
@@ -705,7 +750,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
                   className={styles.screenshotUploadPanelFormTextareaWrapperControlsButton}
                   // use visibility to avoid a small layout shift when the button appears.
                   style={{ visibility: formValue.description.length > 0 ? 'visible' : 'hidden' }}
-                  onClick={() => patchFormValue({ description: '' })}>
+                  onClick={clearDescription}>
                   {translate('Editor.CLEAR', 'Clear')}
                 </Button>
 
@@ -743,7 +788,7 @@ function ScreenshotUploadPanelContentScreenshotInfo({
   );
 }
 
-function ScreenshotUploadPanelFooter({
+const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFooterBase({
   creatorNameIsEmpty,
   uploadProgress,
   draggable,
@@ -755,6 +800,8 @@ function ScreenshotUploadPanelFooter({
   formValue: ScreenshotInfoFormValue;
 }>): ReactElement {
   const { translate } = useLocalization();
+
+  const handleUpload = useCallback(() => uploadScreenshot(formValue), [formValue]);
 
   const isUploading = uploadProgress != null && !uploadProgress.isComplete;
   const isIdleOrUploading = !uploadProgress?.isComplete;
@@ -782,7 +829,7 @@ function ScreenshotUploadPanelFooter({
             variant='primary'
             className={styles.screenshotUploadPanelFooterButton}
             disabled={creatorNameIsEmpty || isUploading}
-            onSelect={() => uploadScreenshot(formValue)}>
+            onSelect={handleUpload}>
             <Icon
               src={cloudArrowUpSolidSrc}
               tinted={true}
@@ -807,7 +854,7 @@ function ScreenshotUploadPanelFooter({
       )}
     </div>
   );
-}
+});
 
 /**
  * Gets a random congratulation message (displayed in the dialog header).

@@ -8,6 +8,7 @@
 // reason.
 // A comment is also appended to each variable to indicate the latest known value, it is useful to
 // compare what changed when a game update breaks the UI.
+// biome-ignore-all lint/style/noHexColors: vanilla-extracted values as-is.
 
 $accent-color-dark: #1e83aa;
 $center-panel-width: var(--centerPanelWidth); // calc((1 + var(--fontScaleChange) / 3) * 1500rem)
@@ -34,4 +35,4 @@ $warning-color: #ffa42d; // #ffa42d
 $panel-gradient-middle: var(--panelGradientMiddle); // var(--gradientDarkBlueMiddle:rgba(41,62,80,var(--gradientOpacity:0.9)))
 
 // Game's "Legacy interface" vars
-$legacy-panel-color-dark: rgb(24, 33, 51, .6); // rgba(24, 33, 51, var(--panelOpacityDark))
+$legacy-panel-color-dark: rgb(24, 33, 51, 0.6); // rgba(24, 33, 51, var(--panelOpacityDark))

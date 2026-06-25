@@ -7,7 +7,13 @@
     "@toverux/blanc-hopital/biome/vanilla"
   ],
   "files": {
-    "includes": ["**", "!**/*.md", "!package.json", "!HallOfFame/UI/vanilla-modules.source.js"]
+    "includes": [
+      "**",
+      "!**/*.md",
+      "!**/*.svg",
+      "!package.json",
+      "!HallOfFame/UI/vanilla-modules.source.js"
+    ]
   },
   "vcs": {
     "enabled": true,
@@ -17,10 +23,17 @@
   },
   "linter": {
     "domains": {
+      "project": "all",
+      "react": "all",
+      "test": "all",
+      "types": "all",
+      "drizzle": "none",
       "next": "none",
+      "playwright": "none",
       "qwik": "none",
+      "reactNative": "none",
       "solid": "none",
-      "test": "none",
+      "turborepo": "none",
       "vue": "none"
     },
     "rules": {
@@ -37,6 +50,8 @@
         "useUniqueElementIds": "off"
       },
       "style": {
+        // Project was created without it, and it's hard to change now.
+        "noDescendingSpecificity": "off",
         "useNamingConvention": {
           "level": "on",
           "options": {
@@ -44,6 +59,11 @@
             "strictCase": false
           }
         }
+      },
+      "suspicious": {
+        // I'm careful this does not happen, and it's annoying: enabling this requires `!!thing` but
+        // then Biome asks for `Boolean(thing)` and then type coercion does not work anymore.
+        "noLeakedRender": "off"
       }
     }
   }

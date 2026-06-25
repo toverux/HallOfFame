@@ -1,8 +1,8 @@
 import { bindValue, useValue } from 'cs2/api';
 import type { LocalizedString } from 'cs2/l10n';
-import type { Dispatch } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import type { Screenshot } from '../common';
-import { createSingletonHook, useModSettings } from '../utils';
+import { createSingletonHook, type ModSettings, useModSettings } from '../utils';
 
 interface ReadonlyMenuState {
   readonly isSlideshowEnabled: boolean;
@@ -28,7 +28,7 @@ interface ReadonlyMenuState {
   readonly forcedRefreshIndex: number;
 
   /**
-   * Whether a new screenshot is being loaded and/or a screenshot image is being preloaded.
+   * Whether a new screenshot is being loaded, and/or a screenshot image is being preloaded.
    *
    * @default false
    */
@@ -97,7 +97,7 @@ const useSingletonMenuState = createSingletonHook<SettableMenuState>({
 
 export function useHofMenuState(): [
   ReadonlyMenuState & SettableMenuState,
-  Dispatch<SettableMenuState>
+  Dispatch<SetStateAction<SettableMenuState>>
 ] {
   const settings = useModSettings();
   const [settableMenuState, setMenuState] = useSingletonMenuState();
@@ -116,15 +116,65 @@ export function useHofMenuState(): [
     hasPreviousScreenshot,
     forcedRefreshIndex,
     isRefreshing,
-    imageUri: screenshot
-      ? settings.screenshotResolution == 'fhd'
-        ? screenshot.imageUrlFHD
-        : screenshot.imageUrl4K
-      : null,
+    imageUri: deriveImageUri(screenshot, settings),
     screenshot,
     error,
     isSaving
   };
 
   return [menuState, setMenuState];
+}
+
+/**
+ * Lightweight selector that only subscribes to the slideshow-enabled flag.
+ *
+ * Prefer this over {@link useHofMenuState} in components that only need to know whether the HoF
+ * slideshow is active: the full hook subscribes to every presenter binding and would re-render
+ * those components on unrelated updates.
+ */
+export function useIsSlideshowEnabled(): boolean {
+  return useValue(enableMainMenuSlideshow$);
+}
+
+/**
+ * Lightweight selector that only subscribes to the menu-visibility flag.
+ *
+ * @see useIsSlideshowEnabled for the rationale.
+ */
+export function useIsMenuVisible(): boolean {
+  const [{ isMenuVisible }] = useSingletonMenuState();
+
+  return isMenuVisible;
+}
+
+/**
+ * Lightweight selector for the splashscreen, subscribing only to the current image URI and the
+ * refreshing flag (plus the stable setter to report readiness for the next image), rather than
+ * every presenter binding.
+ *
+ * @see useIsSlideshowEnabled for the rationale.
+ */
+export function useSplashscreenState(): readonly [
+  Readonly<{ imageUri: string | null; isRefreshing: boolean }>,
+  Dispatch<SetStateAction<SettableMenuState>>
+] {
+  const settings = useModSettings();
+  const [, setMenuState] = useSingletonMenuState();
+
+  const isRefreshing = useValue(isRefreshing$);
+  const screenshot = useValue(screenshot$);
+
+  return [{ imageUri: deriveImageUri(screenshot, settings), isRefreshing }, setMenuState];
+}
+
+/**
+ * Resolves the image URI to display from the current screenshot, picking the resolution variant
+ * that matches the user's quality setting.
+ */
+function deriveImageUri(screenshot: Screenshot | null, settings: ModSettings): string | null {
+  if (!screenshot) {
+    return null;
+  }
+
+  return settings.screenshotResolution == 'fhd' ? screenshot.imageUrlFHD : screenshot.imageUrl4K;
 }

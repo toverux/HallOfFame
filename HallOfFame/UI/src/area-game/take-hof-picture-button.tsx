@@ -2,6 +2,7 @@
 import { useLocalization } from 'cs2/l10n';
 import { Tooltip } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
+// biome-ignore lint/correctness/noPrivateImports: svgs don't have @public annotations
 import sharePictureSrc from '../icons/uil/standard/share-picture.svg';
 import { logError } from '../utils';
 import * as styles from './take-hof-picture-button.module.scss';
@@ -26,6 +27,7 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
   useEffect(() => {
     // Retrieve the button element and add our custom class to it.
     const button = spanRef.current?.firstElementChild;
+
     if (!(button instanceof HTMLButtonElement)) {
       return logError(new Error(`Expected template HTML to be a <button>.`));
     }

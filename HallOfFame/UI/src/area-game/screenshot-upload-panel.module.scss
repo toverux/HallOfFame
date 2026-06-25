@@ -1,6 +1,6 @@
-@use 'sass:color';
-@use '../common';
-@use '../vanilla-vars' as vanilla;
+@use "sass:color";
+@use "../common";
+@use "../vanilla-vars" as vanilla;
 
 .screenshot-upload-panel-container {
   // We should be on top except if other mods add content.
@@ -20,6 +20,11 @@
 }
 
 .screenshot-upload-panel {
+  // Those RGB colors are the ones used by Vanilla in right panels like the lifepath one or the
+  // event log. Vanilla does not use variables here.
+  $game-panel-white: rgba(236, 236, 236, 0.9);
+  $game-panel-gray: rgb(80, 76, 83);
+
   $separator-shadow-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.8);
 
   pointer-events: auto;
@@ -40,7 +45,10 @@
 
   @include common.scale-in-ver-center;
 
-  &-header, &-content, &-warning, &-footer {
+  &-header,
+  &-content,
+  &-warning,
+  &-footer {
     padding: 20rem;
   }
 
@@ -93,9 +101,10 @@
       left: 0;
       right: 0;
       background-color: vanilla.$panel-color-dark;
-      opacity: .5;
+      opacity: 0.5;
 
       @include common.on-new-ui {
+        // biome-ignore lint/suspicious/noDuplicateProperties: intentional
         background-color: vanilla.$panel-gradient-middle;
       }
     }
@@ -106,7 +115,7 @@
       justify-content: center;
       align-items: center;
 
-      transition: transform .3s cubic-bezier(.47, 1.64, .41, .8);
+      transition: transform 0.3s cubic-bezier(0.47, 1.64, 0.41, 0.8);
 
       &-upload-success {
         transform: scale(1.3, 1.3);
@@ -146,20 +155,21 @@
       padding: 10rem;
 
       [class*="icon"] {
-        opacity: .8;
+        opacity: 0.8;
       }
     }
   }
 
-  &-header, &-city-info, &-panes-info {
+  &-header,
+  &-city-info,
+  &-panes-info {
     background-color: var(--menuFocusedColor);
     color: var(--menuText1Inverted);
 
     @include common.on-new-ui {
-      // Those RGB colors are the ones used by Vanilla in right panels like the lifepath one or the
-      // event log. Vanilla does not use variables here.
-      background-color: rgba(236, 236, 236, .9);
-      color: rgb(80, 76, 83);
+      // biome-ignore lint/suspicious/noDuplicateProperties: intentional
+      background-color: $game-panel-white;
+      color: $game-panel-gray;
     }
   }
 
@@ -196,7 +206,7 @@
         width: 60%;
         height: 60%;
         fill: white;
-        opacity: .8;
+        opacity: 0.8;
       }
     }
 
@@ -213,11 +223,11 @@
       font-size: calc(25rem * #{vanilla.$font-scale});
       color: white;
 
-      opacity: .2;
-      transition: opacity .2s ease-in-out;
+      opacity: 0.2;
+      transition: opacity 0.2s ease-in-out;
 
       &:hover {
-        opacity: .8;
+        opacity: 0.8;
       }
     }
   }
@@ -230,10 +240,11 @@
 
   &-form {
     $control-border: 2rem solid transparent;
+    // biome-ignore lint/style/noHexColors: was extracted from some vanilla var, don't remember.
     $control-border-color: #61a0b9;
     $control-border-radius: 5rem; // vanilla is 3rem
     $control-background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
-    $control-background-color-focused: rgba(255, 255, 255, .4);
+    $control-background-color-focused: rgba(255, 255, 255, 0.4);
 
     padding: 10rem;
 
@@ -248,7 +259,8 @@
       border-radius: $control-border-radius;
 
       // Impossible to also make &.checked work so we use &-field-checked below.
-      &:hover, &:focus {
+      &:hover,
+      &:focus {
         background-color: $control-background-color-focused;
       }
 
@@ -275,7 +287,8 @@
       border-radius: $control-border-radius;
       background-color: $control-background-color;
 
-      &:hover, &:focus {
+      &:hover,
+      &:focus {
         border-color: $control-border-color;
         background-color: $control-background-color-focused;
       }
@@ -314,13 +327,20 @@
     }
 
     &-field-invalid &-dropdown-toggle {
+      // biome-ignore lint/complexity/noImportantStyles: yup, I don't remember.
       border-color: vanilla.$warning-color !important;
-      animation: pop-out .3s common.$default-timing-function;
+      animation: pop-out 0.3s common.$default-timing-function;
 
       @keyframes pop-out {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
     }
 
@@ -352,7 +372,8 @@
         padding: 10rem;
         background-color: $control-background-color;
 
-        &:hover, &:focus {
+        &:hover,
+        &:focus {
           border-color: $control-border-color;
           background-color: $control-background-color-focused;
         }
@@ -437,7 +458,7 @@
         width: 35rem;
         height: 100%;
         margin-right: 10rem;
-        filter: drop-shadow(0 1rem .4rem vanilla.$panel-color-normal);
+        filter: drop-shadow(0 1rem 0.4rem vanilla.$panel-color-normal);
       }
     }
   }
@@ -498,15 +519,26 @@
 
       &-cancel {
         color: vanilla.$text-color;
-        background-color: transparent !important; // override higher specificity from .legacy-interface
+        border-color: transparent;
+        background-image: none;
+        // biome-ignore lint/complexity/noImportantStyles: override higher specificity from .legacy-interface
+        background-color: transparent !important;
 
-        &:hover, &:active {
-          background-color: vanilla.$menu-focused-color !important; // same override
-          color: vanilla.$menu-text-1-inverted;
-        }
-
+        &:hover,
         &:active {
-          background-color: vanilla.$menu-selected-color;
+          @include common.on-new-ui {
+            border-color: $game-panel-white;
+            background-image: linear-gradient(
+              90deg,
+              $game-panel-white,
+              vanilla.$menu-focused-color,
+              vanilla.$menu-focused-color,
+              $game-panel-white
+            );
+            // biome-ignore lint/complexity/noImportantStyles: override higher specificity from .legacy-interface
+            background-color: transparent !important;
+            color: vanilla.$menu-text-1-inverted;
+          }
         }
       }
 
@@ -526,7 +558,7 @@
     background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
 
     [class^="thumb"] {
-      transition: background-color .1s ease-in-out;
+      transition: background-color 0.1s ease-in-out;
       background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
     }
   }

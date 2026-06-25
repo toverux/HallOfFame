@@ -3,8 +3,16 @@ import { bindValue, useValue } from 'cs2/api';
 import { ControlIcons } from 'cs2/input';
 import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { Button, Icon, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
-import { type ReactElement, useEffect, useState } from 'react';
+import {
+  type CSSProperties,
+  memo,
+  type ReactElement,
+  useCallback,
+  useEffect,
+  useState
+} from 'react';
 import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../common';
+// biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import discordBrandsSolid from '../icons/fontawesome/discord-brands-solid.svg';
 import ellipsisSolidSrc from '../icons/fontawesome/ellipsis-solid.svg';
 import flagSolidSrc from '../icons/fontawesome/flag-solid.svg';
@@ -17,6 +25,7 @@ import trophySrc from '../icons/paradox/trophy.svg';
 import doubleArrowRightTriangleSrc from '../icons/uil/colored/double-arrow-right-triangle.svg';
 import eyeClosedSrc from '../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../icons/uil/colored/eye-open.svg';
+// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
 import {
   bindInputAction,
   type ModSettings,
@@ -99,6 +108,23 @@ export function MenuControlsContent(): ReactElement {
     }
   }, [menuState.forcedRefreshIndex]);
 
+  const openShowcasedModPage = useCallback(
+    // biome-ignore lint/style/noNonNullAssertion: will not be null here
+    () => openModPage(menuState.screenshot!.showcasedMod!),
+    [menuState.screenshot]
+  );
+
+  const toggleMoreActions = useCallback(() => setShowOtherActions(prev => !prev), []);
+
+  const openGeneralModSettings = useCallback(() => openModSettings('General'), []);
+
+  // Stable thanks to the functional update and the singleton's stable setter, so the memoized
+  // toggle button only re-renders when `isMenuVisible` actually changes.
+  const toggleMenuVisibility = useCallback(
+    () => setMenuState(prev => ({ ...prev, isMenuVisible: !prev.isMenuVisible })),
+    [setMenuState]
+  );
+
   if (menuState.error) {
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
@@ -119,13 +145,13 @@ export function MenuControlsContent(): ReactElement {
   return (
     <div
       className={classNames(styles.menuControls, styles.menuControlsApplyButtonsOffset)}
+      // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
       onMouseLeave={() => setShowOtherActions(false)}>
       {modSettings.showFeaturedAsset && menuState.screenshot.showcasedMod && (
         <Button
           variant='menu'
           className={styles.menuControlsAssetButton}
-          // biome-ignore lint/style/noNonNullAssertion: will not be null here
-          onSelect={() => openModPage(menuState.screenshot!.showcasedMod!)}>
+          onSelect={openShowcasedModPage}>
           <div
             className={styles.menuControlsAssetButtonThumbnail}
             style={{ backgroundImage: `url(${menuState.screenshot.showcasedMod.thumbnailUrl})` }}
@@ -171,12 +197,7 @@ export function MenuControlsContent(): ReactElement {
 
           <MenuControlsToggleMenuVisibilityButton
             isMenuVisible={menuState.isMenuVisible}
-            toggleMenuVisibility={() =>
-              setMenuState({
-                ...menuState,
-                isMenuVisible: !menuState.isMenuVisible
-              })
-            }
+            toggleMenuVisibility={toggleMenuVisibility}
           />
         </div>
 
@@ -221,7 +242,7 @@ export function MenuControlsContent(): ReactElement {
             className={styles.menuControlsSectionButtonsButton}
             src={ellipsisSolidSrc}
             tinted={true}
-            onSelect={() => setShowOtherActions(!showMoreActions)}
+            onSelect={toggleMoreActions}
           />
         </div>
 
@@ -272,7 +293,7 @@ export function MenuControlsContent(): ReactElement {
               variant='menu'
               src='Media/Glyphs/Gear.svg'
               tinted={true}
-              onSelect={() => openModSettings('General')}
+              onSelect={openGeneralModSettings}
             />
           </Tooltip>
         </div>
@@ -283,7 +304,7 @@ export function MenuControlsContent(): ReactElement {
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: that's okay, but yeah.
 // biome-ignore lint/complexity/noExcessiveLinesPerFunction: splitting would make it too complex.
-function MenuControlsCityName({
+const MenuControlsCityName = memo(function MenuControlsCityNameBase({
   screenshot
 }: Readonly<{
   screenshot: Screenshot;
@@ -331,7 +352,9 @@ function MenuControlsCityName({
       {(isCityNameTranslated || isCreatorNameTranslated) && (
         <div
           className={styles.menuControlsNamesTranslatedHint}
+          // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
           onMouseEnter={() => setShowTranslations(true)}
+          // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
           onMouseLeave={() => setShowTranslations(false)}>
           <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>
             <path
@@ -404,8 +427,8 @@ function MenuControlsCityName({
                   variant='round'
                   tinted={true}
                   src={socialPlatforms[link.platform].logo}
-                  // @ts-expect-error
-                  style={{ '--brand-color': socialPlatforms[link.platform].color }}
+                  style={{ '--brand-color': socialPlatforms[link.platform].color } as CSSProperties}
+                  // biome-ignore lint/performance/noJsxPropsBind: handler closes over the mapped item, cannot be a single stable ref
                   onSelect={() => openSocialLink(link)}
                 />
               </Tooltip>
@@ -415,9 +438,9 @@ function MenuControlsCityName({
       </div>
     </div>
   );
-}
+});
 
-function MenuControlsScreenshotLabels({
+const MenuControlsScreenshotLabels = memo(function MenuControlsScreenshotLabelsBase({
   modSettings,
   screenshot
 }: Readonly<{
@@ -487,9 +510,9 @@ function MenuControlsScreenshotLabels({
       </Tooltip>
     </div>
   );
-}
+});
 
-function MenuControlsNextButton({
+const MenuControlsNextButton = memo(function MenuControlsNextButtonBase({
   isLoading
 }: Readonly<{
   isLoading: boolean;
@@ -531,9 +554,9 @@ function MenuControlsNextButton({
       />
     </MenuButtonTooltip>
   );
-}
+});
 
-function MenuControlsPreviousButton({
+const MenuControlsPreviousButton = memo(function MenuControlsPreviousButtonBase({
   isLoading,
   hasPreviousScreenshot
 }: Readonly<{
@@ -577,9 +600,11 @@ function MenuControlsPreviousButton({
       />
     </MenuButtonTooltip>
   );
-}
+});
 
-function MenuControlsToggleMenuVisibilityButton({
+const MenuControlsToggleMenuVisibilityButton = memo(MenuControlsToggleMenuVisibilityButtonBase);
+
+function MenuControlsToggleMenuVisibilityButtonBase({
   isMenuVisible,
   toggleMenuVisibility
 }: Readonly<{
@@ -613,7 +638,7 @@ function MenuControlsToggleMenuVisibilityButton({
   );
 }
 
-function MenuControlsLikeButton({
+const MenuControlsLikeButton = memo(function MenuControlsLikeButtonBase({
   screenshot
 }: Readonly<{
   screenshot: Screenshot;
@@ -672,9 +697,9 @@ function MenuControlsLikeButton({
       />
     </MenuButtonTooltip>
   );
-}
+});
 
-function MenuControlsError({
+const MenuControlsError = memo(function MenuControlsErrorBase({
   error,
   isReadyForNextImage
 }: Readonly<{
@@ -717,7 +742,7 @@ function MenuControlsError({
       </MenuButton>
     </div>
   );
-}
+});
 
 function MenuButtonTooltip({
   tooltip,

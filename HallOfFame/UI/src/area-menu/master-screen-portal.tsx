@@ -2,7 +2,7 @@
 import { createPortal } from 'react-dom';
 import { getClassesModule, logError, selector } from '../utils';
 import { MenuControls } from './menu-controls';
-import { useHofMenuState } from './menu-state-hook';
+import { useIsMenuVisible } from './menu-state-hook';
 
 const coFpsDisplayStyles = getClassesModule(
   'game-ui/debug/components/fps-display/fps-display.module.scss',
@@ -33,7 +33,7 @@ interface Props {
  * It also handles toggling the game UI (except our controls).
  */
 export function MasterScreenPortal({ children }: Props): ReactNode {
-  const [menuState] = useHofMenuState();
+  const isMenuVisible = useIsMenuVisible();
 
   const [portalTargetEl, setPortalTargetEl] = useState<Element>();
 
@@ -89,14 +89,14 @@ export function MasterScreenPortal({ children }: Props): ReactNode {
     );
 
     // Hide all columns except the one with the menu controls.
-    const visibility = menuState.isMenuVisible ? 'visible' : 'hidden';
+    const visibility = isMenuVisible ? 'visible' : 'hidden';
 
     for (const element of elementsToHide) {
       if (element != menuControlsColumn.current) {
         (element as HTMLElement).style.visibility = visibility;
       }
     }
-  }, [menuState.isMenuVisible]);
+  }, [isMenuVisible]);
 
   return (
     <>

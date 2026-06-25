@@ -1,16 +1,14 @@
-﻿$default-timing-function: cubic-bezier(.25, .46, .45, .94);
+﻿$default-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 // Applies the content passed in the mixin when the legacy UI is not enabled.
 @mixin on-new-ui {
+  // biome-ignore lint/correctness/noUnknownPseudoClass: CSS modules pseudo selector
   @at-root :global(.overwrite-legacy) & {
     @content;
   }
 }
 
-@mixin fade-in(
-  $duration: .5s,
-  $timing-function: $default-timing-function) {
-
+@mixin fade-in($duration: 0.5s, $timing-function: $default-timing-function) {
   animation: fade-in $duration $timing-function both;
 
   @keyframes fade-in {
@@ -23,12 +21,7 @@
   }
 }
 
-@mixin fade-in-slide-in(
-  $x: 0,
-  $y: 0,
-  $duration: .5s,
-  $timing-function: $default-timing-function) {
-
+@mixin fade-in-slide-in($x: 0, $y: 0, $duration: 0.5s, $timing-function: $default-timing-function) {
   animation: fade-in $duration $timing-function both;
 
   @keyframes fade-in {
@@ -46,9 +39,9 @@
 @mixin fade-out-slide-out(
   $x: 0,
   $y: 0,
-  $duration: .5s,
-  $timing-function: $default-timing-function) {
-
+  $duration: 0.5s,
+  $timing-function: $default-timing-function
+) {
   animation: fade-out $duration $timing-function both;
 
   @keyframes fade-out {
@@ -66,10 +59,7 @@
   }
 }
 
-@mixin scale-in-ver-center(
-  $duration: .5s,
-  $timing-function: $default-timing-function) {
-
+@mixin scale-in-ver-center($duration: 0.5s, $timing-function: $default-timing-function) {
   animation: scale-in-ver-center $duration $timing-function both;
 
   /**

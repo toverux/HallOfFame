@@ -8,6 +8,7 @@
  *   (`options.url.filter`).
  * - Change css-loader to add "hof-" prefix to CSS modules class names.
  *   This can help debugging and other mods to target our classes.
+ * - Remove custom webpack stats printer.
  */
 
 /** biome-ignore-all lint/correctness/noNodejsModules: webpack config */
@@ -18,8 +19,6 @@ import * as process from 'node:process';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import mod from './mod.json' with { type: 'json' };
-
-const gray = text => `\x1b[90m${text}\x1b[0m`;
 
 const userDataPath = process.env.CSII_USERDATAPATH;
 
@@ -42,7 +41,7 @@ const banner = `
 // biome-ignore lint/style/noDefaultExport: per webpack api contract
 export default {
   mode: 'production',
-  stats: 'none',
+  stats: 'normal',
   entry: {
     [mod.id]: path.join(import.meta.dirname, 'src/index.tsx')
   },
@@ -127,20 +126,5 @@ export default {
   experiments: {
     outputModule: true
   },
-  plugins: [
-    new MiniCssExtractPlugin(),
-    {
-      apply(compiler) {
-        let runCount = 0;
-        compiler.hooks.done.tap('AfterDonePlugin', stats => {
-          // biome-ignore lint/suspicious/noConsole: intended
-          console.info(stats.toString({ colors: true }));
-          // biome-ignore lint/suspicious/noConsole: intended
-          console.info(`\n🔨 ${runCount++ ? 'Updated' : 'Built'} ${mod.id}`);
-          // biome-ignore lint/suspicious/noConsole: intended
-          console.info(`   ${gray(outputDir)}\n`);
-        });
-      }
-    }
-  ]
+  plugins: [new MiniCssExtractPlugin()]
 };

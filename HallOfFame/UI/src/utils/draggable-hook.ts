@@ -4,6 +4,7 @@ import {
   type RefObject,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from 'react';
@@ -51,7 +52,8 @@ export function useDraggable(targetRef: RefObject<HTMLElement | null>): Draggabl
 
       // If the element changed, reset the offset to 0, 0.
       if (state.element != element) {
-        state.x = state.y = 0;
+        state.x = 0;
+        state.y = 0;
       }
 
       state.element = element;
@@ -95,5 +97,7 @@ export function useDraggable(targetRef: RefObject<HTMLElement | null>): Draggabl
     };
   }, [isDragging, onMouseMove, onMouseUp]);
 
-  return { onMouseDown };
+  // Memoize so the returned props object keeps a stable identity across renders, allowing memoized
+  // consumers (e.g. the screenshot upload panel header and footer) to skip re-renders.
+  return useMemo(() => ({ onMouseDown }), [onMouseDown]);
 }

@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { type Dispatch, type SetStateAction, useEffect, useState } from 'react';
 
 /**
  * A function to make a shareable useState-like hook that shares its value and updates with all
@@ -24,7 +24,18 @@ export function createSingletonHook<T>(initialValue: T) {
     }
   }
 
-  return function useSingleton() {
+  // Defined once, outside the hook, so it keeps a stable identity across renders and is shared by
+  // every component using this singleton. A stable setter lets consumers safely omit it from
+  // dependency arrays and memoize the handlers that update the value. It also accepts a functional
+  // update (prev => next) like React's useState, so consumers do not need to close over the current
+  // value to compute the next one, which keeps those handlers stable too.
+  function setSharedValue(action: SetStateAction<T>): void {
+    sharedValue = typeof action == 'function' ? (action as (prev: T) => T)(sharedValue) : action;
+
+    notifyListeners();
+  }
+
+  return function useSingleton(): readonly [T, Dispatch<SetStateAction<T>>] {
     const [value, setValue] = useState<T>(sharedValue);
 
     useEffect(() => {
@@ -35,11 +46,6 @@ export function createSingletonHook<T>(initialValue: T) {
       return () => void listeners.delete(listener);
     }, []);
 
-    function updateValue(newValue: T): void {
-      sharedValue = newValue;
-      notifyListeners();
-    }
-
-    return [value, updateValue] as const;
+    return [value, setSharedValue] as const;
   };
 }
