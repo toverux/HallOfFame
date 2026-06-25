@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Version>2026.2.3</Version>
-        <FileVersion>2026.2.3</FileVersion>
+        <Version>2026.2.4</Version>
+        <FileVersion>2026.2.4</FileVersion>
 
         <Nullable>enable</Nullable>
         <Configurations>Debug;Release</Configurations>

@@ -135,10 +135,12 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Preview_6.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2026.2.3" />
+  <ModVersion Value="2026.2.4" />
   <GameVersion Value="1.6.*" />
-  <ChangeLog>- Fix an error when attempting to upload a screenshot showcasing an asset.
-- Update to Portuguese localization.</ChangeLog>
+  <ChangeLog>- Official compatibility for game update 1.6.0f1.
+- Fixed wrong button color since 1.6.0f1.
+- Optimized performance of UI rendering.
+- Localization updates for Italian and Deutsch</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />

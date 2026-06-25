@@ -1,2 +1,4 @@
-﻿- Fix an error when attempting to upload a screenshot showcasing an asset.
-- Update to Portuguese localization.
+﻿- Official compatibility for game update 1.6.0f1.
+- Fixed wrong button color since 1.6.0f1.
+- Optimized performance of UI rendering.
+- Localization updates for Italian and Deutsch
