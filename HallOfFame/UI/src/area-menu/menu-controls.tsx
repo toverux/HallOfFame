@@ -1,21 +1,10 @@
 import classNames from 'classnames';
-import { bindValue, trigger, useValue } from 'cs2/api';
+import { bindValue, useValue } from 'cs2/api';
 import { ControlIcons } from 'cs2/input';
-import {
-  type Localization,
-  LocalizedNumber,
-  LocalizedString,
-  type LocElement,
-  useLocalization
-} from 'cs2/l10n';
-import { Button, Icon, MenuButton, Tooltip, type TooltipProps, type UISound } from 'cs2/ui';
-import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
-import {
-  type CreatorSocialLink,
-  type Mod,
-  type Screenshot,
-  supportedSocialPlatforms
-} from '../common';
+import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
+import { Button, Icon, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
+import { type ReactElement, useEffect, useState } from 'react';
+import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../common';
 import discordBrandsSolid from '../icons/fontawesome/discord-brands-solid.svg';
 import ellipsisSolidSrc from '../icons/fontawesome/ellipsis-solid.svg';
 import flagSolidSrc from '../icons/fontawesome/flag-solid.svg';
@@ -30,15 +19,26 @@ import eyeClosedSrc from '../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../icons/uil/colored/eye-open.svg';
 import {
   bindInputAction,
-  type InputActionPhase,
   type ModSettings,
   type ProxyBinding,
-  playSound,
   snappyOnSelect,
   useModSettings
 } from '../utils';
 import * as styles from './menu-controls.module.scss';
+import {
+  formatBigNumber,
+  likeScreenshot,
+  locElementToReactNode,
+  nextScreenshot,
+  openModPage,
+  openModSettings,
+  openSocialLink,
+  previousScreenshot,
+  reportScreenshot,
+  saveScreenshot
+} from './menu-controls-utils';
 import { useHofMenuState } from './menu-state-hook';
+import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 
 let lastForcedRefreshIndex = 0;
 
@@ -740,122 +740,5 @@ function MenuButtonTooltip({
       }>
       {children}
     </Tooltip>
-  );
-}
-
-/**
- * Triggers the {@link handler} when the input is executed (key down AND key up).
- * The handler returns a boolean indicating whether the handler has executed the action (was ready
- * to do so).
- * If the handler returns `false`, it will be called again on key up.
- * Returning void (`undefined`) is equivalent to returning `true`.
- *
- * This is a very specific implementation whose sole role is to provide a good UX for the behavior
- * of the main menu control buttons.
- *
- * @param phase   The current input action phase.
- * @param handler The function to call when the input action is performed (key down) AND canceled
- *                (key up).
- * @param sound   The sound to play when the handler returned `true`.
- */
-function useMenuControlsInputAction(
-  phase: InputActionPhase,
-  // biome-ignore lint/suspicious/noConfusingVoidType: it's really how I want it to be here.
-  handler: () => boolean | undefined | void,
-  sound?: `${UISound}`
-) {
-  const [replayOnCanceled, setReplayOnCanceled] = useState(false);
-
-  useEffect(() => {
-    // Performed = keydown
-    // Canceled = keyup
-    if (phase == 'Performed' || (phase == 'Canceled' && replayOnCanceled)) {
-      const ready = handler() ?? true;
-
-      setReplayOnCanceled(phase == 'Performed' && !ready);
-
-      if (ready && sound) {
-        playSound(sound);
-      }
-    }
-  }, [phase]);
-}
-
-function openModSettings(tab: string): void {
-  trigger('hallOfFame.common', 'openModSettings', tab);
-}
-
-function openModPage(mod: Mod): void {
-  trigger('hallOfFame.common', 'openModPage', mod.paradoxModId);
-}
-
-function openSocialLink({ platform, link }: CreatorSocialLink): void {
-  if (platform == 'paradoxmods') {
-    trigger('hallOfFame.common', 'openCreatorPage', link);
-  } else {
-    trigger('hallOfFame.common', 'openWebPage', link);
-  }
-}
-
-function previousScreenshot(): void {
-  trigger('hallOfFame.presenter', 'previousScreenshot');
-}
-
-function nextScreenshot(): void {
-  trigger('hallOfFame.presenter', 'nextScreenshot');
-}
-
-function saveScreenshot(): void {
-  trigger('hallOfFame.presenter', 'saveScreenshot');
-}
-
-function reportScreenshot(): void {
-  trigger('hallOfFame.presenter', 'reportScreenshot');
-}
-
-function likeScreenshot(): void {
-  trigger('hallOfFame.presenter', 'likeScreenshot');
-}
-
-function locElementToReactNode(
-  element: LocElement | null | undefined,
-  fallback: ReactNode
-): ReactElement {
-  return element?.__Type == 'Game.UI.Localization.LocalizedString' ? (
-    <LocalizedString id={element.id} fallback={element.value} />
-  ) : (
-    // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
-    <>{fallback}</>
-  );
-}
-
-/**
- * Formats a big number to a human-readable string, applying special formatting
- * rules depending on the number's magnitude.
- */
-function formatBigNumber(num: number, translate: Localization['translate']): string {
-  let numStr: string;
-
-  if (num < 1000) {
-    // No formatting on small numbers.
-    numStr = num.toString();
-  } else if (num < 10_000) {
-    // Formats as "9.9K", precision .1K.
-    numStr = `${(num / 1000).toFixed(1)} K`;
-  } else if (num < 1_000_000) {
-    // Formats as "99K", rounded, precision 1K.
-    numStr = `${Math.round(num / 1000)} K`;
-  } else {
-    // Formats as "9.9M", precision .1M.
-    numStr = `${(num / 1_000_000).toFixed(1)} M`;
-  }
-
-  return (
-    numStr
-      // Remove trailing zeros.
-      .replace('.0', '')
-      // Replace decimal separator.
-      // biome-ignore lint/style/noNonNullAssertion: fallback value
-      .replace('.', translate('Common.DECIMAL_SEPARATOR', '.')!)
   );
 }
