@@ -1,5 +1,6 @@
 # Machine-specific settings and state
 /.idea/**/workspace.xml
+/.idea/**/biome.xml
 /*.DotSettings.user
 
 # UI mod
