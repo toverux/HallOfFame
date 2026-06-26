@@ -2,14 +2,17 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using Colossal.Json;
-using Colossal.UI.Binding;
 using JetBrains.Annotations;
 
 namespace HallOfFame.Domain;
 
+/// <summary>
+/// Inbound server data decoded via <c>[DecodeAlias]</c>; the outbound UI wire format lives in
+/// <see cref="HallOfFame.Utils.Writers.ScreenshotValueWriter"/>.
+/// </summary>
 [DebuggerDisplay("Screenshot #{Id} {CityName} by {Creator.CreatorName}")]
 [UsedImplicitly]
-internal record Screenshot : IJsonWritable {
+internal record Screenshot {
   [DecodeAlias("id")]
   internal string Id {
     get;
@@ -188,89 +191,4 @@ internal record Screenshot : IJsonWritable {
 
   public override string ToString() =>
     $"Screenshot #{this.Id} {this.CityName} by {this.Creator?.CreatorName}";
-
-  public void Write(IJsonWriter writer) {
-    // Type name does not support polymorphism, so we need to include all object shape changes in
-    // the type name.
-    writer.TypeBegin(
-      $"{this.GetType().FullName}" +
-      $"?Creator={this.Creator is not null}" +
-      $"&ShowcasedMod={this.ShowcasedMod is not null}"
-    );
-
-    writer.PropertyName("id");
-    writer.Write(this.Id);
-
-    writer.PropertyName("cityName");
-    writer.Write(this.CityName);
-
-    writer.PropertyName("cityNameLocale");
-    writer.Write(this.CityNameLocale);
-
-    writer.PropertyName("cityNameLatinized");
-    writer.Write(this.CityNameLatinized);
-
-    writer.PropertyName("cityNameTranslated");
-    writer.Write(this.CityNameTranslated);
-
-    writer.PropertyName("cityMilestone");
-    writer.Write(this.CityMilestone);
-
-    writer.PropertyName("cityPopulation");
-    writer.Write(this.CityPopulation);
-
-    writer.PropertyName("mapName");
-    writer.Write(this.MapName);
-
-    writer.PropertyName("description");
-    writer.Write(this.Description);
-
-    writer.PropertyName("imageUrlFHD");
-    writer.Write(this.ImageUrlFHD);
-
-    writer.PropertyName("imageUrl4K");
-    writer.Write(this.ImageUrl4K);
-
-    writer.PropertyName("shareRenderSettings");
-    writer.Write(this.ShareRenderSettings);
-
-    writer.PropertyName("renderSettings");
-    writer.Write(this.RenderSettings);
-
-    writer.PropertyName("createdAt");
-    writer.Write(this.CreatedAt.ToLocalTime().ToString("o"));
-
-    writer.PropertyName("createdAtFormatted");
-    writer.Write(this.CreatedAtFormatted);
-
-    writer.PropertyName("createdAtFormattedDistance");
-    writer.Write(this.CreatedAtFormattedDistance);
-
-    writer.PropertyName("likesCount");
-    writer.Write(this.LikesCount);
-
-    writer.PropertyName("viewsCount");
-    writer.Write(this.ViewsCount);
-
-    writer.PropertyName("uniqueViewsCount");
-    writer.Write(this.UniqueViewsCount);
-
-    writer.PropertyName("likingPercentage");
-    writer.Write(this.LikingPercentage);
-
-    writer.PropertyName("isLiked");
-    writer.Write(this.IsLiked);
-
-    if (this.Creator is not null) {
-      writer.PropertyName("creator");
-      this.Creator.Write(writer);
-    }
-
-    if (this.ShowcasedMod is not null) {
-      writer.PropertyName("showcasedMod");
-      this.ShowcasedMod.Write(writer);
-    }
-
-    writer.TypeEnd();
-  }
 }

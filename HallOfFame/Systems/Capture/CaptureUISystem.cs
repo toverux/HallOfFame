@@ -18,6 +18,7 @@ using HallOfFame.Http;
 using HallOfFame.Reflection;
 using HallOfFame.Services;
 using HallOfFame.Utils;
+using HallOfFame.Utils.Writers;
 using Unity.Entities;
 using UnityEngine;
 using ValueType = cohtml.Net.ValueType;
@@ -113,7 +114,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         CaptureUISystem.BindingGroup,
         "assetMods",
         null,
-        new ListWriter<Colossal.PSI.Common.Mod>(new ModValueWriter()).Nullable()
+        new ListWriter<Colossal.PSI.Common.Mod>(new AssetModValueWriter()).Nullable()
       );
 
       this.cityNameBinding = new GetterValueBinding<string>(

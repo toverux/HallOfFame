@@ -14,6 +14,7 @@ using HallOfFame.Domain;
 using HallOfFame.Http;
 using HallOfFame.Reflection;
 using HallOfFame.Utils;
+using HallOfFame.Utils.Writers;
 using UnityEngine.InputSystem;
 
 namespace HallOfFame.Systems;
@@ -121,7 +122,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         PresenterUISystem.BindingGroup,
         "screenshot",
         null,
-        new ValueWriter<Screenshot?>().Nullable()
+        new ScreenshotValueWriter()
       );
 
       this.errorBinding = new ValueBinding<LocalizedString?>(

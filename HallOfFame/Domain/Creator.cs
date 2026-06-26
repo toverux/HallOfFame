@@ -1,13 +1,16 @@
 ﻿using System.Diagnostics;
 using Colossal.Json;
-using Colossal.UI.Binding;
 using JetBrains.Annotations;
 
 namespace HallOfFame.Domain;
 
+/// <summary>
+/// Inbound server data decoded via <c>[DecodeAlias]</c>; the outbound UI wire format lives in
+/// <see cref="HallOfFame.Utils.Writers.CreatorValueWriter"/>.
+/// </summary>
 [DebuggerDisplay("Creator #{Id} {CreatorName}")]
 [UsedImplicitly]
-internal record Creator : IJsonWritable {
+internal record Creator {
   [DecodeAlias("id")]
   internal string Id {
     get;
@@ -52,46 +55,6 @@ internal record Creator : IJsonWritable {
   } = [];
 
   public override string ToString() => $"Creator #{this.Id} {this.CreatorName}";
-
-  public void Write(IJsonWriter writer) {
-    var typeName = this.GetType().FullName;
-
-    writer.TypeBegin(typeName);
-
-    writer.PropertyName("id");
-    writer.Write(this.Id);
-
-    writer.PropertyName("creatorName");
-    writer.Write(this.CreatorName);
-
-    writer.PropertyName("creatorNameLocale");
-    writer.Write(this.CreatorNameLocale);
-
-    writer.PropertyName("creatorNameLatinized");
-    writer.Write(this.CreatorNameLatinized);
-
-    writer.PropertyName("creatorNameTranslated");
-    writer.Write(this.CreatorNameTranslated);
-
-    writer.PropertyName("socials");
-    writer.ArrayBegin(this.Socials.Length);
-
-    foreach (var entry in this.Socials) {
-      writer.TypeBegin($"{typeName}/CreatorSocialLink");
-
-      writer.PropertyName("platform");
-      writer.Write(entry.Platform);
-
-      writer.PropertyName("link");
-      writer.Write(entry.Link);
-
-      writer.TypeEnd();
-    }
-
-    writer.ArrayEnd();
-
-    writer.TypeEnd();
-  }
 
   internal record CreatorSocialLink {
     [DecodeAlias("platform")]

@@ -1,11 +1,10 @@
 ﻿using Colossal.Json;
-using Colossal.UI.Binding;
 using JetBrains.Annotations;
 
 namespace HallOfFame.Domain;
 
 [UsedImplicitly]
-internal record CreatorStats : IJsonWritable {
+internal record CreatorStats {
   [DecodeAlias("allCreatorsCount")]
   internal int AllCreatorsCount {
     get;
@@ -53,20 +52,5 @@ internal record CreatorStats : IJsonWritable {
     get;
     [UsedImplicitly]
     set;
-  }
-
-  public void Write(IJsonWriter writer) {
-    writer.TypeBegin(this.GetType().FullName);
-
-    writer.PropertyName("screenshotsCount");
-    writer.Write(this.ScreenshotsCount);
-
-    writer.PropertyName("viewsCount");
-    writer.Write(this.ViewsCount);
-
-    writer.PropertyName("likesCount");
-    writer.Write(this.LikesCount);
-
-    writer.TypeEnd();
   }
 }

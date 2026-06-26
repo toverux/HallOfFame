@@ -1,11 +1,14 @@
 using Colossal.Json;
-using Colossal.UI.Binding;
 using JetBrains.Annotations;
 
 namespace HallOfFame.Domain;
 
+/// <summary>
+/// Inbound server data decoded via <c>[DecodeAlias]</c>; the outbound UI wire format lives in
+/// <see cref="HallOfFame.Utils.Writers.ModValueWriter"/>.
+/// </summary>
 [UsedImplicitly]
-internal record Mod : IJsonWritable {
+internal record Mod {
   [DecodeAlias("id")]
   internal string Id {
     get;
@@ -64,34 +67,4 @@ internal record Mod : IJsonWritable {
 
   public override string ToString() =>
     $"Mod #{this.Id} (Paradox ID={this.ParadoxModId}) {this.Name} by {this.AuthorName}";
-
-  public void Write(IJsonWriter writer) {
-    writer.TypeBegin(this.GetType().FullName);
-
-    writer.PropertyName("id");
-    writer.Write(this.Id);
-
-    writer.PropertyName("paradoxModId");
-    writer.Write(this.ParadoxModId);
-
-    writer.PropertyName("name");
-    writer.Write(this.Name);
-
-    writer.PropertyName("authorName");
-    writer.Write(this.AuthorName);
-
-    writer.PropertyName("shortDescription");
-    writer.Write(this.ShortDescription);
-
-    writer.PropertyName("thumbnailUrl");
-    writer.Write(this.ThumbnailUrl);
-
-    writer.PropertyName("subscribersCount");
-    writer.Write(this.SubscribersCount);
-
-    writer.PropertyName("tags");
-    writer.Write(this.Tags);
-
-    writer.TypeEnd();
-  }
 }

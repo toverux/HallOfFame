@@ -28,6 +28,9 @@ Here is a more detailed breakdown:
 - `HallOfFame/Reflection`: Proxy/accessor classes that reach into private game internals via
   reflection (e.g., screen utilities, error dialogs, Paradox SDK platform).
 - `HallOfFame/Utils`: Small helpers and extensions (localization, logging, input bindings, etc.).
+- `HallOfFame/Utils/Writers`: Outbound C# to cohtml UI-binding writers (`IWriter<T>`
+  implementations). Domain records carry only inbound `[DecodeAlias]` data, so each type's outbound
+  UI wire format lives here, not on the record.
 - `HallOfFame/UI/src`: TypeScript/React frontend, split into `area-game` (in-game HUD panels),
   `area-menu` (main-menu integration), `area-overlay` (loading screen modification), `utils`
   (shared hooks/helpers), and `vanilla-modules` (typed stubs for game UI internals).
