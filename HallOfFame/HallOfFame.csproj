@@ -131,6 +131,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="HallOfFame.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <None Include="$(ModPropsFile)" Link="Properties\Mod.props" />
         <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
     </ItemGroup>
@@ -141,7 +145,43 @@
         <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$(Version)" Query="//ModVersion/@Value" />
     </Target>
 
-    <Target Name="BuildUI" AfterTargets="AfterBuild">
+    <Target Name="BuildUI" AfterTargets="DeployWIP" Condition="'$(SkipBuildUI)' != 'true'">
         <Exec Command="bun run build" WorkingDirectory="$(SolutionDir)" />
+    </Target>
+
+    <!-- The mod contains no Burst jobs, so the per-platform native Burst compile the toolchain runs
+         is wasted time. The targets below trim that work and are only safe because of that. -->
+
+    <!-- For Debug builds, compile Burst for Windows only (the local dev platform). Release and
+         publish keep every platform (this override is Debug-gated), so the shipped mod is
+         unchanged. This uses the toolchain's documented CustomModPostProcessorConfig hook and only
+         strips the unwanted "-p" platform flags from the default args. -->
+    <Target Name="CustomModPostProcessorConfig" AfterTargets="ModPostProcessorConfig"
+            Condition="'$(Configuration)' == 'Debug'">
+        <PropertyGroup>
+            <ModPostProcessorArgs>$(ModPostProcessorArgs.Replace(' -p macOS', '').Replace(' -p Linux', ''))</ModPostProcessorArgs>
+        </PropertyGroup>
+    </Target>
+
+    <!-- Let test runs skip post processing and deployment entirely (the test:cs task sets
+         -p:SkipModPostProcess=true): the unit tests reference only managed domain/service types, so
+         they need neither the Entities/Burst codegen nor the deploy to the game's Mods folder.
+         These two targets override their Mod.targets counterparts to add the SkipModPostProcess
+         guard; keep their bodies in sync with the toolchain if it changes. -->
+    <Target Name="RunModPostProcessor" AfterTargets="AfterBuild"
+            Condition="'$(NeedBuild)' == 'true' And '$(SkipModPostProcess)' != 'true'">
+        <Error Condition="!Exists('$(ModPostProcessorFullPath)')" Text="Post processor not found, please check the path: $(ModPostProcessorFullPath)" />
+        <Message Text="Run post processor: $(ModPostProcessorArgs)" Importance="high" />
+        <Exec Command="$(ModPostProcessorArgs)" LogStandardErrorAsError="true" />
+    </Target>
+
+    <Target Name="DeployWIP" AfterTargets="AfterBuild"
+            Condition="'$(NeedBuild)' == 'true' And '$(SkipModPostProcess)' != 'true'">
+        <ItemGroup>
+            <FilesToDeploy Include="$(OutDir)\**\*.*" />
+        </ItemGroup>
+        <Message Text="Copy output to deploy directory $(DeployDir)" Importance="high" />
+        <RemoveDir Directories="$(DeployDir)" />
+        <Copy SourceFiles="@(FilesToDeploy)" DestinationFiles="@(FilesToDeploy->'$(DeployDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 </Project>

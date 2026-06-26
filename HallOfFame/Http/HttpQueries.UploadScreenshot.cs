@@ -7,37 +7,11 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
-  internal sealed record UploadScreenshotParams {
-    internal required string CityName { get; init; }
-
-    internal required int CityMilestone { get; init; }
-
-    internal required int CityPopulation { get; init; }
-
-    internal required string? MapName { get; init; }
-
-    internal required string? ShowcasedModId { get; init; }
-
-    internal required string? Description { get; init; }
-
-    internal required bool ShareModIds { get; init; }
-
-    internal required IEnumerable<string> ModIds { get; init; }
-
-    internal required bool ShareRenderSettings { get; init; }
-
-    internal required IDictionary<string, float> RenderSettings { get; init; }
-
-    internal required byte[] ScreenshotData { get; init; }
-
-    internal required ProgressHandler? UploadProgressHandler { get; init; }
-  }
-
+internal partial class HttpQueries {
   /// <summary>
   /// Upload a screenshot to the Hall of Fame.
   /// </summary>
-  internal static async Task<Screenshot> UploadScreenshot(UploadScreenshotParams @params) {
+  public async Task<Screenshot> UploadScreenshot(UploadScreenshotParams @params) {
     var multipart = new WWWForm();
 
     multipart.AddField("cityName", @params.CityName);

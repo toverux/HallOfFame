@@ -9,6 +9,7 @@ using Game.UI.Localization;
 using Game.UI.Menu;
 using HallOfFame.Domain;
 using HallOfFame.Http;
+using HallOfFame.Services;
 using HallOfFame.Utils;
 
 namespace HallOfFame.Systems;
@@ -18,6 +19,8 @@ namespace HallOfFame.Systems;
 /// those stats when the mod starts.
 /// </summary>
 internal sealed partial class StatsNotificationSystem : GameSystemBase {
+  private readonly CreatorStatsService creatorStatsService = new(Mod.Api);
+
   private NotificationUISystem? notificationUISystem;
 
   private bool notificationShownOrLoading;
@@ -89,9 +92,9 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
         return;
       }
 
-      var stats = await HttpQueries.GetCreatorStats();
+      var stats = await this.creatorStatsService.GetNotableStats();
 
-      if (stats.LikesCount < 2) {
+      if (stats is null) {
         return;
       }
 

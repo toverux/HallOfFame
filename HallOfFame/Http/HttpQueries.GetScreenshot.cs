@@ -5,11 +5,11 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
+internal partial class HttpQueries {
   /// <summary>
   /// Get a specific <see cref="Screenshot"/> by ID from the server.
   /// </summary>
-  internal static async Task<Screenshot> GetScreenshot(string screenshotId) {
+  public async Task<Screenshot> GetScreenshot(string screenshotId) {
     using var request = UnityWebRequest.Get(
       HttpQueries.PrependApiUrl($"/screenshots/{screenshotId}")
     );

@@ -4,11 +4,11 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
+internal partial class HttpQueries {
   /// <summary>
   /// Marks the given <see cref="Screenshot"/> as liked.
   /// </summary>
-  internal static async Task<View> LikeScreenshot(
+  public async Task<View> LikeScreenshot(
     string screenshotId,
     bool liked
   ) {

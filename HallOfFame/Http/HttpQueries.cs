@@ -11,12 +11,7 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
-  internal delegate void ProgressHandler(
-    float uploadProgress,
-    float downloadProgress
-  );
-
+internal sealed partial class HttpQueries : IHallOfFameApi {
   private const string BaseApiPath = "/api/v1";
 
   private static string HardwareId { get; } =

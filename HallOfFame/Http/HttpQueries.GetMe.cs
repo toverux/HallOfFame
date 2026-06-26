@@ -4,8 +4,8 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
-  internal static async Task<Creator> GetMe() {
+internal partial class HttpQueries {
+  public async Task<Creator> GetMe() {
     using var request = UnityWebRequest.Get(HttpQueries.PrependApiUrl("/creators/me"));
 
     await HttpQueries.SendRequest(request);

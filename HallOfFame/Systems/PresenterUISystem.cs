@@ -262,7 +262,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     try {
       this.isRefreshingBinding.Update(true);
 
-      var screenshot = await HttpQueries.GetScreenshot(screenshotId);
+      var screenshot = await Mod.Api.GetScreenshot(screenshotId);
 
       screenshot = await this.LoadScreenshot(screenshot: screenshot, preload: false);
 
@@ -456,7 +456,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     // Fire-and-forget async method that should be designed to never throw.
     async void MarkViewed() {
       try {
-        await HttpQueries.MarkScreenshotViewed(screenshot.Id);
+        await Mod.Api.MarkScreenshotViewed(screenshot.Id);
       }
       catch (Exception ex) {
         Mod.Log.ErrorSilent(ex);
@@ -486,7 +486,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     Screenshot? screenshot = null
   ) {
     try {
-      screenshot ??= await HttpQueries.GetRandomScreenshotWeighted();
+      screenshot ??= await Mod.Api.GetRandomScreenshotWeighted();
 
       var imageUrl = Mod.Settings.ScreenshotResolution switch {
         "fhd" => screenshot.ImageUrlFHD,
@@ -553,7 +553,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.screenshotBinding.Update(updatedScreenshot);
 
     try {
-      await HttpQueries.LikeScreenshot(
+      await Mod.Api.LikeScreenshot(
         updatedScreenshot.Id,
         updatedScreenshot.IsLiked
       );
@@ -595,7 +595,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     try {
       this.isSavingBinding.Update(true);
 
-      var imageBytes = await HttpQueries.DownloadImage(screenshot.ImageUrl4K);
+      var imageBytes = await Mod.Api.DownloadImage(screenshot.ImageUrl4K);
 
       var directory = Mod.Settings.CreatorsScreenshotSaveDirectory;
 
@@ -657,7 +657,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
           return;
         }
 
-        await HttpQueries.ReportScreenshot(screenshot.Id);
+        await Mod.Api.ReportScreenshot(screenshot.Id);
 
         var successDialog = new MessageDialog(
           LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]"),

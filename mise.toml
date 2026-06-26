@@ -12,3 +12,12 @@ run = [
   # make sure transitive dependencies are updated & deduplicated
   "mise exec bun -- bun update"
 ]
+
+[tasks."test"]
+description = "Runs the C# (and later, also TypeScript) testing suite."
+depends = ["test:cs"]
+
+[tasks."test:cs"]
+description = "Runs the C# unit tests with xUnit. Skips the TypeScript UI build, the mod post-processor, and the deploy step (none are needed by the tests)."
+raw = true
+run = "dotnet test HallOfFame.Tests/HallOfFame.Tests.csproj -p:SkipBuildUI=true -p:SkipModPostProcess=true"

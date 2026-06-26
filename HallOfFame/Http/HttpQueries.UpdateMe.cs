@@ -9,8 +9,8 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
-  internal static async Task<Creator> UpdateMe() {
+internal partial class HttpQueries {
+  public async Task<Creator> UpdateMe() {
     var payload = new Dictionary<string, object> {
       { "locale", GameManager.instance.localizationManager.activeLocaleId },
       // Free-form object we can use for debugging/analytics.

@@ -4,11 +4,11 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
+internal partial class HttpQueries {
   /// <summary>
   /// Report a screenshot to the moderation team.
   /// </summary>
-  internal static async Task<Screenshot>
+  public async Task<Screenshot>
     ReportScreenshot(string screenshotId) {
     using var request = new UnityWebRequest(
       HttpQueries.PrependApiUrl($"/screenshots/{screenshotId}/reports"),

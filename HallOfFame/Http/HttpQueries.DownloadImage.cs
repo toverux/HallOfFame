@@ -5,8 +5,8 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
-  internal static async Task<byte[]> DownloadImage(string url) {
+internal partial class HttpQueries {
+  public async Task<byte[]> DownloadImage(string url) {
     var requestId = (++HttpQueries.lastRequestId).ToString();
 
     using var request = UnityWebRequest.Get(url);

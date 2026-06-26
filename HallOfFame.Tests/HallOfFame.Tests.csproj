@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net48</TargetFramework>
+        <LangVersion>12</LangVersion>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+        <IsPublishable>false</IsPublishable>
+
+        <!-- Resolve the game's managed assemblies the same way the mod does, from the User-scoped
+             CSII_MANAGEDPATH environment variable. -->
+        <ManagedPath>$([System.Environment]::GetEnvironmentVariable('CSII_MANAGEDPATH', 'EnvironmentVariableTarget.User'))</ManagedPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+        <PackageReference Include="xunit" Version="2.9.2" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="PolySharp" Version="1.15.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <!-- Game assemblies pulled in by the mod's domain types, referenced for compilation only and
+         resolved at runtime by the AssemblyResolve probe (see GameAssemblyResolver). -->
+    <ItemGroup>
+        <Reference Include="Colossal.Core">
+            <HintPath>$(ManagedPath)\Colossal.Core.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="Colossal.UI.Binding">
+            <HintPath>$(ManagedPath)\Colossal.UI.Binding.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\HallOfFame\HallOfFame.csproj" />
+    </ItemGroup>
+</Project>

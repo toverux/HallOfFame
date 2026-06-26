@@ -6,6 +6,7 @@ using Colossal.PSI.Environment;
 using Colossal.UI;
 using Game;
 using Game.Modding;
+using HallOfFame.Http;
 using HallOfFame.Systems;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
@@ -36,6 +37,19 @@ public sealed class Mod : IMod {
     Mod.instanceValue?.settingsValue ??
     throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
+  /// <summary>
+  /// Seam over the Hall of Fame server API, consumed by the framework layer (systems,
+  /// <see cref="Settings"/>) directly, and passed by them to plain <c>Services/</c> classes through
+  /// their constructor.
+  /// Built in <see cref="OnLoad"/>; there is no setter, tests inject a fake into the plain class
+  /// under test instead.
+  /// </summary>
+  /// <exception cref="NullReferenceException"> If the mod has not been loaded yet.
+  /// </exception>
+  internal static IHallOfFameApi Api =>
+    Mod.apiValue ??
+    throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
+
   internal static string GameScreenshotsPath { get; } =
     Path.Combine(EnvPath.kUserDataPath, "Screenshots");
 
@@ -52,6 +66,8 @@ public sealed class Mod : IMod {
 
   private static Mod? instanceValue;
 
+  private static IHallOfFameApi? apiValue;
+
   private Settings? settingsValue;
 
   public void OnLoad(UpdateSystem updateSystem) {
@@ -63,6 +79,10 @@ public sealed class Mod : IMod {
     #endif
 
     try {
+      // Build the API seam consumed by the framework layer; it must exist before any system or the
+      // settings login can use it.
+      Mod.apiValue = new HttpQueries();
+
       // Create directories for settings and data.
       Mod.CreateDirectories();
 

@@ -4,11 +4,11 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
+internal partial class HttpQueries {
   /// <summary>
   /// Marks the given <see cref="Screenshot"/> as viewed.
   /// </summary>
-  internal static async Task<View> MarkScreenshotViewed(string screenshotId) {
+  public async Task<View> MarkScreenshotViewed(string screenshotId) {
     using var request = new UnityWebRequest(
       HttpQueries.PrependApiUrl($"/screenshots/{screenshotId}/views"),
       "POST"

@@ -22,6 +22,7 @@ Here is a more detailed breakdown:
   calls (fetching screenshots, uploading, liking, reporting, etc.).
 - `HallOfFame/Systems`: ECS-style UI systems that drive the mod's runtime behavior (presenting
   screenshots, capturing them, preloading images, etc.).
+- `HallOfFame/Services`: Plain (non-ECS) classes holding logic generally extracted from systems.
 - `HallOfFame/Reflection`: Proxy/accessor classes that reach into private game internals via
   reflection (e.g., screen utilities, error dialogs, Paradox SDK platform).
 - `HallOfFame/Utils`: Small helpers and extensions (localization, logging, input bindings, etc.).
@@ -52,6 +53,19 @@ Do NOT use `npx` to run commands, always prefer `mise` or `bun`.
 - `bun run build`: Check that the UI part of the mod compiles fine.
 - `bun check`: Run type checking with tsc, and linting with Biome, performing safe fixes.
   Always run this command after modifying UI code.
+
+## Testing (C#)
+
+Unit tests live in the `HallOfFame.Tests` project and run with xUnit.
+
+- `mise run test:cs`: Run the C# unit tests. It passes `-p:SkipBuildUI=true` so the TypeScript UI
+  is not rebuilt on every run.
+- Tests target `net48` like the mod, so they can reference the same game assemblies.
+- Game assemblies (Colossal, Unity) are referenced for compilation only and loaded at runtime by an
+  `AssemblyResolve` probe pointing at the game's `Managed` folder (see `GameAssemblyResolver`), so
+  no game binaries are copied into the test output.
+- ECS systems (`Systems/`) cannot be instantiated off-engine; extract product logic there to make it
+  testable.
 
 ## Boundaries
 

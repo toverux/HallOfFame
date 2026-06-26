@@ -13,7 +13,6 @@ using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Widgets;
-using HallOfFame.Http;
 using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
@@ -704,8 +703,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
       // Fetch the creator info from the server, this will also update the
       // Creator Name if it's different from the server's.
       var creator = nameOnly
-        ? await HttpQueries.GetMe()
-        : await HttpQueries.UpdateMe();
+        ? await Mod.Api.GetMe()
+        : await Mod.Api.UpdateMe();
 
       Mod.Log.Info(
         $"{nameof(Settings)}: Logged in as {creator.CreatorName}. " +

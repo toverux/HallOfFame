@@ -7,7 +7,6 @@ using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Menu;
-using HallOfFame.Http;
 using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using PDX.ModsUI;
@@ -181,7 +180,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
       async void () => {
         try {
           // Resolves the username and increments the click count.
-          var username = await HttpQueries.ResolveParadoxModsUsername(url);
+          var username = await Mod.Api.ResolveParadoxModsUsername(url);
 
           PdxSdkPlatformProxy.ShowModsUI(view => view.Show(ModsUIScreen.Creator, username));
         }

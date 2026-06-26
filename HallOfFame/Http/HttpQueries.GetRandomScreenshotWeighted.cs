@@ -4,12 +4,12 @@ using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
-internal static partial class HttpQueries {
+internal partial class HttpQueries {
   /// <summary>
   /// Get a random <see cref="Screenshot"/> from the server, with custom weights for the selection
   /// algorithms coming from the mod settings.
   /// </summary>
-  internal static async Task<Screenshot> GetRandomScreenshotWeighted() {
+  public async Task<Screenshot> GetRandomScreenshotWeighted() {
     using var request = UnityWebRequest.Get(
       HttpQueries.PrependApiUrl(
         $"/screenshots/weighted" +

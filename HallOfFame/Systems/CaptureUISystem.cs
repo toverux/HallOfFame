@@ -529,8 +529,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     try {
       this.uploadProgress = new UploadProgress(0, 0);
 
-      var screenshot = await HttpQueries.UploadScreenshot(
-        new HttpQueries.UploadScreenshotParams {
+      var screenshot = await Mod.Api.UploadScreenshot(
+        new UploadScreenshotParams {
           CityName = this.GetCityName(),
           CityMilestone = this.CurrentScreenshot.Value.AchievedMilestone,
           CityPopulation = this.CurrentScreenshot.Value.Population,
