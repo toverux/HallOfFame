@@ -22,6 +22,8 @@ Here is a more detailed breakdown:
   calls (fetching screenshots, uploading, liking, reporting, etc.).
 - `HallOfFame/Systems`: ECS-style UI systems that drive the mod's runtime behavior (presenting
   screenshots, capturing them, preloading images, etc.).
+  The `Capture/` subfolder holds the capture system (`CaptureUISystem`) plus its engine-bound
+  collaborators (`ScreenshotCapturer`, `CitySnapshotProvider`).
 - `HallOfFame/Services`: Plain (non-ECS) classes holding logic generally extracted from systems.
 - `HallOfFame/Reflection`: Proxy/accessor classes that reach into private game internals via
   reflection (e.g., screen utilities, error dialogs, Paradox SDK platform).

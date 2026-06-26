@@ -57,7 +57,7 @@ interface JsonMod {
   readonly thumbnailPath: string;
 }
 
-/** From `HallOfFame.Systems.CaptureUISystem.ScreenshotSnapshot` */
+/** From `HallOfFame.Systems.Capture.CaptureUISystem.ScreenshotSnapshot` */
 interface JsonScreenshotSnapshot {
   readonly achievedMilestone: number;
   readonly population: number;
@@ -70,7 +70,7 @@ interface JsonScreenshotSnapshot {
   readonly areSettingsTopQuality: boolean;
 }
 
-/** From `HallOfFame.Systems.CaptureUISystem.UploadProgress` */
+/** From `HallOfFame.Services.UploadProgress` */
 interface JsonUploadProgress {
   readonly isComplete: boolean;
   readonly globalProgress: number;

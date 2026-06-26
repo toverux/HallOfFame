@@ -9,24 +9,20 @@ using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
 using Game.City;
-using Game.Rendering;
 using Game.SceneFlow;
-using Game.Settings;
-using Game.Simulation;
 using Game.UI;
 using Game.UI.InGame;
 using Game.UI.Localization;
 using Game.UI.Menu;
 using HallOfFame.Http;
 using HallOfFame.Reflection;
+using HallOfFame.Services;
 using HallOfFame.Utils;
 using Unity.Entities;
 using UnityEngine;
-using UnityEngine.Rendering.HighDefinition;
-using Object = UnityEngine.Object;
 using ValueType = cohtml.Net.ValueType;
 
-namespace HallOfFame.Systems;
+namespace HallOfFame.Systems.Capture;
 
 /// <summary>
 /// UI System responsible for taking and uploading screenshots.
@@ -48,15 +44,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   private static readonly string ScreenshotPreviewFilePath =
     Path.Combine(Mod.ModDataPath, "preview.jpg");
 
-  private CitySystem? citySystem;
-
-  private CityConfigurationSystem? cityConfigurationSystem;
-
-  private PhotoModeRenderSystem? photoModeRenderSystem;
+  private CitySnapshotProvider citySnapshotProvider = null!;
 
   private ImagePreloaderUISystem? imagePreloaderUISystem;
-
-  private EntityQuery milestoneLevelQuery;
 
   /// <summary>
   /// Asset mods list for the dropdown allowing to pick a showcased mod.
@@ -78,8 +68,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   private TriggerBinding<ScreenshotInfoFormValue> uploadScreenshotBinding = null!;
 
-  private Colossal.PSI.Common.Mod[]? activeModsCache;
-
   /// <summary>
   /// Current screenshot snapshot.
   /// Null if no screenshot is being displayed/uploaded.
@@ -89,7 +77,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     set {
       this.currentScreenshotValue = value;
 
-      this.uploadProgress = null;
+      this.uploadProgressModel = null;
 
       // Optimization: only enable live bindings when a screenshot is being displayed/uploaded.
       // Run on the next frame to let the UI update one last time.
@@ -102,7 +90,10 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// </summary>
   private ScreenshotSnapshot? currentScreenshotValue;
 
-  private UploadProgress? uploadProgress;
+  /// <summary>
+  /// Progress model for the current upload, or <c>null</c> when no upload is in progress.
+  /// </summary>
+  private UploadProgressModel? uploadProgressModel;
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -111,12 +102,12 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       // Re-enabled when there is an active screenshot.
       this.Enabled = false;
 
-      this.citySystem = this.World.GetOrCreateSystemManaged<CitySystem>();
-      this.cityConfigurationSystem = this.World.GetOrCreateSystemManaged<CityConfigurationSystem>();
-      this.photoModeRenderSystem = this.World.GetOrCreateSystemManaged<PhotoModeRenderSystem>();
       this.imagePreloaderUISystem = this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
 
-      this.milestoneLevelQuery = this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
+      // The query is created here so its lifetime stays system-managed.
+      var milestoneLevelQuery = this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
+
+      this.citySnapshotProvider = new CitySnapshotProvider(this.World, milestoneLevelQuery);
 
       this.assetModsBinding = new ValueBinding<Colossal.PSI.Common.Mod[]?>(
         CaptureUISystem.BindingGroup,
@@ -128,7 +119,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.cityNameBinding = new GetterValueBinding<string>(
         CaptureUISystem.BindingGroup,
         "cityName",
-        this.GetCityName
+        this.citySnapshotProvider.GetCityName
       );
 
       this.screenshotSnapshotBinding =
@@ -143,7 +134,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         new GetterValueBinding<UploadProgress?>(
           CaptureUISystem.BindingGroup,
           "uploadProgress",
-          () => this.uploadProgress,
+          () => this.uploadProgressModel?.Current,
           new ValueWriter<UploadProgress>().Nullable()
         );
 
@@ -184,114 +175,12 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   ) {
     // Clear cache when the game state changes, so ex. if a user leaves to Paradox Mods and installs
     // a mod, it will be picked up if they reopen a save just after.
-    this.activeModsCache = null;
+    this.citySnapshotProvider.InvalidateModsCache();
 
     if (this.CurrentScreenshot is not null) {
       // Clear the screenshot when the game state changes, for example, when the user exits to the
       // main menu. Otherwise, the screenshot dialog would appear when the user reopens a game.
       this.ClearScreenshot();
-    }
-  }
-
-  /// <summary>
-  /// Get the name of the map that was used to create this save.
-  /// </summary>
-  private string? GetMapName() {
-    var mapMetadataSystem = this.World.GetOrCreateSystemManaged<MapMetadataSystem>();
-
-    var mapName = mapMetadataSystem.mapName;
-
-    // In some unclear circumstances (I reproduce this on an old save), this can be null.
-    // (This is also annotated with [CanBeNull]).
-    if (mapName is null) {
-      return null;
-    }
-
-    // The dictionary contains not only Vanilla map names but also map names from mods.
-    // Ex. A mod will have a mapName "DunedinNewZealandReleaseFINAL" (its save name), and this will
-    // be loaded as `Maps.MAP_TITLE[DunedinNewZealandReleaseFINAL]` = "Dunedin, New Zealand".
-    // If the map mod was removed, though, the map display name is lost, and we use mapName
-    // (so "DunedinNewZealandReleaseFINAL") as a fallback value.
-    return $"Maps.MAP_TITLE[{mapName}]".Translate(mapName);
-  }
-
-  /// <summary>
-  /// Get the name of the city.
-  /// </summary>
-  private string GetCityName() => this.cityConfigurationSystem?.cityName ?? string.Empty;
-
-  /// <summary>
-  /// Get the current achieved milestone level.
-  /// </summary>
-  private int GetAchievedMilestone() =>
-    this.milestoneLevelQuery.IsEmptyIgnoreFilter
-      ? 0
-      : this.milestoneLevelQuery
-        .GetSingleton<MilestoneLevel>()
-        .m_AchievedMilestone;
-
-  /// <summary>
-  /// Get the current population of the city.
-  /// </summary>
-  private int GetPopulation() =>
-    this.citySystem is null
-      ? 0
-      : this.EntityManager.HasComponent<Population>(this.citySystem.City)
-        ? this.EntityManager
-          .GetComponentData<Population>(this.citySystem.City)
-          .m_Population
-        : 0;
-
-  /// <summary>
-  /// Get the mods from the current playset.
-  /// It DOES NOT return HoF among the list.
-  /// </summary>
-  private async Task<Colossal.PSI.Common.Mod[]> GetActiveMods() {
-    if (this.activeModsCache is not null) {
-      return this.activeModsCache;
-    }
-
-    try {
-      var pdxSdk = PdxSdkPlatformProxy.PdxSdk;
-
-      // This will return null if the player is not logged in or in other error cases.
-      var mods = pdxSdk is not null ? await pdxSdk.GetModsInActivePlayset() ?? [] : [];
-
-      return this.activeModsCache = mods
-        // Ignore Hall of Fame's ID
-        .Where(mod => mod.id != "90641")
-        .ToArray();
-    }
-    catch (Exception ex) {
-      Mod.Log.ErrorRecoverable(ex);
-
-      return [];
-    }
-  }
-
-  /// <summary>
-  /// Saves the values used by the photo mode render system to a dictionary of property ID => value
-  /// (always a float).
-  /// That is enough info to restore them later!
-  /// </summary>
-  private IDictionary<string, float> GetPhotoModePropertiesSnapshot() {
-    try {
-      if (this.photoModeRenderSystem is null) {
-        return new Dictionary<string, float>();
-      }
-
-      return this.photoModeRenderSystem.photoModeProperties.Values
-        .Where(prop =>
-          prop.getValue is not null &&
-          prop.isEnabled is not null &&
-          prop.isEnabled()
-        )
-        .ToDictionary(prop => prop.id, prop => prop.getValue());
-    }
-    catch (Exception ex) {
-      Mod.Log.ErrorRecoverable(ex);
-
-      return new Dictionary<string, float>();
     }
   }
 
@@ -312,8 +201,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       await this.DoTakeScreenshot();
     }
     catch (Exception ex) {
-      GameManager.instance.userInterface.view.enabled = true;
-
       Mod.Log.ErrorRecoverable(ex);
 
       this.CurrentScreenshot = null;
@@ -323,137 +210,19 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   private async Task DoTakeScreenshot() {
     CaptureUISystem.PlaySound("select-item");
 
-    // Hide the UI, otherwise it will be captured in the screenshot.
-    GameManager.instance.userInterface.view.enabled = false;
-    await Task.Yield();
-
-    // Take a supersize screenshot that is *at least* 2160 pixels (4K).
-    // Height is better than width because of widescreen monitors.
-    // The server will decide the final resolution, i.e., rescale to 2160p if the resulting image is
-    // bigger.
-    var scaleFactor = (int)Math.Ceiling(2160d / Screen.height);
-
-    var camera = Camera.main!;
-
-    // Disable DLSS, causes grainy pictures or artifacts with some setups -- also, we already do
-    // actual supersampling.
-    var cameraData = camera.GetComponent<HDAdditionalCameraData>();
-    var previousDlssValue = cameraData.allowDeepLearningSuperSampling;
-    cameraData.allowDeepLearningSuperSampling = false;
-
-    // Disable Unity dynamic resolution upscaling, it's a low-quality profile.
-    var dynResSettings = SharedSettings.instance.graphics
-      .GetQualitySetting<DynamicResolutionScaleSettings>();
-
-    var previousDynResLevel = dynResSettings.GetLevel();
-
-    if (previousDynResLevel != QualitySetting.Level.High) {
-      // We pass "High", which actually means "Disabled" as disabling this option is the better
-      // quality setting.
-      // We pass "apply: false" because it performs ApplyAndSave() while we want just Apply() to
-      // restore the previous value just after the screenshot is taken.
-      dynResSettings.SetLevel(QualitySetting.Level.High, apply: false);
-      dynResSettings.Apply();
-    }
-
-    // Disable global illumination as it causes a LOT of grain in CS2's implementation of SSGI, on
-    // most NVIDIA GPUs.
-    var ssgiSettings = SharedSettings.instance.graphics
-      .GetQualitySetting<SSGIQualitySettings>();
-
-    var previousSsgiQualityLevel = ssgiSettings.GetLevel();
-
-    if (Mod.Settings.DisableGlobalIllumination) {
-      // We pass "apply: false" because it performs ApplyAndSave() while we want just Apply() to
-      // restore the previous value just after the screenshot is taken.
-      ssgiSettings.SetLevel(QualitySetting.Level.Disabled, apply: false);
-      ssgiSettings.Apply();
-    }
-
-    // Yield to let graphics settings time to apply.
-    await Task.Yield();
-
-    // Create a RenderTexture with the supersize resolution and ask the camera to render to it.
-    var width = Screen.width * scaleFactor;
-    var height = Screen.height * scaleFactor;
-    var renderTexture = new RenderTexture(width, height, 24);
-
-    camera.targetTexture = renderTexture;
-
-    // Proceed with the rendering.
-    // Calling Render() multiple times is useful to let the GPU accumulate data for a cleaner and
-    // sharper image: this helps load more accurate geometry and lets the antialiasing do its job
-    // over multiple frames too.
-    // You can test it on mountain ranges in the distance, for example, it's quite effective.
-    // Typical values are 1, 2, 4 or 8 cycles.
-    // Eight cycles is probably almost overkill, four would do the job well, but I've seen some
-    // minor improvements after 4 cycles (it has diminishing returns).
-    // Eight is at the limit of what's acceptable in terms of performance too.
-    for (var i = 0; i < 8; i++) {
-      camera.Render();
-    }
-
-    // Now, read the RenderTexture to a Texture2D.
-    RenderTexture.active = renderTexture;
-
-    var screenshotTexture = new Texture2D(width, height, TextureFormat.RGB24, false);
-
-    screenshotTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-    screenshotTexture.Apply();
-
-    // Reset DLSS
-    cameraData.allowDeepLearningSuperSampling = previousDlssValue;
-
-    // Reset dynamic resolution
-    if (dynResSettings.GetLevel() != previousDynResLevel) {
-      dynResSettings.SetLevel(previousDynResLevel, false);
-      dynResSettings.Apply();
-    }
-
-    // Reset SSGI
-    if (ssgiSettings.GetLevel() != previousSsgiQualityLevel) {
-      ssgiSettings.SetLevel(previousSsgiQualityLevel, false);
-      ssgiSettings.Apply();
-    }
-
-    // Reset the camera's target texture
-    camera.targetTexture = null;
-    RenderTexture.active = null;
-
-    // Re-enable the UI.
-    GameManager.instance.userInterface.view.enabled = true;
-    await Task.Yield();
-
-    // Encode the Texture2D to a PNG byte array.
-    // Note: image encoding cannot be done in a background thread because Unity requires it to be
-    // done on the main thread.
-    var pngScreenshotBytes = screenshotTexture.EncodeToPNG();
-
-    // Create a light preview image.
-    var previewTexture = CaptureUISystem.Resize(
-      screenshotTexture,
-      Screen.width / 2,
-      Screen.height / 2
-    );
-
-    var jpgPreviewBytes = previewTexture.EncodeToJPG(80);
-
-    // Clean up the textures after usage.
-    Object.DestroyImmediate(renderTexture);
-    Object.DestroyImmediate(screenshotTexture);
-    Object.DestroyImmediate(previewTexture);
+    var captured = await ScreenshotCapturer.Capture();
 
     // Prepare full size and preview images in a background thread.
     await Task.Run(() => {
-        File.WriteAllBytes(CaptureUISystem.ScreenshotPreviewFilePath, jpgPreviewBytes);
-        File.WriteAllBytes(CaptureUISystem.ScreenshotFilePath, pngScreenshotBytes);
+        File.WriteAllBytes(CaptureUISystem.ScreenshotPreviewFilePath, captured.JpgPreviewBytes);
+        File.WriteAllBytes(CaptureUISystem.ScreenshotFilePath, captured.PngBytes);
 
-        CaptureUISystem.WriteLocalScreenshot(pngScreenshotBytes);
+        CaptureUISystem.WriteLocalScreenshot(captured.PngBytes);
       }
     );
 
     // Collect playset.
-    var mods = await this.GetActiveMods();
+    var mods = await this.citySnapshotProvider.GetActiveMods();
     var modIds = mods.Select(mod => mod.id).ToArray();
 
     // If the asset mods value binding is not set yet, initialize it.
@@ -466,19 +235,15 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.assetModsBinding.Update(assetMods);
     }
 
-    var wasGlobalIlluminationDisabled =
-      Mod.Settings.DisableGlobalIllumination &&
-      previousSsgiQualityLevel != QualitySetting.Level.Disabled;
-
     var screenshotSnapshot = new ScreenshotSnapshot(
-      this.GetAchievedMilestone(),
-      this.GetPopulation(),
-      this.GetMapName(),
-      pngScreenshotBytes,
-      new Vector2Int(width, height),
-      wasGlobalIlluminationDisabled,
-      CaptureUISystem.AreSettingsTopQuality(),
-      this.GetPhotoModePropertiesSnapshot(),
+      this.citySnapshotProvider.GetAchievedMilestone(),
+      this.citySnapshotProvider.GetPopulation(),
+      this.citySnapshotProvider.GetMapName(),
+      captured.PngBytes,
+      captured.Size,
+      captured.WasGlobalIlluminationDisabled,
+      captured.AreSettingsTopQuality,
+      this.citySnapshotProvider.GetPhotoModePropertiesSnapshot(),
       modIds
     );
 
@@ -526,12 +291,15 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     CancellationTokenSource? processingUpdatesCts = null;
 
-    try {
-      this.uploadProgress = new UploadProgress(0, 0);
+    // Capture a non-null reference to this upload's model: the field can be cleared concurrently
+    // (e.g., by clearing the screenshot), but the callback and the ramp must keep driving this same
+    // instance, which the UI binding reads back through the field.
+    var progressModel = this.uploadProgressModel = new UploadProgressModel();
 
+    try {
       var screenshot = await Mod.Api.UploadScreenshot(
         new UploadScreenshotParams {
-          CityName = this.GetCityName(),
+          CityName = this.citySnapshotProvider.GetCityName(),
           CityMilestone = this.CurrentScreenshot.Value.AchievedMilestone,
           CityPopulation = this.CurrentScreenshot.Value.Population,
           MapName = this.CurrentScreenshot.Value.MapName,
@@ -543,43 +311,26 @@ internal sealed partial class CaptureUISystem : UISystemBase {
           RenderSettings = this.CurrentScreenshot.Value.RenderSettings,
           ScreenshotData = this.CurrentScreenshot.Value.ImageBytes,
           UploadProgressHandler = (upload, download) => {
-            // Case 1: The request is being sent.
-            if (upload < 1) {
-              // Set progress to the current upload progress.
-              this.uploadProgress = new UploadProgress(upload, 0);
-            }
+            progressModel.ReportUploadProgress(upload);
 
-            // Case 2: The request has been sent, and we are waiting for the response.
-            // The condition must ensure this runs only once.
-            else if (upload >= 1 && processingUpdatesCts is null) {
-              // Mark upload as done and start 'processing' progress.
-              // Processing progress is a guess, as of now the server does not stream back progress,
-              // so it is based on time elapsed.
-              this.uploadProgress = new UploadProgress(1, 0);
-
+            // Once the request body is fully sent, start the time-based processing progress ramp.
+            // The guard ensures it is started only once, as the callback keeps firing afterward.
+            if (progressModel.IsProcessing && processingUpdatesCts is null) {
               processingUpdatesCts = new CancellationTokenSource();
 
-              // This task will update the processing progress asynchronously until we cancel it, or
-              // it reaches 90% progress, then it will stop by itself.
               _ = StartUpdateProcessingProgress(processingUpdatesCts.Token);
             }
-
-            // Case 3: The response has been fully received.
-            // This is handled in the rest of the method, so we ensure the progress is set to 100%
-            // at
-            // the end.
           }
         }
       );
 
-      // Set progress to done.
-      this.uploadProgress = new UploadProgress(1, 1);
+      progressModel.Complete();
 
       Mod.Log.Info($"{nameof(CaptureUISystem)}: Screenshot uploaded, ID #{screenshot.Id}.");
     }
     catch (HttpException ex) {
       // Reset progress state.
-      this.uploadProgress = null;
+      this.uploadProgressModel = null;
 
       ErrorDialogManagerAccessor.Instance?.ShowError(
         new ErrorDialog {
@@ -591,7 +342,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     }
     catch (Exception ex) {
       // Reset progress state.
-      this.uploadProgress = null;
+      this.uploadProgressModel = null;
 
       Mod.Log.ErrorRecoverable(ex);
     }
@@ -602,18 +353,16 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     return;
 
     async Task StartUpdateProcessingProgress(CancellationToken ct) {
-      const float processingTimeSeconds = 8f;
-
       var startTime = DateTime.Now;
 
       while (!ct.IsCancellationRequested) {
         var elapsedSeconds = (float)(DateTime.Now - startTime).TotalSeconds;
 
-        var progress = Math.Min(elapsedSeconds / processingTimeSeconds, .9f);
+        progressModel.ReportProcessingElapsed(elapsedSeconds);
 
-        this.uploadProgress = new UploadProgress(1, progress);
-
-        if (progress >= .9f) {
+        // The model caps the processing guess; once reached, the ramp has nothing left to do and
+        // stops by itself (it is also canceled when the upload completes or errors).
+        if (progressModel.HasReachedProcessingCap) {
           break;
         }
 
@@ -663,28 +412,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Verifies that all graphics settings are set to the highest possible quality.
-  /// Ignores Global Illumination and Dynamic Resolution Scale settings as they are overridden
-  /// during the screenshot process because they cause issues.
-  /// </summary>
-  private static bool AreSettingsTopQuality() {
-    return SharedSettings.instance.graphics
-      .qualitySettings
-      .Where(settings => settings
-        is not SSGIQualitySettings
-        and not DynamicResolutionScaleSettings
-      )
-      .All(settings => {
-          var highestLevel = settings
-            .EnumerateAvailableLevels()
-            .Last(level => level != QualitySetting.Level.Custom);
-
-          return settings.GetLevel() >= highestLevel;
-        }
-      );
-  }
-
-  /// <summary>
   /// Play a sound.
   /// </summary>
   private static void PlaySound(string sound) {
@@ -716,25 +443,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     );
 
     File.WriteAllBytes(fileName, pngScreenshotBytes);
-  }
-
-  /// <summary>
-  /// Resize a Texture2D to a new width and height.
-  /// </summary>
-  private static Texture2D Resize(Texture2D texture2D, int width, int height) {
-    var rt = new RenderTexture(width, height, 24);
-    RenderTexture.active = rt;
-
-    Graphics.Blit(texture2D, rt);
-
-    var result = new Texture2D(width, height);
-    result.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-    result.Apply();
-
-    RenderTexture.active = null;
-    Object.DestroyImmediate(rt);
-
-    return result;
   }
 
   /// <summary>
@@ -817,29 +525,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
       writer.PropertyName("areSettingsTopQuality");
       writer.Write(areSettingsTopQuality);
-
-      writer.TypeEnd();
-    }
-  }
-
-  private readonly struct UploadProgress(
-    float uploadProgress,
-    float processingProgress
-  ) : IJsonWritable {
-    public void Write(IJsonWriter writer) {
-      writer.TypeBegin(this.GetType().FullName);
-
-      writer.PropertyName("isComplete");
-      writer.Write(uploadProgress >= 1 && processingProgress >= 1);
-
-      writer.PropertyName("globalProgress");
-      writer.Write((uploadProgress + processingProgress) / 2);
-
-      writer.PropertyName("uploadProgress");
-      writer.Write(uploadProgress);
-
-      writer.PropertyName("processingProgress");
-      writer.Write(processingProgress);
 
       writer.TypeEnd();
     }

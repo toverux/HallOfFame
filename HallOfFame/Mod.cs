@@ -122,7 +122,7 @@ public sealed class Mod : IMod {
       updateSystem.UpdateAt<StatsNotificationSystem>(SystemUpdatePhase.MainLoop);
       updateSystem.UpdateAt<CommonUISystem>(SystemUpdatePhase.UIUpdate);
       updateSystem.UpdateAt<PresenterUISystem>(SystemUpdatePhase.UIUpdate);
-      updateSystem.UpdateAt<Systems.CaptureUISystem>(SystemUpdatePhase.UIUpdate);
+      updateSystem.UpdateAt<Systems.Capture.CaptureUISystem>(SystemUpdatePhase.UIUpdate);
 
       Mod.Log.Verbose($"{nameof(Mod)}: {nameof(this.OnLoad)} complete.");
     }
