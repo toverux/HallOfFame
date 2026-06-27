@@ -6,6 +6,7 @@ import type * as bindings from '../../bindings';
 import { getClassesModule } from '../../utils';
 import { DescriptionTooltip } from '../../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
 import * as styles from './screenshot-upload-panel.module.scss';
+import { getRatioPreviewInfo } from './screenshot-upload-panel-utils';
 
 const coFixedRatioImageStyles = getClassesModule(
   'game-ui/common/image/fixed-ratio-image.module.scss',
@@ -84,28 +85,6 @@ export const ScreenshotUploadPanelImage = memo(function ScreenshotUploadPanelIma
     </div>
   );
 });
-
-/**
- * Computes the type and style of the ratio preview overlay on the image, helping the user to
- * understand how the image will be cropped on the most common aspect ratio, 16:9.
- */
-function getRatioPreviewInfo(screenshot: bindings.JsonScreenshotSnapshot) {
-  const mostCommonRatio = 16 / 9;
-
-  const ratio = screenshot.imageWidth / screenshot.imageHeight;
-
-  const type = ratio == mostCommonRatio ? 'equal' : ratio > mostCommonRatio ? 'narrower' : 'wider';
-
-  // We use 99% as a max below to leave a small padding around the preview ration rectangle, making
-  // it cleaner than if it hits the edge of the image.
-  // Note that `calc(100% - Xrem)` which would be better, is not supported by cohtml.
-  const style = {
-    width: type == 'wider' ? '99%' : `${(mostCommonRatio / ratio) * 100}%`,
-    height: type == 'wider' ? `${(ratio / mostCommonRatio) * 100}%` : '99%'
-  } satisfies CSSProperties;
-
-  return { type, style } as const;
-}
 
 function showFullscreenImage(src: string): void {
   const div = document.createElement('div');

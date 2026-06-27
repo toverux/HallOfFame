@@ -1,5 +1,6 @@
-import { bindValue, trigger, useValue } from 'cs2/api';
+import { trigger, useValue } from 'cs2/api';
 import type { CreatorSocialLink, Mod } from '../common';
+import { lazyBindValue } from './lazy-value-binding';
 
 const GROUP = 'hallOfFame.common';
 
@@ -19,7 +20,7 @@ export interface ModSettings {
   readonly savedScreenshotDescription: string;
 }
 
-const settings$ = bindValue<ModSettings>(GROUP, 'settings', {
+const settings$ = lazyBindValue<ModSettings>(GROUP, 'settings', {
   creatorName: '',
   enableLoadingScreenBackground: true,
   showFeaturedAsset: true,
@@ -35,17 +36,17 @@ const settings$ = bindValue<ModSettings>(GROUP, 'settings', {
 });
 
 export function useModSettings(): ModSettings {
-  return useValue(settings$);
+  return useValue(settings$());
 }
 
-const locale$ = bindValue<string>(GROUP, 'locale', 'en-US');
+const locale$ = lazyBindValue<string>(GROUP, 'locale', 'en-US');
 
 /**
  * Subscribes to the game's current locale (e.g. `en-US`), used to decide whether city and creator
  * names need translating.
  */
 export function useLocale(): string {
-  return useValue(locale$);
+  return useValue(locale$());
 }
 
 export function openModSettings(tab: string): void {

@@ -1,0 +1,6 @@
+# Preload that loads the real game UI bundle so component tests can render mod components against
+# the real cs2/* modules. Pure-logic tests do not depend on it: the bundle is loaded best-effort,
+# and only component tests fail if it cannot be loaded (game not installed, or anchors drifted).
+# See HallOfFame/UI/src/testing/game-setup.ts.
+[test]
+preload = ["./HallOfFame/UI/src/testing/game-setup.ts"]

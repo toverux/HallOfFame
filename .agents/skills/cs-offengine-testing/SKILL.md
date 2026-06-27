@@ -15,7 +15,7 @@ Tests live in the `HallOfFame.Tests` project.
 ## Run
 
 ```
-mise run test:cs
+mise test:cs
 ```
 
 This runs `dotnet test` with `-p:SkipBuildUI=true -p:SkipModPostProcess=true`, so the TypeScript UI

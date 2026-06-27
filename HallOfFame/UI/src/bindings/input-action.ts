@@ -1,5 +1,6 @@
-import { bindValue, useValue } from 'cs2/api';
+import { useValue } from 'cs2/api';
 import type { ControlPath } from 'cs2/input';
+import { lazyBindValue } from './lazy-value-binding';
 
 export interface ProxyBinding {
   readonly binding: ControlPath;
@@ -22,7 +23,7 @@ export function bindInputAction(
   useInputBinding: () => ProxyBinding;
   useInputPhase: () => InputActionPhase;
 } {
-  const binding$ = bindValue<ProxyBinding>(group, `${name}.binding`, {
+  const binding$ = lazyBindValue<ProxyBinding>(group, `${name}.binding`, {
     binding: {
       device: 'Unknown',
       displayName: 'Unknown',
@@ -31,16 +32,16 @@ export function bindInputAction(
     modifiers: []
   });
 
-  const phase$ = bindValue<InputActionPhase>(group, `${name}.phase`, 'Disabled');
+  const phase$ = lazyBindValue<InputActionPhase>(group, `${name}.phase`, 'Disabled');
 
   // noinspection JSUnusedGlobalSymbols
   return { useInputBinding, useInputPhase };
 
   function useInputBinding(): ProxyBinding {
-    return useValue(binding$);
+    return useValue(binding$());
   }
 
   function useInputPhase(): InputActionPhase {
-    return useValue(phase$);
+    return useValue(phase$());
   }
 }

@@ -6,7 +6,7 @@ import * as bindings from '../../bindings';
 // biome-ignore lint/correctness/noPrivateImports: svgs don't have @public annotations
 import cloudArrowUpSolidSrc from '../../icons/fontawesome/cloud-arrow-up-solid.svg';
 import type { DraggableProps } from '../../utils';
-import type { ScreenshotInfoFormValue } from './form-state';
+import { buildUploadPayload, type ScreenshotInfoFormValue } from './form-state';
 import * as styles from './screenshot-upload-panel.module.scss';
 
 export const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFooterBase({
@@ -27,6 +27,9 @@ export const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFo
   const isUploading = uploadProgress != null && !uploadProgress.isComplete;
   const isIdleOrUploading = !uploadProgress?.isComplete;
   const isDoneUploading = uploadProgress?.isComplete == true;
+
+  // Showcasing an asset requires picking one; without it there is nothing valid to upload.
+  const isShowcaseSelectionMissing = formValue.isShowcasingAsset && !formValue.showcasedMod;
 
   return (
     <div className={styles.screenshotUploadPanelFooter} {...draggable}>
@@ -49,7 +52,7 @@ export const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFo
           <Button
             variant='primary'
             className={styles.screenshotUploadPanelFooterButton}
-            disabled={creatorNameIsEmpty || isUploading}
+            disabled={creatorNameIsEmpty || isUploading || isShowcaseSelectionMissing}
             onSelect={handleUpload}>
             <Icon
               src={cloudArrowUpSolidSrc}
@@ -78,22 +81,14 @@ export const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFo
 });
 
 /**
- * Validates the form state and maps it to the {@link bindings.UploadPayload} the capture facade
- * expects, then submits it. Bails out silently if the user opted to showcase an asset but did not
- * pick one.
+ * Builds the upload payload from the form state and submits it through the capture facade.
+ * Does nothing when {@link buildUploadPayload} returns `undefined` (the user opted to showcase an
+ * asset but did not pick one).
  */
 function submitUpload(formValue: ScreenshotInfoFormValue): void {
-  if (formValue.isShowcasingAsset && !formValue.showcasedMod) {
-    return;
+  const payload = buildUploadPayload(formValue);
+
+  if (payload) {
+    bindings.uploadScreenshot(payload);
   }
-
-  const payload: bindings.UploadPayload = {
-    shareModIds: formValue.shareModIds,
-    shareRenderSettings: formValue.shareRenderSettings,
-    showcasedModId:
-      formValue.isShowcasingAsset && formValue.showcasedMod ? formValue.showcasedMod.id : null,
-    description: formValue.description.trim() || null
-  };
-
-  bindings.uploadScreenshot(payload);
 }

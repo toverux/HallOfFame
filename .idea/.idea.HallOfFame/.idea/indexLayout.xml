@@ -9,6 +9,7 @@
       <Path>AGENTS.md</Path>
       <Path>README.md</Path>
       <Path>biome.jsonc</Path>
+      <Path>bunfig.toml</Path>
       <Path>crowdin.yml</Path>
       <Path>mise.toml</Path>
       <Path>package.json</Path>

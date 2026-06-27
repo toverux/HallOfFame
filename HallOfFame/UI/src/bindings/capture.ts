@@ -1,4 +1,5 @@
-import { bindValue, trigger, useValue } from 'cs2/api';
+import { trigger, useValue } from 'cs2/api';
+import { lazyBindValue } from './lazy-value-binding';
 
 const GROUP = 'hallOfFame.capture';
 
@@ -41,32 +42,32 @@ export interface UploadPayload {
   readonly description: string | null;
 }
 
-const assetMods$ = bindValue<JsonMod[]>(GROUP, 'assetMods');
+const assetMods$ = lazyBindValue<JsonMod[]>(GROUP, 'assetMods');
 
-const cityName$ = bindValue<string>(GROUP, 'cityName');
+const cityName$ = lazyBindValue<string>(GROUP, 'cityName');
 
-const screenshotSnapshot$ = bindValue<JsonScreenshotSnapshot | null>(
+const screenshotSnapshot$ = lazyBindValue<JsonScreenshotSnapshot | null>(
   GROUP,
   'screenshotSnapshot',
   null
 );
 
-const uploadProgress$ = bindValue<JsonUploadProgress | null>(GROUP, 'uploadProgress', null);
+const uploadProgress$ = lazyBindValue<JsonUploadProgress | null>(GROUP, 'uploadProgress', null);
 
 export function useAssetMods(): JsonMod[] {
-  return useValue(assetMods$);
+  return useValue(assetMods$());
 }
 
 export function useCityName(): string {
-  return useValue(cityName$);
+  return useValue(cityName$());
 }
 
 export function useScreenshotSnapshot(): JsonScreenshotSnapshot | null {
-  return useValue(screenshotSnapshot$);
+  return useValue(screenshotSnapshot$());
 }
 
 export function useUploadProgress(): JsonUploadProgress | null {
-  return useValue(uploadProgress$);
+  return useValue(uploadProgress$());
 }
 
 export function takeScreenshot(): void {

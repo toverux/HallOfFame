@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { type Localization, useLocalization } from 'cs2/l10n';
+import { useLocalization } from 'cs2/l10n';
 import { memo, type ReactElement, useEffect } from 'react';
 import type * as bindings from '../../bindings';
 import { createSingletonHook, getClassesModule } from '../../utils';
@@ -8,6 +8,7 @@ import {
   loadingProgressVanillaProps
 } from '../../vanilla-modules/game-ui/overlay/logo-screen/loading/loading-progress';
 import * as styles from './screenshot-upload-panel.module.scss';
+import { getUploadProgressHintText } from './screenshot-upload-panel-utils';
 
 const coLoadingStyles = getClassesModule(
   'game-ui/overlay/logo-screen/loading/loading.module.scss',
@@ -88,31 +89,4 @@ function getRandomUploadSuccessImage(): string {
 
   // biome-ignore lint/style/noNonNullAssertion: always has at least 1 element.
   return images[Math.floor(Math.random() * images.length)]!;
-}
-
-/**
- * Gets the hint text for the upload progress depending on the state of {@link uploadProgress}
- * (pending, uploading, processing).
- */
-function getUploadProgressHintText(
-  translate: Localization['translate'],
-  uploadProgress: bindings.JsonUploadProgress
-): string | null {
-  if (uploadProgress.uploadProgress == 0) {
-    return translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Waiting]');
-  }
-
-  if (uploadProgress.uploadProgress > 0 && uploadProgress.processingProgress == 0) {
-    return translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Uploading]');
-  }
-
-  if (uploadProgress.processingProgress > 0 && !uploadProgress.isComplete) {
-    return translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]');
-  }
-
-  if (uploadProgress.isComplete) {
-    return translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]');
-  }
-
-  return null;
 }

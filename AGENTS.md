@@ -41,7 +41,9 @@ Here is a more detailed breakdown:
   binding group (`presenter`, `common`, `capture`) plus the generic `input-action` factory. Each
   module owns a `const GROUP` and keeps its `bindValue`/`trigger` calls private, exporting only typed
   hooks and command functions. Add new bindings here rather than scattering raw `bindValue`/`trigger`
-  calls across components.
+  calls across components. Create value bindings with `lazyBindValue` (not eager `bindValue`) so that
+  importing a module or component does not instantiate engine bindings; call the returned accessor
+  inside the hook, e.g. `useValue(foo$())`.
 - `HallOfFame/Mod.cs` and `HallOfFame/Settings.cs`: Mod entry point and user-facing settings.
 
 ## Decompiled game sources and retro-engineering
@@ -66,14 +68,24 @@ Do NOT use `npx` to run commands, always prefer `mise` or `bun`.
 - `bun run build`: Check that the UI part of the mod compiles fine.
 - `bun check`: Run type checking with tsc, and linting with Biome, performing safe fixes.
   Always run this command after modifying UI code.
+- `mise test`: Run the full test suite (C# and UI); see the Testing sections below.
 
 ## Testing (C#)
 
-Unit tests live in the `HallOfFame.Tests` project (xUnit, `net48`, run off-engine). Run them with
-`mise run test:cs`.
+Unit tests live in the `HallOfFame.Tests` project (xUnit, `net48`, run off-engine).
+Run them with `mise test:cs`.
 
 When writing or running C# tests, debugging an engine-bound type that won't load off-engine, or
 deciding where to put logic so it stays testable, use the `cs-offengine-testing` skill.
+
+## Testing (UI)
+
+UI tests live in colocated `*.test.ts` / `*.test.tsx` files (bun test): pure-logic tests run bare,
+and component tests render against the real game UI bundle.
+Run them with `mise test:ui`.
+
+When writing or running UI tests, configuring bindings or asserting triggers in a test, or fixing
+the harness after a game update, use the `ui-testing` skill.
 
 ## Boundaries
 

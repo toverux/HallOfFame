@@ -12,3 +12,14 @@ pre-commit:
     biome:
       glob: "*.{ts,tsx,js,json}"
       run: mise exec bun -- bun biome check --error-on-warnings --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+
+# Tests run on push, not commit, to keep commits fast.
+pre-push:
+  parallel: true
+  commands:
+    test:ui:
+      glob: "*.{ts,tsx}"
+      run: mise test:ui
+    test:cs:
+      glob: "*.cs"
+      run: mise test:cs

@@ -1,9 +1,10 @@
-import { bindValue, trigger, useValue } from 'cs2/api';
+import { trigger, useValue } from 'cs2/api';
 import type { LocalizedString } from 'cs2/l10n';
 import type { Dispatch, SetStateAction } from 'react';
 import type { Screenshot } from '../common';
 import { createSingletonHook } from '../utils/singleton-hook';
 import { type ModSettings, useModSettings } from './common';
+import { lazyBindValue } from './lazy-value-binding';
 
 const GROUP = 'hallOfFame.presenter';
 
@@ -71,19 +72,19 @@ interface SettableMenuState {
   readonly isReadyForNextImage: boolean;
 }
 
-const enableMainMenuSlideshow$ = bindValue<boolean>(GROUP, 'enableMainMenuSlideshow', true);
+const enableMainMenuSlideshow$ = lazyBindValue<boolean>(GROUP, 'enableMainMenuSlideshow', true);
 
-const hasPreviousScreenshot$ = bindValue<boolean>(GROUP, 'hasPreviousScreenshot', false);
+const hasPreviousScreenshot$ = lazyBindValue<boolean>(GROUP, 'hasPreviousScreenshot', false);
 
-const forcedRefreshIndex$ = bindValue<number>(GROUP, 'forcedRefreshIndex', 0);
+const forcedRefreshIndex$ = lazyBindValue<number>(GROUP, 'forcedRefreshIndex', 0);
 
-const isRefreshing$ = bindValue<boolean>(GROUP, 'isRefreshing', false);
+const isRefreshing$ = lazyBindValue<boolean>(GROUP, 'isRefreshing', false);
 
-const screenshot$ = bindValue<Screenshot | null>(GROUP, 'screenshot', null);
+const screenshot$ = lazyBindValue<Screenshot | null>(GROUP, 'screenshot', null);
 
-const error$ = bindValue<LocalizedString | null>(GROUP, 'error', null);
+const error$ = lazyBindValue<LocalizedString | null>(GROUP, 'error', null);
 
-const isSaving$ = bindValue<boolean>(GROUP, 'isSaving', false);
+const isSaving$ = lazyBindValue<boolean>(GROUP, 'isSaving', false);
 
 const useSingletonMenuState = createSingletonHook<SettableMenuState>({
   isMenuVisible: true,
@@ -97,13 +98,13 @@ export function useHofMenuState(): [
   const settings = useModSettings();
   const [settableMenuState, setMenuState] = useSingletonMenuState();
 
-  const enableMainMenuSlideshow = useValue(enableMainMenuSlideshow$);
-  const hasPreviousScreenshot = useValue(hasPreviousScreenshot$);
-  const isRefreshing = useValue(isRefreshing$);
-  const forcedRefreshIndex = useValue(forcedRefreshIndex$);
-  const screenshot = useValue(screenshot$);
-  const error = useValue(error$);
-  const isSaving = useValue(isSaving$);
+  const enableMainMenuSlideshow = useValue(enableMainMenuSlideshow$());
+  const hasPreviousScreenshot = useValue(hasPreviousScreenshot$());
+  const isRefreshing = useValue(isRefreshing$());
+  const forcedRefreshIndex = useValue(forcedRefreshIndex$());
+  const screenshot = useValue(screenshot$());
+  const error = useValue(error$());
+  const isSaving = useValue(isSaving$());
 
   const menuState: ReadonlyMenuState & SettableMenuState = {
     ...settableMenuState,
@@ -125,7 +126,7 @@ export function useHofMenuState(): [
  * loading-screen background.
  */
 export function useScreenshot(): Screenshot | null {
-  return useValue(screenshot$);
+  return useValue(screenshot$());
 }
 
 /**
@@ -136,7 +137,7 @@ export function useScreenshot(): Screenshot | null {
  * those components on unrelated updates.
  */
 export function useIsSlideshowEnabled(): boolean {
-  return useValue(enableMainMenuSlideshow$);
+  return useValue(enableMainMenuSlideshow$());
 }
 
 /**
@@ -164,8 +165,8 @@ export function useSplashscreenState(): readonly [
   const settings = useModSettings();
   const [, setMenuState] = useSingletonMenuState();
 
-  const isRefreshing = useValue(isRefreshing$);
-  const screenshot = useValue(screenshot$);
+  const isRefreshing = useValue(isRefreshing$());
+  const screenshot = useValue(screenshot$());
 
   return [{ imageUri: deriveImageUri(screenshot, settings), isRefreshing }, setMenuState];
 }

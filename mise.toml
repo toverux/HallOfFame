@@ -14,10 +14,15 @@ run = [
 ]
 
 [tasks."test"]
-description = "Runs the C# (and later, also TypeScript) testing suite."
-depends = ["test:cs"]
+description = "Runs the full test suite: C# unit tests and TypeScript/UI tests."
+depends = ["test:cs", "test:ui"]
 
 [tasks."test:cs"]
 description = "Runs the C# unit tests with xUnit. Skips the TypeScript UI build, the mod post-processor, and the deploy step (none are needed by the tests)."
 raw = true
 run = "dotnet test HallOfFame.Tests/HallOfFame.Tests.csproj -p:SkipBuildUI=true -p:SkipModPostProcess=true"
+
+[tasks."test:ui"]
+description = "Runs the TypeScript/React UI tests with Bun."
+raw = true
+run = "bun test HallOfFame/UI"

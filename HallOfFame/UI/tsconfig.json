@@ -9,6 +9,7 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
+    "types": ["bun"],
 
     // Strictness options following.
     // I want the strictest possible TypeScript settings.
