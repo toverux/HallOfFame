@@ -12,6 +12,10 @@ namespace HallOfFame.Tests.Http;
 /// No mocking library is used yet; this is deliberately the smallest viable fake.
 /// </summary>
 internal sealed class FakeApi : IHallOfFameApi {
+  internal Func<Task<Creator>>? GetMeImpl { get; init; }
+
+  internal Func<Task<Creator>>? UpdateMeImpl { get; init; }
+
   internal Func<Task<CreatorStats>>? GetCreatorStatsImpl { get; init; }
 
   internal Func<Task<Screenshot>>? GetRandomScreenshotWeightedImpl { get; init; }
@@ -23,9 +27,11 @@ internal sealed class FakeApi : IHallOfFameApi {
   public Task<CreatorStats> GetCreatorStats() =>
     this.GetCreatorStatsImpl?.Invoke() ?? throw new NotImplementedException();
 
-  public Task<Creator> GetMe() => throw new NotImplementedException();
+  public Task<Creator> GetMe() =>
+    this.GetMeImpl?.Invoke() ?? throw new NotImplementedException();
 
-  public Task<Creator> UpdateMe() => throw new NotImplementedException();
+  public Task<Creator> UpdateMe() =>
+    this.UpdateMeImpl?.Invoke() ?? throw new NotImplementedException();
 
   #if DEBUG
   public Task<Screenshot> GetScreenshot(string screenshotId) =>

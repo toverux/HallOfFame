@@ -14,7 +14,7 @@ using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Widgets;
 using HallOfFame.Reflection;
-using HallOfFame.Utils;
+using HallOfFame.Services;
 using JetBrains.Annotations;
 using UnityEngine;
 #if DEBUG
@@ -121,6 +121,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// Masked Creator ID, only the first segment is shown in the Options UI, and it is not editable.
   /// </summary>
   [SettingsUISection(Settings.GroupYourProfile)]
+  [UsedImplicitly]
   public string? MaskedCreatorID => this.CreatorID is null
     ? null
     : string.Join(
@@ -381,6 +382,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [SettingsUISection(Settings.GroupAdvanced)]
   [SettingsUITextInput]
   [SettingsUIAdvanced]
+  [UsedImplicitly]
   public string BaseUrl { get; set; } = null!;
 
   [SettingsUIButton]
@@ -443,6 +445,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
   #if DEBUG
   [SettingsUISection(Settings.GroupDevelopment)]
   [SettingsUITextInput]
+  [UsedImplicitly]
   public string? ScreenshotToLoad {
     get;
     [UsedImplicitly]
@@ -504,6 +507,13 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
   /// <seealso cref="UpdateCreator"/>
   private CancellationTokenSource? updateLoginStatusCts;
+
+  /// <summary>
+  /// Holds the creator identity and login logic.
+  /// Created in <see cref="Initialize"/> on the real instance; clones from <c>MemberwiseClone</c>
+  /// stay dormant and never use it.
+  /// </summary>
+  private CreatorIdentityService? identity;
 
   public Settings(IMod mod) : base(mod) {
     this.SetDefaults();
@@ -575,6 +585,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
     GameManager.instance.localizationManager.AddSource("en-US", new DevDictionarySource());
     #endif
 
+    this.identity = new CreatorIdentityService(Mod.Api, Mod.Log);
+
     this.InitializeCreatorId();
 
     // Update the login status when the mod is being loaded.
@@ -604,39 +616,50 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// Shows a warning dialog if the user is not logged in.
   /// </summary>
   private void InitializeCreatorId() {
-    // If the Creator ID is already set and valid, we just leave it be.
-    if (Guid.TryParse(this.CreatorID, out _)) {
-      return;
-    }
-
-    // Try to get and store the Paradox account ID.
+    // Read and store the Paradox account ID.
     // Why store it?
     // 1. If the user once plays without an internet connection or server failure, we'll still have
     //    the ID used previously.
     // 2. If for some reason the user changes the Paradox account they use, it doesn't mean they
     //    want to change their Hall of Fame account, so we keep the old ID.
     // 3. It is more explicit and transparent to the user.
+    //
+    // A clean null (user not logged in to Paradox) and a thrown read error are kept distinct: only
+    // a clean null pops the warning dialog below, while a thrown read falls silently through to the
+    // random-ID fallback (aside from the warning log).
+    string? paradoxAccountId;
+    Exception? readError = null;
+
     try {
-      this.CreatorID = PdxSdkPlatformProxy.AccountUserId;
-
-      if (this.CreatorID is null) {
-        this.ShowNoParadoxConnectionWarningDialog();
-
-        throw new Exception("User is not logged in to Paradox.");
-      }
-
-      this.IsParadoxAccountID = true;
-
-      Mod.Log.Info($"{nameof(Settings)}: Acquired Paradox account ID {this.MaskedCreatorID}.");
+      paradoxAccountId = PdxSdkPlatformProxy.AccountUserId;
+    }
+    catch (Exception ex) {
+      paradoxAccountId = null;
+      readError = ex;
     }
 
-    // If the user is not logged in, or the operation failed unexpectedly, we generate a random ID.
-    catch (Exception ex) {
-      this.CreatorID = Guid.NewGuid().ToString();
-      this.IsParadoxAccountID = false;
+    var resolution = CreatorIdentityService.ResolveCreatorId(this.CreatorID, paradoxAccountId);
+
+    // A valid existing ID is left untouched, with no save.
+    if (!resolution.Changed) {
+      return;
+    }
+
+    this.CreatorID = resolution.CreatorId;
+    this.IsParadoxAccountID = resolution.IsParadoxAccountId;
+
+    if (resolution.IsParadoxAccountId) {
+      Mod.Log.Info($"{nameof(Settings)}: Acquired Paradox account ID {this.MaskedCreatorID}.");
+    }
+    else {
+      // The warning dialog is for users not logged in to Paradox (a clean null read), not for an
+      // unexpected read failure, which only logs the warning below.
+      if (resolution.NeedsParadoxWarning && readError is null) {
+        this.ShowNoParadoxConnectionWarningDialog();
+      }
 
       Mod.Log.Warn(
-        ex,
+        readError ?? new Exception("User is not logged in to Paradox."),
         $"Settings: Could not acquire Paradox account ID, using a " +
         $"random ID as a fallback ({this.MaskedCreatorID})."
       );
@@ -686,69 +709,31 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
     var thisCts = this.updateLoginStatusCts = new CancellationTokenSource();
 
-    if (!silent)
+    if (!silent) {
       // Show a loading message while we're fetching the status.
-    {
       this.loginStatusValue = LocalizedString.Id("HallOfFame.Common.LOADING");
     }
 
     try {
-      if (debounce)
-        // Apply a delay to debounce the method if it's called multiple
-        // times in a short period (keystrokes while typing username).
-      {
+      if (debounce) {
+        // Apply a delay to debounce the method if it's called multiple times in a short period
+        // (keystrokes while typing username).
         await Task.Delay(500, thisCts.Token);
       }
 
-      // Fetch the creator info from the server, this will also update the
-      // Creator Name if it's different from the server's.
-      var creator = nameOnly
-        ? await Mod.Api.GetMe()
-        : await Mod.Api.UpdateMe();
+      var status = await this.identity!.Refresh(nameOnly, silent, thisCts.Token);
 
-      Mod.Log.Info(
-        $"{nameof(Settings)}: Logged in as {creator.CreatorName}. " +
-        $"Your Public Creator ID is {creator.Id}."
-      );
-
-      // Stop if the operation was canceled while we were fetching data.
-      thisCts.Token.ThrowIfCancellationRequested();
-
-      // Update the login status text with a success message.
-      var isAnonymous = string.IsNullOrEmpty(creator.CreatorName);
-
-      if (!silent) {
-        this.loginStatusValue = new LocalizedString(
-          isAnonymous
-            ? "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]"
-            : "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]",
-          isAnonymous
-            ? "Anonymously logged in."
-            : "Logged in as {CREATOR_NAME}.",
-          new Dictionary<string, ILocElement> {
-            { "CREATOR_NAME", LocalizedString.Value(creator.CreatorName) }
-          }
-        );
+      // A null status means there is nothing to display (silent call); leave the status as is.
+      if (status is not null) {
+        this.loginStatusValue = status.Value;
       }
     }
-    catch (Exception ex) {
-      // Stop if the Task.Delay or the network request was canceled.
-      if (ex is OperationCanceledException) {
-        return;
-      }
-
-      if (silent) {
-        Mod.Log.ErrorSilent(ex, "Settings: Failed to update creator.");
-      }
-      else
-        // Update the login status text with an error message.
-      {
-        this.loginStatusValue = ex.GetUserFriendlyMessage();
-      }
+    catch (OperationCanceledException) {
+      // The Task.Delay or the network request was canceled (a newer call superseded this one);
+      // leave the status as is.
     }
     finally {
-      // Clear the shared cancellation token source if we're the last one
-      // to have been called.
+      // Clear the shared cancellation token source if we're the last one to have been called.
       if (thisCts == this.updateLoginStatusCts) {
         this.updateLoginStatusCts = null;
       }
