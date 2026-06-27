@@ -1,6 +1,6 @@
 @use "sass:color";
-@use "../common";
-@use "../vanilla-vars" as vanilla;
+@use "../../common";
+@use "../../vanilla-vars" as vanilla;
 
 .screenshot-upload-panel-container {
   // We should be on top except if other mods add content.

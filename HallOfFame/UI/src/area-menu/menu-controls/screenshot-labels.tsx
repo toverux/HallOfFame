@@ -1,0 +1,85 @@
+import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
+import { Tooltip } from 'cs2/ui';
+import { memo, type ReactElement } from 'react';
+import type * as bindings from '../../bindings';
+import type { Screenshot } from '../../common';
+// biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
+import naturalResourcesSrc from '../../icons/paradox/natural-resources.svg';
+import populationSrc from '../../icons/paradox/population.svg';
+import trophySrc from '../../icons/paradox/trophy.svg';
+import eyeOpenSrc from '../../icons/uil/colored/eye-open.svg';
+// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
+import * as styles from './menu-controls.module.scss';
+import { formatBigNumber } from './menu-controls-utils';
+
+export const MenuControlsScreenshotLabels = memo(function MenuControlsScreenshotLabelsBase({
+  modSettings,
+  screenshot
+}: Readonly<{
+  modSettings: bindings.ModSettings;
+  screenshot: Screenshot;
+}>): ReactElement {
+  const { translate } = useLocalization();
+
+  // Do not show the pop/milestone labels if this is an empty map screenshot, which is likely when
+  // the pop is 0 and the milestone is 0 (Founding) or 20 (Megalopolis, i.e., creative mode).
+  const isPristineWilderness =
+    screenshot.cityPopulation == 0 &&
+    (screenshot.cityMilestone == 0 || screenshot.cityMilestone == 20);
+
+  // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
+  return (
+    <div className={styles.menuControlsSectionScreenshotLabels}>
+      {isPristineWilderness ? (
+        <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+          <img
+            src={naturalResourcesSrc}
+            className={styles.menuControlsSectionScreenshotLabelsLabelIcon}
+          />
+          {translate(`HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]`)}
+        </span>
+      ) : (
+        <>
+          <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+            <img src={trophySrc} className={styles.menuControlsSectionScreenshotLabelsLabelIcon} />
+            {translate(`Progression.MILESTONE_NAME:${screenshot.cityMilestone}`, `???`)}
+          </span>
+
+          <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+            <img
+              src={populationSrc}
+              className={styles.menuControlsSectionScreenshotLabelsLabelIcon}
+            />
+            {formatBigNumber(screenshot.cityPopulation, translate)}
+          </span>
+        </>
+      )}
+
+      {modSettings.showViewCount && (
+        <Tooltip
+          tooltip={
+            <LocalizedString
+              id='HallOfFame.UI.Menu.MenuControls.LABEL_TOOLTIP[Views]'
+              args={{
+                // biome-ignore lint/style/useNamingConvention: i18n convention
+                VIEWS_COUNT: <LocalizedNumber value={screenshot.viewsCount} />,
+                // biome-ignore lint/style/useNamingConvention: i18n convention
+                UNIQUE_VIEWS_COUNT: <LocalizedNumber value={screenshot.uniqueViewsCount} />
+              }}
+            />
+          }>
+          <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+            <img src={eyeOpenSrc} className={styles.menuControlsSectionScreenshotLabelsLabelIcon} />
+            {formatBigNumber(screenshot.uniqueViewsCount, translate)}
+          </span>
+        </Tooltip>
+      )}
+
+      <Tooltip tooltip={screenshot.createdAtFormatted}>
+        <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
+          {screenshot.createdAtFormattedDistance}
+        </span>
+      </Tooltip>
+    </div>
+  );
+});

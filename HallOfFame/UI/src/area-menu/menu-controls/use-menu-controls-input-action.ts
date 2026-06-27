@@ -1,7 +1,7 @@
 import type { UISound } from 'cs2/ui';
 import { useEffect, useState } from 'react';
-import type * as bindings from '../bindings';
-import { playSound } from '../utils';
+import type * as bindings from '../../bindings';
+import { playSound } from '../../utils';
 
 /**
  * Triggers the {@link handler} when the input is executed (key down AND key up).

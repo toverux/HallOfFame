@@ -1,6 +1,6 @@
 @use "sass:color";
-@use "../common";
-@use "../vanilla-vars" as vanilla;
+@use "../../common";
+@use "../../vanilla-vars" as vanilla;
 
 .menu-controls-container {
   --button-size: 65rem;
