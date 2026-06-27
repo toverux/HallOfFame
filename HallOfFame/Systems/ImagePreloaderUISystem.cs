@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Colossal.UI.Binding;
 using Game.SceneFlow;
 using Game.UI;
+using HallOfFame.Services;
 using HallOfFame.Utils;
 
 namespace HallOfFame.Systems;
@@ -14,8 +15,9 @@ namespace HallOfFame.Systems;
 /// This could be done frontend-side (it was originally done that way), but it meant duplicating
 /// most of the loading and error logic on both sides, leading to a lot of spaghetti reconciliation
 /// code.
+/// It is the engine-bound implementation of the <see cref="IImagePreloader"/> port.
 /// </summary>
-internal sealed partial class ImagePreloaderUISystem : UISystemBase {
+internal sealed partial class ImagePreloaderUISystem : UISystemBase, IImagePreloader {
   private const string BindingGroup = "hallOfFame.imagePreloader";
 
   /// <summary>
@@ -92,7 +94,7 @@ internal sealed partial class ImagePreloaderUISystem : UISystemBase {
   /// <exception cref="ImagePreloadFailedException">
   /// When cohtml failed to load the image (Image.onerror).
   /// </exception>
-  internal async Task Preload(string url) {
+  public async Task Preload(string url) {
     await ImagePreloaderUISystem.PreloadSemaphore.WaitAsync();
 
     try {
@@ -133,7 +135,4 @@ internal sealed partial class ImagePreloaderUISystem : UISystemBase {
     // Completion is set via the trigger bindings.
     await this.preloadCompletionSource.Task;
   }
-
-  internal class ImagePreloadFailedException(string url)
-    : Exception($"Failed to preload image {url}.");
 }

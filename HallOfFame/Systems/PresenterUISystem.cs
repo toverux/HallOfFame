@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
@@ -13,6 +11,7 @@ using Game.UI.Localization;
 using HallOfFame.Domain;
 using HallOfFame.Http;
 using HallOfFame.Reflection;
+using HallOfFame.Services;
 using HallOfFame.Utils;
 using HallOfFame.Utils.Writers;
 using UnityEngine.InputSystem;
@@ -26,7 +25,9 @@ namespace HallOfFame.Systems;
 internal sealed partial class PresenterUISystem : UISystemBase {
   private const string BindingGroup = "hallOfFame.presenter";
 
-  private ImagePreloaderUISystem imagePreloaderUISystem = null!;
+  private ScreenshotCarousel screenshotCarousel = null!;
+
+  private ScreenshotExporter screenshotExporter = null!;
 
   private bool forceEnableMainMenuSlideshow;
 
@@ -64,11 +65,6 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private TriggerBinding reportScreenshotBinding = null!;
 
-  private readonly IList<Screenshot> screenshotsQueue =
-    new List<Screenshot>();
-
-  private int currentScreenshotIndex = -1;
-
   /// <summary>
   /// Indicates the previous game mode to refresh the screenshot when the user returns to the main
   /// menu.
@@ -87,8 +83,15 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       // when needed.
       this.Enabled = false;
 
-      this.imagePreloaderUISystem =
-        this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
+      // The carousel owns the screenshot window and all loading; this system only drives it and
+      // mirrors the result onto the bindings. The resolution is read lazily, per load.
+      this.screenshotCarousel = new ScreenshotCarousel(
+        Mod.Api,
+        this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>(),
+        () => Mod.Settings.ScreenshotResolution
+      );
+
+      this.screenshotExporter = new ScreenshotExporter(Mod.Api);
 
       this.forceEnableMainMenuSlideshowAction =
         Mod.Settings.GetAction(nameof(Settings.KeyBindingForceEnableMainMenuSlideshow));
@@ -103,7 +106,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.hasPreviousScreenshotBinding = new GetterValueBinding<bool>(
         PresenterUISystem.BindingGroup,
         "hasPreviousScreenshot",
-        () => this.currentScreenshotIndex > 0
+        () => this.screenshotCarousel.HasPrevious
       );
 
       this.forcedRefreshIndexBinding = new ValueBinding<int>(
@@ -257,22 +260,22 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   #if DEBUG
   /// <summary>
   /// Debug/development method to load a screenshot by its ID.
-  /// Does not use the queue system.
+  /// It appends to and advances the carousel like any other load, so the displayed screenshot stays
+  /// consistent with the carousel's cursor.
   /// </summary>
+  // ReSharper disable once AsyncVoidMethod
   internal async void LoadScreenshotById(string screenshotId) {
+    this.isRefreshingBinding.Update(true);
+
     try {
-      this.isRefreshingBinding.Update(true);
+      await this.screenshotCarousel.LoadById(screenshotId);
 
-      var screenshot = await Mod.Api.GetScreenshot(screenshotId);
-
-      screenshot = await this.LoadScreenshot(screenshot: screenshot, preload: false);
-
-      if (screenshot is not null) {
-        this.screenshotBinding.Update(screenshot);
-      }
+      this.errorBinding.Update(null);
+      this.screenshotBinding.Update(this.screenshotCarousel.Current);
+      this.hasPreviousScreenshotBinding.Update();
     }
     catch (Exception ex) {
-      Mod.Log.ErrorRecoverable(ex);
+      this.HandleDisplayLoadError(ex);
     }
     finally {
       this.isRefreshingBinding.Update(false);
@@ -299,8 +302,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Switches the current screenshot to the previous if there is one
-  /// (<see cref="screenshotsQueue"/>).
+  /// Switches the current screenshot to the previous one, re-preloading its image.
   /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
   /// and it must be designed to never throw.
   /// </summary>
@@ -310,7 +312,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       return;
     }
 
-    if (this.currentScreenshotIndex <= 0) {
+    // Soft, binding-coupled guard kept in the system: the carousel would throw at the first
+    // screenshot, but here this is an expected no-op rather than an error.
+    if (!this.screenshotCarousel.HasPrevious) {
       Mod.Log.ErrorSilent(
         $"Menu: {nameof(this.PreviousScreenshot)}: " +
         $"Cannot go back, already at the first screenshot."
@@ -321,31 +325,30 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
     this.isRefreshingBinding.Update(true);
 
-    var screenshot = this.screenshotsQueue[--this.currentScreenshotIndex];
+    try {
+      await this.screenshotCarousel.Previous();
 
-    // We still need to make sure the image is preloaded, because these images aren't kept long in
-    // cohtml's cache; if the user clicks 'Previous' a few times, this is necessary.
-    screenshot = await this.LoadScreenshot(screenshot: screenshot, preload: false);
-
-    // There was an error when preloading the previous image.
-    if (screenshot is not null) {
-      this.screenshotBinding.Update(screenshot);
+      this.errorBinding.Update(null);
+      this.screenshotBinding.Update(this.screenshotCarousel.Current);
       this.hasPreviousScreenshotBinding.Update();
+
+      Mod.Log.Verbose(
+        $"{nameof(PresenterUISystem)}: {nameof(this.PreviousScreenshot)}: " +
+        $"Displaying {this.screenshotCarousel.Current} (carousel idx " +
+        $"{this.screenshotCarousel.CurrentIndex}/{this.screenshotCarousel.Count - 1})."
+      );
     }
-
-    Mod.Log.Verbose(
-      $"{nameof(PresenterUISystem)}: {nameof(this.PreviousScreenshot)}: Displaying {screenshot} " +
-      $"(queue idx {this.currentScreenshotIndex}/" +
-      $"{this.screenshotsQueue.Count - 1})."
-    );
-
-    this.isRefreshingBinding.Update(false);
+    catch (Exception ex) {
+      this.HandleDisplayLoadError(ex);
+    }
+    finally {
+      this.isRefreshingBinding.Update(false);
+    }
   }
 
   /// <summary>
-  /// Switches the current screenshot to the next if there is one (<see cref="screenshotsQueue"/>),
-  /// otherwise it loads a new one.
-  /// Then it preloads the next screenshot again in the background.
+  /// Advances to the next screenshot, loading a fresh one when there is no look-ahead in stock,
+  /// then prefetches the following one in the background.
   /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
   /// and it should be designed to never throw.
   /// </summary>
@@ -357,107 +360,65 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
     this.isRefreshingBinding.Update(true);
 
-    Screenshot? screenshot;
-
-    // If there is a preloaded screenshot next in the queue, set it as the current screenshot.
-    // This happens when the user first clicks "Next".
-    if (this.screenshotsQueue.Count - 1 > this.currentScreenshotIndex) {
-      screenshot = this.screenshotsQueue[++this.currentScreenshotIndex];
+    try {
+      await this.screenshotCarousel.Next();
     }
-
-    // Otherwise, load a new screenshot, add it to the queue, and set it as the current screenshot.
-    // This happens when the first image is loaded, or when there was an error preloading the next
-    // image in the previous NextScreenshot call.
-    else {
-      screenshot = await this.LoadScreenshot(false);
-
-      if (screenshot is not null) {
-        this.screenshotsQueue.Add(screenshot);
-        this.currentScreenshotIndex++;
-      }
-    }
-
-    // There was an error, don't preload the next image, but leave the previous screenshot
-    // displayed. Reset the refresh state.
-    // The error binding is already updated by LoadScreenshot().
-    if (screenshot is null) {
+    catch (Exception ex) {
+      // Leave the previously displayed screenshot in place and reset the refresh state.
+      this.HandleDisplayLoadError(ex);
       this.isRefreshingBinding.Update(false);
 
       return;
     }
 
-    // The screenshot was successfully loaded, update the screenshot being displayed and
-    // asynchronously preload the next one.
+    // The screenshot is now displayed, so clear any error left over from a prior failed load.
+    this.errorBinding.Update(null);
+
+    var screenshot = this.screenshotCarousel.Current;
+
     this.screenshotBinding.Update(screenshot);
     this.hasPreviousScreenshotBinding.Update();
 
     Mod.Log.Verbose(
       $"{nameof(PresenterUISystem)}: {nameof(this.NextScreenshot)}: Displaying {screenshot} " +
-      $"(queue idx {this.currentScreenshotIndex}/" +
-      $"{this.screenshotsQueue.Count - 1})."
+      $"(carousel idx {this.screenshotCarousel.CurrentIndex}/" +
+      $"{this.screenshotCarousel.Count - 1})."
     );
 
-    if (this.currentScreenshotIndex < this.screenshotsQueue.Count - 1) {
-      // If we are not at the end of the queue (the user clicked previous once or more), we're done
-      // as we have the next screenshots in stock, so we don't have to preload the next one.
+    if (!this.screenshotCarousel.IsAtEnd) {
+      // We still have look-ahead screenshots in stock (the user clicked previous once or more), so
+      // there is nothing to preload.
       this.isRefreshingBinding.Update(false);
     }
     else {
-      // If we are viewing the last screenshot in the queue, prepare the next one in the background.
-      PreloadNextScreenshot();
+      // We are viewing the last screenshot in the window: prepare the next one in the background.
+      PreloadNextInBackground();
       // It also means the current screenshot was just viewed.
-      MarkViewed();
+      MarkCurrentViewed();
     }
 
     return;
 
-    // Fire-and-forget async method that should be designed to never throw.
-    // ReSharper disable once AsyncVoidMethod
-    async void PreloadNextScreenshot() {
-      // Variable used below to avoid infinite loops when there is only one screenshot in the
-      // database (that can happen during development).
-      #if DEBUG
-      var iterations = 0;
-      #endif
-
-      Screenshot? nextScreenshot;
-
-      // The loop is a workaround to avoid loading the same screenshot twice if the server returns
-      // the same screenshot twice (or more).
-      // This should be extremely rare, only happening in dev mode with a small number of
-      // screenshots and the random algorithm without views taken into account because all
-      // screenshots have been seen.
-      // The check is cheap, and it's more complex to implement server-side, so let's do that here.
-      do {
-        nextScreenshot = await this.LoadScreenshot(true);
-      } while (
-        #if DEBUG
-        iterations++ < 20 &&
-        #endif
-        nextScreenshot is not null &&
-        nextScreenshot.Id ==
-        this.screenshotBinding.value?.Id);
-
-      if (nextScreenshot is not null) {
-        this.screenshotsQueue.Add(nextScreenshot);
-
-        // Trim queue if it's more than 20 screenshots long.
-        if (this.screenshotsQueue.Count > 20) {
-          this.screenshotsQueue.RemoveAt(0);
-          this.currentScreenshotIndex--; // Adjust index.
-        }
+    // Fire-and-forget; designed never to throw. Releases the refresh lock in its finally, so it
+    // stays held throughout the background prefetch.
+    async void PreloadNextInBackground() {
+      try {
+        await this.screenshotCarousel.PreloadAhead();
       }
-
-      // Release the refresh lock.
-      // If any code above is susceptible to throw, ensure this is called
-      // inside a finally block.
-      this.isRefreshingBinding.Update(false);
+      catch (Exception ex) {
+        Mod.Log.ErrorSilent(ex);
+      }
+      finally {
+        this.isRefreshingBinding.Update(false);
+      }
     }
 
-    // Fire-and-forget async method that should be designed to never throw.
-    async void MarkViewed() {
+    // Fire-and-forget; designed never to throw.
+    async void MarkCurrentViewed() {
       try {
-        await Mod.Api.MarkScreenshotViewed(screenshot.Id);
+        if (screenshot is not null) {
+          await Mod.Api.MarkScreenshotViewed(screenshot.Id);
+        }
       }
       catch (Exception ex) {
         Mod.Log.ErrorSilent(ex);
@@ -466,64 +427,17 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Loads a new screenshot from the server and preloads the image in the UI, also is responsible
-  /// to handle all errors.
+  /// Applies the error policy for a failed display-load (next/previous/load-by-id): a network error
+  /// is surfaced to the user via the error binding, anything else is logged as recoverable.
+  /// Background prefetch errors are handled separately (logged silently) by their fire-and-forget
+  /// wrapper.
   /// </summary>
-  /// <param name="preload">
-  /// If true, network errors will be logged, but not displayed, as it is a non-critical background
-  /// operation.<br/>
-  /// It is the responsibility of the caller to handle the fact that the preloading failed, and, for
-  /// example, retry a classic loading operation the next time the user refreshes the image.
-  /// </param>
-  /// <param name="screenshot">
-  /// The screenshot to preload, if null, a new one will be fetched from the server.
-  /// </param>
-  /// <returns>
-  /// A <see cref="Screenshot"/> if the API call *and* image were successful, null if there was an
-  /// error.
-  /// </returns>
-  private async Task<Screenshot?> LoadScreenshot(
-    bool preload,
-    Screenshot? screenshot = null
-  ) {
-    try {
-      screenshot ??= await Mod.Api.GetRandomScreenshotWeighted();
-
-      var imageUrl = Mod.Settings.ScreenshotResolution switch {
-        "fhd" => screenshot.ImageUrlFHD,
-        "4k" => screenshot.ImageUrl4K,
-        var resolution => throw new InvalidOperationException(
-          $"Unknown screenshot resolution: {resolution}."
-        )
-      };
-
-      await this.imagePreloaderUISystem.Preload(imageUrl);
-
-      if (!preload) {
-        this.errorBinding.Update(null);
-      }
-
-      Mod.Log.Verbose(
-        $"{nameof(PresenterUISystem)}: {(preload ? "Preloaded" : "Loaded")} {screenshot} " +
-        $"({imageUrl}, algo={screenshot.Algorithm})."
-      );
-
-      return screenshot;
-    }
-    catch (Exception ex) when (preload) {
-      Mod.Log.ErrorSilent(ex);
-
-      return null;
-    }
-    catch (Exception ex) when (this.IsNetworkError(ex)) {
+  private void HandleDisplayLoadError(Exception ex) {
+    if (PresenterUISystem.IsNetworkError(ex)) {
       this.errorBinding.Update(ex.GetUserFriendlyMessage());
-
-      return null;
     }
-    catch (Exception ex) {
+    else {
       Mod.Log.ErrorRecoverable(ex);
-
-      return null;
     }
   }
 
@@ -536,21 +450,21 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   private async void LikeScreenshot() {
     if (this.isTogglingLike ||
         this.isRefreshingBinding.value ||
-        this.screenshotBinding.value is null) {
+        this.screenshotCarousel.Current is null) {
       return;
     }
 
     this.isTogglingLike = true;
 
-    var prevScreenshot = this.screenshotBinding.value;
+    var prevScreenshot = this.screenshotCarousel.Current;
 
     var updatedScreenshot = prevScreenshot with {
       IsLiked = !prevScreenshot.IsLiked,
       LikesCount = prevScreenshot.LikesCount + (prevScreenshot.IsLiked ? -1 : 1)
     };
 
-    // Replace the current screenshot with the liked one.
-    this.screenshotsQueue[this.currentScreenshotIndex] = updatedScreenshot;
+    // Replace the current screenshot with the liked one (optimistic update).
+    this.screenshotCarousel.ReplaceCurrent(updatedScreenshot);
     this.screenshotBinding.Update(updatedScreenshot);
 
     try {
@@ -569,7 +483,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       );
 
       // Revert the optimistic UI update.
-      this.screenshotsQueue[this.currentScreenshotIndex] = prevScreenshot;
+      this.screenshotCarousel.ReplaceCurrent(prevScreenshot);
       this.screenshotBinding.Update(prevScreenshot);
     }
     catch (Exception ex) {
@@ -596,26 +510,14 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     try {
       this.isSavingBinding.Update(true);
 
-      var imageBytes = await Mod.Api.DownloadImage(screenshot.ImageUrl4K);
-
-      var directory = Mod.Settings.CreatorsScreenshotSaveDirectory;
-
-      var filePath = Path.Combine(
-        Mod.Settings.CreatorsScreenshotSaveDirectory,
-        $"{screenshot.Creator?.CreatorName} - " +
-        $"{screenshot.CityName} - " +
-        $"{screenshot.CreatedAt.ToLocalTime():yyyy.MM.dd HH.mm.ss}.jpg"
-      );
-
-      await Task.Run(() => {
-          Directory.CreateDirectory(directory);
-          File.WriteAllBytes(filePath, imageBytes);
-        }
+      var filePath = await this.screenshotExporter.Export(
+        screenshot,
+        Mod.Settings.CreatorsScreenshotSaveDirectory
       );
 
       Mod.Log.Info($"{nameof(PresenterUISystem)}: Saved {screenshot} image to {filePath}.");
     }
-    catch (Exception ex) when (this.IsNetworkError(ex)) {
+    catch (Exception ex) when (PresenterUISystem.IsNetworkError(ex)) {
       Mod.Log.Error(ex.GetUserFriendlyMessage());
     }
     catch (Exception ex) {
@@ -686,8 +588,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     }
   }
 
-  private bool IsNetworkError(Exception ex) =>
+  private static bool IsNetworkError(Exception ex) =>
     ex
       is HttpException
-      or ImagePreloaderUISystem.ImagePreloadFailedException;
+      or ImagePreloadFailedException;
 }

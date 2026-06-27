@@ -14,6 +14,12 @@ namespace HallOfFame.Tests.Http;
 internal sealed class FakeApi : IHallOfFameApi {
   internal Func<Task<CreatorStats>>? GetCreatorStatsImpl { get; init; }
 
+  internal Func<Task<Screenshot>>? GetRandomScreenshotWeightedImpl { get; init; }
+
+  #if DEBUG
+  internal Func<string, Task<Screenshot>>? GetScreenshotImpl { get; init; }
+  #endif
+
   public Task<CreatorStats> GetCreatorStats() =>
     this.GetCreatorStatsImpl?.Invoke() ?? throw new NotImplementedException();
 
@@ -23,11 +29,11 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   #if DEBUG
   public Task<Screenshot> GetScreenshot(string screenshotId) =>
-    throw new NotImplementedException();
+    this.GetScreenshotImpl?.Invoke(screenshotId) ?? throw new NotImplementedException();
   #endif
 
   public Task<Screenshot> GetRandomScreenshotWeighted() =>
-    throw new NotImplementedException();
+    this.GetRandomScreenshotWeightedImpl?.Invoke() ?? throw new NotImplementedException();
 
   public Task<View> LikeScreenshot(string screenshotId, bool liked) =>
     throw new NotImplementedException();
