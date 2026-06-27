@@ -1,8 +1,11 @@
-import { bindValue, useValue } from 'cs2/api';
+import { bindValue, trigger, useValue } from 'cs2/api';
 import type { LocalizedString } from 'cs2/l10n';
 import type { Dispatch, SetStateAction } from 'react';
 import type { Screenshot } from '../common';
-import { createSingletonHook, type ModSettings, useModSettings } from '../utils';
+import { createSingletonHook } from '../utils/singleton-hook';
+import { type ModSettings, useModSettings } from './common';
+
+const GROUP = 'hallOfFame.presenter';
 
 interface ReadonlyMenuState {
   readonly isSlideshowEnabled: boolean;
@@ -68,27 +71,19 @@ interface SettableMenuState {
   readonly isReadyForNextImage: boolean;
 }
 
-const enableMainMenuSlideshow$ = bindValue<boolean>(
-  'hallOfFame.presenter',
-  'enableMainMenuSlideshow',
-  true
-);
+const enableMainMenuSlideshow$ = bindValue<boolean>(GROUP, 'enableMainMenuSlideshow', true);
 
-const hasPreviousScreenshot$ = bindValue<boolean>(
-  'hallOfFame.presenter',
-  'hasPreviousScreenshot',
-  false
-);
+const hasPreviousScreenshot$ = bindValue<boolean>(GROUP, 'hasPreviousScreenshot', false);
 
-const forcedRefreshIndex$ = bindValue<number>('hallOfFame.presenter', 'forcedRefreshIndex', 0);
+const forcedRefreshIndex$ = bindValue<number>(GROUP, 'forcedRefreshIndex', 0);
 
-const isRefreshing$ = bindValue<boolean>('hallOfFame.presenter', 'isRefreshing', false);
+const isRefreshing$ = bindValue<boolean>(GROUP, 'isRefreshing', false);
 
-const screenshot$ = bindValue<Screenshot | null>('hallOfFame.presenter', 'screenshot', null);
+const screenshot$ = bindValue<Screenshot | null>(GROUP, 'screenshot', null);
 
-const error$ = bindValue<LocalizedString | null>('hallOfFame.presenter', 'error', null);
+const error$ = bindValue<LocalizedString | null>(GROUP, 'error', null);
 
-const isSaving$ = bindValue<boolean>('hallOfFame.presenter', 'isSaving', false);
+const isSaving$ = bindValue<boolean>(GROUP, 'isSaving', false);
 
 const useSingletonMenuState = createSingletonHook<SettableMenuState>({
   isMenuVisible: true,
@@ -123,6 +118,14 @@ export function useHofMenuState(): [
   };
 
   return [menuState, setMenuState];
+}
+
+/**
+ * Subscribes to the current presenter screenshot, the entity backing the menu slideshow and the
+ * loading-screen background.
+ */
+export function useScreenshot(): Screenshot | null {
+  return useValue(screenshot$);
 }
 
 /**
@@ -167,11 +170,34 @@ export function useSplashscreenState(): readonly [
   return [{ imageUri: deriveImageUri(screenshot, settings), isRefreshing }, setMenuState];
 }
 
+export function previousScreenshot(): void {
+  trigger(GROUP, 'previousScreenshot');
+}
+
+export function nextScreenshot(): void {
+  trigger(GROUP, 'nextScreenshot');
+}
+
+export function saveScreenshot(): void {
+  trigger(GROUP, 'saveScreenshot');
+}
+
+export function reportScreenshot(): void {
+  trigger(GROUP, 'reportScreenshot');
+}
+
+export function likeScreenshot(): void {
+  trigger(GROUP, 'likeScreenshot');
+}
+
 /**
  * Resolves the image URI to display from the current screenshot, picking the resolution variant
  * that matches the user's quality setting.
  */
-function deriveImageUri(screenshot: Screenshot | null, settings: ModSettings): string | null {
+export function deriveImageUri(
+  screenshot: Screenshot | null,
+  settings: ModSettings
+): string | null {
   if (!screenshot) {
     return null;
   }

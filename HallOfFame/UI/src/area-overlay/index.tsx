@@ -1,5 +1,5 @@
 import type { ModRegistrar } from 'cs2/modding';
-import { useModSettings } from '../utils';
+import * as bindings from '../bindings';
 import { LogoScreenWrapper } from './logo-screen-wrapper';
 
 export const register: ModRegistrar = moduleRegistry => {
@@ -7,7 +7,7 @@ export const register: ModRegistrar = moduleRegistry => {
     'game-ui/overlay/logo-screen/logo-screen.tsx',
     'LogoScreen',
     LogoScreen => props => {
-      const { enableLoadingScreenBackground } = useModSettings();
+      const { enableLoadingScreenBackground } = bindings.useModSettings();
 
       return enableLoadingScreenBackground ? (
         <LogoScreenWrapper>

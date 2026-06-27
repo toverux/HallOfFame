@@ -34,8 +34,14 @@ Here is a more detailed breakdown:
   implementations). Domain records carry only inbound `[DecodeAlias]` data, so each type's outbound
   UI wire format lives here, not on the record.
 - `HallOfFame/UI/src`: TypeScript/React frontend, split into `area-game` (in-game HUD panels),
-  `area-menu` (main-menu integration), `area-overlay` (loading screen modification), `utils`
-  (shared hooks/helpers), and `vanilla-modules` (typed stubs for game UI internals).
+  `area-menu` (main-menu integration), `area-overlay` (loading screen modification), `bindings`
+  (typed C#<->TS binding facade), `utils` (shared hooks/helpers), and `vanilla-modules` (typed
+  stubs for game UI internals).
+- `HallOfFame/UI/src/bindings`: The typed facade over the C#<->TS bindings, one module per
+  binding group (`presenter`, `common`, `capture`) plus the generic `input-action` factory. Each
+  module owns a `const GROUP` and keeps its `bindValue`/`trigger` calls private, exporting only typed
+  hooks and command functions. Add new bindings here rather than scattering raw `bindValue`/`trigger`
+  calls across components.
 - `HallOfFame/Mod.cs` and `HallOfFame/Settings.cs`: Mod entry point and user-facing settings.
 
 ## Decompiled game sources and retro-engineering

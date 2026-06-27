@@ -1,8 +1,8 @@
 import classNames from 'classnames';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
+import * as bindings from '../bindings';
 import { getClassesModule, selector } from '../utils';
 import * as styles from './menu-splashscreen.module.scss';
-import { useSplashscreenState } from './menu-state-hook';
 
 const coMenuUiBackdropsStyles = getClassesModule(
   'game-ui/menu/components/menu-ui-backdrops/menu-ui-backdrops.module.scss',
@@ -22,7 +22,7 @@ const coMenuUiBackdropsStyles = getClassesModule(
  * And the cycle repeats.
  */
 export function MenuSplashscreen(): ReactElement {
-  const [{ imageUri, isRefreshing }, setMenuState] = useSplashscreenState();
+  const [{ imageUri, isRefreshing }, setMenuState] = bindings.useSplashscreenState();
 
   // The current image displayed on the splashscreen.
   // Initialized at the start with the current Vanilla slideshow image, so there is a transparent

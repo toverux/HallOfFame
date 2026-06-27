@@ -1,6 +1,5 @@
 // biome-ignore lint/style/noExcessiveLinesPerFile: it is a big file, but unsure if I want to split it.
 import classNames from 'classnames';
-import { bindValue, trigger, useValue } from 'cs2/api';
 import { FocusSymbol } from 'cs2/input';
 import { type Localization, LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import {
@@ -24,6 +23,7 @@ import {
   useState
 } from 'react';
 import { useSetState } from 'react-use';
+import * as bindings from '../bindings';
 // biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import cloudArrowUpSolidSrc from '../icons/fontawesome/cloud-arrow-up-solid.svg';
 import populationSrc from '../icons/paradox/population.svg';
@@ -33,10 +33,8 @@ import {
   createSingletonHook,
   type DraggableProps,
   getClassesModule,
-  type ModSettings,
   playSound,
-  useDraggable,
-  useModSettings
+  useDraggable
 } from '../utils';
 import { useScrollController } from '../vanilla-modules/game-ui/common/hooks/use-scroll-controller';
 import {
@@ -50,39 +48,11 @@ import {
 } from '../vanilla-modules/game-ui/overlay/logo-screen/loading/loading-progress';
 import * as styles from './screenshot-upload-panel.module.scss';
 
-/** From `Colossal.PSI.Common.Mod` */
-interface JsonMod {
-  readonly id: string;
-  readonly displayName: string;
-  readonly thumbnailPath: string;
-}
-
-/** From `HallOfFame.Systems.Capture.CaptureUISystem.ScreenshotSnapshot` */
-interface JsonScreenshotSnapshot {
-  readonly achievedMilestone: number;
-  readonly population: number;
-  readonly previewImageUri: string;
-  readonly imageUri: string;
-  readonly imageFileSize: number;
-  readonly imageWidth: number;
-  readonly imageHeight: number;
-  readonly wasGlobalIlluminationDisabled: boolean;
-  readonly areSettingsTopQuality: boolean;
-}
-
-/** From `HallOfFame.Services.UploadProgress` */
-interface JsonUploadProgress {
-  readonly isComplete: boolean;
-  readonly globalProgress: number;
-  readonly uploadProgress: number;
-  readonly processingProgress: number;
-}
-
 interface ScreenshotInfoFormValue {
   shareModIds: boolean;
   shareRenderSettings: boolean;
   isShowcasingAsset: boolean;
-  showcasedMod: JsonMod | undefined;
+  showcasedMod: bindings.JsonMod | undefined;
   description: string;
 }
 
@@ -140,35 +110,19 @@ const dropdownTheme: DropdownTheme = {
   )
 };
 
-const assetMods$ = bindValue<JsonMod[]>('hallOfFame.capture', 'assetMods');
-
-const cityName$ = bindValue<string>('hallOfFame.capture', 'cityName');
-
-const screenshotSnapshot$ = bindValue<JsonScreenshotSnapshot | null>(
-  'hallOfFame.capture',
-  'screenshotSnapshot',
-  null
-);
-
-const uploadProgress$ = bindValue<JsonUploadProgress | null>(
-  'hallOfFame.capture',
-  'uploadProgress',
-  null
-);
-
 const useUploadSuccessImageUri = createSingletonHook<string | undefined>(undefined);
 
 /**
  * Component that shows up when the user takes a HoF screenshot.
  */
 export function ScreenshotUploadPanel(): ReactElement {
-  const settings = useModSettings();
+  const settings = bindings.useModSettings();
 
   const panelRef = useRef<HTMLDivElement>(null);
   const draggable = useDraggable(panelRef);
 
-  const screenshotSnapshot = useValue(screenshotSnapshot$);
-  const uploadProgress = useValue(uploadProgress$);
+  const screenshotSnapshot = bindings.useScreenshotSnapshot();
+  const uploadProgress = bindings.useUploadProgress();
 
   const originalFormState: ScreenshotInfoFormValue = {
     shareModIds: settings.savedShareModIdsPreference,
@@ -248,7 +202,7 @@ const ScreenshotUploadPanelHeader = memo(function ScreenshotUploadPanelHeaderBas
   screenshotSnapshot,
   draggable
 }: Readonly<{
-  screenshotSnapshot: JsonScreenshotSnapshot;
+  screenshotSnapshot: bindings.JsonScreenshotSnapshot;
   draggable: DraggableProps;
 }>): ReactElement {
   const { translate } = useLocalization();
@@ -269,7 +223,7 @@ const ScreenshotUploadPanelHeader = memo(function ScreenshotUploadPanelHeaderBas
       <Button
         variant='round'
         className={styles.screenshotUploadPanelHeaderClose}
-        onSelect={discardScreenshot}
+        onSelect={bindings.clearScreenshot}
         selectSound='close-menu'>
         <Icon src='Media/Glyphs/Close.svg' />
       </Button>
@@ -279,7 +233,7 @@ const ScreenshotUploadPanelHeader = memo(function ScreenshotUploadPanelHeaderBas
 
 const ScreenshotUploadProgress = memo(function ScreenshotUploadProgressBase({
   uploadProgress
-}: Readonly<{ uploadProgress: JsonUploadProgress }>): ReactElement {
+}: Readonly<{ uploadProgress: bindings.JsonUploadProgress }>): ReactElement {
   const { translate } = useLocalization();
 
   const [successImageUri, setSuccessImageUri] = useUploadSuccessImageUri();
@@ -341,13 +295,13 @@ const ScreenshotUploadPanelImage = memo(function ScreenshotUploadPanelImageBase(
   screenshotSnapshot,
   uploadProgress
 }: Readonly<{
-  screenshotSnapshot: JsonScreenshotSnapshot;
-  uploadProgress: JsonUploadProgress | null;
+  screenshotSnapshot: bindings.JsonScreenshotSnapshot;
+  uploadProgress: bindings.JsonUploadProgress | null;
 }>): ReactElement {
   const { translate } = useLocalization();
 
   const ratioPreviewInfo = useMemo(
-    () => screenshotSnapshot && getRatioPreviewInfo(screenshotSnapshot),
+    () => getRatioPreviewInfo(screenshotSnapshot),
     [screenshotSnapshot]
   );
 
@@ -416,14 +370,14 @@ const ScreenshotUploadPanelContentCityInfo = memo(
     screenshotSnapshot,
     creatorNameIsEmpty
   }: Readonly<{
-    settings: ModSettings;
-    screenshotSnapshot: JsonScreenshotSnapshot;
+    settings: bindings.ModSettings;
+    screenshotSnapshot: bindings.JsonScreenshotSnapshot;
     creatorNameIsEmpty: boolean;
   }>): ReactElement {
     const { translate } = useLocalization();
 
     const cityName =
-      useValue(cityName$) ||
+      bindings.useCityName() ||
       // biome-ignore lint/style/noNonNullAssertion: translation controlled by us.
       translate('HallOfFame.Common.DEFAULT_CITY_NAME')!;
 
@@ -473,22 +427,22 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
   formValue,
   patchFormValue
 }: Readonly<{
-  settings: ModSettings;
+  settings: bindings.ModSettings;
   creatorNameIsEmpty: boolean;
-  screenshotSnapshot: JsonScreenshotSnapshot;
+  screenshotSnapshot: bindings.JsonScreenshotSnapshot;
   formValue: ScreenshotInfoFormValue;
   patchFormValue: (state: Partial<ScreenshotInfoFormValue>) => void;
 }>): ReactElement {
   const { translate } = useLocalization();
 
-  const assetMods = useValue(assetMods$);
+  const assetMods = bindings.useAssetMods();
 
   const scrollController = useScrollController?.();
 
   const playHoverSound = useCallback(() => playSound('hover-item'), []);
 
   const selectShowcasedMod = useCallback(
-    (selectedMod: JsonMod) =>
+    (selectedMod: bindings.JsonMod) =>
       patchFormValue({ isShowcasingAsset: true, showcasedMod: selectedMod }),
     [patchFormValue]
   );
@@ -795,13 +749,13 @@ const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFooterBas
   formValue
 }: Readonly<{
   creatorNameIsEmpty: boolean;
-  uploadProgress: JsonUploadProgress | null;
+  uploadProgress: bindings.JsonUploadProgress | null;
   draggable: DraggableProps;
   formValue: ScreenshotInfoFormValue;
 }>): ReactElement {
   const { translate } = useLocalization();
 
-  const handleUpload = useCallback(() => uploadScreenshot(formValue), [formValue]);
+  const handleUpload = useCallback(() => submitUpload(formValue), [formValue]);
 
   const isUploading = uploadProgress != null && !uploadProgress.isComplete;
   const isIdleOrUploading = !uploadProgress?.isComplete;
@@ -819,7 +773,7 @@ const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFooterBas
               )}
               variant='primary'
               disabled={isUploading}
-              onSelect={discardScreenshot}
+              onSelect={bindings.clearScreenshot}
               selectSound='close-panel'>
               {translate('Common.ACTION[Cancel]', 'Cancel')}
             </Button>
@@ -847,7 +801,7 @@ const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFooterBas
         <Button
           variant='primary'
           className={styles.screenshotUploadPanelFooterButton}
-          onSelect={discardScreenshot}
+          onSelect={bindings.clearScreenshot}
           selectSound='close-menu'>
           {translate('Common.CLOSE', 'Close')}
         </Button>
@@ -873,7 +827,7 @@ function getCongratulation(translate: Localization['translate']): string {
  * Computes the type and style of the ratio preview overlay on the image, helping the user to
  * understand how the image will be cropped on the most common aspect ratio, 16:9.
  */
-function getRatioPreviewInfo(screenshot: JsonScreenshotSnapshot) {
+function getRatioPreviewInfo(screenshot: bindings.JsonScreenshotSnapshot) {
   const mostCommonRatio = 16 / 9;
 
   const ratio = screenshot.imageWidth / screenshot.imageHeight;
@@ -911,7 +865,7 @@ function getRandomUploadSuccessImage(): string {
  */
 function getUploadProgressHintText(
   translate: Localization['translate'],
-  uploadProgress: JsonUploadProgress
+  uploadProgress: bindings.JsonUploadProgress
 ): string | null {
   if (uploadProgress.uploadProgress == 0) {
     return translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Waiting]');
@@ -945,16 +899,16 @@ function showFullscreenImage(src: string): void {
   });
 }
 
-function discardScreenshot(): void {
-  trigger('hallOfFame.capture', 'clearScreenshot');
-}
-
-function uploadScreenshot(formValue: ScreenshotInfoFormValue): void {
+/**
+ * Validates the form state and maps it to the {@link bindings.UploadPayload} the capture facade expects,
+ * then submits it. Bails out silently if the user opted to showcase an asset but did not pick one.
+ */
+function submitUpload(formValue: ScreenshotInfoFormValue): void {
   if (formValue.isShowcasingAsset && !formValue.showcasedMod) {
     return;
   }
 
-  const backendFormValue = {
+  const payload: bindings.UploadPayload = {
     shareModIds: formValue.shareModIds,
     shareRenderSettings: formValue.shareRenderSettings,
     showcasedModId:
@@ -962,5 +916,5 @@ function uploadScreenshot(formValue: ScreenshotInfoFormValue): void {
     description: formValue.description.trim() || null
   };
 
-  trigger('hallOfFame.capture', 'uploadScreenshot', backendFormValue);
+  bindings.uploadScreenshot(payload);
 }

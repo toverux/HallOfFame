@@ -1,6 +1,7 @@
 ﻿import { trigger } from 'cs2/api';
 import type { UISound } from 'cs2/ui';
 import type { DOMAttributes } from 'react';
+import * as bindings from '../bindings';
 import { iconsole } from '../iconsole';
 
 /**
@@ -35,5 +36,5 @@ export function logError(error: unknown, fatal = false): void {
 
   const errorString = error instanceof Error ? error.stack : String(error);
 
-  trigger('hallOfFame.common', 'logJavaScriptError', fatal, errorString);
+  bindings.logJavaScriptError(fatal, errorString);
 }

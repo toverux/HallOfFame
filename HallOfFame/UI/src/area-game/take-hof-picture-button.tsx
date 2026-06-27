@@ -1,7 +1,7 @@
-﻿import { trigger } from 'cs2/api';
-import { useLocalization } from 'cs2/l10n';
+﻿import { useLocalization } from 'cs2/l10n';
 import { Tooltip } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
+import * as bindings from '../bindings';
 // biome-ignore lint/correctness/noPrivateImports: svgs don't have @public annotations
 import sharePictureSrc from '../icons/uil/standard/share-picture.svg';
 import { logError } from '../utils';
@@ -48,12 +48,12 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 
   return (
     <Tooltip tooltip={translate('HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP')}>
-      {/** biome-ignore lint/security/noDangerouslySetInnerHtml: not text from a user */}
-      <span ref={spanRef} onClick={takePicture} dangerouslySetInnerHTML={{ __html: html }} />
+      <span
+        ref={spanRef}
+        onClick={bindings.takeScreenshot}
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: not text from a user
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
     </Tooltip>
   );
-}
-
-function takePicture(): void {
-  trigger('hallOfFame.capture', 'takeScreenshot');
 }

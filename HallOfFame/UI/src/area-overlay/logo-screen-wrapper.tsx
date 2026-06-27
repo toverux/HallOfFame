@@ -1,13 +1,10 @@
-import { bindValue, useValue } from 'cs2/api';
 import { type ReactNode, useEffect } from 'react';
-import type { Screenshot } from '../common';
-import { getClassesModule, logError, selector, useModSettings } from '../utils';
+import * as bindings from '../bindings';
+import { getClassesModule, logError, selector } from '../utils';
 
 const logoScreenStyles = getClassesModule('game-ui/overlay/logo-screen/logo-screen.module.scss', [
   'logoScreen'
 ]);
-
-const screenshot$ = bindValue<Screenshot | null>('hallOfFame.presenter', 'screenshot', null);
 
 interface Props {
   readonly children: ReactNode;
@@ -19,17 +16,16 @@ interface Props {
  * untouched.
  */
 export function LogoScreenWrapper({ children }: Props): ReactNode {
-  const settings = useModSettings();
-  const screenshot = useValue(screenshot$);
+  const settings = bindings.useModSettings();
+  const screenshot = bindings.useScreenshot();
 
   // When the component is mounted, immediately apply the new background.
   useEffect(() => {
-    if (!screenshot) {
+    const imageUrl = bindings.deriveImageUri(screenshot, settings);
+
+    if (!imageUrl) {
       return;
     }
-
-    const imageUrl =
-      settings.screenshotResolution == 'fhd' ? screenshot.imageUrlFHD : screenshot.imageUrl4K;
 
     const logoScreenEl = document.querySelector(selector(logoScreenStyles.logoScreen));
 

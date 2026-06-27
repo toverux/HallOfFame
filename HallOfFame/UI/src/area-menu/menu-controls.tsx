@@ -1,5 +1,4 @@
 import classNames from 'classnames';
-import { bindValue, useValue } from 'cs2/api';
 import { ControlIcons } from 'cs2/input';
 import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { Button, Icon, MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
@@ -11,6 +10,7 @@ import {
   useEffect,
   useState
 } from 'react';
+import * as bindings from '../bindings';
 import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../common';
 // biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import discordBrandsSolid from '../icons/fontawesome/discord-brands-solid.svg';
@@ -26,49 +26,32 @@ import doubleArrowRightTriangleSrc from '../icons/uil/colored/double-arrow-right
 import eyeClosedSrc from '../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../icons/uil/colored/eye-open.svg';
 // biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
-import {
-  bindInputAction,
-  type ModSettings,
-  type ProxyBinding,
-  snappyOnSelect,
-  useModSettings
-} from '../utils';
+import { snappyOnSelect } from '../utils';
 import * as styles from './menu-controls.module.scss';
-import {
-  formatBigNumber,
-  likeScreenshot,
-  locElementToReactNode,
-  nextScreenshot,
-  openModPage,
-  openModSettings,
-  openSocialLink,
-  previousScreenshot,
-  reportScreenshot,
-  saveScreenshot
-} from './menu-controls-utils';
-import { useHofMenuState } from './menu-state-hook';
+import { formatBigNumber, locElementToReactNode } from './menu-controls-utils';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 
 let lastForcedRefreshIndex = 0;
 
-const locale$ = bindValue<string>('hallOfFame.common', 'locale', 'en-US');
-
-const previousScreenshotInputAction = bindInputAction(
+const previousScreenshotInputAction = bindings.bindInputAction(
   'hallOfFame.presenter',
   'previousScreenshotInputAction'
 );
 
-const nextScreenshotInputAction = bindInputAction(
+const nextScreenshotInputAction = bindings.bindInputAction(
   'hallOfFame.presenter',
   'nextScreenshotInputAction'
 );
 
-const likeScreenshotInputAction = bindInputAction(
+const likeScreenshotInputAction = bindings.bindInputAction(
   'hallOfFame.presenter',
   'likeScreenshotInputAction'
 );
 
-const toggleMenuInputAction = bindInputAction('hallOfFame.presenter', 'toggleMenuInputAction');
+const toggleMenuInputAction = bindings.bindInputAction(
+  'hallOfFame.presenter',
+  'toggleMenuInputAction'
+);
 
 const socialPlatforms: {
   [K in CreatorSocialLink['platform']]: Readonly<{ name: string; logo: string; color: string }>;
@@ -95,28 +78,28 @@ export function MenuControls(): ReactElement {
 export function MenuControlsContent(): ReactElement {
   const { translate } = useLocalization();
 
-  const modSettings = useModSettings();
+  const modSettings = bindings.useModSettings();
 
-  const [menuState, setMenuState] = useHofMenuState();
+  const [menuState, setMenuState] = bindings.useHofMenuState();
 
   const [showMoreActions, setShowOtherActions] = useState(false);
 
   useEffect(() => {
     if (menuState.forcedRefreshIndex != lastForcedRefreshIndex) {
-      setTimeout(() => nextScreenshot(), 500);
+      setTimeout(() => bindings.nextScreenshot(), 500);
       lastForcedRefreshIndex = menuState.forcedRefreshIndex;
     }
   }, [menuState.forcedRefreshIndex]);
 
   const openShowcasedModPage = useCallback(
     // biome-ignore lint/style/noNonNullAssertion: will not be null here
-    () => openModPage(menuState.screenshot!.showcasedMod!),
+    () => bindings.openModPage(menuState.screenshot!.showcasedMod!),
     [menuState.screenshot]
   );
 
   const toggleMoreActions = useCallback(() => setShowOtherActions(prev => !prev), []);
 
-  const openGeneralModSettings = useCallback(() => openModSettings('General'), []);
+  const openGeneralModSettings = useCallback(() => bindings.openModSettings('General'), []);
 
   // Stable thanks to the functional update and the singleton's stable setter, so the memoized
   // toggle button only re-renders when `isMenuVisible` actually changes.
@@ -265,7 +248,7 @@ export function MenuControlsContent(): ReactElement {
               src={menuState.isSaving ? 'Media/Glyphs/Progress.svg' : 'Media/Editor/Save.svg'}
               tinted={true}
               disabled={menuState.isSaving}
-              onSelect={saveScreenshot}>
+              onSelect={bindings.saveScreenshot}>
               <span>{translate('HallOfFame.UI.Menu.MenuControls.ACTION[Save]')}</span>
             </Button>
           </Tooltip>
@@ -277,7 +260,7 @@ export function MenuControlsContent(): ReactElement {
               variant='menu'
               src={flagSolidSrc}
               tinted={true}
-              onSelect={reportScreenshot}
+              onSelect={bindings.reportScreenshot}
               selectSound='bulldoze'>
               <span>{translate('HallOfFame.UI.Menu.MenuControls.ACTION[Report]')}</span>
             </Button>
@@ -311,9 +294,9 @@ const MenuControlsCityName = memo(function MenuControlsCityNameBase({
 }>): ReactElement | null {
   const { translate } = useLocalization();
 
-  const gameLocale = useValue(locale$);
+  const gameLocale = bindings.useLocale();
 
-  const modSettings = useModSettings();
+  const modSettings = bindings.useModSettings();
 
   const [showTranslations, setShowTranslations] = useState(false);
 
@@ -429,7 +412,7 @@ const MenuControlsCityName = memo(function MenuControlsCityNameBase({
                   src={socialPlatforms[link.platform].logo}
                   style={{ '--brand-color': socialPlatforms[link.platform].color } as CSSProperties}
                   // biome-ignore lint/performance/noJsxPropsBind: handler closes over the mapped item, cannot be a single stable ref
-                  onSelect={() => openSocialLink(link)}
+                  onSelect={() => bindings.openSocialLink(link)}
                 />
               </Tooltip>
             ))}
@@ -444,7 +427,7 @@ const MenuControlsScreenshotLabels = memo(function MenuControlsScreenshotLabelsB
   modSettings,
   screenshot
 }: Readonly<{
-  modSettings: ModSettings;
+  modSettings: bindings.ModSettings;
   screenshot: Screenshot;
 }>): ReactElement {
   const { translate } = useLocalization();
@@ -530,7 +513,7 @@ const MenuControlsNextButton = memo(function MenuControlsNextButtonBase({
     phase,
     // setTimeout is used to give time to the key press .*active class to show briefly before
     // [disabled] is set.
-    () => !disabled && (setTimeout(nextScreenshot), true),
+    () => !disabled && (setTimeout(bindings.nextScreenshot), true),
     'select-item'
   );
 
@@ -550,7 +533,7 @@ const MenuControlsNextButton = memo(function MenuControlsNextButtonBase({
         src={doubleArrowRightTriangleSrc}
         tinted={isLoading}
         disabled={isLoading}
-        {...snappyOnSelect(nextScreenshot)}
+        {...snappyOnSelect(bindings.nextScreenshot)}
       />
     </MenuButtonTooltip>
   );
@@ -576,7 +559,7 @@ const MenuControlsPreviousButton = memo(function MenuControlsPreviousButtonBase(
     phase,
     // setTimeout is used to give time to the key press .*active class to show briefly before
     // [disabled] is set.
-    () => !disabled && (setTimeout(previousScreenshot), true),
+    () => !disabled && (setTimeout(bindings.previousScreenshot), true),
     'select-item'
   );
 
@@ -596,7 +579,7 @@ const MenuControlsPreviousButton = memo(function MenuControlsPreviousButtonBase(
         src={doubleArrowRightTriangleSrc}
         tinted={disabled}
         disabled={disabled}
-        {...snappyOnSelect(previousScreenshot)}
+        {...snappyOnSelect(bindings.previousScreenshot)}
       />
     </MenuButtonTooltip>
   );
@@ -650,7 +633,7 @@ const MenuControlsLikeButton = memo(function MenuControlsLikeButtonBase({
   const binding = useInputBinding();
   const phase = useInputPhase();
 
-  useMenuControlsInputAction(phase, likeScreenshot, selectSound);
+  useMenuControlsInputAction(phase, bindings.likeScreenshot, selectSound);
 
   const activeClass =
     phase == 'Performed'
@@ -692,7 +675,7 @@ const MenuControlsLikeButton = memo(function MenuControlsLikeButtonBase({
         )}
         src={loveChirperSrc}
         tinted={false}
-        onSelect={likeScreenshot}
+        onSelect={bindings.likeScreenshot}
         selectSound={selectSound}
       />
     </MenuButtonTooltip>
@@ -737,7 +720,7 @@ const MenuControlsError = memo(function MenuControlsErrorBase({
       <MenuButton
         src='Media/Glyphs/ArrowCircular.svg'
         disabled={!isReadyForNextImage}
-        {...snappyOnSelect(nextScreenshot)}>
+        {...snappyOnSelect(bindings.nextScreenshot)}>
         {translate('HallOfFame.UI.Menu.MenuControls.ACTION[Retry]')}
       </MenuButton>
     </div>
@@ -750,7 +733,7 @@ function MenuButtonTooltip({
   children
 }: Readonly<{
   tooltip: TooltipProps['tooltip'];
-  binding: ProxyBinding;
+  binding: bindings.ProxyBinding;
   children: TooltipProps['children'];
 }>): ReactElement {
   return (

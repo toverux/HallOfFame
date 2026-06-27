@@ -1,6 +1,7 @@
 import type { UISound } from 'cs2/ui';
 import { useEffect, useState } from 'react';
-import { type InputActionPhase, playSound } from '../utils';
+import type * as bindings from '../bindings';
+import { playSound } from '../utils';
 
 /**
  * Triggers the {@link handler} when the input is executed (key down AND key up).
@@ -18,7 +19,7 @@ import { type InputActionPhase, playSound } from '../utils';
  * @param sound   The sound to play when the handler returned `true`.
  */
 export function useMenuControlsInputAction(
-  phase: InputActionPhase,
+  phase: bindings.InputActionPhase,
   // biome-ignore lint/suspicious/noConfusingVoidType: it's really how I want it to be here.
   handler: () => boolean | undefined | void,
   sound?: `${UISound}`

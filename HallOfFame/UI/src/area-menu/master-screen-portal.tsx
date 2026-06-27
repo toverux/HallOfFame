@@ -1,8 +1,8 @@
 ﻿import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import * as bindings from '../bindings';
 import { getClassesModule, logError, selector } from '../utils';
 import { MenuControls } from './menu-controls';
-import { useIsMenuVisible } from './menu-state-hook';
 
 const coFpsDisplayStyles = getClassesModule(
   'game-ui/debug/components/fps-display/fps-display.module.scss',
@@ -33,7 +33,7 @@ interface Props {
  * It also handles toggling the game UI (except our controls).
  */
 export function MasterScreenPortal({ children }: Props): ReactNode {
-  const isMenuVisible = useIsMenuVisible();
+  const isMenuVisible = bindings.useIsMenuVisible();
 
   const [portalTargetEl, setPortalTargetEl] = useState<Element>();
 

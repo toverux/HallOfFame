@@ -1,43 +1,5 @@
-import { trigger } from 'cs2/api';
 import { type Localization, LocalizedString, type LocElement } from 'cs2/l10n';
 import type { ReactElement, ReactNode } from 'react';
-import type { CreatorSocialLink, Mod } from '../common';
-
-export function openModSettings(tab: string): void {
-  trigger('hallOfFame.common', 'openModSettings', tab);
-}
-
-export function openModPage(mod: Mod): void {
-  trigger('hallOfFame.common', 'openModPage', mod.paradoxModId);
-}
-
-export function openSocialLink({ platform, link }: CreatorSocialLink): void {
-  if (platform == 'paradoxmods') {
-    trigger('hallOfFame.common', 'openCreatorPage', link);
-  } else {
-    trigger('hallOfFame.common', 'openWebPage', link);
-  }
-}
-
-export function previousScreenshot(): void {
-  trigger('hallOfFame.presenter', 'previousScreenshot');
-}
-
-export function nextScreenshot(): void {
-  trigger('hallOfFame.presenter', 'nextScreenshot');
-}
-
-export function saveScreenshot(): void {
-  trigger('hallOfFame.presenter', 'saveScreenshot');
-}
-
-export function reportScreenshot(): void {
-  trigger('hallOfFame.presenter', 'reportScreenshot');
-}
-
-export function likeScreenshot(): void {
-  trigger('hallOfFame.presenter', 'likeScreenshot');
-}
 
 export function locElementToReactNode(
   element: LocElement | null | undefined,
