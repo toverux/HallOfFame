@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using Colossal;
-using HallOfFame.Utils;
 
 namespace HallOfFame.Reflection;
 

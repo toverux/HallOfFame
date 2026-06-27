@@ -7,7 +7,7 @@ using Game.UI.Localization;
 namespace HallOfFame.Utils;
 
 internal static class LocalizationExtensions {
-  internal static LocalizationDictionary LocalizationDictionary =>
+  private static LocalizationDictionary LocalizationDictionary =>
     GameManager.instance.localizationManager.activeDictionary;
 
   /// <summary>
@@ -22,11 +22,10 @@ internal static class LocalizationExtensions {
       : fallback ?? key;
 
   /// <summary>
-  /// Same as <see cref="Translate(string)"/> but with variable interpolation.
+  /// Same as <see cref="Translate(string, string?)"/> but with variable interpolation.
   /// </summary>
   /// <param name="key">
-  /// A key that points to a string that
-  /// <see cref="string.Format(string,object[])"/> can format.
+  /// A key that points to a string that <see cref="string.Format(string,object[])"/> can format.
   /// </param>
   /// <param name="args">Values to interpolate</param>
   internal static string Translate(this string key, params object[] args) =>
@@ -44,4 +43,38 @@ internal static class LocalizationExtensions {
     ex.Message,
     new Dictionary<string, ILocElement> { { "ERROR_MESSAGE", LocalizedString.Value(ex.Message) } }
   );
+
+  /// <summary>
+  /// <para>
+  /// Renders a <see cref="LocalizedString"/> to plain display text using the active localization
+  /// dictionary.
+  /// </para>
+  /// <para>
+  /// The <see cref="LocalizedString.id"/> is looked up in the dictionary and its named placeholders
+  /// (<c>{KEY}</c>) are replaced with the rendered <see cref="LocalizedString.args"/>; when the id
+  /// is absent the literal <see cref="LocalizedString.value"/> is used, falling back to the id
+  /// itself.
+  /// </para>
+  /// </summary>
+  internal static string Render(this LocalizedString localizedString) {
+    var template =
+      localizedString.id is not null &&
+      LocalizationExtensions.LocalizationDictionary.TryGetValue(localizedString.id, out var value)
+        ? value
+        : localizedString.value ?? localizedString.id ?? string.Empty;
+
+    if (localizedString.args is null) {
+      return template;
+    }
+
+    foreach (var arg in localizedString.args) {
+      var rendered = arg.Value is LocalizedString nested
+        ? nested.Render()
+        : arg.Value?.ToString() ?? string.Empty;
+
+      template = template.Replace($"{{{arg.Key}}}", rendered);
+    }
+
+    return template;
+  }
 }

@@ -35,6 +35,10 @@
             <HintPath>$(ManagedPath)\Colossal.UI.Binding.dll</HintPath>
             <Private>false</Private>
         </Reference>
+        <Reference Include="Game">
+            <HintPath>$(ManagedPath)\Game.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>

@@ -27,6 +27,8 @@ Here is a more detailed breakdown:
 - `HallOfFame/Services`: Plain (non-ECS) classes holding logic generally extracted from systems.
 - `HallOfFame/Reflection`: Proxy/accessor classes that reach into private game internals via
   reflection (e.g., screen utilities, error dialogs, Paradox SDK platform).
+- `HallOfFame/Logging`: The mod-owned logging seam (`IModLog` + `ModLog`) used through `Mod.Log`,
+   wrapping the engine's `Colossal.Logging.ILog` so logging logic stays unit-testable off-engine.
 - `HallOfFame/Utils`: Small helpers and extensions (localization, logging, input bindings, etc.).
 - `HallOfFame/Utils/Writers`: Outbound C# to cohtml UI-binding writers (`IWriter<T>`
   implementations). Domain records carry only inbound `[DecodeAlias]` data, so each type's outbound

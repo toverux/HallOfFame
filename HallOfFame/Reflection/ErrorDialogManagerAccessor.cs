@@ -2,7 +2,6 @@
 using System.Reflection;
 using Game.SceneFlow;
 using Game.UI;
-using HallOfFame.Utils;
 
 namespace HallOfFame.Reflection;
 

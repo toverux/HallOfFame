@@ -518,7 +518,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       Mod.Log.Info($"{nameof(PresenterUISystem)}: Saved {screenshot} image to {filePath}.");
     }
     catch (Exception ex) when (PresenterUISystem.IsNetworkError(ex)) {
-      Mod.Log.Error(ex.GetUserFriendlyMessage());
+      Mod.Log.Error(ex.GetUserFriendlyMessage().Render());
     }
     catch (Exception ex) {
       Mod.Log.ErrorRecoverable(ex);

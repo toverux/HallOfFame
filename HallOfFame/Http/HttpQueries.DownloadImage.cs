@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Game;
-using HallOfFame.Utils;
 using UnityEngine.Networking;
 
 namespace HallOfFame.Http;

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Colossal.Logging;
 using Game.UI.Localization;
 using HallOfFame.Http;
+using HallOfFame.Logging;
 using HallOfFame.Utils;
 
 namespace HallOfFame.Services;
@@ -18,7 +18,7 @@ namespace HallOfFame.Services;
 /// The scheduling (cancel the previous call, debounce typing) stays in the <see cref="Settings"/>
 /// shell.
 /// </summary>
-internal sealed class CreatorIdentityService(IHallOfFameApi api, ILog log) {
+internal sealed class CreatorIdentityService(IHallOfFameApi api, IModLog log) {
   /// <summary>
   /// Pure bootstrap decision for the Creator ID, with no engine I/O so it is unit-testable.
   /// The reflection read of the Paradox account ID and the no-Paradox-connection warning dialog

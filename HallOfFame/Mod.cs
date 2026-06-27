@@ -7,6 +7,7 @@ using Colossal.UI;
 using Game;
 using Game.Modding;
 using HallOfFame.Http;
+using HallOfFame.Logging;
 using HallOfFame.Systems;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
@@ -59,10 +60,11 @@ public sealed class Mod : IMod {
   internal static string ModDataPath { get; } =
     Path.Combine(EnvPath.kUserDataPath, "ModsData", nameof(HallOfFame));
 
-  internal static ILog Log { get; } =
+  internal static IModLog Log { get; } = new ModLog(
     LogManager.GetLogger(nameof(HallOfFame))
       .SetShowsErrorsInUI(true)
-      .SetEffectiveness(Level.All);
+      .SetEffectiveness(Level.All)
+  );
 
   private static Mod? instanceValue;
 

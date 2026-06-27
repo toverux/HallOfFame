@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Colossal.Json;
 using Game;
 using Game.SceneFlow;
-using HallOfFame.Utils;
 using UnityEngine;
 using UnityEngine.Networking;
 

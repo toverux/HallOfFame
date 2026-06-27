@@ -5,7 +5,6 @@ using Colossal.UI.Binding;
 using Game.SceneFlow;
 using Game.UI;
 using HallOfFame.Services;
-using HallOfFame.Utils;
 
 namespace HallOfFame.Systems;
 

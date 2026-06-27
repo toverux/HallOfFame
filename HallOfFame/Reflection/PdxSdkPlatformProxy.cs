@@ -2,7 +2,6 @@
 using System.Reflection;
 using Colossal.PSI.Common;
 using Colossal.PSI.PdxSdk;
-using HallOfFame.Utils;
 using PDX.ModsUI;
 
 namespace HallOfFame.Reflection;
