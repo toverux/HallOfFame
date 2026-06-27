@@ -69,16 +69,11 @@ Do NOT use `npx` to run commands, always prefer `mise` or `bun`.
 
 ## Testing (C#)
 
-Unit tests live in the `HallOfFame.Tests` project and run with xUnit.
+Unit tests live in the `HallOfFame.Tests` project (xUnit, `net48`, run off-engine). Run them with
+`mise run test:cs`.
 
-- `mise run test:cs`: Run the C# unit tests. It passes `-p:SkipBuildUI=true` so the TypeScript UI
-  is not rebuilt on every run.
-- Tests target `net48` like the mod, so they can reference the same game assemblies.
-- Game assemblies (Colossal, Unity) are referenced for compilation only and loaded at runtime by an
-  `AssemblyResolve` probe pointing at the game's `Managed` folder (see `GameAssemblyResolver`), so
-  no game binaries are copied into the test output.
-- ECS systems (`Systems/`) cannot be instantiated off-engine; extract product logic there to make it
-  testable.
+When writing or running C# tests, debugging an engine-bound type that won't load off-engine, or
+deciding where to put logic so it stays testable, use the `cs-offengine-testing` skill.
 
 ## Boundaries
 
