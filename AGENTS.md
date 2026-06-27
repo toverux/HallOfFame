@@ -74,6 +74,7 @@ Unit tests live in the `HallOfFame.Tests` project and run with xUnit.
 
 ## Boundaries
 
+- Never commit work yourself unless the user expressly told you so.
 - Never modify generated files unless the generation command was run.
 - Never reformat unrelated files.
 - Ask before adding a dependency.
