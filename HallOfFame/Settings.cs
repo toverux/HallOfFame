@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
 using Colossal.UI.Binding;
@@ -137,7 +135,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
   /// <summary>
   /// Live account status text ("logged in as X", "invalid username", that kind of things).
-  /// Updated by <see cref="UpdateCreator"/> on mod load and creator name change.
+  /// Updated by the <see cref="CreatorIdentityService"/> on mod load and when settings change.
   /// </summary>
   [SettingsUISection(Settings.GroupYourProfile)]
   [UsedImplicitly]
@@ -161,7 +159,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
         : this.CreatorName;
 
       Application.OpenURL(
-        $"https://viewer.halloffame.mtq.io/?creator={(creatorQuery)}&sortOrder=Descending"
+        $"https://viewer.halloffame.mtq.io/?creator={creatorQuery}&sortOrder=Descending"
       );
     }
   }
@@ -505,16 +503,6 @@ public sealed class Settings : ModSetting, IJsonWritable {
   /// <seealso cref="LoginStatus"/>
   private LocalizedString loginStatusValue = string.Empty;
 
-  /// <seealso cref="UpdateCreator"/>
-  private CancellationTokenSource? updateLoginStatusCts;
-
-  /// <summary>
-  /// Holds the creator identity and login logic.
-  /// Created in <see cref="Initialize"/> on the real instance; clones from <c>MemberwiseClone</c>
-  /// stay dormant and never use it.
-  /// </summary>
-  private CreatorIdentityService? identity;
-
   public Settings(IMod mod) : base(mod) {
     this.SetDefaults();
   }
@@ -585,21 +573,26 @@ public sealed class Settings : ModSetting, IJsonWritable {
     GameManager.instance.localizationManager.AddSource("en-US", new DevDictionarySource());
     #endif
 
-    this.identity = new CreatorIdentityService(Mod.Api, Mod.Log);
+    var identityService = new CreatorIdentityService(
+      Mod.Api,
+      Mod.Log,
+      status => this.loginStatusValue = status
+    );
 
     this.InitializeCreatorId();
 
-    // Update the login status when the mod is being loaded.
-    this.UpdateCreator(false, false, false);
+    // Sync the account with the server on mod load.
+    identityService.Sync(CreatorSyncTrigger.Startup);
 
-    // Update the login status when the Creator Name is changed.
+    // Re-sync when settings are applied: a Creator Name edit syncs the name and shows the result,
+    // any other change pushes the updated info silently.
     var prevCreatorName = this.CreatorName;
 
     this.onSettingsApplied += _ => {
-      this.UpdateCreator(
-        prevCreatorName != this.CreatorName,
-        prevCreatorName == this.CreatorName,
-        true
+      identityService.Sync(
+        prevCreatorName != this.CreatorName
+          ? CreatorSyncTrigger.NameEdited
+          : CreatorSyncTrigger.OtherSettingChanged
       );
 
       prevCreatorName = this.CreatorName;
@@ -682,62 +675,6 @@ public sealed class Settings : ModSetting, IJsonWritable {
         actions = ErrorDialog.ActionBits.Continue
       }
     );
-  }
-
-  /// <summary>
-  /// Checks and/or updates the account name with the server and reflect the status in the Options
-  /// UI (success or errors if there are any problems, ex. an incorrect username).
-  /// </summary>
-  /// <param name="nameOnly">
-  /// If true, only update the name, not other info (currently: mod settings).
-  /// </param>
-  /// <param name="silent">
-  /// Whether to update the login status text with loading/success/error messages.
-  /// </param>
-  /// <param name="debounce">
-  /// Whether to debounce the method if it's called multiple times in a short period (keystrokes
-  /// while typing username).
-  /// </param>
-  // ReSharper disable once AsyncVoidMethod
-  private async void UpdateCreator(
-    bool nameOnly,
-    bool silent,
-    bool debounce
-  ) {
-    // Cancel any ongoing update.
-    this.updateLoginStatusCts?.Cancel();
-
-    var thisCts = this.updateLoginStatusCts = new CancellationTokenSource();
-
-    if (!silent) {
-      // Show a loading message while we're fetching the status.
-      this.loginStatusValue = LocalizedString.Id("HallOfFame.Common.LOADING");
-    }
-
-    try {
-      if (debounce) {
-        // Apply a delay to debounce the method if it's called multiple times in a short period
-        // (keystrokes while typing username).
-        await Task.Delay(500, thisCts.Token);
-      }
-
-      var status = await this.identity!.Refresh(nameOnly, silent, thisCts.Token);
-
-      // A null status means there is nothing to display (silent call); leave the status as is.
-      if (status is not null) {
-        this.loginStatusValue = status.Value;
-      }
-    }
-    catch (OperationCanceledException) {
-      // The Task.Delay or the network request was canceled (a newer call superseded this one);
-      // leave the status as is.
-    }
-    finally {
-      // Clear the shared cancellation token source if we're the last one to have been called.
-      if (thisCts == this.updateLoginStatusCts) {
-        this.updateLoginStatusCts = null;
-      }
-    }
   }
 
   void IJsonWritable.Write(IJsonWriter writer) {

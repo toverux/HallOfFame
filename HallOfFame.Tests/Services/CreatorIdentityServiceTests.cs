@@ -43,17 +43,19 @@ public sealed class CreatorIdentityServiceTests {
   }
 
   [Fact]
-  public async Task Refresh_ReturnsLoggedInAsStatus_ForNamedCreator() {
+  public async Task RunSync_ReturnsLoggedInAsStatus_ForNamedCreator() {
     var service = new CreatorIdentityService(
       new FakeApi {
         GetMeImpl = () => Task.FromResult(new Creator { Id = "creator-id", CreatorName = "Alice" })
       },
-      new FakeModLog()
+      new FakeModLog(),
+      _ => { }
     );
 
-    var result = await service.Refresh(nameOnly: true, silent: false, CancellationToken.None);
+    var result = await service.RunSync(CreatorSyncTrigger.NameEdited, CancellationToken.None);
 
     Assert.NotNull(result);
+
     Assert.Equal(
       "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]",
       result.Value.id
@@ -61,17 +63,19 @@ public sealed class CreatorIdentityServiceTests {
   }
 
   [Fact]
-  public async Task Refresh_ReturnsAnonymousStatus_ForEmptyName() {
+  public async Task RunSync_ReturnsAnonymousStatus_ForEmptyName() {
     var service = new CreatorIdentityService(
       new FakeApi {
         GetMeImpl = () => Task.FromResult(new Creator { Id = "creator-id", CreatorName = "" })
       },
-      new FakeModLog()
+      new FakeModLog(),
+      _ => { }
     );
 
-    var result = await service.Refresh(nameOnly: true, silent: false, CancellationToken.None);
+    var result = await service.RunSync(CreatorSyncTrigger.NameEdited, CancellationToken.None);
 
     Assert.NotNull(result);
+
     Assert.Equal(
       "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]",
       result.Value.id
@@ -79,31 +83,54 @@ public sealed class CreatorIdentityServiceTests {
   }
 
   [Fact]
-  public async Task Refresh_ReturnsNull_WhenSilent() {
+  public async Task RunSync_ReturnsNull_WhenSilent() {
+    // OtherSettingChanged is the silent trigger; it pushes full info via UpdateMe.
     var service = new CreatorIdentityService(
       new FakeApi {
-        GetMeImpl = () => Task.FromResult(new Creator { Id = "creator-id", CreatorName = "Alice" })
+        UpdateMeImpl =
+          () => Task.FromResult(new Creator { Id = "creator-id", CreatorName = "Alice" })
       },
-      new FakeModLog()
+      new FakeModLog(),
+      _ => { }
     );
 
-    var result = await service.Refresh(nameOnly: true, silent: true, CancellationToken.None);
+    var result =
+      await service.RunSync(CreatorSyncTrigger.OtherSettingChanged, CancellationToken.None);
 
     Assert.Null(result);
   }
 
   [Fact]
-  public async Task Refresh_ReturnsUserFriendlyMessage_OnError() {
+  public async Task RunSync_ReturnsUserFriendlyMessage_OnError() {
     var exception = new HttpServerException("req-id", new HttpQueries.JsonError());
 
     var service = new CreatorIdentityService(
       new FakeApi { GetMeImpl = () => throw exception },
-      new FakeModLog()
+      new FakeModLog(),
+      _ => { }
     );
 
-    var result = await service.Refresh(nameOnly: true, silent: false, CancellationToken.None);
+    var result = await service.RunSync(CreatorSyncTrigger.NameEdited, CancellationToken.None);
 
     Assert.NotNull(result);
     Assert.Equal(exception.GetUserFriendlyMessage(), result.Value);
+  }
+
+  [Fact]
+  public void PlanFor_MapsEachTriggerToItsPlan() {
+    Assert.Equal(
+      new CreatorIdentityService.SyncPlan(FullInfo: true, Silent: false, Debounce: false),
+      CreatorIdentityService.PlanFor(CreatorSyncTrigger.Startup)
+    );
+
+    Assert.Equal(
+      new CreatorIdentityService.SyncPlan(FullInfo: false, Silent: false, Debounce: true),
+      CreatorIdentityService.PlanFor(CreatorSyncTrigger.NameEdited)
+    );
+
+    Assert.Equal(
+      new CreatorIdentityService.SyncPlan(FullInfo: true, Silent: true, Debounce: true),
+      CreatorIdentityService.PlanFor(CreatorSyncTrigger.OtherSettingChanged)
+    );
   }
 }
