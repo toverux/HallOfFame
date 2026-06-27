@@ -73,6 +73,15 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// </summary>
   private GameMode previousGameMode = GameMode.MainMenu;
 
+  /// <summary>
+  /// Whether a navigation (next/previous) is currently moving the cursor, i.e., the displayed
+  /// screenshot may be changing.
+  /// This is narrower than <see cref="isRefreshingBinding"/>, which also stays set during the
+  /// background look-ahead prefetch, when the current screenshot is already settled and can still
+  /// be liked.
+  /// </summary>
+  private bool isNavigating;
+
   private bool isTogglingLike;
 
   protected override void OnCreate() {
@@ -265,6 +274,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
   internal async void LoadScreenshotById(string screenshotId) {
+    this.isNavigating = true;
     this.isRefreshingBinding.Update(true);
 
     try {
@@ -278,6 +288,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.HandleDisplayLoadError(ex);
     }
     finally {
+      this.isNavigating = false;
       this.isRefreshingBinding.Update(false);
     }
   }
@@ -323,6 +334,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       return;
     }
 
+    this.isNavigating = true;
     this.isRefreshingBinding.Update(true);
 
     try {
@@ -342,6 +354,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.HandleDisplayLoadError(ex);
     }
     finally {
+      this.isNavigating = false;
       this.isRefreshingBinding.Update(false);
     }
   }
@@ -358,6 +371,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       return;
     }
 
+    this.isNavigating = true;
     this.isRefreshingBinding.Update(true);
 
     try {
@@ -366,6 +380,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     catch (Exception ex) {
       // Leave the previously displayed screenshot in place and reset the refresh state.
       this.HandleDisplayLoadError(ex);
+      this.isNavigating = false;
       this.isRefreshingBinding.Update(false);
 
       return;
@@ -378,6 +393,10 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
     this.screenshotBinding.Update(screenshot);
     this.hasPreviousScreenshotBinding.Update();
+
+    // The cursor has settled and the binding mirrors it: navigation is done, so a like is safe even
+    // though the background prefetch below may keep the refresh flag set for a while.
+    this.isNavigating = false;
 
     Mod.Log.Verbose(
       $"{nameof(PresenterUISystem)}: {nameof(this.NextScreenshot)}: Displaying {screenshot} " +
@@ -448,8 +467,11 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
   private async void LikeScreenshot() {
+    // Unlike next/previous, liking is allowed during the background look-ahead prefetch: it acts on
+    // the already-settled current screenshot, so only an in-flight navigation (which may be
+    // swapping that screenshot out) must block it.
     if (this.isTogglingLike ||
-        this.isRefreshingBinding.value ||
+        this.isNavigating ||
         this.screenshotCarousel.Current is null) {
       return;
     }
@@ -482,9 +504,13 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         }
       );
 
-      // Revert the optimistic UI update.
-      this.screenshotCarousel.ReplaceCurrent(prevScreenshot);
-      this.screenshotBinding.Update(prevScreenshot);
+      // Revert the optimistic UI update, but only if the cursor is still on the screenshot we
+      // liked: the API call may have failed after the user navigated away, in which case reverting
+      // would write the stale screenshot at the moved cursor and flash it over the current one.
+      if (this.screenshotCarousel.Current.Id == updatedScreenshot.Id) {
+        this.screenshotCarousel.ReplaceCurrent(prevScreenshot);
+        this.screenshotBinding.Update(prevScreenshot);
+      }
     }
     catch (Exception ex) {
       Mod.Log.ErrorRecoverable(ex);
