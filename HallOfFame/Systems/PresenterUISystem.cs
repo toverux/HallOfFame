@@ -27,6 +27,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private ScreenshotCarousel screenshotCarousel = null!;
 
+  private ScreenshotLiker screenshotLiker = null!;
+
   private ScreenshotExporter screenshotExporter = null!;
 
   private bool forceEnableMainMenuSlideshow;
@@ -82,8 +84,6 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// </summary>
   private bool isNavigating;
 
-  private bool isTogglingLike;
-
   protected override void OnCreate() {
     base.OnCreate();
 
@@ -98,6 +98,23 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         Mod.Api,
         this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>(),
         () => Mod.Settings.ScreenshotResolution
+      );
+
+      // The Liker drives like/unlike on the carousel's current screenshot: it owns the optimistic
+      // update and the serialized network sync, reporting back through callbacks so this system
+      // keeps owning the UI binding and the (engine-bound) error dialog.
+      this.screenshotLiker = new ScreenshotLiker(
+        this.screenshotCarousel,
+        Mod.Api,
+        Mod.Log,
+        screenshot => this.screenshotBinding.Update(screenshot),
+        ex => ErrorDialogManagerAccessor.Instance?.ShowError(
+          new ErrorDialog {
+            localizedTitle = "HallOfFame.Common.OOPS",
+            localizedMessage = ex.GetUserFriendlyMessage(),
+            actions = ErrorDialog.ActionBits.Continue
+          }
+        )
       );
 
       this.screenshotExporter = new ScreenshotExporter(Mod.Api);
@@ -461,63 +478,21 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Toggle the liked status of the current screenshot, with an optimistic UI update.
-  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
-  /// and it should be designed to never throw.
+  /// Toggles the liked status of the current screenshot, delegating to the
+  /// <see cref="screenshotLiker"/> which applies an optimistic UI update and serializes the network
+  /// sync.
   /// </summary>
-  // ReSharper disable once AsyncVoidMethod
-  private async void LikeScreenshot() {
+  private void LikeScreenshot() {
     // Unlike next/previous, liking is allowed during the background look-ahead prefetch: it acts on
     // the already-settled current screenshot, so only an in-flight navigation (which may be
     // swapping that screenshot out) must block it.
-    if (this.isTogglingLike ||
-        this.isNavigating ||
-        this.screenshotCarousel.Current is null) {
+    if (this.isNavigating) {
       return;
     }
 
-    this.isTogglingLike = true;
-
-    var prevScreenshot = this.screenshotCarousel.Current;
-
-    var updatedScreenshot = prevScreenshot with {
-      IsLiked = !prevScreenshot.IsLiked,
-      LikesCount = prevScreenshot.LikesCount + (prevScreenshot.IsLiked ? -1 : 1)
-    };
-
-    // Replace the current screenshot with the liked one (optimistic update).
-    this.screenshotCarousel.ReplaceCurrent(updatedScreenshot);
-    this.screenshotBinding.Update(updatedScreenshot);
-
-    try {
-      await Mod.Api.LikeScreenshot(
-        updatedScreenshot.Id,
-        updatedScreenshot.IsLiked
-      );
-    }
-    catch (HttpException ex) {
-      ErrorDialogManagerAccessor.Instance?.ShowError(
-        new ErrorDialog {
-          localizedTitle = "HallOfFame.Common.OOPS",
-          localizedMessage = ex.GetUserFriendlyMessage(),
-          actions = ErrorDialog.ActionBits.Continue
-        }
-      );
-
-      // Revert the optimistic UI update, but only if the cursor is still on the screenshot we
-      // liked: the API call may have failed after the user navigated away, in which case reverting
-      // would write the stale screenshot at the moved cursor and flash it over the current one.
-      if (this.screenshotCarousel.Current.Id == updatedScreenshot.Id) {
-        this.screenshotCarousel.ReplaceCurrent(prevScreenshot);
-        this.screenshotBinding.Update(prevScreenshot);
-      }
-    }
-    catch (Exception ex) {
-      Mod.Log.ErrorRecoverable(ex);
-    }
-    finally {
-      this.isTogglingLike = false;
-    }
+    // Fire-and-forget: the Liker owns the optimistic update, the serialized sync, and its own error
+    // handling, so it is designed never to throw.
+    _ = this.screenshotLiker.Toggle();
   }
 
   /// <summary>

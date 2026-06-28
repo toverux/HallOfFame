@@ -5,10 +5,14 @@ namespace HallOfFame.Tests.Logging;
 
 /// <summary>
 /// No-op <see cref="IModLog"/> test double.
-/// Logging is a side effect the service tests do not assert on, so every method discards its
-/// arguments; this keeps the engine-bound real logger out of the off-engine test runtime.
+/// Logging is a side effect the service tests usually do not assert on, so every method discards
+/// its arguments; this keeps the engine-bound real logger out of the off-engine test runtime.
+/// A test that does need to observe a specific call wires the matching optional delegate (only
+/// <see cref="ErrorRecoverableImpl"/> so far), mirroring <c>FakeApi</c>.
 /// </summary>
 internal sealed class FakeModLog : IModLog {
+  internal Action<Exception>? ErrorRecoverableImpl { get; init; }
+
   public void Verbose(string message) {
   }
 
@@ -34,6 +38,7 @@ internal sealed class FakeModLog : IModLog {
   }
 
   public void ErrorRecoverable(Exception exception) {
+    this.ErrorRecoverableImpl?.Invoke(exception);
   }
 
   public void ErrorFatal(Exception exception) {
