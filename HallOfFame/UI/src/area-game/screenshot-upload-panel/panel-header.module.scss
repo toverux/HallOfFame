@@ -1,0 +1,26 @@
+@use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
+
+.header {
+  // `.panel-surface` is mixed in via `classNames` in the TSX (see shared.module.scss).
+  padding: shared.$section-padding;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  // For box-shadow to be visible.
+  z-index: 1;
+  box-shadow: 0 1px 0 shared.$separator-shadow-color;
+
+  font-size: calc(28rem * #{vanilla.$font-scale});
+
+  &-close {
+    padding: 10rem;
+
+    [class*="icon"] {
+      opacity: 0.8;
+    }
+  }
+}

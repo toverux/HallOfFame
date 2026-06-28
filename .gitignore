@@ -6,6 +6,9 @@
 # UI mod
 /node_modules
 
+# Generated CSS module type definitions (see `mise build:css-types`)
+*.module.scss.d.ts
+
 # Build artifacts
 Library/
 bin/

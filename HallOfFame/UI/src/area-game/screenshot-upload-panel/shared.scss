@@ -1,0 +1,15 @@
+// Variables shared across the screenshot upload panel's sub-components.
+// Keep this file rule-free (variables and mixins only) so `@use`-ing it never re-emits CSS.
+
+@use "sass:color";
+@use "../../vanilla-vars" as vanilla;
+
+// Those RGB colors are the ones used by Vanilla in right panels like the lifepath one or the
+// event log. Vanilla does not use variables here.
+$game-panel-white: rgba(236, 236, 236, 0.9);
+$game-panel-gray: rgb(80, 76, 83);
+
+$separator-shadow-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.8);
+
+// The padding shared by the panel's header, footer, content, and warning sections.
+$section-padding: 20rem;

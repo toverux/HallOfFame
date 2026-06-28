@@ -1,9 +1,11 @@
+import classNames from 'classnames';
 import { type Localization, useLocalization } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { memo, type ReactElement, useMemo } from 'react';
 import * as bindings from '../../bindings';
 import type { DraggableProps } from '../../utils';
-import * as styles from './screenshot-upload-panel.module.scss';
+import * as styles from './panel-header.module.scss';
+import * as shared from './shared.module.scss';
 
 export const ScreenshotUploadPanelHeader = memo(function ScreenshotUploadPanelHeaderBase({
   screenshotSnapshot,
@@ -24,12 +26,12 @@ export const ScreenshotUploadPanelHeader = memo(function ScreenshotUploadPanelHe
   );
 
   return (
-    <div className={styles.screenshotUploadPanelHeader} {...draggable}>
+    <div className={classNames(styles.header, shared.panelSurface)} {...draggable}>
       {congratulation}
 
       <Button
         variant='round'
-        className={styles.screenshotUploadPanelHeaderClose}
+        className={styles.headerClose}
         onSelect={bindings.clearScreenshot}
         selectSound='close-menu'>
         <Icon src='Media/Glyphs/Close.svg' />

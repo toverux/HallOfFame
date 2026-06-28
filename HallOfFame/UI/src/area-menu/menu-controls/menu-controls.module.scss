@@ -1,497 +1,246 @@
-@use "sass:color";
 @use "../../common";
 @use "../../vanilla-vars" as vanilla;
 
-.menu-controls-container {
+.controls-container {
   --button-size: 65rem;
   --buttons-gap: 30rem;
 
   position: relative;
 
-  .menu-controls {
+  .controls {
     position: absolute;
     bottom: 0;
     right: 0;
     left: 0;
 
-    &-apply-buttons-offset {
+    &--applyButtonsOffset {
       left: calc(var(--button-size) * -1 + 5rem);
     }
   }
 }
 
-.menu-controls {
+.controls {
   display: flex;
   flex-direction: column;
   line-height: 1.35;
   color: white;
 
   @include common.fade-in(0.3s);
+}
 
-  &-error {
-    margin-right: 8rem;
+.assetButton {
+  align-self: flex-start;
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20rem;
+
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+
+  border-radius: 10rem;
+  // biome-ignore lint/complexity/noImportantStyles:  important to also override vanilla hover padding
+  padding: 20rem !important;
+
+  line-height: 1.2;
+  text-align: left;
+  text-transform: none;
+  font-variant: normal;
+
+  /* Some glassomorphism */
+  border: 1rem solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20rem);
+  box-shadow:
+    0 8rem 32rem rgba(0, 0, 0, 0.1),
+    inset 0 1rem 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1rem 0 rgba(255, 255, 255, 0.1),
+    inset 40rem 20rem 20rem rgba(255, 255, 255, 0.1);
+
+  &-thumbnail {
+    margin-right: 20rem;
+    // Perfect size so that everything is perfectly aligned when the title is one line.
+    // If it is more, or when hovering and the description is shown, the image is aligned to the
+    // top.
+    width: 87rem;
+    height: 87rem;
+
+    border-radius: 5rem;
+
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+  }
+
+  &-text {
+    flex: 0 1 auto;
+
     display: flex;
     flex-direction: column;
-    border-radius: 12rem;
-    background-color: color.change(vanilla.$accent-color-dark, $alpha: 0.55);
-    backdrop-filter: vanilla.$menu-blur;
-    padding: 15rem;
-    font-size: vanilla.$font-size-l;
+    align-items: flex-start;
+  }
 
-    &-header {
-      margin-bottom: 15rem;
-      display: flex;
+  &-textHeader {
+    margin-bottom: 5rem;
+    display: flex;
+    align-items: center;
 
-      &-image {
-        flex: 1 1 40%;
-        max-width: 150rem;
-        margin-right: 15rem;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-      }
+    text-transform: uppercase;
+    font-size: vanilla.$font-size-s;
+    font-weight: bold;
 
-      &-text {
-        flex: 1 1;
-        display: flex;
-        flex-direction: column;
-        font-size: 130%;
+    // Targets <Icon>.
+    > [class*="icon"] {
+      margin-right: 5rem;
 
-        strong {
-          font-size: 130%;
-        }
+      // Make the icon 10% smaller.
+      > [class*="icon"] {
+        width: 90%;
+        height: 90%;
       }
     }
+  }
 
-    &-gameplay-not-affected {
-      margin-top: 10rem;
-      font-size: vanilla.$font-size-xl;
+  &-textTitle {
+    margin-bottom: 5rem;
+
+    line-height: 1.1;
+    font-size: vanilla.$font-size-xl;
+    font-weight: bold;
+  }
+
+  &-textAuthor {
+    font-size: vanilla.$font-size-l;
+  }
+
+  &-textDescription {
+    transition: max-width, max-height, opacity 0.3s common.$default-timing-function;
+
+    // Hide, will transition to the natural size.
+    // Unlike in modern browsers we cannot animate width/height from 0 to auto so instead we use
+    // the old max-width/max-height trick.
+    max-width: 0;
+    max-height: 0;
+
+    overflow: hidden;
+    opacity: 0;
+
+    font-size: vanilla.$font-size-s;
+  }
+
+  &:hover {
+    // Neutralize the glassomorphism.
+    border-color: transparent;
+    box-shadow: none;
+  }
+
+  &:hover &-textHeader > [class*="icon"] > [class*="icon"] {
+    background-color: vanilla.$menu-text-1-inverted;
+  }
+
+  &:hover &-textDescription {
+    // Set a high bound for the width/height transition.
+    max-width: 1000rem;
+    max-height: 1000rem;
+    margin-top: 10rem;
+    opacity: 1;
+  }
+}
+
+.section {
+  display: flex;
+
+  &-buttons {
+    z-index: 1;
+
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: var(--button-size);
+  }
+
+  &-content {
+    flex: 1 1 auto;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    margin-left: var(--buttons-gap);
+  }
+
+  &--otherActions &-content {
+    flex-direction: row;
+
+    @include common.fade-out-slide-out(-60rem, $duration: 0.2s);
+
+    &--slideIn {
+      @include common.fade-in-slide-in(-60rem, $duration: 0.2s);
     }
 
     button {
-      align-self: flex-start;
-      margin: 15rem 0 0;
-      // biome-ignore lint/complexity/noImportantStyles: override vanilla padding-left change on hover.
-      padding-left: 15rem !important;
-      // biome-ignore lint/complexity/noImportantStyles: same (also set padding-right to make sure it matches padding-left).
-      padding-right: 15rem !important;
-    }
-  }
-
-  &-asset-button {
-    align-self: flex-start;
-    max-width: 100%;
-    height: auto;
-    margin-bottom: 20rem;
-
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-
-    border-radius: 10rem;
-    // biome-ignore lint/complexity/noImportantStyles:  important to also override vanilla hover padding
-    padding: 20rem !important;
-
-    line-height: 1.2;
-    text-align: left;
-    text-transform: none;
-    font-variant: normal;
-
-    /* Some glassomorphism */
-    border: 1rem solid rgba(255, 255, 255, 0.3);
-    background-color: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(20rem);
-    box-shadow:
-      0 8rem 32rem rgba(0, 0, 0, 0.1),
-      inset 0 1rem 0 rgba(255, 255, 255, 0.5),
-      inset 0 -1rem 0 rgba(255, 255, 255, 0.1),
-      inset 40rem 20rem 20rem rgba(255, 255, 255, 0.1);
-
-    &-thumbnail {
-      margin-right: 20rem;
-      // Perfect size so that everything is perfectly aligned when the title is one line.
-      // If it is more, or when hovering and the description is shown, the image is aligned to the
-      // top.
-      width: 87rem;
-      height: 87rem;
-
-      border-radius: 5rem;
-
-      background-position: center;
-      background-size: cover;
-      background-repeat: no-repeat;
-    }
-
-    &-text {
       flex: 0 1 auto;
+      height: 40rem;
+      margin-top: 0;
+      margin-right: 15rem;
+      border-radius: 20rem;
+      padding: 0 20rem;
+      text-transform: initial;
+      font-size: 1em;
 
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-
-      &-header {
-        margin-bottom: 5rem;
-        display: flex;
-        align-items: center;
-
-        text-transform: uppercase;
-        font-size: vanilla.$font-size-s;
-        font-weight: bold;
-
-        // Targets <Icon>.
-        > [class*="icon"] {
-          margin-right: 5rem;
-
-          // Make the icon 10% smaller.
-          > [class*="icon"] {
-            width: 90%;
-            height: 90%;
-          }
-        }
+      [class*="icon"] {
+        width: 18rem;
+        height: 18rem;
+        margin-right: 10rem;
       }
-
-      &-title {
-        margin-bottom: 5rem;
-
-        line-height: 1.1;
-        font-size: vanilla.$font-size-xl;
-        font-weight: bold;
-      }
-
-      &-author {
-        font-size: vanilla.$font-size-l;
-      }
-
-      &-description {
-        transition: max-width, max-height, opacity 0.3s common.$default-timing-function;
-
-        // Hide, will transition to the natural size.
-        // Unlike in modern browsers we cannot animate width/height from 0 to auto so instead we use
-        // the old max-width/max-height trick.
-        max-width: 0;
-        max-height: 0;
-
-        overflow: hidden;
-        opacity: 0;
-
-        font-size: vanilla.$font-size-s;
-      }
-    }
-
-    &:hover {
-      // Neutralize the glassomorphism.
-      border-color: transparent;
-      box-shadow: none;
-    }
-
-    &:hover &-text-header > [class*="icon"] > [class*="icon"] {
-      background-color: vanilla.$menu-text-1-inverted;
-    }
-
-    &:hover &-text-description {
-      // Set a high bound for the width/height transition.
-      max-width: 1000rem;
-      max-height: 1000rem;
-      margin-top: 10rem;
-      opacity: 1;
     }
   }
 
-  &-section {
+  &--otherActions &-saveButtonSpin [class*="icon"] {
+    animation: spin 1s linear infinite;
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  }
+
+  &--otherActions &-settingsButton {
+    width: 40rem;
+    // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
+    margin-right: 0 !important;
     display: flex;
+    justify-content: center;
+    // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
+    padding: 0 !important;
 
-    &-screenshot-labels {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      // Makes sense here + avoids a bug in cohtml's layout engine.
-      align-items: flex-start;
-
-      &-label {
-        margin-right: 15rem;
-        margin-bottom: 15rem;
-
-        // Normally we would not have to use a hardcoded height here, but this circumvents a cohtml
-        // layout bug where images have trouble stretching to the height of this container (and that
-        // depended on the flex configuration of the parents too, so this seems to be the most
-        // robust way to deal with it).
-        height: 40rem;
-        display: flex;
-        align-items: center;
-        border-radius: 20rem;
-        backdrop-filter: contrast(80%) blur(25px);
-        padding: 0 12rem;
-
-        // This circumvents a rare bug where a span element can collapse in a random way, a bug in
-        // cohtml's layout engine.
-        white-space: nowrap;
-
-        &-icon,
-        & > [class*="icon"] {
-          width: 22rem;
-          height: 100%;
-          margin-right: 10rem;
-          filter: drop-shadow(0 1rem 0.4rem #{vanilla.$panel-color-normal});
-        }
-      }
+    [class*="icon"] {
+      // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
+      width: 25rem !important;
+      // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
+      height: 25rem !important;
+      // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
+      margin-right: 0 !important;
     }
 
-    &-buttons {
-      z-index: 1;
-
-      flex-grow: 0;
-      flex-shrink: 0;
-      flex-basis: var(--button-size);
-
-      &-button-tooltip {
-        display: flex;
-        flex-direction: column;
-
-        [class*="hint"] {
-          font-size: 0.8em;
-          margin-top: 5rem;
-        }
-      }
-
-      &-button {
-        margin-top: 8rem;
-        margin-bottom: 8rem;
-
-        width: var(--button-size);
-        height: var(--button-size);
-        display: flex;
-        border-radius: 50%;
-        justify-content: center;
-        // biome-ignore lint/complexity/noImportantStyles: override vanilla hover padding
-        padding: 0 !important;
-        backdrop-filter: brightness(80%) contrast(90%) blur(25px);
-
-        &[disabled],
-        &[disabled]:hover {
-          // biome-ignore lint/complexity/noImportantStyles: I don't remember.
-          background-color: rgba(16, 19, 29, 0.2) !important;
-        }
-
-        &-active {
-          // Class set when the related action is performed via keypress and not via the button.
-          // Values taken from the vanilla :active button style.
-          background-color: vanilla.$menu-active-color-bright;
-        }
-
-        [class*="label"] {
-          display: none;
-        }
-
-        [class*="icon"] {
-          margin: 0;
-          transition: all 0.1s ease-in-out;
-        }
-
-        &-previous [class*="icon"] {
-          // The X translation is a slight visual adjustment to make the icon appear better
-          // centered.
-          transform: translateX(-2rem) rotate(180deg);
-        }
-
-        &-next [class*="icon"] {
-          // Same as for previous icon.
-          transform: translateX(2rem);
-        }
-
-        &-like {
-          transition: all 0.1s ease-in-out;
-
-          [class*="icon"] {
-            width: calc(var(--button-size) - 30rem);
-            height: calc(var(--button-size) - 30rem);
-            transition: transform 0.15s ease-in-out;
-          }
-
-          &:hover [class*="icon"],
-          &-liked [class*="icon"] {
-            transform: rotate(-10deg) scale(1.6) translateX(3rem);
-          }
-
-          &:active [class*="icon"] {
-            transform: rotate(-5deg) scale(1.45) translateX(3rem);
-          }
-
-          &-liked {
-            // biome-ignore-start lint/complexity/noImportantStyles: importants are for overriding :hover styles.
-            box-shadow: 0 0 0 2rem rgb(226 85 112) !important;
-            background-color: rgba(226, 85, 112, 0.67) !important;
-            color: vanilla.$menu-text-1-normal !important;
-
-            &:active,
-            &-active {
-              background-color: rgba(226, 85, 112, 0.8) !important;
-            }
-            // biome-ignore-end lint/complexity/noImportantStyles: importants are for overriding :hover styles.
-          }
-        }
-      }
-    }
-
-    &-content {
-      flex: 1 1 auto;
-      align-self: center;
-      display: flex;
-      flex-direction: column;
-      margin-left: var(--buttons-gap);
-    }
-
-    &-other-actions &-content {
-      flex-direction: row;
-
-      @include common.fade-out-slide-out(-60rem, $duration: 0.2s);
-
-      &-slide-in {
-        @include common.fade-in-slide-in(-60rem, $duration: 0.2s);
-      }
-
-      button {
-        flex: 0 1 auto;
-        height: 40rem;
-        margin-top: 0;
-        margin-right: 15rem;
-        border-radius: 20rem;
-        padding: 0 20rem;
-        text-transform: initial;
-        font-size: 1em;
-
-        [class*="icon"] {
-          width: 18rem;
-          height: 18rem;
-          margin-right: 10rem;
-        }
-      }
-
-      &-button-save-spin [class*="icon"] {
-        animation: spin 1s linear infinite;
-
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-      }
-
-      &-button-settings {
-        width: 40rem;
-        // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
-        margin-right: 0 !important;
-        display: flex;
-        justify-content: center;
-        // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
-        padding: 0 !important;
-
-        [class*="icon"] {
-          // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
-          width: 25rem !important;
-          // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
-          height: 25rem !important;
-          // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
-          margin-right: 0 !important;
-        }
-
-        [class*="label"] {
-          display: none;
-        }
-      }
+    [class*="label"] {
+      display: none;
     }
   }
+}
 
-  &-names {
-    position: relative; // to position-absolute translated hint.
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 25rem;
-    text-shadow: 1rem 1rem 4rem vanilla.$panel-color-dark;
-    font-size: calc(35rem * #{vanilla.$font-scale});
-
-    &-translated-hint {
-      position: absolute;
-      top: -1.2em; // same as line-height
-      display: flex;
-      opacity: 0.7;
-      font-size: vanilla.$font-size-m;
-      filter: drop-shadow(1rem 1rem 1rem vanilla.$panel-color-dark);
-      transition: opacity 0.2s ease-in-out;
-
-      &:hover {
-        opacity: 1;
-      }
-
-      svg {
-        width: 1.2em; // same as line-height
-        height: 1.2em; // same as line-height
-        margin-right: 8rem;
-      }
-    }
-
-    &-translated-tooltip {
-      display: flex;
-      flex-direction: column;
-      font-size: calc(25rem * #{vanilla.$font-scale});
-    }
-
-    &-city {
-      display: flex;
-      font-size: calc(45rem * #{vanilla.$font-scale});
-    }
-
-    &-creator {
-      display: flex;
-      flex-wrap: wrap;
-
-      &-by {
-        margin-right: 5px + 5px /* for the visual fix below */;
-      }
-
-      &-socials {
-        // Visual fix for when the social icons wrap to a new line
-        margin-left: -5px;
-        display: flex;
-        align-items: center;
-
-        &-button {
-          width: 1.2em;
-          height: 1.2em;
-          margin-right: 2px;
-
-          display: flex;
-          justify-content: center;
-          align-items: center;
-
-          &:hover {
-            background-color: var(--brand-color);
-
-            [class*="icon"] {
-              filter: none;
-            }
-          }
-
-          [class*="icon"] {
-            width: 70%;
-            height: 70%;
-            // Copied from the city/creator name text but made less prominent.
-            filter: drop-shadow(0rem 0rem 3rem vanilla.$panel-color-dark);
-          }
-        }
-      }
-    }
-  }
-
-  &-likes-count {
+// Must be emitted after `.section`: the likes container carries both `.controls-likesCount` and
+// `.section-content`, and relies on source order for its `display: inline` to override the latter's
+// `display: flex` (equal specificity). A candidate for consolidation in pass 2.
+.controls {
+  &-likesCount {
     display: inline;
     text-shadow: 1rem 1rem 4rem vanilla.$panel-color-dark;
     font-size: calc(30rem * #{vanilla.$font-scale});
+  }
 
-    &-number {
-      font-weight: bold;
-    }
+  &-likesCountNumber {
+    font-weight: bold;
   }
 }

@@ -5,7 +5,7 @@ import { type CSSProperties, memo, type ReactElement, useCallback, useMemo } fro
 import type * as bindings from '../../bindings';
 import { getClassesModule } from '../../utils';
 import { DescriptionTooltip } from '../../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
-import * as styles from './screenshot-upload-panel.module.scss';
+import * as styles from './panel-image.module.scss';
 import { getRatioPreviewInfo } from './screenshot-upload-panel-utils';
 
 const coFixedRatioImageStyles = getClassesModule(
@@ -35,10 +35,7 @@ export const ScreenshotUploadPanelImage = memo(function ScreenshotUploadPanelIma
   // noinspection HtmlRequiredAltAttribute
   return (
     <div
-      className={classNames(
-        styles.screenshotUploadPanelImage,
-        coFixedRatioImageStyles.fixedRatioImage
-      )}
+      className={classNames(styles.image, coFixedRatioImageStyles.fixedRatioImage)}
       style={
         {
           '--w': screenshotSnapshot.imageWidth,
@@ -58,8 +55,8 @@ export const ScreenshotUploadPanelImage = memo(function ScreenshotUploadPanelIma
             'HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION'
           )}>
           <div
-            className={classNames(styles.screenshotUploadPanelImageRatioPreview, {
-              [styles.screenshotUploadPanelImageHidden]: uploadProgress != null
+            className={classNames(styles.imageRatioPreview, {
+              [styles.imageHidden]: uploadProgress != null
             })}
             style={ratioPreviewInfo.style}>
             {/** biome-ignore lint/style/noJsxLiterals: no need to translate this */}
@@ -73,8 +70,8 @@ export const ScreenshotUploadPanelImage = memo(function ScreenshotUploadPanelIma
           variant='round'
           selectSound='open-panel'
           onSelect={showImageFullscreen}
-          className={classNames(styles.screenshotUploadPanelImageMagnifyButton, {
-            [styles.screenshotUploadPanelImageHidden]: uploadProgress != null
+          className={classNames(styles.imageMagnifyButton, {
+            [styles.imageHidden]: uploadProgress != null
           })}>
           <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'>
             {/* Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc. */}

@@ -1,0 +1,82 @@
+@use "../../vanilla-vars" as vanilla;
+
+.names {
+  position: relative; // to position-absolute translated hint.
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 25rem;
+  text-shadow: 1rem 1rem 4rem vanilla.$panel-color-dark;
+  font-size: calc(35rem * #{vanilla.$font-scale});
+
+  &-translatedHint {
+    position: absolute;
+    top: -1.2em; // same as line-height
+    display: flex;
+    opacity: 0.7;
+    font-size: vanilla.$font-size-m;
+    filter: drop-shadow(1rem 1rem 1rem vanilla.$panel-color-dark);
+    transition: opacity 0.2s ease-in-out;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    svg {
+      width: 1.2em; // same as line-height
+      height: 1.2em; // same as line-height
+      margin-right: 8rem;
+    }
+  }
+
+  &-translatedTooltip {
+    display: flex;
+    flex-direction: column;
+    font-size: calc(25rem * #{vanilla.$font-scale});
+  }
+
+  &-city {
+    display: flex;
+    font-size: calc(45rem * #{vanilla.$font-scale});
+  }
+
+  &-creator {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &-creatorBy {
+    margin-right: 5px + 5px /* for the visual fix below */;
+  }
+
+  &-creatorSocials {
+    // Visual fix for when the social icons wrap to a new line
+    margin-left: -5px;
+    display: flex;
+    align-items: center;
+  }
+
+  &-creatorSocialsButton {
+    width: 1.2em;
+    height: 1.2em;
+    margin-right: 2px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:hover {
+      background-color: var(--brand-color);
+
+      [class*="icon"] {
+        filter: none;
+      }
+    }
+
+    [class*="icon"] {
+      width: 70%;
+      height: 70%;
+      // Copied from the city/creator name text but made less prominent.
+      filter: drop-shadow(0rem 0rem 3rem vanilla.$panel-color-dark);
+    }
+  }
+}

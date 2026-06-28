@@ -5,12 +5,7 @@
     "node": ">=24.0.0"
   },
   "scripts": {
-    "// When making changes in scripts check out if .lefthook.yml should be synced (`bun lefthook install`)": "",
-    "check": "bun --bun tsc --p HallOfFame/UI --noEmit && biome check --fix",
-    "// Cannot 'bun --bun' webpack yet: https://github.com/oven-sh/bun/issues/10768": "",
-    "// When we can bunify (or replace) webpack, use 'bun --bun --smol' to consume less memory, it's useful with CS2 in the background...": "",
-    "build": "webpack --config HallOfFame/UI/webpack.config.js --progress",
-    "dev": "webpack --config HallOfFame/UI/webpack.config.js --progress --watch"
+    "// We use mise-en-place to manage tasks. See mise.toml for more info.": ""
   },
   "// about dependencies housekeeping": {
     "react, react-dom": "Pinned to the version the game uses, we cannot change it.",
@@ -43,6 +38,7 @@
     "sass-loader": "^17.0.0",
     "terser-webpack-plugin": "^5.6.1",
     "ts-loader": "^9.6.2",
+    "typed-scss-modules": "^8.1.1",
     "typescript": "^6.0.3",
     "webpack": "^5.108.0",
     "webpack-cli": "^7.0.3"

@@ -16,6 +16,7 @@ import {
   MenuControlsPreviousButton,
   MenuControlsToggleMenuVisibilityButton
 } from './nav-buttons';
+import * as navButtons from './nav-buttons.module.scss';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
 
 let lastForcedRefreshIndex = 0;
@@ -25,7 +26,7 @@ let lastForcedRefreshIndex = 0;
  */
 export function MenuControls(): ReactElement {
   return (
-    <div className={styles.menuControlsContainer}>
+    <div className={styles.controlsContainer}>
       {/* Subcomponent just to avoid one stupid level of indentation! */}
       <MenuControlsContent />
     </div>
@@ -69,7 +70,7 @@ export function MenuControlsContent(): ReactElement {
   if (menuState.error) {
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
-      <div className={styles.menuControls}>
+      <div className={styles.controls}>
         <MenuControlsError
           error={menuState.error}
           isReadyForNextImage={menuState.isReadyForNextImage}
@@ -85,32 +86,29 @@ export function MenuControlsContent(): ReactElement {
 
   return (
     <div
-      className={classNames(styles.menuControls, styles.menuControlsApplyButtonsOffset)}
+      className={classNames(styles.controls, styles.controlsApplyButtonsOffset)}
       // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
       onMouseLeave={() => setShowOtherActions(false)}>
       {modSettings.showFeaturedAsset && menuState.screenshot.showcasedMod && (
-        <Button
-          variant='menu'
-          className={styles.menuControlsAssetButton}
-          onSelect={openShowcasedModPage}>
+        <Button variant='menu' className={styles.assetButton} onSelect={openShowcasedModPage}>
           <div
-            className={styles.menuControlsAssetButtonThumbnail}
+            className={styles.assetButtonThumbnail}
             style={{ backgroundImage: `url(${menuState.screenshot.showcasedMod.thumbnailUrl})` }}
           />
 
-          <section className={styles.menuControlsAssetButtonText}>
-            <span className={styles.menuControlsAssetButtonTextHeader}>
+          <section className={styles.assetButtonText}>
+            <span className={styles.assetButtonTextHeader}>
               <Icon src='Media/Glyphs/ParadoxMods.svg' tinted={true} />
               {menuState.screenshot.showcasedMod.tags.includes('Map')
                 ? translate('HallOfFame.UI.Menu.MenuControls.SHOWCASED_MAP')
                 : translate('HallOfFame.UI.Menu.MenuControls.SHOWCASED_ASSET')}
             </span>
 
-            <span className={styles.menuControlsAssetButtonTextTitle}>
+            <span className={styles.assetButtonTextTitle}>
               {menuState.screenshot.showcasedMod.name}
             </span>
 
-            <span className={styles.menuControlsAssetButtonTextAuthor}>
+            <span className={styles.assetButtonTextAuthor}>
               <LocalizedString
                 id='HallOfFame.Common.CITY_BY'
                 // biome-ignore lint/style/useNamingConvention: i18n convention
@@ -119,7 +117,7 @@ export function MenuControlsContent(): ReactElement {
             </span>
 
             {menuState.screenshot.showcasedMod.shortDescription && (
-              <span className={styles.menuControlsAssetButtonTextDescription}>
+              <span className={styles.assetButtonTextDescription}>
                 {menuState.screenshot.showcasedMod.shortDescription}
               </span>
             )}
@@ -127,8 +125,8 @@ export function MenuControlsContent(): ReactElement {
         </Button>
       )}
 
-      <div className={styles.menuControlsSection}>
-        <div className={styles.menuControlsSectionButtons} style={{ alignSelf: 'flex-end' }}>
+      <div className={styles.section}>
+        <div className={styles.sectionButtons} style={{ alignSelf: 'flex-end' }}>
           <MenuControlsNextButton isLoading={!menuState.isReadyForNextImage} />
 
           <MenuControlsPreviousButton
@@ -142,7 +140,7 @@ export function MenuControlsContent(): ReactElement {
           />
         </div>
 
-        <div className={styles.menuControlsSectionContent} style={{ alignSelf: 'flex-start' }}>
+        <div className={styles.sectionContent} style={{ alignSelf: 'flex-start' }}>
           <MenuControlsCityName screenshot={menuState.screenshot} />
 
           <MenuControlsScreenshotLabels
@@ -152,14 +150,13 @@ export function MenuControlsContent(): ReactElement {
         </div>
       </div>
 
-      <div className={styles.menuControlsSection}>
-        <div className={styles.menuControlsSectionButtons}>
+      <div className={styles.section}>
+        <div className={styles.sectionButtons}>
           <MenuControlsLikeButton screenshot={menuState.screenshot} />
         </div>
 
-        <div
-          className={classNames(styles.menuControlsSectionContent, styles.menuControlsLikesCount)}>
-          <span className={styles.menuControlsLikesCountNumber}>
+        <div className={classNames(styles.sectionContent, styles.controlsLikesCount)}>
+          <span className={styles.controlsLikesCountNumber}>
             {menuState.screenshot.likesCount < 1000
               ? menuState.screenshot.likesCount
               : `${(menuState.screenshot.likesCount / 1000).toFixed(1)} k`}
@@ -176,11 +173,10 @@ export function MenuControlsContent(): ReactElement {
         </div>
       </div>
 
-      <div
-        className={classNames(styles.menuControlsSection, styles.menuControlsSectionOtherActions)}>
-        <div className={styles.menuControlsSectionButtons}>
+      <div className={classNames(styles.section, styles.sectionOtherActions)}>
+        <div className={styles.sectionButtons}>
           <MenuButton
-            className={styles.menuControlsSectionButtonsButton}
+            className={navButtons.button}
             src={ellipsisSolidSrc}
             tinted={true}
             onSelect={toggleMoreActions}
@@ -188,8 +184,8 @@ export function MenuControlsContent(): ReactElement {
         </div>
 
         <div
-          className={classNames(styles.menuControlsSectionContent, {
-            [styles.menuControlsSectionContentSlideIn]: showMoreActions
+          className={classNames(styles.sectionContent, {
+            [styles.sectionContentSlideIn]: showMoreActions
           })}>
           <Tooltip
             direction='down'
@@ -201,7 +197,7 @@ export function MenuControlsContent(): ReactElement {
               />
             }>
             <Button
-              className={menuState.isSaving ? styles.menuControlsSectionContentButtonSaveSpin : ''}
+              className={menuState.isSaving ? styles.sectionSaveButtonSpin : ''}
               variant='menu'
               src={menuState.isSaving ? 'Media/Glyphs/Progress.svg' : 'Media/Editor/Save.svg'}
               tinted={true}
@@ -230,7 +226,7 @@ export function MenuControlsContent(): ReactElement {
               'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Open Mod Settings]'
             )}>
             <Button
-              className={styles.menuControlsSectionContentButtonSettings}
+              className={styles.sectionSettingsButton}
               variant='menu'
               src='Media/Glyphs/Gear.svg'
               tinted={true}

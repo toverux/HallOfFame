@@ -1,0 +1,37 @@
+@use "../../vanilla-vars" as vanilla;
+
+.labels {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  // Makes sense here + avoids a bug in cohtml's layout engine.
+  align-items: flex-start;
+
+  &-label {
+    margin-right: 15rem;
+    margin-bottom: 15rem;
+
+    // Normally we would not have to use a hardcoded height here, but this circumvents a cohtml
+    // layout bug where images have trouble stretching to the height of this container (and that
+    // depended on the flex configuration of the parents too, so this seems to be the most
+    // robust way to deal with it).
+    height: 40rem;
+    display: flex;
+    align-items: center;
+    border-radius: 20rem;
+    backdrop-filter: contrast(80%) blur(25px);
+    padding: 0 12rem;
+
+    // This circumvents a rare bug where a span element can collapse in a random way, a bug in
+    // cohtml's layout engine.
+    white-space: nowrap;
+  }
+
+  &-labelIcon,
+  &-label > [class*="icon"] {
+    width: 22rem;
+    height: 100%;
+    margin-right: 10rem;
+    filter: drop-shadow(0 1rem 0.4rem #{vanilla.$panel-color-normal});
+  }
+}

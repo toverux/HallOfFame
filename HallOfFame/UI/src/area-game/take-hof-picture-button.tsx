@@ -32,7 +32,7 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
       return logError(new Error(`Expected template HTML to be a <button>.`));
     }
 
-    button.classList.add(styles.screenshotButton);
+    button.classList.add(styles.button);
 
     // Replace the button icon with our share picture icon.
     if (button.firstElementChild instanceof HTMLElement) {

@@ -12,7 +12,7 @@ import eyeClosedSrc from '../../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../../icons/uil/colored/eye-open.svg';
 // biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
 import { snappyOnSelect } from '../../utils';
-import * as styles from './menu-controls.module.scss';
+import * as styles from './nav-buttons.module.scss';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 
 const previousScreenshotInputAction = bindings.bindInputAction(
@@ -57,19 +57,14 @@ export const MenuControlsNextButton = memo(function MenuControlsNextButtonBase({
     'select-item'
   );
 
-  const activeClass =
-    phase == 'Performed' && !disabled ? styles.menuControlsSectionButtonsButtonActive : '';
+  const activeClass = phase == 'Performed' && !disabled ? styles.buttonActive : '';
 
   return (
     <MenuButtonTooltip
       binding={binding}
       tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]')}>
       <MenuButton
-        className={classNames(
-          styles.menuControlsSectionButtonsButton,
-          styles.menuControlsSectionButtonsButtonNext,
-          activeClass
-        )}
+        className={classNames(styles.button, styles.buttonNext, activeClass)}
         src={doubleArrowRightTriangleSrc}
         tinted={isLoading}
         disabled={isLoading}
@@ -103,19 +98,14 @@ export const MenuControlsPreviousButton = memo(function MenuControlsPreviousButt
     'select-item'
   );
 
-  const activeClass =
-    phase == 'Performed' && !disabled ? styles.menuControlsSectionButtonsButtonActive : '';
+  const activeClass = phase == 'Performed' && !disabled ? styles.buttonActive : '';
 
   return (
     <MenuButtonTooltip
       binding={binding}
       tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]')}>
       <MenuButton
-        className={classNames(
-          styles.menuControlsSectionButtonsButton,
-          styles.menuControlsSectionButtonsButtonPrevious,
-          activeClass
-        )}
+        className={classNames(styles.button, styles.buttonPrevious, activeClass)}
         src={doubleArrowRightTriangleSrc}
         tinted={disabled}
         disabled={disabled}
@@ -147,14 +137,14 @@ function MenuControlsToggleMenuVisibilityButtonBase({
 
   useMenuControlsInputAction(phase, toggleMenuVisibility, selectSound);
 
-  const activeClass = phase == 'Performed' ? styles.menuControlsSectionButtonsButtonActive : '';
+  const activeClass = phase == 'Performed' ? styles.buttonActive : '';
 
   return (
     <MenuButtonTooltip
       binding={binding}
       tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]')}>
       <MenuButton
-        className={classNames(styles.menuControlsSectionButtonsButton, activeClass)}
+        className={classNames(styles.button, activeClass)}
         src={isMenuVisible ? eyeOpenSrc : eyeClosedSrc}
         tinted={false}
         {...snappyOnSelect(toggleMenuVisibility, selectSound)}
@@ -180,8 +170,8 @@ export const MenuControlsLikeButton = memo(function MenuControlsLikeButtonBase({
   const activeClass =
     phase == 'Performed'
       ? screenshot.isLiked
-        ? styles.menuControlsSectionButtonsButtonLikeLikedActive
-        : styles.menuControlsSectionButtonsButtonActive
+        ? styles.buttonLikeLikedActive
+        : styles.buttonActive
       : '';
 
   return (
@@ -208,10 +198,10 @@ export const MenuControlsLikeButton = memo(function MenuControlsLikeButtonBase({
       }>
       <MenuButton
         className={classNames(
-          styles.menuControlsSectionButtonsButton,
-          styles.menuControlsSectionButtonsButtonLike,
+          styles.button,
+          styles.buttonLike,
           {
-            [styles.menuControlsSectionButtonsButtonLikeLiked]: screenshot.isLiked
+            [styles.buttonLikeLiked]: screenshot.isLiked
           },
           activeClass
         )}
@@ -237,7 +227,7 @@ function MenuButtonTooltip({
     <Tooltip
       direction='right'
       tooltip={
-        <div className={styles.menuControlsSectionButtonsButtonTooltip}>
+        <div className={styles.buttonTooltip}>
           {tooltip}
 
           <ControlIcons bindings={[binding.binding]} modifiers={binding.modifiers} />

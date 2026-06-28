@@ -146,7 +146,7 @@
     </Target>
 
     <Target Name="BuildUI" AfterTargets="DeployWIP" Condition="'$(SkipBuildUI)' != 'true'">
-        <Exec Command="bun run build" WorkingDirectory="$(SolutionDir)" />
+        <Exec Command="mise build" WorkingDirectory="$(SolutionDir)" />
     </Target>
 
     <!-- The mod contains no Burst jobs, so the per-platform native Burst compile the toolchain runs

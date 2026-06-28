@@ -1,0 +1,36 @@
+// Emitted classes shared across the screenshot upload panel's sub-components, applied either as a
+// BEM mix via `composes` (`.panel-surface`) or via `classNames` (`.scrollable-track-customization`).
+
+@use "sass:color";
+@use "../../common";
+@use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
+
+// The panel's surface look, mixed onto the header, the city info, and the info pane.
+.panel-surface {
+  background-color: var(--menuFocusedColor);
+  color: var(--menuText1Inverted);
+
+  @include common.on-new-ui {
+    // biome-ignore lint/suspicious/noDuplicateProperties: intentional
+    background-color: shared.$game-panel-white;
+    color: shared.$game-panel-gray;
+  }
+}
+
+// Applied on the panel's scrollable container and on the dropdown popup scrollable, which is not
+// contained in the panel, so this needs to be higher scope.
+.scrollable-track-customization {
+  [class^="track"] {
+    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
+
+    [class^="thumb"] {
+      transition: background-color 0.1s ease-in-out;
+      background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
+    }
+  }
+
+  &:hover [class^="track"] [class^="thumb"] {
+    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.6);
+  }
+}

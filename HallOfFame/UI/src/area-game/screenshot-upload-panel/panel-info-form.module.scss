@@ -1,0 +1,229 @@
+@use "sass:color";
+@use "../../common";
+@use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
+
+// Form control look, shared only within this form module.
+$control-border: 2rem solid transparent;
+// biome-ignore lint/style/noHexColors: was extracted from some vanilla var, don't remember.
+$control-border-color: #61a0b9;
+$control-border-radius: 5rem; // vanilla is 3rem
+$control-background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
+$control-background-color-focused: rgba(255, 255, 255, 0.4);
+
+.form {
+  padding: 10rem;
+
+  &-field {
+    margin-bottom: 10rem;
+    border-radius: 4rem;
+    padding: 10rem;
+    font-weight: bold;
+
+    &:hover {
+      background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
+    }
+
+    label small {
+      font-weight: normal;
+    }
+
+    &--inline {
+      display: flex;
+      flex-direction: row;
+
+      > :nth-child(2) {
+        flex: 1 1 auto;
+        margin-left: 10rem;
+      }
+    }
+
+    &--block {
+      display: flex;
+      flex-direction: column;
+
+      > :nth-child(1) {
+        margin-bottom: 10rem;
+      }
+    }
+  }
+}
+
+// Checkbox control. These classes are injected alongside the Vanilla checkbox classes.
+.checkbox {
+  &-toggle {
+    width: calc(26rem * #{vanilla.$font-scale});
+    height: calc(26rem * #{vanilla.$font-scale});
+    //noinspection CssReplaceWithShorthandSafely
+    border: $control-border;
+    //noinspection CssReplaceWithShorthandSafely
+    border-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.7);
+    border-radius: $control-border-radius;
+
+    // Impossible to also make &.checked work so we use the field's checked state below.
+    &:hover,
+    &:focus {
+      background-color: $control-background-color-focused;
+    }
+  }
+
+  &-checkmark {
+    background-color: $control-border-color; // sets mask image color
+  }
+}
+
+// The checkbox toggle reacts to the enclosing field's checked and hover states.
+.form-field--checked .checkbox-toggle,
+.form-field:hover .checkbox-toggle {
+  border-color: $control-border-color;
+  background-color: $control-background-color-focused;
+}
+
+// Dropdown control. These classes are injected alongside the Vanilla dropdown classes.
+.dropdown {
+  &-toggle {
+    padding: 0 10rem;
+    border: $control-border;
+    border-radius: $control-border-radius;
+    background-color: $control-background-color;
+
+    &:hover,
+    &:focus {
+      border-color: $control-border-color;
+      background-color: $control-background-color-focused;
+    }
+  }
+
+  &-item {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    font-size: vanilla.$font-size-xl;
+  }
+
+  &-itemImage {
+    width: 40rem;
+    height: 40rem;
+    margin-right: 10rem;
+    border-radius: 5rem;
+    background-color: lightgrey;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  &-itemText {
+    flex: 1 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  // An item NOT in the popup menu but 'adopted' by the toggle to show the current value.
+  &-previewItem {
+    pointer-events: none; // suppress hover effect, the toggle takes pointer events.
+    padding: 0; // the toggle already has padding.
+  }
+
+  &-popup {
+    // Set a scrollbar color that looks like the panel's main scrollbar.
+    --scrollbarColor: 24, 33, 51;
+
+    // So that the dropdown menu, attached to the same root as the panel, appears on top.
+    z-index: 1;
+
+    // This is a hack so that the dropdown does not expand too much, including overflowing the
+    // screen, for long asset names.
+    // However the actual applied width won't be zero, the game sets min-width so that the popup
+    // has at least the width of its parent input. This will take precedence over width: 0, but
+    // our width: 0 will prevent the popup from expanding further than that min-width.
+    width: 0;
+  }
+}
+
+// The dropdown toggle pops when its enclosing field is invalid.
+.form-field--invalid .dropdown-toggle {
+  // biome-ignore lint/complexity/noImportantStyles: yup, I don't remember.
+  border-color: vanilla.$warning-color !important;
+  animation: pop-out 0.3s common.$default-timing-function;
+
+  @keyframes pop-out {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+}
+
+// Textarea control.
+.textarea {
+  &-wrapper {
+    display: flex;
+    flex-direction: column;
+
+    textarea {
+      position: relative;
+      width: auto;
+      border: $control-border;
+      border-radius: $control-border-radius;
+      padding: 10rem;
+      background-color: $control-background-color;
+
+      &:hover,
+      &:focus {
+        border-color: $control-border-color;
+        background-color: $control-background-color-focused;
+      }
+    }
+  }
+
+  &-controls {
+    margin-top: 10rem;
+    display: flex; // Workaround cohtml breaking text nodes into two lines.
+    align-items: center;
+    font-size: vanilla.$font-size-s;
+    color: vanilla.$menu-text-1-disabled;
+  }
+
+  &-controlsButton {
+    border: $control-border;
+    border-radius: $control-border-radius;
+    padding: 1rem 5rem;
+    background-color: $control-background-color;
+
+    &:hover {
+      border-color: $control-border-color;
+      background-color: $control-background-color-focused;
+    }
+  }
+}
+
+.warning {
+  padding: shared.$section-padding;
+  background-color: vanilla.$warning-color;
+}
+
+.content {
+  padding: shared.$section-padding;
+
+  > p {
+    margin-bottom: 8rem;
+  }
+}
+
+.screenshotInfoScrollable {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  [class^="content"] {
+    min-height: 100%;
+  }
+}

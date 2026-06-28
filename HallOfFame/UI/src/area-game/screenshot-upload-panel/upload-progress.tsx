@@ -7,8 +7,8 @@ import {
   LoadingProgress,
   loadingProgressVanillaProps
 } from '../../vanilla-modules/game-ui/overlay/logo-screen/loading/loading-progress';
-import * as styles from './screenshot-upload-panel.module.scss';
 import { getUploadProgressHintText } from './screenshot-upload-panel-utils';
+import * as styles from './upload-progress.module.scss';
 
 const coLoadingStyles = getClassesModule(
   'game-ui/overlay/logo-screen/loading/loading.module.scss',
@@ -42,12 +42,12 @@ export const ScreenshotUploadProgress = memo(function ScreenshotUploadProgressBa
 
   // noinspection HtmlRequiredAltAttribute
   return (
-    <div className={styles.screenshotUploadPanelUploadProgress}>
-      <div className={styles.screenshotUploadPanelUploadProgressBackgroundColor} />
+    <div className={styles.uploadProgress}>
+      <div className={styles.uploadProgressBackgroundColor} />
 
       <div
-        className={classNames(styles.screenshotUploadPanelUploadProgressContent, {
-          [styles.screenshotUploadPanelUploadProgressContentUploadSuccess]: successImageUri != null
+        className={classNames(styles.uploadProgressContent, {
+          [styles.uploadProgressContentUploadSuccess]: successImageUri != null
         })}>
         {successImageUri ? (
           <img
@@ -69,7 +69,7 @@ export const ScreenshotUploadProgress = memo(function ScreenshotUploadProgressBa
           />
         )}
 
-        <div className={styles.screenshotUploadPanelUploadProgressContentHint}>
+        <div className={styles.uploadProgressContentHint}>
           {getUploadProgressHintText(translate, uploadProgress)}
         </div>
       </div>

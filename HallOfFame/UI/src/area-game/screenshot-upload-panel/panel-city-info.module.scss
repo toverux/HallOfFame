@@ -1,0 +1,34 @@
+@use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
+
+.cityInfo {
+  // `.panel-surface` is mixed in via `classNames` in the TSX (see shared.module.scss).
+  // Padding preserves the 20rem the city info previously got from the shared `.content` class.
+  padding: shared.$section-padding;
+
+  display: flex;
+  flex-direction: row;
+  font-size: calc(20rem * #{vanilla.$font-scale});
+
+  span {
+    margin-left: 20rem;
+    align-items: center;
+
+    &.cityInfo-name {
+      margin-left: 0;
+
+      strong {
+        margin-right: 10rem;
+        font-size: calc(28rem * #{vanilla.$font-scale});
+        font-weight: normal;
+      }
+    }
+
+    img {
+      width: 35rem;
+      height: 100%;
+      margin-right: 10rem;
+      filter: drop-shadow(0 1rem 0.4rem vanilla.$panel-color-normal);
+    }
+  }
+}

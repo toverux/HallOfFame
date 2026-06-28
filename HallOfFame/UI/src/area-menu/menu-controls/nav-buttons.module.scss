@@ -1,0 +1,92 @@
+@use "../../vanilla-vars" as vanilla;
+
+// The round nav/menu buttons (previous, next, like, toggle visibility). Also mixed onto the shell's
+// "more actions" ellipsis button via `classNames`, so the base and its variants must stay in this
+// one file: the base `[class*="icon"]` transition is overridden by `--like` purely on source order.
+.button {
+  margin-top: 8rem;
+  margin-bottom: 8rem;
+
+  width: var(--button-size);
+  height: var(--button-size);
+  display: flex;
+  border-radius: 50%;
+  justify-content: center;
+  // biome-ignore lint/complexity/noImportantStyles: override vanilla hover padding
+  padding: 0 !important;
+  backdrop-filter: brightness(80%) contrast(90%) blur(25px);
+
+  &[disabled],
+  &[disabled]:hover {
+    // biome-ignore lint/complexity/noImportantStyles: I don't remember.
+    background-color: rgba(16, 19, 29, 0.2) !important;
+  }
+
+  &--active {
+    // Class set when the related action is performed via keypress and not via the button.
+    // Values taken from the vanilla :active button style.
+    background-color: vanilla.$menu-active-color-bright;
+  }
+
+  [class*="label"] {
+    display: none;
+  }
+
+  [class*="icon"] {
+    margin: 0;
+    transition: all 0.1s ease-in-out;
+  }
+
+  &--previous [class*="icon"] {
+    // The X translation is a slight visual adjustment to make the icon appear better
+    // centered.
+    transform: translateX(-2rem) rotate(180deg);
+  }
+
+  &--next [class*="icon"] {
+    // Same as for previous icon.
+    transform: translateX(2rem);
+  }
+
+  &--like {
+    transition: all 0.1s ease-in-out;
+
+    [class*="icon"] {
+      width: calc(var(--button-size) - 30rem);
+      height: calc(var(--button-size) - 30rem);
+      transition: transform 0.15s ease-in-out;
+    }
+
+    &:hover [class*="icon"],
+    &--liked [class*="icon"] {
+      transform: rotate(-10deg) scale(1.6) translateX(3rem);
+    }
+
+    &:active [class*="icon"] {
+      transform: rotate(-5deg) scale(1.45) translateX(3rem);
+    }
+
+    &--liked {
+      // biome-ignore-start lint/complexity/noImportantStyles: importants are for overriding :hover styles.
+      box-shadow: 0 0 0 2rem rgb(226 85 112) !important;
+      background-color: rgba(226, 85, 112, 0.67) !important;
+      color: vanilla.$menu-text-1-normal !important;
+
+      &:active,
+      &--active {
+        background-color: rgba(226, 85, 112, 0.8) !important;
+      }
+      // biome-ignore-end lint/complexity/noImportantStyles: importants are for overriding :hover styles.
+    }
+  }
+}
+
+.button-tooltip {
+  display: flex;
+  flex-direction: column;
+
+  [class*="hint"] {
+    font-size: 0.8em;
+    margin-top: 5rem;
+  }
+}

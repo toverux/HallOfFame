@@ -19,7 +19,7 @@ mise test:ui
 ```
 
 This runs `bun test HallOfFame/UI`. For a focused run during TDD, call `bun test <path>` directly;
-the `bunfig.toml` preload still applies. Run `bun check` after, like any UI change.
+the `bunfig.toml` preload still applies. Run `mise check` after, like any UI change.
 
 ## The two tiers, and where logic goes
 

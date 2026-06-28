@@ -6,7 +6,8 @@ import * as bindings from '../../bindings';
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
 // biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
-import * as styles from './screenshot-upload-panel.module.scss';
+import * as styles from './panel-city-info.module.scss';
+import * as shared from './shared.module.scss';
 
 export const ScreenshotUploadPanelContentCityInfo = memo(
   function ScreenshotUploadPanelContentCityInfoBase({
@@ -27,12 +28,8 @@ export const ScreenshotUploadPanelContentCityInfo = memo(
 
     // noinspection HtmlRequiredAltAttribute
     return (
-      <div
-        className={classNames(
-          styles.screenshotUploadPanelContent,
-          styles.screenshotUploadPanelCityInfo
-        )}>
-        <span className={styles.screenshotUploadPanelCityInfoName}>
+      <div className={classNames(styles.cityInfo, shared.panelSurface)}>
+        <span className={styles.cityInfoName}>
           <strong>{cityName}</strong>
           {!creatorNameIsEmpty && (
             <LocalizedString

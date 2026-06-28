@@ -8,9 +8,9 @@ import naturalResourcesSrc from '../../icons/paradox/natural-resources.svg';
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
 import eyeOpenSrc from '../../icons/uil/colored/eye-open.svg';
-// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
-import * as styles from './menu-controls.module.scss';
 import { formatBigNumber } from './menu-controls-utils';
+// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
+import * as styles from './screenshot-labels.module.scss';
 
 export const MenuControlsScreenshotLabels = memo(function MenuControlsScreenshotLabelsBase({
   modSettings,
@@ -29,27 +29,21 @@ export const MenuControlsScreenshotLabels = memo(function MenuControlsScreenshot
 
   // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
   return (
-    <div className={styles.menuControlsSectionScreenshotLabels}>
+    <div className={styles.labels}>
       {isPristineWilderness ? (
-        <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
-          <img
-            src={naturalResourcesSrc}
-            className={styles.menuControlsSectionScreenshotLabelsLabelIcon}
-          />
+        <span className={styles.labelsLabel}>
+          <img src={naturalResourcesSrc} className={styles.labelsLabelIcon} />
           {translate(`HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]`)}
         </span>
       ) : (
         <>
-          <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
-            <img src={trophySrc} className={styles.menuControlsSectionScreenshotLabelsLabelIcon} />
+          <span className={styles.labelsLabel}>
+            <img src={trophySrc} className={styles.labelsLabelIcon} />
             {translate(`Progression.MILESTONE_NAME:${screenshot.cityMilestone}`, `???`)}
           </span>
 
-          <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
-            <img
-              src={populationSrc}
-              className={styles.menuControlsSectionScreenshotLabelsLabelIcon}
-            />
+          <span className={styles.labelsLabel}>
+            <img src={populationSrc} className={styles.labelsLabelIcon} />
             {formatBigNumber(screenshot.cityPopulation, translate)}
           </span>
         </>
@@ -68,17 +62,15 @@ export const MenuControlsScreenshotLabels = memo(function MenuControlsScreenshot
               }}
             />
           }>
-          <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
-            <img src={eyeOpenSrc} className={styles.menuControlsSectionScreenshotLabelsLabelIcon} />
+          <span className={styles.labelsLabel}>
+            <img src={eyeOpenSrc} className={styles.labelsLabelIcon} />
             {formatBigNumber(screenshot.uniqueViewsCount, translate)}
           </span>
         </Tooltip>
       )}
 
       <Tooltip tooltip={screenshot.createdAtFormatted}>
-        <span className={styles.menuControlsSectionScreenshotLabelsLabel}>
-          {screenshot.createdAtFormattedDistance}
-        </span>
+        <span className={styles.labelsLabel}>{screenshot.createdAtFormattedDistance}</span>
       </Tooltip>
     </div>
   );

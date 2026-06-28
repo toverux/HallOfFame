@@ -10,6 +10,7 @@ import { ScreenshotUploadPanelHeader } from './panel-header';
 import { ScreenshotUploadPanelImage } from './panel-image';
 import { ScreenshotUploadPanelContentScreenshotInfo } from './panel-info-form';
 import * as styles from './screenshot-upload-panel.module.scss';
+import * as shared from './shared.module.scss';
 import { ScreenshotUploadProgress } from './upload-progress';
 
 /**
@@ -51,19 +52,17 @@ export function ScreenshotUploadPanel(): ReactElement {
   const creatorNameIsEmpty = !settings.creatorName.trim();
 
   return (
-    <div className={styles.screenshotUploadPanelContainer}>
-      <div
-        ref={panelRef}
-        className={classNames(styles.screenshotUploadPanel, styles.scrollableTrackCustomization)}>
+    <div className={styles.panelContainer}>
+      <div ref={panelRef} className={classNames(styles.panel, shared.scrollableTrackCustomization)}>
         <ScreenshotUploadPanelHeader
           screenshotSnapshot={screenshotSnapshot}
           draggable={draggable}
         />
 
-        <div className={styles.screenshotUploadPanelPanes}>
+        <div className={styles.panelPanes}>
           {uploadProgress && <ScreenshotUploadProgress uploadProgress={uploadProgress} />}
 
-          <div className={styles.screenshotUploadPanelPanesImage}>
+          <div className={styles.panelPanesImage}>
             <ScreenshotUploadPanelImage
               screenshotSnapshot={screenshotSnapshot}
               uploadProgress={uploadProgress}
@@ -76,7 +75,7 @@ export function ScreenshotUploadPanel(): ReactElement {
             />
           </div>
 
-          <div className={styles.screenshotUploadPanelPanesInfo}>
+          <div className={classNames(styles.panelPanesInfo, shared.panelSurface)}>
             <ScreenshotUploadPanelContentScreenshotInfo
               settings={settings}
               creatorNameIsEmpty={creatorNameIsEmpty}

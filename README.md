@@ -121,7 +121,7 @@ Here's a game launch command to also skip the launcher in Steam:
 
 The UI mod will be built automatically with the C# solution.
 
-However, if you are actively working on the UI, you may recompile it on change with `bun dev`.
+However, if you are actively working on the UI, you may recompile it on change with `mise dev`.
 
 You can enable the game's UI live reload on change with `--uiDeveloperMode`.
 
@@ -152,7 +152,7 @@ Logs are situated in either:
 ### TypeScript
 
 TypeScript code is formatted and linted by [Biome](https://biomejs.dev).
-Run `bun check` to check for linting errors, format files and autofix simple issues.
+Run `mise check` to check for linting errors, format files and autofix simple issues.
 
 You can also use Biome directly with `bun biome`.
 

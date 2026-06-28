@@ -18,7 +18,8 @@ import {
   type CheckboxTheme
 } from '../../vanilla-modules/game-ui/common/input/toggle/checkbox/checkbox';
 import type { ScreenshotInfoFormValue } from './form-state';
-import * as styles from './screenshot-upload-panel.module.scss';
+import * as styles from './panel-info-form.module.scss';
+import * as shared from './shared.module.scss';
 
 const coCheckboxTheme = getClassesModule(
   'game-ui/common/input/toggle/checkbox/checkbox.module.scss',
@@ -40,28 +41,19 @@ const coDropdownTheme = getClassesModule(
 
 const checkboxTheme: CheckboxTheme = {
   ...coCheckboxTheme,
-  toggle: classNames(coCheckboxTheme.toggle, styles.screenshotUploadPanelFormCheckboxToggle),
-  checkmark: classNames(
-    coCheckboxTheme.checkmark,
-    styles.screenshotUploadPanelFormCheckboxToggleCheckmark
-  )
+  toggle: classNames(coCheckboxTheme.toggle, styles.checkboxToggle),
+  checkmark: classNames(coCheckboxTheme.checkmark, styles.checkboxCheckmark)
 };
 
 const dropdownTheme: DropdownTheme = {
   ...coDropdownTheme,
-  dropdownToggle: classNames(
-    coDropdownTheme.dropdownToggle,
-    styles.screenshotUploadPanelFormDropdownToggle
-  ),
+  dropdownToggle: classNames(coDropdownTheme.dropdownToggle, styles.dropdownToggle),
   dropdownPopup: classNames(
     coDropdownTheme.dropdownPopup,
-    styles.screenshotUploadPanelFormDropdownPopup,
-    styles.scrollableTrackCustomization
+    styles.dropdownPopup,
+    shared.scrollableTrackCustomization
   ),
-  dropdownItem: classNames(
-    coDropdownTheme.dropdownItem,
-    styles.screenshotUploadPanelFormDropdownToggleItem
-  )
+  dropdownItem: classNames(coDropdownTheme.dropdownItem, styles.dropdownItem)
 };
 
 export const ScreenshotUploadPanelContentScreenshotInfo = memo(
@@ -150,12 +142,10 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
           focusKey={new FocusSymbol(`mod-${mod.id}`)}
           onChange={selectShowcasedMod}>
           <div
-            className={styles.screenshotUploadPanelFormDropdownToggleItemImage}
+            className={styles.dropdownItemImage}
             style={{ backgroundImage: `url(${mod.thumbnailPath})` }}
           />
-          <div className={styles.screenshotUploadPanelFormDropdownToggleItemText}>
-            {mod.displayName}
-          </div>
+          <div className={styles.dropdownItemText}>{mod.displayName}</div>
         </DropdownItem>
       )),
     [assetMods, selectShowcasedMod]
@@ -165,26 +155,24 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
   return (
     <Scrollable
       {...(scrollController ? { controller: scrollController } : {})}
-      className={styles.screenshotUploadPanelScreenshotInfoScrollable}>
+      className={styles.screenshotInfoScrollable}>
       {creatorNameIsEmpty && (
-        <div className={styles.screenshotUploadPanelWarning}>
+        <div className={styles.warning}>
           {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.CREATOR_NAME_IS_EMPTY')}
         </div>
       )}
 
       {!screenshotSnapshot.areSettingsTopQuality && (
-        <div className={styles.screenshotUploadPanelWarning}>
+        <div className={styles.warning}>
           {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.SETTINGS_NOT_TOP_QUALITY')}
         </div>
       )}
 
-      <div className={styles.screenshotUploadPanelForm} onMouseEnter={playHoverSound}>
+      <div className={styles.form} onMouseEnter={playHoverSound}>
         <div
-          className={classNames(
-            styles.screenshotUploadPanelFormField,
-            styles.screenshotUploadPanelFormFieldInline,
-            { [styles.screenshotUploadPanelFormFieldChecked]: formValue.shareModIds }
-          )}
+          className={classNames(styles.formField, styles.formFieldInline, {
+            [styles.formFieldChecked]: formValue.shareModIds
+          })}
           onMouseEnter={playHoverSound}
           // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
           onClick={() => (
@@ -206,11 +194,9 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
         </div>
 
         <div
-          className={classNames(
-            styles.screenshotUploadPanelFormField,
-            styles.screenshotUploadPanelFormFieldInline,
-            { [styles.screenshotUploadPanelFormFieldChecked]: formValue.shareRenderSettings }
-          )}
+          className={classNames(styles.formField, styles.formFieldInline, {
+            [styles.formFieldChecked]: formValue.shareRenderSettings
+          })}
           onMouseEnter={playHoverSound}
           // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
           onClick={() => (
@@ -238,15 +224,10 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
         {assetMods.length > 0 && (
           <div
-            className={classNames(
-              styles.screenshotUploadPanelFormField,
-              styles.screenshotUploadPanelFormFieldInline,
-              {
-                [styles.screenshotUploadPanelFormFieldChecked]: formValue.isShowcasingAsset,
-                [styles.screenshotUploadPanelFormFieldInvalid]:
-                  formValue.isShowcasingAsset && !formValue.showcasedMod
-              }
-            )}
+            className={classNames(styles.formField, styles.formFieldInline, {
+              [styles.formFieldChecked]: formValue.isShowcasingAsset,
+              [styles.formFieldInvalid]: formValue.isShowcasingAsset && !formValue.showcasedMod
+            })}
             onMouseEnter={playHoverSound}
             // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
             onClick={() => (
@@ -262,7 +243,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
               onChange={handleShowcasingAssetChange}
             />
 
-            <div className={styles.screenshotUploadPanelFormFieldBlock}>
+            <div className={styles.formFieldBlock}>
               <label>
                 {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_LABEL')}
                 <br />
@@ -279,13 +260,13 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
                     <div
                       className={classNames(
                         dropdownTheme.dropdownItem,
-                        styles.screenshotUploadPanelFormDropdownTogglePreviewItem
+                        styles.dropdownPreviewItem
                       )}>
                       <div
-                        className={styles.screenshotUploadPanelFormDropdownToggleItemImage}
+                        className={styles.dropdownItemImage}
                         style={{ backgroundImage: `url(${formValue.showcasedMod.thumbnailPath})` }}
                       />
-                      <div className={styles.screenshotUploadPanelFormDropdownToggleItemText}>
+                      <div className={styles.dropdownItemText}>
                         {formValue.showcasedMod.displayName}
                       </div>
                     </div>
@@ -293,7 +274,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
                     <div
                       className={classNames(
                         dropdownTheme.dropdownItem,
-                        styles.screenshotUploadPanelFormDropdownTogglePreviewItem
+                        styles.dropdownPreviewItem
                       )}>
                       {translate(
                         'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_SELECT_ASSET'
@@ -308,10 +289,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
         <div
           ref={textareaContainerRef}
-          className={classNames(
-            styles.screenshotUploadPanelFormField,
-            styles.screenshotUploadPanelFormFieldBlock
-          )}
+          className={classNames(styles.formField, styles.formFieldBlock)}
           style={{ margin: 0 }}
           onMouseEnter={playHoverSound}>
           <label>
@@ -322,7 +300,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
             </small>
           </label>
 
-          <div className={styles.screenshotUploadPanelFormTextareaWrapper}>
+          <div className={styles.textareaWrapper}>
             <textarea
               rows={textareaFocused || formValue.description.length > 0 ? 5 : 1}
               maxLength={4000}
@@ -336,11 +314,11 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
             />
 
             {(textareaFocused || formValue.description.length > 0) && (
-              <div className={styles.screenshotUploadPanelFormTextareaWrapperControls}>
+              <div className={styles.textareaControls}>
                 {formValue.description.length == 0 && settings.savedScreenshotDescription && (
                   <Button
                     variant='default'
-                    className={styles.screenshotUploadPanelFormTextareaWrapperControlsButton}
+                    className={styles.textareaControlsButton}
                     // biome-ignore lint/performance/noJsxPropsBind: trivial preventDefault handler, not worth extracting
                     onMouseDown={event => event.preventDefault()}
                     onClick={restoreSavedDescription}>
@@ -350,7 +328,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
                 <Button
                   variant='default'
-                  className={styles.screenshotUploadPanelFormTextareaWrapperControlsButton}
+                  className={styles.textareaControlsButton}
                   // use visibility to avoid a small layout shift when the button appears.
                   style={{ visibility: formValue.description.length > 0 ? 'visible' : 'hidden' }}
                   onClick={clearDescription}>
@@ -369,7 +347,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
       <div style={{ flex: 1 }} />
 
-      <div className={styles.screenshotUploadPanelContent}>
+      <div className={styles.content}>
         <p>
           {`β ${translate('HallOfFame.UI.Game.ScreenshotUploadPanel.PARTIALLY_IMPLEMENTED_FEATURES')}`}
         </p>

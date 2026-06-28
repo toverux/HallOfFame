@@ -80,7 +80,7 @@ export default {
               importLoaders: 1,
               modules: {
                 auto: true,
-                exportLocalsConvention: 'camelCase',
+                exportLocalsConvention: 'camel-case-only',
                 localIdentName: 'hof-[local]_[hash:base64:3]'
               }
             }

@@ -1,6 +1,11 @@
+# https://mise.jdx.dev -- One tool to manage languages, env vars, and tasks per project, reproducibly.
+
 [tools]
 bun = "1.3.14"
 node = "26.3.1"
+
+# DEVELOPMENT TASKS
+# =================
 
 [tasks."dev:deps-upgrade"]
 description = "Upgrades mise-en-place, proposes upgrades for tools managed by mise, npm dependencies upgrades, and skills update."
@@ -12,6 +17,67 @@ run = [
   # make sure transitive dependencies are updated & deduplicated
   "mise exec bun -- bun update"
 ]
+
+[tasks."dev"]
+description = "Watches and rebuilds the UI: the webpack bundle and the CSS module type definitions."
+# Grouping task with no `run`: mise runs independent `depends` in parallel, so both watchers run
+# side by side. Their shared `build:css-types` dep is deduplicated and runs exactly once before
+# either watcher starts, so the *.module.scss.d.ts files exist before ts-loader/tsc type-check.
+depends = ["dev:webpack", "dev:css-types"]
+
+[tasks."dev:webpack"]
+description = "Watches and recompiles the UI bundle with webpack."
+# Depends on a one-shot `build:css-types` so the *.module.scss.d.ts exist before ts-loader
+# type-checks the style imports (mirrors build:webpack).
+depends = ["build:css-types"]
+run = "bun webpack --config HallOfFame/UI/webpack.config.js --watch"
+
+[tasks."dev:css-types"]
+description = "Watches and regenerates the CSS module type definitions."
+# `build:css-types` does the full initial generation once; `--ignoreInitial` then makes this
+# watcher skip its redundant startup pass and only react to later file additions/changes.
+depends = ["build:css-types"]
+run = 'bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType named --nameFormat camel --ignoreInitial --watch'
+
+# CHECK/LINT TASKS
+# ================
+
+[tasks."check"]
+description = "Type-checks the UI with tsc and lints/formats it with Biome, applying safe fixes."
+depends = ["check:tsc", "check:biome"]
+
+[tasks."check:tsc"]
+description = "Type-checks the UI with tsc."
+depends = ["build:css-types"]
+raw = true
+run = "bun --bun tsc --p HallOfFame/UI --noEmit"
+
+[tasks."check:biome"]
+description = "Lints/formats it with Biome, applying safe fixes."
+depends = ["build:css-types"]
+raw = true
+run = "bun biome check --fix"
+
+# BUILD TASKS
+# ===========
+
+[tasks."build"]
+description = "Builds the UI: the webpack bundle and the (gitignored) CSS module type definitions."
+depends = ["build:css-types", "build:webpack"]
+
+[tasks."build:webpack"]
+description = "Compiles the UI bundle with webpack."
+depends = ["build:css-types"]
+# No `--bun`: bun's runtime cannot run webpack yet (https://github.com/oven-sh/bun/issues/10768),
+# so plain `bun webpack` runs it on Node through its shebang.
+run = "bun webpack --config HallOfFame/UI/webpack.config.js"
+
+[tasks."build:css-types"]
+description = "Generates the gitignored *.module.scss.d.ts so tsc catches stale styles.* references."
+run = 'bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType named --nameFormat camel'
+
+# TEST TASKS
+# ==========
 
 [tasks."test"]
 description = "Runs the full test suite: C# unit tests and TypeScript/UI tests."

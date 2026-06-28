@@ -3,7 +3,7 @@ import { MenuButton } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
 import * as bindings from '../../bindings';
 import { snappyOnSelect } from '../../utils';
-import * as styles from './menu-controls.module.scss';
+import * as styles from './error.module.scss';
 import { locElementToReactNode } from './menu-controls-utils';
 
 export const MenuControlsError = memo(function MenuControlsErrorBase({
@@ -16,13 +16,13 @@ export const MenuControlsError = memo(function MenuControlsErrorBase({
   const { translate } = useLocalization();
 
   return (
-    <div className={styles.menuControlsError}>
-      <div className={styles.menuControlsErrorHeader}>
+    <div className={styles.error}>
+      <div className={styles.errorHeader}>
         <div
-          className={styles.menuControlsErrorHeaderImage}
+          className={styles.errorHeaderImage}
           style={{ backgroundImage: 'url(Media/Game/Icons/AdvisorTrafficAccident.svg)' }}
         />
-        <div className={styles.menuControlsErrorHeaderText}>
+        <div className={styles.errorHeaderText}>
           <strong>{translate('HallOfFame.Common.OOPS')}</strong>
           {translate('HallOfFame.UI.Menu.MenuControls.COULD_NOT_LOAD_IMAGE')}
         </div>
@@ -37,7 +37,7 @@ export const MenuControlsError = memo(function MenuControlsErrorBase({
         }}
       />
 
-      <strong className={styles.menuControlsErrorGameplayNotAffected}>
+      <strong className={styles.errorGameplayNotAffected}>
         {translate('HallOfFame.UI.Menu.MenuControls.GAMEPLAY_NOT_AFFECTED')}
       </strong>
 

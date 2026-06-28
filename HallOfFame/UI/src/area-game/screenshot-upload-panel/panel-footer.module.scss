@@ -1,0 +1,77 @@
+@use "sass:color";
+@use "../../common";
+@use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
+
+.footer {
+  padding: shared.$section-padding;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: vanilla.$legacy-panel-color-dark;
+
+  @include common.on-new-ui {
+    background-image: linear-gradient(
+      #{vanilla.$panel-gradient-start},
+      #{vanilla.$panel-gradient-end}
+    );
+  }
+
+  &-button {
+    margin-left: 20rem;
+    display: flex;
+    align-items: center;
+    padding: 10rem 20rem;
+
+    &[disabled] {
+      pointer-events: none;
+      filter: grayscale(1);
+    }
+
+    @include common.on-new-ui {
+      color: vanilla.$text-color;
+      background-color: color.adjust(vanilla.$highlight-green, $lightness: -15%);
+
+      &:hover {
+        background-color: color.adjust(vanilla.$highlight-green, $lightness: -10%);
+      }
+
+      &:active {
+        background-color: color.adjust(vanilla.$highlight-green, $lightness: -20%);
+      }
+    }
+
+    &--cancel {
+      color: vanilla.$text-color;
+      border-color: transparent;
+      background-image: none;
+      // biome-ignore lint/complexity/noImportantStyles: override higher specificity from .legacy-interface
+      background-color: transparent !important;
+
+      &:hover,
+      &:active {
+        @include common.on-new-ui {
+          border-color: shared.$game-panel-white;
+          background-image: linear-gradient(
+            90deg,
+            shared.$game-panel-white,
+            vanilla.$menu-focused-color,
+            vanilla.$menu-focused-color,
+            shared.$game-panel-white
+          );
+          // biome-ignore lint/complexity/noImportantStyles: override higher specificity from .legacy-interface
+          background-color: transparent !important;
+          color: vanilla.$menu-text-1-inverted;
+        }
+      }
+    }
+  }
+
+  &-buttonIcon {
+    // Variable used by the vanilla icon class.
+    --size: calc(26rem * #{vanilla.$font-scale});
+    margin-right: 10rem;
+  }
+}

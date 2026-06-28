@@ -11,7 +11,7 @@
   background-size: cover;
   background-repeat: no-repeat no-repeat;
 
-  &.splashscreen-fade-in {
+  &--fade-in {
     // Use same timing as vanilla class base_iEQ for backdrop images.
     animation: fadeIn ease 0.75s;
 

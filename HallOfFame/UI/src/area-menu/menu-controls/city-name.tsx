@@ -8,7 +8,7 @@ import discordBrandsSolid from '../../icons/fontawesome/discord-brands-solid.svg
 import twitchBrandsSolid from '../../icons/fontawesome/twitch-brands-solid.svg';
 import youtubeBrandsSolid from '../../icons/fontawesome/youtube-brands-solid.svg';
 // biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
-import * as styles from './menu-controls.module.scss';
+import * as styles from './city-name.module.scss';
 
 const socialPlatforms: {
   [K in CreatorSocialLink['platform']]: Readonly<{ name: string; logo: string; color: string }>;
@@ -65,10 +65,10 @@ export const MenuControlsCityName = memo(function MenuControlsCityNameBase({
     );
 
   return (
-    <div className={styles.menuControlsNames}>
+    <div className={styles.names}>
       {(isCityNameTranslated || isCreatorNameTranslated) && (
         <div
-          className={styles.menuControlsNamesTranslatedHint}
+          className={styles.namesTranslatedHint}
           // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
           onMouseEnter={() => setShowTranslations(true)}
           // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
@@ -83,13 +83,13 @@ export const MenuControlsCityName = memo(function MenuControlsCityNameBase({
         </div>
       )}
 
-      <div className={styles.menuControlsNamesCity}>
+      <div className={styles.namesCity}>
         <Tooltip
           direction='right'
           disabled={!isCityNameTranslated}
           forceVisible={showTranslations && isCityNameTranslated}
           tooltip={
-            <div className={styles.menuControlsNamesTranslatedTooltip}>
+            <div className={styles.namesTranslatedTooltip}>
               <strong>{screenshot.cityName}</strong>
               {modSettings.namesTranslationMode == 'translate'
                 ? screenshot.cityNameLatinized
@@ -100,20 +100,20 @@ export const MenuControlsCityName = memo(function MenuControlsCityNameBase({
         </Tooltip>
       </div>
 
-      <div className={styles.menuControlsNamesCreator}>
+      <div className={styles.namesCreator}>
         <Tooltip
           direction={isCityNameTranslated ? 'down' : 'right'}
           disabled={!isCreatorNameTranslated}
           forceVisible={showTranslations && isCreatorNameTranslated}
           tooltip={
-            <div className={styles.menuControlsNamesTranslatedTooltip}>
+            <div className={styles.namesTranslatedTooltip}>
               <strong>{screenshot.creator.creatorName}</strong>
               {modSettings.namesTranslationMode == 'translate'
                 ? screenshot.creator.creatorNameLatinized
                 : screenshot.creator.creatorNameTranslated}
             </div>
           }>
-          <span className={styles.menuControlsNamesCreatorBy}>
+          <span className={styles.namesCreatorBy}>
             <LocalizedString
               id='HallOfFame.Common.CITY_BY'
               // biome-ignore lint/style/useNamingConvention: i18n convention
@@ -123,7 +123,7 @@ export const MenuControlsCityName = memo(function MenuControlsCityNameBase({
         </Tooltip>
 
         {modSettings.showCreatorSocials && (
-          <div className={styles.menuControlsNamesCreatorSocials}>
+          <div className={styles.namesCreatorSocials}>
             {supportedSocials.map(link => (
               <Tooltip
                 key={link.platform}
@@ -140,7 +140,7 @@ export const MenuControlsCityName = memo(function MenuControlsCityNameBase({
                 }
                 direction='down'>
                 <Button
-                  className={styles.menuControlsNamesCreatorSocialsButton}
+                  className={styles.namesCreatorSocialsButton}
                   variant='round'
                   tinted={true}
                   src={socialPlatforms[link.platform].logo}

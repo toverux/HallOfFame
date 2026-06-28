@@ -7,7 +7,7 @@ import * as bindings from '../../bindings';
 import cloudArrowUpSolidSrc from '../../icons/fontawesome/cloud-arrow-up-solid.svg';
 import type { DraggableProps } from '../../utils';
 import { buildUploadPayload, type ScreenshotInfoFormValue } from './form-state';
-import * as styles from './screenshot-upload-panel.module.scss';
+import * as styles from './panel-footer.module.scss';
 
 export const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFooterBase({
   creatorNameIsEmpty,
@@ -32,15 +32,12 @@ export const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFo
   const isShowcaseSelectionMissing = formValue.isShowcasingAsset && !formValue.showcasedMod;
 
   return (
-    <div className={styles.screenshotUploadPanelFooter} {...draggable}>
+    <div className={styles.footer} {...draggable}>
       {isIdleOrUploading && (
         <>
           {!isUploading && (
             <Button
-              className={classNames(
-                styles.screenshotUploadPanelFooterButton,
-                styles.screenshotUploadPanelFooterButtonCancel
-              )}
+              className={classNames(styles.footerButton, styles.footerButtonCancel)}
               variant='primary'
               disabled={isUploading}
               onSelect={bindings.clearScreenshot}
@@ -51,14 +48,10 @@ export const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFo
 
           <Button
             variant='primary'
-            className={styles.screenshotUploadPanelFooterButton}
+            className={styles.footerButton}
             disabled={creatorNameIsEmpty || isUploading || isShowcaseSelectionMissing}
             onSelect={handleUpload}>
-            <Icon
-              src={cloudArrowUpSolidSrc}
-              tinted={true}
-              className={styles.screenshotUploadPanelFooterButtonIcon}
-            />
+            <Icon src={cloudArrowUpSolidSrc} tinted={true} className={styles.footerButtonIcon} />
 
             {isUploading
               ? translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING')
@@ -70,7 +63,7 @@ export const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFo
       {isDoneUploading && (
         <Button
           variant='primary'
-          className={styles.screenshotUploadPanelFooterButton}
+          className={styles.footerButton}
           onSelect={bindings.clearScreenshot}
           selectSound='close-menu'>
           {translate('Common.CLOSE', 'Close')}

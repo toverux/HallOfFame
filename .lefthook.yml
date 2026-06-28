@@ -7,8 +7,8 @@ pre-commit:
   parallel: true
   commands:
     tsc:
-      glob: "*.{ts,tsx,js,json}"
-      run: mise exec bun -- bun --bun tsc --p HallOfFame/UI --noEmit
+      glob: "*.{ts,tsx,js,json,scss}"
+      run: mise build:css-types && mise check:tsc
     biome:
       glob: "*.{ts,tsx,js,json}"
       run: mise exec bun -- bun biome check --error-on-warnings --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
