@@ -1,5 +1,6 @@
-// Emitted classes shared across the screenshot upload panel's sub-components, applied either as a
-// BEM mix via `composes` (`.panel-surface`) or via `classNames` (`.scrollable-track-customization`).
+// Emitted classes shared across the panel's sub-components, mixed onto their host elements via
+// `classNames` (`.panel-surface`, `.scrollable-track-customization`). Not `composes`: the type
+// generator parses a `composes` target as plain CSS and chokes on its SCSS syntax.
 
 @use "sass:color";
 @use "../../common";

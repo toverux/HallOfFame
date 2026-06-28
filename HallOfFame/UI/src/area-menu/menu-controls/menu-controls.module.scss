@@ -26,6 +26,22 @@
   color: white;
 
   @include common.fade-in(0.3s);
+
+  &-likesCount {
+    // Borrows section-content's positioning (right column of a section row), but flows its text
+    // inline so the count and "N likes" label stay on one line.
+    flex: 1 1 auto;
+    align-self: center;
+    margin-left: var(--buttons-gap);
+
+    display: inline;
+    text-shadow: 1rem 1rem 4rem vanilla.$panel-color-dark;
+    font-size: calc(30rem * #{vanilla.$font-scale});
+  }
+
+  &-likesCountNumber {
+    font-weight: bold;
+  }
 }
 
 .assetButton {
@@ -174,26 +190,28 @@
     &--slideIn {
       @include common.fade-in-slide-in(-60rem, $duration: 0.2s);
     }
+  }
 
-    button {
-      flex: 0 1 auto;
-      height: 40rem;
-      margin-top: 0;
-      margin-right: 15rem;
-      border-radius: 20rem;
-      padding: 0 20rem;
-      text-transform: initial;
-      font-size: 1em;
+  // The save/report/settings pills revealed in the more-actions row. An explicit element class
+  // instead of a bare `button` selector, so the styling is not coupled to the DOM tag.
+  &--otherActions &-actionButton {
+    flex: 0 1 auto;
+    height: 40rem;
+    margin-top: 0;
+    margin-right: 15rem;
+    border-radius: 20rem;
+    padding: 0 20rem;
+    text-transform: initial;
+    font-size: 1em;
 
-      [class*="icon"] {
-        width: 18rem;
-        height: 18rem;
-        margin-right: 10rem;
-      }
+    [class*="icon"] {
+      width: 18rem;
+      height: 18rem;
+      margin-right: 10rem;
     }
   }
 
-  &--otherActions &-saveButtonSpin [class*="icon"] {
+  &--otherActions &-saveButtonSpinning [class*="icon"] {
     animation: spin 1s linear infinite;
 
     @keyframes spin {
@@ -206,41 +224,24 @@
     }
   }
 
+  // Icon-only pill overriding the shared action-pill base; its overrides win by source order, so
+  // the only `!important` guards the vanilla hover-padding change.
   &--otherActions &-settingsButton {
     width: 40rem;
-    // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
-    margin-right: 0 !important;
+    margin-right: 0;
     display: flex;
     justify-content: center;
-    // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
+    // biome-ignore lint/complexity/noImportantStyles: override vanilla hover padding.
     padding: 0 !important;
 
     [class*="icon"] {
-      // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
-      width: 25rem !important;
-      // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
-      height: 25rem !important;
-      // biome-ignore lint/complexity/noImportantStyles: overriding vanilla styles.
-      margin-right: 0 !important;
+      width: 25rem;
+      height: 25rem;
+      margin-right: 0;
     }
 
     [class*="label"] {
       display: none;
     }
-  }
-}
-
-// Must be emitted after `.section`: the likes container carries both `.controls-likesCount` and
-// `.section-content`, and relies on source order for its `display: inline` to override the latter's
-// `display: flex` (equal specificity). A candidate for consolidation in pass 2.
-.controls {
-  &-likesCount {
-    display: inline;
-    text-shadow: 1rem 1rem 4rem vanilla.$panel-color-dark;
-    font-size: calc(30rem * #{vanilla.$font-scale});
-  }
-
-  &-likesCountNumber {
-    font-weight: bold;
   }
 }

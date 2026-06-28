@@ -347,7 +347,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
       <div style={{ flex: 1 }} />
 
-      <div className={styles.content}>
+      <div className={styles.notes}>
         <p>
           {`β ${translate('HallOfFame.UI.Game.ScreenshotUploadPanel.PARTIALLY_IMPLEMENTED_FEATURES')}`}
         </p>

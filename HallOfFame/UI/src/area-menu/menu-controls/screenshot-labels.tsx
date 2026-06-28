@@ -32,18 +32,18 @@ export const MenuControlsScreenshotLabels = memo(function MenuControlsScreenshot
     <div className={styles.labels}>
       {isPristineWilderness ? (
         <span className={styles.labelsLabel}>
-          <img src={naturalResourcesSrc} className={styles.labelsLabelIcon} />
+          <img src={naturalResourcesSrc} className={styles.labelsIcon} />
           {translate(`HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]`)}
         </span>
       ) : (
         <>
           <span className={styles.labelsLabel}>
-            <img src={trophySrc} className={styles.labelsLabelIcon} />
+            <img src={trophySrc} className={styles.labelsIcon} />
             {translate(`Progression.MILESTONE_NAME:${screenshot.cityMilestone}`, `???`)}
           </span>
 
           <span className={styles.labelsLabel}>
-            <img src={populationSrc} className={styles.labelsLabelIcon} />
+            <img src={populationSrc} className={styles.labelsIcon} />
             {formatBigNumber(screenshot.cityPopulation, translate)}
           </span>
         </>
@@ -63,7 +63,7 @@ export const MenuControlsScreenshotLabels = memo(function MenuControlsScreenshot
             />
           }>
           <span className={styles.labelsLabel}>
-            <img src={eyeOpenSrc} className={styles.labelsLabelIcon} />
+            <img src={eyeOpenSrc} className={styles.labelsIcon} />
             {formatBigNumber(screenshot.uniqueViewsCount, translate)}
           </span>
         </Tooltip>

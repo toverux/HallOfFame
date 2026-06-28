@@ -5,6 +5,8 @@ import { MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
 import * as bindings from '../../bindings';
 import type { Screenshot } from '../../common';
+// biome-ignore lint/correctness/noPrivateImports: svg doesn't have a @public annotation
+import ellipsisSolidSrc from '../../icons/fontawesome/ellipsis-solid.svg';
 import loveChirperSrc from '../../icons/love-chirper.png';
 // biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import doubleArrowRightTriangleSrc from '../../icons/uil/colored/double-arrow-right-triangle.svg';
@@ -211,6 +213,21 @@ export const MenuControlsLikeButton = memo(function MenuControlsLikeButtonBase({
         selectSound={selectSound}
       />
     </MenuButtonTooltip>
+  );
+});
+
+export const MenuControlsMoreActionsButton = memo(function MenuControlsMoreActionsButtonBase({
+  onToggle
+}: Readonly<{
+  onToggle: () => void;
+}>): ReactElement {
+  return (
+    <MenuButton
+      className={styles.button}
+      src={ellipsisSolidSrc}
+      tinted={true}
+      onSelect={onToggle}
+    />
   );
 });
 

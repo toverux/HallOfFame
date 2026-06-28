@@ -41,7 +41,9 @@
     font-size: vanilla.$font-size-xl;
   }
 
-  button {
+  // Explicit element class instead of a bare `button` selector. Kept scoped under `.error` (the
+  // `& &-button` descendant) so it still outranks the vanilla button styles it overrides.
+  & &-button {
     align-self: flex-start;
     margin: 15rem 0 0;
     // biome-ignore lint/complexity/noImportantStyles: override vanilla padding-left change on hover.

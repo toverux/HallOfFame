@@ -208,7 +208,7 @@ $control-background-color-focused: rgba(255, 255, 255, 0.4);
   background-color: vanilla.$warning-color;
 }
 
-.content {
+.notes {
   padding: shared.$section-padding;
 
   > p {
@@ -223,6 +223,8 @@ $control-background-color-focused: rgba(255, 255, 255, 0.4);
   left: 0;
   right: 0;
 
+  // Targets the vanilla Scrollable's inner content wrapper (our own classes are `hof-`-prefixed,
+  // so this never matches them).
   [class^="content"] {
     min-height: 100%;
   }

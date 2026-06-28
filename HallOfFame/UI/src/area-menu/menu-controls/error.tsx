@@ -42,6 +42,7 @@ export const MenuControlsError = memo(function MenuControlsErrorBase({
       </strong>
 
       <MenuButton
+        className={styles.errorButton}
         src='Media/Glyphs/ArrowCircular.svg'
         disabled={!isReadyForNextImage}
         {...snappyOnSelect(bindings.nextScreenshot)}>

@@ -1,10 +1,9 @@
 import classNames from 'classnames';
 import { LocalizedString, useLocalization } from 'cs2/l10n';
-import { Button, Icon, MenuButton, Tooltip } from 'cs2/ui';
+import { Button, Icon, Tooltip } from 'cs2/ui';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import * as bindings from '../../bindings';
 // biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
-import ellipsisSolidSrc from '../../icons/fontawesome/ellipsis-solid.svg';
 import flagSolidSrc from '../../icons/fontawesome/flag-solid.svg';
 // biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
 import { MenuControlsCityName } from './city-name';
@@ -12,11 +11,11 @@ import { MenuControlsError } from './error';
 import * as styles from './menu-controls.module.scss';
 import {
   MenuControlsLikeButton,
+  MenuControlsMoreActionsButton,
   MenuControlsNextButton,
   MenuControlsPreviousButton,
   MenuControlsToggleMenuVisibilityButton
 } from './nav-buttons';
-import * as navButtons from './nav-buttons.module.scss';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
 
 let lastForcedRefreshIndex = 0;
@@ -155,7 +154,7 @@ export function MenuControlsContent(): ReactElement {
           <MenuControlsLikeButton screenshot={menuState.screenshot} />
         </div>
 
-        <div className={classNames(styles.sectionContent, styles.controlsLikesCount)}>
+        <div className={styles.controlsLikesCount}>
           <span className={styles.controlsLikesCountNumber}>
             {menuState.screenshot.likesCount < 1000
               ? menuState.screenshot.likesCount
@@ -175,12 +174,7 @@ export function MenuControlsContent(): ReactElement {
 
       <div className={classNames(styles.section, styles.sectionOtherActions)}>
         <div className={styles.sectionButtons}>
-          <MenuButton
-            className={navButtons.button}
-            src={ellipsisSolidSrc}
-            tinted={true}
-            onSelect={toggleMoreActions}
-          />
+          <MenuControlsMoreActionsButton onToggle={toggleMoreActions} />
         </div>
 
         <div
@@ -197,7 +191,9 @@ export function MenuControlsContent(): ReactElement {
               />
             }>
             <Button
-              className={menuState.isSaving ? styles.sectionSaveButtonSpin : ''}
+              className={classNames(styles.sectionActionButton, {
+                [styles.sectionSaveButtonSpinning]: menuState.isSaving
+              })}
               variant='menu'
               src={menuState.isSaving ? 'Media/Glyphs/Progress.svg' : 'Media/Editor/Save.svg'}
               tinted={true}
@@ -211,6 +207,7 @@ export function MenuControlsContent(): ReactElement {
             direction='down'
             tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report]')}>
             <Button
+              className={styles.sectionActionButton}
               variant='menu'
               src={flagSolidSrc}
               tinted={true}
@@ -226,7 +223,7 @@ export function MenuControlsContent(): ReactElement {
               'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Open Mod Settings]'
             )}>
             <Button
-              className={styles.sectionSettingsButton}
+              className={classNames(styles.sectionActionButton, styles.sectionSettingsButton)}
               variant='menu'
               src='Media/Glyphs/Gear.svg'
               tinted={true}

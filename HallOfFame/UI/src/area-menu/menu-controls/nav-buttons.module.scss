@@ -1,8 +1,8 @@
 @use "../../vanilla-vars" as vanilla;
 
-// The round nav/menu buttons (previous, next, like, toggle visibility). Also mixed onto the shell's
-// "more actions" ellipsis button via `classNames`, so the base and its variants must stay in this
-// one file: the base `[class*="icon"]` transition is overridden by `--like` purely on source order.
+// The round nav/menu buttons (previous, next, like, toggle visibility, more-actions). The base and
+// its variants must stay in this one file: the base `[class*="icon"]` transition is overridden by
+// `--like` purely on source order.
 .button {
   margin-top: 8rem;
   margin-bottom: 8rem;
@@ -18,7 +18,7 @@
 
   &[disabled],
   &[disabled]:hover {
-    // biome-ignore lint/complexity/noImportantStyles: I don't remember.
+    // biome-ignore lint/complexity/noImportantStyles: I don't remember, probably forcing the dimmed disabled background over vanilla's button/hover background.
     background-color: rgba(16, 19, 29, 0.2) !important;
   }
 
