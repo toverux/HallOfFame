@@ -31,6 +31,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private ScreenshotExporter screenshotExporter = null!;
 
+  private ScreenshotViewRecorder screenshotViewRecorder = null!;
+
   private NavigationState navigation = null!;
 
   private bool forceEnableMainMenuSlideshow;
@@ -111,6 +113,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       );
 
       this.screenshotExporter = new ScreenshotExporter(Mod.Api);
+
+      // Records a view as a fire-and-forget side effect when a step lands on a new screenshot.
+      this.screenshotViewRecorder = new ScreenshotViewRecorder(Mod.Api, Mod.Log);
 
       // The phase model behind the navigation lock: this system drives its transitions and mirrors
       // its CanAdvance fact onto the binding below.
@@ -427,7 +432,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     );
 
     if (step.ViewedScreenshotId is { } viewedScreenshotId) {
-      this.RecordView(viewedScreenshotId);
+      _ = this.screenshotViewRecorder.RecordView(viewedScreenshotId);
     }
 
     if (step.ShouldPreloadAhead) {
@@ -452,19 +457,6 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     finally {
       this.navigation.EndPrefetch();
       this.UpdateCanAdvanceBinding();
-    }
-  }
-
-  /// <summary>
-  /// Fire-and-forget recording of a screenshot view; designed never to throw.
-  /// </summary>
-  // ReSharper disable once AsyncVoidMethod
-  private async void RecordView(string screenshotId) {
-    try {
-      await Mod.Api.MarkScreenshotViewed(screenshotId);
-    }
-    catch (Exception ex) {
-      Mod.Log.ErrorSilent(ex);
     }
   }
 
