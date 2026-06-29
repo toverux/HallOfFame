@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Colossal.Core;
 using Colossal.Serialization.Entities;
@@ -14,14 +12,12 @@ using Game.UI;
 using Game.UI.InGame;
 using Game.UI.Localization;
 using Game.UI.Menu;
-using HallOfFame.Http;
 using HallOfFame.Reflection;
 using HallOfFame.Services;
 using HallOfFame.Utils;
 using HallOfFame.Utils.Writers;
 using Unity.Entities;
 using UnityEngine;
-using ValueType = cohtml.Net.ValueType;
 
 namespace HallOfFame.Systems.Capture;
 
@@ -36,16 +32,18 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// For file-serving purposes only.
   /// </summary>
   private static readonly string ScreenshotFilePath =
-    Path.Combine(Mod.ModDataPath, "screenshot.jpg");
+    Path.Combine(Mod.ModDataPath, ScreenshotSnapshot.ScreenshotFileName);
 
   /// <summary>
   /// File path for the preview of the latest screenshot taken.
   /// For file-serving purposes only.
   /// </summary>
   private static readonly string ScreenshotPreviewFilePath =
-    Path.Combine(Mod.ModDataPath, "preview.jpg");
+    Path.Combine(Mod.ModDataPath, ScreenshotSnapshot.ScreenshotPreviewFileName);
 
   private CitySnapshotProvider citySnapshotProvider = null!;
+
+  private ScreenshotUploader screenshotUploader = null!;
 
   private ImagePreloaderUISystem? imagePreloaderUISystem;
 
@@ -78,7 +76,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     set {
       this.currentScreenshotValue = value;
 
-      this.uploadProgressModel = null;
+      this.screenshotUploader.Reset();
 
       // Optimization: only enable live bindings when a screenshot is being displayed/uploaded.
       // Run on the next frame to let the UI update one last time.
@@ -90,11 +88,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// Backing field for <see cref="CurrentScreenshot"/>.
   /// </summary>
   private ScreenshotSnapshot? currentScreenshotValue;
-
-  /// <summary>
-  /// Progress model for the current upload, or <c>null</c> when no upload is in progress.
-  /// </summary>
-  private UploadProgressModel? uploadProgressModel;
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -109,6 +102,21 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       var milestoneLevelQuery = this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
 
       this.citySnapshotProvider = new CitySnapshotProvider(this.World, milestoneLevelQuery);
+
+      // The uploader owns the capture -> assemble -> upload -> progress workflow, reporting back
+      // through callbacks so this system keeps owning the UI binding and the (engine-bound) error
+      // dialog.
+      this.screenshotUploader = new ScreenshotUploader(
+        Mod.Api,
+        Mod.Log,
+        ex => ErrorDialogManagerAccessor.Instance?.ShowError(
+          new ErrorDialog {
+            localizedTitle = "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR",
+            localizedMessage = ex.GetUserFriendlyMessage(),
+            actions = ErrorDialog.ActionBits.Continue
+          }
+        )
+      );
 
       this.assetModsBinding = new ValueBinding<Colossal.PSI.Common.Mod[]?>(
         CaptureUISystem.BindingGroup,
@@ -135,7 +143,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         new GetterValueBinding<UploadProgress?>(
           CaptureUISystem.BindingGroup,
           "uploadProgress",
-          () => this.uploadProgressModel?.Current,
+          () => this.screenshotUploader.CurrentProgress,
           new ValueWriter<UploadProgress>().Nullable()
         );
 
@@ -241,7 +249,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.citySnapshotProvider.GetPopulation(),
       this.citySnapshotProvider.GetMapName(),
       captured.PngBytes,
-      captured.Size,
+      captured.Size.x,
+      captured.Size.y,
       captured.WasGlobalIlluminationDisabled,
       captured.AreSettingsTopQuality,
       this.citySnapshotProvider.GetPhotoModePropertiesSnapshot(),
@@ -258,7 +267,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   private void ClearScreenshot() {
     if (this.CurrentScreenshot is null) {
-      Mod.Log.Warn($"Game: Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
+      Mod.Log.Warn(
+        $"{nameof(CaptureUISystem)}: Call to {nameof(this.ClearScreenshot)} with no active screenshot."
+      );
 
       return;
     }
@@ -275,10 +286,11 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     }
   }
 
-  // ReSharper disable once AsyncVoidMethod
-  private async void UploadScreenshot(ScreenshotInfoFormValue formValue) {
+  private void UploadScreenshot(ScreenshotInfoFormValue formValue) {
     if (this.CurrentScreenshot is null) {
-      Mod.Log.Warn($"Game: Call to {nameof(this.ClearScreenshot)} with no active screenshot.");
+      Mod.Log.Warn(
+        $"{nameof(CaptureUISystem)}: Call to {nameof(this.UploadScreenshot)} with no active screenshot."
+      );
 
       return;
     }
@@ -290,86 +302,12 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         formValue.Description
       );
 
-    CancellationTokenSource? processingUpdatesCts = null;
+    // The city name is read live at upload time (the user can edit it after the screenshot is
+    // taken), unlike the rest of the snapshot which is frozen at capture.
+    var cityName = this.citySnapshotProvider.GetCityName();
 
-    // Capture a non-null reference to this upload's model: the field can be cleared concurrently
-    // (e.g., by clearing the screenshot), but the callback and the ramp must keep driving this same
-    // instance, which the UI binding reads back through the field.
-    var progressModel = this.uploadProgressModel = new UploadProgressModel();
-
-    try {
-      var screenshot = await Mod.Api.UploadScreenshot(
-        new UploadScreenshotParams {
-          CityName = this.citySnapshotProvider.GetCityName(),
-          CityMilestone = this.CurrentScreenshot.Value.AchievedMilestone,
-          CityPopulation = this.CurrentScreenshot.Value.Population,
-          MapName = this.CurrentScreenshot.Value.MapName,
-          ShowcasedModId = formValue.ShowcasedModId,
-          Description = formValue.Description,
-          ShareModIds = formValue.ShareModIds,
-          ModIds = this.CurrentScreenshot.Value.ModIds,
-          ShareRenderSettings = formValue.ShareRenderSettings,
-          RenderSettings = this.CurrentScreenshot.Value.RenderSettings,
-          ScreenshotData = this.CurrentScreenshot.Value.ImageBytes,
-          UploadProgressHandler = (upload, download) => {
-            progressModel.ReportUploadProgress(upload);
-
-            // Once the request body is fully sent, start the time-based processing progress ramp.
-            // The guard ensures it is started only once, as the callback keeps firing afterward.
-            if (progressModel.IsProcessing && processingUpdatesCts is null) {
-              processingUpdatesCts = new CancellationTokenSource();
-
-              _ = StartUpdateProcessingProgress(processingUpdatesCts.Token);
-            }
-          }
-        }
-      );
-
-      progressModel.Complete();
-
-      Mod.Log.Info($"{nameof(CaptureUISystem)}: Screenshot uploaded, ID #{screenshot.Id}.");
-    }
-    catch (HttpException ex) {
-      // Reset progress state.
-      this.uploadProgressModel = null;
-
-      ErrorDialogManagerAccessor.Instance?.ShowError(
-        new ErrorDialog {
-          localizedTitle = "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR",
-          localizedMessage = ex.GetUserFriendlyMessage(),
-          actions = ErrorDialog.ActionBits.Continue
-        }
-      );
-    }
-    catch (Exception ex) {
-      // Reset progress state.
-      this.uploadProgressModel = null;
-
-      Mod.Log.ErrorRecoverable(ex);
-    }
-    finally {
-      processingUpdatesCts?.Cancel();
-    }
-
-    return;
-
-    async Task StartUpdateProcessingProgress(CancellationToken ct) {
-      var startTime = DateTime.Now;
-
-      while (!ct.IsCancellationRequested) {
-        var elapsedSeconds = (float)(DateTime.Now - startTime).TotalSeconds;
-
-        progressModel.ReportProcessingElapsed(elapsedSeconds);
-
-        // The model caps the processing guess; once reached, the ramp has nothing left to do and
-        // stops by itself (it is also canceled when the upload completes or errors).
-        if (progressModel.HasReachedProcessingCap) {
-          break;
-        }
-
-        await Task.Yield();
-      }
-    }
+    // The uploader never throws and drives its own progress/error reporting, so fire-and-forget.
+    _ = this.screenshotUploader.Upload(this.CurrentScreenshot.Value, cityName, formValue);
   }
 
   /// <summary>
@@ -444,128 +382,5 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     );
 
     File.WriteAllBytes(fileName, pngScreenshotBytes);
-  }
-
-  /// <summary>
-  /// Snapshot of the latest screenshot.
-  /// Stores the state of the current screenshot and accompanying info that we don't want to update
-  /// in real-time after the screenshot is taken. Other info like city name and username have their
-  /// own separated binding as we want to allow the user to change them on the fly after the
-  /// screenshot is taken.
-  /// Serializable to JSON for displaying in the UI.
-  /// </summary>
-  private readonly struct ScreenshotSnapshot(
-    int achievedMilestone,
-    int population,
-    string? mapName,
-    byte[] imageBytes,
-    Vector2Int imageSize,
-    bool wasGlobalIlluminationDisabled,
-    bool areSettingsTopQuality,
-    IDictionary<string, float> renderSettings,
-    string[] modIds
-  ) : IJsonWritable {
-    /// <summary>
-    /// As we use the same file name for each new screenshot, this is a refresh counter appended to
-    /// the URL of the image as a query parameter for cache busting.
-    /// </summary>
-    private static int latestVersion;
-
-    private readonly int currentVersion = ScreenshotSnapshot.latestVersion++;
-
-    internal int AchievedMilestone { get; } = achievedMilestone;
-
-    internal int Population { get; } = population;
-
-    internal string? MapName { get; } = mapName;
-
-    internal byte[] ImageBytes { get; } = imageBytes;
-
-    internal IDictionary<string, float> RenderSettings { get; } =
-      renderSettings;
-
-    internal string[] ModIds { get; } = modIds;
-
-    internal string PreviewImageUri =>
-      $"coui://halloffame/{Path.GetFileName(CaptureUISystem.ScreenshotPreviewFilePath)}" +
-      $"?v={this.currentVersion}";
-
-    private string ImageUri =>
-      $"coui://halloffame/{Path.GetFileName(CaptureUISystem.ScreenshotFilePath)}" +
-      $"?v={this.currentVersion}";
-
-    public void Write(IJsonWriter writer) {
-      writer.TypeBegin(this.GetType().FullName);
-
-      writer.PropertyName("mapName");
-      writer.Write(this.MapName);
-
-      writer.PropertyName("achievedMilestone");
-      writer.Write(this.AchievedMilestone);
-
-      writer.PropertyName("population");
-      writer.Write(this.Population);
-
-      writer.PropertyName("previewImageUri");
-      writer.Write(this.PreviewImageUri);
-
-      writer.PropertyName("imageUri");
-      writer.Write(this.ImageUri);
-
-      writer.PropertyName("imageWidth");
-      writer.Write(imageSize.x);
-
-      writer.PropertyName("imageHeight");
-      writer.Write(imageSize.y);
-
-      writer.PropertyName("imageFileSize");
-      writer.Write(this.ImageBytes.Length);
-
-      writer.PropertyName("wasGlobalIlluminationDisabled");
-      writer.Write(wasGlobalIlluminationDisabled);
-
-      writer.PropertyName("areSettingsTopQuality");
-      writer.Write(areSettingsTopQuality);
-
-      writer.TypeEnd();
-    }
-  }
-
-  // ReSharper disable once ClassNeverInstantiated.Local
-  private sealed record ScreenshotInfoFormValue : IJsonReadable {
-    internal bool ShareModIds;
-
-    internal bool ShareRenderSettings;
-
-    internal string? ShowcasedModId;
-
-    internal string? Description;
-
-    public void Read(IJsonReader reader) {
-      reader.ReadMapBegin();
-
-      reader.ReadProperty("shareModIds");
-      reader.Read(out this.ShareModIds);
-
-      reader.ReadProperty("shareRenderSettings");
-      reader.Read(out this.ShareRenderSettings);
-
-      reader.ReadProperty("showcasedModId");
-
-      var showcasedModIdValueType = reader.PeekValueType();
-
-      if (showcasedModIdValueType is ValueType.Null) {
-        reader.SkipValue();
-      }
-      else {
-        reader.Read(out string showcasedModId);
-        this.ShowcasedModId = showcasedModId;
-      }
-
-      reader.ReadProperty("description");
-      reader.Read(out this.Description);
-
-      reader.ReadMapEnd();
-    }
   }
 }

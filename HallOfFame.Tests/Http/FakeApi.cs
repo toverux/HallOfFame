@@ -22,6 +22,8 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   internal Func<string, bool, Task<View>>? LikeScreenshotImpl { get; init; }
 
+  internal Func<UploadScreenshotParams, Task<Screenshot>>? UploadScreenshotImpl { get; init; }
+
   #if DEBUG
   internal Func<string, Task<Screenshot>>? GetScreenshotImpl { get; init; }
   #endif
@@ -53,7 +55,7 @@ internal sealed class FakeApi : IHallOfFameApi {
     throw new NotImplementedException();
 
   public Task<Screenshot> UploadScreenshot(UploadScreenshotParams @params) =>
-    throw new NotImplementedException();
+    this.UploadScreenshotImpl?.Invoke(@params) ?? throw new NotImplementedException();
 
   public Task<byte[]> DownloadImage(string url) => throw new NotImplementedException();
 

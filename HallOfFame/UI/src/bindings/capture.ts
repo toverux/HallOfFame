@@ -10,7 +10,7 @@ export interface JsonMod {
   readonly thumbnailPath: string;
 }
 
-/** From `HallOfFame.Systems.Capture.CaptureUISystem.ScreenshotSnapshot` */
+/** From `HallOfFame.Services.ScreenshotSnapshot` */
 export interface JsonScreenshotSnapshot {
   readonly achievedMilestone: number;
   readonly population: number;
