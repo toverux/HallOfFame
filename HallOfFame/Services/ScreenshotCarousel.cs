@@ -248,6 +248,17 @@ internal sealed class ScreenshotCarousel(
   /// <summary>
   /// Picks the image URL for the configured screenshot resolution.
   /// </summary>
+  /// <remarks>
+  /// This resolution-to-URL mapping is deliberately duplicated on the front end
+  /// (<c>deriveImageUri</c>): C# resolves it here to choose which variant to preload, and the UI
+  /// resolves it again to choose which to display.
+  /// Collapsing the two into a single C#-resolved URL sent across the binding was considered and
+  /// dropped: the UI re-derives live from the reactive resolution setting, so changing it updates
+  /// the on-screen image immediately. Making C# the sole resolver would instead force it to
+  /// re-preload and republish on every settings change to stay flash-free, more complexity than
+  /// the deduplication is worth.
+  /// Both sides must therefore agree on the mapping for every supported resolution.
+  /// </remarks>
   /// <exception cref="InvalidOperationException">
   /// When the configured resolution is not a known value.
   /// </exception>

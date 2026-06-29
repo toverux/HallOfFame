@@ -196,6 +196,12 @@ export function likeScreenshot(): void {
 /**
  * Resolves the image URI to display from the current screenshot, picking the resolution variant
  * that matches the user's quality setting.
+ *
+ * This mirrors the same resolution-to-URL choice C# makes when preloading
+ * (`SelectImageUrl`). The duplication is intentional and was kept after weighing a single
+ * C#-resolved URL crossing the binding: deriving here lets the displayed image follow a
+ * resolution-setting change live, without a C# re-preload/republish round-trip.
+ * Both sides must agree on the mapping for every supported resolution.
  */
 export function deriveImageUri(
   screenshot: Screenshot | null,
@@ -205,5 +211,12 @@ export function deriveImageUri(
     return null;
   }
 
-  return settings.screenshotResolution == 'fhd' ? screenshot.imageUrlFHD : screenshot.imageUrl4K;
+  switch (settings.screenshotResolution) {
+    case 'fhd':
+      return screenshot.imageUrlFHD;
+    case '4k':
+      return screenshot.imageUrl4K;
+    default:
+      throw settings.screenshotResolution satisfies never;
+  }
 }
