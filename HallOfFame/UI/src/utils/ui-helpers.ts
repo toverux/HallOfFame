@@ -1,15 +1,7 @@
-﻿import { trigger } from 'cs2/api';
-import type { UISound } from 'cs2/ui';
+﻿import type { UISound } from 'cs2/ui';
 import type { DOMAttributes } from 'react';
-import * as bindings from '../bindings';
 import { iconsole } from '../iconsole';
-
-/**
- * Plays a Vanilla sound.
- */
-export function playSound(sound: `${UISound}`, volume = 1): void {
-  trigger('audio', 'playSound', sound, volume);
-}
+import * as bindings from './bindings';
 
 /**
  * Based on a hot take from John Carmack, see
@@ -23,7 +15,7 @@ export function snappyOnSelect(handler: () => void, sound?: `${UISound}`) {
   return {
     onMouseDown(): void {
       handler();
-      playSound(sound ?? 'select-item');
+      bindings.playSound(sound ?? 'select-item');
     }
   } satisfies DOMAttributes<Element>;
 }

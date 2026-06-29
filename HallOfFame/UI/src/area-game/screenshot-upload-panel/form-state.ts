@@ -1,4 +1,4 @@
-import type { JsonMod, UploadPayload } from '../../bindings';
+import type { JsonMod, UploadPayload } from '../../utils/bindings';
 
 /**
  * UI-side state of the screenshot upload form.

@@ -1,8 +1,8 @@
 import classNames from 'classnames';
 import { useLocalization } from 'cs2/l10n';
 import { memo, type ReactElement, useEffect } from 'react';
-import type * as bindings from '../../bindings';
 import { createSingletonHook, getClassesModule } from '../../utils';
+import type * as bindings from '../../utils/bindings';
 import {
   LoadingProgress,
   loadingProgressVanillaProps

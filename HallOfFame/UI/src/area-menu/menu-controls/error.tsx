@@ -1,8 +1,8 @@
 import { LocalizedString, useLocalization } from 'cs2/l10n';
 import { MenuButton } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
-import * as bindings from '../../bindings';
 import { snappyOnSelect } from '../../utils';
+import * as bindings from '../../utils/bindings';
 import * as styles from './error.module.scss';
 import { locElementToReactNode } from './menu-controls-utils';
 

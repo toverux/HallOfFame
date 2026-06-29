@@ -1,5 +1,5 @@
 import type { ModRegistrar } from 'cs2/modding';
-import * as bindings from '../bindings';
+import * as bindings from '../utils/bindings';
 import { LogoScreenWrapper } from './logo-screen-wrapper';
 
 export const register: ModRegistrar = moduleRegistry => {

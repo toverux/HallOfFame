@@ -1,13 +1,13 @@
 import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { Tooltip } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
-import type * as bindings from '../../bindings';
 import type { Screenshot } from '../../common';
 // biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import naturalResourcesSrc from '../../icons/paradox/natural-resources.svg';
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
 import eyeOpenSrc from '../../icons/uil/colored/eye-open.svg';
+import type * as bindings from '../../utils/bindings';
 import { formatBigNumber } from './menu-controls-utils';
 // biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
 import * as styles from './screenshot-labels.module.scss';

@@ -1,9 +1,8 @@
 import { trigger, useValue } from 'cs2/api';
 import type { LocalizedString } from 'cs2/l10n';
 import type { Dispatch, SetStateAction } from 'react';
-import type { Screenshot } from '../common';
-// noinspection ES6PreferShortImport Causes issue with Biome's import loop detection even if it's fine.
-import { createSingletonHook } from '../utils/singleton-hook';
+import type { Screenshot } from '../../common';
+import { createSingletonHook } from '../singleton-hook';
 import { type ModSettings, useModSettings } from './common';
 import { lazyBindValue } from './lazy-value-binding';
 

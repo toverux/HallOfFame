@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect } from 'react';
-import * as bindings from '../bindings';
 import { getClassesModule, logError, selector } from '../utils';
+import * as bindings from '../utils/bindings';
 
 const logoScreenStyles = getClassesModule('game-ui/overlay/logo-screen/logo-screen.module.scss', [
   'logoScreen'

@@ -1,7 +1,7 @@
 ﻿import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import * as bindings from '../bindings';
 import { getClassesModule, logError, selector } from '../utils';
+import * as bindings from '../utils/bindings';
 import { MenuControls } from './menu-controls';
 
 const coFpsDisplayStyles = getClassesModule(

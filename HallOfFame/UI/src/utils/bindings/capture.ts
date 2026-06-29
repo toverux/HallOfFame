@@ -3,14 +3,22 @@ import { lazyBindValue } from './lazy-value-binding';
 
 const GROUP = 'hallOfFame.capture';
 
-/** From `Colossal.PSI.Common.Mod` */
+/**
+ * From `Colossal.PSI.Common.Mod`
+ *
+ * @public
+ */
 export interface JsonMod {
   readonly id: string;
   readonly displayName: string;
   readonly thumbnailPath: string;
 }
 
-/** From `HallOfFame.Services.ScreenshotSnapshot` */
+/**
+ * From `HallOfFame.Services.ScreenshotSnapshot`
+ *
+ * @public
+ */
 export interface JsonScreenshotSnapshot {
   readonly achievedMilestone: number;
   readonly population: number;
@@ -23,7 +31,11 @@ export interface JsonScreenshotSnapshot {
   readonly areSettingsTopQuality: boolean;
 }
 
-/** From `HallOfFame.Services.UploadProgress` */
+/**
+ * From `HallOfFame.Services.UploadProgress`
+ *
+ * @public
+ */
 export interface JsonUploadProgress {
   readonly isComplete: boolean;
   readonly globalProgress: number;
@@ -34,6 +46,8 @@ export interface JsonUploadProgress {
 /**
  * Argument of the {@link uploadScreenshot} command, mapped on the UI side from the upload form
  * state into the shape the C# `uploadScreenshot` command expects.
+ *
+ * @public
  */
 export interface UploadPayload {
   readonly shareModIds: boolean;

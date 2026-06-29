@@ -1,6 +1,6 @@
 import type { Localization } from 'cs2/l10n';
 import type { CSSProperties } from 'react';
-import type { JsonScreenshotSnapshot, JsonUploadProgress } from '../../bindings';
+import type { JsonScreenshotSnapshot, JsonUploadProgress } from '../../utils/bindings';
 
 /**
  * Computes the type and style of the ratio preview overlay on the image, helping the user to

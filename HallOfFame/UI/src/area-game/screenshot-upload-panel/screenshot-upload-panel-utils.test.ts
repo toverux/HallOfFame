@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import type { Localization } from 'cs2/l10n';
-import type { JsonScreenshotSnapshot, JsonUploadProgress } from '../../bindings';
+import type { JsonScreenshotSnapshot, JsonUploadProgress } from '../../utils/bindings';
 import { getRatioPreviewInfo, getUploadProgressHintText } from './screenshot-upload-panel-utils';
 
 function snapshotWithSize(imageWidth: number, imageHeight: number): JsonScreenshotSnapshot {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import type { JsonMod } from '../../bindings';
+import type { JsonMod } from '../../utils/bindings';
 import { buildUploadPayload, type ScreenshotInfoFormValue } from './form-state';
 
 const baseForm: ScreenshotInfoFormValue = {

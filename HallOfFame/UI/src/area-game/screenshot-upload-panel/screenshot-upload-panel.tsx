@@ -1,8 +1,8 @@
 import classNames from 'classnames';
 import { type ReactElement, useEffect, useRef } from 'react';
 import { useSetState } from 'react-use';
-import * as bindings from '../../bindings';
 import { useDraggable } from '../../utils';
+import * as bindings from '../../utils/bindings';
 import type { ScreenshotInfoFormValue } from './form-state';
 import { ScreenshotUploadPanelContentCityInfo } from './panel-city-info';
 import { ScreenshotUploadPanelFooter } from './panel-footer';

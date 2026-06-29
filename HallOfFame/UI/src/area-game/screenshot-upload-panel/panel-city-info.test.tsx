@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { cleanup, render, screen } from '@testing-library/react';
-import type { JsonScreenshotSnapshot, ModSettings } from '../../bindings';
 import { resetBindings, setBinding } from '../../testing/game-setup';
+import type { JsonScreenshotSnapshot, ModSettings } from '../../utils/bindings';
 import { ScreenshotUploadPanelContentCityInfo } from './panel-city-info';
 
 afterEach(() => {

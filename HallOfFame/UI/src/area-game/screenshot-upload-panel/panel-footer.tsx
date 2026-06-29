@@ -2,10 +2,10 @@ import classNames from 'classnames';
 import { useLocalization } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { memo, type ReactElement, useCallback } from 'react';
-import * as bindings from '../../bindings';
 // biome-ignore lint/correctness/noPrivateImports: svgs don't have @public annotations
 import cloudArrowUpSolidSrc from '../../icons/fontawesome/cloud-arrow-up-solid.svg';
 import type { DraggableProps } from '../../utils';
+import * as bindings from '../../utils/bindings';
 import { buildUploadPayload, type ScreenshotInfoFormValue } from './form-state';
 import * as styles from './panel-footer.module.scss';
 

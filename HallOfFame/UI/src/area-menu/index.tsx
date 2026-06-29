@@ -3,7 +3,7 @@
  */
 
 import type { ModRegistrar } from 'cs2/modding';
-import * as bindings from '../bindings';
+import * as bindings from '../utils/bindings';
 import { MasterScreenPortal } from './master-screen-portal';
 import { MenuSplashscreen } from './menu-splashscreen';
 

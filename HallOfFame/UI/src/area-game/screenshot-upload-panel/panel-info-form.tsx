@@ -10,8 +10,8 @@ import {
   Scrollable
 } from 'cs2/ui';
 import { memo, type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import * as bindings from '../../bindings';
-import { getClassesModule, playSound } from '../../utils';
+import { getClassesModule } from '../../utils';
+import * as bindings from '../../utils/bindings';
 import { useScrollController } from '../../vanilla-modules/game-ui/common/hooks/use-scroll-controller';
 import {
   Checkbox,
@@ -80,7 +80,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
   const scrollController = useScrollController?.();
 
-  const playHoverSound = useCallback(() => playSound('hover-item'), []);
+  const playHoverSound = useCallback(() => bindings.playSound('hover-item'), []);
 
   const selectShowcasedMod = useCallback(
     (selectedMod: bindings.JsonMod) =>
@@ -176,7 +176,8 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
           onMouseEnter={playHoverSound}
           // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
           onClick={() => (
-            patchFormValue({ shareModIds: !formValue.shareModIds }), playSound('select-toggle')
+            patchFormValue({ shareModIds: !formValue.shareModIds }),
+            bindings.playSound('select-toggle')
           )}>
           <Checkbox
             theme={checkboxTheme}
@@ -201,7 +202,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
           // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
           onClick={() => (
             patchFormValue({ shareRenderSettings: !formValue.shareRenderSettings }),
-            playSound('select-toggle')
+            bindings.playSound('select-toggle')
           )}>
           <Checkbox
             theme={checkboxTheme}
@@ -235,7 +236,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
                 isShowcasingAsset: !formValue.isShowcasingAsset,
                 showcasedMod: formValue.isShowcasingAsset ? undefined : formValue.showcasedMod
               }),
-              playSound('select-toggle')
+              bindings.playSound('select-toggle')
             )}>
             <Checkbox
               theme={checkboxTheme}

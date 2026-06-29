@@ -1,7 +1,6 @@
 import type { UISound } from 'cs2/ui';
 import { useEffect, useState } from 'react';
-import type * as bindings from '../../bindings';
-import { playSound } from '../../utils';
+import * as bindings from '../../utils/bindings';
 
 /**
  * Triggers the {@link handler} when the input is executed (key down AND key up).
@@ -35,7 +34,7 @@ export function useMenuControlsInputAction(
       setReplayOnCanceled(phase == 'Performed' && !ready);
 
       if (ready && sound) {
-        playSound(sound);
+        bindings.playSound(sound);
       }
     }
   }, [phase]);

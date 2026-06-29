@@ -2,10 +2,10 @@ import classNames from 'classnames';
 import { LocalizedString, useLocalization } from 'cs2/l10n';
 import { Button, Icon, Tooltip } from 'cs2/ui';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
-import * as bindings from '../../bindings';
 // biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import flagSolidSrc from '../../icons/fontawesome/flag-solid.svg';
 // biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
+import * as bindings from '../../utils/bindings';
 import { MenuControlsCityName } from './city-name';
 import { MenuControlsError } from './error';
 import * as styles from './menu-controls.module.scss';
@@ -18,6 +18,12 @@ import {
 } from './nav-buttons';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
 
+// Deliberately module-scoped, not a per-instance `useRef`. `MenuControls` is mounted via a
+// portal in `MasterScreenPortal` and remounts fresh when returning to the menu from a game.
+// C# bumps `forcedRefreshIndex` on exactly that transition to request a new screenshot, so the
+// value must outlive the remount: a `useRef` would reset to 0 and the return-to-menu refresh
+// would never fire. The right place to revisit this C#<->UI refresh round-trip is the
+// SlideshowConductor (architecture candidate #1).
 let lastForcedRefreshIndex = 0;
 
 /**

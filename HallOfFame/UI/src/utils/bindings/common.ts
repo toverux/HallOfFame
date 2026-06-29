@@ -1,10 +1,14 @@
 import { trigger, useValue } from 'cs2/api';
-import type { CreatorSocialLink, Mod } from '../common';
+import type { CreatorSocialLink, Mod } from '../../common';
 import { lazyBindValue } from './lazy-value-binding';
 
 const GROUP = 'hallOfFame.common';
 
-/** See C# `HallOfFame.Settings` class for documentation. */
+/**
+ * See C# `HallOfFame.Settings` class for documentation.
+ *
+ * @public
+ */
 export interface ModSettings {
   readonly creatorName: string;
   readonly enableLoadingScreenBackground: boolean;

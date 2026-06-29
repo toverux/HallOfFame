@@ -1,14 +1,15 @@
 import { LocalizedString, useLocalization } from 'cs2/l10n';
 import { Button, Tooltip } from 'cs2/ui';
 import { type CSSProperties, memo, type ReactElement, useState } from 'react';
-import * as bindings from '../../bindings';
 import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../../common';
 // biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import discordBrandsSolid from '../../icons/fontawesome/discord-brands-solid.svg';
 import twitchBrandsSolid from '../../icons/fontawesome/twitch-brands-solid.svg';
 import youtubeBrandsSolid from '../../icons/fontawesome/youtube-brands-solid.svg';
 // biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
+import * as bindings from '../../utils/bindings';
 import * as styles from './city-name.module.scss';
+import { selectLocalizedName } from './select-localized-name';
 
 const socialPlatforms: {
   [K in CreatorSocialLink['platform']]: Readonly<{ name: string; logo: string; color: string }>;
@@ -19,7 +20,6 @@ const socialPlatforms: {
   youtube: { name: 'YouTube', logo: youtubeBrandsSolid, color: '#FF0000' }
 };
 
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: that's okay, but yeah.
 // biome-ignore lint/complexity/noExcessiveLinesPerFunction: splitting would make it too complex.
 export const MenuControlsCityName = memo(function MenuControlsCityNameBase({
   screenshot
@@ -34,28 +34,21 @@ export const MenuControlsCityName = memo(function MenuControlsCityNameBase({
 
   const [showTranslations, setShowTranslations] = useState(false);
 
-  const isCityNameTranslated =
-    modSettings.namesTranslationMode != 'disabled' &&
-    screenshot.cityNameLocale != null &&
-    !gameLocale.startsWith(screenshot.cityNameLocale);
+  const city = selectLocalizedName(modSettings.namesTranslationMode, gameLocale, {
+    value: screenshot.cityName,
+    latinized: screenshot.cityNameLatinized,
+    translated: screenshot.cityNameTranslated,
+    locale: screenshot.cityNameLocale
+  });
 
-  const isCreatorNameTranslated =
-    modSettings.namesTranslationMode != 'disabled' &&
-    screenshot.creator.creatorNameLocale != null &&
-    !gameLocale.startsWith(screenshot.creator.creatorNameLocale);
+  const creator = selectLocalizedName(modSettings.namesTranslationMode, gameLocale, {
+    value: screenshot.creator.creatorName ?? '',
+    latinized: screenshot.creator.creatorNameLatinized,
+    translated: screenshot.creator.creatorNameTranslated,
+    locale: screenshot.creator.creatorNameLocale
+  });
 
-  const cityName = isCityNameTranslated
-    ? modSettings.namesTranslationMode == 'transliterate'
-      ? screenshot.cityNameLatinized
-      : screenshot.cityNameTranslated
-    : screenshot.cityName;
-
-  const creatorName =
-    (isCreatorNameTranslated
-      ? modSettings.namesTranslationMode == 'transliterate'
-        ? screenshot.creator.creatorNameLatinized
-        : screenshot.creator.creatorNameTranslated
-      : screenshot.creator.creatorName) || 'anonymous';
+  const creatorName = creator.name || 'anonymous';
 
   const supportedSocials = screenshot.creator.socials
     .filter(link => supportedSocialPlatforms.includes(link.platform))
@@ -66,7 +59,7 @@ export const MenuControlsCityName = memo(function MenuControlsCityNameBase({
 
   return (
     <div className={styles.names}>
-      {(isCityNameTranslated || isCreatorNameTranslated) && (
+      {(city.isTranslated || creator.isTranslated) && (
         <div
           className={styles.namesTranslatedHint}
           // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
@@ -86,31 +79,27 @@ export const MenuControlsCityName = memo(function MenuControlsCityNameBase({
       <div className={styles.namesCity}>
         <Tooltip
           direction='right'
-          disabled={!isCityNameTranslated}
-          forceVisible={showTranslations && isCityNameTranslated}
+          disabled={!city.isTranslated}
+          forceVisible={showTranslations && city.isTranslated}
           tooltip={
             <div className={styles.namesTranslatedTooltip}>
               <strong>{screenshot.cityName}</strong>
-              {modSettings.namesTranslationMode == 'translate'
-                ? screenshot.cityNameLatinized
-                : screenshot.cityNameTranslated}
+              {city.alternate}
             </div>
           }>
-          <span>{cityName}</span>
+          <span>{city.name}</span>
         </Tooltip>
       </div>
 
       <div className={styles.namesCreator}>
         <Tooltip
-          direction={isCityNameTranslated ? 'down' : 'right'}
-          disabled={!isCreatorNameTranslated}
-          forceVisible={showTranslations && isCreatorNameTranslated}
+          direction={city.isTranslated ? 'down' : 'right'}
+          disabled={!creator.isTranslated}
+          forceVisible={showTranslations && creator.isTranslated}
           tooltip={
             <div className={styles.namesTranslatedTooltip}>
               <strong>{screenshot.creator.creatorName}</strong>
-              {modSettings.namesTranslationMode == 'translate'
-                ? screenshot.creator.creatorNameLatinized
-                : screenshot.creator.creatorNameTranslated}
+              {creator.alternate}
             </div>
           }>
           <span className={styles.namesCreatorBy}>

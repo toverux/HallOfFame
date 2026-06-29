@@ -1,10 +1,10 @@
 import classNames from 'classnames';
 import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { memo, type ReactElement } from 'react';
-import * as bindings from '../../bindings';
 // biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
+import * as bindings from '../../utils/bindings';
 // biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
 import * as styles from './panel-city-info.module.scss';
 import * as shared from './shared.module.scss';

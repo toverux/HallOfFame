@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
-import * as bindings from '../bindings';
 import { getClassesModule, selector } from '../utils';
+import * as bindings from '../utils/bindings';
 import * as styles from './menu-splashscreen.module.scss';
 
 const coMenuUiBackdropsStyles = getClassesModule(

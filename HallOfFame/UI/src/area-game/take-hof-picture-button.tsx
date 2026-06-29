@@ -1,10 +1,10 @@
 ﻿import { useLocalization } from 'cs2/l10n';
 import { Tooltip } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
-import * as bindings from '../bindings';
 // biome-ignore lint/correctness/noPrivateImports: svgs don't have @public annotations
 import sharePictureSrc from '../icons/uil/standard/share-picture.svg';
 import { logError } from '../utils';
+import * as bindings from '../utils/bindings';
 import * as styles from './take-hof-picture-button.module.scss';
 
 /**
