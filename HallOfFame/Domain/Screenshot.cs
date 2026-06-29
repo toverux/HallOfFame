@@ -126,6 +126,9 @@ internal record Screenshot {
     set;
   } = string.Empty;
 
+  // The server uses "favorite" terminology where the mod and UI use "like".
+  // Here the `[DecodeAlias]` carries the server field name and the property holds the mod/UI name.
+  // The same rename applies to LikingPercentage and IsLiked below.
   [DecodeAlias("favoritesCount")]
   internal int LikesCount {
     get;
@@ -147,6 +150,7 @@ internal record Screenshot {
     set;
   }
 
+  // The favorite/like rename; see the note on LikesCount above.
   [DecodeAlias("favoritingPercentage")]
   internal int LikingPercentage {
     get;
@@ -156,6 +160,7 @@ internal record Screenshot {
 
   /// <summary>
   /// Non-inherent property of screenshot only set on some endpoints.
+  /// The favorite/like rename applies here too; see the note on <see cref="LikesCount"/>.
   /// </summary>
   [DecodeAlias("__favorited")]
   internal bool IsLiked {

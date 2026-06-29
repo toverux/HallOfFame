@@ -18,12 +18,13 @@ internal record Creator {
     set;
   } = string.Empty;
 
+  // Null for anonymous creators.
   [DecodeAlias("creatorName")]
-  internal string CreatorName {
+  internal string? CreatorName {
     get;
     [UsedImplicitly]
     set;
-  } = string.Empty;
+  }
 
   [DecodeAlias("creatorNameLocale")]
   internal string? CreatorNameLocale {
