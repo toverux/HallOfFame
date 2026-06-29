@@ -1,4 +1,3 @@
-﻿- Official compatibility for game update 1.6.0f1.
-- Fixed wrong button color since 1.6.0f1.
-- Optimized performance of UI rendering.
-- Localization updates for Italian and Deutsch
+﻿- Fixed liking and unliking a screenshot sometimes not working ("button does nothing one or more times").
+- Fixed some rare potential bugs.
+- Many internal improvements on overall robustness and modularity for future maintainability.
