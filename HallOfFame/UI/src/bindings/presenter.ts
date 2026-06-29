@@ -2,6 +2,7 @@ import { trigger, useValue } from 'cs2/api';
 import type { LocalizedString } from 'cs2/l10n';
 import type { Dispatch, SetStateAction } from 'react';
 import type { Screenshot } from '../common';
+// noinspection ES6PreferShortImport Causes issue with Biome's import loop detection even if it's fine.
 import { createSingletonHook } from '../utils/singleton-hook';
 import { type ModSettings, useModSettings } from './common';
 import { lazyBindValue } from './lazy-value-binding';
@@ -32,11 +33,12 @@ interface ReadonlyMenuState {
   readonly forcedRefreshIndex: number;
 
   /**
-   * Whether a new screenshot is being loaded, and/or a screenshot image is being preloaded.
+   * Whether the slideshow can advance to another screenshot, i.e., no navigation is moving the
+   * cursor, and no image is being preloaded.
    *
-   * @default false
+   * @default true
    */
-  readonly isRefreshing: boolean;
+  readonly canAdvance: boolean;
 
   /**
    * Current screenshot data, or `null` when no data is available yet.
@@ -78,7 +80,7 @@ const hasPreviousScreenshot$ = lazyBindValue<boolean>(GROUP, 'hasPreviousScreens
 
 const forcedRefreshIndex$ = lazyBindValue<number>(GROUP, 'forcedRefreshIndex', 0);
 
-const isRefreshing$ = lazyBindValue<boolean>(GROUP, 'isRefreshing', false);
+const canAdvance$ = lazyBindValue<boolean>(GROUP, 'canAdvance', true);
 
 const screenshot$ = lazyBindValue<Screenshot | null>(GROUP, 'screenshot', null);
 
@@ -100,7 +102,7 @@ export function useHofMenuState(): [
 
   const enableMainMenuSlideshow = useValue(enableMainMenuSlideshow$());
   const hasPreviousScreenshot = useValue(hasPreviousScreenshot$());
-  const isRefreshing = useValue(isRefreshing$());
+  const canAdvance = useValue(canAdvance$());
   const forcedRefreshIndex = useValue(forcedRefreshIndex$());
   const screenshot = useValue(screenshot$());
   const error = useValue(error$());
@@ -111,7 +113,7 @@ export function useHofMenuState(): [
     isSlideshowEnabled: enableMainMenuSlideshow,
     hasPreviousScreenshot,
     forcedRefreshIndex,
-    isRefreshing,
+    canAdvance,
     imageUri: deriveImageUri(screenshot, settings),
     screenshot,
     error,
@@ -122,7 +124,7 @@ export function useHofMenuState(): [
 }
 
 /**
- * Subscribes to the current presenter screenshot, the entity backing the menu slideshow and the
+ * Subscribes to the current presenter screenshot, the entity backing the menu slideshow, and the
  * loading-screen background.
  */
 export function useScreenshot(): Screenshot | null {
@@ -153,22 +155,22 @@ export function useIsMenuVisible(): boolean {
 
 /**
  * Lightweight selector for the splashscreen, subscribing only to the current image URI and the
- * refreshing flag (plus the stable setter to report readiness for the next image), rather than
+ * can-advance flag (plus the stable setter to report readiness for the next image), rather than
  * every presenter binding.
  *
  * @see useIsSlideshowEnabled for the rationale.
  */
 export function useSplashscreenState(): readonly [
-  Readonly<{ imageUri: string | null; isRefreshing: boolean }>,
+  Readonly<{ imageUri: string | null; canAdvance: boolean }>,
   Dispatch<SetStateAction<SettableMenuState>>
 ] {
   const settings = useModSettings();
   const [, setMenuState] = useSingletonMenuState();
 
-  const isRefreshing = useValue(isRefreshing$());
+  const canAdvance = useValue(canAdvance$());
   const screenshot = useValue(screenshot$());
 
-  return [{ imageUri: deriveImageUri(screenshot, settings), isRefreshing }, setMenuState];
+  return [{ imageUri: deriveImageUri(screenshot, settings), canAdvance }, setMenuState];
 }
 
 export function previousScreenshot(): void {

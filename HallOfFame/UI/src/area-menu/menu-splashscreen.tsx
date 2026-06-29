@@ -22,7 +22,7 @@ const coMenuUiBackdropsStyles = getClassesModule(
  * And the cycle repeats.
  */
 export function MenuSplashscreen(): ReactElement {
-  const [{ imageUri, isRefreshing }, setMenuState] = bindings.useSplashscreenState();
+  const [{ imageUri, canAdvance }, setMenuState] = bindings.useSplashscreenState();
 
   // The current image displayed on the splashscreen.
   // Initialized at the start with the current Vanilla slideshow image, so there is a transparent
@@ -33,14 +33,14 @@ export function MenuSplashscreen(): ReactElement {
 
   const [isAnimatingFadeIn, setIsAnimatingFadeIn] = useState(false);
 
-  // When the menu is refreshing or the fade-in animation is in progress, we disable the ability to
-  // show the next image.
+  // The UI is ready for the next image once the slideshow can advance again (no navigation or image
+  // preload in progress), and the fade-in animation has finished.
   useEffect(() => {
     setMenuState(prev => ({
       ...prev,
-      isReadyForNextImage: !(isRefreshing || isAnimatingFadeIn)
+      isReadyForNextImage: canAdvance && !isAnimatingFadeIn
     }));
-  }, [isRefreshing, isAnimatingFadeIn]);
+  }, [canAdvance, isAnimatingFadeIn]);
 
   // When a new image is requested, we set it as the incoming image; this will trigger the fade-in
   // animation.

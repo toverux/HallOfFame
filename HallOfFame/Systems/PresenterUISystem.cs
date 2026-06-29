@@ -31,6 +31,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private ScreenshotExporter screenshotExporter = null!;
 
+  private NavigationState navigation = null!;
+
   private bool forceEnableMainMenuSlideshow;
 
   private ProxyAction forceEnableMainMenuSlideshowAction = null!;
@@ -41,7 +43,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private ValueBinding<int> forcedRefreshIndexBinding = null!;
 
-  private ValueBinding<bool> isRefreshingBinding = null!;
+  private ValueBinding<bool> canAdvanceBinding = null!;
 
   private ValueBinding<Screenshot?> screenshotBinding = null!;
 
@@ -74,15 +76,6 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// intentional.
   /// </summary>
   private GameMode previousGameMode = GameMode.MainMenu;
-
-  /// <summary>
-  /// Whether a navigation (next/previous) is currently moving the cursor, i.e., the displayed
-  /// screenshot may be changing.
-  /// This is narrower than <see cref="isRefreshingBinding"/>, which also stays set during the
-  /// background look-ahead prefetch, when the current screenshot is already settled and can still
-  /// be liked.
-  /// </summary>
-  private bool isNavigating;
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -119,6 +112,10 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
       this.screenshotExporter = new ScreenshotExporter(Mod.Api);
 
+      // The phase model behind the navigation lock: this system drives its transitions and mirrors
+      // its CanAdvance fact onto the binding below.
+      this.navigation = new NavigationState();
+
       this.forceEnableMainMenuSlideshowAction =
         Mod.Settings.GetAction(nameof(Settings.KeyBindingForceEnableMainMenuSlideshow));
 
@@ -141,10 +138,10 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         1
       );
 
-      this.isRefreshingBinding = new ValueBinding<bool>(
+      this.canAdvanceBinding = new ValueBinding<bool>(
         PresenterUISystem.BindingGroup,
-        "isRefreshing",
-        false
+        "canAdvance",
+        true
       );
 
       this.screenshotBinding = new ValueBinding<Screenshot?>(
@@ -170,7 +167,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.AddBinding(this.enableMainMenuSlideshowBinding);
       this.AddBinding(this.hasPreviousScreenshotBinding);
       this.AddBinding(this.forcedRefreshIndexBinding);
-      this.AddBinding(this.isRefreshingBinding);
+      this.AddBinding(this.canAdvanceBinding);
       this.AddBinding(this.screenshotBinding);
       this.AddBinding(this.errorBinding);
       this.AddBinding(this.isSavingBinding);
@@ -283,6 +280,14 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.EnableOrDisableEnableMainMenuSlideshowAction();
   }
 
+  /// <summary>
+  /// Pulls the current navigation phase and mirrors <see cref="NavigationState.CanAdvance"/> onto
+  /// its binding; called after every navigation transition.
+  /// </summary>
+  private void UpdateCanAdvanceBinding() {
+    this.canAdvanceBinding.Update(this.navigation.CanAdvance);
+  }
+
   #if DEBUG
   /// <summary>
   /// Debug/development method to load a screenshot by its ID.
@@ -291,8 +296,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
   internal async void LoadScreenshotById(string screenshotId) {
-    this.isNavigating = true;
-    this.isRefreshingBinding.Update(true);
+    this.navigation.Begin();
+    this.UpdateCanAdvanceBinding();
 
     NavigationStep step;
 
@@ -334,12 +339,13 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
   private async void PreviousScreenshot() {
-    if (this.isRefreshingBinding.value) {
+    if (!this.navigation.CanAdvance) {
       return;
     }
 
-    // Soft, binding-coupled guard kept in the system: the carousel would throw at the first
-    // screenshot, but here this is an expected no-op rather than an error.
+    // Soft guard kept in the system: the carousel would throw at the first screenshot, but here
+    // this is an expected no-op rather than an error.
+    // Checked before acquiring the lock so there is no acquire-then-release.
     if (!this.screenshotCarousel.HasPrevious) {
       Mod.Log.ErrorSilent(
         $"Menu: {nameof(this.PreviousScreenshot)}: " +
@@ -349,8 +355,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       return;
     }
 
-    this.isNavigating = true;
-    this.isRefreshingBinding.Update(true);
+    this.navigation.Begin();
+    this.UpdateCanAdvanceBinding();
 
     NavigationStep step;
 
@@ -374,12 +380,12 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// </summary>
   // ReSharper disable once AsyncVoidMethod
   private async void NextScreenshot() {
-    if (this.isRefreshingBinding.value) {
+    if (!this.navigation.CanAdvance) {
       return;
     }
 
-    this.isNavigating = true;
-    this.isRefreshingBinding.Update(true);
+    this.navigation.Begin();
+    this.UpdateCanAdvanceBinding();
 
     NavigationStep step;
 
@@ -398,7 +404,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// <summary>
   /// Mirrors a successful <see cref="NavigationStep"/> onto the UI and enacts the engine side
   /// effects the carousel decided but does not perform itself: it publishes the screenshot,
-  /// releases the navigation lock, records the view, and prefetches the next image.
+  /// settles the navigation lock, records the view, and prefetches the next image.
   /// This is the single apply path shared by next, previous, and (in debug) load-by-id.
   /// </summary>
   private void ApplyStep(NavigationStep step) {
@@ -407,9 +413,12 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.screenshotBinding.Update(step.Current);
     this.hasPreviousScreenshotBinding.Update();
 
-    // The cursor has settled and the binding mirrors it: navigation is done, so a like is safe even
-    // though the background prefetch below may keep the refresh flag set for a while.
-    this.isNavigating = false;
+    // The cursor has settled onto the new screenshot. When the step lands at the front of the
+    // window, the navigation settles into the background prefetch below, which keeps the lock held;
+    // otherwise (scrollback) the lock is released right away.
+    // Either way, the current screenshot is settled now, and a like is safe.
+    this.navigation.Settle(step.ShouldPreloadAhead);
+    this.UpdateCanAdvanceBinding();
 
     Mod.Log.Verbose(
       $"{nameof(PresenterUISystem)}: {nameof(this.ApplyStep)}: Displaying {step.Current} " +
@@ -426,11 +435,6 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       // which keeps the refresh lock held until the prefetch settles.
       this.PreloadAheadInBackground();
     }
-    else {
-      // Look-ahead screenshots are still in stock (the user scrolled back), so there is nothing to
-      // prefetch, and the refresh lock can be released right away.
-      this.isRefreshingBinding.Update(false);
-    }
   }
 
   /// <summary>
@@ -446,7 +450,8 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       Mod.Log.ErrorSilent(ex);
     }
     finally {
-      this.isRefreshingBinding.Update(false);
+      this.navigation.EndPrefetch();
+      this.UpdateCanAdvanceBinding();
     }
   }
 
@@ -479,14 +484,14 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Aborts an in-flight navigation after a failed load: applies the error policy and resets the
-  /// navigation/refresh flags, leaving the previously displayed screenshot in place.
+  /// Aborts an in-flight navigation after a failed load: applies the error policy and releases the
+  /// navigation lock, leaving the previously displayed screenshot in place.
   /// Callers return immediately afterward.
   /// </summary>
   private void AbortNavigation(Exception ex) {
     this.HandleDisplayLoadError(ex);
-    this.isNavigating = false;
-    this.isRefreshingBinding.Update(false);
+    this.navigation.Abort();
+    this.UpdateCanAdvanceBinding();
   }
 
   /// <summary>
@@ -495,10 +500,10 @@ internal sealed partial class PresenterUISystem : UISystemBase {
   /// sync.
   /// </summary>
   private void LikeScreenshot() {
-    // Unlike next/previous, liking is allowed during the background look-ahead prefetch: it acts on
-    // the already-settled current screenshot, so only an in-flight navigation (which may be
-    // swapping that screenshot out) must block it.
-    if (this.isNavigating) {
+    // Liking uses CanLike, broader than the CanAdvance guard on next/previous: it acts on the
+    // already-settled current screenshot, so it is blocked only mid-navigation, not during the
+    // background prefetch that follows (see NavigationState.CanLike).
+    if (!this.navigation.CanLike) {
       return;
     }
 
