@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
@@ -9,7 +10,6 @@ using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
 using HallOfFame.Domain;
-using HallOfFame.Http;
 using HallOfFame.Reflection;
 using HallOfFame.Services;
 using HallOfFame.Utils;
@@ -21,19 +21,19 @@ namespace HallOfFame.Systems;
 /// <summary>
 /// System in charge of handling the presentation of community images and the various interactions
 /// that come with it (next, prev, like, etc.).
+/// <para>
+/// It is the thin production adapter for <see cref="SlideshowConductor"/>: it registers the engine
+/// bindings, forwards engine events (trigger bindings, game-mode changes) to the conductor, and
+/// implements <see cref="IPresentationSink"/> to enact the engine side effects the conductor
+/// decides.
+/// All orchestration lives in the conductor; this shell keeps only binding plumbing, event
+/// forwarding, and the force-enable dev keybinding.
+/// </para>
 /// </summary>
-internal sealed partial class PresenterUISystem : UISystemBase {
+internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSink {
   private const string BindingGroup = "hallOfFame.presenter";
 
-  private ScreenshotCarousel screenshotCarousel = null!;
-
-  private ScreenshotLiker screenshotLiker = null!;
-
-  private ScreenshotExporter screenshotExporter = null!;
-
-  private ScreenshotViewRecorder screenshotViewRecorder = null!;
-
-  private NavigationState navigation = null!;
+  private SlideshowConductor conductor = null!;
 
   private bool forceEnableMainMenuSlideshow;
 
@@ -41,7 +41,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private GetterValueBinding<bool> enableMainMenuSlideshowBinding = null!;
 
-  private GetterValueBinding<bool> hasPreviousScreenshotBinding = null!;
+  private ValueBinding<bool> hasPreviousScreenshotBinding = null!;
 
   private ValueBinding<int> forcedRefreshIndexBinding = null!;
 
@@ -49,7 +49,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private ValueBinding<Screenshot?> screenshotBinding = null!;
 
-  private ValueBinding<LocalizedString?> errorBinding = null!;
+  private ValueBinding<LocalizedString?> loadErrorBinding = null!;
 
   private ValueBinding<bool> isSavingBinding = null!;
 
@@ -71,14 +71,6 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   private TriggerBinding reportScreenshotBinding = null!;
 
-  /// <summary>
-  /// Indicates the previous game mode to refresh the screenshot when the user returns to the main
-  /// menu.
-  /// Note: it is initialized with <see cref="GameMode.MainMenu"/> and not the default value, it is
-  /// intentional.
-  /// </summary>
-  private GameMode previousGameMode = GameMode.MainMenu;
-
   protected override void OnCreate() {
     base.OnCreate();
 
@@ -87,39 +79,15 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       // when needed.
       this.Enabled = false;
 
-      // The carousel owns the screenshot window and all loading; this system only drives it and
-      // mirrors the result onto the bindings. The resolution is read lazily, per load.
-      this.screenshotCarousel = new ScreenshotCarousel(
+      // The conductor owns all orchestration; this system only registers bindings, forwards events
+      // to it, and implements the sink it pushes engine effects through.
+      this.conductor = new SlideshowConductor(
         Mod.Api,
         this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>(),
-        () => Mod.Settings.ScreenshotResolution
-      );
-
-      // The Liker drives like/unlike on the carousel's current screenshot: it owns the optimistic
-      // update and the serialized network sync, reporting back through callbacks so this system
-      // keeps owning the UI binding and the (engine-bound) error dialog.
-      this.screenshotLiker = new ScreenshotLiker(
-        this.screenshotCarousel,
-        Mod.Api,
         Mod.Log,
-        screenshot => this.screenshotBinding.Update(screenshot),
-        ex => ErrorDialogManagerAccessor.Instance?.ShowError(
-          new ErrorDialog {
-            localizedTitle = "HallOfFame.Common.OOPS",
-            localizedMessage = ex.GetUserFriendlyMessage(),
-            actions = ErrorDialog.ActionBits.Continue
-          }
-        )
+        Mod.Settings,
+        this
       );
-
-      this.screenshotExporter = new ScreenshotExporter(Mod.Api);
-
-      // Records a view as a fire-and-forget side effect when a step lands on a new screenshot.
-      this.screenshotViewRecorder = new ScreenshotViewRecorder(Mod.Api, Mod.Log);
-
-      // The phase model behind the navigation lock: this system drives its transitions and mirrors
-      // its CanAdvance fact onto the binding below.
-      this.navigation = new NavigationState();
 
       this.forceEnableMainMenuSlideshowAction =
         Mod.Settings.GetAction(nameof(Settings.KeyBindingForceEnableMainMenuSlideshow));
@@ -131,10 +99,10 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         () => this.forceEnableMainMenuSlideshow || Mod.Settings.EnableMainMenuSlideshow
       );
 
-      this.hasPreviousScreenshotBinding = new GetterValueBinding<bool>(
+      this.hasPreviousScreenshotBinding = new ValueBinding<bool>(
         PresenterUISystem.BindingGroup,
         "hasPreviousScreenshot",
-        () => this.screenshotCarousel.HasPrevious
+        false
       );
 
       this.forcedRefreshIndexBinding = new ValueBinding<int>(
@@ -156,9 +124,9 @@ internal sealed partial class PresenterUISystem : UISystemBase {
         new ScreenshotValueWriter()
       );
 
-      this.errorBinding = new ValueBinding<LocalizedString?>(
+      this.loadErrorBinding = new ValueBinding<LocalizedString?>(
         PresenterUISystem.BindingGroup,
-        "error",
+        "loadError",
         null,
         new ValueWriter<LocalizedString>().Nullable()
       );
@@ -174,7 +142,7 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.AddBinding(this.forcedRefreshIndexBinding);
       this.AddBinding(this.canAdvanceBinding);
       this.AddBinding(this.screenshotBinding);
-      this.AddBinding(this.errorBinding);
+      this.AddBinding(this.loadErrorBinding);
       this.AddBinding(this.isSavingBinding);
 
       // INPUT ACTION BINDINGS
@@ -208,34 +176,36 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       this.AddBinding(this.toggleMenuInputActionBinding);
 
       // TRIGGER BINDINGS
+      // Fire-and-forget edges: the conductor entry points are designed never to throw, so the
+      // discarded task is the single async boundary between the engine triggers and the conductor.
       this.previousScreenshotBinding = new TriggerBinding(
         PresenterUISystem.BindingGroup,
         "previousScreenshot",
-        this.PreviousScreenshot
+        () => { _ = this.conductor.Previous(); }
       );
 
       this.nextScreenshotBinding = new TriggerBinding(
         PresenterUISystem.BindingGroup,
         "nextScreenshot",
-        this.NextScreenshot
+        () => { _ = this.conductor.Next(); }
       );
 
       this.likeScreenshotBinding = new TriggerBinding(
         PresenterUISystem.BindingGroup,
         "likeScreenshot",
-        this.LikeScreenshot
+        () => { _ = this.conductor.Like(); }
       );
 
       this.saveScreenshotBinding = new TriggerBinding(
         PresenterUISystem.BindingGroup,
         "saveScreenshot",
-        this.SaveScreenshot
+        () => { _ = this.conductor.Save(); }
       );
 
       this.reportScreenshotBinding = new TriggerBinding(
         PresenterUISystem.BindingGroup,
         "reportScreenshot",
-        this.ReportScreenshot
+        () => { _ = this.conductor.Report(); }
       );
 
       this.AddBinding(this.previousScreenshotBinding);
@@ -268,56 +238,91 @@ internal sealed partial class PresenterUISystem : UISystemBase {
 
   /// <summary>
   /// Lifecycle method used for changing the current screenshot when the user returns to the main
-  /// menu.
+  /// menu: forwards the game-mode change to the conductor (which owns the refresh decision) and
+  /// re-gates the force-enable keybinding.
   /// </summary>
   protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode) {
-    // The condition serves two purposes:
-    // 1. Call NextScreenshot when the user returns to the main menu from another game mode.
-    // 2. Avoid potentially repeating the NextScreenshot call when the game boots and mods are
-    //    initialized before the first game mode is set, this rarely happens, but it's possible.
-    //    Note: in later versions of the game, this seems extremely unlikely in normal setups.
-    if (mode is GameMode.MainMenu && this.previousGameMode is not GameMode.MainMenu) {
-      this.forcedRefreshIndexBinding.Update(this.forcedRefreshIndexBinding.value + 1);
-    }
-
-    this.previousGameMode = mode;
+    this.conductor.OnGameModeChanged(mode);
 
     this.EnableOrDisableEnableMainMenuSlideshowAction();
   }
 
-  /// <summary>
-  /// Pulls the current navigation phase and mirrors <see cref="NavigationState.CanAdvance"/> onto
-  /// its binding; called after every navigation transition.
-  /// </summary>
-  private void UpdateCanAdvanceBinding() {
-    this.canAdvanceBinding.Update(this.navigation.CanAdvance);
-  }
-
   #if DEBUG
   /// <summary>
-  /// Debug/development method to load a screenshot by its ID.
-  /// It appends to and advances the carousel like any other load, so the displayed screenshot stays
-  /// consistent with the carousel's cursor.
+  /// Debug/development method to load a screenshot by its ID, forwarded to the conductor.
   /// </summary>
-  // ReSharper disable once AsyncVoidMethod
-  internal async void LoadScreenshotById(string screenshotId) {
-    this.navigation.Begin();
-    this.UpdateCanAdvanceBinding();
-
-    NavigationStep step;
-
-    try {
-      step = await this.screenshotCarousel.LoadById(screenshotId);
-    }
-    catch (Exception ex) {
-      this.AbortNavigation(ex);
-
-      return;
-    }
-
-    this.ApplyStep(step);
+  internal void LoadScreenshotById(string screenshotId) {
+    _ = this.conductor.LoadById(screenshotId);
   }
   #endif
+
+  void IPresentationSink.PublishScreenshot(Screenshot? screenshot) {
+    this.screenshotBinding.Update(screenshot);
+  }
+
+  void IPresentationSink.PublishLoadError(LocalizedString? error) {
+    this.loadErrorBinding.Update(error);
+  }
+
+  void IPresentationSink.SetCanAdvance(bool canAdvance) {
+    this.canAdvanceBinding.Update(canAdvance);
+  }
+
+  void IPresentationSink.SetHasPrevious(bool hasPrevious) {
+    this.hasPreviousScreenshotBinding.Update(hasPrevious);
+  }
+
+  void IPresentationSink.SetSaving(bool isSaving) {
+    this.isSavingBinding.Update(isSaving);
+  }
+
+  void IPresentationSink.ShowError(LocalizedString message) {
+    ErrorDialogManagerAccessor.Instance?.ShowError(
+      new ErrorDialog {
+        localizedTitle = "HallOfFame.Common.OOPS",
+        localizedMessage = message,
+        actions = ErrorDialog.ActionBits.Continue
+      }
+    );
+  }
+
+  Task<bool> IPresentationSink.ConfirmReport(Screenshot screenshot) {
+    var confirmation = new TaskCompletionSource<bool>();
+
+    var dialog = new ConfirmationDialog(
+      new LocalizedString(
+        id: "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
+        value: null,
+        args: new Dictionary<string, ILocElement> {
+          { "CITY_NAME", LocalizedString.Value(screenshot.CityName) },
+          { "AUTHOR_NAME", LocalizedString.Value(screenshot.Creator?.CreatorName) }
+        }
+      ),
+      LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]"),
+      LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]"),
+      LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel")
+    );
+
+    GameManager.instance.userInterface.appBindings
+      .ShowConfirmationDialog(dialog, choice => confirmation.SetResult(choice is 0));
+
+    return confirmation.Task;
+  }
+
+  void IPresentationSink.ShowReportSuccess() {
+    var successDialog = new MessageDialog(
+      LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]"),
+      LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]"),
+      LocalizedString.IdWithFallback("Common.CLOSE", "Close")
+    );
+
+    GameManager.instance.userInterface.appBindings
+      .ShowMessageDialog(successDialog, _ => { });
+  }
+
+  void IPresentationSink.RequestRefresh() {
+    this.forcedRefreshIndexBinding.Update(this.forcedRefreshIndexBinding.value + 1);
+  }
 
   private void OnSettingsApplied(Setting _) {
     this.enableMainMenuSlideshowBinding.Update();
@@ -336,270 +341,4 @@ internal sealed partial class PresenterUISystem : UISystemBase {
       Mod.Settings.EnableMainMenuSlideshow is false &&
       GameManager.instance.gameMode is GameMode.MainMenu;
   }
-
-  /// <summary>
-  /// Switches the current screenshot to the previous one, re-preloading its image.
-  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
-  /// and it must be designed to never throw.
-  /// </summary>
-  // ReSharper disable once AsyncVoidMethod
-  private async void PreviousScreenshot() {
-    if (!this.navigation.CanAdvance) {
-      return;
-    }
-
-    // Soft guard kept in the system: the carousel would throw at the first screenshot, but here
-    // this is an expected no-op rather than an error.
-    // Checked before acquiring the lock so there is no acquire-then-release.
-    if (!this.screenshotCarousel.HasPrevious) {
-      Mod.Log.ErrorSilent(
-        $"Menu: {nameof(this.PreviousScreenshot)}: " +
-        $"Cannot go back, already at the first screenshot."
-      );
-
-      return;
-    }
-
-    this.navigation.Begin();
-    this.UpdateCanAdvanceBinding();
-
-    NavigationStep step;
-
-    try {
-      step = await this.screenshotCarousel.Previous();
-    }
-    catch (Exception ex) {
-      this.AbortNavigation(ex);
-
-      return;
-    }
-
-    this.ApplyStep(step);
-  }
-
-  /// <summary>
-  /// Advances to the next screenshot, loading a fresh one when there is no look-ahead in stock,
-  /// then prefetches the following one in the background.
-  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
-  /// and it should be designed to never throw.
-  /// </summary>
-  // ReSharper disable once AsyncVoidMethod
-  private async void NextScreenshot() {
-    if (!this.navigation.CanAdvance) {
-      return;
-    }
-
-    this.navigation.Begin();
-    this.UpdateCanAdvanceBinding();
-
-    NavigationStep step;
-
-    try {
-      step = await this.screenshotCarousel.Next();
-    }
-    catch (Exception ex) {
-      this.AbortNavigation(ex);
-
-      return;
-    }
-
-    this.ApplyStep(step);
-  }
-
-  /// <summary>
-  /// Mirrors a successful <see cref="NavigationStep"/> onto the UI and enacts the engine side
-  /// effects the carousel decided but does not perform itself: it publishes the screenshot,
-  /// settles the navigation lock, records the view, and prefetches the next image.
-  /// This is the single apply path shared by next, previous, and (in debug) load-by-id.
-  /// </summary>
-  private void ApplyStep(NavigationStep step) {
-    // The screenshot is now displayed, so clear any error left over from a prior failed load.
-    this.errorBinding.Update(null);
-    this.screenshotBinding.Update(step.Current);
-    this.hasPreviousScreenshotBinding.Update();
-
-    // The cursor has settled onto the new screenshot. When the step lands at the front of the
-    // window, the navigation settles into the background prefetch below, which keeps the lock held;
-    // otherwise (scrollback) the lock is released right away.
-    // Either way, the current screenshot is settled now, and a like is safe.
-    this.navigation.Settle(step.ShouldPreloadAhead);
-    this.UpdateCanAdvanceBinding();
-
-    Mod.Log.Verbose(
-      $"{nameof(PresenterUISystem)}: {nameof(this.ApplyStep)}: Displaying {step.Current} " +
-      $"(carousel idx {this.screenshotCarousel.CurrentIndex}/" +
-      $"{this.screenshotCarousel.Count - 1})."
-    );
-
-    if (step.ViewedScreenshotId is { } viewedScreenshotId) {
-      _ = this.screenshotViewRecorder.RecordView(viewedScreenshotId);
-    }
-
-    if (step.ShouldPreloadAhead) {
-      // We are viewing the front of the window: prepare the next screenshot in the background,
-      // which keeps the refresh lock held until the prefetch settles.
-      this.PreloadAheadInBackground();
-    }
-  }
-
-  /// <summary>
-  /// Fire-and-forget background look-ahead prefetch; designed never to throw.
-  /// Releases the refresh lock in its finally, so the lock stays held throughout the prefetch.
-  /// </summary>
-  // ReSharper disable once AsyncVoidMethod
-  private async void PreloadAheadInBackground() {
-    try {
-      await this.screenshotCarousel.PreloadAhead();
-    }
-    catch (Exception ex) {
-      Mod.Log.ErrorSilent(ex);
-    }
-    finally {
-      this.navigation.EndPrefetch();
-      this.UpdateCanAdvanceBinding();
-    }
-  }
-
-  /// <summary>
-  /// Applies the error policy for a failed display-load (next/previous/load-by-id): a network error
-  /// is surfaced to the user via the error binding, anything else is logged as recoverable.
-  /// Background prefetch errors are handled separately (logged silently) by their fire-and-forget
-  /// wrapper.
-  /// </summary>
-  private void HandleDisplayLoadError(Exception ex) {
-    if (PresenterUISystem.IsNetworkError(ex)) {
-      this.errorBinding.Update(ex.GetUserFriendlyMessage());
-    }
-    else {
-      Mod.Log.ErrorRecoverable(ex);
-    }
-  }
-
-  /// <summary>
-  /// Aborts an in-flight navigation after a failed load: applies the error policy and releases the
-  /// navigation lock, leaving the previously displayed screenshot in place.
-  /// Callers return immediately afterward.
-  /// </summary>
-  private void AbortNavigation(Exception ex) {
-    this.HandleDisplayLoadError(ex);
-    this.navigation.Abort();
-    this.UpdateCanAdvanceBinding();
-  }
-
-  /// <summary>
-  /// Toggles the liked status of the current screenshot, delegating to the
-  /// <see cref="screenshotLiker"/> which applies an optimistic UI update and serializes the network
-  /// sync.
-  /// </summary>
-  private void LikeScreenshot() {
-    // Liking uses CanLike, broader than the CanAdvance guard on next/previous: it acts on the
-    // already-settled current screenshot, so it is blocked only mid-navigation, not during the
-    // background prefetch that follows (see NavigationState.CanLike).
-    if (!this.navigation.CanLike) {
-      return;
-    }
-
-    // Fire-and-forget: the Liker owns the optimistic update, the serialized sync, and its own error
-    // handling, so it is designed never to throw.
-    _ = this.screenshotLiker.Toggle();
-  }
-
-  /// <summary>
-  /// Saves the current screenshot 4K image to the disk, to the path specified in the mod settings.
-  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
-  /// and it should be designed to never throw.
-  /// </summary>
-  // ReSharper disable once AsyncVoidMethod
-  private async void SaveScreenshot() {
-    var screenshot = this.screenshotBinding.value;
-
-    if (this.isSavingBinding.value || screenshot is null) {
-      return;
-    }
-
-    try {
-      this.isSavingBinding.Update(true);
-
-      var filePath = await this.screenshotExporter.Export(
-        screenshot,
-        Mod.Settings.CreatorsScreenshotSaveDirectory
-      );
-
-      Mod.Log.Info($"{nameof(PresenterUISystem)}: Saved {screenshot} image to {filePath}.");
-    }
-    catch (Exception ex) when (PresenterUISystem.IsNetworkError(ex)) {
-      Mod.Log.Error(ex.GetUserFriendlyMessage().Render());
-    }
-    catch (Exception ex) {
-      Mod.Log.ErrorRecoverable(ex);
-    }
-    finally {
-      this.isSavingBinding.Update(false);
-    }
-  }
-
-  private void ReportScreenshot() {
-    var screenshot = this.screenshotBinding.value;
-
-    if (screenshot is null) {
-      throw new ArgumentNullException(nameof(this.screenshotBinding));
-    }
-
-    var dialog = new ConfirmationDialog(
-      new LocalizedString(
-        "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
-        "Report screenshot {CITY_NAME} by {AUTHOR_NAME}?",
-        new Dictionary<string, ILocElement> {
-          { "CITY_NAME", LocalizedString.Value(screenshot.CityName) },
-          { "AUTHOR_NAME", LocalizedString.Value(screenshot.Creator?.CreatorName) }
-        }
-      ),
-      LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]"),
-      LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]"),
-      LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel")
-    );
-
-    GameManager.instance.userInterface.appBindings
-      .ShowConfirmationDialog(dialog, OnConfirmOrCancel);
-
-    return;
-
-    async void OnConfirmOrCancel(int choice) {
-      try {
-        if (choice is not 0) {
-          return;
-        }
-
-        await Mod.Api.ReportScreenshot(screenshot.Id);
-
-        var successDialog = new MessageDialog(
-          LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]"),
-          LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]"),
-          LocalizedString.IdWithFallback("Common.CLOSE", "Close")
-        );
-
-        GameManager.instance.userInterface.appBindings
-          .ShowMessageDialog(successDialog, _ => { });
-
-        this.forcedRefreshIndexBinding.Update(this.forcedRefreshIndexBinding.value + 1);
-      }
-      catch (HttpException ex) {
-        ErrorDialogManagerAccessor.Instance?.ShowError(
-          new ErrorDialog {
-            localizedTitle = "HallOfFame.Common.OOPS",
-            localizedMessage = ex.GetUserFriendlyMessage(),
-            actions = ErrorDialog.ActionBits.Continue
-          }
-        );
-      }
-      catch (Exception ex) {
-        Mod.Log.ErrorRecoverable(ex);
-      }
-    }
-  }
-
-  private static bool IsNetworkError(Exception ex) =>
-    ex
-      is HttpException
-      or ImagePreloadFailedException;
 }

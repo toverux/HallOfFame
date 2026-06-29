@@ -66,12 +66,12 @@ export function MenuControlsContent(): ReactElement {
     [setMenuState]
   );
 
-  if (menuState.error) {
+  if (menuState.loadError) {
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
       <div className={styles.controls}>
         <MenuControlsError
-          error={menuState.error}
+          error={menuState.loadError}
           isReadyForNextImage={menuState.isReadyForNextImage}
         />
       </div>

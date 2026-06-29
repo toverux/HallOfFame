@@ -39,6 +39,16 @@ from `CSII_MANAGEDPATH` (the game's `Managed` folder). Pure managed assemblies l
 `CreatorStats`, ...) and pure managed structs like `Game.UI.Localization.LocalizedString` are
 test-constructible (the test project has `InternalsVisibleTo`).
 
+### Caveat: engine enums in `[InlineData]` break discovery
+
+An engine type loads in a test **body** (the probe is active for executing code) but **not** when
+xUnit parses an attribute's argument blob. So a `[Theory]` whose `[InlineData(...)]` embeds an
+engine-assembly enum value (e.g. `GameMode.MainMenu` from `Game.dll`) fails at **discovery** with
+`System.IO.FileNotFoundException: Could not load file or assembly 'Game'`: xUnit reads the blob via
+`CustomAttributeData` reflection, a path `GameAssemblyResolver` does not cover. Use a single
+`[Fact]` with the enum values inside the method body instead, e.g.
+`Assert.True(SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.Game, GameMode.MainMenu))`.
+
 ## What fails off-engine, and the seam to use instead
 
 The probe cannot save you from code that makes Unity **native** calls or loads engine-only types.

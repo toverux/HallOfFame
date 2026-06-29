@@ -1,4 +1,5 @@
 using System;
+using Game.UI.Localization;
 
 namespace HallOfFame.Logging;
 
@@ -31,9 +32,17 @@ internal interface IModLog {
   void Warn(Exception exception, string message);
 
   /// <summary>
-  /// Logs an error message that is also surfaced to the user in the game UI.
+  /// Logs an error message also surfaced to the user in the game UI.
   /// </summary>
   void Error(string message);
+
+  /// <summary>
+  /// Same as <see cref="Error(string)"/> but takes a <see cref="LocalizedString"/> that the
+  /// implementation renders to display text.
+  /// This keeps the (engine-bound) rendering inside the production logger, so a caller that owns a
+  /// user-friendly <see cref="LocalizedString"/> can log it without rendering off-engine itself.
+  /// </summary>
+  void Error(LocalizedString message);
 
   /// <summary>
   /// Logs an error message without surfacing it to the user, regardless of the underlying logger's

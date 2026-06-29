@@ -46,9 +46,11 @@ interface ReadonlyMenuState {
   readonly screenshot: Screenshot | null;
 
   /**
-   * Error that occurred while loading the screenshot, API request or image preloading included.
+   * Error that occurred while loading a screenshot to display (the random fetch or its image
+   * preloading) on next/previous. Like, report, and save failures are surfaced through a dialog,
+   * not this binding.
    */
-  readonly error: LocalizedString | null;
+  readonly loadError: LocalizedString | null;
 
   /**
    * Whether a save-image-to-disk operation is going on.
@@ -84,7 +86,7 @@ const canAdvance$ = lazyBindValue<boolean>(GROUP, 'canAdvance', true);
 
 const screenshot$ = lazyBindValue<Screenshot | null>(GROUP, 'screenshot', null);
 
-const error$ = lazyBindValue<LocalizedString | null>(GROUP, 'error', null);
+const loadError$ = lazyBindValue<LocalizedString | null>(GROUP, 'loadError', null);
 
 const isSaving$ = lazyBindValue<boolean>(GROUP, 'isSaving', false);
 
@@ -105,7 +107,7 @@ export function useHofMenuState(): [
   const canAdvance = useValue(canAdvance$());
   const forcedRefreshIndex = useValue(forcedRefreshIndex$());
   const screenshot = useValue(screenshot$());
-  const error = useValue(error$());
+  const loadError = useValue(loadError$());
   const isSaving = useValue(isSaving$());
 
   const menuState: ReadonlyMenuState & SettableMenuState = {
@@ -116,7 +118,7 @@ export function useHofMenuState(): [
     canAdvance,
     imageUri: deriveImageUri(screenshot, settings),
     screenshot,
-    error,
+    loadError,
     isSaving
   };
 

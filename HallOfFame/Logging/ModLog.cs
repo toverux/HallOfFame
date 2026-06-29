@@ -1,5 +1,6 @@
 using System;
 using Colossal.Logging;
+using Game.UI.Localization;
 using HallOfFame.Utils;
 
 namespace HallOfFame.Logging;
@@ -25,6 +26,9 @@ internal sealed class ModLog(ILog log) : IModLog {
 
   public void Error(string message) =>
     log.Error(message);
+
+  public void Error(LocalizedString message) =>
+    log.Error(message.Render());
 
   public void ErrorSilent(string message) =>
     this.Silently(() => log.Error(message));

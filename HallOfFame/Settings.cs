@@ -40,7 +40,7 @@ namespace HallOfFame;
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingNext), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingLike), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
-public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore {
+public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore, IPresenterSettings {
   private const string GroupYourProfile = "YourProfile";
 
   private const string GroupUIPreferences = "UIPreferences";
@@ -515,6 +515,14 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore 
   /// <see cref="ICreatorIdentityStore"/> seam.
   /// </summary>
   void ICreatorIdentityStore.Save() => this.ApplyAndSave();
+
+  /// <summary>
+  /// Exposes the save directory to <see cref="SlideshowConductor"/> through the
+  /// <see cref="IPresenterSettings"/> seam.
+  /// <see cref="IPresenterSettings.ScreenshotResolution"/> is satisfied directly by the public
+  /// <see cref="ScreenshotResolution"/> property.
+  /// </summary>
+  string IPresenterSettings.SaveDirectory => this.CreatorsScreenshotSaveDirectory;
 
   public Settings(IMod mod) : base(mod) {
     this.SetDefaults();
