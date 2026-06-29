@@ -8,7 +8,6 @@ using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Menu;
 using HallOfFame.Domain;
-using HallOfFame.Http;
 using HallOfFame.Services;
 using HallOfFame.Utils;
 
@@ -19,11 +18,9 @@ namespace HallOfFame.Systems;
 /// those stats when the mod starts.
 /// </summary>
 internal sealed partial class StatsNotificationSystem : GameSystemBase {
-  private readonly CreatorStatsService creatorStatsService = new(Mod.Api);
-
   private NotificationUISystem? notificationUISystem;
 
-  private bool notificationShownOrLoading;
+  private StatsNotifier statsNotifier = null!;
 
   private string thousandsSeparator = string.Empty;
 
@@ -40,9 +37,17 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
         NumberFormatInfo.InvariantInfo.NumberGroupSeparator
       );
 
+      // The notifier owns the fetch/threshold/error lifecycle; this system keeps owning the
+      // engine-bound notification it builds through the callback.
+      this.statsNotifier = new StatsNotifier(
+        Mod.Api,
+        Mod.Log,
+        this.ShowStatsNotification
+      );
+
       // If the mod loaded *after* the main menu has already loaded, show the notification.
       if (GameManager.instance.gameMode is GameMode.MainMenu) {
-        this.LoadAndShowNotification();
+        _ = this.statsNotifier.ShowIfNotable();
       }
     }
     catch (Exception ex) {
@@ -65,7 +70,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
     base.OnGameLoadingComplete(purpose, mode);
 
     if (mode is GameMode.MainMenu) {
-      this.LoadAndShowNotification();
+      _ = this.statsNotifier.ShowIfNotable();
     }
   }
 
@@ -74,65 +79,40 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
   }
 
   /// <summary>
-  /// Load the creator stats and display a notification with the stats.
-  /// The method is `async void` because it is designed to be called in a fire-and-forget manner,
-  /// and it should be designed to never throw.
+  /// Builds and shows the creator-stats notification for the given notable stats, wiring its click
+  /// to open the detailed stats dialog.
+  /// This is the engine-bound presentation the <see cref="StatsNotifier"/> drives through its
+  /// callback.
   /// </summary>
-  private async void LoadAndShowNotification() {
-    try {
-      if (this.notificationShownOrLoading) {
-        return;
-      }
-
-      this.notificationShownOrLoading = true;
-
-      if (this.notificationUISystem is null) {
-        Mod.Log.ErrorSilent($"{nameof(NotificationUISystem)} is null.");
-
-        return;
-      }
-
-      var stats = await this.creatorStatsService.GetNotableStats();
-
-      if (stats is null) {
-        return;
-      }
-
-      this.notificationUISystem.AddOrUpdateNotification(
-        "HallOfFame.CreatorStats",
-        "Menu.NOTIFICATION_TITLE[HallOfFame.CreatorStats]",
-        new LocalizedString(
-          "Menu.NOTIFICATION_DESCRIPTION[HallOfFame.CreatorStats]",
-          "",
-          new Dictionary<string, ILocElement> {
-            { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
-            { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
-            { "LIKES_COUNT", this.LocalizeNumber(stats.LikesCount) }
-          }
-        ),
-        "coui://ui-mods/images/stats-notification.svg",
-        onClicked: () => {
-          this.ShowStatsDialog(stats);
-
-          this.notificationUISystem.RemoveNotification("HallOfFame.CreatorStats");
+  private void ShowStatsNotification(CreatorStats stats) {
+    this.notificationUISystem!.AddOrUpdateNotification(
+      "HallOfFame.CreatorStats",
+      "Menu.NOTIFICATION_TITLE[HallOfFame.CreatorStats]",
+      new LocalizedString(
+        id: "Menu.NOTIFICATION_DESCRIPTION[HallOfFame.CreatorStats]",
+        value: null,
+        args: new Dictionary<string, ILocElement> {
+          { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
+          { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
+          { "LIKES_COUNT", this.LocalizeNumber(stats.LikesCount) }
         }
-      );
-    }
-    catch (HttpException ex) {
-      Mod.Log.ErrorSilent(ex);
-    }
-    catch (Exception ex) {
-      Mod.Log.ErrorRecoverable(ex);
-    }
+      ),
+      "coui://ui-mods/images/stats-notification.svg",
+      onClicked: () => {
+        this.ShowStatsDialog(stats);
+
+        this.notificationUISystem!.RemoveNotification("HallOfFame.CreatorStats");
+      }
+    );
   }
 
   private void ShowStatsDialog(CreatorStats stats) {
     var successDialog = new MessageDialog(
       LocalizedString.Id("HallOfFame.Systems.StatsNotification.STATS_DIALOG[Title]"),
       new LocalizedString(
-        "HallOfFame.Systems.StatsNotification.STATS_DIALOG[Message]",
-        "",
-        new Dictionary<string, ILocElement> {
+        id: "HallOfFame.Systems.StatsNotification.STATS_DIALOG[Message]",
+        value: null,
+        args: new Dictionary<string, ILocElement> {
           { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
           { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
           { "UNIQUE_VIEWS_COUNT", this.LocalizeNumber(stats.UniqueViewsCount) },

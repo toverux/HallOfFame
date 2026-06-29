@@ -24,7 +24,7 @@ build and the mod post-processor are skipped (the tests need neither). Prefer it
 
 ## Where testable logic goes
 
-- Put logic you want to test in plain `Services/` classes (e.g. `CreatorStatsService`,
+- Put logic you want to test in plain `Services/` classes (e.g. `StatsNotifier`,
   `ScreenshotCarousel`). These construct fine off-engine.
 - ECS `Systems/` **cannot be instantiated off-engine** at all. When a system holds logic worth
   testing, extract it into a plain `Services/` class and have the system delegate to it.
