@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Colossal.Serialization.Entities;
 using Game;
@@ -88,14 +87,11 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
     this.notificationUISystem!.AddOrUpdateNotification(
       "HallOfFame.CreatorStats",
       "Menu.NOTIFICATION_TITLE[HallOfFame.CreatorStats]",
-      new LocalizedString(
-        id: "Menu.NOTIFICATION_DESCRIPTION[HallOfFame.CreatorStats]",
-        value: null,
-        args: new Dictionary<string, ILocElement> {
-          { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
-          { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
-          { "LIKES_COUNT", this.LocalizeNumber(stats.LikesCount) }
-        }
+      LocalizedString.Id(
+        "Menu.NOTIFICATION_DESCRIPTION[HallOfFame.CreatorStats]",
+        ("SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount)),
+        ("VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount)),
+        ("LIKES_COUNT", this.LocalizeNumber(stats.LikesCount))
       ),
       "coui://ui-mods/images/stats-notification.svg",
       onClicked: () => {
@@ -109,18 +105,15 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
   private void ShowStatsDialog(CreatorStats stats) {
     var successDialog = new MessageDialog(
       LocalizedString.Id("HallOfFame.Systems.StatsNotification.STATS_DIALOG[Title]"),
-      new LocalizedString(
-        id: "HallOfFame.Systems.StatsNotification.STATS_DIALOG[Message]",
-        value: null,
-        args: new Dictionary<string, ILocElement> {
-          { "SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount) },
-          { "VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount) },
-          { "UNIQUE_VIEWS_COUNT", this.LocalizeNumber(stats.UniqueViewsCount) },
-          { "LIKES_COUNT", this.LocalizeNumber(stats.LikesCount) },
-          { "TOTAL_CREATORS_COUNT", this.LocalizeNumber(stats.AllCreatorsCount) },
-          { "TOTAL_SCREENSHOTS_COUNT", this.LocalizeNumber(stats.AllScreenshotsCount) },
-          { "TOTAL_VIEWS_COUNT", this.LocalizeNumber(stats.AllViewsCount) }
-        }
+      LocalizedString.Id(
+        "HallOfFame.Systems.StatsNotification.STATS_DIALOG[Message]",
+        ("SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount)),
+        ("VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount)),
+        ("UNIQUE_VIEWS_COUNT", this.LocalizeNumber(stats.UniqueViewsCount)),
+        ("LIKES_COUNT", this.LocalizeNumber(stats.LikesCount)),
+        ("TOTAL_CREATORS_COUNT", this.LocalizeNumber(stats.AllCreatorsCount)),
+        ("TOTAL_SCREENSHOTS_COUNT", this.LocalizeNumber(stats.AllScreenshotsCount)),
+        ("TOTAL_VIEWS_COUNT", this.LocalizeNumber(stats.AllViewsCount))
       ),
       LocalizedString.IdWithFallback("Common.CLOSE", "Close")
     );

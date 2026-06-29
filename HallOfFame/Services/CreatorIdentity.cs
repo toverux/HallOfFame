@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Game.UI.Localization;
@@ -321,14 +320,11 @@ internal sealed class CreatorIdentity(
 
       var isAnonymous = string.IsNullOrEmpty(creator.CreatorName);
 
-      return new LocalizedString(
-        id: isAnonymous
+      return LocalizedString.Id(
+        isAnonymous
           ? "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]"
           : "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]",
-        value: null,
-        args: new Dictionary<string, ILocElement> {
-          { "CREATOR_NAME", LocalizedString.Value(creator.CreatorName) }
-        }
+        ("CREATOR_NAME", LocalizedString.Value(creator.CreatorName))
       );
     }
     // Let the caller ignore superseded calls; this must precede the generic catch so the latter

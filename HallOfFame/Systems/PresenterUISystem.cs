@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
@@ -290,13 +289,10 @@ internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSin
     var confirmation = new TaskCompletionSource<bool>();
 
     var dialog = new ConfirmationDialog(
-      new LocalizedString(
-        id: "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
-        value: null,
-        args: new Dictionary<string, ILocElement> {
-          { "CITY_NAME", LocalizedString.Value(screenshot.CityName) },
-          { "AUTHOR_NAME", LocalizedString.Value(screenshot.Creator?.CreatorName) }
-        }
+      LocalizedString.Id(
+        "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
+        ("CITY_NAME", LocalizedString.Value(screenshot.CityName)),
+        ("AUTHOR_NAME", LocalizedString.Value(screenshot.Creator?.CreatorName))
       ),
       LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]"),
       LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]"),
