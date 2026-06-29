@@ -5,16 +5,12 @@ using System.Threading.Tasks;
 using Colossal.Json;
 using Game;
 using Game.SceneFlow;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace HallOfFame.Http;
 
 internal sealed partial class HttpQueries : IHallOfFameApi {
   private const string BaseApiPath = "/api/v1";
-
-  private static string HardwareId { get; } =
-    SystemInfo.deviceUniqueIdentifier;
 
   private static ushort lastRequestId;
 
@@ -96,19 +92,9 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
       return;
     }
 
-    var creatorName = Mod.Settings.CreatorName is null
-      ? string.Empty
-      : Uri.EscapeDataString(Mod.Settings.CreatorName);
-
-    var provider = Mod.Settings.IsParadoxAccountID ? "paradox" : "local";
-
     request.SetRequestHeader(
       "Authorization",
-      "Creator " +
-      $"name={creatorName}" +
-      $"&id={Mod.Settings.CreatorID}" +
-      $"&provider={provider}" +
-      $"&hwid={HttpQueries.HardwareId}"
+      Mod.CreatorIdentity.BuildAuthorizationHeader()
     );
 
     request.SetRequestHeader(

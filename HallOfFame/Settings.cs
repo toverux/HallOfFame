@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,10 +7,8 @@ using Colossal.UI.Binding;
 using Game.Input;
 using Game.Modding;
 using Game.Settings;
-using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Widgets;
-using HallOfFame.Reflection;
 using HallOfFame.Services;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -43,7 +40,7 @@ namespace HallOfFame;
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingNext), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingLike), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
-public sealed class Settings : ModSetting, IJsonWritable {
+public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore {
   private const string GroupYourProfile = "YourProfile";
 
   private const string GroupUIPreferences = "UIPreferences";
@@ -135,7 +132,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
   /// <summary>
   /// Live account status text ("logged in as X", "invalid username", that kind of things).
-  /// Updated by the <see cref="CreatorIdentityService"/> on mod load and when settings change.
+  /// Updated by the <see cref="CreatorIdentity"/> on mod load and when settings change.
   /// </summary>
   [SettingsUISection(Settings.GroupYourProfile)]
   [UsedImplicitly]
@@ -463,7 +460,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
   [UsedImplicitly]
   public bool DumpTranslations {
     // ReSharper disable once ValueParameterNotUsed
-    set => this.DoDumpTranslations();
+    set => Settings.DoDumpTranslations();
   }
   #endif
 
@@ -502,6 +499,22 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
   /// <seealso cref="LoginStatus"/>
   private LocalizedString loginStatusValue = string.Empty;
+
+  /// <summary>
+  /// Writes the live login status surfaced by the getter-only <see cref="LoginStatus"/>.
+  /// The public property must stay getter-only, so the game treats it as an Options entry, so the
+  /// write-side is exposed only through the <see cref="ICreatorIdentityStore"/> seam that
+  /// <see cref="CreatorIdentity"/> drives.
+  /// </summary>
+  LocalizedString ICreatorIdentityStore.LoginStatus {
+    set => this.loginStatusValue = value;
+  }
+
+  /// <summary>
+  /// Persists the settings on behalf of <see cref="CreatorIdentity"/> through the
+  /// <see cref="ICreatorIdentityStore"/> seam.
+  /// </summary>
+  void ICreatorIdentityStore.Save() => this.ApplyAndSave();
 
   public Settings(IMod mod) : base(mod) {
     this.SetDefaults();
@@ -564,118 +577,8 @@ public sealed class Settings : ModSetting, IJsonWritable {
 
   internal Settings Clone() => (Settings)this.MemberwiseClone();
 
-  /// <summary>
-  /// Method to call on the Settings instance that is actually used by the Options panel (i.e., not
-  /// the default settings reference instance).
-  /// </summary>
-  internal void Initialize() {
-    #if DEBUG
-    GameManager.instance.localizationManager.AddSource("en-US", new DevDictionarySource());
-    #endif
-
-    var identityService = new CreatorIdentityService(
-      Mod.Api,
-      Mod.Log,
-      status => this.loginStatusValue = status
-    );
-
-    this.InitializeCreatorId();
-
-    // Sync the account with the server on mod load.
-    identityService.Sync(CreatorSyncTrigger.Startup);
-
-    // Re-sync when settings are applied: a Creator Name edit syncs the name and shows the result,
-    // any other change pushes the updated info silently.
-    var prevCreatorName = this.CreatorName;
-
-    this.onSettingsApplied += _ => {
-      identityService.Sync(
-        prevCreatorName != this.CreatorName
-          ? CreatorSyncTrigger.NameEdited
-          : CreatorSyncTrigger.OtherSettingChanged
-      );
-
-      prevCreatorName = this.CreatorName;
-    };
-  }
-
   internal static bool IsNvidiaGpu() =>
     SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
-
-  /// <summary>
-  /// Initializes <see cref="CreatorID"/>, <see cref="IsParadoxAccountID"/> and
-  /// <see cref="MaskedCreatorID"/> with the Paradox account ID, or a locally generated fallback ID
-  /// if the user is not logged in or an error occurs.
-  /// Shows a warning dialog if the user is not logged in.
-  /// </summary>
-  private void InitializeCreatorId() {
-    // Read and store the Paradox account ID.
-    // Why store it?
-    // 1. If the user once plays without an internet connection or server failure, we'll still have
-    //    the ID used previously.
-    // 2. If for some reason the user changes the Paradox account they use, it doesn't mean they
-    //    want to change their Hall of Fame account, so we keep the old ID.
-    // 3. It is more explicit and transparent to the user.
-    //
-    // A clean null (user not logged in to Paradox) and a thrown read error are kept distinct: only
-    // a clean null pops the warning dialog below, while a thrown read falls silently through to the
-    // random-ID fallback (aside from the warning log).
-    string? paradoxAccountId;
-    Exception? readError = null;
-
-    try {
-      paradoxAccountId = PdxSdkPlatformProxy.AccountUserId;
-    }
-    catch (Exception ex) {
-      paradoxAccountId = null;
-      readError = ex;
-    }
-
-    var resolution = CreatorIdentityService.ResolveCreatorId(this.CreatorID, paradoxAccountId);
-
-    // A valid existing ID is left untouched, with no save.
-    if (!resolution.Changed) {
-      return;
-    }
-
-    this.CreatorID = resolution.CreatorId;
-    this.IsParadoxAccountID = resolution.IsParadoxAccountId;
-
-    if (resolution.IsParadoxAccountId) {
-      Mod.Log.Info($"{nameof(Settings)}: Acquired Paradox account ID {this.MaskedCreatorID}.");
-    }
-    else {
-      // The warning dialog is for users not logged in to Paradox (a clean null read), not for an
-      // unexpected read failure, which only logs the warning below.
-      if (resolution.NeedsParadoxWarning && readError is null) {
-        this.ShowNoParadoxConnectionWarningDialog();
-      }
-
-      Mod.Log.Warn(
-        readError ?? new Exception("User is not logged in to Paradox."),
-        $"Settings: Could not acquire Paradox account ID, using a " +
-        $"random ID as a fallback ({this.MaskedCreatorID})."
-      );
-    }
-
-    // Explicitly save the settings so they're written to disk asap.
-    this.ApplyAndSave();
-  }
-
-  /// <summary>
-  /// Show a warning dialog to the user warning them that they are not using their Paradox account
-  /// ID.
-  /// </summary>
-  private void ShowNoParadoxConnectionWarningDialog() {
-    ErrorDialogManagerAccessor.Instance?.ShowError(
-      new ErrorDialog {
-        severity = ErrorDialog.Severity.Warning,
-        localizedTitle = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]"),
-        localizedMessage = LocalizedString.Id("HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Message]"),
-        actions = ErrorDialog.ActionBits.Continue
-      }
-    );
-  }
 
   void IJsonWritable.Write(IJsonWriter writer) {
     writer.TypeBegin(this.GetType().FullName);
@@ -734,7 +637,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     this.ScreenshotToLoad = null;
   }
 
-  private void DoDumpTranslations() {
+  private static void DoDumpTranslations() {
     var localizationManager = GameManager.instance.localizationManager;
     var originalLocale = localizationManager.activeLocaleId;
 
@@ -759,7 +662,7 @@ public sealed class Settings : ModSetting, IJsonWritable {
     localizationManager.SetActiveLocale(originalLocale);
   }
 
-  private sealed class DevDictionarySource : IDictionarySource {
+  internal sealed class DevDictionarySource : IDictionarySource {
     public IEnumerable<KeyValuePair<string, string>> ReadEntries(
       IList<IDictionaryEntryError> errors,
       Dictionary<string, int> indexCounts

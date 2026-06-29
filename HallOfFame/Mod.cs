@@ -8,11 +8,14 @@ using Game;
 using Game.Modding;
 using HallOfFame.Http;
 using HallOfFame.Logging;
+using HallOfFame.Reflection;
+using HallOfFame.Services;
 using HallOfFame.Systems;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
+using UnityEngine;
 #if DEBUG
-using HallOfFame.Reflection;
+using Game.SceneFlow;
 #endif
 
 namespace HallOfFame;
@@ -51,6 +54,17 @@ public sealed class Mod : IMod {
     Mod.apiValue ??
     throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
+  /// <summary>
+  /// The creator identity module: owns the Creator ID bootstrap, the login sync, and the assembly
+  /// of the per-request authorization credential the HTTP layer reads at call time.
+  /// Built and wired in <see cref="OnLoad"/>; there is no setter, tests construct the module with
+  /// fakes instead.
+  /// </summary>
+  /// <exception cref="NullReferenceException">If the mod has not been loaded yet.</exception>
+  internal static CreatorIdentity CreatorIdentity =>
+    Mod.creatorIdentityValue ??
+    throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
+
   internal static string GameScreenshotsPath { get; } =
     Path.Combine(EnvPath.kUserDataPath, "Screenshots");
 
@@ -69,6 +83,8 @@ public sealed class Mod : IMod {
   private static Mod? instanceValue;
 
   private static IHallOfFameApi? apiValue;
+
+  private static CreatorIdentity? creatorIdentityValue;
 
   private Settings? settingsValue;
 
@@ -107,7 +123,31 @@ public sealed class Mod : IMod {
       // Set singleton instance only when OnLoad is likely to complete.
       Mod.instanceValue = this;
 
-      this.settingsValue.Initialize();
+      #if DEBUG
+      GameManager.instance.localizationManager.AddSource(
+        "en-US",
+        new Settings.DevDictionarySource()
+      );
+      #endif
+
+      // Build the creator identity module and publish it as a singleton before starting it: its
+      // startup sync issues the first authorized request, whose credential is assembled through
+      // Mod.CreatorIdentity.
+      var identity = new CreatorIdentity(
+        Mod.Api,
+        Mod.Log,
+        this.settingsValue,
+        SystemInfo.deviceUniqueIdentifier,
+        new ParadoxConnection()
+      );
+
+      Mod.creatorIdentityValue = identity;
+
+      identity.Start();
+
+      // Re-sync when settings are applied: a Creator Name edit syncs the name and shows the result,
+      // any other change pushes the updated info silently.
+      this.settingsValue.onSettingsApplied += _ => identity.OnSettingsApplied();
 
       // Adds "coui://halloffame/" host location for serving images.
       UIManager.defaultUISystem.AddHostLocation(
