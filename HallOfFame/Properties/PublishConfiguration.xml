@@ -137,10 +137,9 @@ Donations are very welcome and will help keep the service running.
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
   <ModVersion Value="2026.2.4" />
   <GameVersion Value="1.6.*" />
-  <ChangeLog>- Official compatibility for game update 1.6.0f1.
-- Fixed wrong button color since 1.6.0f1.
-- Optimized performance of UI rendering.
-- Localization updates for Italian and Deutsch</ChangeLog>
+  <ChangeLog>- Fixed liking and unliking a screenshot sometimes not working ("button does nothing one or more times").
+- Fixed some rare potential bugs.
+- Many internal improvements on overall robustness and modularity for future maintainability.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />

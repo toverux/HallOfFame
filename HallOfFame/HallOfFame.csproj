@@ -4,6 +4,11 @@
         <FileVersion>2026.2.4</FileVersion>
 
         <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+        <IsPackable>false</IsPackable>
+        <IsPublishable>false</IsPublishable>
+
         <Configurations>Debug;Release</Configurations>
 
         <!--The file where mod information which is required for publishing mod on PDX mods are stored-->

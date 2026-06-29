@@ -5,7 +5,8 @@ paths:
 
 # C# Code Style
 
-- You are working with C# strict null settings (`<Nullable>true</Nullable>`).
+- Projects build with `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>`.
+- Strict null-check settings is enabled (`<Nullable>true</Nullable>`).
 - Use the very latest C# 12 language features.
 - Use the init and required modifiers when appropriate rather than ctor-based params.
 - Use the compiler-synthesized `field` for backing fields rather than manually declaring them.

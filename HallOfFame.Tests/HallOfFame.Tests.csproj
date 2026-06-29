@@ -3,6 +3,7 @@
         <TargetFramework>net48</TargetFramework>
         <LangVersion>12</LangVersion>
         <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <IsPackable>false</IsPackable>
         <IsPublishable>false</IsPublishable>
 
