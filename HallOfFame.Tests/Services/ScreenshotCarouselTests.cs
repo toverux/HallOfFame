@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HallOfFame.Domain;
 using HallOfFame.Http;
@@ -17,7 +19,13 @@ public sealed class ScreenshotCarouselTests {
       () => "4k"
     );
 
-    await carousel.Next();
+    var step = await carousel.Next();
+
+    // Landing on the freshly fetched screenshot is a first display at the front of the window: it
+    // should preload ahead and counts as a view.
+    Assert.Equal("s0", step.Current.Id);
+    Assert.True(step.ShouldPreloadAhead);
+    Assert.Equal("s0", step.ViewedScreenshotId);
 
     Assert.Equal("s0", carousel.Current?.Id);
     Assert.Equal(0, carousel.CurrentIndex);
@@ -118,10 +126,16 @@ public sealed class ScreenshotCarouselTests {
 
     var callsBeforeAdvance = callCount();
 
-    await carousel.Next();
+    var step = await carousel.Next();
 
     Assert.Equal(callsBeforeAdvance, callCount());
-    Assert.Equal("s1", carousel.Current?.Id);
+
+    // The cursor moved onto the prefetched look-ahead, which is now the window's front: still a
+    // first display, so it preloads ahead and counts as a view.
+    Assert.Equal("s1", step.Current.Id);
+    Assert.True(step.ShouldPreloadAhead);
+    Assert.Equal("s1", step.ViewedScreenshotId);
+
     Assert.True(carousel.HasPrevious);
   }
 
@@ -160,10 +174,16 @@ public sealed class ScreenshotCarouselTests {
 
     var callsBeforePrevious = callCount();
 
-    await carousel.Previous();
+    var step = await carousel.Previous();
 
     Assert.Equal(callsBeforePrevious, callCount());
-    Assert.Equal("s0", carousel.Current?.Id);
+
+    // Scrolling back lands on an already-seen screenshot with look-ahead still ahead of it: the
+    // degenerate step neither preloads ahead nor re-counts the view.
+    Assert.Equal("s0", step.Current.Id);
+    Assert.False(step.ShouldPreloadAhead);
+    Assert.Null(step.ViewedScreenshotId);
+
     Assert.Equal("https://img/s0-4k.jpg", preloadedUrl);
     Assert.False(carousel.HasPrevious);
   }
@@ -192,6 +212,76 @@ public sealed class ScreenshotCarouselTests {
     await Assert.ThrowsAsync<ImagePreloadFailedException>(carousel.Previous);
   }
 
+  /// <summary>
+  /// Forward through scrollback: after stepping back into the window, moving forward again lands on
+  /// an already-seen middle screenshot (<see cref="ScreenshotCarousel.IsAtEnd"/> is false), so the
+  /// step must neither preload ahead nor re-count the view.
+  /// </summary>
+  [Fact]
+  public async Task Next_AfterScrollback_OntoMiddle_DoesNotPreloadOrCountView() {
+    var carousel = new ScreenshotCarousel(
+      ScreenshotCarouselTests.CountingApi(),
+      new FakePreloader(),
+      () => "4k"
+    );
+
+    // Walk forward far enough to build scrollback (the system prefetches a look-ahead after each
+    // forward step), then step back twice to land in the middle of the window.
+    await ScreenshotCarouselTests.Drive(
+      carousel,
+      Move.Next,
+      Move.Next,
+      Move.Next,
+      Move.Previous,
+      Move.Previous
+    );
+
+    var step = await carousel.Next();
+
+    Assert.Equal("s1", step.Current.Id);
+    Assert.False(step.ShouldPreloadAhead);
+    Assert.Null(step.ViewedScreenshotId);
+    Assert.False(carousel.IsAtEnd);
+  }
+
+  /// <summary>
+  /// Centerpiece: a scripted walk goes forward, scrolls back over seen screenshots, then forward
+  /// again past them into fresh territory. Every distinct screenshot is reported viewed exactly
+  /// once, on its first display. Re-displaying a screenshot on scrollback or scroll-forward must
+  /// never re-count it.
+  /// </summary>
+  [Fact]
+  public async Task ViewedScreenshotId_OverScriptedWalk_ReportsEachFirstDisplayOnce() {
+    var carousel = new ScreenshotCarousel(
+      ScreenshotCarouselTests.CountingApi(),
+      new FakePreloader(),
+      () => "4k"
+    );
+
+    // The leading three forward steps (rather than two as one might first reach for) are what make
+    // the two scrollback steps valid: two Previous moves need the cursor to sit at index >= 2.
+    var steps = await ScreenshotCarouselTests.Drive(
+      carousel,
+      Move.Next,
+      Move.Next,
+      Move.Next,
+      Move.Previous,
+      Move.Previous,
+      Move.Next,
+      Move.Next,
+      Move.Next
+    );
+
+    var viewed = steps
+      .Select(step => step.ViewedScreenshotId)
+      .OfType<string>()
+      .ToList();
+
+    // s1 and s2 are re-displayed during the forward replay after scrollback, yet never re-reported;
+    // s3 is reported only when the replay crosses into never-seen territory.
+    Assert.Equal(new[] { "s0", "s1", "s2", "s3" }, viewed);
+  }
+
   [Fact]
   public async Task PreloadAhead_AppendsLookAhead_WithoutMovingCursor() {
     var api = ScreenshotCarouselTests.SequentialApi(out _, "s0", "s1");
@@ -210,8 +300,8 @@ public sealed class ScreenshotCarouselTests {
   }
 
   /// <summary>
-  /// Crown jewel #7: the dedupe loop refetches while the weighted-random endpoint keeps returning
-  /// the screenshot already displayed and stops as soon as a different one arrives.
+  /// The dedupe loop refetches while the weighted-random endpoint keeps returning the screenshot
+  /// already displayed and stops as soon as a different one arrives.
   /// </summary>
   [Fact]
   public async Task PreloadAhead_RefetchesUntilDifferentFromCurrent() {
@@ -233,31 +323,30 @@ public sealed class ScreenshotCarouselTests {
     Assert.Equal(4, callCount());
     Assert.Equal(2, carousel.Count);
 
-    await carousel.Next();
+    var step = await carousel.Next();
 
-    Assert.Equal("s1", carousel.Current?.Id);
+    Assert.Equal("s1", step.Current.Id);
   }
 
   /// <summary>
-  /// Crown jewel #6: once the window grows past its cap, the oldest screenshot is trimmed off the
-  /// front and the cursor is adjusted so it keeps pointing at the same screenshot.
+  /// Once the window grows past its cap, the oldest screenshot is trimmed off the front, and the
+  /// cursor is adjusted so it keeps pointing at the same screenshot.
   /// </summary>
   [Fact]
   public async Task PreloadAhead_TrimsWindowAndKeepsCursorOnSameScreenshot() {
     // A counting endpoint that returns "s0", "s1", "s2"... so every fetch is distinct (the dedupe
     // loop never spins).
-    var api = ScreenshotCarouselTests.CountingApi();
+    var carousel = new ScreenshotCarousel(
+      ScreenshotCarouselTests.CountingApi(),
+      new FakePreloader(),
+      () => "4k"
+    );
 
-    var carousel = new ScreenshotCarousel(api, new FakePreloader(), () => "4k");
-
-    // Drive the slideshow exactly as the system does: advance, then prefetch when at the end.
-    for (var step = 0; step < 25; step++) {
-      await carousel.Next();
-
-      if (carousel.IsAtEnd) {
-        await carousel.PreloadAhead();
-      }
-    }
+    // Drive the slideshow exactly as the system does: advance, then prefetch when the step says so.
+    await ScreenshotCarouselTests.Drive(
+      carousel,
+      Enumerable.Repeat(Move.Next, 25).ToArray()
+    );
 
     // The window is capped, and the cursor still points at the last screenshot advanced onto (the
     // 25th, "s24"), proving the trim adjusted the index rather than corrupting it.
@@ -293,8 +382,8 @@ public sealed class ScreenshotCarouselTests {
       () => "4k"
     );
 
-    Assert.Throws<InvalidOperationException>(
-      () => carousel.ReplaceCurrent(ScreenshotCarouselTests.MakeScreenshot("x"))
+    Assert.Throws<InvalidOperationException>(() =>
+      carousel.ReplaceCurrent(ScreenshotCarouselTests.MakeScreenshot("x"))
     );
   }
 
@@ -317,7 +406,13 @@ public sealed class ScreenshotCarouselTests {
 
     var carousel = new ScreenshotCarousel(api, preloader, () => "4k");
 
-    await carousel.LoadById("abc");
+    var step = await carousel.LoadById("abc");
+
+    // Loading by ID lands at the front of the window, so its step behaves like any other forward
+    // move: it preloads ahead and counts as a view.
+    Assert.Equal("abc", step.Current.Id);
+    Assert.True(step.ShouldPreloadAhead);
+    Assert.Equal("abc", step.ViewedScreenshotId);
 
     Assert.Equal("abc", carousel.Current?.Id);
     Assert.Equal(0, carousel.CurrentIndex);
@@ -332,6 +427,35 @@ public sealed class ScreenshotCarouselTests {
       ImageUrlFHD = $"https://img/{id}-fhd.jpg",
       ImageUrl4K = $"https://img/{id}-4k.jpg"
     };
+
+  /// <summary>
+  /// Drives the carousel the way <c>PresenterUISystem</c> does: each move applies its returned
+  /// <see cref="NavigationStep"/>, and a step that asks to preload ahead triggers the look-ahead
+  /// prefetch (the system fires it in the background; here it is awaited so the window settles).
+  /// Returns the emitted steps in order, so a test can collect the viewed ids or inspect any step.
+  /// </summary>
+  private static async Task<IReadOnlyList<NavigationStep>> Drive(
+    ScreenshotCarousel carousel,
+    params Move[] moves
+  ) {
+    var steps = new List<NavigationStep>();
+
+    foreach (var move in moves) {
+      var step = move switch {
+        Move.Next => await carousel.Next(),
+        Move.Previous => await carousel.Previous(),
+        _ => throw new ArgumentOutOfRangeException(nameof(moves), move, null)
+      };
+
+      steps.Add(step);
+
+      if (step.ShouldPreloadAhead) {
+        await carousel.PreloadAhead();
+      }
+    }
+
+    return steps;
+  }
 
   /// <summary>
   /// A fake API whose weighted-random endpoint returns the given IDs in order;
@@ -360,4 +484,9 @@ public sealed class ScreenshotCarouselTests {
         Task.FromResult(ScreenshotCarouselTests.MakeScreenshot($"s{count++}"))
     };
   }
+
+  /// <summary>
+  /// A single slideshow move fed to <see cref="Drive"/>.
+  /// </summary>
+  private enum Move { Next, Previous }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
@@ -294,20 +294,18 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.isNavigating = true;
     this.isRefreshingBinding.Update(true);
 
-    try {
-      await this.screenshotCarousel.LoadById(screenshotId);
+    NavigationStep step;
 
-      this.errorBinding.Update(null);
-      this.screenshotBinding.Update(this.screenshotCarousel.Current);
-      this.hasPreviousScreenshotBinding.Update();
+    try {
+      step = await this.screenshotCarousel.LoadById(screenshotId);
     }
     catch (Exception ex) {
-      this.HandleDisplayLoadError(ex);
+      this.AbortNavigation(ex);
+
+      return;
     }
-    finally {
-      this.isNavigating = false;
-      this.isRefreshingBinding.Update(false);
-    }
+
+    this.ApplyStep(step);
   }
   #endif
 
@@ -354,26 +352,18 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.isNavigating = true;
     this.isRefreshingBinding.Update(true);
 
+    NavigationStep step;
+
     try {
-      await this.screenshotCarousel.Previous();
-
-      this.errorBinding.Update(null);
-      this.screenshotBinding.Update(this.screenshotCarousel.Current);
-      this.hasPreviousScreenshotBinding.Update();
-
-      Mod.Log.Verbose(
-        $"{nameof(PresenterUISystem)}: {nameof(this.PreviousScreenshot)}: " +
-        $"Displaying {this.screenshotCarousel.Current} (carousel idx " +
-        $"{this.screenshotCarousel.CurrentIndex}/{this.screenshotCarousel.Count - 1})."
-      );
+      step = await this.screenshotCarousel.Previous();
     }
     catch (Exception ex) {
-      this.HandleDisplayLoadError(ex);
+      this.AbortNavigation(ex);
+
+      return;
     }
-    finally {
-      this.isNavigating = false;
-      this.isRefreshingBinding.Update(false);
-    }
+
+    this.ApplyStep(step);
   }
 
   /// <summary>
@@ -391,24 +381,30 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.isNavigating = true;
     this.isRefreshingBinding.Update(true);
 
+    NavigationStep step;
+
     try {
-      await this.screenshotCarousel.Next();
+      step = await this.screenshotCarousel.Next();
     }
     catch (Exception ex) {
-      // Leave the previously displayed screenshot in place and reset the refresh state.
-      this.HandleDisplayLoadError(ex);
-      this.isNavigating = false;
-      this.isRefreshingBinding.Update(false);
+      this.AbortNavigation(ex);
 
       return;
     }
 
+    this.ApplyStep(step);
+  }
+
+  /// <summary>
+  /// Mirrors a successful <see cref="NavigationStep"/> onto the UI and enacts the engine side
+  /// effects the carousel decided but does not perform itself: it publishes the screenshot,
+  /// releases the navigation lock, records the view, and prefetches the next image.
+  /// This is the single apply path shared by next, previous, and (in debug) load-by-id.
+  /// </summary>
+  private void ApplyStep(NavigationStep step) {
     // The screenshot is now displayed, so clear any error left over from a prior failed load.
     this.errorBinding.Update(null);
-
-    var screenshot = this.screenshotCarousel.Current;
-
-    this.screenshotBinding.Update(screenshot);
+    this.screenshotBinding.Update(step.Current);
     this.hasPreviousScreenshotBinding.Update();
 
     // The cursor has settled and the binding mirrors it: navigation is done, so a like is safe even
@@ -416,49 +412,54 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     this.isNavigating = false;
 
     Mod.Log.Verbose(
-      $"{nameof(PresenterUISystem)}: {nameof(this.NextScreenshot)}: Displaying {screenshot} " +
+      $"{nameof(PresenterUISystem)}: {nameof(this.ApplyStep)}: Displaying {step.Current} " +
       $"(carousel idx {this.screenshotCarousel.CurrentIndex}/" +
       $"{this.screenshotCarousel.Count - 1})."
     );
 
-    if (!this.screenshotCarousel.IsAtEnd) {
-      // We still have look-ahead screenshots in stock (the user clicked previous once or more), so
-      // there is nothing to preload.
-      this.isRefreshingBinding.Update(false);
+    if (step.ViewedScreenshotId is { } viewedScreenshotId) {
+      this.RecordView(viewedScreenshotId);
+    }
+
+    if (step.ShouldPreloadAhead) {
+      // We are viewing the front of the window: prepare the next screenshot in the background,
+      // which keeps the refresh lock held until the prefetch settles.
+      this.PreloadAheadInBackground();
     }
     else {
-      // We are viewing the last screenshot in the window: prepare the next one in the background.
-      PreloadNextInBackground();
-      // It also means the current screenshot was just viewed.
-      MarkCurrentViewed();
+      // Look-ahead screenshots are still in stock (the user scrolled back), so there is nothing to
+      // prefetch, and the refresh lock can be released right away.
+      this.isRefreshingBinding.Update(false);
     }
+  }
 
-    return;
-
-    // Fire-and-forget; designed never to throw. Releases the refresh lock in its finally, so it
-    // stays held throughout the background prefetch.
-    async void PreloadNextInBackground() {
-      try {
-        await this.screenshotCarousel.PreloadAhead();
-      }
-      catch (Exception ex) {
-        Mod.Log.ErrorSilent(ex);
-      }
-      finally {
-        this.isRefreshingBinding.Update(false);
-      }
+  /// <summary>
+  /// Fire-and-forget background look-ahead prefetch; designed never to throw.
+  /// Releases the refresh lock in its finally, so the lock stays held throughout the prefetch.
+  /// </summary>
+  // ReSharper disable once AsyncVoidMethod
+  private async void PreloadAheadInBackground() {
+    try {
+      await this.screenshotCarousel.PreloadAhead();
     }
+    catch (Exception ex) {
+      Mod.Log.ErrorSilent(ex);
+    }
+    finally {
+      this.isRefreshingBinding.Update(false);
+    }
+  }
 
-    // Fire-and-forget; designed never to throw.
-    async void MarkCurrentViewed() {
-      try {
-        if (screenshot is not null) {
-          await Mod.Api.MarkScreenshotViewed(screenshot.Id);
-        }
-      }
-      catch (Exception ex) {
-        Mod.Log.ErrorSilent(ex);
-      }
+  /// <summary>
+  /// Fire-and-forget recording of a screenshot view; designed never to throw.
+  /// </summary>
+  // ReSharper disable once AsyncVoidMethod
+  private async void RecordView(string screenshotId) {
+    try {
+      await Mod.Api.MarkScreenshotViewed(screenshotId);
+    }
+    catch (Exception ex) {
+      Mod.Log.ErrorSilent(ex);
     }
   }
 
@@ -475,6 +476,17 @@ internal sealed partial class PresenterUISystem : UISystemBase {
     else {
       Mod.Log.ErrorRecoverable(ex);
     }
+  }
+
+  /// <summary>
+  /// Aborts an in-flight navigation after a failed load: applies the error policy and resets the
+  /// navigation/refresh flags, leaving the previously displayed screenshot in place.
+  /// Callers return immediately afterward.
+  /// </summary>
+  private void AbortNavigation(Exception ex) {
+    this.HandleDisplayLoadError(ex);
+    this.isNavigating = false;
+    this.isRefreshingBinding.Update(false);
   }
 
   /// <summary>
