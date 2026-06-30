@@ -18,10 +18,7 @@ const settings: ModSettings = {
   screenshotResolution: 'fhd',
   namesTranslationMode: 'translate',
   creatorsScreenshotSaveDirectory: '',
-  baseUrl: '',
-  savedShareModIdsPreference: true,
-  savedShareRenderSettingsPreference: true,
-  savedScreenshotDescription: ''
+  baseUrl: ''
 };
 
 const snapshot: JsonScreenshotSnapshot = {

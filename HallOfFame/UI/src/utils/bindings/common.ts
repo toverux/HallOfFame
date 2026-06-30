@@ -19,9 +19,6 @@ export interface ModSettings {
   readonly namesTranslationMode: 'disabled' | 'transliterate' | 'translate';
   readonly creatorsScreenshotSaveDirectory: string;
   readonly baseUrl: string;
-  readonly savedShareModIdsPreference: boolean;
-  readonly savedShareRenderSettingsPreference: boolean;
-  readonly savedScreenshotDescription: string;
 }
 
 const settings$ = lazyBindValue<ModSettings>(GROUP, 'settings', {
@@ -33,10 +30,7 @@ const settings$ = lazyBindValue<ModSettings>(GROUP, 'settings', {
   screenshotResolution: 'fhd',
   namesTranslationMode: 'translate',
   creatorsScreenshotSaveDirectory: '',
-  baseUrl: '',
-  savedShareModIdsPreference: true,
-  savedShareRenderSettingsPreference: true,
-  savedScreenshotDescription: ''
+  baseUrl: ''
 });
 
 export function useModSettings(): ModSettings {

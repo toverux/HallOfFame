@@ -44,6 +44,17 @@ export interface JsonUploadProgress {
 }
 
 /**
+ * From `HallOfFame.Services.UploadFormMemory`
+ *
+ * @public
+ */
+export interface JsonUploadFormMemory {
+  readonly shareModIds: boolean;
+  readonly shareRenderSettings: boolean;
+  readonly description: string | null;
+}
+
+/**
  * Argument of the {@link uploadScreenshot} command, mapped on the UI side from the upload form
  * state into the shape the C# `uploadScreenshot` command expects.
  *
@@ -68,6 +79,12 @@ const screenshotSnapshot$ = lazyBindValue<JsonScreenshotSnapshot | null>(
 
 const uploadProgress$ = lazyBindValue<JsonUploadProgress | null>(GROUP, 'uploadProgress', null);
 
+const uploadFormMemory$ = lazyBindValue<JsonUploadFormMemory>(GROUP, 'uploadFormMemory', {
+  shareModIds: true,
+  shareRenderSettings: true,
+  description: null
+});
+
 export function useAssetMods(): JsonMod[] {
   return useValue(assetMods$());
 }
@@ -82,6 +99,10 @@ export function useScreenshotSnapshot(): JsonScreenshotSnapshot | null {
 
 export function useUploadProgress(): JsonUploadProgress | null {
   return useValue(uploadProgress$());
+}
+
+export function useUploadFormMemory(): JsonUploadFormMemory {
+  return useValue(uploadFormMemory$());
 }
 
 export function takeScreenshot(): void {

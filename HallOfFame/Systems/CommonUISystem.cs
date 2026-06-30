@@ -38,18 +38,6 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
   private GetterValueBinding<Settings> settingsBinding = null!;
 
-  internal void SaveScreenshotPreferences(
-    bool shareModIds,
-    bool shareRenderSettings,
-    string? description
-  ) {
-    Mod.Settings.SavedShareModIdsPreference = shareModIds;
-    Mod.Settings.SavedShareRenderSettingsPreference = shareRenderSettings;
-    Mod.Settings.SavedScreenshotDescription = description;
-
-    this.settingsBinding.Update();
-  }
-
   protected override void OnCreate() {
     base.OnCreate();
 

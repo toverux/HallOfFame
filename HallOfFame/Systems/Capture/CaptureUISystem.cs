@@ -61,6 +61,13 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   private GetterValueBinding<UploadProgress?> uploadProgressBinding = null!;
 
+  /// <summary>
+  /// Surfaces the user's saved upload-form choices to the UI so the panel can restore them when it
+  /// reopens.
+  /// Manually updated (not an update binding) on each upload, see <see cref="UploadScreenshot"/>.
+  /// </summary>
+  private GetterValueBinding<UploadFormMemory> uploadFormMemoryBinding = null!;
+
   private TriggerBinding takeScreenshotBinding = null!;
 
   private TriggerBinding clearScreenshotBinding = null!;
@@ -147,6 +154,17 @@ internal sealed partial class CaptureUISystem : UISystemBase {
           new ValueWriter<UploadProgress>().Nullable()
         );
 
+      this.uploadFormMemoryBinding =
+        new GetterValueBinding<UploadFormMemory>(
+          CaptureUISystem.BindingGroup,
+          "uploadFormMemory",
+          () => new UploadFormMemory(
+            Mod.Settings.SavedShareModIdsPreference,
+            Mod.Settings.SavedShareRenderSettingsPreference,
+            Mod.Settings.SavedScreenshotDescription
+          )
+        );
+
       this.takeScreenshotBinding = new TriggerBinding(
         CaptureUISystem.BindingGroup,
         "takeScreenshot",
@@ -169,6 +187,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.AddUpdateBinding(this.cityNameBinding);
       this.AddUpdateBinding(this.screenshotSnapshotBinding);
       this.AddUpdateBinding(this.uploadProgressBinding);
+      this.AddBinding(this.uploadFormMemoryBinding);
       this.AddBinding(this.takeScreenshotBinding);
       this.AddBinding(this.clearScreenshotBinding);
       this.AddBinding(this.uploadScreenshotBinding);
@@ -295,12 +314,16 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       return;
     }
 
-    this.World.GetOrCreateSystemManaged<CommonUISystem>()
-      .SaveScreenshotPreferences(
-        formValue.ShareModIds,
-        formValue.ShareRenderSettings,
-        formValue.Description
-      );
+    // Remember the form choices so the panel can restore them the next time it opens.
+    // We deliberately do NOT ApplyAndSave() here: the in-memory writing is enough (CS2 dumps
+    // ModSetting properties to file on game close), and ApplyAndSave() would fire
+    // onSettingsApplied, triggering a spurious creator UpdateMe server sync.
+    // We refresh our own binding directly.
+    Mod.Settings.SavedShareModIdsPreference = formValue.ShareModIds;
+    Mod.Settings.SavedShareRenderSettingsPreference = formValue.ShareRenderSettings;
+    Mod.Settings.SavedScreenshotDescription = formValue.Description;
+
+    this.uploadFormMemoryBinding.Update();
 
     // The city name is read live at upload time (the user can edit it after the screenshot is
     // taken), unlike the rest of the snapshot which is frozen at capture.

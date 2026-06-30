@@ -18,6 +18,7 @@ import { ScreenshotUploadProgress } from './upload-progress';
  */
 export function ScreenshotUploadPanel(): ReactElement {
   const settings = bindings.useModSettings();
+  const uploadFormMemory = bindings.useUploadFormMemory();
 
   const panelRef = useRef<HTMLDivElement>(null);
   const draggable = useDraggable(panelRef);
@@ -26,11 +27,11 @@ export function ScreenshotUploadPanel(): ReactElement {
   const uploadProgress = bindings.useUploadProgress();
 
   const originalFormState: ScreenshotInfoFormValue = {
-    shareModIds: settings.savedShareModIdsPreference,
-    shareRenderSettings: settings.savedShareRenderSettingsPreference,
+    shareModIds: uploadFormMemory.shareModIds,
+    shareRenderSettings: uploadFormMemory.shareRenderSettings,
     isShowcasingAsset: false,
     showcasedMod: undefined,
-    // A button under the textarea allows the user to restore from `settings.savedDescription`
+    // A button under the textarea allows the user to restore from `uploadFormMemory.description`.
     description: ''
   };
 
@@ -77,7 +78,6 @@ export function ScreenshotUploadPanel(): ReactElement {
 
           <div className={classNames(styles.panelPanesInfo, shared.panelSurface)}>
             <ScreenshotUploadPanelContentScreenshotInfo
-              settings={settings}
               creatorNameIsEmpty={creatorNameIsEmpty}
               screenshotSnapshot={screenshotSnapshot}
               formValue={formValue}

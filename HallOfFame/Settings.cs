@@ -494,8 +494,8 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
   public string? SavedScreenshotDescription { get; set; }
 
   internal string BaseUrlWithScheme => this.BaseUrl.StartsWith("http")
-    ? $"{this.BaseUrl}"
-    : $"https://{Mod.Settings.BaseUrl}";
+    ? this.BaseUrl
+    : $"https://{this.BaseUrl}";
 
   /// <seealso cref="LoginStatus"/>
   private LocalizedString loginStatusValue = string.Empty;
@@ -617,15 +617,6 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
 
     writer.PropertyName("baseUrl");
     writer.Write(this.BaseUrlWithScheme);
-
-    writer.PropertyName("savedShareModIdsPreference");
-    writer.Write(this.SavedShareModIdsPreference);
-
-    writer.PropertyName("savedShareRenderSettingsPreference");
-    writer.Write(this.SavedShareRenderSettingsPreference);
-
-    writer.PropertyName("savedScreenshotDescription");
-    writer.Write(this.SavedScreenshotDescription);
 
     writer.TypeEnd();
   }

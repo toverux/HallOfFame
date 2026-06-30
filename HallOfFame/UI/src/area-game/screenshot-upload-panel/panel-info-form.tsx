@@ -62,13 +62,11 @@ export const ScreenshotUploadPanelContentScreenshotInfo = memo(
 
 // biome-ignore lint/complexity/noExcessiveLinesPerFunction: form template makes it long, but it's simple
 function ScreenshotUploadPanelContentScreenshotInfoBase({
-  settings,
   creatorNameIsEmpty,
   screenshotSnapshot,
   formValue,
   patchFormValue
 }: Readonly<{
-  settings: bindings.ModSettings;
   creatorNameIsEmpty: boolean;
   screenshotSnapshot: bindings.JsonScreenshotSnapshot;
   formValue: ScreenshotInfoFormValue;
@@ -77,6 +75,8 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
   const { translate } = useLocalization();
 
   const assetMods = bindings.useAssetMods();
+
+  const uploadFormMemory = bindings.useUploadFormMemory();
 
   const scrollController = useScrollController?.();
 
@@ -108,8 +108,8 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
   );
 
   const restoreSavedDescription = useCallback(
-    () => patchFormValue({ description: settings.savedScreenshotDescription }),
-    [patchFormValue, settings.savedScreenshotDescription]
+    () => patchFormValue({ description: uploadFormMemory.description ?? '' }),
+    [patchFormValue, uploadFormMemory.description]
   );
 
   const clearDescription = useCallback(() => patchFormValue({ description: '' }), [patchFormValue]);
@@ -316,7 +316,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
             {(textareaFocused || formValue.description.length > 0) && (
               <div className={styles.textareaControls}>
-                {formValue.description.length == 0 && settings.savedScreenshotDescription && (
+                {formValue.description.length == 0 && uploadFormMemory.description && (
                   <Button
                     variant='default'
                     className={styles.textareaControlsButton}
