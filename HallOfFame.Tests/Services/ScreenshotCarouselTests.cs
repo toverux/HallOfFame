@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using HallOfFame.Domain;
@@ -21,11 +20,10 @@ public sealed class ScreenshotCarouselTests {
 
     var step = await carousel.Next();
 
-    // Landing on the freshly fetched screenshot is a first display at the front of the window: it
-    // should preload ahead and counts as a view.
+    // Landing on the freshly fetched screenshot is at the front of the window, so it preloads
+    // ahead.
     Assert.Equal("s0", step.Current.Id);
     Assert.True(step.ShouldPreloadAhead);
-    Assert.Equal("s0", step.ViewedScreenshotId);
 
     Assert.Equal("s0", carousel.Current?.Id);
     Assert.Equal(0, carousel.CurrentIndex);
@@ -130,11 +128,10 @@ public sealed class ScreenshotCarouselTests {
 
     Assert.Equal(callsBeforeAdvance, callCount());
 
-    // The cursor moved onto the prefetched look-ahead, which is now the window's front: still a
-    // first display, so it preloads ahead and counts as a view.
+    // The cursor moved onto the prefetched look-ahead, which is now the window's front, so it
+    // preloads ahead.
     Assert.Equal("s1", step.Current.Id);
     Assert.True(step.ShouldPreloadAhead);
-    Assert.Equal("s1", step.ViewedScreenshotId);
 
     Assert.True(carousel.HasPrevious);
   }
@@ -179,10 +176,9 @@ public sealed class ScreenshotCarouselTests {
     Assert.Equal(callsBeforePrevious, callCount());
 
     // Scrolling back lands on an already-seen screenshot with look-ahead still ahead of it: the
-    // degenerate step neither preloads ahead nor re-counts the view.
+    // degenerate step does not preload ahead.
     Assert.Equal("s0", step.Current.Id);
     Assert.False(step.ShouldPreloadAhead);
-    Assert.Null(step.ViewedScreenshotId);
 
     Assert.Equal("https://img/s0-4k.jpg", preloadedUrl);
     Assert.False(carousel.HasPrevious);
@@ -215,10 +211,10 @@ public sealed class ScreenshotCarouselTests {
   /// <summary>
   /// Forward through scrollback: after stepping back into the window, moving forward again lands on
   /// an already-seen middle screenshot (<see cref="ScreenshotCarousel.IsAtEnd"/> is false), so the
-  /// step must neither preload ahead nor re-count the view.
+  /// step must not preload ahead.
   /// </summary>
   [Fact]
-  public async Task Next_AfterScrollback_OntoMiddle_DoesNotPreloadOrCountView() {
+  public async Task Next_AfterScrollback_OntoMiddle_DoesNotPreloadAhead() {
     var carousel = new ScreenshotCarousel(
       ScreenshotCarouselTests.CountingApi(),
       new FakePreloader(),
@@ -240,46 +236,7 @@ public sealed class ScreenshotCarouselTests {
 
     Assert.Equal("s1", step.Current.Id);
     Assert.False(step.ShouldPreloadAhead);
-    Assert.Null(step.ViewedScreenshotId);
     Assert.False(carousel.IsAtEnd);
-  }
-
-  /// <summary>
-  /// Centerpiece: a scripted walk goes forward, scrolls back over seen screenshots, then forward
-  /// again past them into fresh territory. Every distinct screenshot is reported viewed exactly
-  /// once, on its first display. Re-displaying a screenshot on scrollback or scroll-forward must
-  /// never re-count it.
-  /// </summary>
-  [Fact]
-  public async Task ViewedScreenshotId_OverScriptedWalk_ReportsEachFirstDisplayOnce() {
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.CountingApi(),
-      new FakePreloader(),
-      () => "4k"
-    );
-
-    // The leading three forward steps (rather than two as one might first reach for) are what make
-    // the two scrollback steps valid: two Previous moves need the cursor to sit at index >= 2.
-    var steps = await ScreenshotCarouselTests.Drive(
-      carousel,
-      Move.Next,
-      Move.Next,
-      Move.Next,
-      Move.Previous,
-      Move.Previous,
-      Move.Next,
-      Move.Next,
-      Move.Next
-    );
-
-    var viewed = steps
-      .Select(step => step.ViewedScreenshotId)
-      .OfType<string>()
-      .ToList();
-
-    // s1 and s2 are re-displayed during the forward replay after scrollback, yet never re-reported;
-    // s3 is reported only when the replay crosses into never-seen territory.
-    Assert.Equal(new[] { "s0", "s1", "s2", "s3" }, viewed);
   }
 
   [Fact]
@@ -409,10 +366,9 @@ public sealed class ScreenshotCarouselTests {
     var step = await carousel.LoadById("abc");
 
     // Loading by ID lands at the front of the window, so its step behaves like any other forward
-    // move: it preloads ahead and counts as a view.
+    // move: it preloads ahead.
     Assert.Equal("abc", step.Current.Id);
     Assert.True(step.ShouldPreloadAhead);
-    Assert.Equal("abc", step.ViewedScreenshotId);
 
     Assert.Equal("abc", carousel.Current?.Id);
     Assert.Equal(0, carousel.CurrentIndex);
@@ -432,14 +388,8 @@ public sealed class ScreenshotCarouselTests {
   /// Drives the carousel the way <c>PresenterUISystem</c> does: each move applies its returned
   /// <see cref="NavigationStep"/>, and a step that asks to preload ahead triggers the look-ahead
   /// prefetch (the system fires it in the background; here it is awaited so the window settles).
-  /// Returns the emitted steps in order, so a test can collect the viewed ids or inspect any step.
   /// </summary>
-  private static async Task<IReadOnlyList<NavigationStep>> Drive(
-    ScreenshotCarousel carousel,
-    params Move[] moves
-  ) {
-    var steps = new List<NavigationStep>();
-
+  private static async Task Drive(ScreenshotCarousel carousel, params Move[] moves) {
     foreach (var move in moves) {
       var step = move switch {
         Move.Next => await carousel.Next(),
@@ -447,14 +397,10 @@ public sealed class ScreenshotCarouselTests {
         _ => throw new ArgumentOutOfRangeException(nameof(moves), move, null)
       };
 
-      steps.Add(step);
-
       if (step.ShouldPreloadAhead) {
         await carousel.PreloadAhead();
       }
     }
-
-    return steps;
   }
 
   /// <summary>

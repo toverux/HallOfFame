@@ -299,9 +299,9 @@ internal sealed class SlideshowConductor {
       or ImagePreloadFailedException;
 
   /// <summary>
-  /// Mirrors a successful <see cref="NavigationStep"/> onto the UI and enacts the engine side
-  /// effects the carousel decided but does not perform itself: it publishes the screenshot, settles
-  /// the navigation lock, records the view, and prefetches the next image.
+  /// Mirrors a successful <see cref="NavigationStep"/> onto the UI and enacts the side effects
+  /// around it: it publishes the screenshot, settles the navigation lock, records the view, and
+  /// prefetches the next image when the step calls for it.
   /// The screenshot is published before the prefetch is awaited, so the display stays immediate
   /// while the lock is held throughout the prefetch.
   /// This is the single apply path shared by next, previous, and (in debug) load-by-id.
@@ -324,9 +324,9 @@ internal sealed class SlideshowConductor {
       $"(carousel idx {this.carousel.CurrentIndex}/{this.carousel.Count - 1})."
     );
 
-    if (step.ViewedScreenshotId is { } viewedScreenshotId) {
-      _ = this.viewRecorder.RecordView(viewedScreenshotId);
-    }
+    // Every apply path records the displayed screenshot as viewed, scrollback re-displays included:
+    // the recorder owns the at-most-once dedupe, so the conductor does not pre-filter here.
+    _ = this.viewRecorder.RecordView(step.Current.Id);
 
     if (step.ShouldPreloadAhead) {
       // We are viewing the front of the window: prepare the next screenshot in the background,

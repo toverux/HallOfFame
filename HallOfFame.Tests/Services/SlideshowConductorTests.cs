@@ -269,6 +269,50 @@ public sealed class SlideshowConductorTests {
     Assert.Empty(viewed);
   }
 
+  // VIEW RECORDING
+
+  /// <summary>
+  /// A scripted walk goes forward into fresh territory, scrolls back over already-seen screenshots,
+  /// then forward again past them.
+  /// The conductor records every display and leans on the recorder's at-most-once dedupe rather
+  /// than pre-filtering, so each distinct screenshot is counted exactly once, on its first display.
+  /// This is the integration-level counterpart to the recorder's own dedupe unit tests.
+  /// </summary>
+  [Fact]
+  public async Task ViewRecording_OverScriptedWalk_CountsEachFirstDisplayOnce() {
+    var counter = 0;
+
+    var viewed = new List<string>();
+
+    // Distinct screenshots on every fetch keep the carousel's look-ahead dedupe from spinning.
+    var api = new FakeApi {
+      GetRandomScreenshotWeightedImpl =
+        () => Task.FromResult(SlideshowConductorTests.MakeScreenshot($"s{counter++}")),
+      MarkScreenshotViewedImpl = id => {
+        viewed.Add(id);
+
+        return Task.FromResult(new View());
+      }
+    };
+
+    var conductor = SlideshowConductorTests.CreateConductor(api: api);
+
+    // Three forward steps before scrolling back twice: two Previous moves need the cursor at index
+    // >= 2.
+    await conductor.Next();
+    await conductor.Next();
+    await conductor.Next();
+    await conductor.Previous();
+    await conductor.Previous();
+    await conductor.Next();
+    await conductor.Next();
+    await conductor.Next();
+
+    // s1 and s2 are re-displayed during the forward replay after scrollback, yet never re-counted;
+    // s3 is counted only when the replay crosses into never-seen territory.
+    Assert.Equal(["s0", "s1", "s2", "s3"], viewed);
+  }
+
   // LIKE
 
   [Fact]

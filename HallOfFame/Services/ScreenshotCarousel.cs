@@ -8,9 +8,9 @@ namespace HallOfFame.Services;
 
 /// <summary>
 /// The decision produced by a successful carousel navigation step: which screenshot to display,
-/// plus the two side effect decisions derived from where the cursor landed.
+/// plus the look-ahead decision derived from where the cursor landed.
 /// It carries data only; the driving system enacts the side effects (UI bindings, look-ahead
-/// prefetch, view recording), keeping the carousel free of engine concerns.
+/// prefetch), keeping the carousel free of engine concerns.
 /// </summary>
 /// <param name="Current">
 /// The screenshot to display; never null after a successful step.
@@ -19,14 +19,9 @@ namespace HallOfFame.Services;
 /// Whether the next look-ahead screenshot should be prefetched, true exactly when the cursor landed
 /// at the front of the window (<see cref="ScreenshotCarousel.IsAtEnd"/>).
 /// </param>
-/// <param name="ViewedScreenshotId">
-/// The id of the screenshot to record as viewed (<see cref="Current"/>'s on a first display), or
-/// null when scrolling onto an already-seen screenshot.
-/// </param>
 internal readonly record struct NavigationStep(
   Screenshot Current,
-  bool ShouldPreloadAhead,
-  string? ViewedScreenshotId
+  bool ShouldPreloadAhead
 );
 
 /// <summary>
@@ -132,9 +127,9 @@ internal sealed class ScreenshotCarousel(
     await this.Preload(this.screenshots[this.CurrentIndex]);
 
     // Scrolling back always lands on an already-seen screenshot with look-ahead still ahead of it:
-    // there is nothing to prefetch, and it must not be re-counted as a view.
+    // there is nothing to prefetch.
     // Hence, the degenerate step, regardless of the cursor position.
-    return new NavigationStep(this.Current!, ShouldPreloadAhead: false, ViewedScreenshotId: null);
+    return new NavigationStep(this.Current!, ShouldPreloadAhead: false);
   }
 
   /// <summary>
@@ -196,8 +191,7 @@ internal sealed class ScreenshotCarousel(
   /// Debug-only: loads a specific screenshot by its ID, preloads its image, appends it to the
   /// window, and advances the cursor onto it so <see cref="Current"/> stays consistent, returning
   /// the resulting <see cref="NavigationStep"/>.
-  /// It lands at the front of the window, so the step prefetches ahead and counts as a view like
-  /// any other forward move.
+  /// It lands at the front of the window, so the step prefetches ahead like any other forward move.
   /// </summary>
   internal async Task<NavigationStep> LoadById(string id) {
     var screenshot = await api.GetScreenshot(id);
@@ -214,19 +208,11 @@ internal sealed class ScreenshotCarousel(
   /// <summary>
   /// Builds the <see cref="NavigationStep"/> for the screenshot the cursor has just moved forward
   /// onto.
-  /// Landing at the front of the window (<see cref="IsAtEnd"/>) is the single trigger for both
-  /// look-ahead prefetching and counting the screenshot as viewed; moving onto an already-loaded
-  /// look-ahead screenshot triggers neither.
+  /// Landing at the front of the window (<see cref="IsAtEnd"/>) is what triggers the look-ahead
+  /// prefetch; moving onto an already-loaded look-ahead screenshot does not.
   /// </summary>
-  private NavigationStep ForwardStep() {
-    var current = this.Current!;
-
-    return new NavigationStep(
-      current,
-      ShouldPreloadAhead: this.IsAtEnd,
-      ViewedScreenshotId: this.IsAtEnd ? current.Id : null
-    );
-  }
+  private NavigationStep ForwardStep() =>
+    new(this.Current!, ShouldPreloadAhead: this.IsAtEnd);
 
   /// <summary>
   /// Fetches a fresh random screenshot from the server and preloads its image.
