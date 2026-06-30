@@ -38,7 +38,7 @@ Here is a more detailed breakdown:
   (typed C#<->TS binding facade), `utils` (shared hooks/helpers), and `vanilla-modules` (typed
   stubs for game UI internals).
 - `HallOfFame/UI/src/bindings`: The typed facade over the C#<->TS bindings, one module per
-  binding group (`presenter`, `common`, `capture`) plus the generic `input-action` factory. Each
+  binding group (`slideshow`, `common`, `capture`) plus the generic `input-action` factory. Each
   module owns a `const GROUP` and keeps its `bindValue`/`trigger` calls private, exporting only typed
   hooks and command functions. Add new bindings here rather than scattering raw `bindValue`/`trigger`
   calls across components. Create value bindings with `lazyBindValue` (not eager `bindValue`) so that

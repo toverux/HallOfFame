@@ -8,14 +8,14 @@ using HallOfFame.Services;
 namespace HallOfFame.Tests.Services;
 
 /// <summary>
-/// Handwritten <see cref="IPresentationSink"/> test double for the conductor, mirroring the
-/// recorder/delegate split of <c>FakeStore</c> and <c>FakeParadoxConnection</c>.
+/// Handwritten <see cref="ISlideshowPresentationSink"/> test double for the conductor, mirroring
+/// the recorder/delegate split of <c>FakeStore</c> and <c>FakeParadoxConnection</c>.
 /// The eight void sinks are recorded passively so a test can assert on them; the lone
 /// value-returning <see cref="ConfirmReport"/> is wired per test through
 /// <see cref="ConfirmReportImpl"/> and defaults to declining (<c>false</c>), the safe choice that
 /// performs no report.
 /// </summary>
-internal sealed class FakePresentationSink : IPresentationSink {
+internal sealed class FakeSlideshowPresentationSink : ISlideshowPresentationSink {
   /// <summary>
   /// Decides the report confirmation; left unset, the user declines.
   /// </summary>

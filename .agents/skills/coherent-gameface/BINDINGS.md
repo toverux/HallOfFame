@@ -28,7 +28,7 @@ This is implemented in the outbound writers in `HallOfFame/Utils/Writers` - see 
 ## Where the C# side lives
 
 - **Outbound C# -> UI writers:** `HallOfFame/Utils/Writers` (`IWriter<T>` implementations). Domain records hold only inbound `[DecodeAlias]` data; the outbound wire format lives in the writers.
-- **Typed TS facade:** `HallOfFame/UI/src/bindings`, one module per binding group (`presenter`, `common`, `capture`) plus the generic `input-action` factory. Each module keeps its `bindValue`/`trigger` calls private and exports typed hooks/commands.
+- **Typed TS facade:** `HallOfFame/UI/src/bindings`, one module per binding group (`slideshow`, `common`, `capture`) plus the generic `input-action` factory. Each module keeps its `bindValue`/`trigger` calls private and exports typed hooks/commands.
 
 ## HTML data binding (`data-bind-*`)
 

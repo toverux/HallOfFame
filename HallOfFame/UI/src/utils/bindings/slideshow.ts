@@ -6,7 +6,7 @@ import { createSingletonHook } from '../singleton-hook';
 import { type ModSettings, useModSettings } from './common';
 import { lazyBindValue } from './lazy-value-binding';
 
-const GROUP = 'hallOfFame.presenter';
+const GROUP = 'hallOfFame.slideshow';
 
 interface ReadonlyMenuState {
   readonly isSlideshowEnabled: boolean;
@@ -125,7 +125,7 @@ export function useHofMenuState(): [
 }
 
 /**
- * Subscribes to the current presenter screenshot, the entity backing the menu slideshow, and the
+ * Subscribes to the current slideshow screenshot, the entity backing the menu slideshow, and the
  * loading-screen background.
  */
 export function useScreenshot(): Screenshot | null {
@@ -136,7 +136,7 @@ export function useScreenshot(): Screenshot | null {
  * Lightweight selector that only subscribes to the slideshow-enabled flag.
  *
  * Prefer this over {@link useHofMenuState} in components that only need to know whether the HoF
- * slideshow is active: the full hook subscribes to every presenter binding and would re-render
+ * slideshow is active: the full hook subscribes to every slideshow binding and would re-render
  * those components on unrelated updates.
  */
 export function useIsSlideshowEnabled(): boolean {
@@ -157,7 +157,7 @@ export function useIsMenuVisible(): boolean {
 /**
  * Lightweight selector for the splashscreen, subscribing only to the current image URI and the
  * can-advance flag (plus the stable setter to report readiness for the next image), rather than
- * every presenter binding.
+ * every slideshow binding.
  *
  * @see useIsSlideshowEnabled for the rationale.
  */

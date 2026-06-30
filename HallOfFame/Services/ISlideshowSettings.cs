@@ -8,7 +8,7 @@ namespace HallOfFame.Services;
 /// <see cref="Settings"/> shell so it constructs and runs off-engine under test.
 /// The production implementation is <see cref="Settings"/>; tests inject an in-memory fake.
 /// </summary>
-internal interface IPresenterSettings {
+internal interface ISlideshowSettings {
   /// <summary>
   /// The configured screenshot resolution (e.g. <c>fhd</c> or <c>4k</c>), read lazily on each load
   /// to pick which image variant to preload.

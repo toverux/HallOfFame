@@ -8,12 +8,12 @@ namespace HallOfFame.Services;
 /// Narrow outbound-effects seam through which <see cref="SlideshowConductor"/> enacts the engine
 /// side effects its orchestration decides but does not perform itself: the value pushes onto the UI
 /// bindings, the two user-facing dialogs, and the forced-refresh bump.
-/// It replaces the scattered callbacks the presenter used to wire in <c>OnCreate</c>, keeping the
+/// It replaces the scattered callbacks the system used to wire in <c>OnCreate</c>, keeping the
 /// conductor free of engine-bound binding and dialog types so it constructs and runs off-engine
 /// under test.
-/// The production implementation is <c>PresenterUISystem</c>; tests inject an in-memory fake.
+/// The production implementation is <c>SlideshowUISystem</c>; tests inject an in-memory fake.
 /// </summary>
-internal interface IPresentationSink {
+internal interface ISlideshowPresentationSink {
   /// <summary>
   /// Publishes the screenshot to display, driving both the navigation apply step and the Liker's
   /// optimistic like render.

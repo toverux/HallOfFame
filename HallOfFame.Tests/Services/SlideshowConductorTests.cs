@@ -19,7 +19,7 @@ namespace HallOfFame.Tests.Services;
 /// view recorder, exporter) wired to fake boundaries, driven through the <see cref="Task"/> entry
 /// points.
 /// This is the test surface the extraction exists to create: the sequencing that used to live
-/// untested in the engine-bound presenter.
+/// untested in the engine-bound slideshow system.
 /// </summary>
 public sealed class SlideshowConductorTests {
   // PURE HELPERS
@@ -73,7 +73,7 @@ public sealed class SlideshowConductorTests {
       }
     };
 
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -112,7 +112,7 @@ public sealed class SlideshowConductorTests {
       MarkScreenshotViewedImpl = _ => Task.FromResult(new View())
     };
 
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
 
     var conductor =
       SlideshowConductorTests.CreateConductor(api: api, preloader: preloader, sink: sink);
@@ -138,7 +138,7 @@ public sealed class SlideshowConductorTests {
         () => Task.FromException<Screenshot>(new HttpNetworkException("1", "boom"))
     };
 
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -158,7 +158,7 @@ public sealed class SlideshowConductorTests {
         () => Task.FromException<Screenshot>(new InvalidOperationException("boom"))
     };
 
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
@@ -185,7 +185,7 @@ public sealed class SlideshowConductorTests {
     };
 
     var silentLogged = new List<Exception>();
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
@@ -216,7 +216,7 @@ public sealed class SlideshowConductorTests {
       MarkScreenshotViewedImpl = _ => Task.FromResult(new View())
     };
 
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -248,7 +248,7 @@ public sealed class SlideshowConductorTests {
       }
     };
 
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -341,7 +341,7 @@ public sealed class SlideshowConductorTests {
       }
     };
 
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
 
     var conductor =
       SlideshowConductorTests.CreateConductor(api: api, preloader: preloader, sink: sink);
@@ -387,7 +387,7 @@ public sealed class SlideshowConductorTests {
       }
     };
 
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
 
     var conductor =
       SlideshowConductorTests.CreateConductor(api: api, preloader: preloader, sink: sink);
@@ -411,7 +411,7 @@ public sealed class SlideshowConductorTests {
 
   [Fact]
   public async Task Save_WithNoCurrentScreenshot_IsANoOp() {
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(sink: sink);
 
     await conductor.Save();
@@ -437,7 +437,7 @@ public sealed class SlideshowConductorTests {
       }
     };
 
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -476,11 +476,11 @@ public sealed class SlideshowConductorTests {
     try {
       var recoverable = new List<Exception>();
       var localizedErrors = new List<LocalizedString>();
-      var sink = new FakePresentationSink();
+      var sink = new FakeSlideshowPresentationSink();
 
       var conductor = SlideshowConductorTests.CreateConductor(
         api: api,
-        settings: new FakePresenterSettings { SaveDirectory = directory },
+        settings: new FakeSlideshowSettings { SaveDirectory = directory },
         log: new FakeModLog {
           ErrorRecoverableImpl = recoverable.Add, ErrorLocalizedImpl = localizedErrors.Add
         },
@@ -512,7 +512,7 @@ public sealed class SlideshowConductorTests {
     };
 
     var localizedErrors = new List<LocalizedString>();
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
@@ -542,7 +542,7 @@ public sealed class SlideshowConductorTests {
     };
 
     var recoverable = new List<Exception>();
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
@@ -563,7 +563,7 @@ public sealed class SlideshowConductorTests {
   public async Task Report_WithNoCurrentScreenshot_IsANoOp() {
     var confirmCalls = 0;
 
-    var sink = new FakePresentationSink {
+    var sink = new FakeSlideshowPresentationSink {
       ConfirmReportImpl = _ => {
         confirmCalls++;
 
@@ -584,7 +584,9 @@ public sealed class SlideshowConductorTests {
     var reported = new List<string>();
     var api = SlideshowConductorTests.ReportableApi(reported);
 
-    var sink = new FakePresentationSink { ConfirmReportImpl = _ => Task.FromResult(false) };
+    var sink = new FakeSlideshowPresentationSink {
+      ConfirmReportImpl = _ => Task.FromResult(false)
+    };
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -600,7 +602,7 @@ public sealed class SlideshowConductorTests {
     var reported = new List<string>();
     var api = SlideshowConductorTests.ReportableApi(reported);
 
-    var sink = new FakePresentationSink { ConfirmReportImpl = _ => Task.FromResult(true) };
+    var sink = new FakeSlideshowPresentationSink { ConfirmReportImpl = _ => Task.FromResult(true) };
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -623,7 +625,7 @@ public sealed class SlideshowConductorTests {
       ReportScreenshotImpl = _ => Task.FromException<Screenshot>(new HttpNetworkException("1", "x"))
     };
 
-    var sink = new FakePresentationSink { ConfirmReportImpl = _ => Task.FromResult(true) };
+    var sink = new FakeSlideshowPresentationSink { ConfirmReportImpl = _ => Task.FromResult(true) };
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -647,7 +649,7 @@ public sealed class SlideshowConductorTests {
     };
 
     var recoverable = new List<Exception>();
-    var sink = new FakePresentationSink { ConfirmReportImpl = _ => Task.FromResult(true) };
+    var sink = new FakeSlideshowPresentationSink { ConfirmReportImpl = _ => Task.FromResult(true) };
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
@@ -667,7 +669,7 @@ public sealed class SlideshowConductorTests {
 
   [Fact]
   public void OnGameModeChanged_ReturningToMainMenu_RequestsRefresh() {
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(sink: sink);
 
     conductor.OnGameModeChanged(GameMode.Game);
@@ -679,7 +681,7 @@ public sealed class SlideshowConductorTests {
   [Fact]
   public void OnGameModeChanged_OnBoot_DoesNotRefresh() {
     // The previous-mode baseline is seeded to MainMenu, so the first MainMenu is not a return.
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(sink: sink);
 
     conductor.OnGameModeChanged(GameMode.MainMenu);
@@ -689,7 +691,7 @@ public sealed class SlideshowConductorTests {
 
   [Fact]
   public void OnGameModeChanged_EnteringGame_DoesNotRefresh() {
-    var sink = new FakePresentationSink();
+    var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(sink: sink);
 
     conductor.OnGameModeChanged(GameMode.Game);
@@ -707,14 +709,14 @@ public sealed class SlideshowConductorTests {
     IHallOfFameApi? api = null,
     IImagePreloader? preloader = null,
     IModLog? log = null,
-    IPresenterSettings? settings = null,
-    IPresentationSink? sink = null
+    ISlideshowSettings? settings = null,
+    ISlideshowPresentationSink? sink = null
   ) => new(
     api ?? new FakeApi(),
     preloader ?? new FakePreloader(),
     log ?? new FakeModLog(),
-    settings ?? new FakePresenterSettings(),
-    sink ?? new FakePresentationSink()
+    settings ?? new FakeSlideshowSettings(),
+    sink ?? new FakeSlideshowPresentationSink()
   );
 
   /// <summary>

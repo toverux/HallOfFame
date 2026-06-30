@@ -385,7 +385,7 @@ public sealed class ScreenshotCarouselTests {
     };
 
   /// <summary>
-  /// Drives the carousel the way <c>PresenterUISystem</c> does: each move applies its returned
+  /// Drives the carousel the way <c>SlideshowUISystem</c> does: each move applies its returned
   /// <see cref="NavigationStep"/>, and a step that asks to preload ahead triggers the look-ahead
   /// prefetch (the system fires it in the background; here it is awaited so the window settles).
   /// </summary>

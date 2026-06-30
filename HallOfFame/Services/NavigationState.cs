@@ -8,7 +8,7 @@ namespace HallOfFame.Services;
 /// prefetch) and the derived facts the driving system gates its interactions on.
 /// It carries no engine types and no dependencies, so it constructs off-engine like
 /// <see cref="ScreenshotCarousel"/>, which is what makes the lock acquire/release unit-testable in
-/// isolation; the driving <c>PresenterUISystem</c> mirrors <see cref="CanAdvance"/> onto its
+/// isolation; the driving <c>SlideshowUISystem</c> mirrors <see cref="CanAdvance"/> onto its
 /// binding after every transition.
 /// Each transition throws <see cref="InvalidOperationException"/> on an illegal source phase, the
 /// same misuse-throws contract as the carousel, so callers guard with the derived facts first.

@@ -23,14 +23,14 @@ namespace HallOfFame.Systems;
 /// <para>
 /// It is the thin production adapter for <see cref="SlideshowConductor"/>: it registers the engine
 /// bindings, forwards engine events (trigger bindings, game-mode changes) to the conductor, and
-/// implements <see cref="IPresentationSink"/> to enact the engine side effects the conductor
-/// decides.
+/// implements <see cref="ISlideshowPresentationSink"/> to enact the engine side effects the
+/// conductor decides.
 /// All orchestration lives in the conductor; this shell keeps only binding plumbing, event
 /// forwarding, and the force-enable dev keybinding.
 /// </para>
 /// </summary>
-internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSink {
-  private const string BindingGroup = "hallOfFame.presenter";
+internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresentationSink {
+  private const string BindingGroup = "hallOfFame.slideshow";
 
   private SlideshowConductor conductor = null!;
 
@@ -93,45 +93,45 @@ internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSin
 
       // VALUE BINDINGS
       this.enableMainMenuSlideshowBinding = new GetterValueBinding<bool>(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "enableMainMenuSlideshow",
         () => this.forceEnableMainMenuSlideshow || Mod.Settings.EnableMainMenuSlideshow
       );
 
       this.hasPreviousScreenshotBinding = new ValueBinding<bool>(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "hasPreviousScreenshot",
         false
       );
 
       this.forcedRefreshIndexBinding = new ValueBinding<int>(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "forcedRefreshIndex",
         1
       );
 
       this.canAdvanceBinding = new ValueBinding<bool>(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "canAdvance",
         true
       );
 
       this.screenshotBinding = new ValueBinding<Screenshot?>(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "screenshot",
         null,
         new ScreenshotValueWriter()
       );
 
       this.loadErrorBinding = new ValueBinding<LocalizedString?>(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "loadError",
         null,
         new ValueWriter<LocalizedString>().Nullable()
       );
 
       this.isSavingBinding = new ValueBinding<bool>(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "isSaving",
         false
       );
@@ -146,25 +146,25 @@ internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSin
 
       // INPUT ACTION BINDINGS
       this.previousScreenshotInputActionBinding = new InputActionBinding(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "previousScreenshotInputAction",
         Mod.Settings.KeyBindingPrevious
       );
 
       this.nextScreenshotInputActionBinding = new InputActionBinding(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "nextScreenshotInputAction",
         Mod.Settings.KeyBindingNext
       );
 
       this.likeScreenshotInputActionBinding = new InputActionBinding(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "likeScreenshotInputAction",
         Mod.Settings.KeyBindingLike
       );
 
       this.toggleMenuInputActionBinding = new InputActionBinding(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "toggleMenuInputAction",
         Mod.Settings.KeyBindingToggleMenu
       );
@@ -178,31 +178,31 @@ internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSin
       // Fire-and-forget edges: the conductor entry points are designed never to throw, so the
       // discarded task is the single async boundary between the engine triggers and the conductor.
       this.previousScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "previousScreenshot",
         () => { _ = this.conductor.Previous(); }
       );
 
       this.nextScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "nextScreenshot",
         () => { _ = this.conductor.Next(); }
       );
 
       this.likeScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "likeScreenshot",
         () => { _ = this.conductor.Like(); }
       );
 
       this.saveScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "saveScreenshot",
         () => { _ = this.conductor.Save(); }
       );
 
       this.reportScreenshotBinding = new TriggerBinding(
-        PresenterUISystem.BindingGroup,
+        SlideshowUISystem.BindingGroup,
         "reportScreenshot",
         () => { _ = this.conductor.Report(); }
       );
@@ -255,27 +255,27 @@ internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSin
   }
   #endif
 
-  void IPresentationSink.PublishScreenshot(Screenshot? screenshot) {
+  void ISlideshowPresentationSink.PublishScreenshot(Screenshot? screenshot) {
     this.screenshotBinding.Update(screenshot);
   }
 
-  void IPresentationSink.PublishLoadError(LocalizedString? error) {
+  void ISlideshowPresentationSink.PublishLoadError(LocalizedString? error) {
     this.loadErrorBinding.Update(error);
   }
 
-  void IPresentationSink.SetCanAdvance(bool canAdvance) {
+  void ISlideshowPresentationSink.SetCanAdvance(bool canAdvance) {
     this.canAdvanceBinding.Update(canAdvance);
   }
 
-  void IPresentationSink.SetHasPrevious(bool hasPrevious) {
+  void ISlideshowPresentationSink.SetHasPrevious(bool hasPrevious) {
     this.hasPreviousScreenshotBinding.Update(hasPrevious);
   }
 
-  void IPresentationSink.SetSaving(bool isSaving) {
+  void ISlideshowPresentationSink.SetSaving(bool isSaving) {
     this.isSavingBinding.Update(isSaving);
   }
 
-  void IPresentationSink.ShowError(LocalizedString message) {
+  void ISlideshowPresentationSink.ShowError(LocalizedString message) {
     ErrorDialogManagerAccessor.Instance?.ShowError(
       new ErrorDialog {
         localizedTitle = "HallOfFame.Common.OOPS",
@@ -285,17 +285,17 @@ internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSin
     );
   }
 
-  Task<bool> IPresentationSink.ConfirmReport(Screenshot screenshot) {
+  Task<bool> ISlideshowPresentationSink.ConfirmReport(Screenshot screenshot) {
     var confirmation = new TaskCompletionSource<bool>();
 
     var dialog = new ConfirmationDialog(
       LocalizedString.IdWithArgs(
-        "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
+        "HallOfFame.Systems.SlideshowUI.CONFIRM_REPORT_DIALOG[Title]",
         ("CITY_NAME", LocalizedString.Value(screenshot.CityName)),
         ("AUTHOR_NAME", LocalizedString.Value(screenshot.Creator?.CreatorName))
       ),
-      LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Message]"),
-      LocalizedString.Id("HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[ConfirmAction]"),
+      LocalizedString.Id("HallOfFame.Systems.SlideshowUI.CONFIRM_REPORT_DIALOG[Message]"),
+      LocalizedString.Id("HallOfFame.Systems.SlideshowUI.CONFIRM_REPORT_DIALOG[ConfirmAction]"),
       LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel")
     );
 
@@ -305,10 +305,10 @@ internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSin
     return confirmation.Task;
   }
 
-  void IPresentationSink.ShowReportSuccess() {
+  void ISlideshowPresentationSink.ShowReportSuccess() {
     var successDialog = new MessageDialog(
-      LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Title]"),
-      LocalizedString.Id("HallOfFame.Systems.PresenterUI.REPORT_SUCCESS_DIALOG[Message]"),
+      LocalizedString.Id("HallOfFame.Systems.SlideshowUI.REPORT_SUCCESS_DIALOG[Title]"),
+      LocalizedString.Id("HallOfFame.Systems.SlideshowUI.REPORT_SUCCESS_DIALOG[Message]"),
       LocalizedString.IdWithFallback("Common.CLOSE", "Close")
     );
 
@@ -316,7 +316,7 @@ internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSin
       .ShowMessageDialog(successDialog, _ => { });
   }
 
-  void IPresentationSink.RequestRefresh() {
+  void ISlideshowPresentationSink.RequestRefresh() {
     this.forcedRefreshIndexBinding.Update(this.forcedRefreshIndexBinding.value + 1);
   }
 

@@ -9,8 +9,8 @@ namespace HallOfFame.Services;
 /// Downloads a community screenshot's 4K image and writes it to disk under a creator/city/date
 /// filename.
 /// This is the "save another creator's screenshot from the main menu" concern, lifted out of the
-/// presenter; it owns no UI state and reports nothing, leaving the saving indicator and error
-/// policy to the caller.
+/// slideshow system; it owns no UI state and reports nothing, leaving the saving indicator and
+/// error policy to the caller.
 /// </summary>
 internal sealed class ScreenshotExporter(IHallOfFameApi api) {
   /// <summary>

@@ -163,7 +163,7 @@ public sealed class Mod : IMod {
       // Initialize subsystems.
       updateSystem.UpdateAt<StatsNotificationSystem>(SystemUpdatePhase.MainLoop);
       updateSystem.UpdateAt<CommonUISystem>(SystemUpdatePhase.UIUpdate);
-      updateSystem.UpdateAt<PresenterUISystem>(SystemUpdatePhase.UIUpdate);
+      updateSystem.UpdateAt<SlideshowUISystem>(SystemUpdatePhase.UIUpdate);
       updateSystem.UpdateAt<Systems.Capture.CaptureUISystem>(SystemUpdatePhase.UIUpdate);
 
       Mod.Log.Verbose($"{nameof(Mod)}: {nameof(this.OnLoad)} complete.");

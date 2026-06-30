@@ -8,7 +8,7 @@ using HallOfFame.Utils;
 namespace HallOfFame.Services;
 
 /// <summary>
-/// Owns the main-menu slideshow orchestration lifted out of <c>PresenterUISystem</c>: it sequences
+/// Owns the main-menu slideshow orchestration lifted out of <c>SlideshowUISystem</c>: it sequences
 /// the navigation lock (begin, settle or abort, background prefetch), applies each navigation step
 /// onto the UI, drives the like/save/report flows, owns their error policy, and decides when to
 /// refresh on return to the main menu.
@@ -16,14 +16,16 @@ namespace HallOfFame.Services;
 /// It constructs and owns the deep leaves it sequences (<see cref="ScreenshotCarousel"/>,
 /// <see cref="NavigationState"/>, <see cref="ScreenshotLiker"/>, <see cref="ScreenshotViewRecorder"/>,
 /// <see cref="ScreenshotExporter"/>) and reaches the engine only through the narrow
-/// <see cref="IPresentationSink"/> (value pushes and dialogs), <see cref="IPresenterSettings"/>
-/// (resolution and save directory), <see cref="IHallOfFameApi"/>, and <see cref="IModLog"/> seams.
+/// <see cref="ISlideshowPresentationSink"/> (value pushes and dialogs),
+/// <see cref="ISlideshowSettings"/> (resolution and save directory),
+/// <see cref="IHallOfFameApi"/>, and <see cref="IModLog"/> seams.
 /// Carrying no engine-bound binding or dialog types, it constructs and runs off-engine under test,
 /// where the sequencing bugs finally have a test surface.
 /// </para>
 /// <para>
-/// The <c>PresenterUISystem</c> shell is reduced to the production adapter: it registers the engine
-/// bindings, forwards engine events to this conductor, and implements <see cref="IPresentationSink"/>.
+/// The <c>SlideshowUISystem</c> shell is reduced to the production adapter: it registers the engine
+/// bindings, forwards engine events to this conductor, and implements
+/// <see cref="ISlideshowPresentationSink"/>.
 /// Exactly the <see cref="CreatorIdentity"/> to <see cref="Settings"/> relationship.
 /// </para>
 /// </summary>
@@ -32,9 +34,9 @@ internal sealed class SlideshowConductor {
 
   private readonly IModLog log;
 
-  private readonly IPresenterSettings settings;
+  private readonly ISlideshowSettings settings;
 
-  private readonly IPresentationSink sink;
+  private readonly ISlideshowPresentationSink sink;
 
   private readonly ScreenshotCarousel carousel;
 
@@ -48,7 +50,8 @@ internal sealed class SlideshowConductor {
 
   /// <summary>
   /// Whether a screenshot is currently being exported to disk, owned here as the save flow's
-  /// reentrancy guard and mirrored onto the UI through <see cref="IPresentationSink.SetSaving"/>.
+  /// reentrancy guard and mirrored onto the UI through
+  /// <see cref="ISlideshowPresentationSink.SetSaving"/>.
   /// </summary>
   private bool isSaving;
 
@@ -73,8 +76,8 @@ internal sealed class SlideshowConductor {
     IHallOfFameApi api,
     IImagePreloader preloader,
     IModLog log,
-    IPresenterSettings settings,
-    IPresentationSink sink
+    ISlideshowSettings settings,
+    ISlideshowPresentationSink sink
   ) {
     this.api = api;
     this.log = log;

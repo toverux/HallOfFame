@@ -18,22 +18,22 @@ import * as styles from './nav-buttons.module.scss';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 
 const previousScreenshotInputAction = bindings.bindInputAction(
-  'hallOfFame.presenter',
+  'hallOfFame.slideshow',
   'previousScreenshotInputAction'
 );
 
 const nextScreenshotInputAction = bindings.bindInputAction(
-  'hallOfFame.presenter',
+  'hallOfFame.slideshow',
   'nextScreenshotInputAction'
 );
 
 const likeScreenshotInputAction = bindings.bindInputAction(
-  'hallOfFame.presenter',
+  'hallOfFame.slideshow',
   'likeScreenshotInputAction'
 );
 
 const toggleMenuInputAction = bindings.bindInputAction(
-  'hallOfFame.presenter',
+  'hallOfFame.slideshow',
   'toggleMenuInputAction'
 );
 

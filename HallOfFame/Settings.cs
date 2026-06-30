@@ -40,7 +40,7 @@ namespace HallOfFame;
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingNext), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingLike), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
-public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore, IPresenterSettings {
+public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore, ISlideshowSettings {
   private const string GroupYourProfile = "YourProfile";
 
   private const string GroupUIPreferences = "UIPreferences";
@@ -518,11 +518,11 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
 
   /// <summary>
   /// Exposes the save directory to <see cref="SlideshowConductor"/> through the
-  /// <see cref="IPresenterSettings"/> seam.
-  /// <see cref="IPresenterSettings.ScreenshotResolution"/> is satisfied directly by the public
+  /// <see cref="ISlideshowSettings"/> seam.
+  /// <see cref="ISlideshowSettings.ScreenshotResolution"/> is satisfied directly by the public
   /// <see cref="ScreenshotResolution"/> property.
   /// </summary>
-  string IPresenterSettings.SaveDirectory => this.CreatorsScreenshotSaveDirectory;
+  string ISlideshowSettings.SaveDirectory => this.CreatorsScreenshotSaveDirectory;
 
   public Settings(IMod mod) : base(mod) {
     this.SetDefaults();
@@ -630,7 +630,7 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
     var world = World.All[0];
 
     world
-      .GetOrCreateSystemManaged<PresenterUISystem>()
+      .GetOrCreateSystemManaged<SlideshowUISystem>()
       .LoadScreenshotById(this.ScreenshotToLoad!);
 
     this.ScreenshotToLoad = null;
