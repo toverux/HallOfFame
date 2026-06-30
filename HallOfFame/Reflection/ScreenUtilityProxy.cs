@@ -14,8 +14,6 @@ internal static class ScreenUtilityProxy {
   /// </summary>
   private static readonly FieldInfo? CountField;
 
-  private static int countFallback;
-
   static ScreenUtilityProxy() {
     ScreenUtilityProxy.CountField = typeof(ScreenUtility).GetField(
       "m_Count",
@@ -40,11 +38,11 @@ internal static class ScreenUtilityProxy {
   /// </summary>
   internal static int Count {
     get => ScreenUtilityProxy.CountField is null
-      ? ScreenUtilityProxy.countFallback
+      ? field
       : (int)ScreenUtilityProxy.CountField.GetValue(null);
     set {
       if (ScreenUtilityProxy.CountField is null) {
-        ScreenUtilityProxy.countFallback = value;
+        field = value;
       }
       else {
         ScreenUtilityProxy.CountField.SetValue(null, value);

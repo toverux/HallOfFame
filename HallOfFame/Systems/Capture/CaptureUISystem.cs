@@ -79,9 +79,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// Null if no screenshot is being displayed/uploaded.
   /// </summary>
   private ScreenshotSnapshot? CurrentScreenshot {
-    get => this.currentScreenshotValue;
+    get => field;
     set {
-      this.currentScreenshotValue = value;
+      field = value;
 
       this.screenshotUploader.Reset();
 
@@ -90,11 +90,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       MainThreadDispatcher.RegisterUpdater(() => { this.Enabled = value is not null; });
     }
   }
-
-  /// <summary>
-  /// Backing field for <see cref="CurrentScreenshot"/>.
-  /// </summary>
-  private ScreenshotSnapshot? currentScreenshotValue;
 
   protected override void OnCreate() {
     base.OnCreate();

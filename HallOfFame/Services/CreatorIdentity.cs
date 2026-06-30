@@ -320,10 +320,12 @@ internal sealed class CreatorIdentity(
 
       var isAnonymous = string.IsNullOrEmpty(creator.CreatorName);
 
-      return LocalizedString.Id(
-        isAnonymous
-          ? "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]"
-          : "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]",
+      var statusId = isAnonymous
+        ? "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]"
+        : "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]";
+
+      return LocalizedString.IdWithArgs(
+        statusId,
         ("CREATOR_NAME", LocalizedString.Value(creator.CreatorName))
       );
     }

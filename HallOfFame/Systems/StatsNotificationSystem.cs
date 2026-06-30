@@ -87,7 +87,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
     this.notificationUISystem!.AddOrUpdateNotification(
       "HallOfFame.CreatorStats",
       "Menu.NOTIFICATION_TITLE[HallOfFame.CreatorStats]",
-      LocalizedString.Id(
+      LocalizedString.IdWithArgs(
         "Menu.NOTIFICATION_DESCRIPTION[HallOfFame.CreatorStats]",
         ("SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount)),
         ("VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount)),
@@ -105,7 +105,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
   private void ShowStatsDialog(CreatorStats stats) {
     var successDialog = new MessageDialog(
       LocalizedString.Id("HallOfFame.Systems.StatsNotification.STATS_DIALOG[Title]"),
-      LocalizedString.Id(
+      LocalizedString.IdWithArgs(
         "HallOfFame.Systems.StatsNotification.STATS_DIALOG[Message]",
         ("SCREENSHOTS_COUNT", this.LocalizeNumber(stats.ScreenshotsCount)),
         ("VIEWS_COUNT", this.LocalizeNumber(stats.ViewsCount)),

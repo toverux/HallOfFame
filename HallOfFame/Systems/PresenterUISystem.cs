@@ -289,7 +289,7 @@ internal sealed partial class PresenterUISystem : UISystemBase, IPresentationSin
     var confirmation = new TaskCompletionSource<bool>();
 
     var dialog = new ConfirmationDialog(
-      LocalizedString.Id(
+      LocalizedString.IdWithArgs(
         "HallOfFame.Systems.PresenterUI.CONFIRM_REPORT_DIALOG[Title]",
         ("CITY_NAME", LocalizedString.Value(screenshot.CityName)),
         ("AUTHOR_NAME", LocalizedString.Value(screenshot.Creator?.CreatorName))
