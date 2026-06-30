@@ -25,6 +25,16 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   private static string PrependApiUrl(string path) =>
     $"{Mod.Settings.BaseUrlWithScheme}{HttpQueries.BaseApiPath}{path}";
 
+  /// <summary>
+  /// Returns the tracking request ID assigned to <paramref name="request"/> in
+  /// <see cref="RequestIdsMap"/>, or "?" when none was recorded.
+  /// </summary>
+  private static string GetRequestId(UnityWebRequest request) {
+    HttpQueries.RequestIdsMap.TryGetValue(request, out var requestId);
+
+    return requestId ?? "?";
+  }
+
   private static async Task SendRequest(
     UnityWebRequest request,
     ProgressHandler? progressHandler = null
@@ -87,6 +97,62 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
     }
   }
 
+  /// <summary>
+  /// Sends a request expecting a JSON body, then parses and status-maps it into
+  /// <typeparamref name="T"/> (see <see cref="ParseResponse{T}"/>).
+  /// </summary>
+  private static async Task<T> Send<T>(
+    UnityWebRequest request,
+    ProgressHandler? progressHandler = null
+  ) where T : new() {
+    await HttpQueries.SendRequest(request, progressHandler);
+
+    return HttpQueries.ParseResponse<T>(request);
+  }
+
+  /// <summary>
+  /// Sends a request expecting a raw binary body (e.g., a CDN image) and returns the downloaded
+  /// bytes.
+  /// Unlike <see cref="Send{T}"/>, this applies no JSON status mapping: any non-success result is
+  /// logged and rethrown as a <see cref="HttpNetworkException"/>.
+  /// </summary>
+  private static async Task<byte[]> SendForBytes(UnityWebRequest request) {
+    await HttpQueries.SendRequest(request);
+
+    if (request.result is UnityWebRequest.Result.Success) {
+      return request.downloadHandler.data;
+    }
+
+    // The verbose send/complete tracing may be disabled at the default log level, so the failing
+    // URL has to stay in this always-on error line.
+    Mod.Log.ErrorSilent(
+      $"HTTP: Downloading {request.url} failed ({request.responseCode}): " +
+      (string.IsNullOrEmpty(request.downloadHandler.text)
+        ? request.error
+        : request.downloadHandler.text)
+    );
+
+    throw new HttpNetworkException(HttpQueries.GetRequestId(request), request.error);
+  }
+
+  /// <summary>
+  /// Sends a request and returns its final URL after any redirects (the request is typically a HEAD
+  /// whose only purpose is to follow the redirect chain).
+  /// A non-success result is thrown as a <see cref="HttpNetworkException"/>.
+  /// </summary>
+  private static async Task<string> SendForRedirect(UnityWebRequest request) {
+    await HttpQueries.SendRequest(request);
+
+    if (request.result is not UnityWebRequest.Result.Success) {
+      throw new HttpNetworkException(
+        HttpQueries.GetRequestId(request),
+        $"Error resolving link to creator page: {request.responseCode} {request.error}."
+      );
+    }
+
+    return request.url;
+  }
+
   private static void AddModHeaders(UnityWebRequest request) {
     if (!request.uri.AbsolutePath.StartsWith(HttpQueries.BaseApiPath)) {
       return;
@@ -114,8 +180,7 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   }
 
   private static T ParseResponse<T>(UnityWebRequest request) where T : new() {
-    HttpQueries.RequestIdsMap.TryGetValue(request, out var requestId);
-    requestId ??= "?";
+    var requestId = HttpQueries.GetRequestId(request);
 
     if (!request.isDone) {
       throw new InvalidOperationException($"Request #{requestId} is not done.");
@@ -175,8 +240,7 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
 
   private static T ParseResponseJson<T>(UnityWebRequest request)
     where T : new() {
-    HttpQueries.RequestIdsMap.TryGetValue(request, out var requestId);
-    requestId ??= "?";
+    var requestId = HttpQueries.GetRequestId(request);
 
     var json = request.downloadHandler.text;
 

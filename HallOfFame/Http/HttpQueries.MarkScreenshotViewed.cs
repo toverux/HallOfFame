@@ -14,8 +14,6 @@ internal partial class HttpQueries {
       "POST"
     );
 
-    await HttpQueries.SendRequest(request);
-
-    return HttpQueries.ParseResponse<View>(request);
+    return await HttpQueries.Send<View>(request);
   }
 }

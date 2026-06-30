@@ -51,8 +51,6 @@ internal partial class HttpQueries {
 
     request.SetRequestHeader("Content-Type", "application/json");
 
-    await HttpQueries.SendRequest(request);
-
-    return HttpQueries.ParseResponse<Creator>(request);
+    return await HttpQueries.Send<Creator>(request);
   }
 }

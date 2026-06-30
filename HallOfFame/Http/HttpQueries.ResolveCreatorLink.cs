@@ -1,5 +1,3 @@
-﻿using System;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UnityEngine.Networking;
 
@@ -14,21 +12,14 @@ internal partial class HttpQueries {
   public async Task<string> ResolveParadoxModsUsername(string url) {
     using var request = UnityWebRequest.Head(url);
 
-    await HttpQueries.SendRequest(request);
-
-    if (request.result is not UnityWebRequest.Result.Success) {
-      throw new Exception(
-        $"Error resolving link to creator page: {request.responseCode} {request.error}."
-      );
-    }
-
     // We should have been redirected to the Paradox Mods URL.
-    var pdxUrl = request.url;
+    var pdxUrl = await HttpQueries.SendForRedirect(request);
 
-    var username = Regex.Match(pdxUrl, "/authors/(?<author>[^/?#]+)").Groups["author"]?.Value;
+    var username = CreatorUsernameResolver.Resolve(pdxUrl);
 
     if (username is null) {
-      throw new Exception(
+      throw new HttpNetworkException(
+        HttpQueries.GetRequestId(request),
         $"Error resolving link to creator page: Could not extract username from {pdxUrl}."
       );
     }

@@ -8,8 +8,6 @@ internal partial class HttpQueries {
   public async Task<Creator> GetMe() {
     using var request = UnityWebRequest.Get(HttpQueries.PrependApiUrl("/creators/me"));
 
-    await HttpQueries.SendRequest(request);
-
-    return HttpQueries.ParseResponse<Creator>(request);
+    return await HttpQueries.Send<Creator>(request);
   }
 }

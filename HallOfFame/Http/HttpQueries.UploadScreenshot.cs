@@ -61,8 +61,6 @@ internal partial class HttpQueries {
       multipart
     );
 
-    await HttpQueries.SendRequest(request, @params.UploadProgressHandler);
-
-    return HttpQueries.ParseResponse<Screenshot>(request);
+    return await HttpQueries.Send<Screenshot>(request, @params.UploadProgressHandler);
   }
 }

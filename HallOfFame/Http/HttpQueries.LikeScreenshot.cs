@@ -20,8 +20,6 @@ internal partial class HttpQueries {
 
     using var request = new UnityWebRequest(HttpQueries.PrependApiUrl(uri), method);
 
-    await HttpQueries.SendRequest(request);
-
-    return HttpQueries.ParseResponse<View>(request);
+    return await HttpQueries.Send<View>(request);
   }
 }

@@ -15,8 +15,6 @@ internal partial class HttpQueries {
       "POST"
     );
 
-    await HttpQueries.SendRequest(request);
-
-    return HttpQueries.ParseResponse<Screenshot>(request);
+    return await HttpQueries.Send<Screenshot>(request);
   }
 }

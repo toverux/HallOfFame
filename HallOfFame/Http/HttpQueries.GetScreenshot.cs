@@ -14,9 +14,7 @@ internal partial class HttpQueries {
       HttpQueries.PrependApiUrl($"/screenshots/{screenshotId}")
     );
 
-    await HttpQueries.SendRequest(request);
-
-    return HttpQueries.ParseResponse<Screenshot>(request);
+    return await HttpQueries.Send<Screenshot>(request);
   }
 }
 #endif
