@@ -11,6 +11,10 @@
   background-size: cover;
   background-repeat: no-repeat no-repeat;
 
+  // Last-resort fallback background color so uncached images don't show the game's 3D empty
+  // environment.
+  background-color: rgb(16, 19, 29);
+
   &--fade-in {
     // Use same timing as vanilla class base_iEQ for backdrop images.
     animation: fadeIn ease 0.75s;

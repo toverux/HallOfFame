@@ -102,6 +102,7 @@
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=debounces/@EntryIndexedValue">True</s:Boolean>
     <s:Boolean x:Key="/Default/UserDictionary/Words/=factorio/@EntryIndexedValue">True</s:Boolean>
     <s:Boolean x:Key="/Default/UserDictionary/Words/=fonticons/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=gameface/@EntryIndexedValue">True</s:Boolean>
     <s:Boolean x:Key="/Default/UserDictionary/Words/=hwid/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=lefthook/@EntryIndexedValue">True</s:Boolean>
     <s:Boolean x:Key="/Default/UserDictionary/Words/=lumina/@EntryIndexedValue">True</s:Boolean>

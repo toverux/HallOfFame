@@ -138,6 +138,7 @@ Donations are very welcome and will help keep the service running.
   <ModVersion Value="2026.2.4" />
   <GameVersion Value="1.6.*" />
   <ChangeLog>- Fixed liking and unliking a screenshot sometimes not working ("button does nothing one or more times").
+- Fixed abrupt slideshow transitions and other related issues. The slideshow should generally feel smoother.
 - Fixed some rare potential bugs.
 - Many internal improvements on overall robustness and modularity for future maintainability.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />

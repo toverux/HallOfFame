@@ -1,3 +1,4 @@
 ﻿- Fixed liking and unliking a screenshot sometimes not working ("button does nothing one or more times").
+- Fixed abrupt slideshow transitions and other related issues. The slideshow should generally feel smoother.
 - Fixed some rare potential bugs.
 - Many internal improvements on overall robustness and modularity for future maintainability.
