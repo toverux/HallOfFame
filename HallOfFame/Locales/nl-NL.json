@@ -7,7 +7,6 @@
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "Onze server is niet bereikbaar. Controleer je internetverbinding. Als deze werkt, is het waarschijnlijk een tijdelijk probleem aan onze kant. Foutdetails: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpServerException]": "Het lijkt erop dat onze server problemen ondervindt. Probeer het later opnieuw. Foutdetails: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpUserCompatibilityException]": "Deze versie van Hall of Fame is niet compatibel met de server. Controleer of de mod up-to-date is.",
-  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Systems.ImagePreloaderUISystem.ImagePreloadFailedException]": "Het downloaden van de afbeelding is mislukt. Foutdetails: {ERROR_MESSAGE}",
   "HallOfFame.Common.DEFAULT_CITY_NAME": "Mijn stad",
   "HallOfFame.Common.CITY_BY": "door {CREATOR_NAME}",
   "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]": "Welkom in de Hall of Fame! Maar…",
