@@ -7,7 +7,6 @@
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "서버에 접속할 수 없습니다. 인터넷 연결을 검사해보세요. 정상이라면, 이 문제는 우리 쪽의 일시적인 문제일 가능성이 있습니다. 오류 내용: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpServerException]": "서버에 문제가 있는 것 같습니다. 나중에 다시 시도하세요. 오류 내용: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpUserCompatibilityException]": "현재 설치된 버전의 Hall of Fame은 서버와 호환되지 않습니다. 모드가 최신화되었는지 확인하세요.",
-  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Systems.ImagePreloaderUISystem.ImagePreloadFailedException]": "사진 다운로드에 실패했습니다. 오류 내용: {ERROR_MESSAGE}",
   "HallOfFame.Common.DEFAULT_CITY_NAME": "내 도시",
   "HallOfFame.Common.CITY_BY": "by {CREATOR_NAME}",
   "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]": "Hall of Fame에 오신 것을 환영합니다! 하지만…",
