@@ -17,7 +17,6 @@ using HallOfFame.Services;
 using HallOfFame.Utils;
 using HallOfFame.Utils.Writers;
 using Unity.Entities;
-using UnityEngine;
 
 namespace HallOfFame.Systems.Capture;
 
@@ -44,8 +43,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   private CitySnapshotProvider citySnapshotProvider = null!;
 
   private ScreenshotUploader screenshotUploader = null!;
-
-  private ImagePreloaderUISystem? imagePreloaderUISystem;
 
   /// <summary>
   /// Asset mods list for the dropdown allowing to pick a showcased mod.
@@ -79,7 +76,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// Null if no screenshot is being displayed/uploaded.
   /// </summary>
   private ScreenshotSnapshot? CurrentScreenshot {
-    get => field;
+    get;
     set {
       field = value;
 
@@ -97,8 +94,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     try {
       // Re-enabled when there is an active screenshot.
       this.Enabled = false;
-
-      this.imagePreloaderUISystem = this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>();
 
       // The query is created here so its lifetime stays system-managed.
       var milestoneLevelQuery = this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
@@ -231,8 +226,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   }
 
   private async Task DoTakeScreenshot() {
-    CaptureUISystem.PlaySound("select-item");
-
     var captured = await ScreenshotCapturer.Capture();
 
     // Prepare full size and preview images in a background thread.
@@ -271,12 +264,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       modIds
     );
 
-    // Preload the preview image in the cache before updating the UI.
-    await this.imagePreloaderUISystem!.Preload(screenshotSnapshot.PreviewImageUri);
-
     this.CurrentScreenshot = screenshotSnapshot;
-
-    CaptureUISystem.PlaySound("take-photo");
   }
 
   private void ClearScreenshot() {
@@ -365,20 +353,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         "HallOfFame.HallOfFame.Mod.General",
         false
       );
-    }
-  }
-
-  /// <summary>
-  /// Play a sound.
-  /// </summary>
-  private static void PlaySound(string sound) {
-    try {
-      // ReSharper disable once Unity.UnknownResource
-      var sounds = Resources.Load<UISoundCollection>("Audio/UI Sounds");
-      sounds.PlaySound(sound);
-    }
-    catch (Exception ex) {
-      Mod.Log.ErrorSilent(ex, $"Could not play sound {sound}.");
     }
   }
 

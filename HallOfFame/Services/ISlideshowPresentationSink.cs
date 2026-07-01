@@ -33,9 +33,20 @@ internal interface ISlideshowPresentationSink {
   void SetCanAdvance(bool canAdvance);
 
   /// <summary>
-  /// Mirrors whether there is a screenshot to scroll back to onto its binding.
+  /// Publishes the current screenshot's window neighbors: the previous screenshot to scroll back to
+  /// (<c>null</c> at the first), and the already-loaded look-ahead (<c>null</c> before it is
+  /// prefetched).
+  /// The UI derives both its keep-alive image set and the Previous-button enabled state from these,
+  /// so this replaces the former has-previous flag.
   /// </summary>
-  void SetHasPrevious(bool hasPrevious);
+  void PublishNeighbors(Screenshot? previous, Screenshot? next);
+
+  /// <summary>
+  /// Mirrors whether the game is on the main menu (as opposed to in a game or editor) onto its
+  /// binding, so the UI can size its keep-alive image set accordingly: prev/current/next in the
+  /// menu, current only while playing.
+  /// </summary>
+  void SetInMainMenu(bool isInMainMenu);
 
   /// <summary>
   /// Mirrors the saving-in-progress flag onto its binding while a screenshot is exported to disk.

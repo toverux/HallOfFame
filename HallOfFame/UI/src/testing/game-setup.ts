@@ -37,9 +37,8 @@ type Dict = Record<string, unknown>;
 type Handler = (...args: readonly unknown[]) => void;
 
 /**
- * A command trigger recorded by the mock engine, e.g. `hallOfFame.capture.uploadScreenshot`.
- *
  * @public
+ * A command trigger recorded by the mock engine, e.g. `hallOfFame.capture.uploadScreenshot`.
  */
 export interface RecordedTrigger {
   readonly event: string;
@@ -60,11 +59,10 @@ const handlers = new Map<string, Set<Handler>>();
 const recordedTriggers: RecordedTrigger[] = [];
 
 /**
+ * @public
  * Configures the value a `bindValue(group, name, default)` binding returns.
  * Call before rendering; after the first render this also live-updates already-subscribed
  * components, but such updates run outside React's `act`, so prefer configuring before rendering.
- *
- * @public
  */
 export function setBinding(group: string, name: string, value: unknown): void {
   const base = `${group}.${name}`;
@@ -75,12 +73,11 @@ export function setBinding(group: string, name: string, value: unknown): void {
 }
 
 /**
+ * @public
  * Configures a single entry of a MapEntry binding (the kind behind `cs2/ui` input hints).
  * Best-effort: keys are matched by `String(key)`, so bindings keyed by object identity will not
  * match.
  * Unconfigured entries resolve to `null`, which is enough for game widgets to render.
- *
- * @public
  */
 export function setMapBinding(group: string, name: string, key: unknown, value: unknown): void {
   const base = `${group}.${name}`;
@@ -98,19 +95,17 @@ export function setMapBinding(group: string, name: string, key: unknown, value: 
 }
 
 /**
- * Returns the command triggers recorded since the last {@link resetBindings} call.
- *
  * @public
+ * Returns the command triggers recorded since the last {@link resetBindings} call.
  */
 export function getTriggers(): readonly RecordedTrigger[] {
   return recordedTriggers;
 }
 
 /**
+ * @public
  * Clears all configured bindings and recorded triggers.
  * Call in an `afterEach` with `cleanup`.
- *
- * @public
  */
 export function resetBindings(): void {
   valueBindings.clear();

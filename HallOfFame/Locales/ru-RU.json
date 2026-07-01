@@ -7,7 +7,6 @@
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "Не удалось связаться с нашим сервером. Пожалуйста, проверьте ваше интернет-соединение, если оно работает, то, скорее всего, это временная проблема на нашей стороне. Подробности ошибки: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpServerException]": "Похоже, что у нашего сервера возникли проблемы. Пожалуйста, повторите попытку позже. Подробнее об ошибке: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpUserCompatibilityException]": "Установленная версия мода несовместима с сервером. Пожалуйста, проверьте, что мод обновлен.",
-  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Systems.ImagePreloaderUISystem.ImagePreloadFailedException]": "К сожалению, мы не удалось загрузить изображение. Подробности ошибки: {ERROR_MESSAGE}",
   "HallOfFame.Common.DEFAULT_CITY_NAME": "Мой город",
   "HallOfFame.Common.CITY_BY": "от  {CREATOR_NAME}",
   "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]": "Добро пожаловать в Hall of Fame! Но…",

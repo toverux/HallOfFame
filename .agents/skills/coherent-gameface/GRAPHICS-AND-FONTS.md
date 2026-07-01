@@ -13,13 +13,13 @@
 - **No `object-fit`.** For cover/contain fitting, use a `<div>` with `background-size: cover`/`contain` instead of `<img>` (`menu-splashscreen.tsx:68`).
 - **Percentage `width`/`height` on inline images are unsupported** - size their container instead.
 
-### Image cache model (preload, and re-preload on scrollback)
+### Image cache model (eviction, keep-alive, and preload)
 
-Cohtml evicts images from its cache quickly, so images must be preloaded to display instantly and **re-preloaded when revisited**:
+Cohtml evicts images from its cache quickly (a system-level orphaned-resource watermark), so an image is only instant if something keeps it referenced or preloads it first:
 
-- The mod preloads images into Cohtml's cache via an injected `new Image()` script before showing them (`HallOfFame/Systems/ImagePreloaderUISystem.cs`).
-- Scrolling back to a previously shown screenshot **must re-preload it** because it has likely been evicted (`HallOfFame/Services/ScreenshotCarousel.cs:86`).
-- Re-setting an image `src` to the **same URL does not re-fire `onload`** (`ImagePreloaderUISystem.cs:109`); guard against it to avoid deadlocking the awaiting task.
+- A live DOM reference exempts an image from eviction, **even a hidden `display:none` node**. The mod exploits this with a keep-alive manager that pins a small window of slideshow images (prev/current/next) resident in off-screen nodes, so navigation and returns from menu sub-screens are flicker-free with no re-fetch (`HallOfFame/UI/src/keep-alive-images/`).
+- To warm an image the keep-alive set does not already cover (a fresh splashscreen image, a capture preview), preload it with `new Image()` and await `onload` before displaying (`HallOfFame/UI/src/utils/preload-image.ts`).
+- Re-setting an image `src` to the **same URL does not re-fire `onload`**, which would deadlock an awaiting task; `preloadImage` sidesteps this by creating a fresh `Image` per call.
 
 ## Video
 

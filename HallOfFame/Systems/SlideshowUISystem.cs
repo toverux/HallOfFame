@@ -40,7 +40,11 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
 
   private GetterValueBinding<bool> enableMainMenuSlideshowBinding = null!;
 
-  private ValueBinding<bool> hasPreviousScreenshotBinding = null!;
+  private ValueBinding<Screenshot?> previousNeighborBinding = null!;
+
+  private ValueBinding<Screenshot?> nextNeighborBinding = null!;
+
+  private ValueBinding<bool> isInMainMenuBinding = null!;
 
   private ValueBinding<int> forcedRefreshIndexBinding = null!;
 
@@ -82,7 +86,6 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
       // to it, and implements the sink it pushes engine effects through.
       this.conductor = new SlideshowConductor(
         Mod.Api,
-        this.World.GetOrCreateSystemManaged<ImagePreloaderUISystem>(),
         Mod.Log,
         Mod.Settings,
         this
@@ -98,10 +101,24 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         () => this.forceEnableMainMenuSlideshow || Mod.Settings.EnableMainMenuSlideshow
       );
 
-      this.hasPreviousScreenshotBinding = new ValueBinding<bool>(
+      this.previousNeighborBinding = new ValueBinding<Screenshot?>(
         SlideshowUISystem.BindingGroup,
-        "hasPreviousScreenshot",
-        false
+        "previousNeighbor",
+        null,
+        new ScreenshotValueWriter()
+      );
+
+      this.nextNeighborBinding = new ValueBinding<Screenshot?>(
+        SlideshowUISystem.BindingGroup,
+        "nextNeighbor",
+        null,
+        new ScreenshotValueWriter()
+      );
+
+      this.isInMainMenuBinding = new ValueBinding<bool>(
+        SlideshowUISystem.BindingGroup,
+        "isInMainMenu",
+        true
       );
 
       this.forcedRefreshIndexBinding = new ValueBinding<int>(
@@ -137,7 +154,9 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
       );
 
       this.AddBinding(this.enableMainMenuSlideshowBinding);
-      this.AddBinding(this.hasPreviousScreenshotBinding);
+      this.AddBinding(this.previousNeighborBinding);
+      this.AddBinding(this.nextNeighborBinding);
+      this.AddBinding(this.isInMainMenuBinding);
       this.AddBinding(this.forcedRefreshIndexBinding);
       this.AddBinding(this.canAdvanceBinding);
       this.AddBinding(this.screenshotBinding);
@@ -267,8 +286,13 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
     this.canAdvanceBinding.Update(canAdvance);
   }
 
-  void ISlideshowPresentationSink.SetHasPrevious(bool hasPrevious) {
-    this.hasPreviousScreenshotBinding.Update(hasPrevious);
+  void ISlideshowPresentationSink.PublishNeighbors(Screenshot? previous, Screenshot? next) {
+    this.previousNeighborBinding.Update(previous);
+    this.nextNeighborBinding.Update(next);
+  }
+
+  void ISlideshowPresentationSink.SetInMainMenu(bool isInMainMenu) {
+    this.isInMainMenuBinding.Update(isInMainMenu);
   }
 
   void ISlideshowPresentationSink.SetSaving(bool isSaving) {

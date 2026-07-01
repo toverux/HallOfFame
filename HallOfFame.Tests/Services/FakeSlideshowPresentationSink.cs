@@ -10,10 +10,9 @@ namespace HallOfFame.Tests.Services;
 /// <summary>
 /// Handwritten <see cref="ISlideshowPresentationSink"/> test double for the conductor, mirroring
 /// the recorder/delegate split of <c>FakeStore</c> and <c>FakeParadoxConnection</c>.
-/// The eight void sinks are recorded passively so a test can assert on them; the lone
-/// value-returning <see cref="ConfirmReport"/> is wired per test through
-/// <see cref="ConfirmReportImpl"/> and defaults to declining (<c>false</c>), the safe choice that
-/// performs no report.
+/// The void sinks are recorded passively so a test can assert on them; the lone value-returning
+/// <see cref="ConfirmReport"/> is wired per test through <see cref="ConfirmReportImpl"/> and
+/// defaults to declining (<c>false</c>), the safe choice that performs no report.
 /// </summary>
 internal sealed class FakeSlideshowPresentationSink : ISlideshowPresentationSink {
   /// <summary>
@@ -38,9 +37,19 @@ internal sealed class FakeSlideshowPresentationSink : ISlideshowPresentationSink
   internal List<bool> CanAdvanceLog { get; } = [];
 
   /// <summary>
-  /// The last value pushed to <see cref="SetHasPrevious"/>, or <c>null</c> when never pushed.
+  /// The last previous-neighbor pushed to <see cref="PublishNeighbors"/>, or <c>null</c>.
   /// </summary>
-  internal bool? LastHasPrevious { get; private set; }
+  internal Screenshot? LastPublishedPrevious { get; private set; }
+
+  /// <summary>
+  /// The last next-neighbor (look-ahead) pushed to <see cref="PublishNeighbors"/>, or <c>null</c>.
+  /// </summary>
+  internal Screenshot? LastPublishedNext { get; private set; }
+
+  /// <summary>
+  /// Every value pushed to <see cref="SetInMainMenu"/>, in order.
+  /// </summary>
+  internal List<bool> InMainMenuLog { get; } = [];
 
   /// <summary>
   /// Every value pushed to <see cref="SetSaving"/>, in order, so a test can assert the
@@ -72,8 +81,13 @@ internal sealed class FakeSlideshowPresentationSink : ISlideshowPresentationSink
   public void SetCanAdvance(bool canAdvance) =>
     this.CanAdvanceLog.Add(canAdvance);
 
-  public void SetHasPrevious(bool hasPrevious) =>
-    this.LastHasPrevious = hasPrevious;
+  public void PublishNeighbors(Screenshot? previous, Screenshot? next) {
+    this.LastPublishedPrevious = previous;
+    this.LastPublishedNext = next;
+  }
+
+  public void SetInMainMenu(bool isInMainMenu) =>
+    this.InMainMenuLog.Add(isInMainMenu);
 
   public void SetSaving(bool isSaving) =>
     this.SavingLog.Add(isSaving);

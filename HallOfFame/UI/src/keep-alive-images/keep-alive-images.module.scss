@@ -1,0 +1,19 @@
+.node {
+  // A display :none node is not laid out or painted, yet cohtml still loads and decodes its
+  // background-image at full resolution and keeps it alive (a live DOM reference is exempt from
+  // cache eviction).
+  // So these nodes pin images invisibly, at zero rendering cost.
+  display: none;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+
+  // background-image is set dynamically per kept image.
+  background-position-x: 50%;
+  background-position-y: 50%;
+  background-size: cover;
+  background-repeat: no-repeat no-repeat;
+}

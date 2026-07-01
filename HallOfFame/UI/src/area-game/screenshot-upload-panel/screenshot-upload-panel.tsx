@@ -1,8 +1,9 @@
 import classNames from 'classnames';
 import { type ReactElement, useEffect, useRef } from 'react';
 import { useSetState } from 'react-use';
-import { useDraggable } from '../../utils';
+import { preloadImage as defaultPreloadImage, useDraggable } from '../../utils';
 import * as bindings from '../../utils/bindings';
+import { useCaptureRevealGate } from './capture-reveal-gate';
 import type { ScreenshotInfoFormValue } from './form-state';
 import { ScreenshotUploadPanelContentCityInfo } from './panel-city-info';
 import { ScreenshotUploadPanelFooter } from './panel-footer';
@@ -13,10 +14,26 @@ import * as styles from './screenshot-upload-panel.module.scss';
 import * as shared from './shared.module.scss';
 import { ScreenshotUploadProgress } from './upload-progress';
 
+interface ScreenshotUploadPanelProps {
+  /**
+   * Preview-image preloader seam.
+   * Injectable so tests can drive the reveal deterministically; defaults to the real Cohtml-backed
+   * {@link defaultPreloadImage}.
+   */
+  readonly preloadImage?: (url: string) => Promise<void>;
+}
+
 /**
  * Component that shows up when the user takes a HoF screenshot.
+ *
+ * Its reveal is gated behind preloading the preview image: the panel plays an entrance animation,
+ * and decoding a large preview mid-animation stutters, so it stays unmounted until the preview is
+ * decoded, then reveals (animation runs against an already-decoded image) and plays the shutter
+ * sound.
  */
-export function ScreenshotUploadPanel(): ReactElement {
+export function ScreenshotUploadPanel({
+  preloadImage = defaultPreloadImage
+}: ScreenshotUploadPanelProps): ReactElement {
   const settings = bindings.useModSettings();
   const uploadFormMemory = bindings.useUploadFormMemory();
 
@@ -25,6 +42,10 @@ export function ScreenshotUploadPanel(): ReactElement {
 
   const screenshotSnapshot = bindings.useScreenshotSnapshot();
   const uploadProgress = bindings.useUploadProgress();
+
+  const previewImageUri = screenshotSnapshot ? screenshotSnapshot.previewImageUri : null;
+
+  const isRevealed = useCaptureRevealGate(previewImageUri, preloadImage);
 
   const originalFormState: ScreenshotInfoFormValue = {
     shareModIds: uploadFormMemory.shareModIds,
@@ -44,8 +65,8 @@ export function ScreenshotUploadPanel(): ReactElement {
     }
   }, [screenshotSnapshot]);
 
-  // Show the panel when there is a screenshot to upload.
-  if (!screenshotSnapshot) {
+  // Show the panel only once there is a screenshot and its preview image has been decoded.
+  if (!(screenshotSnapshot && isRevealed)) {
     // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
     return <></>;
   }

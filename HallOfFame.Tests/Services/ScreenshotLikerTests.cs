@@ -15,7 +15,7 @@ public sealed class ScreenshotLikerTests {
   public async Task Toggle_WithNoCurrentScreenshot_IsANoOp() {
     // A carousel that was never advanced has no current screenshot; the like API would throw if it
     // were ever called.
-    var carousel = new ScreenshotCarousel(new FakeApi(), new FakePreloader(), () => "4k");
+    var carousel = new ScreenshotCarousel(new FakeApi());
 
     var rendered = new List<Screenshot>();
     var liker = ScreenshotLikerTests.MakeLiker(carousel, new FakeApi(), rendered);
@@ -240,7 +240,7 @@ public sealed class ScreenshotLikerTests {
   /// screenshot the API's weighted-random endpoint returns.
   /// </summary>
   private static async Task<ScreenshotCarousel> SeededCarousel(FakeApi api) {
-    var carousel = new ScreenshotCarousel(api, new FakePreloader(), () => "4k");
+    var carousel = new ScreenshotCarousel(api);
 
     await carousel.Next();
 

@@ -5,9 +5,8 @@ import { lazyBindValue } from './lazy-value-binding';
 const GROUP = 'hallOfFame.common';
 
 /**
- * See C# `HallOfFame.Settings` class for documentation.
- *
  * @public
+ * See C# `HallOfFame.Settings` class for documentation.
  */
 export interface ModSettings {
   readonly creatorName: string;
@@ -35,6 +34,22 @@ const settings$ = lazyBindValue<ModSettings>(GROUP, 'settings', {
 
 export function useModSettings(): ModSettings {
   return useValue(settings$());
+}
+
+/**
+ * Imperatively subscribes to the mod settings, invoking [listener] once with the current value and
+ * again on every change.
+ *
+ * The React counterpart is {@link useModSettings}; this non-React form exists for the keep-alive
+ * manager, which runs outside the component tree (see `installKeepAliveImages`).
+ * Returns a disposer that ends the subscription.
+ */
+export function subscribeToModSettings(listener: (settings: ModSettings) => void): () => void {
+  const subscription = settings$().subscribe(() => listener(settings$().value));
+
+  listener(settings$().value);
+
+  return () => subscription.dispose();
 }
 
 const locale$ = lazyBindValue<string>(GROUP, 'locale', 'en-US');

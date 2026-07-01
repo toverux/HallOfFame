@@ -6,9 +6,9 @@ import type { ModuleRegistry, ModuleRegistryExtend } from 'cs2/modding';
 import type { ReactElement } from 'react';
 import type { Screenshot } from '../common';
 import { iconsole } from '../iconsole';
+import { createFakePreloader, makeScreenshot, makeSettings } from '../testing/fixtures';
 import { resetBindings, setBinding } from '../testing/game-setup';
 import { getClassesModule } from '../utils';
-import type { ModSettings } from '../utils/bindings';
 import * as bindings from '../utils/bindings';
 import { register } from './index';
 import { MenuSplashscreen } from './menu-splashscreen';
@@ -136,14 +136,14 @@ describe('MenuSplashscreen transition machine', () => {
   });
 
   it(`holds the old image and reports not-ready during a slow resolution-change load`, async () => {
-    setBinding(COMMON, 'settings', settingsWith('fhd'));
+    setBinding(COMMON, 'settings', makeSettings({ screenshotResolution: 'fhd' }));
     setScreenshot(makeScreenshot({ imageUrlFHD: 'fhd.png', imageUrl4K: '4k.png' }));
 
     const fake = createFakePreloader();
     const { container } = renderSplashscreen(fake);
 
     // Toggle the resolution: the 4K variant is not in cache, so a real UI-side load starts.
-    act(() => setBinding(COMMON, 'settings', settingsWith('4k')));
+    act(() => setBinding(COMMON, 'settings', makeSettings({ screenshotResolution: '4k' })));
 
     expect(fake.calls.map(call => call.url)).toEqual(['4k.png']);
     expect(splashscreenDivs(container)).toHaveLength(1);
@@ -263,47 +263,6 @@ describe(`menu backdrop gating (area-menu/index)`, () => {
   });
 });
 
-interface FakePreloadCall {
-  readonly url: string;
-  readonly resolve: () => void;
-  readonly reject: (error: unknown) => void;
-}
-
-interface FakePreloader {
-  readonly preload: (url: string) => Promise<void>;
-  readonly calls: readonly FakePreloadCall[];
-  readonly resolveLast: (url: string) => void;
-  readonly rejectLast: (url: string, error?: unknown) => void;
-}
-
-/**
- * Substitute for the `preloadImage` seam that records every call and lets a test resolve or reject
- * a specific URL on command, so `onload`/`onerror`/timeout are deterministic, not wall-clock.
- */
-function createFakePreloader(): FakePreloader {
-  const calls: FakePreloadCall[] = [];
-
-  const findLast = (url: string): FakePreloadCall => {
-    const call = calls.findLast(candidate => candidate.url == url);
-
-    if (!call) {
-      throw new Error(`No preload call recorded for "${url}".`);
-    }
-
-    return call;
-  };
-
-  return {
-    calls,
-    preload: url =>
-      new Promise<void>((resolve, reject) => {
-        calls.push({ url, resolve, reject });
-      }),
-    resolveLast: url => findLast(url).resolve(),
-    rejectLast: (url, error) => findLast(url).reject(error ?? new Error(`preload failed: ${url}`))
-  };
-}
-
 /**
  * Renders the splashscreen next to a readiness probe.
  * The probe is rendered first, so its singleton listener is registered before the splashscreen's
@@ -389,53 +348,4 @@ function VanillaBackdrops(): ReactElement {
 
 function VanillaMenu(): ReactElement {
   return <div data-testid='vanilla-menu' />;
-}
-
-function settingsWith(screenshotResolution: ModSettings['screenshotResolution']): ModSettings {
-  return {
-    creatorName: '',
-    enableLoadingScreenBackground: true,
-    showFeaturedAsset: true,
-    showCreatorSocials: true,
-    showViewCount: false,
-    screenshotResolution,
-    namesTranslationMode: 'translate',
-    creatorsScreenshotSaveDirectory: '',
-    baseUrl: ''
-  };
-}
-
-function makeScreenshot(overrides: Partial<Screenshot> = {}): Screenshot {
-  return {
-    id: 'id',
-    cityName: '',
-    cityNameLocale: null,
-    cityNameLatinized: null,
-    cityNameTranslated: null,
-    cityMilestone: 0,
-    cityPopulation: 0,
-    mapName: '',
-    description: '',
-    imageUrlFHD: 'fhd.png',
-    imageUrl4K: '4k.png',
-    shareRenderSettings: false,
-    renderSettings: {},
-    createdAt: '',
-    createdAtFormatted: '',
-    createdAtFormattedDistance: '',
-    likesCount: 0,
-    viewsCount: 0,
-    uniqueViewsCount: 0,
-    likingPercentage: 0,
-    isLiked: false,
-    creator: {
-      id: 'creator',
-      creatorName: null,
-      creatorNameLocale: null,
-      creatorNameLatinized: null,
-      creatorNameTranslated: null,
-      socials: []
-    },
-    ...overrides
-  };
 }

@@ -7,9 +7,9 @@ import naturalResourcesSrc from '../../icons/paradox/natural-resources.svg';
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
 import eyeOpenSrc from '../../icons/uil/colored/eye-open.svg';
+// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
 import type * as bindings from '../../utils/bindings';
 import { formatBigNumber } from './menu-controls-utils';
-// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
 import * as styles from './screenshot-labels.module.scss';
 
 export const MenuControlsScreenshotLabels = memo(function MenuControlsScreenshotLabelsBase({

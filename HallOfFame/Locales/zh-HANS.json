@@ -7,7 +7,6 @@
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "无法连接至服务器，请检查您的网络链接。如果网络正常，那可能是我们服务器的问题。错误详情：{ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpServerException]": "看起来我们的服务器出现了些许问题，请稍后再试。错误详情：{ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpUserCompatibilityException]": "您的“城市画廊”模组版本与服务器不兼容。请检查您的模组是否为最新版本。",
-  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Systems.ImagePreloaderUISystem.ImagePreloadFailedException]": "图片下载失败。错误详情：{ERROR_MESSAGE}",
   "HallOfFame.Common.DEFAULT_CITY_NAME": "我的城市",
   "HallOfFame.Common.CITY_BY": "来自{CREATOR_NAME}",
   "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]": "欢迎来到城市画廊！虽然但是…",

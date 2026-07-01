@@ -63,4 +63,4 @@ There is **no built-in network/resource stack** - real I/O is routed through C# 
 
 ## Codebase gotcha
 
-Re-setting an image's `src` to the **same URL does not re-fire `onload`**, which would deadlock an awaiting task - guard by skipping identical URLs (`ImagePreloaderUISystem.cs:109`). See the image cache model in [GRAPHICS-AND-FONTS.md](GRAPHICS-AND-FONTS.md).
+Re-setting an image's `src` to the **same URL does not re-fire `onload`**, which would deadlock an awaiting task; `preloadImage` sidesteps this by creating a fresh `Image` per call (`HallOfFame/UI/src/utils/preload-image.ts`). See the image cache model in [GRAPHICS-AND-FONTS.md](GRAPHICS-AND-FONTS.md).

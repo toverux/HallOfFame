@@ -1,10 +1,9 @@
 import classNames from 'classnames';
 import { type CSSProperties, type ReactElement, useCallback, useEffect, useReducer } from 'react';
 import { iconsole } from '../iconsole';
-import { getClassesModule, selector } from '../utils';
+import { preloadImage as defaultPreloadImage, getClassesModule, selector } from '../utils';
 import * as bindings from '../utils/bindings';
 import * as styles from './menu-splashscreen.module.scss';
-import { preloadImage as defaultPreloadImage } from './preload-image';
 
 const coMenuUiBackdropsStyles = getClassesModule(
   'game-ui/menu/components/menu-ui-backdrops/menu-ui-backdrops.module.scss',

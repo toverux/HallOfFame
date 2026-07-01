@@ -25,9 +25,8 @@ public sealed class SlideshowConductorTests {
   // PURE HELPERS
 
   [Fact]
-  public void IsNetworkError_TrueForHttpAndPreloadErrors_FalseOtherwise() {
+  public void IsNetworkError_TrueForHttp_FalseOtherwise() {
     Assert.True(SlideshowConductor.IsNetworkError(new HttpNetworkException("1", "boom")));
-    Assert.True(SlideshowConductor.IsNetworkError(new ImagePreloadFailedException("url")));
     Assert.False(SlideshowConductor.IsNetworkError(new InvalidOperationException()));
   }
 
@@ -79,7 +78,10 @@ public sealed class SlideshowConductorTests {
     await conductor.Next();
 
     Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
-    Assert.False(sink.LastHasPrevious);
+
+    // First screenshot has no previous; the prefetched look-ahead becomes its next neighbor.
+    Assert.Null(sink.LastPublishedPrevious);
+    Assert.Equal("s1", sink.LastPublishedNext!.Id);
 
     // The lock is taken (false) for the navigation, stays held (false) for the prefetch, then
     // released (true) once the prefetch settles.
@@ -94,28 +96,21 @@ public sealed class SlideshowConductorTests {
 
   [Fact]
   public async Task Next_GatedPrefetch_KeepsLockHeld_UntilPrefetchSettles() {
-    var screenshots = new Queue<Screenshot>([
-      SlideshowConductorTests.MakeScreenshot("s0"),
-      SlideshowConductorTests.MakeScreenshot("s1")
-    ]);
+    var fetchGate = new TaskCompletionSource<Screenshot>();
+    var fetchCount = 0;
 
-    var preloadGate = new TaskCompletionSource<object?>();
-    var preloadCount = 0;
-
-    // Gate the second preload, which is the background prefetch's image.
-    var preloader = new FakePreloader {
-      PreloadImpl = _ => ++preloadCount == 2 ? preloadGate.Task : Task.CompletedTask
-    };
-
+    // Gate the second fetch, which is the background prefetch's look-ahead.
     var api = new FakeApi {
-      GetRandomScreenshotWeightedImpl = () => Task.FromResult(screenshots.Dequeue()),
+      GetRandomScreenshotWeightedImpl = () =>
+        ++fetchCount == 1
+          ? Task.FromResult(SlideshowConductorTests.MakeScreenshot("s0"))
+          : fetchGate.Task,
       MarkScreenshotViewedImpl = _ => Task.FromResult(new View())
     };
 
     var sink = new FakeSlideshowPresentationSink();
 
-    var conductor =
-      SlideshowConductorTests.CreateConductor(api: api, preloader: preloader, sink: sink);
+    var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     var nextTask = conductor.Next();
 
@@ -124,7 +119,7 @@ public sealed class SlideshowConductorTests {
     Assert.Equal([false, false], sink.CanAdvanceLog);
     Assert.False(nextTask.IsCompleted);
 
-    preloadGate.SetResult(null);
+    fetchGate.SetResult(SlideshowConductorTests.MakeScreenshot("s1"));
 
     await nextTask;
 
@@ -260,7 +255,10 @@ public sealed class SlideshowConductorTests {
     await conductor.Previous();
 
     Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
-    Assert.False(sink.LastHasPrevious);
+
+    // Back at the first screenshot: no previous, and s1 is the look-ahead sitting just ahead.
+    Assert.Null(sink.LastPublishedPrevious);
+    Assert.Equal("s1", sink.LastPublishedNext!.Id);
 
     // Scrollback takes the lock then releases it right away, with no background prefetch.
     Assert.Equal([false, true], sink.CanAdvanceLog);
@@ -317,22 +315,17 @@ public sealed class SlideshowConductorTests {
 
   [Fact]
   public async Task Like_DuringBackgroundPrefetch_IsAllowed() {
-    var screenshots = new Queue<Screenshot>([
-      SlideshowConductorTests.MakeScreenshot("s0", likesCount: 5),
-      SlideshowConductorTests.MakeScreenshot("s1")
-    ]);
-
-    var preloadGate = new TaskCompletionSource<object?>();
-    var preloadCount = 0;
-
-    var preloader = new FakePreloader {
-      PreloadImpl = _ => ++preloadCount == 2 ? preloadGate.Task : Task.CompletedTask
-    };
+    var fetchGate = new TaskCompletionSource<Screenshot>();
+    var fetchCount = 0;
 
     var likeCalls = new List<(string Id, bool Liked)>();
 
+    // Gate the second fetch (the background prefetch's look-ahead).
     var api = new FakeApi {
-      GetRandomScreenshotWeightedImpl = () => Task.FromResult(screenshots.Dequeue()),
+      GetRandomScreenshotWeightedImpl = () =>
+        ++fetchCount == 1
+          ? Task.FromResult(SlideshowConductorTests.MakeScreenshot("s0", likesCount: 5))
+          : fetchGate.Task,
       MarkScreenshotViewedImpl = _ => Task.FromResult(new View()),
       LikeScreenshotImpl = (id, liked) => {
         likeCalls.Add((id, liked));
@@ -343,8 +336,7 @@ public sealed class SlideshowConductorTests {
 
     var sink = new FakeSlideshowPresentationSink();
 
-    var conductor =
-      SlideshowConductorTests.CreateConductor(api: api, preloader: preloader, sink: sink);
+    var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     // Suspends in the background prefetch (Prefetching phase): the current screenshot is settled.
     var nextTask = conductor.Next();
@@ -354,31 +346,25 @@ public sealed class SlideshowConductorTests {
     // The like acted on the settled current screenshot even while the prefetch was in flight.
     Assert.Equal(("s0", true), Assert.Single(likeCalls));
 
-    preloadGate.SetResult(null);
+    fetchGate.SetResult(SlideshowConductorTests.MakeScreenshot("s1"));
 
     await nextTask;
   }
 
   [Fact]
   public async Task Like_DuringNavigation_IsBlocked() {
-    var screenshots = new Queue<Screenshot>([
-      SlideshowConductorTests.MakeScreenshot("s0"),
-      SlideshowConductorTests.MakeScreenshot("s1"),
-      SlideshowConductorTests.MakeScreenshot("s2")
-    ]);
-
-    var preloadGate = new TaskCompletionSource<object?>();
-    var preloadCount = 0;
-
-    // Gate the fourth preload, which is the scrollback re-preload during the Previous navigation.
-    var preloader = new FakePreloader {
-      PreloadImpl = _ => ++preloadCount == 4 ? preloadGate.Task : Task.CompletedTask
-    };
+    var fetchGate = new TaskCompletionSource<Screenshot>();
+    var fetchCount = 0;
 
     var likeCalls = new List<(string Id, bool Liked)>();
 
+    // Gate the first fetch so the conductor stays mid-navigation (Navigating phase) while it is
+    // pending; the later ungated fetches serve the look-ahead.
     var api = new FakeApi {
-      GetRandomScreenshotWeightedImpl = () => Task.FromResult(screenshots.Dequeue()),
+      GetRandomScreenshotWeightedImpl = () =>
+        ++fetchCount == 1
+          ? fetchGate.Task
+          : Task.FromResult(SlideshowConductorTests.MakeScreenshot($"s{fetchCount - 1}")),
       MarkScreenshotViewedImpl = _ => Task.FromResult(new View()),
       LikeScreenshotImpl = (id, liked) => {
         likeCalls.Add((id, liked));
@@ -389,22 +375,18 @@ public sealed class SlideshowConductorTests {
 
     var sink = new FakeSlideshowPresentationSink();
 
-    var conductor =
-      SlideshowConductorTests.CreateConductor(api: api, preloader: preloader, sink: sink);
+    var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
-    await conductor.Next();
-    await conductor.Next();
-
-    // Suspends mid-navigation (Navigating phase): the current screenshot may be swapped out.
-    var previousTask = conductor.Previous();
+    // Suspends mid-navigation (Navigating phase) on the gated fetch, before any screenshot settles.
+    var nextTask = conductor.Next();
 
     await conductor.Like();
 
     Assert.Empty(likeCalls);
 
-    preloadGate.SetResult(null);
+    fetchGate.SetResult(SlideshowConductorTests.MakeScreenshot("s0"));
 
-    await previousTask;
+    await nextTask;
   }
 
   // SAVE
@@ -676,6 +658,9 @@ public sealed class SlideshowConductorTests {
     conductor.OnGameModeChanged(GameMode.MainMenu);
 
     Assert.Equal(1, sink.RefreshCount);
+
+    // Each game-mode change mirrors the main-menu flag: false entering the game, true on return.
+    Assert.Equal([false, true], sink.InMainMenuLog);
   }
 
   [Fact]
@@ -687,6 +672,7 @@ public sealed class SlideshowConductorTests {
     conductor.OnGameModeChanged(GameMode.MainMenu);
 
     Assert.Equal(0, sink.RefreshCount);
+    Assert.Equal([true], sink.InMainMenuLog);
   }
 
   [Fact]
@@ -697,6 +683,7 @@ public sealed class SlideshowConductorTests {
     conductor.OnGameModeChanged(GameMode.Game);
 
     Assert.Equal(0, sink.RefreshCount);
+    Assert.Equal([false], sink.InMainMenuLog);
   }
 
   // HELPERS
@@ -707,13 +694,11 @@ public sealed class SlideshowConductorTests {
   /// </summary>
   private static SlideshowConductor CreateConductor(
     IHallOfFameApi? api = null,
-    IImagePreloader? preloader = null,
     IModLog? log = null,
     ISlideshowSettings? settings = null,
     ISlideshowPresentationSink? sink = null
   ) => new(
     api ?? new FakeApi(),
-    preloader ?? new FakePreloader(),
     log ?? new FakeModLog(),
     settings ?? new FakeSlideshowSettings(),
     sink ?? new FakeSlideshowPresentationSink()

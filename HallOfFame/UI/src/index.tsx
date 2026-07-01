@@ -3,6 +3,7 @@ import { register as registerOnGame } from './area-game';
 import { register as registerOnMenu } from './area-menu';
 import { register as registerOnOverlay } from './area-overlay';
 import { iconsole } from './iconsole';
+import { installKeepAliveImages } from './keep-alive-images';
 import { logError } from './utils';
 
 // Bundle icons in the build to be used by the C# backend.
@@ -15,6 +16,10 @@ const register: ModRegistrar = moduleRegistry => {
     registerOnMenu(moduleRegistry);
     registerOnGame(moduleRegistry);
     registerOnOverlay(moduleRegistry);
+
+    // App-wide, not an area: the keep-alive nodes live on document.body outside the module
+    // registry, so they persist across menu, sub-screen, and gameplay states.
+    installKeepAliveImages();
   } catch (error) {
     return logError(error, true);
   }

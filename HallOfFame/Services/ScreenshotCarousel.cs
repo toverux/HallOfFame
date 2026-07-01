@@ -27,19 +27,16 @@ internal readonly record struct NavigationStep(
 /// <summary>
 /// A cursor over a sliding window of community screenshots, driving the main-menu slideshow.
 /// It is infinite forward (each step past the end fetches a fresh random screenshot), keeps bounded
-/// scrollback (trimmed to <see cref="MaxWindowSize"/>), and look-ahead-prefetches the next image so
-/// it can be displayed instantly.
-/// It owns the loading itself (taking <see cref="IHallOfFameApi"/>, <see cref="IImagePreloader"/>,
-/// and a resolution getter), which is what makes the dedupe loop, the look-ahead, and the
-/// trim-testable off-engine.
+/// scrollback (trimmed to <see cref="MaxWindowSize"/>), and fetches the next screenshot ahead so it
+/// can be displayed instantly.
+/// It is a pure metadata cursor: it fetches <see cref="Screenshot"/> data through
+/// <see cref="IHallOfFameApi"/> and manages the window, but does no image loading (the UI keeps
+/// prev/current/next resident in hidden DOM nodes; see the keep-alive manager).
+/// This is what makes the dedupe loop, the look-ahead, and the trim, testable off-engine.
 /// It propagates errors and never swallows them: it touches no UI bindings and does no logging, so
 /// the driving system stays the single owner of error policy.
 /// </summary>
-internal sealed class ScreenshotCarousel(
-  IHallOfFameApi api,
-  IImagePreloader preloader,
-  Func<string> getResolution
-) {
+internal sealed class ScreenshotCarousel(IHallOfFameApi api) {
   /// <summary>
   /// Maximum number of screenshots kept in the window; older ones are trimmed off the front as new
   /// ones are prefetched, so the scrollback stays bounded.
@@ -62,6 +59,22 @@ internal sealed class ScreenshotCarousel(
   internal bool HasPrevious => this.CurrentIndex > 0;
 
   /// <summary>
+  /// The screenshot immediately before <see cref="Current"/> in the window (the scroll-back
+  /// target), or <c>null</c> when the cursor is at the first screenshot.
+  /// </summary>
+  internal Screenshot? PreviousNeighbor =>
+    this.HasPrevious ? this.screenshots[this.CurrentIndex - 1] : null;
+
+  /// <summary>
+  /// The already-loaded look-ahead screenshot immediately after <see cref="Current"/>, or
+  /// <c>null</c> when the cursor is at the front of the window (nothing prefetched onto it yet).
+  /// </summary>
+  internal Screenshot? NextNeighbor =>
+    this.CurrentIndex >= 0 && this.CurrentIndex < this.Count - 1
+      ? this.screenshots[this.CurrentIndex + 1]
+      : null;
+
+  /// <summary>
   /// Whether the cursor is at (or past) the front of the window, i.e., there is no already-loaded
   /// look-ahead screenshot to move onto.
   /// </summary>
@@ -80,9 +93,8 @@ internal sealed class ScreenshotCarousel(
   /// <summary>
   /// Moves the cursor forward by one screenshot and returns the resulting
   /// <see cref="NavigationStep"/>.
-  /// If a look-ahead screenshot is already loaded, the cursor just moves onto it (its image is
-  /// already preloaded); otherwise a fresh random screenshot is fetched, its image preloaded, and
-  /// it is appended to the window before advancing.
+  /// If a look-ahead screenshot is already loaded, the cursor just moves onto it; otherwise a fresh
+  /// random screenshot is fetched and appended to the window before advancing.
   /// On error the window is left untouched, so <see cref="Current"/> does not change and no step is
   /// produced.
   /// </summary>
@@ -94,8 +106,8 @@ internal sealed class ScreenshotCarousel(
       return this.ForwardStep();
     }
 
-    // We are at the front of the window: fetch a fresh screenshot, preload its image, append, and
-    // advance. Mutation happens only after a successful load, so a failure leaves the cursor put.
+    // We are at the front of the window: fetch a fresh screenshot, append, and advance.
+    // Mutation happens only after a successful fetch, so a failure leaves the cursor put.
     var screenshot = await this.LoadRandom();
 
     this.screenshots.Add(screenshot);
@@ -105,26 +117,22 @@ internal sealed class ScreenshotCarousel(
   }
 
   /// <summary>
-  /// Moves the cursor back by one screenshot, re-preloads its image (these images are not kept long
-  /// in cohtml's cache, so they must be preloaded again on scrollback), and returns the resulting
+  /// Moves the cursor back by one screenshot and returns the resulting
   /// <see cref="NavigationStep"/>.
+  /// The target screenshot is already in the window, so this is a pure cursor move with no fetch.
   /// </summary>
   /// <exception cref="InvalidOperationException">
   /// When already at the first screenshot; the caller is expected to guard with
   /// <see cref="HasPrevious"/>.
   /// </exception>
-  internal async Task<NavigationStep> Previous() {
+  internal NavigationStep Previous() {
     if (!this.HasPrevious) {
       throw new InvalidOperationException(
         "Cannot move to the previous screenshot: already at the first one."
       );
     }
 
-    // The cursor is moved before the preload, so on a preload error it stays put on the previous
-    // screenshot, matching the pre-existing behavior.
     this.CurrentIndex--;
-
-    await this.Preload(this.screenshots[this.CurrentIndex]);
 
     // Scrolling back always lands on an already-seen screenshot with look-ahead still ahead of it:
     // there is nothing to prefetch.
@@ -133,8 +141,8 @@ internal sealed class ScreenshotCarousel(
   }
 
   /// <summary>
-  /// Fetches a fresh random screenshot and preloads its image in the background, appending it to
-  /// the window as the next look-ahead screenshot, ready for the next <see cref="Next"/>.
+  /// Fetches a fresh random screenshot in the background and appends it to the window as the next
+  /// look-ahead screenshot, ready for the next <see cref="Next"/>.
   /// Intended to be called only when <see cref="IsAtEnd"/>, so the trim below keeps the cursor on
   /// the same screenshot.
   /// </summary>
@@ -188,15 +196,13 @@ internal sealed class ScreenshotCarousel(
 
   #if DEBUG
   /// <summary>
-  /// Debug-only: loads a specific screenshot by its ID, preloads its image, appends it to the
-  /// window, and advances the cursor onto it so <see cref="Current"/> stays consistent, returning
-  /// the resulting <see cref="NavigationStep"/>.
+  /// Debug-only: loads a specific screenshot by its ID, appends it to the window, and advances the
+  /// cursor onto it so <see cref="Current"/> stays consistent, returning the resulting
+  /// <see cref="NavigationStep"/>.
   /// It lands at the front of the window, so the step prefetches ahead like any other forward move.
   /// </summary>
   internal async Task<NavigationStep> LoadById(string id) {
     var screenshot = await api.GetScreenshot(id);
-
-    await this.Preload(screenshot);
 
     this.screenshots.Add(screenshot);
     this.CurrentIndex = this.Count - 1;
@@ -215,45 +221,8 @@ internal sealed class ScreenshotCarousel(
     new(this.Current!, ShouldPreloadAhead: this.IsAtEnd);
 
   /// <summary>
-  /// Fetches a fresh random screenshot from the server and preloads its image.
+  /// Fetches a fresh random screenshot from the server.
   /// </summary>
-  private async Task<Screenshot> LoadRandom() {
-    var screenshot = await api.GetRandomScreenshotWeighted();
-
-    await this.Preload(screenshot);
-
-    return screenshot;
-  }
-
-  /// <summary>
-  /// Preloads the image for the given screenshot at the currently configured resolution.
-  /// </summary>
-  private Task Preload(Screenshot screenshot) =>
-    preloader.Preload(this.SelectImageUrl(screenshot));
-
-  /// <summary>
-  /// Picks the image URL for the configured screenshot resolution.
-  /// </summary>
-  /// <remarks>
-  /// This resolution-to-URL mapping is deliberately duplicated on the front end
-  /// (<c>deriveImageUri</c>): C# resolves it here to choose which variant to preload, and the UI
-  /// resolves it again to choose which to display.
-  /// Collapsing the two into a single C#-resolved URL sent across the binding was considered and
-  /// dropped: the UI re-derives live from the reactive resolution setting, so changing it updates
-  /// the on-screen image immediately. Making C# the sole resolver would instead force it to
-  /// re-preload and republish on every settings change to stay flash-free, more complexity than
-  /// the deduplication is worth.
-  /// Both sides must therefore agree on the mapping for every supported resolution.
-  /// </remarks>
-  /// <exception cref="InvalidOperationException">
-  /// When the configured resolution is not a known value.
-  /// </exception>
-  private string SelectImageUrl(Screenshot screenshot) =>
-    getResolution() switch {
-      "fhd" => screenshot.ImageUrlFHD,
-      "4k" => screenshot.ImageUrl4K,
-      var resolution => throw new InvalidOperationException(
-        $"Unknown screenshot resolution: {resolution}."
-      )
-    };
+  private Task<Screenshot> LoadRandom() =>
+    api.GetRandomScreenshotWeighted();
 }

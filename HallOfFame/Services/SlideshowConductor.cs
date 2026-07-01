@@ -64,7 +64,6 @@ internal sealed class SlideshowConductor {
   private GameMode previousGameMode = GameMode.MainMenu;
 
   /// <param name="api">Server API used by the leaves this conductor drives.</param>
-  /// <param name="preloader">Image preloader the carousel loads images through.</param>
   /// <param name="log">
   /// Mod logger; the conductor logs through it and never renders off-engine.
   /// </param>
@@ -74,7 +73,6 @@ internal sealed class SlideshowConductor {
   /// </param>
   internal SlideshowConductor(
     IHallOfFameApi api,
-    IImagePreloader preloader,
     IModLog log,
     ISlideshowSettings settings,
     ISlideshowPresentationSink sink
@@ -85,8 +83,8 @@ internal sealed class SlideshowConductor {
     this.sink = sink;
 
     // The conductor constructs its own leaves and injects only the true boundaries, so tests
-    // exercise the real leaves wired to fakes. The carousel reads the resolution lazily, per load.
-    this.carousel = new ScreenshotCarousel(api, preloader, () => settings.ScreenshotResolution);
+    // exercise the real leaves wired to fakes.
+    this.carousel = new ScreenshotCarousel(api);
 
     this.navigation = new NavigationState();
 
@@ -160,7 +158,7 @@ internal sealed class SlideshowConductor {
     NavigationStep step;
 
     try {
-      step = await this.carousel.Previous();
+      step = this.carousel.Previous();
     }
     catch (Exception ex) {
       this.AbortNavigation(ex);
@@ -277,6 +275,11 @@ internal sealed class SlideshowConductor {
   /// from another mode, then advances the previous-mode baseline.
   /// </summary>
   internal void OnGameModeChanged(GameMode mode) {
+    // The keep-alive set narrows to the current image only while playing, so the UI needs to know
+    // which side of the menu boundary we are on. True exactly for the main menu, never for the
+    // in-game pause menu (which stays GameMode.Game).
+    this.sink.SetInMainMenu(mode is GameMode.MainMenu);
+
     if (SlideshowConductor.ShouldRefreshOnReturnToMenu(this.previousGameMode, mode)) {
       this.sink.RequestRefresh();
     }
@@ -297,9 +300,7 @@ internal sealed class SlideshowConductor {
   /// display-load and save error policies.
   /// </summary>
   internal static bool IsNetworkError(Exception ex) =>
-    ex
-      is HttpException
-      or ImagePreloadFailedException;
+    ex is HttpException;
 
   /// <summary>
   /// Mirrors a successful <see cref="NavigationStep"/> onto the UI and enacts the side effects
@@ -313,7 +314,7 @@ internal sealed class SlideshowConductor {
     // The screenshot is now displayed, so clear any error left over from a prior failed load.
     this.sink.PublishLoadError(null);
     this.sink.PublishScreenshot(step.Current);
-    this.sink.SetHasPrevious(this.carousel.HasPrevious);
+    this.PublishNeighbors();
 
     // The cursor has settled onto the new screenshot. When the step lands at the front of the
     // window, the navigation settles into the background prefetch below, which keeps the lock held;
@@ -345,6 +346,10 @@ internal sealed class SlideshowConductor {
   private async Task PreloadAhead() {
     try {
       await this.carousel.PreloadAhead();
+
+      // The look-ahead just landed, so it is now the current screenshot's `next` neighbor:
+      // republish so the UI can keep it resident.
+      this.PublishNeighbors();
     }
     catch (Exception ex) {
       this.log.ErrorSilent(ex);
@@ -354,6 +359,13 @@ internal sealed class SlideshowConductor {
       this.sink.SetCanAdvance(this.navigation.CanAdvance);
     }
   }
+
+  /// <summary>
+  /// Publishes the current screenshot's window neighbors (previous and look-ahead) onto the UI, the
+  /// single source of truth for the keep-alive set and the Previous-button state.
+  /// </summary>
+  private void PublishNeighbors() =>
+    this.sink.PublishNeighbors(this.carousel.PreviousNeighbor, this.carousel.NextNeighbor);
 
   /// <summary>
   /// Aborts an in-flight navigation after a failed load: applies the error policy and releases the

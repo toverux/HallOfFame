@@ -1,4 +1,5 @@
 /**
+ * @public
  * Preloads an image into Cohtml's image cache so it can later be displayed without a visible load.
  *
  * Resolves once the image's `onload` fires and rejects on `onerror`.

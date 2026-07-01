@@ -77,7 +77,11 @@ interface SettableMenuState {
 
 const enableMainMenuSlideshow$ = lazyBindValue<boolean>(GROUP, 'enableMainMenuSlideshow', true);
 
-const hasPreviousScreenshot$ = lazyBindValue<boolean>(GROUP, 'hasPreviousScreenshot', false);
+const previousNeighbor$ = lazyBindValue<Screenshot | null>(GROUP, 'previousNeighbor', null);
+
+const nextNeighbor$ = lazyBindValue<Screenshot | null>(GROUP, 'nextNeighbor', null);
+
+const isInMainMenu$ = lazyBindValue<boolean>(GROUP, 'isInMainMenu', true);
 
 const forcedRefreshIndex$ = lazyBindValue<number>(GROUP, 'forcedRefreshIndex', 0);
 
@@ -102,7 +106,7 @@ export function useHofMenuState(): [
   const [settableMenuState, setMenuState] = useSingletonMenuState();
 
   const enableMainMenuSlideshow = useValue(enableMainMenuSlideshow$());
-  const hasPreviousScreenshot = useValue(hasPreviousScreenshot$());
+  const hasPreviousScreenshot = useValue(previousNeighbor$()) != null;
   const canAdvance = useValue(canAdvance$());
   const forcedRefreshIndex = useValue(forcedRefreshIndex$());
   const screenshot = useValue(screenshot$());
@@ -174,6 +178,54 @@ export function useSplashscreenState(): readonly [
   return [{ imageUri: deriveImageUri(screenshot, settings), canAdvance }, setMenuState];
 }
 
+/**
+ * @public
+ * The current slideshow screenshot with its window neighbors (previous and look-ahead), plus
+ * whether the game is on the main menu, which together drive the keep-alive image set.
+ */
+export interface KeepAliveScreenshotsState {
+  readonly current: Screenshot | null;
+  readonly prev: Screenshot | null;
+  readonly next: Screenshot | null;
+  readonly isInMainMenu: boolean;
+}
+
+/**
+ * Imperatively subscribes to the keep-alive screenshot window (current, neighbors, and in-menu
+ * flag), invoking [listener] once with the current values and again on every change.
+ *
+ * This is a non-React subscription because the keep-alive nodes live directly on `document.body`,
+ * outside the component tree (see `installKeepAliveImages`).
+ *
+ * @return A disposer that ends all subscriptions.
+ */
+export function subscribeToKeepAliveScreenshots(
+  listener: (state: KeepAliveScreenshotsState) => void
+): () => void {
+  const notify = (): void =>
+    listener({
+      current: screenshot$().value,
+      prev: previousNeighbor$().value,
+      next: nextNeighbor$().value,
+      isInMainMenu: isInMainMenu$().value
+    });
+
+  const subscriptions = [
+    screenshot$().subscribe(notify),
+    previousNeighbor$().subscribe(notify),
+    nextNeighbor$().subscribe(notify),
+    isInMainMenu$().subscribe(notify)
+  ];
+
+  notify();
+
+  return () => {
+    for (const subscription of subscriptions) {
+      subscription.dispose();
+    }
+  };
+}
+
 export function previousScreenshot(): void {
   trigger(GROUP, 'previousScreenshot');
 }
@@ -195,14 +247,13 @@ export function likeScreenshot(): void {
 }
 
 /**
+ * @public
  * Resolves the image URI to display from the current screenshot, picking the resolution variant
  * that matches the user's quality setting.
  *
- * This mirrors the same resolution-to-URL choice C# makes when preloading
- * (`SelectImageUrl`). The duplication is intentional and was kept after weighing a single
- * C#-resolved URL crossing the binding: deriving here lets the displayed image follow a
- * resolution-setting change live, without a C# re-preload/republish round-trip.
- * Both sides must agree on the mapping for every supported resolution.
+ * The screenshot carries every resolution variant, and the UI selects one here rather than being
+ * handed a pre-resolved URL: deriving live means a resolution-setting change updates the on-screen
+ * image immediately, with no round-trip.
  */
 export function deriveImageUri(
   screenshot: Screenshot | null,

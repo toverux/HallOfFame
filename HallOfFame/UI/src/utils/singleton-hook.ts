@@ -1,10 +1,8 @@
 ﻿import { type Dispatch, type SetStateAction, useEffect, useState } from 'react';
-
 /**
  * A function to make a shareable useState-like hook that shares its value and updates with all
  * components using the same instance.
  *
- * @public
  *
  * @link https://stackoverflow.com/questions/57602715/react-custom-hooks-fetch-data-globally-and-share-across-components/61449641#61449641
  *
@@ -15,6 +13,7 @@
  *     const [value, setValue] = useSingletonState();
  * }
  */
+
 export function createSingletonHook<T>(initialValue: T) {
   let sharedValue: T = initialValue;
 

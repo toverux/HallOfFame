@@ -11,12 +11,8 @@ namespace HallOfFame.Tests.Services;
 
 public sealed class ScreenshotCarouselTests {
   [Fact]
-  public async Task Next_OnEmpty_FetchesPreloadsAndSetsCurrent() {
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.SequentialApi(out _, "s0"),
-      new FakePreloader(),
-      () => "4k"
-    );
+  public async Task Next_OnEmpty_FetchesAndSetsCurrent() {
+    var carousel = new ScreenshotCarousel(ScreenshotCarouselTests.SequentialApi(out _, "s0"));
 
     var step = await carousel.Next();
 
@@ -30,45 +26,6 @@ public sealed class ScreenshotCarouselTests {
     Assert.Equal(1, carousel.Count);
     Assert.False(carousel.HasPrevious);
     Assert.True(carousel.IsAtEnd);
-  }
-
-  [Theory]
-  [InlineData("4k", "https://img/s0-4k.jpg")]
-  [InlineData("fhd", "https://img/s0-fhd.jpg")]
-  public async Task Next_PreloadsUrlForConfiguredResolution(string resolution, string expectedUrl) {
-    string? preloadedUrl = null;
-
-    var preloader = new FakePreloader {
-      PreloadImpl = url => {
-        preloadedUrl = url;
-
-        return Task.CompletedTask;
-      }
-    };
-
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.SequentialApi(out _, "s0"),
-      preloader,
-      () => resolution
-    );
-
-    await carousel.Next();
-
-    Assert.Equal(expectedUrl, preloadedUrl);
-  }
-
-  [Fact]
-  public async Task Next_UnknownResolution_Throws_AndLeavesWindowEmpty() {
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.SequentialApi(out _, "s0"),
-      new FakePreloader(),
-      () => "8k"
-    );
-
-    await Assert.ThrowsAsync<InvalidOperationException>(carousel.Next);
-
-    Assert.Null(carousel.Current);
-    Assert.Equal(0, carousel.Count);
   }
 
   [Fact]
@@ -85,7 +42,7 @@ public sealed class ScreenshotCarouselTests {
       }
     };
 
-    var carousel = new ScreenshotCarousel(api, new FakePreloader(), () => "4k");
+    var carousel = new ScreenshotCarousel(api);
 
     await carousel.Next();
 
@@ -96,28 +53,10 @@ public sealed class ScreenshotCarouselTests {
   }
 
   [Fact]
-  public async Task Next_PreloadError_Propagates_AndLeavesWindowEmpty() {
-    var preloader = new FakePreloader {
-      PreloadImpl = url => throw new ImagePreloadFailedException(url)
-    };
-
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.SequentialApi(out _, "s0"),
-      preloader,
-      () => "4k"
-    );
-
-    await Assert.ThrowsAsync<ImagePreloadFailedException>(carousel.Next);
-
-    Assert.Null(carousel.Current);
-    Assert.Equal(0, carousel.Count);
-  }
-
-  [Fact]
   public async Task Next_WithLookAhead_AdvancesWithoutFetching() {
     var api = ScreenshotCarouselTests.SequentialApi(out var callCount, "s0", "s1");
 
-    var carousel = new ScreenshotCarousel(api, new FakePreloader(), () => "4k");
+    var carousel = new ScreenshotCarousel(api);
 
     await carousel.Next();
     await carousel.PreloadAhead();
@@ -138,32 +77,18 @@ public sealed class ScreenshotCarouselTests {
 
   [Fact]
   public async Task Previous_AtFirstScreenshot_Throws() {
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.SequentialApi(out _, "s0"),
-      new FakePreloader(),
-      () => "4k"
-    );
+    var carousel = new ScreenshotCarousel(ScreenshotCarouselTests.SequentialApi(out _, "s0"));
 
     await carousel.Next();
 
-    await Assert.ThrowsAsync<InvalidOperationException>(carousel.Previous);
+    Assert.Throws<InvalidOperationException>(() => carousel.Previous());
   }
 
   [Fact]
-  public async Task Previous_MovesBackAndRePreloads_WithoutFetching() {
-    string? preloadedUrl = null;
-
-    var preloader = new FakePreloader {
-      PreloadImpl = url => {
-        preloadedUrl = url;
-
-        return Task.CompletedTask;
-      }
-    };
-
+  public async Task Previous_MovesBack_WithoutFetching() {
     var api = ScreenshotCarouselTests.SequentialApi(out var callCount, "s0", "s1");
 
-    var carousel = new ScreenshotCarousel(api, preloader, () => "4k");
+    var carousel = new ScreenshotCarousel(api);
 
     await carousel.Next();
     await carousel.PreloadAhead();
@@ -171,7 +96,7 @@ public sealed class ScreenshotCarouselTests {
 
     var callsBeforePrevious = callCount();
 
-    var step = await carousel.Previous();
+    var step = carousel.Previous();
 
     Assert.Equal(callsBeforePrevious, callCount());
 
@@ -180,32 +105,7 @@ public sealed class ScreenshotCarouselTests {
     Assert.Equal("s0", step.Current.Id);
     Assert.False(step.ShouldPreloadAhead);
 
-    Assert.Equal("https://img/s0-4k.jpg", preloadedUrl);
     Assert.False(carousel.HasPrevious);
-  }
-
-  [Fact]
-  public async Task Previous_PreloadError_Propagates() {
-    var failNext = false;
-
-    var preloader = new FakePreloader {
-      // ReSharper disable once AccessToModifiedClosure
-      PreloadImpl = url => failNext
-        ? throw new ImagePreloadFailedException(url)
-        : Task.CompletedTask
-    };
-
-    var api = ScreenshotCarouselTests.SequentialApi(out _, "s0", "s1");
-
-    var carousel = new ScreenshotCarousel(api, preloader, () => "4k");
-
-    await carousel.Next();
-    await carousel.PreloadAhead();
-    await carousel.Next();
-
-    failNext = true;
-
-    await Assert.ThrowsAsync<ImagePreloadFailedException>(carousel.Previous);
   }
 
   /// <summary>
@@ -215,11 +115,7 @@ public sealed class ScreenshotCarouselTests {
   /// </summary>
   [Fact]
   public async Task Next_AfterScrollback_OntoMiddle_DoesNotPreloadAhead() {
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.CountingApi(),
-      new FakePreloader(),
-      () => "4k"
-    );
+    var carousel = new ScreenshotCarousel(ScreenshotCarouselTests.CountingApi());
 
     // Walk forward far enough to build scrollback (the system prefetches a look-ahead after each
     // forward step), then step back twice to land in the middle of the window.
@@ -243,7 +139,7 @@ public sealed class ScreenshotCarouselTests {
   public async Task PreloadAhead_AppendsLookAhead_WithoutMovingCursor() {
     var api = ScreenshotCarouselTests.SequentialApi(out _, "s0", "s1");
 
-    var carousel = new ScreenshotCarousel(api, new FakePreloader(), () => "4k");
+    var carousel = new ScreenshotCarousel(api);
 
     await carousel.Next();
 
@@ -272,7 +168,7 @@ public sealed class ScreenshotCarouselTests {
       "s1"
     );
 
-    var carousel = new ScreenshotCarousel(api, new FakePreloader(), () => "4k");
+    var carousel = new ScreenshotCarousel(api);
 
     await carousel.Next();
     await carousel.PreloadAhead();
@@ -293,11 +189,7 @@ public sealed class ScreenshotCarouselTests {
   public async Task PreloadAhead_TrimsWindowAndKeepsCursorOnSameScreenshot() {
     // A counting endpoint that returns "s0", "s1", "s2"... so every fetch is distinct (the dedupe
     // loop never spins).
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.CountingApi(),
-      new FakePreloader(),
-      () => "4k"
-    );
+    var carousel = new ScreenshotCarousel(ScreenshotCarouselTests.CountingApi());
 
     // Drive the slideshow exactly as the system does: advance, then prefetch when the step says so.
     await ScreenshotCarouselTests.Drive(
@@ -314,11 +206,7 @@ public sealed class ScreenshotCarouselTests {
 
   [Fact]
   public async Task ReplaceCurrent_SwapsInPlace_WithoutMovingCursor() {
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.SequentialApi(out _, "s0"),
-      new FakePreloader(),
-      () => "4k"
-    );
+    var carousel = new ScreenshotCarousel(ScreenshotCarouselTests.SequentialApi(out _, "s0"));
 
     await carousel.Next();
 
@@ -333,11 +221,7 @@ public sealed class ScreenshotCarouselTests {
 
   [Fact]
   public void ReplaceCurrent_WithNoCurrent_Throws() {
-    var carousel = new ScreenshotCarousel(
-      ScreenshotCarouselTests.SequentialApi(out _, "s0"),
-      new FakePreloader(),
-      () => "4k"
-    );
+    var carousel = new ScreenshotCarousel(ScreenshotCarouselTests.SequentialApi(out _, "s0"));
 
     Assert.Throws<InvalidOperationException>(() =>
       carousel.ReplaceCurrent(ScreenshotCarouselTests.MakeScreenshot("x"))
@@ -346,22 +230,12 @@ public sealed class ScreenshotCarouselTests {
 
   #if DEBUG
   [Fact]
-  public async Task LoadById_FetchesPreloadsAppendsAndAdvances() {
-    string? preloadedUrl = null;
-
-    var preloader = new FakePreloader {
-      PreloadImpl = url => {
-        preloadedUrl = url;
-
-        return Task.CompletedTask;
-      }
-    };
-
+  public async Task LoadById_FetchesAppendsAndAdvances() {
     var api = new FakeApi {
       GetScreenshotImpl = id => Task.FromResult(ScreenshotCarouselTests.MakeScreenshot(id))
     };
 
-    var carousel = new ScreenshotCarousel(api, preloader, () => "4k");
+    var carousel = new ScreenshotCarousel(api);
 
     var step = await carousel.LoadById("abc");
 
@@ -373,7 +247,6 @@ public sealed class ScreenshotCarouselTests {
     Assert.Equal("abc", carousel.Current?.Id);
     Assert.Equal(0, carousel.CurrentIndex);
     Assert.Equal(1, carousel.Count);
-    Assert.Equal("https://img/abc-4k.jpg", preloadedUrl);
   }
   #endif
 
@@ -393,7 +266,7 @@ public sealed class ScreenshotCarouselTests {
     foreach (var move in moves) {
       var step = move switch {
         Move.Next => await carousel.Next(),
-        Move.Previous => await carousel.Previous(),
+        Move.Previous => carousel.Previous(),
         _ => throw new ArgumentOutOfRangeException(nameof(moves), move, null)
       };
 

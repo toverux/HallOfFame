@@ -50,10 +50,18 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
     <Tooltip tooltip={translate('HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP')}>
       <span
         ref={spanRef}
-        onClick={bindings.takeScreenshot}
+        onClick={takeHofPicture}
         // biome-ignore lint/security/noDangerouslySetInnerHtml: not text from a user
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </Tooltip>
   );
+}
+
+/**
+ * Plays the shutter-press feedback sound and requests the capture.
+ */
+function takeHofPicture(): void {
+  bindings.playSound('select-item');
+  bindings.takeScreenshot();
 }

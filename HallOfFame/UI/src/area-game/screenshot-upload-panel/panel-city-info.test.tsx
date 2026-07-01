@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { cleanup, render, screen } from '@testing-library/react';
+import { makeSettings } from '../../testing/fixtures';
 import { resetBindings, setBinding } from '../../testing/game-setup';
-import type { JsonScreenshotSnapshot, ModSettings } from '../../utils/bindings';
+import type { JsonScreenshotSnapshot } from '../../utils/bindings';
 import { ScreenshotUploadPanelContentCityInfo } from './panel-city-info';
 
 afterEach(() => {
@@ -9,17 +10,7 @@ afterEach(() => {
   resetBindings();
 });
 
-const settings: ModSettings = {
-  creatorName: 'Alice',
-  enableLoadingScreenBackground: true,
-  showFeaturedAsset: true,
-  showCreatorSocials: true,
-  showViewCount: false,
-  screenshotResolution: 'fhd',
-  namesTranslationMode: 'translate',
-  creatorsScreenshotSaveDirectory: '',
-  baseUrl: ''
-};
+const settings = makeSettings({ creatorName: 'Alice' });
 
 const snapshot: JsonScreenshotSnapshot = {
   achievedMilestone: 5,

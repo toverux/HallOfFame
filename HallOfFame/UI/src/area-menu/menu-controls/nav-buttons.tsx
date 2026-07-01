@@ -4,10 +4,9 @@ import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
 import { MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
 import type { Screenshot } from '../../common';
-// biome-ignore lint/correctness/noPrivateImports: svg doesn't have a @public annotation
+// biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import ellipsisSolidSrc from '../../icons/fontawesome/ellipsis-solid.svg';
 import loveChirperSrc from '../../icons/love-chirper.png';
-// biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import doubleArrowRightTriangleSrc from '../../icons/uil/colored/double-arrow-right-triangle.svg';
 import eyeClosedSrc from '../../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../../icons/uil/colored/eye-open.svg';

@@ -3,8 +3,8 @@ import type { CSSProperties, FC, MouseEventHandler } from 'react';
 import { getModuleExport } from '../../../../../../utils';
 
 /**
- * Inferred from `game-ui/common/input/toggle/toggle.tsx`.
  * @public
+ * Inferred from `game-ui/common/input/toggle/toggle.tsx`.
  */
 export interface ToggleProps {
   readonly focusKey?: FocusKey;
@@ -23,16 +23,16 @@ export interface ToggleProps {
 }
 
 /**
- * Inferred from `game-ui/common/input/toggle/checkbox/checkbox.tsx`.
  * @public
+ * Inferred from `game-ui/common/input/toggle/checkbox/checkbox.tsx`.
  */
 export interface CheckboxProps extends ToggleProps {
   readonly theme?: Partial<CheckboxTheme>;
 }
 
 /**
- * Inferred from `game-ui/common/input/toggle/checkbox/checkbox.module.scss`.
  * @public
+ * Inferred from `game-ui/common/input/toggle/checkbox/checkbox.module.scss`.
  */
 export interface CheckboxTheme {
   readonly toggle: string;
