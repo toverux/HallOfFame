@@ -7,7 +7,6 @@
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "Unser Server konnte nicht erreicht werden. Bitte überprüfe deine Internetverbindung, falls sie funktioniert, ist es wahrscheinlich ein vorübergehendes Problem auf unserer Seite. Fehlerdetails: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpServerException]": "Es scheint, als ob unser Server Probleme hat. Bitte versuche es später erneut. Fehlerdetails: {ERROR_MESSAGE}",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpUserCompatibilityException]": "Die Version von Hall of Fame ist nicht mit dem Server kompatibel. Bitte überprüfe, ob die Mod auf dem neuesten Stand ist.",
-  "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Systems.ImagePreloaderUISystem.ImagePreloadFailedException]": "Das Bild konnte nicht heruntergeladen werden. Fehlerdetails: {ERROR_MESSAGE}",
   "HallOfFame.Common.DEFAULT_CITY_NAME": "Meine Stadt",
   "HallOfFame.Common.CITY_BY": "von {CREATOR_NAME}",
   "HallOfFame.Settings.PARADOX_LOGIN_DIALOG[Title]": "Willkommen in der Hall of Fame! Aber…",
