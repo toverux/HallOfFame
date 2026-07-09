@@ -27,15 +27,20 @@ export function LogoScreenWrapper({ children }: Props): ReactNode {
       return;
     }
 
-    const logoScreenEl = document.querySelector(selector(logoScreenStyles.logoScreen));
+    const logoScreenSelector = selector(logoScreenStyles.logoScreen);
+    const logoScreenEl = document.querySelector(logoScreenSelector);
 
     if (!(logoScreenEl instanceof HTMLElement)) {
       return logError(
-        new Error(`Could not locate loading screen element (using selector "${logoScreenEl}")`)
+        new Error(
+          `Could not locate loading screen element (using selector "${logoScreenSelector}")`
+        )
       );
     }
 
     logoScreenEl.style.backgroundImage = `url(${imageUrl})`;
+    // This effect is intentionally mount-only; screenshot and settings must not re-trigger it.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps - apply the background once on mount.
   }, []);
 
   // Passthrough content.

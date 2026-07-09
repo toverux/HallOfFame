@@ -6,7 +6,11 @@ import type { JsonScreenshotSnapshot, JsonUploadProgress } from '../../utils/bin
  * Computes the type and style of the ratio preview overlay on the image, helping the user to
  * understand how the image will be cropped on the most common aspect ratio, 16:9.
  */
-export function getRatioPreviewInfo(screenshot: JsonScreenshotSnapshot) {
+export function getRatioPreviewInfo(screenshot: JsonScreenshotSnapshot): {
+  type: 'equal' | 'narrower' | 'wider';
+  style: CSSProperties;
+} {
+  // oxlint-disable-next-line no-magic-numbers - 16:9 is the reference aspect ratio
   const mostCommonRatio = 16 / 9;
 
   const ratio = screenshot.imageWidth / screenshot.imageHeight;

@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/*"
+  - '**/*'
 ---
 
 # General Code Style
@@ -41,5 +41,3 @@ These rules are general guidelines applying to every language.
 - Respect a strict 100-character line length limit, including in comments (including the docblock
   formatting). However, do NOT verify this with external tools like `awk`, this is too
   token-intensive.
-- In docblocks, always break into multi-line docblocks *except* if it's just for one JSDoc
-  annotation (ex. `/** @public */`).

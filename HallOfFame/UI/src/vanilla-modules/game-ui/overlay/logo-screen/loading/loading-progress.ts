@@ -6,7 +6,6 @@ const coLoadingStyles = getClassesModule(
   ['progress']
 );
 
-/** @public */
 export interface LoadingProgressProps {
   size: number;
   lineWidth: number;
@@ -16,7 +15,6 @@ export interface LoadingProgressProps {
 }
 
 /**
- * @public
  * Those are values used by vanilla for the loading screens.
  */
 export const loadingProgressVanillaProps = {
@@ -27,7 +25,6 @@ export const loadingProgressVanillaProps = {
 } satisfies Partial<LoadingProgressProps>;
 
 /**
- * @public
  * Loading circles that are displayed on the loading screens.
  */
 export const LoadingProgress = getModuleExport<FC<LoadingProgressProps>>(

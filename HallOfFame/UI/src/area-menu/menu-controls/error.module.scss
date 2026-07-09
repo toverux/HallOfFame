@@ -46,9 +46,7 @@
   & &-button {
     align-self: flex-start;
     margin: 15rem 0 0;
-    // biome-ignore lint/complexity/noImportantStyles: override vanilla padding-left change on hover.
     padding-left: 15rem !important;
-    // biome-ignore lint/complexity/noImportantStyles: same (also set padding-right to make sure it matches padding-left).
     padding-right: 15rem !important;
   }
 }

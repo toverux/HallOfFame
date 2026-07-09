@@ -2,7 +2,6 @@ import type { Screenshot } from '../common';
 import type { ModSettings } from '../utils/bindings';
 
 /**
- * @public
  * A deferred preload call recorded by {@link createFakePreloader}: the requested URL plus the
  * resolve/reject handles a test settles on command.
  */
@@ -13,7 +12,6 @@ export interface FakePreloadCall {
 }
 
 /**
- * @public
  * Controllable substitute for the `preloadImage` seam.
  */
 export interface FakePreloader {
@@ -24,7 +22,6 @@ export interface FakePreloader {
 }
 
 /**
- * @public
  * Substitute for the `preloadImage` seam that records every call and lets a test resolve or reject
  * a specific URL on command, so `onload`/`onerror`/timeout are deterministic, not wall-clock.
  */
@@ -44,6 +41,7 @@ export function createFakePreloader(): FakePreloader {
   return {
     calls,
     preload: url =>
+      // oxlint-disable-next-line promise/avoid-new - deferred promise: captures resolve/reject to settle on command in tests
       new Promise<void>((resolve, reject) => {
         calls.push({ url, resolve, reject });
       }),
@@ -53,7 +51,6 @@ export function createFakePreloader(): FakePreloader {
 }
 
 /**
- * @public
  * Builds a {@link ModSettings} with test-friendly defaults, overridable per field.
  */
 export function makeSettings(overrides: Partial<ModSettings> = {}): ModSettings {
@@ -72,7 +69,6 @@ export function makeSettings(overrides: Partial<ModSettings> = {}): ModSettings 
 }
 
 /**
- * @public
  * Builds a {@link Screenshot} with placeholder defaults, overridable per field.
  */
 export function makeScreenshot(overrides: Partial<Screenshot> = {}): Screenshot {

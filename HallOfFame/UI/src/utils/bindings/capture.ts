@@ -4,7 +4,6 @@ import { lazyBindValue } from './lazy-value-binding';
 const GROUP = 'hallOfFame.capture';
 
 /**
- * @public
  * From `Colossal.PSI.Common.Mod`
  */
 export interface JsonMod {
@@ -14,7 +13,6 @@ export interface JsonMod {
 }
 
 /**
- * @public
  * From `HallOfFame.Services.ScreenshotSnapshot`
  */
 export interface JsonScreenshotSnapshot {
@@ -30,7 +28,6 @@ export interface JsonScreenshotSnapshot {
 }
 
 /**
- * @public
  * From `HallOfFame.Services.UploadProgress`
  */
 export interface JsonUploadProgress {
@@ -41,7 +38,6 @@ export interface JsonUploadProgress {
 }
 
 /**
- * @public
  * From `HallOfFame.Services.UploadFormMemory`
  */
 export interface JsonUploadFormMemory {
@@ -51,7 +47,6 @@ export interface JsonUploadFormMemory {
 }
 
 /**
- * @public
  * Argument of the {@link uploadScreenshot} command, mapped on the UI side from the upload form
  * state into the shape the C# `uploadScreenshot` command expects.
  */

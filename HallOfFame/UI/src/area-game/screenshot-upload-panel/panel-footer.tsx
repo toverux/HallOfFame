@@ -1,77 +1,77 @@
 import classNames from 'classnames';
-import { useLocalization } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { memo, type ReactElement, useCallback } from 'react';
-// biome-ignore lint/correctness/noPrivateImports: svgs don't have @public annotations
 import cloudArrowUpSolidSrc from '../../icons/fontawesome/cloud-arrow-up-solid.svg';
-import type { DraggableProps } from '../../utils';
+import { type DraggableProps, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { buildUploadPayload, type ScreenshotInfoFormValue } from './form-state';
 import * as styles from './panel-footer.module.scss';
 
-export const ScreenshotUploadPanelFooter = memo(function ScreenshotUploadPanelFooterBase({
-  creatorNameIsEmpty,
-  uploadProgress,
-  draggable,
-  formValue
-}: Readonly<{
-  creatorNameIsEmpty: boolean;
-  uploadProgress: bindings.JsonUploadProgress | null;
-  draggable: DraggableProps;
-  formValue: ScreenshotInfoFormValue;
-}>): ReactElement {
-  const { translate } = useLocalization();
+export const ScreenshotUploadPanelFooter = memo(
+  ({
+    creatorNameIsEmpty,
+    uploadProgress,
+    draggable,
+    formValue
+  }: Readonly<{
+    creatorNameIsEmpty: boolean;
+    uploadProgress: bindings.JsonUploadProgress | null;
+    draggable: DraggableProps;
+    formValue: ScreenshotInfoFormValue;
+  }>): ReactElement => {
+    const translate = useTranslate();
 
-  const handleUpload = useCallback(() => submitUpload(formValue), [formValue]);
+    const handleUpload = useCallback(() => submitUpload(formValue), [formValue]);
 
-  const isUploading = uploadProgress != null && !uploadProgress.isComplete;
-  const isIdleOrUploading = !uploadProgress?.isComplete;
-  const isDoneUploading = uploadProgress?.isComplete == true;
+    const isUploading = uploadProgress != null && !uploadProgress.isComplete;
+    const isIdleOrUploading = !uploadProgress?.isComplete;
+    const isDoneUploading = uploadProgress?.isComplete == true;
 
-  // Showcasing an asset requires picking one; without it there is nothing valid to upload.
-  const isShowcaseSelectionMissing = formValue.isShowcasingAsset && !formValue.showcasedMod;
+    // Showcasing an asset requires picking one; without it there is nothing valid to upload.
+    const isShowcaseSelectionMissing = formValue.isShowcasingAsset && !formValue.showcasedMod;
 
-  return (
-    <div className={styles.footer} {...draggable}>
-      {isIdleOrUploading && (
-        <>
-          {!isUploading && (
+    return (
+      <div className={styles.footer} {...draggable}>
+        {isIdleOrUploading && (
+          <>
+            {!isUploading && (
+              <Button
+                className={classNames(styles.footerButton, styles.footerButtonCancel)}
+                variant='primary'
+                disabled={isUploading}
+                onSelect={bindings.clearScreenshot}
+                selectSound='close-panel'>
+                {translate('Common.ACTION[Cancel]', 'Cancel')}
+              </Button>
+            )}
+
             <Button
-              className={classNames(styles.footerButton, styles.footerButtonCancel)}
               variant='primary'
-              disabled={isUploading}
-              onSelect={bindings.clearScreenshot}
-              selectSound='close-panel'>
-              {translate('Common.ACTION[Cancel]', 'Cancel')}
-            </Button>
-          )}
+              className={styles.footerButton}
+              disabled={creatorNameIsEmpty || isUploading || isShowcaseSelectionMissing}
+              onSelect={handleUpload}>
+              <Icon src={cloudArrowUpSolidSrc} tinted={true} className={styles.footerButtonIcon} />
 
+              {isUploading
+                ? translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING')
+                : translate('HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE')}
+            </Button>
+          </>
+        )}
+
+        {isDoneUploading && (
           <Button
             variant='primary'
             className={styles.footerButton}
-            disabled={creatorNameIsEmpty || isUploading || isShowcaseSelectionMissing}
-            onSelect={handleUpload}>
-            <Icon src={cloudArrowUpSolidSrc} tinted={true} className={styles.footerButtonIcon} />
-
-            {isUploading
-              ? translate('HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOADING')
-              : translate('HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE')}
+            onSelect={bindings.clearScreenshot}
+            selectSound='close-menu'>
+            {translate('Common.CLOSE', 'Close')}
           </Button>
-        </>
-      )}
-
-      {isDoneUploading && (
-        <Button
-          variant='primary'
-          className={styles.footerButton}
-          onSelect={bindings.clearScreenshot}
-          selectSound='close-menu'>
-          {translate('Common.CLOSE', 'Close')}
-        </Button>
-      )}
-    </div>
-  );
-});
+        )}
+      </div>
+    );
+  }
+);
 
 /**
  * Builds the upload payload from the form state and submits it through the capture facade.

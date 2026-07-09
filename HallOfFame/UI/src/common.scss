@@ -2,7 +2,6 @@
 
 // Applies the content passed in the mixin when the legacy UI is not enabled.
 @mixin on-new-ui {
-  // biome-ignore lint/correctness/noUnknownPseudoClass: CSS modules pseudo selector
   @at-root :global(.overwrite-legacy) & {
     @content;
   }

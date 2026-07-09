@@ -1,7 +1,9 @@
-﻿import { getModule } from 'cs2/modding';
+import { getModule } from 'cs2/modding';
 import { logError } from './ui-helpers';
 
-/** @see getClassesModule */
+/**
+ * @see getClassesModule
+ */
 const ignoreResolveErrorsFor = new Set<string>();
 
 /**
@@ -12,18 +14,18 @@ const ignoreResolveErrorsFor = new Set<string>();
  * it will be ignored to avoid spamming the user.
  * A missing class will be resolved in the resulting map with a "_missing" suffix.
  *
- * @param module     Path of the vanilla module.
+ * @param module Path of the vanilla module.
  * @param classNames Classes to ensure are in the module, ensuring compilation and runtime
- *                   type-safety.
+ *   type-safety.
  */
 export function getClassesModule<const TClassNames extends readonly string[]>(
   module: string,
   classNames: TClassNames
-): { [Class in TClassNames[number]]: string } {
+): Record<TClassNames[number], string> {
   let classes: Record<string, string>;
 
   try {
-    classes = getModule(module, 'classes');
+    classes = getModule(module, 'classes') as Record<string, string>;
   } catch {
     classes = {};
 
@@ -46,7 +48,7 @@ export function getClassesModule<const TClassNames extends readonly string[]>(
     }
   }
 
-  return classes as ReturnType<typeof getClassesModule<TClassNames>>;
+  return classes;
 }
 
 /**
@@ -55,10 +57,10 @@ export function getClassesModule<const TClassNames extends readonly string[]>(
  * it will be ignored to avoid spamming the user.
  * A missing export will resolve to the provided fallback value.
  *
- * @param module     Path of the vanilla module.
+ * @param module Path of the vanilla module.
  * @param exportName Symbol export name.
- * @param guard      Type guard to ensure the export is of the correct type.
- * @param fallback   Fallback value to use if the export is missing or invalid.
+ * @param guard Type guard to ensure the export is of the correct type.
+ * @param fallback Fallback value to use if the export is missing or invalid.
  */
 export function getModuleExport<TExport>(
   module: string,
@@ -67,7 +69,7 @@ export function getModuleExport<TExport>(
   fallback: TExport
 ): TExport {
   try {
-    const exported = getModule(module, exportName);
+    const exported = getModule(module, exportName) as unknown;
 
     if (guard(exported)) {
       return exported;
@@ -96,6 +98,5 @@ export function getModuleExport<TExport>(
  * "class1 class2 class3" -> ".class1.class2.class3".
  */
 export function selector(classNames: string): string {
-  // biome-ignore lint/style/useTemplate: intent clearer like that
-  return `.` + classNames.replaceAll(' ', '.');
+  return `.${classNames.replaceAll(' ', '.')}`;
 }

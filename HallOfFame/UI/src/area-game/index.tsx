@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Extensions for in-game UI components.
  */
 

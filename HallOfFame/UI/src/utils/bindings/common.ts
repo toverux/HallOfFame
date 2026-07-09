@@ -5,7 +5,6 @@ import { lazyBindValue } from './lazy-value-binding';
 const GROUP = 'hallOfFame.common';
 
 /**
- * @public
  * See C# `HallOfFame.Settings` class for documentation.
  */
 export interface ModSettings {

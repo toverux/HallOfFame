@@ -1,16 +1,15 @@
 import classNames from 'classnames';
-import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
+import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
 import { memo, type ReactElement } from 'react';
-// biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
-// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
+import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import * as styles from './panel-city-info.module.scss';
 import * as shared from './shared.module.scss';
 
 export const ScreenshotUploadPanelContentCityInfo = memo(
-  function ScreenshotUploadPanelContentCityInfoBase({
+  ({
     settings,
     screenshotSnapshot,
     creatorNameIsEmpty
@@ -18,13 +17,11 @@ export const ScreenshotUploadPanelContentCityInfo = memo(
     settings: bindings.ModSettings;
     screenshotSnapshot: bindings.JsonScreenshotSnapshot;
     creatorNameIsEmpty: boolean;
-  }>): ReactElement {
-    const { translate } = useLocalization();
+  }>): ReactElement => {
+    const translate = useTranslate();
 
-    const cityName =
-      bindings.useCityName() ||
-      // biome-ignore lint/style/noNonNullAssertion: translation controlled by us.
-      translate('HallOfFame.Common.DEFAULT_CITY_NAME')!;
+    // oxlint-disable-next-line typescript/no-non-null-assertion - default city name key always resolves
+    const cityName = bindings.useCityName() || translate('HallOfFame.Common.DEFAULT_CITY_NAME')!;
 
     // noinspection HtmlRequiredAltAttribute
     return (
@@ -34,7 +31,6 @@ export const ScreenshotUploadPanelContentCityInfo = memo(
           {!creatorNameIsEmpty && (
             <LocalizedString
               id='HallOfFame.Common.CITY_BY'
-              // biome-ignore lint/style/useNamingConvention: i18n convention
               args={{ CREATOR_NAME: settings.creatorName }}
             />
           )}

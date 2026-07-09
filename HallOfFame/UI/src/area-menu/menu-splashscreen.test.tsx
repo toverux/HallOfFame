@@ -1,4 +1,4 @@
-// biome-ignore-all lint/style/useComponentExportOnlyModules: test module; components are local render fixtures beside helpers, and Fast Refresh does not apply to tests.
+/* oxlint-disable require-await, typescript/require-await - async act() callbacks flush React effects, no direct await */
 
 import { afterEach, describe, expect, it, spyOn } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
@@ -33,7 +33,6 @@ afterEach(() => {
   }
 });
 
-// biome-ignore lint/complexity/noExcessiveLinesPerFunction: comprehensive matrix; one `describe` per concern reads better than splitting it up.
 describe('MenuSplashscreen transition machine', () => {
   it(`seeds from the Vanilla image on cold boot and shows it with no fade`, () => {
     plantVanillaBackdrop('vanilla.png');
@@ -159,7 +158,9 @@ describe('MenuSplashscreen transition machine', () => {
   });
 
   it(`holds the current image, warns, and unfreezes readiness on a preload error`, async () => {
-    const errorSpy = spyOn(iconsole, 'error').mockImplementation(() => undefined);
+    const errorSpy = spyOn(iconsole, 'error').mockImplementation(() => {
+      /* Intentional no-op: swallow the expected error log during the test. */
+    });
 
     setScreenshot(makeScreenshot({ imageUrlFHD: 'a.png' }));
 
@@ -186,7 +187,9 @@ describe('MenuSplashscreen transition machine', () => {
   });
 
   it(`recovers from a preload timeout exactly like an error`, async () => {
-    const errorSpy = spyOn(iconsole, 'error').mockImplementation(() => undefined);
+    const errorSpy = spyOn(iconsole, 'error').mockImplementation(() => {
+      /* Intentional no-op: swallow the expected error log during the test. */
+    });
 
     setScreenshot(makeScreenshot({ imageUrlFHD: 'a.png' }));
 
@@ -291,7 +294,9 @@ function splashscreenDivs(container: HTMLElement): readonly HTMLElement[] {
   return [...container.querySelectorAll('div')];
 }
 
-/** The incoming fade-in div (the second splashscreen div), present only while fading. */
+/**
+ * The incoming fade-in div (the second splashscreen div), present only while fading.
+ */
 function fadeDiv(container: HTMLElement): HTMLElement {
   const [, div] = splashscreenDivs(container);
 
@@ -319,7 +324,9 @@ function plantVanillaBackdrop(url: string): void {
   document.body.append(element);
 }
 
-/** Runs the mod's `register` against a fake registry and returns the named extension's enhancer. */
+/**
+ * Runs the mod's `register` against a fake registry and returns the named extension's enhancer.
+ */
 function captureExtension(exportName: string): ModuleRegistryExtend {
   const extensions = new Map<string, ModuleRegistryExtend>();
 

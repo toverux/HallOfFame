@@ -1,3 +1,5 @@
+/* oxlint-disable no-magic-numbers - test fixtures use literal dimensions/ratios */
+
 import { describe, expect, it } from 'bun:test';
 import type { Localization } from 'cs2/l10n';
 import type { JsonScreenshotSnapshot, JsonUploadProgress } from '../../utils/bindings';

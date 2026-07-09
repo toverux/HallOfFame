@@ -12,6 +12,7 @@ import * as bindings from '../../utils/bindings';
  *
  * @param previewImageUri The current capture's preview URI, or `null` when no capture is active.
  * @param preloadImage Injectable preloader seam; the caller wires defaults.
+ *
  * @returns Whether the panel may be revealed now.
  */
 export function useCaptureRevealGate(
@@ -30,10 +31,15 @@ export function useCaptureRevealGate(
 
     let canceled = false;
 
+    // A React effect callback must return its cleanup synchronously, so this preload runs as a
+    // fire-and-forget chain rather than being awaited.
+    // oxlint-disable-next-line promise/catch-or-return - see above
     preloadImage(previewImageUri)
+      // oxlint-disable-next-line promise/prefer-await-to-then, promise/prefer-await-to-callbacks - see above
       .catch((error: unknown) => {
         iconsole.error(`HoF: Failed to preload capture preview "${previewImageUri}".`, error);
       })
+      // oxlint-disable-next-line promise/prefer-await-to-then - see above
       .finally(() => {
         if (canceled) {
           return;
@@ -44,6 +50,7 @@ export function useCaptureRevealGate(
         bindings.playSound('take-photo');
       });
 
+    // oxlint-disable-next-line typescript/consistent-return - effect returns a cleanup fn or nothing (early exit)
     return () => {
       canceled = true;
     };

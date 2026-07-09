@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/*.scss"
+  - '**/*.scss'
 ---
 
 # CSS Modules conventions

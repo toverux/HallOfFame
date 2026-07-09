@@ -1,20 +1,18 @@
 import classNames from 'classnames';
 import { ControlIcons } from 'cs2/input';
-import { LocalizedNumber, LocalizedString, useLocalization } from 'cs2/l10n';
+import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
 import { MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
 import type { Screenshot } from '../../common';
-// biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import ellipsisSolidSrc from '../../icons/fontawesome/ellipsis-solid.svg';
 import loveChirperSrc from '../../icons/love-chirper.png';
 import doubleArrowRightTriangleSrc from '../../icons/uil/colored/double-arrow-right-triangle.svg';
 import eyeClosedSrc from '../../icons/uil/colored/eye-closed.svg';
 import eyeOpenSrc from '../../icons/uil/colored/eye-open.svg';
-// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
-import { snappyOnSelect } from '../../utils';
+import { snappyOnSelect, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
-import * as styles from './nav-buttons.module.scss';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
+import * as styles from './nav-buttons.module.scss';
 
 const previousScreenshotInputAction = bindings.bindInputAction(
   'hallOfFame.slideshow',
@@ -36,85 +34,89 @@ const toggleMenuInputAction = bindings.bindInputAction(
   'toggleMenuInputAction'
 );
 
-export const MenuControlsNextButton = memo(function MenuControlsNextButtonBase({
-  isLoading
-}: Readonly<{
-  isLoading: boolean;
-}>): ReactElement {
-  const disabled = isLoading;
+export const MenuControlsNextButton = memo(
+  ({
+    isLoading
+  }: Readonly<{
+    isLoading: boolean;
+  }>): ReactElement => {
+    const disabled = isLoading;
 
-  const { translate } = useLocalization();
+    const translate = useTranslate();
 
-  const { useInputBinding, useInputPhase } = nextScreenshotInputAction;
+    const { useInputBinding, useInputPhase } = nextScreenshotInputAction;
 
-  const binding = useInputBinding();
-  const phase = useInputPhase();
+    const binding = useInputBinding();
+    const phase = useInputPhase();
 
-  useMenuControlsInputAction(
-    phase,
-    // setTimeout is used to give time to the key press .*active class to show briefly before
-    // [disabled] is set.
-    () => !disabled && (setTimeout(bindings.nextScreenshot), true),
-    'select-item'
-  );
+    useMenuControlsInputAction(
+      phase,
+      // SetTimeout is used to give time to the key press .*active class to show briefly before
+      // [disabled] is set.
+      () => !disabled && (setTimeout(bindings.nextScreenshot, 0), true),
+      'select-item'
+    );
 
-  const activeClass = phase == 'Performed' && !disabled ? styles.buttonActive : '';
+    const activeClass = phase == 'Performed' && !disabled ? styles.buttonActive : '';
 
-  return (
-    <MenuButtonTooltip
-      binding={binding}
-      tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]')}>
-      <MenuButton
-        className={classNames(styles.button, styles.buttonNext, activeClass)}
-        src={doubleArrowRightTriangleSrc}
-        tinted={isLoading}
-        disabled={isLoading}
-        {...snappyOnSelect(bindings.nextScreenshot)}
-      />
-    </MenuButtonTooltip>
-  );
-});
+    return (
+      <MenuButtonTooltip
+        binding={binding}
+        tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]')}>
+        <MenuButton
+          className={classNames(styles.button, styles.buttonNext, activeClass)}
+          src={doubleArrowRightTriangleSrc}
+          tinted={isLoading}
+          disabled={isLoading}
+          {...snappyOnSelect(bindings.nextScreenshot)}
+        />
+      </MenuButtonTooltip>
+    );
+  }
+);
 
-export const MenuControlsPreviousButton = memo(function MenuControlsPreviousButtonBase({
-  isLoading,
-  hasPreviousScreenshot
-}: Readonly<{
-  isLoading: boolean;
-  hasPreviousScreenshot: boolean;
-}>): ReactElement {
-  const disabled = isLoading || !hasPreviousScreenshot;
+export const MenuControlsPreviousButton = memo(
+  ({
+    isLoading,
+    hasPreviousScreenshot
+  }: Readonly<{
+    isLoading: boolean;
+    hasPreviousScreenshot: boolean;
+  }>): ReactElement => {
+    const disabled = isLoading || !hasPreviousScreenshot;
 
-  const { translate } = useLocalization();
+    const translate = useTranslate();
 
-  const { useInputBinding, useInputPhase } = previousScreenshotInputAction;
+    const { useInputBinding, useInputPhase } = previousScreenshotInputAction;
 
-  const binding = useInputBinding();
-  const phase = useInputPhase();
+    const binding = useInputBinding();
+    const phase = useInputPhase();
 
-  useMenuControlsInputAction(
-    phase,
-    // setTimeout is used to give time to the key press .*active class to show briefly before
-    // [disabled] is set.
-    () => !disabled && (setTimeout(bindings.previousScreenshot), true),
-    'select-item'
-  );
+    useMenuControlsInputAction(
+      phase,
+      // SetTimeout is used to give time to the key press .*active class to show briefly before
+      // [disabled] is set.
+      () => !disabled && (setTimeout(bindings.previousScreenshot, 0), true),
+      'select-item'
+    );
 
-  const activeClass = phase == 'Performed' && !disabled ? styles.buttonActive : '';
+    const activeClass = phase == 'Performed' && !disabled ? styles.buttonActive : '';
 
-  return (
-    <MenuButtonTooltip
-      binding={binding}
-      tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]')}>
-      <MenuButton
-        className={classNames(styles.button, styles.buttonPrevious, activeClass)}
-        src={doubleArrowRightTriangleSrc}
-        tinted={disabled}
-        disabled={disabled}
-        {...snappyOnSelect(bindings.previousScreenshot)}
-      />
-    </MenuButtonTooltip>
-  );
-});
+    return (
+      <MenuButtonTooltip
+        binding={binding}
+        tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]')}>
+        <MenuButton
+          className={classNames(styles.button, styles.buttonPrevious, activeClass)}
+          src={doubleArrowRightTriangleSrc}
+          tinted={disabled}
+          disabled={disabled}
+          {...snappyOnSelect(bindings.previousScreenshot)}
+        />
+      </MenuButtonTooltip>
+    );
+  }
+);
 
 export const MenuControlsToggleMenuVisibilityButton = memo(
   MenuControlsToggleMenuVisibilityButtonBase
@@ -129,7 +131,7 @@ function MenuControlsToggleMenuVisibilityButtonBase({
 }>): ReactElement {
   const selectSound = isMenuVisible ? 'close-menu' : 'open-menu';
 
-  const { translate } = useLocalization();
+  const translate = useTranslate();
 
   const { useInputBinding, useInputPhase } = toggleMenuInputAction;
 
@@ -154,81 +156,81 @@ function MenuControlsToggleMenuVisibilityButtonBase({
   );
 }
 
-export const MenuControlsLikeButton = memo(function MenuControlsLikeButtonBase({
-  screenshot
-}: Readonly<{
-  screenshot: Screenshot;
-}>): ReactElement {
-  const selectSound = screenshot.isLiked ? 'chirp-event' : 'xp-event';
+export const MenuControlsLikeButton = memo(
+  ({
+    screenshot
+  }: Readonly<{
+    screenshot: Screenshot;
+  }>): ReactElement => {
+    const selectSound = screenshot.isLiked ? 'chirp-event' : 'xp-event';
 
-  const { useInputBinding, useInputPhase } = likeScreenshotInputAction;
+    const { useInputBinding, useInputPhase } = likeScreenshotInputAction;
 
-  const binding = useInputBinding();
-  const phase = useInputPhase();
+    const binding = useInputBinding();
+    const phase = useInputPhase();
 
-  useMenuControlsInputAction(phase, bindings.likeScreenshot, selectSound);
+    useMenuControlsInputAction(phase, bindings.likeScreenshot, selectSound);
 
-  const activeClass =
-    phase == 'Performed'
-      ? screenshot.isLiked
-        ? styles.buttonLikeLikedActive
-        : styles.buttonActive
-      : '';
+    const activeClass =
+      phase == 'Performed'
+        ? screenshot.isLiked
+          ? styles.buttonLikeLikedActive
+          : styles.buttonActive
+        : '';
 
-  return (
-    <MenuButtonTooltip
-      binding={binding}
-      tooltip={
-        <LocalizedString
-          id={
-            screenshot.isLiked
-              ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Remove Like]'
-              : screenshot.likesCount == 0
-                ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Like Zero]'
-                : screenshot.likesCount == 1
-                  ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Like Singular]'
-                  : 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Like Plural]'
-          }
-          args={{
-            // biome-ignore lint/style/useNamingConvention: i18n convention
-            NUMBER: <LocalizedNumber value={screenshot.likesCount} />,
-            // biome-ignore lint/style/useNamingConvention: i18n convention
-            LIKING_PERCENTAGE: <LocalizedNumber value={screenshot.likingPercentage} />
-          }}
+    return (
+      <MenuButtonTooltip
+        binding={binding}
+        tooltip={
+          <LocalizedString
+            id={
+              screenshot.isLiked
+                ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Remove Like]'
+                : screenshot.likesCount == 0
+                  ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Like Zero]'
+                  : screenshot.likesCount == 1
+                    ? 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Like Singular]'
+                    : 'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Like Plural]'
+            }
+            args={{
+              NUMBER: <LocalizedNumber value={screenshot.likesCount} />,
+              LIKING_PERCENTAGE: <LocalizedNumber value={screenshot.likingPercentage} />
+            }}
+          />
+        }>
+        <MenuButton
+          className={classNames(
+            styles.button,
+            styles.buttonLike,
+            {
+              [styles.buttonLikeLiked]: screenshot.isLiked
+            },
+            activeClass
+          )}
+          src={loveChirperSrc}
+          tinted={false}
+          onSelect={bindings.likeScreenshot}
+          selectSound={selectSound}
         />
-      }>
-      <MenuButton
-        className={classNames(
-          styles.button,
-          styles.buttonLike,
-          {
-            [styles.buttonLikeLiked]: screenshot.isLiked
-          },
-          activeClass
-        )}
-        src={loveChirperSrc}
-        tinted={false}
-        onSelect={bindings.likeScreenshot}
-        selectSound={selectSound}
-      />
-    </MenuButtonTooltip>
-  );
-});
+      </MenuButtonTooltip>
+    );
+  }
+);
 
-export const MenuControlsMoreActionsButton = memo(function MenuControlsMoreActionsButtonBase({
-  onToggle
-}: Readonly<{
-  onToggle: () => void;
-}>): ReactElement {
-  return (
+export const MenuControlsMoreActionsButton = memo(
+  ({
+    onToggle
+  }: Readonly<{
+    onToggle: () => void;
+  }>): ReactElement => (
     <MenuButton
       className={styles.button}
       src={ellipsisSolidSrc}
       tinted={true}
       onSelect={onToggle}
     />
-  );
-});
+  )
+);
 
 function MenuButtonTooltip({
   tooltip,

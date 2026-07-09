@@ -67,7 +67,10 @@ export function installKeepAliveImages(): void {
 
     reconcileScheduled = true;
 
+    // Fire-and-forget: scheduleReconcile is called synchronously from subscriptions, so its
+    // microtask-deferred reconcile runs as a chain rather than being awaited.
     Promise.resolve()
+      // oxlint-disable-next-line promise/prefer-await-to-then, promise/always-return - see above
       .then(() => {
         reconcileScheduled = false;
 
@@ -79,6 +82,7 @@ export function installKeepAliveImages(): void {
 
         reconcile(nodes, keepAliveImageUris({ current, prev, next }, isInMainMenu, settings));
       })
+      // oxlint-disable-next-line promise/prefer-await-to-then, promise/prefer-await-to-callbacks - see above
       .catch((error: unknown) => {
         iconsole.error(`HoF: Failed to reconcile keep-alive images.`, error);
       });

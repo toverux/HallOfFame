@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Extensions for menu UI components.
  */
 
@@ -14,7 +14,6 @@ export const register: ModRegistrar = moduleRegistry => {
     MenuUIBackdrops => props => {
       const isSlideshowEnabled = bindings.useIsSlideshowEnabled();
 
-      // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
       return isSlideshowEnabled ? <></> : <MenuUIBackdrops {...props} />;
     }
   );

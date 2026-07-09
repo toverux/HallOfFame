@@ -10,9 +10,9 @@ import { ScreenshotUploadPanelFooter } from './panel-footer';
 import { ScreenshotUploadPanelHeader } from './panel-header';
 import { ScreenshotUploadPanelImage } from './panel-image';
 import { ScreenshotUploadPanelContentScreenshotInfo } from './panel-info-form';
+import { ScreenshotUploadProgress } from './upload-progress';
 import * as styles from './screenshot-upload-panel.module.scss';
 import * as shared from './shared.module.scss';
-import { ScreenshotUploadProgress } from './upload-progress';
 
 interface ScreenshotUploadPanelProps {
   /**
@@ -63,11 +63,13 @@ export function ScreenshotUploadPanel({
     if (screenshotSnapshot) {
       patchFormValue(originalFormState);
     }
+    // Deps are intentionally narrow: originalFormState is recreated each render, so depending on it
+    // (or patchFormValue) would reset the form on every render instead of only on a new capture.
+    // oxlint-disable-next-line react-hooks/exhaustive-deps - reset only on a new capture.
   }, [screenshotSnapshot]);
 
   // Show the panel only once there is a screenshot and its preview image has been decoded.
   if (!(screenshotSnapshot && isRevealed)) {
-    // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
     return <></>;
   }
 

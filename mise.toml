@@ -39,24 +39,49 @@ description = "Watches and regenerates the CSS module type definitions."
 depends = ["build:css-types"]
 run = 'bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType named --nameFormat camel --ignoreInitial --watch'
 
-# CHECK/LINT TASKS
-# ================
+# CHECK TASKS
+# ===========
 
 [tasks."check"]
-description = "Type-checks the UI with tsc and lints/formats it with Biome, applying safe fixes."
-depends = ["check:tsc", "check:biome"]
+description = "Run lint checks (typescript and oxfmt/oxlint), with safe auto-fixes."
+# Not using `depends` because we want a sequential run with lint then format.
+run = ["mise check:tsc", "mise check:oxlint", "mise check:oxfmt"]
 
 [tasks."check:tsc"]
-description = "Type-checks the UI with tsc."
-depends = ["build:css-types"]
+description = "Type-checks code with tsc."
+depends = "build:css-types"
 raw = true
 run = "bun --bun tsc --p HallOfFame/UI --noEmit"
 
-[tasks."check:biome"]
-description = "Lints/formats it with Biome, applying safe fixes."
-depends = ["build:css-types"]
+[tasks."check:oxfmt"]
+description = "Formats code with oxfmt."
 raw = true
-run = "bun biome check --fix"
+run = "bun --bun oxfmt"
+
+[tasks."check:oxlint"]
+description = "Lints code with oxlint."
+depends = "build:css-types"
+raw = true
+run = "bun --bun oxlint --fix"
+
+# CHECK TASKS (AGENTS)
+# ====================
+
+[tasks."check:agents"]
+description = "Run lint checks (typescript and oxfmt/oxlint), with safe auto-fixes, output optimized for AI agents."
+# Not using `depends` because we want a sequential run with lint then format.
+run = ["mise check:agents:tsc", "mise check:agents:oxlint", "mise check:oxfmt"]
+
+[tasks."check:agents:tsc"]
+description = "Type-checks code with tsc, output optimized for AI agents."
+depends = "build:css-types"
+raw = true
+run = "bun --bun tsc --p HallOfFame/UI --noEmit --pretty false"
+
+[tasks."check:agents:oxlint"]
+description = "Lints code with oxlint, output optimized for AI agents."
+depends = "build:css-types"
+run = "bun --bun oxlint --fix --format agent"
 
 # BUILD TASKS
 # ===========

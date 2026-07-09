@@ -1,3 +1,5 @@
+/* oxlint-disable require-await, typescript/require-await - async act() callbacks flush React effects, no direct await */
+
 import { afterEach, describe, expect, it, spyOn } from 'bun:test';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { iconsole } from '../../iconsole';
@@ -29,7 +31,9 @@ describe('useCaptureRevealGate', () => {
   });
 
   it(`reveals anyway and still plays the sound when the preview preload fails`, async () => {
-    const errorSpy = spyOn(iconsole, 'error').mockImplementation(() => undefined);
+    const errorSpy = spyOn(iconsole, 'error').mockImplementation(() => {
+      /* Intentional no-op: swallow the expected error log during the test. */
+    });
 
     const fake = createFakePreloader();
 

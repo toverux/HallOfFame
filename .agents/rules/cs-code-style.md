@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/*.{cs}"
+  - '**/*.{cs}'
 ---
 
 # C# Code Style

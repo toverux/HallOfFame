@@ -1,4 +1,4 @@
-# ﻿<img src="logo.png" alt="Hall of Fame logo" align="right" style="width: 256px">Hall of Fame for Cities: Skylines II
+# <img src="logo.png" alt="Hall of Fame logo" align="right" style="width: 256px">Hall of Fame for Cities: Skylines II
 
 [![Discord](https://img.shields.io/badge/Discord-@toverux-5865f2?logo=discord&logoColor=white)](https://discord.gg/SsshDVq2Zj)
 [![Paradox Mods](https://img.shields.io/badge/Paradox_Mods-Hall_of_Fame-5abe41)](https://mods.paradoxplaza.com/mods/90641/Windows)
@@ -12,6 +12,7 @@ main menu, with information about the creator, the city name and controls to ref
 upvote or hide the UI to better see the image, to name a few features.
 
 **As of April 2026, Hall of Fame has registered:**
+
 - 👥 **13K** users tried the mod
 - ❤️ **120K** likes were given
 - ⬆️ **12K** screenshots were uploaded
@@ -19,7 +20,7 @@ upvote or hide the UI to better see the image, to name a few features.
 
 See also: **[📈 live community statistics](https://metabase.mtq.io/public/dashboard/a74fc50f-8e69-43b7-bdba-7e5fc7420c1b?date_range=thisyear)**
 
---------------
+---
 
 <h3 align="center">
   <img align="center" alt="Paradox Mods Logo" src="HallOfFame/Properties/ParadoxModsCloud.svg" width="40">
@@ -34,7 +35,7 @@ The source code for the server is at
 <a href="https://github.com/toverux/HallOfFameServer">toverux/HallOfFameServer</a>
 </h4>
 
---------------
+---
 
 ![Hall of Fame Store Preview](HallOfFame/Properties/Preview_1.png)
 
@@ -151,18 +152,19 @@ Logs are situated in either:
 
 ### TypeScript
 
-TypeScript code is formatted and linted by [Biome](https://biomejs.dev).
-Run `mise check` to check for linting errors, format files and autofix simple issues.
+TypeScript code is formatted and linted by the [Oxc toolchain](https://oxc.rs) (oxfmt and oxlint).
 
-You can also use Biome directly with `bun biome`.
+Run `mise check` to typecheck the database, linting errors, format files and autofix simple issues
+(run `mise tasks` to see more checking options).
 
 The formatter and linter should run as a pre-commit hook if you have it installed,
 which should be done automatically when running `bun i` (otherwise run `bun lefthook install`).
 
-I'd suggest using a Biome plugin for your editor to ease development.
+I'd suggest using an Oxc plugin for your editor to ease development. Make sure that your plugin is
+set to type-aware mode if it does not inherit this configuration from the project.
 
 If a rule seems out of place for this project, you can either disable/reconfigure it in the
-`biome.json` file or disable it with an annotation comment, but these should be justified and
+`oxlint.config.ts` file or disable it with an annotation comment, but these should be justified and
 concerted.
 
 ### C#
@@ -176,17 +178,3 @@ At the very least, please ensure your IDE has `.editorconfig` support enabled.
 
 Commits must follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0)
 specification and more specifically, the Angular one.
-
-Scope can be one or more of the following:
-
-- `mod`: for general changes to how the mod "presents itself" to the game or
-  user;
-- `cs`: for C# mod changes;
-- `ui`: for UI mod changes;
-- `options`: for changes in the mod options;
-- `menu`: for changes in the main menu part of the mod;
-- `game`: for changes in the in-game part of the mod;
-- `i18n`: for changes in translation files and translations system;
-- `deps`: for dependencies updates;
-- `chore(release)`: for new releases (bump version, update changelog, etc.);
-- Propose new scopes if needed!

@@ -5,7 +5,6 @@ import { register as registerOnOverlay } from './area-overlay';
 import { iconsole } from './iconsole';
 import { installKeepAliveImages } from './keep-alive-images';
 import { logError } from './utils';
-
 // Bundle icons in the build to be used by the C# backend.
 // Ex. resulting URL: `coui://ui-mods/images/stats-notification.svg`
 import './icons/stats-notification.svg';
@@ -30,5 +29,5 @@ const register: ModRegistrar = moduleRegistry => {
 // noinspection JSUnusedGlobalSymbols
 export const hasCSS = true;
 
-// biome-ignore lint/style/noDefaultExport: this is per contract the main entry point of the mod.
+// oxlint-disable-next-line import/no-default-export - the game mod loader requires a default export
 export default register;

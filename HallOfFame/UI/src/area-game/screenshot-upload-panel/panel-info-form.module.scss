@@ -5,7 +5,6 @@
 
 // Form control look, shared only within this form module.
 $control-border: 2rem solid transparent;
-// biome-ignore lint/style/noHexColors: was extracted from some vanilla var, don't remember.
 $control-border-color: #61a0b9;
 $control-border-radius: 5rem; // vanilla is 3rem
 $control-background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
@@ -143,7 +142,6 @@ $control-background-color-focused: rgba(255, 255, 255, 0.4);
 
 // The dropdown toggle pops when its enclosing field is invalid.
 .form-field--invalid .dropdown-toggle {
-  // biome-ignore lint/complexity/noImportantStyles: yup, I don't remember.
   border-color: vanilla.$warning-color !important;
   animation: pop-out 0.3s common.$default-timing-function;
 

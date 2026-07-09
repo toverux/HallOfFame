@@ -73,8 +73,8 @@ export function useDraggable(targetRef: RefObject<HTMLElement | null>): Draggabl
     state.x += event.movementX;
     state.y += event.movementY;
 
-    // translate() would be more appropriate in theory, in a normal browser, but here at low FPS I
-    // found left/top to work better.
+    // `translate()` would be more appropriate in theory, in a normal browser, but here at low FPS,
+    // I found left/top to work better.
     state.element.style.left = `${state.x}px`;
     state.element.style.top = `${state.y}px`;
   }, []);

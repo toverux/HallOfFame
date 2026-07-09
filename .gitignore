@@ -1,6 +1,7 @@
 # Machine-specific settings and state
+/.idea/OxcSettings.xml
+/.idea/OxfmtSettings.xml
 /.idea/**/workspace.xml
-/.idea/**/biome.xml
 /*.DotSettings.user
 
 # UI mod

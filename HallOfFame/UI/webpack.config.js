@@ -1,21 +1,20 @@
 /**
  * File originally by Colossal Order.
  * Changes made:
- * - Auto code reformat with Biome, renamed a few variables.
+ * - Auto code reformat with oxfmt, renamed a few variables.
  * - Migrated to ESM (require => import, import.meta.dirname => import.meta.dirname, etc.).
  * - Removed custom CSSPresencePlugin.
  * - Change css-loader to ignore resolving static game images (Media/...) and leave them as-is
- *   (`options.url.filter`).
+ * (`options.url.filter`).
  * - Change css-loader to add "hof-" prefix to CSS modules class names.
- *   This can help debugging and other mods to target our classes.
+ * This can help debugging and other mods to target our classes.
  * - Remove custom webpack stats printer.
  */
 
-/** biome-ignore-all lint/correctness/noNodejsModules: webpack config */
-/** biome-ignore-all lint/style/noProcessEnv: webpack config */
+// oxlint-disable import/no-nodejs-modules
 
-import * as path from 'node:path';
-import * as process from 'node:process';
+import path from 'node:path';
+import process from 'node:process';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
 import mod from './mod.json' with { type: 'json' };
@@ -23,7 +22,7 @@ import mod from './mod.json' with { type: 'json' };
 const userDataPath = process.env.CSII_USERDATAPATH;
 
 if (!userDataPath) {
-  // biome-ignore lint/style/useThrowOnlyError: CLI pattern.
+  // oxlint-disable-next-line typescript/only-throw-error - CLI usage
   throw 'CSII_USERDATAPATH environment variable is not set, ensure the CSII Modding Toolchain is installed correctly';
 }
 
@@ -38,7 +37,7 @@ const banner = `
  * Dependencies: ${mod.dependencies.join(',')}
 `;
 
-// biome-ignore lint/style/noDefaultExport: per webpack api contract
+// oxlint-disable-next-line import/no-default-export import/no-anonymous-default-export
 export default {
   mode: 'production',
   stats: 'normal',
@@ -47,7 +46,7 @@ export default {
   },
   externalsType: 'window',
   externals: {
-    react: 'React',
+    'react': 'React',
     'react-dom': 'ReactDOM',
     'cs2/modding': 'cs2/modding',
     'cs2/api': 'cs2/api',
@@ -61,12 +60,12 @@ export default {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.tsx?$/u,
         use: 'ts-loader',
-        exclude: /node_modules/
+        exclude: /node_modules/u
       },
       {
-        test: /\.s?css$/,
+        test: /\.s?css$/u,
         include: path.join(import.meta.dirname, 'src'),
         use: [
           MiniCssExtractPlugin.loader,
@@ -75,7 +74,11 @@ export default {
             options: {
               url: {
                 // Avoid requiring intrinsic assets
-                filter: url => !url.startsWith('Media')
+                filter: (
+                  /**
+                   * @type {string}
+                   */ url
+                ) => !url.startsWith('Media')
               },
               importLoaders: 1,
               modules: {
@@ -89,7 +92,7 @@ export default {
         ]
       },
       {
-        test: /\.(png|jpe?g|gif|svg)$/i,
+        test: /\.(?:png|jpe?g|gif|svg)$/iu,
         type: 'asset/resource',
         generator: {
           filename: 'images/[name][ext][query]'
@@ -116,7 +119,7 @@ export default {
     minimize: true,
     minimizer: [
       new TerserPlugin({
-        test: /\.(chunk)?m?js(\?.*)?$/i,
+        test: /\.(?:chunk)?m?js(?:\?.*)?$/iu,
         extractComments: {
           banner: () => banner
         }

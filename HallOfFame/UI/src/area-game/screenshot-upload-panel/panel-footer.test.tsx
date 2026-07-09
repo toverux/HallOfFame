@@ -27,7 +27,7 @@ const validForm: ScreenshotInfoFormValue = {
 
 const uploadEvent = 'hallOfFame.capture.uploadScreenshot';
 
-// translate() returns the id when no fallback is given, so the Share button's label is its id.
+// `translate()` returns the id when no fallback is given, so the Share button's label is its id.
 const shareLabel = 'HallOfFame.UI.Game.ScreenshotUploadPanel.SHARE';
 
 describe('ScreenshotUploadPanelFooter', () => {

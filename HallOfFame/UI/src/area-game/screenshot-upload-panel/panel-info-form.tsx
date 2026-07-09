@@ -1,16 +1,16 @@
 import classNames from 'classnames';
 import { FocusSymbol } from 'cs2/input';
-import { useLocalization } from 'cs2/l10n';
 import {
   Button,
   Dropdown,
   DropdownItem,
   type DropdownTheme,
   DropdownToggle,
+  type Element,
   Scrollable
 } from 'cs2/ui';
 import { memo, type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { getClassesModule } from '../../utils';
+import { getClassesModule, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { useScrollController } from '../../vanilla-modules/game-ui/common/hooks/use-scroll-controller';
 import {
@@ -60,7 +60,6 @@ export const ScreenshotUploadPanelContentScreenshotInfo = memo(
   ScreenshotUploadPanelContentScreenshotInfoBase
 );
 
-// biome-ignore lint/complexity/noExcessiveLinesPerFunction: form template makes it long, but it's simple
 function ScreenshotUploadPanelContentScreenshotInfoBase({
   creatorNameIsEmpty,
   screenshotSnapshot,
@@ -72,7 +71,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
   formValue: ScreenshotInfoFormValue;
   patchFormValue: (state: Partial<ScreenshotInfoFormValue>) => void;
 }>): ReactElement {
-  const { translate } = useLocalization();
+  const translate = useTranslate();
 
   const assetMods = bindings.useAssetMods();
 
@@ -126,10 +125,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
     // The textarea expands when focused; wait for the textarea row count to be set and rendered.
     setTimeout(() => {
-      scrollController?.scrollIntoView(
-        // Strange cast because of incorrect things in cs2/ui types.
-        textareaContainerRef.current as unknown as import('cs2/ui').Element
-      );
+      scrollController?.scrollIntoView(textareaContainerRef.current as unknown as Element);
     }, 100 /* for some reason the textarea takes ages to resize */);
   }, [textareaContainerRef, scrollController, textareaFocused]);
 
@@ -174,11 +170,10 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
             [styles.formFieldChecked]: formValue.shareModIds
           })}
           onMouseEnter={playHoverSound}
-          // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
-          onClick={() => (
-            patchFormValue({ shareModIds: !formValue.shareModIds }),
-            bindings.playSound('select-toggle')
-          )}>
+          onClick={() => {
+            patchFormValue({ shareModIds: !formValue.shareModIds });
+            bindings.playSound('select-toggle');
+          }}>
           <Checkbox
             theme={checkboxTheme}
             checked={formValue.shareModIds}
@@ -199,11 +194,10 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
             [styles.formFieldChecked]: formValue.shareRenderSettings
           })}
           onMouseEnter={playHoverSound}
-          // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
-          onClick={() => (
-            patchFormValue({ shareRenderSettings: !formValue.shareRenderSettings }),
-            bindings.playSound('select-toggle')
-          )}>
+          onClick={() => {
+            patchFormValue({ shareRenderSettings: !formValue.shareRenderSettings });
+            bindings.playSound('select-toggle');
+          }}>
           <Checkbox
             theme={checkboxTheme}
             checked={formValue.shareRenderSettings}
@@ -230,14 +224,13 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
               [styles.formFieldInvalid]: formValue.isShowcasingAsset && !formValue.showcasedMod
             })}
             onMouseEnter={playHoverSound}
-            // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
-            onClick={() => (
+            onClick={() => {
               patchFormValue({
                 isShowcasingAsset: !formValue.isShowcasingAsset,
                 showcasedMod: formValue.isShowcasingAsset ? undefined : formValue.showcasedMod
-              }),
-              bindings.playSound('select-toggle')
-            )}>
+              });
+              bindings.playSound('select-toggle');
+            }}>
             <Checkbox
               theme={checkboxTheme}
               checked={formValue.isShowcasingAsset}
@@ -303,14 +296,12 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
           <div className={styles.textareaWrapper}>
             <textarea
+              // oxlint-disable-next-line no-magic-numbers - expanded vs collapsed textarea row count
               rows={textareaFocused || formValue.description.length > 0 ? 5 : 1}
               maxLength={4000}
               value={formValue.description}
-              // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
               onFocus={() => setTextareaFocused(true)}
-              // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
               onBlur={() => setTextareaFocused(false)}
-              // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
               onChange={event => patchFormValue({ description: event.target.value })}
             />
 
@@ -320,7 +311,6 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
                   <Button
                     variant='default'
                     className={styles.textareaControlsButton}
-                    // biome-ignore lint/performance/noJsxPropsBind: trivial preventDefault handler, not worth extracting
                     onMouseDown={event => event.preventDefault()}
                     onClick={restoreSavedDescription}>
                     {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_RESTORE')}
@@ -330,7 +320,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
                 <Button
                   variant='default'
                   className={styles.textareaControlsButton}
-                  // use visibility to avoid a small layout shift when the button appears.
+                  // Use visibility to avoid a small layout shift when the button appears.
                   style={{ visibility: formValue.description.length > 0 ? 'visible' : 'hidden' }}
                   onClick={clearDescription}>
                   {translate('Editor.CLEAR', 'Clear')}
@@ -338,7 +328,6 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
                 <div style={{ flex: 1 }} />
 
-                {/** biome-ignore lint/style/noJsxLiterals: no need to translate this */}
                 <span>{formValue.description.length}&thinsp;/&thinsp;4000</span>
               </div>
             )}

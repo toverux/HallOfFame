@@ -12,13 +12,11 @@
   display: flex;
   border-radius: 50%;
   justify-content: center;
-  // biome-ignore lint/complexity/noImportantStyles: override vanilla hover padding
   padding: 0 !important;
   backdrop-filter: brightness(80%) contrast(90%) blur(25px);
 
   &[disabled],
   &[disabled]:hover {
-    // biome-ignore lint/complexity/noImportantStyles: I don't remember, probably forcing the dimmed disabled background over vanilla's button/hover background.
     background-color: rgba(16, 19, 29, 0.2) !important;
   }
 
@@ -67,7 +65,6 @@
     }
 
     &--liked {
-      // biome-ignore-start lint/complexity/noImportantStyles: importants are for overriding :hover styles.
       box-shadow: 0 0 0 2rem rgb(226 85 112) !important;
       background-color: rgba(226, 85, 112, 0.67) !important;
       color: vanilla.$menu-text-1-normal !important;
@@ -76,7 +73,6 @@
       &--active {
         background-color: rgba(226, 85, 112, 0.8) !important;
       }
-      // biome-ignore-end lint/complexity/noImportantStyles: importants are for overriding :hover styles.
     }
   }
 }

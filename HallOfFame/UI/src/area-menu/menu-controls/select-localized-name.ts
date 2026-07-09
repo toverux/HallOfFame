@@ -35,12 +35,12 @@ export interface LocalizedName {
 }
 
 /**
- * Resolves which form of an entity name to display, plus the data the tooltip needs, from the user's
- * translation mode and the game's current locale.
+ * Resolves which form of an entity name to display, plus the data the tooltip needs, from the
+ * user's translation mode and the game's current locale.
  *
- * A name is considered translated only when a mode is active, the name has a source locale, and that
- * locale differs from the game's, in which case the transliterated or translated variant is chosen
- * per the mode. Otherwise the native value is used.
+ * A name is considered translated only when a mode is active, the name has a source locale, and
+ * that locale differs from the game's, in which case the transliterated or translated variant is
+ * chosen per the mode. Otherwise the native value is used.
  */
 export function selectLocalizedName(
   mode: ModSettings['namesTranslationMode'],

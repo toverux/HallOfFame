@@ -1,4 +1,4 @@
-﻿/**
+/**
  * These interfaces mirror the outbound UI wire format emitted by the C#
  * `Utils/Writers/*ValueWriter` classes, not the `Domain/*` records directly: decode uses the
  * server's vocabulary while the writers use the mod/UI vocabulary.
@@ -8,7 +8,9 @@
 
 export const supportedSocialPlatforms = ['paradoxmods', 'discord', 'youtube', 'twitch'] as const;
 
-/** Serialization of C# `HallOfFame.Domain.Creator` */
+/**
+ * Serialization of C# `HallOfFame.Domain.Creator`
+ */
 export interface Creator {
   readonly id: string;
   // `null` for anonymous creators.
@@ -19,13 +21,17 @@ export interface Creator {
   readonly socials: readonly CreatorSocialLink[];
 }
 
-/** Serialization of C# `HallOfFame.Domain.Creator.CreatorSocialLink` */
+/**
+ * Serialization of C# `HallOfFame.Domain.Creator.CreatorSocialLink`
+ */
 export interface CreatorSocialLink {
   readonly platform: (typeof supportedSocialPlatforms)[number];
   readonly link: string;
 }
 
-/** Serialization of C# `HallOfFame.Domain.Screenshot` */
+/**
+ * Serialization of C# `HallOfFame.Domain.Screenshot`
+ */
 export interface Screenshot {
   readonly id: string;
   readonly cityName: string;
@@ -55,7 +61,9 @@ export interface Screenshot {
   readonly showcasedMod?: Mod;
 }
 
-/** Serialization of C# `HallOfFame.Domain.Mod` */
+/**
+ * Serialization of C# `HallOfFame.Domain.Mod`
+ */
 export interface Mod {
   readonly id: string;
   readonly paradoxModId: number;

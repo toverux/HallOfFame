@@ -1,3 +1,5 @@
+/* oxlint-disable import/no-nodejs-modules, no-console, node/no-sync, no-underscore-dangle - Node-side test harness; sentinel globals and React internal context slots */
+
 // `bun test --preload` harness that loads the real Cities: Skylines II game UI bundle so that mod
 // React components (which `import ... from 'cs2/*'`) can be rendered with @testing-library/react
 // against the real game modules, with a binding-value mock so `cs2/api` value bindings return
@@ -22,13 +24,10 @@
 //     hooks so ValueBinding/MapEntry subscribe requests are answered synchronously with configured
 //     (or default) values, and command triggers are recorded for assertions.
 
-// biome-ignore-all lint/correctness/noNodejsModules: test harness running under bun, not the mod.
-// biome-ignore-all lint/style/noProcessEnv: test harness needs the game install path.
-
 import { mock } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { join } from 'node:path';
+import path from 'node:path';
 import process from 'node:process';
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
 
@@ -37,7 +36,6 @@ type Dict = Record<string, unknown>;
 type Handler = (...args: readonly unknown[]) => void;
 
 /**
- * @public
  * A command trigger recorded by the mock engine, e.g. `hallOfFame.capture.uploadScreenshot`.
  */
 export interface RecordedTrigger {
@@ -59,7 +57,6 @@ const handlers = new Map<string, Set<Handler>>();
 const recordedTriggers: RecordedTrigger[] = [];
 
 /**
- * @public
  * Configures the value a `bindValue(group, name, default)` binding returns.
  * Call before rendering; after the first render this also live-updates already-subscribed
  * components, but such updates run outside React's `act`, so prefer configuring before rendering.
@@ -73,7 +70,6 @@ export function setBinding(group: string, name: string, value: unknown): void {
 }
 
 /**
- * @public
  * Configures a single entry of a MapEntry binding (the kind behind `cs2/ui` input hints).
  * Best-effort: keys are matched by `String(key)`, so bindings keyed by object identity will not
  * match.
@@ -95,7 +91,6 @@ export function setMapBinding(group: string, name: string, key: unknown, value: 
 }
 
 /**
- * @public
  * Returns the command triggers recorded since the last {@link resetBindings} call.
  */
 export function getTriggers(): readonly RecordedTrigger[] {
@@ -103,7 +98,6 @@ export function getTriggers(): readonly RecordedTrigger[] {
 }
 
 /**
- * @public
  * Clears all configured bindings and recorded triggers.
  * Call in an `afterEach` with `cleanup`.
  */
@@ -121,14 +115,14 @@ export function resetBindings(): void {
 function bootstrap(): void {
   GlobalRegistrator.register();
 
-  // happy-dom does not provide this; the bundle's chart.js module needs it at load.
+  // Happy-dom does not provide this; the bundle's chart.js module needs it at load.
+  // oxlint-disable-next-line typescript/no-extraneous-class - minimal stub the bundle needs at load
   globals.CanvasRenderingContext2D = class CanvasRenderingContext2D {};
 
   // The cohtml engine the bundle binds to. Defining it before load flips the bundle to its
   // "attached" mode; a no-op `BindingsReady` keeps the app from auto-booting (its `whenReady`
   // never fires), so only our test trees render.
   globals.engine = {
-    // biome-ignore-start lint/style/useNamingConvention: cohtml's native engine API is PascalCase.
     AddOrRemoveOnHandler: (name: string, fn: Handler): void => addHandler(name, fn),
     RemoveOnHandler: (name: string, fn: Handler): void => removeHandler(name, fn),
     ReleaseOnHandler: (): void => {
@@ -138,7 +132,6 @@ function bootstrap(): void {
       // No-op on purpose: keeps the app's `whenReady` from firing so it never auto-boots.
     },
     TriggerEvent: triggerEvent
-    // biome-ignore-end lint/style/useNamingConvention: cohtml's native engine API is PascalCase.
   };
 
   try {
@@ -146,7 +139,6 @@ function bootstrap(): void {
   } catch (error) {
     // Pure-logic tests do not need the bundle, so do not fail the whole run; only component tests
     // that import `cs2/*` at runtime will fail, and with a clearer downstream error.
-    // biome-ignore lint/suspicious/noConsole: surfacing why component tests will fail.
     console.warn(
       `[HoF test harness] Game bundle not loaded; component tests will fail. Reason: ${
         error instanceof Error ? error.message : String(error)
@@ -166,7 +158,7 @@ function loadGameBundle(): void {
     throw new Error('CSII_INSTALLATIONPATH is not set');
   }
 
-  const bundlePath = join(installPath, 'Cities2_Data', 'Content', 'Game', 'UI', 'index.js');
+  const bundlePath = path.join(installPath, 'Cities2_Data', 'Content', 'Game', 'UI', 'index.js');
 
   // The bundle's two thin React wrapper modules are repointed at this repo's react/jsx-runtime, so
   // the whole tree runs on a single (dev) React instance shared with @testing-library/react.
@@ -179,6 +171,7 @@ function loadGameBundle(): void {
 
   for (const [from, to] of reactInjectionPatches) {
     if (!source.includes(from)) {
+      // oxlint-disable-next-line no-magic-numbers
       throw new Error(`React injection anchor not found (game updated?): ${from.slice(0, 28)}...`);
     }
 
@@ -186,7 +179,6 @@ function loadGameBundle(): void {
   }
 
   // Indirect eval hands the raw script to JavaScriptCore; a direct `import()` is rejected by bun.
-  // biome-ignore lint/security/noGlobalEval: loading the prebuilt game bundle is the whole point.
   const indirectEval = eval;
 
   indirectEval(source);
@@ -195,9 +187,11 @@ function loadGameBundle(): void {
   overrideLocalization();
 }
 
-/** Aliases every bare game specifier the mod imports to the loaded bundle's window export. */
+/**
+ * Aliases every bare game specifier the mod imports to the loaded bundle's window export.
+ */
 function aliasGameModules(): void {
-  // react/react-dom are intentionally absent: the injection above already makes the bundle use this
+  // React/react-dom are intentionally absent: the injection above already makes the bundle use this
   // repo's React, so a mod's `import 'react'` is the same instance. Aliasing React via mock.module
   // instead makes react-dom bind to a spread copy and silently no-op on commit.
   const specifiers = [
@@ -212,13 +206,13 @@ function aliasGameModules(): void {
   ];
 
   for (const specifier of specifiers) {
-    const exported = (globals as Dict)[specifier];
+    const exported = globals[specifier];
 
     if (exported == null) {
       throw new Error(`Bundle did not export "${specifier}"`);
     }
 
-    mock.module(specifier, () => ({ ...(exported as Dict), default: exported }));
+    void mock.module(specifier, () => ({ ...(exported as Dict), default: exported }));
   }
 }
 
@@ -230,7 +224,7 @@ function aliasGameModules(): void {
  */
 function overrideLocalization(): void {
   const { getModule } = globals['cs2/modding'] as {
-    getModule: (m: string, e: string) => unknown;
+    getModule: (moduleName: string, exportName: string) => unknown;
   };
 
   const context = getModule(
@@ -269,7 +263,7 @@ function dispatch(name: string, ...args: readonly unknown[]): void {
   const set = handlers.get(name);
 
   if (set) {
-    for (const fn of [...set]) {
+    for (const fn of Array.from(set)) {
       fn(...args);
     }
   }
@@ -313,12 +307,12 @@ function triggerEvent(name: string, ...args: readonly unknown[]): void {
 }
 
 const reactInjectionPatches: ReadonlyArray<readonly [string, string]> = [
-  // react
+  // React
   [
     '6540:(e,t,n)=>{"use strict";e.exports=n(5287)}',
     '6540:(e,t,n)=>{"use strict";e.exports=globalThis.__TEST_REACT__}'
   ],
-  // react/jsx-runtime
+  // React/jsx-runtime
   [
     '4848:(e,t,n)=>{"use strict";e.exports=n(1020)}',
     '4848:(e,t,n)=>{"use strict";e.exports=globalThis.__TEST_JSX__}'

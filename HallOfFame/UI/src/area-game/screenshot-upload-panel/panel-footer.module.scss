@@ -47,7 +47,6 @@
       color: vanilla.$text-color;
       border-color: transparent;
       background-image: none;
-      // biome-ignore lint/complexity/noImportantStyles: override higher specificity from .legacy-interface
       background-color: transparent !important;
 
       &:hover,
@@ -61,7 +60,6 @@
             vanilla.$menu-focused-color,
             shared.$game-panel-white
           );
-          // biome-ignore lint/complexity/noImportantStyles: override higher specificity from .legacy-interface
           background-color: transparent !important;
           color: vanilla.$menu-text-1-inverted;
         }

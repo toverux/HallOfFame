@@ -7,11 +7,14 @@ pre-commit:
   parallel: true
   commands:
     tsc:
-      glob: "*.{ts,tsx,js,json,scss}"
-      run: mise build:css-types && mise check:tsc
-    biome:
       glob: "*.{ts,tsx,js,json}"
-      run: mise exec bun -- bun biome check --error-on-warnings --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      run: mise build:css-types && mise check:tsc
+    oxlint:
+      glob: "*.{ts,tsx,js,jsx,mjs,cjs}"
+      run: mise exec bun -- bun --bun oxlint --deny-warnings --no-error-on-unmatched-pattern {staged_files}
+    oxfmt:
+      glob: "*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc,md}"
+      run: mise exec bun -- bun --bun oxfmt --check --no-error-on-unmatched-pattern {staged_files}
 
 # Tests run on push, not commit, to keep commits fast.
 pre-push:

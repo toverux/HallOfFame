@@ -1,4 +1,4 @@
-﻿import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
+import { type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getClassesModule, logError, selector } from '../utils';
 import { TakeHofPictureButton } from './take-hof-picture-button';

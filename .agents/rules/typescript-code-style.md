@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/*.{js,ts,tsx}"
+  - '**/*.{js,ts,tsx}'
 ---
 
 # TypeScript Code Style
@@ -33,8 +33,8 @@ paths:
 
 - NEVER use `===` unless strict equality (with null or undefined for example) is specifically
   required. Instead, use `==`.
-- When using the `!` non-null assertion for a good reason, you will need to silence Biome's
-  `lint/style/noNonNullAssertion`.
+- When using the `!` non-null assertion for a good reason, you will need to silence oxlint's
+  `typescript/no-non-null-assertion`.
 
 ## Readonly Data
 

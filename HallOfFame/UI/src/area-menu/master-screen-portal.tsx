@@ -1,4 +1,4 @@
-﻿import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getClassesModule, logError, selector } from '../utils';
 import * as bindings from '../utils/bindings';

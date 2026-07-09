@@ -28,7 +28,7 @@ Here is a more detailed breakdown:
 - `HallOfFame/Reflection`: Proxy/accessor classes that reach into private game internals via
   reflection (e.g., screen utilities, error dialogs, Paradox SDK platform).
 - `HallOfFame/Logging`: The mod-owned logging seam (`IModLog` + `ModLog`) used through `Mod.Log`,
-   wrapping the engine's `Colossal.Logging.ILog` so logging logic stays unit-testable off-engine.
+  wrapping the engine's `Colossal.Logging.ILog` so logging logic stays unit-testable off-engine.
 - `HallOfFame/Utils`: Small helpers and extensions (localization, logging, input bindings, etc.).
 - `HallOfFame/Utils/Writers`: Outbound C# to cohtml UI-binding writers (`IWriter<T>`
   implementations). Domain records carry only inbound `[DecodeAlias]` data, so each type's outbound
@@ -62,19 +62,25 @@ features or answering questions:
 As you will have limited knowledge of the game's UI and inner workings, ask the user for guidance
 when you need to know what's what in the game from the source.
 
-Store things learned from the user or from the game's sources in your memory.
+Store things learned from the user or from the game's sources in your memory, or better yet, update/
+propose a new skill or documentation update.
 
 ## Commands
 
-Do NOT use `npx` to run commands, always prefer `mise` or `bun`.
+You can run `mise tasks` to see the full list of shortcut commands. Do NOT use `npx` to run
+commands, always prefer mise shortcuts, or bun/bunx if there is no mise shortcut.
 
 - `mise build`: Check that the UI part of the mod compiles fine.
 - `mise build:css-types`: Regenerate the gitignored `*.module.scss.d.ts` files. `mise check` runs
   this automatically; run it by hand if your editor needs the CSS module types refreshed.
-- `mise check`: Run type checking with tsc, and linting with Biome, performing safe fixes.
-  Always run this command after modifying UI code.
+- `mise check:agents`: Run type checking, formatting, and linting, with optimized output.
+- `mise check:agents:tsc`: Only type-checks the code, optimized output.
+- `mise check:agents:oxlint`: Only lints the code, optimized output.
 - `mise dev`: Watch and rebuild the UI (webpack bundle and CSS module types) on change.
 - `mise test`: Run the full test suite (C# and UI); see the Testing sections below.
+
+Always run the appropriate check/test commands after performing changes. But do it at the end of the
+editing session, not in the middle.
 
 ## Testing (C#)
 

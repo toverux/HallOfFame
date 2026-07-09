@@ -1,4 +1,4 @@
-﻿import type { UISound } from 'cs2/ui';
+import type { UISound } from 'cs2/ui';
 import type { DOMAttributes } from 'react';
 import { iconsole } from '../iconsole';
 import * as bindings from './bindings';
@@ -11,7 +11,10 @@ import * as bindings from './bindings';
  * Unlike Carmack, I think onClick is still better as a default, but I agree that onMouseDown is
  * nice for low-stakes interactions and games, as the difference is really noticeable and pleasant.
  */
-export function snappyOnSelect(handler: () => void, sound?: `${UISound}`) {
+export function snappyOnSelect(
+  handler: () => void,
+  sound?: `${UISound}`
+): { onMouseDown: () => void } {
   return {
     onMouseDown(): void {
       handler();

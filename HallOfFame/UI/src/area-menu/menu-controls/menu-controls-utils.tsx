@@ -1,14 +1,14 @@
-import { type Localization, LocalizedString, type LocElement } from 'cs2/l10n';
+import { type Localization, LocalizedString, type LocElement, LocElementType } from 'cs2/l10n';
 import type { ReactElement, ReactNode } from 'react';
 
 export function locElementToReactNode(
   element: LocElement | null | undefined,
   fallback: ReactNode
 ): ReactElement {
-  return element?.__Type == 'Game.UI.Localization.LocalizedString' ? (
+  // oxlint-disable-next-line no-underscore-dangle - __Type is the game LocElement discriminant
+  return element?.__Type == LocElementType.String ? (
     <LocalizedString id={element.id} fallback={element.value} />
   ) : (
-    // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
     <>{fallback}</>
   );
 }
@@ -23,14 +23,17 @@ export function formatBigNumber(num: number, translate: Localization['translate'
   if (num < 1000) {
     // No formatting on small numbers.
     numStr = num.toString();
+    // oxlint-disable-next-line no-magic-numbers
   } else if (num < 10_000) {
     // Formats as "9.9K", precision .1K.
     numStr = `${(num / 1000).toFixed(1)} K`;
+    // oxlint-disable-next-line no-magic-numbers
   } else if (num < 1_000_000) {
     // Formats as "99K", rounded, precision 1K.
     numStr = `${Math.round(num / 1000)} K`;
   } else {
     // Formats as "9.9M", precision .1M.
+    // oxlint-disable-next-line no-magic-numbers
     numStr = `${(num / 1_000_000).toFixed(1)} M`;
   }
 
@@ -39,7 +42,7 @@ export function formatBigNumber(num: number, translate: Localization['translate'
       // Remove trailing zeros.
       .replace('.0', '')
       // Replace decimal separator.
-      // biome-ignore lint/style/noNonNullAssertion: fallback value
+      // oxlint-disable-next-line typescript/no-non-null-assertion - fallback '.' means non-null
       .replace('.', translate('Common.DECIMAL_SEPARATOR', '.')!)
   );
 }

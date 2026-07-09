@@ -3,18 +3,23 @@ import type { CSSProperties, FC, MouseEventHandler } from 'react';
 import { getModuleExport } from '../../../../../../utils';
 
 /**
- * @public
  * Inferred from `game-ui/common/input/toggle/toggle.tsx`.
  */
 export interface ToggleProps {
   readonly focusKey?: FocusKey;
-  /** @default "Toggle" */
+  /**
+   * @default 'Toggle'
+   */
   readonly debugName?: string;
   readonly checked?: boolean | undefined;
-  /** @default false */
+  /**
+   * @default false
+   */
   readonly disabled?: boolean | undefined;
   readonly style?: CSSProperties;
-  /** @default "select-toggle" */
+  /**
+   * @default 'select-toggle'
+   */
   readonly toggleSound?: UISound;
   readonly className?: string;
   readonly onChange?: (value: boolean) => void;
@@ -23,7 +28,6 @@ export interface ToggleProps {
 }
 
 /**
- * @public
  * Inferred from `game-ui/common/input/toggle/checkbox/checkbox.tsx`.
  */
 export interface CheckboxProps extends ToggleProps {
@@ -31,7 +35,6 @@ export interface CheckboxProps extends ToggleProps {
 }
 
 /**
- * @public
  * Inferred from `game-ui/common/input/toggle/checkbox/checkbox.module.scss`.
  */
 export interface CheckboxTheme {
@@ -39,11 +42,10 @@ export interface CheckboxTheme {
   readonly checkmark: string;
 }
 
-/** @public */
 export const Checkbox = getModuleExport<FC<CheckboxProps>>(
   'game-ui/common/input/toggle/checkbox/checkbox.tsx',
   'Checkbox',
   (value): value is FC<CheckboxProps> => typeof value == 'function',
-  // biome-ignore lint/style/noJsxLiterals: not the happy path at all, no need to translate.
+  // oxlint-disable-next-line react/jsx-no-literals
   () => <>Error</>
 );

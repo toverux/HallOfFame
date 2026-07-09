@@ -13,7 +13,6 @@
   color: var(--menuText1Inverted);
 
   @include common.on-new-ui {
-    // biome-ignore lint/suspicious/noDuplicateProperties: intentional
     background-color: shared.$game-panel-white;
     color: shared.$game-panel-gray;
   }

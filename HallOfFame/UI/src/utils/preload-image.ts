@@ -1,5 +1,6 @@
+/* oxlint-disable promise/avoid-new, unicorn/prefer-add-event-listener - Cohtml image preload uses the onload/onerror handler API wrapped in a Promise */
+
 /**
- * @public
  * Preloads an image into Cohtml's image cache so it can later be displayed without a visible load.
  *
  * Resolves once the image's `onload` fires and rejects on `onerror`.
@@ -10,6 +11,7 @@
  * Cohtml evicts images from its cache quickly, so an image must be preloaded before every display,
  * even one shown moments ago.
  */
+
 export function preloadImage(url: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     const image = new Image();

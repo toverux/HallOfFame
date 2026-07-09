@@ -31,7 +31,6 @@
     opacity: 0.5;
 
     @include common.on-new-ui {
-      // biome-ignore lint/suspicious/noDuplicateProperties: intentional
       background-color: vanilla.$panel-gradient-middle;
     }
   }

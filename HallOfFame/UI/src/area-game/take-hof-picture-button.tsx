@@ -1,9 +1,7 @@
-﻿import { useLocalization } from 'cs2/l10n';
 import { Tooltip } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
-// biome-ignore lint/correctness/noPrivateImports: svgs don't have @public annotations
 import sharePictureSrc from '../icons/uil/standard/share-picture.svg';
-import { logError } from '../utils';
+import { logError, useTranslate } from '../utils';
 import * as bindings from '../utils/bindings';
 import * as styles from './take-hof-picture-button.module.scss';
 
@@ -17,7 +15,7 @@ import * as styles from './take-hof-picture-button.module.scss';
  * way to change the text either.
  */
 export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
-  const { translate } = useLocalization();
+  const translate = useTranslate();
 
   // A neutral element just needed to put the HTML of the button somewhere.
   const spanRef = useRef<HTMLElement>(null);
@@ -48,12 +46,7 @@ export function TakeHofPictureButton({ html }: { html: string }): ReactElement {
 
   return (
     <Tooltip tooltip={translate('HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP')}>
-      <span
-        ref={spanRef}
-        onClick={takeHofPicture}
-        // biome-ignore lint/security/noDangerouslySetInnerHtml: not text from a user
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <span ref={spanRef} onClick={takeHofPicture} dangerouslySetInnerHTML={{ __html: html }} />
     </Tooltip>
   );
 }

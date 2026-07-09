@@ -23,6 +23,7 @@ interface MenuSplashscreenProps {
  * Component that displays the splashscreen image on the main menu.
  *
  * ###### Implementation notes
+ *
  * The image transition is modeled as an explicit state machine (see {@link reducer}): a new image
  * URI is first preloaded into Cohtml's cache (the engine evicts images quickly, so a fresh preload
  * is needed before every display), then cross-faded in over the current image, then promoted to
@@ -30,7 +31,6 @@ interface MenuSplashscreenProps {
  * Modeling the in-flight load as state makes supersession (a newer URI arriving mid-load) and load
  * failure explicit, non-racy transitions.
  */
-// biome-ignore lint/complexity/noExcessiveLinesPerFunction: cohesive machine driver; splitting the two effects out would scatter the transition logic and hurt readability.
 export function MenuSplashscreen({
   preloadImage = defaultPreloadImage
 }: MenuSplashscreenProps): ReactElement {
@@ -59,7 +59,7 @@ export function MenuSplashscreen({
 
   useEffect(() => {
     setMenuState(prev => ({ ...prev, isReadyForNextImage }));
-  }, [isReadyForNextImage]);
+  }, [isReadyForNextImage, setMenuState]);
 
   // Drives the transition machine off `imageUri`: starts a preload when a new image is requested
   // and cancels an in-flight transition when `imageUri` returns to the displayed image mid-load
@@ -77,12 +77,16 @@ export function MenuSplashscreen({
 
     dispatch({ type: 'request', url: imageUri });
 
+    // A React effect callback must return its cleanup synchronously, so this preload runs as a
+    // fire-and-forget chain rather than being awaited.
     preloadImage(imageUri)
+      // oxlint-disable-next-line promise/prefer-await-to-then, promise/always-return - see above
       .then(() => {
         if (!canceled) {
           dispatch({ type: 'loaded', url: imageUri });
         }
       })
+      // oxlint-disable-next-line promise/prefer-await-to-then, promise/prefer-await-to-callbacks - see above
       .catch((error: unknown) => {
         if (canceled) {
           return;
@@ -96,6 +100,7 @@ export function MenuSplashscreen({
         dispatch({ type: 'failed', url: imageUri });
       });
 
+    // oxlint-disable-next-line typescript/consistent-return - effect returns a cleanup fn or nothing (early exit)
     return () => {
       canceled = true;
     };
@@ -221,8 +226,10 @@ function reducer(state: SplashscreenState, action: SplashscreenAction): Splashsc
       return { ...state, phase: { kind: 'displayed' }, requestedUrl: state.displayedUrl };
     }
 
-    default:
+    default: {
+      // oxlint-disable-next-line typescript/only-throw-error
       throw action satisfies never;
+    }
   }
 }
 
@@ -264,9 +271,9 @@ function getCurrentSlideshowImageSrc(): string | null {
 
   // Here too, we shouldn't get a null result but again, fail gracefully.
   const backgroundImage =
-    backdropImageEl.style.backgroundImage
-      // biome-ignore lint/performance/useTopLevelRegex: called only once
-      ?.match(/^url\(["']?(.*?)["']?\)$/)?.[1] || null;
+    // oxlint-disable-next-line typescript/prefer-nullish-coalescing - empty '' capture must fall to null
+    backdropImageEl.style.backgroundImage?.match(/^url\(["']?(?<url>.*?)["']?\)$/u)?.groups?.url ||
+    null;
 
   if (!backgroundImage) {
     iconsole.error(`HoF: Failed to retrieve the background image from the Vanilla slideshow.`);

@@ -1,14 +1,12 @@
 import classNames from 'classnames';
-import { LocalizedString, useLocalization } from 'cs2/l10n';
+import { LocalizedString } from 'cs2/l10n';
 import { Button, Icon, Tooltip } from 'cs2/ui';
 import { type ReactElement, useCallback, useEffect, useState } from 'react';
-// biome-ignore-start lint/correctness/noPrivateImports: svgs don't have @public annotations
 import flagSolidSrc from '../../icons/fontawesome/flag-solid.svg';
-// biome-ignore-end lint/correctness/noPrivateImports: svgs don't have @public annotations
+import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { MenuControlsCityName } from './city-name';
 import { MenuControlsError } from './error';
-import * as styles from './menu-controls.module.scss';
 import {
   MenuControlsLikeButton,
   MenuControlsMoreActionsButton,
@@ -17,11 +15,12 @@ import {
   MenuControlsToggleMenuVisibilityButton
 } from './nav-buttons';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
+import * as styles from './menu-controls.module.scss';
 
 // Deliberately module-scoped, not a per-instance `useRef`. `MenuControls` is mounted via a
 // portal in `MasterScreenPortal` and remounts fresh when returning to the menu from a game.
 // C# bumps `forcedRefreshIndex` on exactly that transition to request a new screenshot, so the
-// value must outlive the remount: a `useRef` would reset to 0 and the return-to-menu refresh
+// value must outlive the remount: a `useRef` would reset to 0, and the return-to-menu refresh
 // would never fire. The right place to revisit this C#<->UI refresh round-trip is the
 // SlideshowConductor (architecture candidate #1).
 let lastForcedRefreshIndex = 0;
@@ -38,30 +37,30 @@ export function MenuControls(): ReactElement {
   );
 }
 
-// biome-ignore lint/complexity/noExcessiveLinesPerFunction: splitting further would make it too complex.
 export function MenuControlsContent(): ReactElement {
-  const { translate } = useLocalization();
+  const translate = useTranslate();
 
   const modSettings = bindings.useModSettings();
 
   const [menuState, setMenuState] = bindings.useHofMenuState();
 
-  const [showMoreActions, setShowOtherActions] = useState(false);
+  const [showMoreActions, setShowMoreActions] = useState(false);
 
   useEffect(() => {
     if (menuState.forcedRefreshIndex != lastForcedRefreshIndex) {
+      // oxlint-disable-next-line no-magic-numbers
       setTimeout(() => bindings.nextScreenshot(), 500);
       lastForcedRefreshIndex = menuState.forcedRefreshIndex;
     }
   }, [menuState.forcedRefreshIndex]);
 
   const openShowcasedModPage = useCallback(
-    // biome-ignore lint/style/noNonNullAssertion: will not be null here
+    // oxlint-disable-next-line typescript/no-non-null-assertion - set when asset button renders
     () => bindings.openModPage(menuState.screenshot!.showcasedMod!),
     [menuState.screenshot]
   );
 
-  const toggleMoreActions = useCallback(() => setShowOtherActions(prev => !prev), []);
+  const toggleMoreActions = useCallback(() => setShowMoreActions(prev => !prev), []);
 
   const openGeneralModSettings = useCallback(() => bindings.openModSettings('General'), []);
 
@@ -85,15 +84,13 @@ export function MenuControlsContent(): ReactElement {
   }
 
   if (!menuState.screenshot) {
-    // biome-ignore lint/complexity/noUselessFragments: we need to return a ReactElement.
     return <></>;
   }
 
   return (
     <div
       className={classNames(styles.controls, styles.controlsApplyButtonsOffset)}
-      // biome-ignore lint/performance/noJsxPropsBind: host element does not bail out on prop identity
-      onMouseLeave={() => setShowOtherActions(false)}>
+      onMouseLeave={() => setShowMoreActions(false)}>
       {modSettings.showFeaturedAsset && menuState.screenshot.showcasedMod && (
         <Button variant='menu' className={styles.assetButton} onSelect={openShowcasedModPage}>
           <div
@@ -116,7 +113,6 @@ export function MenuControlsContent(): ReactElement {
             <span className={styles.assetButtonTextAuthor}>
               <LocalizedString
                 id='HallOfFame.Common.CITY_BY'
-                // biome-ignore lint/style/useNamingConvention: i18n convention
                 args={{ CREATOR_NAME: menuState.screenshot.showcasedMod.authorName }}
               />
             </span>
@@ -166,8 +162,7 @@ export function MenuControlsContent(): ReactElement {
               ? menuState.screenshot.likesCount
               : `${(menuState.screenshot.likesCount / 1000).toFixed(1)} k`}
           </span>
-          {/** biome-ignore lint/style/noJsxLiterals: it's kinda okay */}
-          &thinsp;
+          {' ' /* Thin space, preserving the former &thinsp; entity's narrow gap. */}
           {translate(
             menuState.screenshot.likesCount == 0
               ? 'HallOfFame.UI.Menu.MenuControls.N_LIKES[Zero]'
@@ -192,7 +187,6 @@ export function MenuControlsContent(): ReactElement {
             tooltip={
               <LocalizedString
                 id='HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Save]'
-                // biome-ignore lint/style/useNamingConvention: i18n convention
                 args={{ DIRECTORY: modSettings.creatorsScreenshotSaveDirectory }}
               />
             }>

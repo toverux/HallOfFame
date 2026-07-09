@@ -70,7 +70,7 @@ interface SettableMenuState {
    * - The current image has been fully loaded.
    * - The next image has been fully preloaded.
    * - The current image has finished its fade-in animation (so there are no "jumps" in the
-   *   animation, and there is no need for the user to be able to hit Next every .5 seconds).
+   * animation, and there is no need for the user to be able to hit Next every .5 seconds).
    */
   readonly isReadyForNextImage: boolean;
 }
@@ -179,7 +179,6 @@ export function useSplashscreenState(): readonly [
 }
 
 /**
- * @public
  * The current slideshow screenshot with its window neighbors (previous and look-ahead), plus
  * whether the game is on the main menu, which together drive the keep-alive image set.
  */
@@ -197,7 +196,7 @@ export interface KeepAliveScreenshotsState {
  * This is a non-React subscription because the keep-alive nodes live directly on `document.body`,
  * outside the component tree (see `installKeepAliveImages`).
  *
- * @return A disposer that ends all subscriptions.
+ * @returns A disposer that ends all subscriptions.
  */
 export function subscribeToKeepAliveScreenshots(
   listener: (state: KeepAliveScreenshotsState) => void
@@ -247,7 +246,6 @@ export function likeScreenshot(): void {
 }
 
 /**
- * @public
  * Resolves the image URI to display from the current screenshot, picking the resolution variant
  * that matches the user's quality setting.
  *
@@ -264,11 +262,15 @@ export function deriveImageUri(
   }
 
   switch (settings.screenshotResolution) {
-    case 'fhd':
+    case 'fhd': {
       return screenshot.imageUrlFHD;
-    case '4k':
+    }
+    case '4k': {
       return screenshot.imageUrl4K;
-    default:
+    }
+    default: {
+      // oxlint-disable-next-line typescript/only-throw-error
       throw settings.screenshotResolution satisfies never;
+    }
   }
 }
