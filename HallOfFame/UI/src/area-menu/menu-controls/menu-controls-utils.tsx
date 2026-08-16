@@ -1,12 +1,13 @@
-import { type Localization, LocalizedString, type LocElement, LocElementType } from 'cs2/l10n';
+import { type Localization, LocalizedString, type LocElement, type LocElementType } from 'cs2/l10n';
 import type { ReactElement, ReactNode } from 'react';
 
 export function locElementToReactNode(
   element: LocElement | null | undefined,
   fallback: ReactNode
 ): ReactElement {
-  // oxlint-disable-next-line no-underscore-dangle - __Type is the game LocElement discriminant
-  return element?.__Type == LocElementType.String ? (
+  // oxlint-disable-next-line no-underscore-dangle typescript/no-unsafe-enum-comparison
+  return element?.__Type ==
+    ('Game.UI.Localization.LocalizedString' satisfies `${LocElementType}`) ? (
     <LocalizedString id={element.id} fallback={element.value} />
   ) : (
     <>{fallback}</>
@@ -14,8 +15,8 @@ export function locElementToReactNode(
 }
 
 /**
- * Formats a big number to a human-readable string, applying special formatting
- * rules depending on the number's magnitude.
+ * Formats a big number to a human-readable string, applying special formatting rules depending on
+ * the number's magnitude.
  */
 export function formatBigNumber(num: number, translate: Localization['translate']): string {
   let numStr: string;
