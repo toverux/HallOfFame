@@ -299,8 +299,7 @@ internal sealed class SlideshowConductor {
   /// Classifies an exception as a network error (vs. an unexpected, recoverable one), driving the
   /// display-load and save error policies.
   /// </summary>
-  internal static bool IsNetworkError(Exception ex) =>
-    ex is HttpException;
+  internal static bool IsNetworkError(Exception ex) => ex is HttpException;
 
   /// <summary>
   /// Mirrors a successful <see cref="NavigationStep"/> onto the UI and enacts the side effects

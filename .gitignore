@@ -14,3 +14,6 @@
 Library/
 bin/
 obj/
+
+# Agent working material (specs and tickets in flight, see `docs/agents/cantrips-loop.md`)
+/.scratch/

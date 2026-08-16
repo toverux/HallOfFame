@@ -37,8 +37,7 @@ internal sealed class FakeApi : IHallOfFameApi {
   public Task<CreatorStats> GetCreatorStats() =>
     this.GetCreatorStatsImpl?.Invoke() ?? throw new NotImplementedException();
 
-  public Task<Creator> GetMe() =>
-    this.GetMeImpl?.Invoke() ?? throw new NotImplementedException();
+  public Task<Creator> GetMe() => this.GetMeImpl?.Invoke() ?? throw new NotImplementedException();
 
   public Task<Creator> UpdateMe() =>
     this.UpdateMeImpl?.Invoke() ?? throw new NotImplementedException();
@@ -66,6 +65,5 @@ internal sealed class FakeApi : IHallOfFameApi {
   public Task<byte[]> DownloadImage(string url) =>
     this.DownloadImageImpl?.Invoke(url) ?? throw new NotImplementedException();
 
-  public Task<string> ResolveParadoxModsUsername(string url) =>
-    throw new NotImplementedException();
+  public Task<string> ResolveParadoxModsUsername(string url) => throw new NotImplementedException();
 }

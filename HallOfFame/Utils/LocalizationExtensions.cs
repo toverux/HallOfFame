@@ -28,8 +28,7 @@ internal static class LocalizationExtensions {
     /// <see cref="string.Format(string,object[])"/>.
     /// </summary>
     /// <param name="args">Values to interpolate.</param>
-    internal string Translate(params object[] args) =>
-      string.Format(key.Translate(), args);
+    internal string Translate(params object[] args) => string.Format(key.Translate(), args);
   }
 
   extension(Exception ex) {
@@ -40,11 +39,14 @@ internal static class LocalizationExtensions {
     /// <br/>
     /// The fallback value is defined to the exception message.
     /// </summary>
-    internal LocalizedString GetUserFriendlyMessage() => new(
-      $"HallOfFame.Common.ERROR_MESSAGE[{ex.GetType().FullName}]",
-      ex.Message,
-      new Dictionary<string, ILocElement> { { "ERROR_MESSAGE", LocalizedString.Value(ex.Message) } }
-    );
+    internal LocalizedString GetUserFriendlyMessage() =>
+      new(
+        $"HallOfFame.Common.ERROR_MESSAGE[{ex.GetType().FullName}]",
+        ex.Message,
+        new Dictionary<string, ILocElement> {
+          { "ERROR_MESSAGE", LocalizedString.Value(ex.Message) }
+        }
+      );
   }
 
   extension(LocalizedString) {

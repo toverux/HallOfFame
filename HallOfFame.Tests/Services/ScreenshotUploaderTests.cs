@@ -15,7 +15,11 @@ public sealed class ScreenshotUploaderTests {
   [Fact]
   public async Task Upload_Success_LeavesCurrentProgressComplete() {
     var api = new FakeApi {
-      UploadScreenshotImpl = _ => Task.FromResult(new Screenshot { Id = "42" })
+      UploadScreenshotImpl = _ => Task.FromResult(
+        new Screenshot {
+          Id = "42"
+        }
+      )
     };
 
     var uploader = ScreenshotUploaderTests.MakeUploader(api);
@@ -63,7 +67,9 @@ public sealed class ScreenshotUploaderTests {
 
     var uploader = new ScreenshotUploader(
       api,
-      new FakeModLog { ErrorRecoverableImpl = logged.Add },
+      new FakeModLog {
+        ErrorRecoverableImpl = logged.Add
+      },
       reported.Add
     );
 
@@ -92,14 +98,20 @@ public sealed class ScreenshotUploaderTests {
       UploadScreenshotImpl = @params => {
         captured = @params;
 
-        return Task.FromResult(new Screenshot { Id = "1" });
+        return Task.FromResult(
+          new Screenshot {
+            Id = "1"
+          }
+        );
       }
     };
 
     var uploader = ScreenshotUploaderTests.MakeUploader(api);
 
     var imageBytes = new byte[] { 1, 2, 3 };
-    var renderSettings = new Dictionary<string, float> { ["bloom"] = 1.5f };
+    var renderSettings = new Dictionary<string, float> {
+      ["bloom"] = 1.5f
+    };
     var modIds = new[] { "mod.a", "mod.b" };
 
     var snapshot = ScreenshotUploaderTests.MakeSnapshot(
@@ -159,7 +171,11 @@ public sealed class ScreenshotUploaderTests {
         // ReSharper disable once AccessToModifiedClosure
         observedUpload.Add(uploader.CurrentProgress!.Value.Upload);
 
-        return Task.FromResult(new Screenshot { Id = "1" });
+        return Task.FromResult(
+          new Screenshot {
+            Id = "1"
+          }
+        );
       }
     };
 
@@ -181,7 +197,11 @@ public sealed class ScreenshotUploaderTests {
   [Fact]
   public async Task Reset_ClearsCurrentProgress() {
     var api = new FakeApi {
-      UploadScreenshotImpl = _ => Task.FromResult(new Screenshot { Id = "1" })
+      UploadScreenshotImpl = _ => Task.FromResult(
+        new Screenshot {
+          Id = "1"
+        }
+      )
     };
 
     var uploader = ScreenshotUploaderTests.MakeUploader(api);
@@ -204,7 +224,7 @@ public sealed class ScreenshotUploaderTests {
     Action<HttpException>? reportError = null,
     IModLog? log = null
   ) =>
-    new(api, log ?? new FakeModLog(), reportError ?? (_ => { }));
+    new(api, log ?? new FakeModLog(), reportError ?? (_ => {}));
 
   private static ScreenshotSnapshot MakeSnapshot(
     int achievedMilestone = 0,

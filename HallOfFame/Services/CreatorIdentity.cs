@@ -200,10 +200,10 @@ internal sealed class CreatorIdentity(
     var provider = store.IsParadoxAccountID ? "paradox" : "local";
 
     return "Creator " +
-           $"name={creatorName}" +
-           $"&id={store.CreatorID}" +
-           $"&provider={provider}" +
-           $"&hwid={hwid}";
+      $"name={creatorName}" +
+      $"&id={store.CreatorID}" +
+      $"&provider={provider}" +
+      $"&hwid={hwid}";
   }
 
   /// <summary>
@@ -352,20 +352,19 @@ internal sealed class CreatorIdentity(
   /// This is the single place the three scenarios diverge, keeping <see cref="Sync"/> and
   /// <see cref="RunSync"/> free of scattered flag logic.
   /// </summary>
-  internal static SyncPlan PlanFor(CreatorSyncTrigger trigger) => trigger switch {
-    // Mod load: push full info, show status, run immediately.
-    CreatorSyncTrigger.Startup =>
-      new SyncPlan(FullInfo: true, Silent: false, Debounce: false),
-
-    // Creator Name edited: sync just the name (via GetMe), show status, debounce typing.
-    CreatorSyncTrigger.NameEdited =>
-      new SyncPlan(FullInfo: false, Silent: false, Debounce: true),
-
-    // Any other setting changed: push full info (via UpdateMe), stay silent, debounce.
-    CreatorSyncTrigger.OtherSettingChanged =>
-      new SyncPlan(FullInfo: true, Silent: true, Debounce: true),
-    _ => throw new ArgumentOutOfRangeException(nameof(trigger), trigger, null)
-  };
+  internal static SyncPlan PlanFor(CreatorSyncTrigger trigger) =>
+    trigger switch {
+      // Mod load: push full info, show status, run immediately.
+      CreatorSyncTrigger.Startup =>
+        new SyncPlan(FullInfo: true, Silent: false, Debounce: false),
+      // Creator Name edited: sync just the name (via GetMe), show status, debounce typing.
+      CreatorSyncTrigger.NameEdited =>
+        new SyncPlan(FullInfo: false, Silent: false, Debounce: true),
+      // Any other setting changed: push full info (via UpdateMe), stay silent, debounce.
+      CreatorSyncTrigger.OtherSettingChanged =>
+        new SyncPlan(FullInfo: true, Silent: true, Debounce: true),
+      _ => throw new ArgumentOutOfRangeException(nameof(trigger), trigger, null)
+    };
 
   /// <summary>
   /// How a creator sync runs, derived from its <see cref="CreatorSyncTrigger"/> by

@@ -14,9 +14,505 @@ max_line_length = 100
 insert_final_newline = false
 max_line_length = 999999999
 
-[*.cs]
-indent_size = 2
-charset = utf-8-bom # Visual Studio does not like UTF-8 without BOM
-
 [*.{md,toml,yml,js,json,jsonc,ts,tsx,scss}]
 indent_size = 2
+
+[*.cs]
+indent_size = 2
+
+# https://github.com/toverux/scrolls/blob/main/templates/csharp.editorconfig
+# Version: 1.2.0
+# C# style. Compatible with various formatters, but made in particular for `jb cleanupcode`
+# (ReSharper CLI, same engine as Rider), run with the profile in `csharp.sln.DotSettings` for
+# enabling more smart diagnostics and auto-fixes for mechanical changes.
+# Minor auto-applied rules are :warning (they should gate the build via `EnforceCodeStyleInBuild`
+# and `TreatWarningsAsErrors`); shape-changing rules stay :suggestion (hints only).
+# Usage: $ dotnet jb cleanupcode csharp.slnx --profile="AutoCleanup" --settings="csharp.sln.DotSettings"
+
+# --- Brace & newline placement --------------------------------------------------
+csharp_new_line_before_open_brace = none
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_between_query_expression_clauses = true
+resharper_csharp_new_line_before_while = false
+resharper_csharp_special_else_if_treatment = true
+resharper_csharp_type_declaration_braces = end_of_line
+resharper_csharp_invocable_declaration_braces = end_of_line
+resharper_csharp_anonymous_method_declaration_braces = end_of_line
+resharper_csharp_accessor_owner_declaration_braces = end_of_line
+resharper_csharp_accessor_declaration_braces = end_of_line
+resharper_csharp_case_block_braces = end_of_line
+resharper_csharp_initializer_braces = end_of_line
+resharper_csharp_other_braces = end_of_line
+resharper_csharp_empty_block_style = multiline
+resharper_csharp_braces_redundant = false
+resharper_csharp_braces_for_ifelse = required
+resharper_csharp_braces_for_for = required
+resharper_csharp_braces_for_foreach = required
+resharper_csharp_braces_for_while = required
+resharper_csharp_braces_for_dowhile = required
+resharper_csharp_braces_for_using = required
+resharper_csharp_braces_for_lock = required
+resharper_csharp_braces_for_fixed = required
+
+# --- Indentation ----------------------------------------------------------------
+csharp_indent_case_contents = true
+csharp_indent_case_contents_when_block = true
+csharp_indent_switch_labels = true
+csharp_indent_labels = no_change
+csharp_indent_block_contents = true
+csharp_indent_braces = false
+# Wrapped continuations use one fixed indent level (+2), never column alignment.
+resharper_csharp_continuous_line_indent = single
+resharper_csharp_indent_preprocessor_if = usual_indent
+resharper_csharp_indent_preprocessor_region = usual_indent
+resharper_csharp_indent_preprocessor_other = usual_indent
+resharper_csharp_align_multiline_argument = false
+resharper_csharp_align_multiline_parameter = false
+resharper_csharp_align_multiline_calls_chain = false
+resharper_csharp_align_multiline_binary_expression = false
+resharper_csharp_align_multiline_binary_expressions_chain = false
+resharper_csharp_align_multiline_extends_list = false
+resharper_csharp_align_linq_query = false
+resharper_csharp_align_multiline_array_and_object_initializer = false
+resharper_csharp_align_multiline_switch_expression = false
+resharper_csharp_align_multiline_property_pattern = false
+resharper_csharp_align_multiline_list_pattern = false
+resharper_csharp_align_multiline_binary_patterns = false
+resharper_csharp_align_first_arg_by_paren = false
+resharper_csharp_align_tuple_components = false
+resharper_csharp_align_multiline_expression = false
+resharper_csharp_align_multiline_statement_conditions = false
+resharper_csharp_align_multiline_for_stmt = false
+resharper_csharp_align_multiple_declaration = false
+resharper_csharp_align_multline_type_parameter_list = false
+resharper_csharp_align_multline_type_parameter_constrains = false
+resharper_csharp_outdent_binary_ops = false
+resharper_csharp_outdent_binary_pattern_ops = false
+resharper_csharp_outdent_dots = false
+resharper_csharp_outdent_commas = false
+resharper_csharp_int_align_fields = false
+resharper_csharp_int_align_properties = false
+resharper_csharp_int_align_methods = false
+resharper_csharp_int_align_parameters = false
+resharper_csharp_int_align_variables = false
+resharper_csharp_int_align_assignments = false
+resharper_csharp_int_align_nested_ternary = false
+resharper_csharp_int_align_invocations = false
+resharper_csharp_int_align_binary_expressions = false
+resharper_csharp_int_align_comments = false
+resharper_csharp_int_align_switch_expressions = false
+
+# --- Spacing --------------------------------------------------------------------
+csharp_space_after_keywords_in_control_flow_statements = true
+csharp_space_after_cast = true
+csharp_space_around_binary_operators = before_and_after
+csharp_space_after_comma = true
+csharp_space_before_comma = false
+csharp_space_after_dot = false
+csharp_space_before_dot = false
+csharp_space_after_semicolon_in_for_statement = true
+csharp_space_before_semicolon_in_for_statement = false
+csharp_space_before_colon_in_inheritance_clause = true
+csharp_space_after_colon_in_inheritance_clause = true
+csharp_space_around_declaration_statements = false
+csharp_space_between_method_declaration_parameter_list_parentheses = false
+csharp_space_between_method_call_parameter_list_parentheses = false
+csharp_space_between_parentheses = false
+csharp_space_before_open_square_brackets = false
+csharp_space_between_empty_square_brackets = false
+csharp_space_between_square_brackets = false
+csharp_space_between_method_call_name_and_opening_parenthesis = false
+csharp_space_between_method_declaration_name_and_open_parenthesis = false
+csharp_space_between_method_call_empty_parameter_list_parentheses = false
+csharp_space_between_method_declaration_empty_parameter_list_parentheses = false
+resharper_csharp_space_within_parentheses = false
+resharper_csharp_space_between_typecast_parentheses = false
+resharper_csharp_space_within_typeof_parentheses = false
+resharper_csharp_space_within_nameof_parentheses = false
+resharper_csharp_space_within_sizeof_parentheses = false
+resharper_csharp_space_within_checked_parentheses = false
+resharper_csharp_space_within_default_parentheses = false
+resharper_csharp_space_within_new_parentheses = false
+resharper_csharp_space_within_if_parentheses = false
+resharper_csharp_space_within_while_parentheses = false
+resharper_csharp_space_within_catch_parentheses = false
+resharper_csharp_space_within_switch_parentheses = false
+resharper_csharp_space_within_for_parentheses = false
+resharper_csharp_space_within_foreach_parentheses = false
+resharper_csharp_space_within_using_parentheses = false
+resharper_csharp_space_within_lock_parentheses = false
+resharper_csharp_space_within_fixed_parentheses = false
+resharper_csharp_space_within_array_access_brackets = false
+resharper_csharp_space_within_type_argument_angles = false
+resharper_csharp_space_within_type_parameter_angles = false
+resharper_csharp_space_within_attribute_brackets = false
+resharper_csharp_space_before_type_argument_angle = false
+resharper_csharp_space_before_type_parameter_angle = false
+resharper_csharp_space_before_nullable_mark = false
+resharper_csharp_space_before_semicolon = false
+# Single-line brace bodies ARE padded (`{ 1, 2 }`, `{ get; set; }`); empty braces are not.
+resharper_csharp_space_within_single_line_array_initializer_braces = true
+resharper_csharp_space_before_singleline_accessorholder = true
+resharper_csharp_space_in_singleline_accessorholder = true
+resharper_csharp_space_between_accessors_in_singleline_property = true
+resharper_csharp_space_in_singleline_method = true
+resharper_csharp_space_in_singleline_anonymous_method = true
+resharper_csharp_space_within_empty_braces = false
+resharper_csharp_space_before_ternary_quest = true
+resharper_csharp_space_after_ternary_quest = true
+resharper_csharp_space_before_ternary_colon = true
+resharper_csharp_space_after_ternary_colon = true
+resharper_csharp_space_around_lambda_arrow = true
+resharper_csharp_space_before_attribute_colon = false
+resharper_csharp_space_after_attribute_colon = true
+resharper_csharp_space_before_colon_in_case = false
+resharper_csharp_space_after_colon_in_case = true
+resharper_csharp_space_before_type_parameter_constraint_colon = true
+resharper_csharp_space_after_type_parameter_constraint_colon = true
+resharper_csharp_space_before_trailing_comment = true
+resharper_csharp_space_around_arrow_op = false
+resharper_csharp_space_after_logical_not_op = false
+resharper_csharp_space_after_unary_minus_op = false
+resharper_csharp_space_after_unary_plus_op = false
+resharper_csharp_space_after_ampersand_op = false
+resharper_csharp_space_after_asterik_op = false
+resharper_csharp_space_near_postfix_and_prefix_op = false
+
+# --- Statement / member placement -----------------------------------------------
+csharp_preserve_single_line_blocks = false
+csharp_preserve_single_line_statements = false
+resharper_csharp_place_simple_blocks_on_single_line = false
+resharper_csharp_place_simple_method_on_single_line = false
+resharper_csharp_place_simple_embedded_block_on_same_line = false
+resharper_csharp_place_simple_embedded_statement_on_same_line = never
+resharper_csharp_place_simple_case_statement_on_same_line = if_owner_is_single_line
+resharper_csharp_place_simple_accessorholder_on_single_line = true
+resharper_csharp_place_simple_accessor_on_single_line = true
+resharper_csharp_place_abstract_accessorholder_on_single_line = true
+resharper_csharp_place_accessor_with_attrs_holder_on_single_line = true
+resharper_csharp_place_simple_anonymousmethod_on_single_line = true
+resharper_csharp_place_simple_switch_expression_on_single_line = false
+resharper_csharp_place_simple_enum_on_single_line = false
+resharper_csharp_place_simple_initializer_on_single_line = true
+resharper_csharp_place_simple_property_pattern_on_single_line = true
+resharper_csharp_place_simple_list_pattern_on_single_line = true
+resharper_csharp_place_expr_method_on_single_line = if_owner_is_single_line
+resharper_csharp_place_expr_property_on_single_line = if_owner_is_single_line
+resharper_csharp_place_expr_accessor_on_single_line = if_owner_is_single_line
+resharper_csharp_place_type_constraints_on_same_line = true
+resharper_csharp_place_constructor_initializer_on_same_line = true
+resharper_csharp_place_linq_into_on_new_line = true
+# Attributes go on their own line above the member; accessor attributes stay inline so
+# single-line auto-props stay one line. No key places a PARAMETER's attribute, but
+# keep_existing_linebreaks below preserves the break when the author writes one.
+resharper_csharp_place_type_attribute_on_same_line = false
+resharper_csharp_place_method_attribute_on_same_line = false
+resharper_csharp_place_accessorholder_attribute_on_same_line = false
+resharper_csharp_place_accessor_attribute_on_same_line = if_owner_is_single_line
+resharper_csharp_place_field_attribute_on_same_line = false
+resharper_csharp_place_record_field_attribute_on_same_line = false
+resharper_csharp_force_attribute_style = separate
+
+# --- Wrapping -------------------------------------------------------------------
+# Prettier-style: on overflow, break after "(", one item per line, ")" dangling; short stays inline.
+resharper_csharp_wrap_arguments_style = chop_if_long
+resharper_csharp_wrap_parameters_style = chop_if_long
+resharper_csharp_wrap_before_invocation_rpar = true
+resharper_csharp_wrap_before_declaration_rpar = true
+resharper_csharp_wrap_after_invocation_lpar = true
+resharper_csharp_wrap_after_declaration_lpar = true
+resharper_csharp_wrap_before_invocation_lpar = false
+resharper_csharp_wrap_before_declaration_lpar = false
+resharper_csharp_wrap_after_dot_in_method_calls = false
+resharper_csharp_wrap_before_first_method_call = false
+resharper_csharp_wrap_after_property_in_chained_method_calls = false
+resharper_csharp_wrap_chained_method_calls = chop_if_long
+# Binary/boolean operators trail (stay at end of the wrapped line).
+resharper_csharp_wrap_before_binary_opsign = false
+resharper_csharp_wrap_before_binary_pattern_op = false
+resharper_csharp_wrap_chained_binary_expressions = chop_if_long
+resharper_csharp_wrap_chained_binary_patterns = chop_if_long
+resharper_csharp_force_chop_compound_if_expression = false
+resharper_csharp_force_chop_compound_while_expression = false
+resharper_csharp_force_chop_compound_do_expression = false
+# Ternary: operators LEAD the wrapped line; nested ternaries fully expand.
+resharper_csharp_wrap_ternary_expr_style = chop_if_long
+resharper_csharp_wrap_before_ternary_opsigns = true
+resharper_csharp_nested_ternary_style = expanded
+resharper_csharp_wrap_before_arrow_with_expressions = false
+resharper_csharp_wrap_extends_list_style = chop_if_long
+resharper_csharp_wrap_before_extends_colon = false
+resharper_csharp_wrap_object_and_collection_initializer_style = chop_always
+resharper_csharp_wrap_array_initializer_style = chop_if_long
+resharper_csharp_wrap_switch_expression = chop_always
+resharper_csharp_wrap_enum_declaration = chop_always
+resharper_csharp_wrap_linq_expressions = chop_always
+resharper_csharp_wrap_before_linq_expression = false
+resharper_csharp_wrap_for_stmt_header_style = chop_if_long
+resharper_csharp_wrap_multiple_declaration_style = chop_if_long
+resharper_csharp_wrap_multiple_type_parameter_constraints_style = chop_if_long
+resharper_csharp_wrap_property_pattern = chop_if_long
+resharper_csharp_wrap_list_pattern = chop_if_long
+resharper_csharp_wrap_verbatim_interpolated_strings = no_wrap
+resharper_csharp_indent_raw_literal_string = do_not_change
+# No trailing comma; ArrangeTrailingCommas strips any existing.
+resharper_csharp_trailing_comma_in_multiline_lists = false
+resharper_csharp_trailing_comma_in_singleline_lists = false
+# Keep the author's line breaks. Nothing else preserves a deliberately chopped construct the
+# wrapping rules do not cover (a named-tuple expression has no wrap_* style of its own, so the
+# reformatter otherwise refills it to the line width). ReSharper exposes this one setting under
+# three interchangeable names (keep_existing_linebreaks, keep_user_linebreaks,
+# keep_existing_arrangement); listing it more than once is last-one-wins, so keep exactly one.
+resharper_csharp_keep_existing_linebreaks = true
+# Everything below enforces the canonical arrangement for a construct that has one.
+resharper_csharp_keep_existing_declaration_parens_arrangement = false
+resharper_csharp_keep_existing_invocation_parens_arrangement = false
+resharper_csharp_keep_existing_expr_member_arrangement = false
+resharper_csharp_keep_existing_attribute_arrangement = false
+resharper_csharp_keep_existing_embedded_arrangement = false
+resharper_csharp_keep_existing_embedded_block_arrangement = false
+resharper_csharp_keep_existing_initializer_arrangement = false
+resharper_csharp_keep_existing_enum_arrangement = false
+resharper_csharp_keep_existing_switch_expression_arrangement = false
+resharper_csharp_keep_existing_declaration_block_arrangement = false
+resharper_csharp_keep_existing_property_patterns_arrangement = false
+resharper_csharp_keep_existing_list_patterns_arrangement = false
+
+# --- Blank lines ----------------------------------------------------------------
+# Never consecutive: collapse runs to one blank; one blank around every member.
+resharper_csharp_keep_blank_lines_in_code = 1
+resharper_csharp_keep_blank_lines_in_declarations = 1
+resharper_csharp_remove_blank_lines_near_braces_in_declarations = true
+resharper_csharp_remove_blank_lines_near_braces_in_code = true
+resharper_csharp_blank_lines_around_namespace = 1
+resharper_csharp_blank_lines_inside_namespace = 0
+resharper_csharp_blank_lines_after_file_scoped_namespace_directive = 1
+resharper_csharp_blank_lines_after_using_list = 1
+resharper_csharp_blank_lines_between_using_groups = 0
+resharper_csharp_blank_lines_around_type = 1
+resharper_csharp_blank_lines_around_single_line_type = 1
+resharper_csharp_blank_lines_inside_type = 0
+resharper_csharp_blank_lines_around_field = 1
+resharper_csharp_blank_lines_around_single_line_field = 1
+resharper_csharp_blank_lines_around_property = 1
+resharper_csharp_blank_lines_around_single_line_property = 1
+resharper_csharp_blank_lines_around_auto_property = 1
+resharper_csharp_blank_lines_around_single_line_auto_property = 1
+resharper_csharp_blank_lines_around_invocable = 1
+resharper_csharp_blank_lines_around_single_line_invocable = 1
+resharper_csharp_blank_lines_around_local_method = 1
+resharper_csharp_blank_lines_around_single_line_local_method = 1
+resharper_csharp_blank_lines_around_accessor = 0
+resharper_csharp_blank_lines_around_single_line_accessor = 0
+resharper_csharp_blank_lines_around_region = 1
+resharper_csharp_blank_lines_inside_region = 1
+resharper_csharp_blank_lines_before_single_line_comment = 0
+resharper_csharp_blank_lines_after_start_comment = 1
+resharper_csharp_blank_lines_before_control_transfer_statements = 1
+resharper_csharp_blank_lines_after_control_transfer_statements = 1
+resharper_csharp_blank_lines_before_block_statements = 1
+resharper_csharp_blank_lines_after_block_statements = 1
+resharper_csharp_blank_lines_before_multiline_statements = 0
+resharper_csharp_blank_lines_after_multiline_statements = 0
+resharper_csharp_blank_lines_before_case = 0
+resharper_csharp_blank_lines_after_case = 0
+resharper_csharp_blank_lines_around_block_case_section = 0
+resharper_csharp_blank_lines_around_multiline_case_section = 0
+csharp_style_allow_multiple_blank_lines_experimental = false
+csharp_style_allow_embedded_statements_on_same_line_experimental = false
+csharp_style_allow_blank_lines_between_consecutive_braces_experimental = false
+dotnet_style_allow_statement_immediately_after_block_experimental = true
+csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = true
+csharp_style_allow_blank_line_after_token_in_conditional_expression_experimental = true
+csharp_style_allow_blank_line_after_token_in_arrow_expression_clause_experimental = true
+
+# =============================================================================
+# Code-style analyzers: minor auto-applied = :warning (build-gating); shape-changing = :suggestion.
+# =============================================================================
+
+# --- var, this., predefined types (minor) ---
+csharp_style_var_for_built_in_types = true:warning
+csharp_style_var_when_type_is_apparent = true:warning
+csharp_style_var_elsewhere = true:warning
+dotnet_style_qualification_for_field = true:warning
+dotnet_style_qualification_for_property = true:warning
+dotnet_style_qualification_for_method = true:warning
+dotnet_style_qualification_for_event = true:warning
+# Static members keep an explicit type-name qualifier, like `this.` on instance members.
+resharper_csharp_static_members_qualify_with = current_type
+resharper_csharp_static_members_qualify_members = all
+dotnet_style_predefined_type_for_locals_parameters_members = true:warning
+dotnet_style_predefined_type_for_member_access = true:warning
+
+# --- Namespace, usings, braces (minor) ---
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_using_directive_placement = outside_namespace:warning
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+csharp_prefer_braces = true:warning
+
+# --- Modifiers, readonly (minor) ---
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+csharp_preferred_modifier_order = public, private, protected, internal, file, static, extern, new, virtual, abstract, sealed, override, readonly, unsafe, required, volatile, async:warning
+dotnet_style_readonly_field = true:warning
+
+# --- Null idioms, simplification, inferred names (minor) ---
+dotnet_style_null_propagation = true:warning
+dotnet_style_coalesce_expression = true:warning
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:warning
+csharp_style_conditional_delegate_call = true:warning
+dotnet_style_object_initializer = true:warning
+dotnet_style_collection_initializer = true:warning
+dotnet_style_prefer_auto_properties = true:warning
+dotnet_style_prefer_compound_assignment = true:warning
+dotnet_style_prefer_simplified_interpolation = true:warning
+dotnet_style_prefer_simplified_boolean_expressions = true:warning
+dotnet_style_explicit_tuple_names = true:warning
+dotnet_style_prefer_inferred_tuple_names = true:warning
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:warning
+
+# --- Modern syntax: mechanically-safe = minor; shape-changing = suggestion ---
+csharp_style_implicit_object_creation_when_type_is_apparent = true:warning
+csharp_style_prefer_index_operator = true:warning
+csharp_style_prefer_range_operator = true:warning
+csharp_style_inlined_variable_declaration = true:warning
+csharp_prefer_simple_default_expression = true:warning
+csharp_style_prefer_method_group_conversion = true:warning
+csharp_prefer_static_anonymous_function = true:warning
+csharp_style_prefer_null_check_over_type_check = true:warning
+dotnet_style_prefer_collection_expression = when_types_loosely_match:warning
+csharp_style_throw_expression = true:suggestion
+csharp_style_deconstructed_variable_declaration = true:suggestion
+csharp_style_prefer_tuple_swap = true:suggestion
+csharp_style_prefer_simple_using_statement = true:suggestion
+csharp_style_prefer_utf8_string_literals = true:suggestion
+csharp_style_prefer_local_over_anonymous_function = true:suggestion
+
+# --- Expression-bodied members (suggestion; shape choice) ---
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_constructors = false:suggestion
+csharp_style_expression_bodied_operators = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_expression_bodied_indexers = when_on_single_line:suggestion
+csharp_style_expression_bodied_accessors = true:suggestion
+csharp_style_expression_bodied_lambdas = true:suggestion
+csharp_style_expression_bodied_local_functions = when_on_single_line:suggestion
+
+# --- Pattern matching (suggestion; shape-changing rewrites) ---
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
+csharp_style_prefer_switch_expression = true:suggestion
+csharp_style_prefer_pattern_matching = true:suggestion
+csharp_style_prefer_not_pattern = true:suggestion
+csharp_style_prefer_extended_property_pattern = true:suggestion
+
+# --- Parentheses clarity (suggestion) ---
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:suggestion
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:suggestion
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:suggestion
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary:suggestion
+
+# --- Other preferences (suggestion) ---
+csharp_prefer_static_local_function = true:suggestion
+csharp_style_prefer_readonly_struct = true:suggestion
+csharp_style_prefer_readonly_struct_member = true:suggestion
+csharp_style_prefer_primary_constructors = true:suggestion
+csharp_style_prefer_top_level_statements = true:suggestion
+csharp_style_unused_value_assignment_preference = discard_variable:suggestion
+csharp_style_unused_value_expression_statement_preference = discard_variable:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
+dotnet_style_prefer_conditional_expression_over_return = true:suggestion
+dotnet_style_namespace_match_folder = true:suggestion
+dotnet_code_quality_unused_parameters = all:suggestion
+csharp_prefer_system_threading_lock = true:suggestion
+dotnet_style_operator_placement_when_wrapping = end_of_line
+
+# Formatting is jb's job: IDE0055 (Roslyn formatter) fights the resharper_* keys, so disable it.
+dotnet_diagnostic.IDE0055.severity = none
+# Keep explicit fluent `.ToArray()`/`.ToList()`; do not rewrite to spread `[.. x]`.
+# (The literal collection expression IDE0300, `new[] { .. }` -> `[..]`, stays on.)
+dotnet_diagnostic.IDE0305.severity = none
+
+# =============================================================================
+# Naming conventions (all :suggestion; not build-enforced). Most specific first.
+# =============================================================================
+
+# Styles
+dotnet_naming_style.pascal_case.capitalization = pascal_case
+dotnet_naming_style.camel_case.capitalization = camel_case
+dotnet_naming_style.interface_style.capitalization = pascal_case
+dotnet_naming_style.interface_style.required_prefix = I
+dotnet_naming_style.type_parameter_style.capitalization = pascal_case
+dotnet_naming_style.type_parameter_style.required_prefix = T
+
+# Symbol groups
+dotnet_naming_symbols.interfaces.applicable_kinds = interface
+dotnet_naming_symbols.interfaces.applicable_accessibilities = *
+dotnet_naming_symbols.type_parameters.applicable_kinds = type_parameter
+dotnet_naming_symbols.type_parameters.applicable_accessibilities = *
+dotnet_naming_symbols.const_fields.applicable_kinds = field
+dotnet_naming_symbols.const_fields.applicable_accessibilities = *
+dotnet_naming_symbols.const_fields.required_modifiers = const
+dotnet_naming_symbols.static_readonly_fields.applicable_kinds = field
+dotnet_naming_symbols.static_readonly_fields.applicable_accessibilities = *
+dotnet_naming_symbols.static_readonly_fields.required_modifiers = static, readonly
+dotnet_naming_symbols.non_private_fields.applicable_kinds = field
+dotnet_naming_symbols.non_private_fields.applicable_accessibilities = public, protected, protected_internal
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private, internal, private_protected
+dotnet_naming_symbols.local_constants.applicable_kinds = local
+dotnet_naming_symbols.local_constants.applicable_accessibilities = *
+dotnet_naming_symbols.local_constants.required_modifiers = const
+dotnet_naming_symbols.locals.applicable_kinds = local
+dotnet_naming_symbols.locals.applicable_accessibilities = *
+dotnet_naming_symbols.parameters.applicable_kinds = parameter
+dotnet_naming_symbols.parameters.applicable_accessibilities = *
+dotnet_naming_symbols.local_functions.applicable_kinds = local_function
+dotnet_naming_symbols.local_functions.applicable_accessibilities = *
+dotnet_naming_symbols.type_members.applicable_kinds = namespace, class, struct, enum, delegate, method, property, event
+dotnet_naming_symbols.type_members.applicable_accessibilities = *
+
+# Rules (most specific first)
+dotnet_naming_rule.interfaces_rule.symbols = interfaces
+dotnet_naming_rule.interfaces_rule.style = interface_style
+dotnet_naming_rule.interfaces_rule.severity = suggestion
+dotnet_naming_rule.type_parameters_rule.symbols = type_parameters
+dotnet_naming_rule.type_parameters_rule.style = type_parameter_style
+dotnet_naming_rule.type_parameters_rule.severity = suggestion
+dotnet_naming_rule.const_fields_rule.symbols = const_fields
+dotnet_naming_rule.const_fields_rule.style = pascal_case
+dotnet_naming_rule.const_fields_rule.severity = suggestion
+dotnet_naming_rule.static_readonly_fields_rule.symbols = static_readonly_fields
+dotnet_naming_rule.static_readonly_fields_rule.style = pascal_case
+dotnet_naming_rule.static_readonly_fields_rule.severity = suggestion
+dotnet_naming_rule.non_private_fields_rule.symbols = non_private_fields
+dotnet_naming_rule.non_private_fields_rule.style = pascal_case
+dotnet_naming_rule.non_private_fields_rule.severity = suggestion
+dotnet_naming_rule.private_fields_rule.symbols = private_fields
+dotnet_naming_rule.private_fields_rule.style = camel_case
+dotnet_naming_rule.private_fields_rule.severity = suggestion
+dotnet_naming_rule.local_constants_rule.symbols = local_constants
+dotnet_naming_rule.local_constants_rule.style = camel_case
+dotnet_naming_rule.local_constants_rule.severity = suggestion
+dotnet_naming_rule.locals_rule.symbols = locals
+dotnet_naming_rule.locals_rule.style = camel_case
+dotnet_naming_rule.locals_rule.severity = suggestion
+dotnet_naming_rule.parameters_rule.symbols = parameters
+dotnet_naming_rule.parameters_rule.style = camel_case
+dotnet_naming_rule.parameters_rule.severity = suggestion
+dotnet_naming_rule.local_functions_rule.symbols = local_functions
+dotnet_naming_rule.local_functions_rule.style = pascal_case
+dotnet_naming_rule.local_functions_rule.severity = suggestion
+dotnet_naming_rule.type_members_rule.symbols = type_members
+dotnet_naming_rule.type_members_rule.style = pascal_case
+dotnet_naming_rule.type_members_rule.severity = suggestion
+
+# Generated build output is not our code: exempt obj/ from analysis. (The vendored
+# Mono.Debugger.Soft tree is instead handled by not enforcing style on the sdb project.)
+[**/obj/**]
+generated_code = true
+dotnet_analyzer_diagnostic.severity = none

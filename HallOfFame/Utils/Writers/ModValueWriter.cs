@@ -5,9 +5,9 @@ namespace HallOfFame.Utils.Writers;
 /// <summary>
 /// Outbound C# to cohtml UI-binding writer for <see cref="HallOfFame.Domain.Mod"/>.
 /// </summary>
-internal sealed class ModValueWriter : IWriter<HallOfFame.Domain.Mod> {
-  public void Write(IJsonWriter writer, HallOfFame.Domain.Mod value) {
-    writer.TypeBegin(typeof(HallOfFame.Domain.Mod).FullName);
+internal sealed class ModValueWriter : IWriter<Domain.Mod> {
+  public void Write(IJsonWriter writer, Domain.Mod value) {
+    writer.TypeBegin(typeof(Domain.Mod).FullName);
 
     writer.PropertyName("id");
     writer.Write(value.Id);

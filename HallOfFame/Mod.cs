@@ -11,6 +11,7 @@ using HallOfFame.Logging;
 using HallOfFame.Reflection;
 using HallOfFame.Services;
 using HallOfFame.Systems;
+using HallOfFame.Systems.Capture;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -164,7 +165,7 @@ public sealed class Mod : IMod {
       updateSystem.UpdateAt<StatsNotificationSystem>(SystemUpdatePhase.MainLoop);
       updateSystem.UpdateAt<CommonUISystem>(SystemUpdatePhase.UIUpdate);
       updateSystem.UpdateAt<SlideshowUISystem>(SystemUpdatePhase.UIUpdate);
-      updateSystem.UpdateAt<Systems.Capture.CaptureUISystem>(SystemUpdatePhase.UIUpdate);
+      updateSystem.UpdateAt<CaptureUISystem>(SystemUpdatePhase.UIUpdate);
 
       Mod.Log.Verbose($"{nameof(Mod)}: {nameof(this.OnLoad)} complete.");
     }

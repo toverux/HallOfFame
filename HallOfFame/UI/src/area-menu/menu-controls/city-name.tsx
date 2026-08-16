@@ -53,7 +53,7 @@ export const MenuControlsCityName = memo(
 
     const supportedSocials = screenshot.creator.socials
       .filter(link => supportedSocialPlatforms.includes(link.platform))
-      .toSorted(
+      .sort(
         (a, b) =>
           supportedSocialPlatforms.indexOf(a.platform) -
           supportedSocialPlatforms.indexOf(b.platform)

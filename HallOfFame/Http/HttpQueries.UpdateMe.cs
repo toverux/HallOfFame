@@ -39,7 +39,7 @@ internal partial class HttpQueries {
           { "screenshotResolution", Mod.Settings.ScreenshotResolution },
           { "createLocalScreenshot", Mod.Settings.CreateLocalScreenshot },
           { "disableGlobalIllumination", Mod.Settings.DisableGlobalIllumination },
-          { "paradoxModsBrowsingPreference", Mod.Settings.ParadoxModsBrowsingPreference },
+          { "paradoxModsBrowsingPreference", Mod.Settings.ParadoxModsBrowsingPreference }
         }
       }
     };

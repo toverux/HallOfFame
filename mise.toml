@@ -42,46 +42,93 @@ run = 'bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType 
 # CHECK TASKS
 # ===========
 
+# check:* are READ-ONLY (idempotent, CI-safe): they verify and write nothing of the source tree.
+# The in-place auto-fixers live under fix:* (see FIX TASKS).
+# Run `mise fix` locally to apply, `mise check` to verify.
+# The `build:css-types` dependency is the one exception, and not a source write: it regenerates the
+# gitignored *.module.scss.d.ts that tsc and oxlint need to resolve the `styles.*` imports.
+
 [tasks."check"]
-description = "Run lint checks (typescript and oxfmt/oxlint), with safe auto-fixes."
-# Not using `depends` because we want a sequential run with lint then format.
+description = "Verify read-only: typescript, oxlint, and oxfmt. Writes nothing, run `mise fix` to auto-fix."
 run = ["mise check:tsc", "mise check:oxlint", "mise check:oxfmt"]
 
 [tasks."check:tsc"]
-description = "Type-checks code with tsc."
+description = "Type-checks the UI with tsc (read-only)."
 depends = "build:css-types"
 raw = true
-run = "bun --bun tsc --p HallOfFame/UI --noEmit"
+run = "bun --bun tsc --noEmit"
 
 [tasks."check:oxfmt"]
-description = "Formats code with oxfmt."
+description = "Verifies formatting with oxfmt (read-only, `mise fix:oxfmt` writes)."
 raw = true
-run = "bun --bun oxfmt"
+run = "bun --bun oxfmt --check"
 
 [tasks."check:oxlint"]
-description = "Lints code with oxlint."
+description = "Lints with oxlint, warnings denied (read-only, `mise fix:oxlint` auto-fixes)."
 depends = "build:css-types"
 raw = true
-run = "bun --bun oxlint --fix"
+run = "bun --bun oxlint --deny-warnings"
+
+# No check:cs: jb cleanupcode (the C# formatter, see fix:cs) has no read-only/dry-run mode, so there
+# is no read-only C# verify. Run `mise fix:cs` and commit; Rider formats live with the same engine,
+# the same HallOfFame.sln.DotSettings profile, and the same root .editorconfig.
 
 # CHECK TASKS (AGENTS)
 # ====================
 
 [tasks."check:agents"]
-description = "Run lint checks (typescript and oxfmt/oxlint), with safe auto-fixes, output optimized for AI agents."
-# Not using `depends` because we want a sequential run with lint then format.
+description = "Verify read-only (typescript, oxlint, oxfmt), output optimized for AI agents. Writes nothing."
 run = ["mise check:agents:tsc", "mise check:agents:oxlint", "mise check:oxfmt"]
 
 [tasks."check:agents:tsc"]
-description = "Type-checks code with tsc, output optimized for AI agents."
+description = "Type-checks the UI with tsc, output optimized for AI agents."
 depends = "build:css-types"
 raw = true
-run = "bun --bun tsc --p HallOfFame/UI --noEmit --pretty false"
+run = "bun --bun tsc --noEmit --pretty false"
 
 [tasks."check:agents:oxlint"]
-description = "Lints code with oxlint, output optimized for AI agents."
+description = "Lints with oxlint (read-only, warnings denied), output optimized for AI agents."
 depends = "build:css-types"
-run = "bun --bun oxlint --fix --format agent"
+run = "bun --bun oxlint --deny-warnings --format agent"
+
+# FIX TASKS
+# =========
+
+# fix:* WRITE in place (the counterparts to the read-only check:*). For local dev.
+
+[tasks."fix"]
+description = "Auto-fix in place: oxlint --fix, oxfmt, then the C# cleanup. `mise check` is the read-only counterpart, minus the C# part it cannot verify."
+# Sequential, lint then format, so formatting settles after lint rewrites.
+run = ["mise fix:oxlint", "mise fix:oxfmt", "mise fix:cs"]
+
+[tasks."fix:oxlint"]
+description = "Auto-fixes lint issues with oxlint (writes, `mise check:oxlint` only reports)."
+depends = "build:css-types"
+raw = true
+run = "bun --bun oxlint --fix"
+
+[tasks."fix:oxfmt"]
+description = "Formats code in place with oxfmt (writes, `mise check:oxfmt` only verifies)."
+raw = true
+run = "bun --bun oxfmt"
+
+[tasks."fix:cs"]
+description = "Formats the C# code in place with jb (ReSharper) cleanupcode."
+raw = true
+# jb cleanupcode (same engine as Rider) with the custom "AutoCleanup" profile: applies the
+# resharper_* wrapping dotnet format cannot, and the minor code-style fixes that keep the :warning
+# IDE rules satisfied.
+# Skips the UI build and the mod post-processor like `test:cs` does (cleanup needs the C# semantics,
+# not the deployed mod), and excludes the generated build output.
+# `jb` is a local tool pinned in .config/dotnet-tools.json, so the restore has to precede it: it is
+# idempotent and a no-op once the tool is installed.
+run = ["dotnet tool restore", """
+dotnet jb cleanupcode HallOfFame.sln \
+  --profile="AutoCleanup" \
+  --settings="HallOfFame.sln.DotSettings" \
+  --properties:SkipBuildUI=true --properties:SkipModPostProcess=true \
+  --exclude="**/obj/**;**/bin/**"
+"""]
 
 # BUILD TASKS
 # ===========

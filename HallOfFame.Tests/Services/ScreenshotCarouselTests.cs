@@ -210,7 +210,9 @@ public sealed class ScreenshotCarouselTests {
 
     await carousel.Next();
 
-    var liked = carousel.Current! with { LikesCount = 99 };
+    var liked = carousel.Current! with {
+      LikesCount = 99
+    };
 
     carousel.ReplaceCurrent(liked);
 
@@ -307,5 +309,9 @@ public sealed class ScreenshotCarouselTests {
   /// <summary>
   /// A single slideshow move fed to <see cref="Drive"/>.
   /// </summary>
-  private enum Move { Next, Previous }
+  private enum Move {
+    Next,
+
+    Previous
+  }
 }

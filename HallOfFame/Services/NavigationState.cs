@@ -107,5 +107,11 @@ internal sealed class NavigationState {
     this.phase = Phase.Idle;
   }
 
-  private enum Phase { Idle, Navigating, Prefetching }
+  private enum Phase {
+    Idle,
+
+    Navigating,
+
+    Prefetching
+  }
 }

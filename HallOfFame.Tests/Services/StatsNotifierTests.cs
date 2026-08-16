@@ -13,10 +13,14 @@ namespace HallOfFame.Tests.Services;
 public sealed class StatsNotifierTests {
   [Fact]
   public async Task ShowIfNotable_Emits_WhenLikesMeetThreshold() {
-    var stats = new CreatorStats { LikesCount = 2 };
+    var stats = new CreatorStats {
+      LikesCount = 2
+    };
     var shown = new List<CreatorStats>();
 
-    var api = new FakeApi { GetCreatorStatsImpl = () => Task.FromResult(stats) };
+    var api = new FakeApi {
+      GetCreatorStatsImpl = () => Task.FromResult(stats)
+    };
 
     var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add);
 
@@ -30,7 +34,11 @@ public sealed class StatsNotifierTests {
     var shown = new List<CreatorStats>();
 
     var api = new FakeApi {
-      GetCreatorStatsImpl = () => Task.FromResult(new CreatorStats { LikesCount = 1 })
+      GetCreatorStatsImpl = () => Task.FromResult(
+        new CreatorStats {
+          LikesCount = 1
+        }
+      )
     };
 
     var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add);
@@ -42,7 +50,9 @@ public sealed class StatsNotifierTests {
 
   [Fact]
   public async Task ShowIfNotable_IsNoOp_WhileAFetchIsInFlight() {
-    var stats = new CreatorStats { LikesCount = 2 };
+    var stats = new CreatorStats {
+      LikesCount = 2
+    };
     var shown = new List<CreatorStats>();
     var fetchCount = 0;
     var gate = new TaskCompletionSource<CreatorStats>();
@@ -76,7 +86,9 @@ public sealed class StatsNotifierTests {
 
   [Fact]
   public async Task ShowIfNotable_DoesNotReEmit_AfterANotableShow() {
-    var stats = new CreatorStats { LikesCount = 2 };
+    var stats = new CreatorStats {
+      LikesCount = 2
+    };
     var shown = new List<CreatorStats>();
     var fetchCount = 0;
 
@@ -99,7 +111,9 @@ public sealed class StatsNotifierTests {
 
   [Fact]
   public async Task ShowIfNotable_ReFetchesAndEmits_AfterABelowThresholdResult() {
-    var notable = new CreatorStats { LikesCount = 2 };
+    var notable = new CreatorStats {
+      LikesCount = 2
+    };
     var shown = new List<CreatorStats>();
     var fetchCount = 0;
 
@@ -108,7 +122,13 @@ public sealed class StatsNotifierTests {
         fetchCount++;
 
         // Below threshold on the first fetch, notable on the second.
-        return Task.FromResult(fetchCount == 1 ? new CreatorStats { LikesCount = 1 } : notable);
+        return Task.FromResult(
+          fetchCount == 1
+            ? new CreatorStats {
+              LikesCount = 1
+            }
+            : notable
+        );
       }
     };
 
@@ -125,7 +145,9 @@ public sealed class StatsNotifierTests {
 
   [Fact]
   public async Task ShowIfNotable_LogsSilentlyAndStaysRetryable_OnHttpException() {
-    var notable = new CreatorStats { LikesCount = 2 };
+    var notable = new CreatorStats {
+      LikesCount = 2
+    };
     var shown = new List<CreatorStats>();
     var silent = new List<Exception>();
     var recoverable = new List<Exception>();
@@ -142,7 +164,8 @@ public sealed class StatsNotifierTests {
     };
 
     var log = new FakeModLog {
-      ErrorSilentImpl = silent.Add, ErrorRecoverableImpl = recoverable.Add
+      ErrorSilentImpl = silent.Add,
+      ErrorRecoverableImpl = recoverable.Add
     };
 
     var notifier = new StatsNotifier(api, log, shown.Add);
@@ -163,7 +186,9 @@ public sealed class StatsNotifierTests {
 
   [Fact]
   public async Task ShowIfNotable_LogsRecoverablyAndStaysRetryable_OnOtherException() {
-    var notable = new CreatorStats { LikesCount = 2 };
+    var notable = new CreatorStats {
+      LikesCount = 2
+    };
     var shown = new List<CreatorStats>();
     var silent = new List<Exception>();
     var recoverable = new List<Exception>();
@@ -180,7 +205,8 @@ public sealed class StatsNotifierTests {
     };
 
     var log = new FakeModLog {
-      ErrorSilentImpl = silent.Add, ErrorRecoverableImpl = recoverable.Add
+      ErrorSilentImpl = silent.Add,
+      ErrorRecoverableImpl = recoverable.Add
     };
 
     var notifier = new StatsNotifier(api, log, shown.Add);

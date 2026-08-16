@@ -118,7 +118,7 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
       LocalizedString.IdWithFallback("Common.CLOSE", "Close")
     );
 
-    GameManager.instance.userInterface.appBindings.ShowMessageDialog(successDialog, _ => { });
+    GameManager.instance.userInterface.appBindings.ShowMessageDialog(successDialog, _ => {});
   }
 
   private LocalizedString LocalizeNumber(int number) {

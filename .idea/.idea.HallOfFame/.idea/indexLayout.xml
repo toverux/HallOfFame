@@ -7,12 +7,16 @@
       <Path>.gitignore</Path>
       <Path>.lefthook.yml</Path>
       <Path>AGENTS.md</Path>
+      <Path>HallOfFame.sln.DotSettings</Path>
       <Path>README.md</Path>
-      <Path>biome.jsonc</Path>
       <Path>bunfig.toml</Path>
       <Path>crowdin.yml</Path>
+      <Path>lefthook.yml</Path>
       <Path>mise.toml</Path>
+      <Path>oxfmt.config.ts</Path>
+      <Path>oxlint.config.ts</Path>
       <Path>package.json</Path>
+      <Path>tsconfig.json</Path>
     </explicitIncludes>
     <explicitExcludes />
   </component>

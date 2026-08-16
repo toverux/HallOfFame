@@ -48,8 +48,12 @@ public sealed class CreatorIdentityTests {
   [Fact]
   public void Bootstrap_KeepsExistingValidGuid_WithoutSavingOrWarning() {
     var existingId = Guid.NewGuid().ToString();
-    var store = new FakeStore { CreatorID = existingId };
-    var paradox = new FakeParadoxConnection { ReadAccountIdImpl = () => "paradox-id" };
+    var store = new FakeStore {
+      CreatorID = existingId
+    };
+    var paradox = new FakeParadoxConnection {
+      ReadAccountIdImpl = () => "paradox-id"
+    };
 
     CreatorIdentityTests.CreateIdentity(store: store, paradox: paradox).Bootstrap();
 
@@ -61,8 +65,12 @@ public sealed class CreatorIdentityTests {
 
   [Fact]
   public void Bootstrap_AdoptsParadoxId_AndSaves() {
-    var store = new FakeStore { CreatorID = null };
-    var paradox = new FakeParadoxConnection { ReadAccountIdImpl = () => "paradox-id" };
+    var store = new FakeStore {
+      CreatorID = null
+    };
+    var paradox = new FakeParadoxConnection {
+      ReadAccountIdImpl = () => "paradox-id"
+    };
 
     CreatorIdentityTests.CreateIdentity(store: store, paradox: paradox).Bootstrap();
 
@@ -75,8 +83,12 @@ public sealed class CreatorIdentityTests {
   [Fact]
   public void Bootstrap_FallsBackToRandomId_AndWarns_WhenNotLoggedIn() {
     // A clean null read means the user is simply not logged in to Paradox: warn and fall back.
-    var store = new FakeStore { CreatorID = null };
-    var paradox = new FakeParadoxConnection { ReadAccountIdImpl = () => null };
+    var store = new FakeStore {
+      CreatorID = null
+    };
+    var paradox = new FakeParadoxConnection {
+      ReadAccountIdImpl = () => null
+    };
 
     CreatorIdentityTests.CreateIdentity(store: store, paradox: paradox).Bootstrap();
 
@@ -89,7 +101,9 @@ public sealed class CreatorIdentityTests {
   [Fact]
   public void Bootstrap_FallsBackToRandomId_WithoutWarning_WhenReadThrows() {
     // A thrown read is an unexpected failure, not a "not logged in": fall back but do not warn.
-    var store = new FakeStore { CreatorID = null };
+    var store = new FakeStore {
+      CreatorID = null
+    };
     var paradox = new FakeParadoxConnection {
       ReadAccountIdImpl = () => throw new InvalidOperationException("read failed")
     };
@@ -105,7 +119,9 @@ public sealed class CreatorIdentityTests {
   [Fact]
   public void BuildAuthorizationHeader_UsesParadoxProvider_AndEscapesName() {
     var store = new FakeStore {
-      CreatorName = "John Doe", CreatorID = "creator-id", IsParadoxAccountID = true
+      CreatorName = "John Doe",
+      CreatorID = "creator-id",
+      IsParadoxAccountID = true
     };
 
     var header = CreatorIdentityTests
@@ -125,7 +141,9 @@ public sealed class CreatorIdentityTests {
     string? name
   ) {
     var store = new FakeStore {
-      CreatorName = name, CreatorID = "creator-id", IsParadoxAccountID = false
+      CreatorName = name,
+      CreatorID = "creator-id",
+      IsParadoxAccountID = false
     };
 
     var header = CreatorIdentityTests
@@ -140,7 +158,9 @@ public sealed class CreatorIdentityTests {
 
   [Fact]
   public void NextSyncTrigger_DiffsCreatorName_AndAdvancesBaseline() {
-    var store = new FakeStore { CreatorName = "Alice" };
+    var store = new FakeStore {
+      CreatorName = "Alice"
+    };
 
     var identity = CreatorIdentityTests.CreateIdentity(store: store);
 
@@ -159,7 +179,12 @@ public sealed class CreatorIdentityTests {
   public async Task RunSync_ReturnsLoggedInAsStatus_ForNamedCreator() {
     var identity = CreatorIdentityTests.CreateIdentity(
       new FakeApi {
-        GetMeImpl = () => Task.FromResult(new Creator { Id = "creator-id", CreatorName = "Alice" })
+        GetMeImpl = () => Task.FromResult(
+          new Creator {
+            Id = "creator-id",
+            CreatorName = "Alice"
+          }
+        )
       }
     );
 
@@ -177,7 +202,12 @@ public sealed class CreatorIdentityTests {
   public async Task RunSync_ReturnsAnonymousStatus_ForEmptyName() {
     var identity = CreatorIdentityTests.CreateIdentity(
       new FakeApi {
-        GetMeImpl = () => Task.FromResult(new Creator { Id = "creator-id", CreatorName = "" })
+        GetMeImpl = () => Task.FromResult(
+          new Creator {
+            Id = "creator-id",
+            CreatorName = ""
+          }
+        )
       }
     );
 
@@ -197,7 +227,12 @@ public sealed class CreatorIdentityTests {
     var identity = CreatorIdentityTests.CreateIdentity(
       new FakeApi {
         UpdateMeImpl =
-          () => Task.FromResult(new Creator { Id = "creator-id", CreatorName = "Alice" })
+          () => Task.FromResult(
+            new Creator {
+              Id = "creator-id",
+              CreatorName = "Alice"
+            }
+          )
       }
     );
 
@@ -212,7 +247,9 @@ public sealed class CreatorIdentityTests {
     var exception = new HttpServerException("req-id", new HttpQueries.JsonError());
 
     var identity = CreatorIdentityTests.CreateIdentity(
-      new FakeApi { GetMeImpl = () => throw exception }
+      new FakeApi {
+        GetMeImpl = () => throw exception
+      }
     );
 
     var result = await identity.RunSync(CreatorSyncTrigger.NameEdited, CancellationToken.None);
@@ -249,11 +286,12 @@ public sealed class CreatorIdentityTests {
     IParadoxConnection? paradox = null,
     IModLog? log = null,
     string hwid = "hwid"
-  ) => new(
-    api ?? new FakeApi(),
-    log ?? new FakeModLog(),
-    store ?? new FakeStore(),
-    hwid,
-    paradox ?? new FakeParadoxConnection()
-  );
+  ) =>
+    new(
+      api ?? new FakeApi(),
+      log ?? new FakeModLog(),
+      store ?? new FakeStore(),
+      hwid,
+      paradox ?? new FakeParadoxConnection()
+    );
 }

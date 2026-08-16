@@ -10,60 +10,28 @@ namespace HallOfFame.Domain;
 [UsedImplicitly]
 internal record Mod {
   [DecodeAlias("id")]
-  internal string Id {
-    get;
-    [UsedImplicitly]
-    set;
-  } = string.Empty;
+  internal string Id { get; [UsedImplicitly] set; } = string.Empty;
 
   [DecodeAlias("paradoxModId")]
-  internal int ParadoxModId {
-    get;
-    [UsedImplicitly]
-    set;
-  }
+  internal int ParadoxModId { get; [UsedImplicitly] set; }
 
   [DecodeAlias("name")]
-  internal string Name {
-    get;
-    [UsedImplicitly]
-    set;
-  } = string.Empty;
+  internal string Name { get; [UsedImplicitly] set; } = string.Empty;
 
   [DecodeAlias("authorName")]
-  internal string AuthorName {
-    get;
-    [UsedImplicitly]
-    set;
-  } = string.Empty;
+  internal string AuthorName { get; [UsedImplicitly] set; } = string.Empty;
 
   [DecodeAlias("shortDescription")]
-  internal string ShortDescription {
-    get;
-    [UsedImplicitly]
-    set;
-  } = string.Empty;
+  internal string ShortDescription { get; [UsedImplicitly] set; } = string.Empty;
 
   [DecodeAlias("thumbnailUrl")]
-  internal string ThumbnailUrl {
-    get;
-    [UsedImplicitly]
-    set;
-  } = string.Empty;
+  internal string ThumbnailUrl { get; [UsedImplicitly] set; } = string.Empty;
 
   [DecodeAlias("subscribersCount")]
-  internal int SubscribersCount {
-    get;
-    [UsedImplicitly]
-    set;
-  }
+  internal int SubscribersCount { get; [UsedImplicitly] set; }
 
   [DecodeAlias("tags")]
-  internal string[] Tags {
-    get;
-    [UsedImplicitly]
-    set;
-  } = [];
+  internal string[] Tags { get; [UsedImplicitly] set; } = [];
 
   public override string ToString() =>
     $"Mod #{this.Id} (Paradox ID={this.ParadoxModId}) {this.Name} by {this.AuthorName}";

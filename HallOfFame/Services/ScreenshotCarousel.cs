@@ -160,8 +160,7 @@ internal sealed class ScreenshotCarousel(IHallOfFameApi api) {
     // server-side, and only bites in development with very few screenshots.
     do {
       next = await this.LoadRandom();
-    }
-    while (
+    } while (
       #if DEBUG
       iterations++ < ScreenshotCarousel.MaxWindowSize &&
       #endif
@@ -217,12 +216,10 @@ internal sealed class ScreenshotCarousel(IHallOfFameApi api) {
   /// Landing at the front of the window (<see cref="IsAtEnd"/>) is what triggers the look-ahead
   /// prefetch; moving onto an already-loaded look-ahead screenshot does not.
   /// </summary>
-  private NavigationStep ForwardStep() =>
-    new(this.Current!, ShouldPreloadAhead: this.IsAtEnd);
+  private NavigationStep ForwardStep() => new(this.Current!, ShouldPreloadAhead: this.IsAtEnd);
 
   /// <summary>
   /// Fetches a fresh random screenshot from the server.
   /// </summary>
-  private Task<Screenshot> LoadRandom() =>
-    api.GetRandomScreenshotWeighted();
+  private Task<Screenshot> LoadRandom() => api.GetRandomScreenshotWeighted();
 }

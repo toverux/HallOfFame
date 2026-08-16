@@ -114,7 +114,7 @@ internal sealed class ScreenshotUploader(
       var startTime = DateTime.Now;
 
       while (!ct.IsCancellationRequested) {
-        var elapsedSeconds = (float)(DateTime.Now - startTime).TotalSeconds;
+        var elapsedSeconds = (float) (DateTime.Now - startTime).TotalSeconds;
 
         progressModel.ReportProcessingElapsed(elapsedSeconds);
 

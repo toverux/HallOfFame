@@ -112,11 +112,37 @@ Special thanks to:
 3. `bun i` to install UI mod dependencies.
 4. Recommended: enable `--developerMode --uiDeveloperMode` as game launch options.
 
-Here's a game launch command to also skip the launcher in Steam:
+On Steam those go in Properties → General → Launch Options, where `%command%` stands for the game
+executable:
 
 ```sh
-"C:\Program Files (x86)\Steam\steamapps\common\Cities Skylines II\Cities2.exe" %command% --developerMode --uiDeveloperMode
+%command% --developerMode --uiDeveloperMode
 ```
+
+Point that at `Cities2.exe` under your install to also skip the launcher. The modding toolchain
+exports the install path as `CSII_INSTALLATIONPATH`.
+
+### Coding agents
+
+If you develop with Claude Code or Codex CLI, the
+[CS Modding agent plugins](https://github.com/CitiesSkylinesModding/agents-plugins) are recommended:
+they give an agent a live line into the running game's UI and its C#/ECS internals, plus knowledge
+of how the game is built.
+
+```sh
+claude plugin marketplace add CitiesSkylinesModding/agents-plugins
+claude plugin install cs2-modding@csmodding
+claude plugin install coherent-gameface@csmodding
+claude plugin install unity-devtools@csmodding
+```
+
+Then run `/cs2-modding-setup`, which provisions the local ground truth for this game: a decompile of
+your installed game, the launch options above, the debug patch that lets a debugger attach, a corpus
+of community mods to read, and a readable copy of the game's UI bundle. It records what it
+provisioned in `~/.cs2-modding/setup.md`, which is where this repo's own agent skills read those
+paths from, so nothing machine-specific is hardcoded here.
+
+Codex CLI uses the same arguments with `codex plugin marketplace add` / `codex plugin add`.
 
 ### Development workflow
 
@@ -154,8 +180,8 @@ Logs are situated in either:
 
 TypeScript code is formatted and linted by the [Oxc toolchain](https://oxc.rs) (oxfmt and oxlint).
 
-Run `mise check` to typecheck the database, linting errors, format files and autofix simple issues
-(run `mise tasks` to see more checking options).
+Run `mise check` to verify types, lint rules and formatting without writing anything, and `mise fix`
+to apply the auto-fixes it reports (run `mise tasks` to see more options).
 
 The formatter and linter should run as a pre-commit hook if you have it installed,
 which should be done automatically when running `bun i` (otherwise run `bun lefthook install`).

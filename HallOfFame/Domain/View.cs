@@ -8,18 +8,10 @@ namespace HallOfFame.Domain;
 [UsedImplicitly]
 internal record View {
   [DecodeAlias("id")]
-  internal string Id {
-    get;
-    [UsedImplicitly]
-    set;
-  } = string.Empty;
+  internal string Id { get; [UsedImplicitly] set; } = string.Empty;
 
   [DecodeAlias("screenshotId")]
-  internal string ScreenshotId {
-    get;
-    [UsedImplicitly]
-    set;
-  } = string.Empty;
+  internal string ScreenshotId { get; [UsedImplicitly] set; } = string.Empty;
 
   public override string ToString() => $"View #{this.Id} on Screenshot #{this.ScreenshotId}";
 }

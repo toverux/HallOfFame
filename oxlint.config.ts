@@ -8,7 +8,6 @@ import { defineConfig } from 'oxlint';
 export default defineConfig({
   extends: [all, agnostic, react, reactPerfRelaxed],
   plugins: ['jest'],
-  ignorePatterns: ['vanilla-modules.source.js'],
   rules: {
     // Jest (bun test) rules that conflict with production code, that we re-enable below with an
     // override on .test.* files.
@@ -35,6 +34,7 @@ export default defineConfig({
     'react/no-multi-comp': 'off',
 
     // Cohtml does not support those DOM APIs.
+    'unicorn/no-array-sort': 'off',
     'unicorn/prefer-dom-node-append': 'off',
     'unicorn/prefer-dom-node-dataset': 'off',
     'unicorn/prefer-dom-node-remove': 'off',

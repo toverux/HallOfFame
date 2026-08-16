@@ -75,32 +75,25 @@ internal sealed class FakeSlideshowPresentationSink : ISlideshowPresentationSink
   public void PublishScreenshot(Screenshot? screenshot) =>
     this.LastPublishedScreenshot = screenshot;
 
-  public void PublishLoadError(LocalizedString? error) =>
-    this.PublishedLoadErrors.Add(error);
+  public void PublishLoadError(LocalizedString? error) => this.PublishedLoadErrors.Add(error);
 
-  public void SetCanAdvance(bool canAdvance) =>
-    this.CanAdvanceLog.Add(canAdvance);
+  public void SetCanAdvance(bool canAdvance) => this.CanAdvanceLog.Add(canAdvance);
 
   public void PublishNeighbors(Screenshot? previous, Screenshot? next) {
     this.LastPublishedPrevious = previous;
     this.LastPublishedNext = next;
   }
 
-  public void SetInMainMenu(bool isInMainMenu) =>
-    this.InMainMenuLog.Add(isInMainMenu);
+  public void SetInMainMenu(bool isInMainMenu) => this.InMainMenuLog.Add(isInMainMenu);
 
-  public void SetSaving(bool isSaving) =>
-    this.SavingLog.Add(isSaving);
+  public void SetSaving(bool isSaving) => this.SavingLog.Add(isSaving);
 
-  public void ShowError(LocalizedString message) =>
-    this.ShownErrors.Add(message);
+  public void ShowError(LocalizedString message) => this.ShownErrors.Add(message);
 
   public Task<bool> ConfirmReport(Screenshot screenshot) =>
     this.ConfirmReportImpl?.Invoke(screenshot) ?? Task.FromResult(false);
 
-  public void ShowReportSuccess() =>
-    this.ReportSuccessCount++;
+  public void ShowReportSuccess() => this.ReportSuccessCount++;
 
-  public void RequestRefresh() =>
-    this.RefreshCount++;
+  public void RequestRefresh() => this.RefreshCount++;
 }

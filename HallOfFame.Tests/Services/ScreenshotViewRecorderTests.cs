@@ -43,7 +43,12 @@ public sealed class ScreenshotViewRecorderTests {
     var logged = new List<Exception>();
 
     var recorder =
-      new ScreenshotViewRecorder(api, new FakeModLog { ErrorSilentImpl = logged.Add });
+      new ScreenshotViewRecorder(
+        api,
+        new FakeModLog {
+          ErrorSilentImpl = logged.Add
+        }
+      );
 
     // Must not throw, even though the API faulted.
     await recorder.RecordView("s0");

@@ -35,31 +35,24 @@ public sealed class SlideshowConductorTests {
     // A Theory with [InlineData(GameMode...)] cannot be used here: xUnit's discovery resolves the
     // engine-bound Game assembly to parse enum values out of the attribute blob, which fails
     // off-engine. GameMode in the test body is fine.
-    Assert.True(
-      SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.Game, GameMode.MainMenu)
-    );
+    Assert.True(SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.Game, GameMode.MainMenu));
 
-    Assert.True(
-      SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.Editor, GameMode.MainMenu)
-    );
+    Assert.True(SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.Editor, GameMode.MainMenu));
 
     Assert.False(
       SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.MainMenu, GameMode.MainMenu)
     );
 
-    Assert.False(
-      SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.MainMenu, GameMode.Game)
-    );
+    Assert.False(SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.MainMenu, GameMode.Game));
   }
 
   // NEXT
 
   [Fact]
   public async Task Next_FirstAdvance_PublishesScreenshot_RecordsView_AndSettlesTheLock() {
-    var screenshots = new Queue<Screenshot>([
-      SlideshowConductorTests.MakeScreenshot("s0"),
-      SlideshowConductorTests.MakeScreenshot("s1")
-    ]);
+    var screenshots = new Queue<Screenshot>(
+      [SlideshowConductorTests.MakeScreenshot("s0"), SlideshowConductorTests.MakeScreenshot("s1")]
+    );
 
     var viewed = new List<string>();
 
@@ -157,7 +150,9 @@ public sealed class SlideshowConductorTests {
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
-      log: new FakeModLog { ErrorRecoverableImpl = logged.Add },
+      log: new FakeModLog {
+        ErrorRecoverableImpl = logged.Add
+      },
       sink: sink
     );
 
@@ -184,7 +179,9 @@ public sealed class SlideshowConductorTests {
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
-      log: new FakeModLog { ErrorSilentImpl = silentLogged.Add },
+      log: new FakeModLog {
+        ErrorSilentImpl = silentLogged.Add
+      },
       sink: sink
     );
 
@@ -201,10 +198,9 @@ public sealed class SlideshowConductorTests {
 
   [Fact]
   public async Task Previous_AtFirstScreenshot_IsANoOp() {
-    var screenshots = new Queue<Screenshot>([
-      SlideshowConductorTests.MakeScreenshot("s0"),
-      SlideshowConductorTests.MakeScreenshot("s1")
-    ]);
+    var screenshots = new Queue<Screenshot>(
+      [SlideshowConductorTests.MakeScreenshot("s0"), SlideshowConductorTests.MakeScreenshot("s1")]
+    );
 
     var api = new FakeApi {
       GetRandomScreenshotWeightedImpl = () => Task.FromResult(screenshots.Dequeue()),
@@ -226,11 +222,13 @@ public sealed class SlideshowConductorTests {
 
   [Fact]
   public async Task Previous_MovesBack_PublishesPrior_WithoutPrefetchOrView() {
-    var screenshots = new Queue<Screenshot>([
-      SlideshowConductorTests.MakeScreenshot("s0"),
-      SlideshowConductorTests.MakeScreenshot("s1"),
-      SlideshowConductorTests.MakeScreenshot("s2")
-    ]);
+    var screenshots = new Queue<Screenshot>(
+      [
+        SlideshowConductorTests.MakeScreenshot("s0"),
+        SlideshowConductorTests.MakeScreenshot("s1"),
+        SlideshowConductorTests.MakeScreenshot("s2")
+      ]
+    );
 
     var viewed = new List<string>();
 
@@ -462,9 +460,12 @@ public sealed class SlideshowConductorTests {
 
       var conductor = SlideshowConductorTests.CreateConductor(
         api: api,
-        settings: new FakeSlideshowSettings { SaveDirectory = directory },
+        settings: new FakeSlideshowSettings {
+          SaveDirectory = directory
+        },
         log: new FakeModLog {
-          ErrorRecoverableImpl = recoverable.Add, ErrorLocalizedImpl = localizedErrors.Add
+          ErrorRecoverableImpl = recoverable.Add,
+          ErrorLocalizedImpl = localizedErrors.Add
         },
         sink: sink
       );
@@ -498,7 +499,9 @@ public sealed class SlideshowConductorTests {
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
-      log: new FakeModLog { ErrorLocalizedImpl = localizedErrors.Add },
+      log: new FakeModLog {
+        ErrorLocalizedImpl = localizedErrors.Add
+      },
       sink: sink
     );
 
@@ -528,7 +531,9 @@ public sealed class SlideshowConductorTests {
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
-      log: new FakeModLog { ErrorRecoverableImpl = recoverable.Add },
+      log: new FakeModLog {
+        ErrorRecoverableImpl = recoverable.Add
+      },
       sink: sink
     );
 
@@ -584,7 +589,9 @@ public sealed class SlideshowConductorTests {
     var reported = new List<string>();
     var api = SlideshowConductorTests.ReportableApi(reported);
 
-    var sink = new FakeSlideshowPresentationSink { ConfirmReportImpl = _ => Task.FromResult(true) };
+    var sink = new FakeSlideshowPresentationSink {
+      ConfirmReportImpl = _ => Task.FromResult(true)
+    };
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -607,7 +614,9 @@ public sealed class SlideshowConductorTests {
       ReportScreenshotImpl = _ => Task.FromException<Screenshot>(new HttpNetworkException("1", "x"))
     };
 
-    var sink = new FakeSlideshowPresentationSink { ConfirmReportImpl = _ => Task.FromResult(true) };
+    var sink = new FakeSlideshowPresentationSink {
+      ConfirmReportImpl = _ => Task.FromResult(true)
+    };
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
     await conductor.Next();
@@ -631,11 +640,15 @@ public sealed class SlideshowConductorTests {
     };
 
     var recoverable = new List<Exception>();
-    var sink = new FakeSlideshowPresentationSink { ConfirmReportImpl = _ => Task.FromResult(true) };
+    var sink = new FakeSlideshowPresentationSink {
+      ConfirmReportImpl = _ => Task.FromResult(true)
+    };
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
-      log: new FakeModLog { ErrorRecoverableImpl = recoverable.Add },
+      log: new FakeModLog {
+        ErrorRecoverableImpl = recoverable.Add
+      },
       sink: sink
     );
 
@@ -697,12 +710,13 @@ public sealed class SlideshowConductorTests {
     IModLog? log = null,
     ISlideshowSettings? settings = null,
     ISlideshowPresentationSink? sink = null
-  ) => new(
-    api ?? new FakeApi(),
-    log ?? new FakeModLog(),
-    settings ?? new FakeSlideshowSettings(),
-    sink ?? new FakeSlideshowPresentationSink()
-  );
+  ) =>
+    new(
+      api ?? new FakeApi(),
+      log ?? new FakeModLog(),
+      settings ?? new FakeSlideshowSettings(),
+      sink ?? new FakeSlideshowPresentationSink()
+    );
 
   /// <summary>
   /// An API that serves distinct screenshots (the first being "s0") and records the IDs passed to

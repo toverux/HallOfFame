@@ -247,7 +247,10 @@ internal sealed partial class CommonUISystem : UISystemBase {
       : "HallOfFame.Common.RECOVERABLE_ERROR".Translate();
 
     ErrorDialogManagerAccessor.Instance?.ShowError(
-      new ErrorDialog { localizedMessage = $"{@base} \n{gravity}", errorDetails = error }
+      new ErrorDialog {
+        localizedMessage = $"{@base} \n{gravity}",
+        errorDetails = error
+      }
     );
 
     Mod.Log.ErrorSilent(error);

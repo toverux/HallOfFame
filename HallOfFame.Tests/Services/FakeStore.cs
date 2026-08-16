@@ -30,9 +30,7 @@ internal sealed class FakeStore : ICreatorIdentityStore {
   /// </summary>
   internal int SaveCount { get; private set; }
 
-  LocalizedString ICreatorIdentityStore.LoginStatus {
-    set => this.LastLoginStatus = value;
-  }
+  LocalizedString ICreatorIdentityStore.LoginStatus { set => this.LastLoginStatus = value; }
 
   public void Save() => this.SaveCount++;
 }

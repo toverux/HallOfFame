@@ -75,5 +75,11 @@ internal sealed class StatsNotifier(
     }
   }
 
-  private enum State { Idle, Loading, Shown }
+  private enum State {
+    Idle,
+
+    Loading,
+
+    Shown
+  }
 }

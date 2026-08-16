@@ -157,8 +157,10 @@ public sealed class ScreenshotLikerTests {
     var liker = new ScreenshotLiker(
       carousel,
       api,
-      new FakeModLog { ErrorRecoverableImpl = logged.Add },
-      _ => { },
+      new FakeModLog {
+        ErrorRecoverableImpl = logged.Add
+      },
+      _ => {},
       failures.Add
     );
 

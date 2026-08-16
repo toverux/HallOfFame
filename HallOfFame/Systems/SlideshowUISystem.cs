@@ -337,7 +337,7 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
     );
 
     GameManager.instance.userInterface.appBindings
-      .ShowMessageDialog(successDialog, _ => { });
+      .ShowMessageDialog(successDialog, _ => {});
   }
 
   void ISlideshowPresentationSink.RequestRefresh() {

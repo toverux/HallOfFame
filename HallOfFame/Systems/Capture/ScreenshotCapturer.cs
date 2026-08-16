@@ -30,7 +30,7 @@ internal static class ScreenshotCapturer {
     // Height is better than width because of widescreen monitors.
     // The server will decide the final resolution, i.e., rescale to 2160p if the resulting image is
     // bigger.
-    var scaleFactor = (int)Math.Ceiling(2160d / Screen.height);
+    var scaleFactor = (int) Math.Ceiling(2160d / Screen.height);
 
     var camera = Camera.main!;
 
@@ -172,8 +172,7 @@ internal static class ScreenshotCapturer {
     return SharedSettings.instance.graphics
       .qualitySettings
       .Where(settings => settings
-        is not SSGIQualitySettings
-        and not DynamicResolutionScaleSettings
+        is not SSGIQualitySettings and not DynamicResolutionScaleSettings
       )
       .All(settings => {
           var highestLevel = settings

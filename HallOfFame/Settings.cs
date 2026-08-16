@@ -40,7 +40,8 @@ namespace HallOfFame;
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingNext), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingLike), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
-public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore, ISlideshowSettings {
+public sealed class
+  Settings : ModSetting, IJsonWritable, ICreatorIdentityStore, ISlideshowSettings {
   private const string GroupYourProfile = "YourProfile";
 
   private const string GroupUIPreferences = "UIPreferences";
@@ -57,21 +58,29 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
 
   // Needs to be getter method to be read by the game.
   private static DropdownItem<string>[] ResolutionDropdownItems => [
-    new() { value = "fhd", displayName = "Full HD" },
-    new() { value = "4k", displayName = "4K" }
+    new() {
+      value = "fhd",
+      displayName = "Full HD"
+    },
+    new() {
+      value = "4k",
+      displayName = "4K"
+    }
   ];
 
   // Needs to be getter method to be read by the game.
   private DropdownItem<string>[] TranslationModeDropdownItems => [
     new() {
-      value = "translate", displayName = this.GetOptionLabelLocaleID("TranslationMode.Translate")
+      value = "translate",
+      displayName = this.GetOptionLabelLocaleID("TranslationMode.Translate")
     },
     new() {
       value = "transliterate",
       displayName = this.GetOptionLabelLocaleID("TranslationMode.Transliterate")
     },
     new() {
-      value = "disabled", displayName = this.GetOptionLabelLocaleID("TranslationMode.Disabled")
+      value = "disabled",
+      displayName = this.GetOptionLabelLocaleID("TranslationMode.Disabled")
     }
   ];
 
@@ -117,18 +126,19 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
   /// </summary>
   [SettingsUISection(Settings.GroupYourProfile)]
   [UsedImplicitly]
-  public string? MaskedCreatorID => this.CreatorID is null
-    ? null
-    : string.Join(
-      "-",
-      this
-        .CreatorID
-        .Split('-')
-        .Select((segment, index) => index == 0
-          ? segment
-          : new string('*', segment.Length)
-        )
-    );
+  public string? MaskedCreatorID =>
+    this.CreatorID is null
+      ? null
+      : string.Join(
+        "-",
+        this
+          .CreatorID
+          .Split('-')
+          .Select((segment, index) => index == 0
+            ? segment
+            : new string('*', segment.Length)
+          )
+      );
 
   /// <summary>
   /// Live account status text ("logged in as X", "invalid username", that kind of things).
@@ -415,8 +425,7 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
   [UsedImplicitly]
   public bool CrowdinLink {
     // ReSharper disable once ValueParameterNotUsed
-    set =>
-      Application.OpenURL("https://crowdin.com/project/halloffame-cs2");
+    set => Application.OpenURL("https://crowdin.com/project/halloffame-cs2");
   }
 
   [SettingsUIButton]
@@ -441,11 +450,7 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
   [SettingsUISection(Settings.GroupDevelopment)]
   [SettingsUITextInput]
   [UsedImplicitly]
-  public string? ScreenshotToLoad {
-    get;
-    [UsedImplicitly]
-    set;
-  }
+  public string? ScreenshotToLoad { get; [UsedImplicitly] set; }
 
   [SettingsUIButton]
   [SettingsUISection(Settings.GroupDevelopment)]
@@ -493,9 +498,10 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
   [SettingsUIHidden]
   public string? SavedScreenshotDescription { get; set; }
 
-  internal string BaseUrlWithScheme => this.BaseUrl.StartsWith("http")
-    ? this.BaseUrl
-    : $"https://{this.BaseUrl}";
+  internal string BaseUrlWithScheme =>
+    this.BaseUrl.StartsWith("http")
+      ? this.BaseUrl
+      : $"https://{this.BaseUrl}";
 
   /// <seealso cref="LoginStatus"/>
   private LocalizedString loginStatusValue = string.Empty;
@@ -506,9 +512,7 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
   /// write-side is exposed only through the <see cref="ICreatorIdentityStore"/> seam that
   /// <see cref="CreatorIdentity"/> drives.
   /// </summary>
-  LocalizedString ICreatorIdentityStore.LoginStatus {
-    set => this.loginStatusValue = value;
-  }
+  LocalizedString ICreatorIdentityStore.LoginStatus { set => this.loginStatusValue = value; }
 
   /// <summary>
   /// Persists the settings on behalf of <see cref="CreatorIdentity"/> through the
@@ -583,7 +587,7 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
     this.SavedScreenshotDescription = string.Empty;
   }
 
-  internal Settings Clone() => (Settings)this.MemberwiseClone();
+  internal Settings Clone() => (Settings) this.MemberwiseClone();
 
   internal static bool IsNvidiaGpu() =>
     SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");
@@ -665,14 +669,16 @@ public sealed class Settings : ModSetting, IJsonWritable, ICreatorIdentityStore,
     public IEnumerable<KeyValuePair<string, string>> ReadEntries(
       IList<IDictionaryEntryError> errors,
       Dictionary<string, int> indexCounts
-    ) => new Dictionary<string, string> {
-      { "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]", "{ Development }" },
-      { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]", "Screenshot ID" },
-      { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]", "Load Screenshot" }, {
-        "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
-        "Dump Locales as JSON"
-      }
-    };
+    ) =>
+      new Dictionary<string, string> {
+        { "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]", "{ Development }" },
+        { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]", "Screenshot ID" }, {
+          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]", "Load Screenshot"
+        }, {
+          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
+          "Dump Locales as JSON"
+        }
+      };
 
     public void Unload() {
     }

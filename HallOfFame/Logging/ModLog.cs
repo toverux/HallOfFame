@@ -12,29 +12,21 @@ namespace HallOfFame.Logging;
 /// recoverable/fatal error messages from the localization dictionary.
 /// </summary>
 internal sealed class ModLog(ILog log) : IModLog {
-  public void Verbose(string message) =>
-    log.Verbose(message);
+  public void Verbose(string message) => log.Verbose(message);
 
-  public void Info(string message) =>
-    log.Info(message);
+  public void Info(string message) => log.Info(message);
 
-  public void Warn(string message) =>
-    log.Warn(message);
+  public void Warn(string message) => log.Warn(message);
 
-  public void Warn(Exception exception, string message) =>
-    log.Warn(exception, message);
+  public void Warn(Exception exception, string message) => log.Warn(exception, message);
 
-  public void Error(string message) =>
-    log.Error(message);
+  public void Error(string message) => log.Error(message);
 
-  public void Error(LocalizedString message) =>
-    log.Error(message.Render());
+  public void Error(LocalizedString message) => log.Error(message.Render());
 
-  public void ErrorSilent(string message) =>
-    this.Silently(() => log.Error(message));
+  public void ErrorSilent(string message) => this.Silently(() => log.Error(message));
 
-  public void ErrorSilent(Exception exception) =>
-    this.Silently(() => log.Error(exception));
+  public void ErrorSilent(Exception exception) => this.Silently(() => log.Error(exception));
 
   public void ErrorSilent(Exception exception, string message) =>
     this.Silently(() => log.Error(exception, message));

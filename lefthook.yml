@@ -1,0 +1,33 @@
+post-checkout:
+  commands:
+    configure-git:
+      run: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+pre-commit:
+  parallel: true
+  commands:
+    tsc:
+      # One root tsconfig covers both HallOfFame/UI/src and .agents/hooks, so a staged file anywhere
+      # runs the task that knows the whole project rather than one tsc over the staged files.
+      # `check:tsc` depends on `build:css-types`, which regenerates the *.module.scss.d.ts first.
+      glob: "*.{ts,tsx,js,json}"
+      run: mise check:tsc
+    oxlint:
+      glob: "*.{ts,tsx,js,jsx,mjs,cjs}"
+      run: mise exec bun -- bun --bun oxlint --deny-warnings --no-error-on-unmatched-pattern {staged_files}
+    oxfmt:
+      # Wider than oxlint's glob: oxfmt rewrites JSON, Markdown, TOML and YAML too, which puts
+      # mise.toml and this very file in its scope.
+      glob: "*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc,md,toml,yml,yaml}"
+      run: mise exec bun -- bun --bun oxfmt --check --no-error-on-unmatched-pattern {staged_files}
+
+# Tests run on push, not commit, to keep commits fast.
+pre-push:
+  parallel: true
+  commands:
+    test:ui:
+      glob: "*.{ts,tsx}"
+      run: mise test:ui
+    test:cs:
+      glob: "*.cs"
+      run: mise test:cs

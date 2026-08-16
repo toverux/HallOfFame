@@ -190,8 +190,7 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
       // First, handle classical pure network errors (ex. no internet, host unreachable, etc.).
       // ReSharper disable once ConvertIfStatementToSwitchStatement
       if (request.result
-          is UnityWebRequest.Result.ConnectionError
-          or UnityWebRequest.Result.DataProcessingError) {
+        is UnityWebRequest.Result.ConnectionError or UnityWebRequest.Result.DataProcessingError) {
         throw new HttpNetworkException(requestId, request.error);
       }
 

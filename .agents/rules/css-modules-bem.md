@@ -5,54 +5,38 @@ paths:
 
 # CSS Modules conventions
 
-Class names follow a BEM-derived convention written in SCSS and consumed as camelCase in TypeScript
-through typed CSS modules.
+Class names follow a BEM-derived convention written in SCSS and consumed as camelCase in TypeScript through typed CSS modules.
 
 ## Naming
 
-- One block per concept. A module's root block is named for its role, not for the feature or panel
-  it belongs to: per-file scoping removes the need for a global prefix (`footer`, `cityInfo`,
-  `uploadProgress`, not `screenshotUploadPanelFooter`).
+- One block per concept. A module's root block is named for its role, not for the feature or panel it belongs to: per-file scoping removes the need for a global prefix (`footer`, `cityInfo`, `uploadProgress`, not `screenshotUploadPanelFooter`).
 - A segment that spans multiple words is camelCase: `cityInfo`, `itemImage`, `backgroundColor`.
 - Block to element uses a single hyphen: `footer-button`, `cityInfo-name`.
 - A modifier uses a double hyphen: `footer-button--cancel`, `form-field--checked`, `image--hidden`.
-- Elements are flat. There are no sub-elements (never `block-element-subElement`). A DOM-nested part
-  that is not its own block gets a flat compound element name: `image-magnifyButton`,
-  `dropdown-itemImage`.
-- Promote a nested structural unit to its own block rather than nesting elements: `checkbox`,
-  `dropdown`, and `textarea` are blocks, not `form-...` elements.
-- In SCSS, build names with `&-` and `&--` concatenation, and keep the source nested for
-  readability even though the generated names stay flat.
+- Elements are flat. There are no sub-elements (never `block-element-subElement`). A DOM-nested part that is not its own block gets a flat compound element name: `image-magnifyButton`, `dropdown-itemImage`.
+- Promote a nested structural unit to its own block rather than nesting elements: `checkbox`, `dropdown`, and `textarea` are blocks, not `form-...` elements.
+- In SCSS, build names with `&-` and `&--` concatenation, and keep the source nested for readability even though the generated names stay flat.
 
-Names convert to camelCase in TypeScript (css-loader `camel-case-only`), so `.footer-button--cancel`
-becomes `styles.footerButtonCancel`. Always access them via
-`import * as styles from './x.module.scss'`.
+Names convert to camelCase in TypeScript (css-loader `camel-case-only`), so `.footer-button--cancel` becomes `styles.footerButtonCancel`.
+Always access them via `import * as styles from './x.module.scss'`.
 
 ## File layout
 
-- One `*.module.scss` per component file, colocated next to its `*.tsx`. When a component is split
-  into sub-components, split its stylesheet to match.
-- Cross-subcomponent SCSS variables and mixins live in a colocated `shared.scss` partial. It must
-  contain only variables and mixins (no top-level rules), so `@use` never re-emits CSS per importer.
-- Cross-subcomponent emitted classes and shared trait blocks live in a colocated
-  `shared.module.scss`, mixed in via `classNames`. Do not `composes` from these SCSS modules: the
-  type generator parses a `composes` target as plain CSS and chokes on its SCSS syntax, though
-  webpack handles it fine.
+- One `*.module.scss` per component file, colocated next to its `*.tsx`.
+  When a component is split into sub-components, split its stylesheet to match.
+- Cross-subcomponent SCSS variables and mixins live in a colocated `shared.scss` partial.
+  It must contain only variables and mixins (no top-level rules), so `@use` never re-emits CSS per importer.
+- Cross-subcomponent emitted classes and shared trait blocks live in a colocated `shared.module.scss`, mixed in via `classNames`.
+  Do not `composes` from these SCSS modules: the type generator parses a `composes` target as plain CSS and chokes on its SCSS syntax, though webpack handles it fine.
 - Component-local tokens stay in the component module, not in the shared files.
 
 ## Generated class names
 
-- css-loader emits each class as `hof-[local]_[hash]` (e.g. `.cityInfo-name` becomes
-  `hof-cityInfo-name_aB3`). The `hof-` prefix namespaces every mod class.
-- Because of that prefix, attribute selectors that reach into vanilla game-UI internals, like
-  `[class*="icon"]`, `[class^="track"]`, or `[class^="content"]`, never match our own classes:
-  ours all start with `hof-`. Use them to target the game's generated structure inside a vanilla
-  component (icons, scrollbar tracks, dropdown popups) without colliding with mod classes.
+- css-loader emits each class as `hof-[local]_[hash]` (e.g. `.cityInfo-name` becomes `hof-cityInfo-name_aB3`). The `hof-` prefix namespaces every mod class.
+- Because of that prefix, attribute selectors that reach into vanilla game-UI internals, like `[class*="icon"]`, `[class^="track"]`, or `[class^="content"]`, never match our own classes: ours all start with `hof-`. Use them to target the game's generated structure inside a vanilla component (icons, scrollbar tracks, dropdown popups) without colliding with mod classes.
 
 ## Typed CSS modules
 
-- `*.module.scss.d.ts` files are generated by `mise build:css-types` (typed-scss-modules with
-  `--exportType named --nameFormat camel`), and they are gitignored.
-- `mise check` regenerates them before tsc, so a renamed or missing class surfaces as a type error
-  on the `styles.*` reference. Without this, tsc is blind to CSS module keys (the ambient
-  `declare module '*.scss'` types them as `any`).
+- `*.module.scss.d.ts` files are generated by `mise build:css-types` (typed-scss-modules with `--exportType named --nameFormat camel`), and they are gitignored.
+- `mise check` and `mise fix` regenerate them before tsc/oxlint, so a renamed or missing class surfaces as a type error on the `styles.*` reference.
+  Without this, tsc is blind to CSS module keys (the ambient `declare module '*.scss'` types them as `any`).

@@ -37,11 +37,15 @@ internal static class ScreenUtilityProxy {
   /// Returns zero and sets nothing if the field was not found.
   /// </summary>
   internal static int Count {
-    get => ScreenUtilityProxy.CountField is null
-      ? field
-      : (int)ScreenUtilityProxy.CountField.GetValue(null);
+    get =>
+      ScreenUtilityProxy.CountField is null
+
+        // ReSharper disable once ArrangeStaticMemberQualifier -- false positive
+        ? field
+        : (int) ScreenUtilityProxy.CountField.GetValue(null);
     set {
       if (ScreenUtilityProxy.CountField is null) {
+        // ReSharper disable once ArrangeStaticMemberQualifier -- false positive
         field = value;
       }
       else {
