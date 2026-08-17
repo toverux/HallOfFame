@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="HallOfFame.Tests/HallOfFame.Tests.csproj" />
+  <Project Path="HallOfFame/HallOfFame.csproj" />
+</Solution>

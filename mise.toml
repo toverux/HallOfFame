@@ -71,7 +71,7 @@ run = "bun --bun oxlint --deny-warnings"
 
 # No check:cs: jb cleanupcode (the C# formatter, see fix:cs) has no read-only/dry-run mode, so there
 # is no read-only C# verify. Run `mise fix:cs` and commit; Rider formats live with the same engine,
-# the same HallOfFame.sln.DotSettings profile, and the same root .editorconfig.
+# the same HallOfFame.slnx.DotSettings profile, and the same root .editorconfig.
 
 # CHECK TASKS (AGENTS)
 # ====================
@@ -123,9 +123,9 @@ raw = true
 # `jb` is a local tool pinned in .config/dotnet-tools.json, so the restore has to precede it: it is
 # idempotent and a no-op once the tool is installed.
 run = ["dotnet tool restore", """
-dotnet jb cleanupcode HallOfFame.sln \
+dotnet jb cleanupcode HallOfFame.slnx \
   --profile="AutoCleanup" \
-  --settings="HallOfFame.sln.DotSettings" \
+  --settings="HallOfFame.slnx.DotSettings" \
   --properties:SkipBuildUI=true --properties:SkipModPostProcess=true \
   --exclude="**/obj/**;**/bin/**"
 """]
@@ -134,7 +134,12 @@ dotnet jb cleanupcode HallOfFame.sln \
 # ===========
 
 [tasks."build"]
-description = "Builds the UI: the webpack bundle and the (gitignored) CSS module type definitions."
+description = "Builds and deploys the whole mod: the C# assembly, the post-processor, and the UI (the csproj calls `build:ui` itself). Requires the game to be closed, which holds the deployed assembly open."
+raw = true
+run = "dotnet build HallOfFame.slnx"
+
+[tasks."build:ui"]
+description = "Builds the UI alone: the webpack bundle and the (gitignored) CSS module type definitions. Deploys straight to the game's Mods folder, so it is the task to run while iterating with the game open."
 depends = ["build:css-types", "build:webpack"]
 
 [tasks."build:webpack"]
