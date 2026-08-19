@@ -1,0 +1,14 @@
+// The save item while the file is being written, its glyph swapped for the progress one.
+// Only the spin is local: everything else about the item comes from the shared menu skin.
+.spinningIcon [class*="iconImg"] {
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

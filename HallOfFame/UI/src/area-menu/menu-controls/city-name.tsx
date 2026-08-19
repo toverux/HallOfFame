@@ -1,24 +1,24 @@
 import { LocalizedString } from 'cs2/l10n';
-import { Button, Tooltip } from 'cs2/ui';
+import { Button, Icon } from 'cs2/ui';
 import { type CSSProperties, memo, type ReactElement, useState } from 'react';
-import { type CreatorSocialLink, type Screenshot, supportedSocialPlatforms } from '../../common';
-import discordBrandsSolid from '../../icons/fontawesome/discord-brands-solid.svg';
-import twitchBrandsSolid from '../../icons/fontawesome/twitch-brands-solid.svg';
-import youtubeBrandsSolid from '../../icons/fontawesome/youtube-brands-solid.svg';
+import { type Screenshot, supportedSocialPlatforms } from '../../common';
+import { Tooltip } from '../../components/tooltip';
+import translateSrc from '../../icons/translate.svg';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { selectLocalizedName } from './select-localized-name';
+import { socialPlatforms } from './social-platforms';
+import { MenuControlsViewerLink } from './viewer-link';
 import * as styles from './city-name.module.scss';
 
-const socialPlatforms: Record<
-  CreatorSocialLink['platform'],
-  Readonly<{ name: string; logo: string; color: string }>
-> = {
-  discord: { name: 'Discord', logo: discordBrandsSolid, color: '#5865F2' },
-  paradoxmods: { name: 'Paradox Mods', logo: 'Media/Glyphs/ParadoxMods.svg', color: '#5abe41' },
-  twitch: { name: 'Twitch', logo: twitchBrandsSolid, color: '#8956FB' },
-  youtube: { name: 'YouTube', logo: youtubeBrandsSolid, color: '#FF0000' }
-};
+/**
+ * The translated-names hint's glyph, for the preloading the controls do on its behalf.
+ *
+ * The hint only appears on a screenshot whose names were translated, so the first one to come up in
+ * the slideshow would otherwise fetch it on the frame it is meant to be drawn.
+ */
+// oxlint-disable-next-line react/only-export-components - no Fast Refresh in a Cohtml bundle
+export const cityNamePreloadedIcons: readonly string[] = [translateSrc];
 
 export const MenuControlsCityName = memo(
   ({
@@ -33,6 +33,8 @@ export const MenuControlsCityName = memo(
     const modSettings = bindings.useModSettings();
 
     const [showTranslations, setShowTranslations] = useState(false);
+
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const city = selectLocalizedName(modSettings.namesTranslationMode, gameLocale, {
       value: screenshot.cityName,
@@ -51,13 +53,15 @@ export const MenuControlsCityName = memo(
     // oxlint-disable-next-line typescript/prefer-nullish-coalescing - empty '' must fall through
     const creatorName = creator.name || 'anonymous';
 
-    const supportedSocials = screenshot.creator.socials
-      .filter(link => supportedSocialPlatforms.includes(link.platform))
-      .sort(
-        (a, b) =>
-          supportedSocialPlatforms.indexOf(a.platform) -
-          supportedSocialPlatforms.indexOf(b.platform)
-      );
+    const supportedSocials = modSettings.showCreatorSocials
+      ? screenshot.creator.socials
+          .filter(link => supportedSocialPlatforms.includes(link.platform))
+          .sort(
+            (a, b) =>
+              supportedSocialPlatforms.indexOf(a.platform) -
+              supportedSocialPlatforms.indexOf(b.platform)
+          )
+      : [];
 
     return (
       <div className={styles.names}>
@@ -66,12 +70,7 @@ export const MenuControlsCityName = memo(
             className={styles.namesTranslatedHint}
             onMouseEnter={() => setShowTranslations(true)}
             onMouseLeave={() => setShowTranslations(false)}>
-            <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'>
-              <path
-                fill='white'
-                d='m190 230 57 58-21 51-72-73-85 85-36-37 84-84-22-22c-14-14-26-33-33-54h56c4 7 8 13 13 18l23 23 22-23c16-16 29-48 29-70H0V51h128V0h51v51h128v51h-51c0 36-19 81-43 106l-23 22zm98 205-32 77h-51l128-307h51l128 307h-51l-32-77H288zm21-51h99l-49-118-50 118z'
-              />
-            </svg>
+            <Icon src={translateSrc} className={styles.namesTranslatedHintIcon} />
             {translate('HallOfFame.UI.Menu.MenuControls.TRANSLATED')}
           </div>
         )}
@@ -79,34 +78,60 @@ export const MenuControlsCityName = memo(
         <div className={styles.namesCity}>
           <Tooltip
             direction='right'
-            disabled={!city.isTranslated}
-            forceVisible={showTranslations && city.isTranslated}
+            disabled={!city.isTranslated || isMenuOpen}
+            forceVisible={showTranslations}
             tooltip={
               <div className={styles.namesTranslatedTooltip}>
                 <strong>{screenshot.cityName}</strong>
                 {city.alternate}
               </div>
             }>
-            <span>{city.name}</span>
+            {/*
+              The tooltip anchors to this wrapper, not to the link inside it. Both want to own the
+              same element's DOM handle, and opening the menu re-resolves it, which would strip the
+              tooltip's listeners off the element for good.
+            */}
+            <span>
+              <MenuControlsViewerLink
+                key={screenshot.id}
+                trackedUrl={screenshot.viewerUrl}
+                shareUrl={screenshot.viewerShareUrl}
+                onToggle={setIsMenuOpen}>
+                {city.name}
+              </MenuControlsViewerLink>
+            </span>
           </Tooltip>
         </div>
 
         <div className={styles.namesCreator}>
           <Tooltip
-            direction={city.isTranslated ? 'down' : 'right'}
-            disabled={!creator.isTranslated}
-            forceVisible={showTranslations && creator.isTranslated}
+            direction='down'
+            disabled={!creator.isTranslated || isMenuOpen}
+            forceVisible={showTranslations}
             tooltip={
               <div className={styles.namesTranslatedTooltip}>
                 <strong>{screenshot.creator.creatorName}</strong>
                 {creator.alternate}
               </div>
             }>
+            {/*
+              The whole "by …" phrase is the link, rather than the name alone. Cohtml lays every
+              element out as a box and never fragments one across line boxes, so a name wrapped in
+              its own element becomes a box starting mid-sentence: a long name would wrap within
+              that box instead of back to the phrase's left margin, and the social icons would stop
+              trailing it.
+            */}
             <span className={styles.namesCreatorBy}>
-              <LocalizedString
-                id='HallOfFame.Common.CITY_BY'
-                args={{ CREATOR_NAME: creatorName }}
-              />
+              <MenuControlsViewerLink
+                key={screenshot.id}
+                trackedUrl={screenshot.creator.viewerUrl}
+                shareUrl={screenshot.creator.viewerShareUrl}
+                onToggle={setIsMenuOpen}>
+                <LocalizedString
+                  id='HallOfFame.Common.CITY_BY'
+                  args={{ CREATOR_NAME: creatorName }}
+                />
+              </MenuControlsViewerLink>
             </span>
           </Tooltip>
 

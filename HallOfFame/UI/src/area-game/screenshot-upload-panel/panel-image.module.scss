@@ -15,8 +15,10 @@
 
   &-magnifyButton {
     position: absolute;
-    right: 15rem;
-    bottom: 15rem;
+    // The round button is a good deal wider than the glyph it centres, so it carries its own
+    // transparent margin: these offsets sit inside that, not on top of it.
+    right: 5rem;
+    bottom: 5rem;
 
     width: 50rem;
     height: 50rem;
@@ -25,16 +27,17 @@
     justify-content: center;
     align-items: center;
 
-    &:hover svg {
-      opacity: 1;
-      filter: none;
-    }
-
-    svg {
+    // The glyph is a mask, so its colour is a background, not a `fill`: Cohtml does not accept the
+    // SVG presentation attributes as CSS properties.
+    [class*="icon"] {
       width: 60%;
       height: 60%;
-      fill: white;
+      background-color: white;
       opacity: 0.8;
+    }
+
+    &:hover [class*="icon"] {
+      opacity: 1;
     }
   }
 

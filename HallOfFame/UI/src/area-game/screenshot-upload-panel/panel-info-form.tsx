@@ -13,6 +13,7 @@ import { memo, type ReactElement, useCallback, useEffect, useMemo, useRef, useSt
 import { getClassesModule, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { useScrollController } from '../../vanilla-modules/game-ui/common/hooks/use-scroll-controller';
+import { defaultButtonSounds } from '../../vanilla-modules/game-ui/common/input/button/button';
 import {
   Checkbox,
   type CheckboxTheme
@@ -249,7 +250,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
               </label>
 
               <Dropdown theme={dropdownTheme} content={assetModsDropdownItems}>
-                <DropdownToggle sounds={{ hover: null }}>
+                <DropdownToggle sounds={{ ...defaultButtonSounds, hover: null }}>
                   {formValue.showcasedMod ? (
                     <div
                       className={classNames(

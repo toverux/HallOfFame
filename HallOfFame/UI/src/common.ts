@@ -18,6 +18,10 @@ export interface Creator {
   readonly creatorNameLocale: string | null;
   readonly creatorNameLatinized: string | null;
   readonly creatorNameTranslated: string | null;
+  // Tracked redirect to this creator's viewer page: it counts the click, then redirects.
+  readonly viewerUrl: string;
+  // The viewer page itself, untracked. This is the link to hand to a human.
+  readonly viewerShareUrl: string;
   readonly socials: readonly CreatorSocialLink[];
 }
 
@@ -44,6 +48,10 @@ export interface Screenshot {
   readonly description: string;
   readonly imageUrlFHD: string;
   readonly imageUrl4K: string;
+  // Tracked redirect to this screenshot's viewer page: it counts the click, then redirects.
+  readonly viewerUrl: string;
+  // The viewer page itself, untracked. This is the link to hand to a human.
+  readonly viewerShareUrl: string;
   readonly shareRenderSettings: boolean;
   readonly renderSettings: Readonly<Record<string, string>>;
   readonly createdAt: string;

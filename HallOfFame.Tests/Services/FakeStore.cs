@@ -15,6 +15,8 @@ internal sealed class FakeStore : ICreatorIdentityStore {
 
   public bool IsParadoxAccountID { get; set; }
 
+  public string? PublicCreatorID { get; set; }
+
   public string? CreatorName { get; set; }
 
   public string? MaskedCreatorID { get; set; }

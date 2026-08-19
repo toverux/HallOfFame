@@ -310,6 +310,13 @@ internal sealed class CreatorIdentity(
         $"Your Public Creator ID is {creator.Id}."
       );
 
+      // This sync is the only place the public ID is learned, so it is recorded here for the parts
+      // of the mod that address the creator on the viewer.
+      // Recorded without saving: saving applies the settings, which reports an applied change,
+      // which starts a sync that cancels this one. The value rides along with whatever saves next,
+      // and every startup sync learns it again regardless.
+      store.PublicCreatorID = creator.Id;
+
       // Stop if the sync was superseded while fetching; the log above still fires, matching the
       // original ordering (a superseded call still logs).
       ct.ThrowIfCancellationRequested();

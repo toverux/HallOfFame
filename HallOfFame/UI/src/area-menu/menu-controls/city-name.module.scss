@@ -21,9 +21,9 @@
       opacity: 1;
     }
 
-    svg {
-      width: 1.2em; // same as line-height
-      height: 1.2em; // same as line-height
+    &Icon {
+      // The vanilla icon class sizes itself from this, both dimensions at once.
+      --size: 1.2em; // same as line-height
       margin-right: 8rem;
     }
   }
@@ -45,6 +45,13 @@
   }
 
   &-creatorBy {
+    // The phrase holds its width instead of being squeezed to make room for the social icons: left
+    // to shrink it would just grow another line and keep them wedged alongside, where what should
+    // happen is the icons dropping to a line of their own. The cap is what still lets a name wider
+    // than the row wrap inside the phrase rather than overflow it.
+    flex-shrink: 0;
+    max-width: 100%;
+
     margin-right: 5px + 5px /* for the visual fix below */;
   }
 
@@ -53,6 +60,14 @@
     margin-left: -5px;
     display: flex;
     align-items: center;
+
+    // A creator name long enough to wrap leaves this box stretched over both lines, which floats
+    // the icons in the middle of the block and reads as a second, detached column. Holding the box
+    // to the first line instead keeps the icons on the line the name starts on, and `align-items`
+    // above centres them within it.
+    // `baseline` would say this outright, but Cohtml ignores it and falls back to the stretching.
+    align-self: flex-start;
+    height: 1.35em; // the game's line-height, so the box is exactly one line tall
   }
 
   &-creatorSocialsButton {

@@ -56,6 +56,9 @@ const handlers = new Map<string, Set<Handler>>();
 
 const recordedTriggers: RecordedTrigger[] = [];
 
+// Localization id -> string, consulted by `translate` before its echo-the-id default.
+const translations = new Map<string, string>();
+
 /**
  * Configures the value a `bindValue(group, name, default)` binding returns.
  * Call before rendering; after the first render this also live-updates already-subscribed
@@ -91,6 +94,19 @@ export function setMapBinding(group: string, name: string, key: unknown, value: 
 }
 
 /**
+ * Configures what `translate` returns for the given ids, overriding its echo-the-id default.
+ *
+ * Needed whenever a rendered string carries `{PLACEHOLDER}` arguments: `LocalizedString`
+ * substitutes its `args` into the *translated* string, so with only the id to work with it drops
+ * them, and an argument passed as an element never reaches the tree at all.
+ */
+export function setTranslations(entries: Readonly<Record<string, string>>): void {
+  for (const [id, value] of Object.entries(entries)) {
+    translations.set(id, value);
+  }
+}
+
+/**
  * Returns the command triggers recorded since the last {@link resetBindings} call.
  */
 export function getTriggers(): readonly RecordedTrigger[] {
@@ -98,12 +114,13 @@ export function getTriggers(): readonly RecordedTrigger[] {
 }
 
 /**
- * Clears all configured bindings and recorded triggers.
+ * Clears all configured bindings, translations and recorded triggers.
  * Call in an `afterEach` with `cleanup`.
  */
 export function resetBindings(): void {
   valueBindings.clear();
   mapBindings.clear();
+  translations.clear();
   recordedTriggers.length = 0;
 }
 
@@ -218,9 +235,9 @@ function aliasGameModules(): void {
 
 /**
  * Overrides the `LocalizationContext` no-provider default so `useLocalization().translate(id,
- * fallback)` returns the fallback (or the id) instead of `null`, without the real, binding-driven
- * localization provider. `unitSettings` is reused from the original default, so `LocalizedNumber`
- * and friends keep working.
+ * fallback)` returns whatever {@link setTranslations} configured, else the fallback, else the id,
+ * instead of `null`, without the real, binding-driven localization provider. `unitSettings` is
+ * reused from the original default, so `LocalizedNumber` and friends keep working.
  */
 function overrideLocalization(): void {
   const { getModule } = globals['cs2/modding'] as {
@@ -235,7 +252,8 @@ function overrideLocalization(): void {
   const originalDefault = context._currentValue ?? context._currentValue2 ?? {};
 
   const value = {
-    translate: (id: string, fallback?: string | null): string => fallback ?? id,
+    translate: (id: string, fallback?: string | null): string =>
+      translations.get(id) ?? fallback ?? id,
     unitSettings: originalDefault.unitSettings
   };
 

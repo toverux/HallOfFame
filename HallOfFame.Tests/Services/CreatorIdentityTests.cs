@@ -199,6 +199,77 @@ public sealed class CreatorIdentityTests {
   }
 
   [Fact]
+  public async Task RunSync_PersistsPublicCreatorId() {
+    var store = new FakeStore();
+
+    var identity = CreatorIdentityTests.CreateIdentity(
+      new FakeApi {
+        GetMeImpl = () => Task.FromResult(
+          new Creator {
+            Id = "public-creator-id",
+            CreatorName = "Alice"
+          }
+        )
+      },
+      store
+    );
+
+    await identity.RunSync(CreatorSyncTrigger.NameEdited, CancellationToken.None);
+
+    Assert.Equal("public-creator-id", store.PublicCreatorID);
+  }
+
+  /// <summary>
+  /// Saving from inside a sync would apply the settings, which reports an applied change, which
+  /// starts a sync that cancels the one doing the saving.
+  /// </summary>
+  [Fact]
+  public async Task RunSync_DoesNotSaveSettingsWhenLearningPublicCreatorId() {
+    var store = new FakeStore();
+
+    var identity = CreatorIdentityTests.CreateIdentity(
+      new FakeApi {
+        GetMeImpl = () => Task.FromResult(
+          new Creator {
+            Id = "public-creator-id",
+            CreatorName = "Alice"
+          }
+        )
+      },
+      store
+    );
+
+    await identity.RunSync(CreatorSyncTrigger.NameEdited, CancellationToken.None);
+
+    Assert.Equal(0, store.SaveCount);
+  }
+
+  /// <summary>
+  /// The startup path goes through <c>UpdateMe</c> rather than <c>GetMe</c>, and it is the one
+  /// that learns the ID on a fresh install.
+  /// </summary>
+  [Fact]
+  public async Task RunSync_PersistsPublicCreatorId_OnTheUpdateMePath() {
+    var store = new FakeStore();
+
+    var identity = CreatorIdentityTests.CreateIdentity(
+      new FakeApi {
+        UpdateMeImpl = () => Task.FromResult(
+          new Creator {
+            Id = "public-creator-id",
+            CreatorName = "Alice"
+          }
+        )
+      },
+      store
+    );
+
+    await identity.RunSync(CreatorSyncTrigger.Startup, CancellationToken.None);
+
+    Assert.Equal("public-creator-id", store.PublicCreatorID);
+  }
+
+  [Fact]
   public async Task RunSync_ReturnsAnonymousStatus_ForEmptyName() {
     var identity = CreatorIdentityTests.CreateIdentity(
       new FakeApi {

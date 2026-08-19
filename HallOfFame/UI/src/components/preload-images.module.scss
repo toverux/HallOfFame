@@ -1,0 +1,6 @@
+.preload {
+  // A display :none node is not laid out or painted, yet cohtml still loads the images it
+  // references and keeps them alive, a live DOM reference being exempt from cache eviction.
+  // So these nodes pin images invisibly, at zero rendering cost.
+  display: none;
+}

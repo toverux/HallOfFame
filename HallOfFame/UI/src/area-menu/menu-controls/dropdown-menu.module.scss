@@ -1,0 +1,97 @@
+@use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
+
+// The skin shared by the mod's dropdown menus over the slideshow, themed to its own surfaces rather
+// than the game's white dropdown.
+// Each class here rides alongside the vanilla one it skins rather than replacing it, so the popup
+// keeps the positioning and structure the game gives it.
+.menu {
+  margin-top: 4rem;
+  margin-bottom: 4rem;
+
+  &-list {
+    min-width: 250rem;
+    padding: 5rem;
+    border-radius: 10rem;
+
+    // The round nav buttons' glass, at rest, through the shared mixin.
+    background-color: rgba(255, 255, 255, 0.05);
+    @include shared.glass(108%);
+    border: none;
+    box-shadow:
+      0 2rem 10rem rgba(0, 0, 0, 0.35),
+      inset 0 0 0 2rem rgba(255, 255, 255, 0.25);
+  }
+
+  // For an anchor sitting in the button column: there is never room below it there, so the popup
+  // always flips up, and up is straight over the buttons above. Nudged clear of the column and back
+  // down to the anchor's own row, the menu unfolds out of the button instead of burying its
+  // neighbours.
+  // Both offsets are the column's measurements: one button down, and across by the button plus the
+  // gap the controls put between the column and their text, which lines the menu up with the city
+  // name and the labels above it rather than at some clearance of its own.
+  &--fromColumn {
+    margin-left: 95rem;
+    transform: translateY(65rem);
+  }
+
+  &-scrollable {
+    // The items are few and short, so the vanilla scroller only ever gets in the way here.
+    max-height: none;
+  }
+
+  // An item is a vanilla `Button`, and a Cohtml button inherits nothing, so every text property it
+  // should have taken from the menu around it has to be restated here.
+  &-item {
+    padding: 8rem 12rem;
+    border-radius: 5rem;
+    color: vanilla.$menu-text-1-normal;
+    font-size: vanilla.$font-size-m;
+    transition: background-color 0.1s ease-in-out;
+
+    // The frost averages the backdrop rather than darkening it, so a uniformly bright screenshot
+    // still comes through bright, which is the one thing white text cannot sit on. The shadow is
+    // what keeps the labels readable there.
+    text-shadow: 0 1rem 4rem rgba(0, 0, 0, 0.8);
+
+    // The vanilla item lays its icon and label out inline, which hangs the icon from the top of
+    // the label's line box.
+    display: flex;
+    align-items: center;
+
+    // A tinted icon is a mask filled by its own background, so the label's colour does not reach
+    // it and the two are kept in step by hand, here and in the hover state below.
+    [class*="iconImg"] {
+      background-color: vanilla.$menu-text-1-normal;
+      transition: background-color 0.1s ease-in-out;
+    }
+
+    // One step up from the surface, not a new shade: the item is lit by the same white wash the
+    // rest of the menu UI uses to mark what the pointer is on.
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: vanilla.$menu-active-color-bright;
+
+      [class*="iconImg"] {
+        background-color: vanilla.$menu-active-color-bright;
+      }
+    }
+
+    &[disabled],
+    &[disabled]:hover {
+      background-color: transparent;
+      color: rgba(255, 255, 255, 0.4);
+
+      [class*="iconImg"] {
+        background-color: rgba(255, 255, 255, 0.4);
+      }
+    }
+  }
+
+  // Sized in `em` so the glyph tracks the label beside it rather than a fixed pixel size.
+  &-itemIcon {
+    width: 1em;
+    height: 1em;
+    margin-right: 10rem;
+  }
+}

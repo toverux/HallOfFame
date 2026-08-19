@@ -1,11 +1,11 @@
 import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
-import { Tooltip } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
 import type { Screenshot } from '../../common';
+import { Tooltip } from '../../components/tooltip';
 import naturalResourcesSrc from '../../icons/paradox/natural-resources.svg';
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
-import eyeOpenSrc from '../../icons/uil/colored/eye-open.svg';
+import eyeOpenSrc from '../../icons/uil/eye-open.svg';
 import { useTranslate } from '../../utils';
 import type * as bindings from '../../utils/bindings';
 import { formatBigNumber } from './menu-controls-utils';

@@ -1,0 +1,11 @@
+// The glass the mod's surfaces over the slideshow are made of: the round nav buttons and the
+// dropdown menus.
+
+// Frosted, not clear.
+$glass-blur: 56px;
+
+// Only the brightness varies between the resting, hovered and pressed states: a surface is lit
+// harder, not remade.
+@mixin glass($brightness) {
+  backdrop-filter: saturate(135%) brightness($brightness) blur($glass-blur);
+}

@@ -27,6 +27,13 @@ internal sealed class CreatorValueWriter : IWriter<Creator> {
     writer.PropertyName("creatorNameTranslated");
     writer.Write(value.CreatorNameTranslated);
 
+    // See the note in ScreenshotValueWriter on why both a tracked and a clean URL are written.
+    writer.PropertyName("viewerUrl");
+    writer.Write(value.ViewerUrl);
+
+    writer.PropertyName("viewerShareUrl");
+    writer.Write(WebViewer.CreatorPageUrl(value.Id));
+
     writer.PropertyName("socials");
     writer.ArrayBegin(value.Socials.Length);
 

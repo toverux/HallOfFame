@@ -23,6 +23,14 @@ internal interface ICreatorIdentityStore {
   bool IsParadoxAccountID { get; set; }
 
   /// <summary>
+  /// The creator's public identifier, as the server knows them and as the web viewer addresses
+  /// them.
+  /// Distinct from <see cref="CreatorID"/>, which is a credential and belongs in no URL.
+  /// It is learned from the login sync, so it is null until the first one succeeds.
+  /// </summary>
+  string? PublicCreatorID { get; set; }
+
+  /// <summary>
   /// The Creator Name; the module only reads it (to diff name edits and to assemble the
   /// credential).
   /// </summary>

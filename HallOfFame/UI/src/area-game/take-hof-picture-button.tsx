@@ -1,6 +1,6 @@
-import { Tooltip } from 'cs2/ui';
 import { type ReactElement, useEffect, useRef } from 'react';
-import sharePictureSrc from '../icons/uil/standard/share-picture.svg';
+import { Tooltip } from '../components/tooltip';
+import sharePictureSrc from '../icons/uil/share-picture.svg';
 import { logError, useTranslate } from '../utils';
 import * as bindings from '../utils/bindings';
 import * as styles from './take-hof-picture-button.module.scss';

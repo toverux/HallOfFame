@@ -10,6 +10,7 @@ using Game.Settings;
 using Game.UI.Localization;
 using Game.UI.Widgets;
 using HallOfFame.Services;
+using HallOfFame.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 #if DEBUG
@@ -102,6 +103,16 @@ public sealed class
   public bool IsParadoxAccountID { get; set; }
 
   /// <summary>
+  /// The creator's public identifier, as the server knows them and as the web viewer addresses
+  /// them.
+  /// Unlike <see cref="CreatorID"/>, which authorizes and is private, this one is safe to put in a
+  /// link.
+  /// The login sync fills it in, so it is null until the first one succeeds.
+  /// </summary>
+  [SettingsUIHidden]
+  public string? PublicCreatorID { get; set; }
+
+  /// <summary>
   /// Text explaining the algorithms' weight selection mechanism.
   /// </summary>
   [SettingsUIMultilineText("coui://ui-mods/images/cs2-lightbulb.svg")]
@@ -152,7 +163,9 @@ public sealed class
   public LocalizedString LoginStatus => this.loginStatusValue;
 
   /// <summary>
-  /// Opens https://viewer.halloffame.mtq.io on the Creator's profile page.
+  /// Opens the web viewer on the Creator's profile page.
+  /// This goes straight to the viewer rather than through the server's tracked redirect, so these
+  /// visits are not counted.
   /// </summary>
   [SettingsUISection(Settings.GroupYourProfile)]
   [SettingsUIButton]
@@ -161,13 +174,13 @@ public sealed class
   public bool OpenWebViewer {
     // ReSharper disable once ValueParameterNotUsed
     set {
-      var creatorQuery = string.IsNullOrWhiteSpace(this.CreatorName)
-        ? this.CreatorID
-        : this.CreatorName;
+      // The viewer's own home rather than a creator page the viewer cannot resolve, for the window
+      // between installing the mod and the first successful login sync.
+      var url = this.PublicCreatorID is { Length: > 0 } publicCreatorId
+        ? $"{WebViewer.CreatorPageUrl(publicCreatorId)}&sortOrder=Descending"
+        : WebViewer.BaseUrl;
 
-      Application.OpenURL(
-        $"https://viewer.halloffame.mtq.io/?creator={creatorQuery}&sortOrder=Descending"
-      );
+      Application.OpenURL(url);
     }
   }
 
@@ -477,6 +490,13 @@ public sealed class
   public string ParadoxModsBrowsingPreference { get; set; } = null!;
 
   /// <summary>
+  /// Whether the notice telling that the web viewer is a third-party website was already shown.
+  /// It is shown the first time the user opens or copies a web viewer link, then never again.
+  /// </summary>
+  [SettingsUIHidden]
+  public bool HasSeenWebViewerDialog { get; set; }
+
+  /// <summary>
   /// The latest value the user selected for the "Share playset" option in the upload panel.
   /// It is restored when it opens.
   /// </summary>
@@ -582,6 +602,7 @@ public sealed class
     this.BaseUrl = "halloffame.cs2.mtq.io";
 
     this.ParadoxModsBrowsingPreference = "undefined";
+    this.HasSeenWebViewerDialog = false;
     this.SavedShareModIdsPreference = true;
     this.SavedShareRenderSettingsPreference = true;
     this.SavedScreenshotDescription = string.Empty;
@@ -671,9 +692,15 @@ public sealed class
       Dictionary<string, int> indexCounts
     ) =>
       new Dictionary<string, string> {
-        { "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]", "{ Development }" },
-        { "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]", "Screenshot ID" }, {
-          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]", "Load Screenshot"
+        {
+          "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]",
+          "{ Development }"
+        }, {
+          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]",
+          "Screenshot ID"
+        }, {
+          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]",
+          "Load Screenshot"
         }, {
           "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
           "Dump Locales as JSON"

@@ -1,21 +1,37 @@
 import classNames from 'classnames';
 import { LocalizedString } from 'cs2/l10n';
-import { Button, Icon, Tooltip } from 'cs2/ui';
-import { type ReactElement, useCallback, useEffect, useState } from 'react';
-import flagSolidSrc from '../../icons/fontawesome/flag-solid.svg';
+import { Button, Icon } from 'cs2/ui';
+import { type ReactElement, useCallback, useEffect } from 'react';
+import { PreloadImages } from '../../components/preload-images';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
-import { MenuControlsCityName } from './city-name';
+import { cityNamePreloadedIcons, MenuControlsCityName } from './city-name';
 import { MenuControlsError } from './error';
+import { MenuControlsMoreActionsMenu, moreActionsPreloadedIcons } from './more-actions-menu';
 import {
   MenuControlsLikeButton,
-  MenuControlsMoreActionsButton,
   MenuControlsNextButton,
   MenuControlsPreviousButton,
-  MenuControlsToggleMenuVisibilityButton
+  MenuControlsToggleMenuVisibilityButton,
+  navButtonsPreloadedIcons
 } from './nav-buttons';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
+import { MenuControlsSocialsPreloader } from './socials-preloader';
+import { viewerLinkPreloadedIcons } from './viewer-link';
 import * as styles from './menu-controls.module.scss';
+
+// The icons the controls only show on demand, gathered from the components that own them.
+//
+// They are preloaded from here rather than from those components because this is the one node that
+// outlives every popup and every screenshot: an icon pinned from inside a menu would be pinned only
+// once that menu was already open, which is the frame it was needed, and one pinned from inside the
+// city name would be unpinned again on the next slide.
+const preloadedIcons: readonly string[] = [
+  ...navButtonsPreloadedIcons,
+  ...moreActionsPreloadedIcons,
+  ...viewerLinkPreloadedIcons,
+  ...cityNamePreloadedIcons
+];
 
 // Deliberately module-scoped, not a per-instance `useRef`. `MenuControls` is mounted via a
 // portal in `MasterScreenPortal` and remounts fresh when returning to the menu from a game.
@@ -31,6 +47,10 @@ let lastForcedRefreshIndex = 0;
 export function MenuControls(): ReactElement {
   return (
     <div className={styles.controlsContainer}>
+      <PreloadImages srcs={preloadedIcons} />
+
+      <MenuControlsSocialsPreloader />
+
       {/* Subcomponent just to avoid one stupid level of indentation! */}
       <MenuControlsContent />
     </div>
@@ -43,8 +63,6 @@ export function MenuControlsContent(): ReactElement {
   const modSettings = bindings.useModSettings();
 
   const [menuState, setMenuState] = bindings.useHofMenuState();
-
-  const [showMoreActions, setShowMoreActions] = useState(false);
 
   useEffect(() => {
     if (menuState.forcedRefreshIndex != lastForcedRefreshIndex) {
@@ -59,10 +77,6 @@ export function MenuControlsContent(): ReactElement {
     () => bindings.openModPage(menuState.screenshot!.showcasedMod!),
     [menuState.screenshot]
   );
-
-  const toggleMoreActions = useCallback(() => setShowMoreActions(prev => !prev), []);
-
-  const openGeneralModSettings = useCallback(() => bindings.openModSettings('General'), []);
 
   // Stable thanks to the functional update and the singleton's stable setter, so the memoized
   // toggle button only re-renders when `isMenuVisible` actually changes.
@@ -88,9 +102,7 @@ export function MenuControlsContent(): ReactElement {
   }
 
   return (
-    <div
-      className={classNames(styles.controls, styles.controlsApplyButtonsOffset)}
-      onMouseLeave={() => setShowMoreActions(false)}>
+    <div className={classNames(styles.controls, styles.controlsApplyButtonsOffset)}>
       {modSettings.showFeaturedAsset && menuState.screenshot.showcasedMod && (
         <Button variant='menu' className={styles.assetButton} onSelect={openShowcasedModPage}>
           <div
@@ -173,63 +185,12 @@ export function MenuControlsContent(): ReactElement {
         </div>
       </div>
 
-      <div className={classNames(styles.section, styles.sectionOtherActions)}>
+      <div className={styles.section}>
         <div className={styles.sectionButtons}>
-          <MenuControlsMoreActionsButton onToggle={toggleMoreActions} />
-        </div>
-
-        <div
-          className={classNames(styles.sectionContent, {
-            [styles.sectionContentSlideIn]: showMoreActions
-          })}>
-          <Tooltip
-            direction='down'
-            tooltip={
-              <LocalizedString
-                id='HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Save]'
-                args={{ DIRECTORY: modSettings.creatorsScreenshotSaveDirectory }}
-              />
-            }>
-            <Button
-              className={classNames(styles.sectionActionButton, {
-                [styles.sectionSaveButtonSpinning]: menuState.isSaving
-              })}
-              variant='menu'
-              src={menuState.isSaving ? 'Media/Glyphs/Progress.svg' : 'Media/Editor/Save.svg'}
-              tinted={true}
-              disabled={menuState.isSaving}
-              onSelect={bindings.saveScreenshot}>
-              <span>{translate('HallOfFame.UI.Menu.MenuControls.ACTION[Save]')}</span>
-            </Button>
-          </Tooltip>
-
-          <Tooltip
-            direction='down'
-            tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Report]')}>
-            <Button
-              className={styles.sectionActionButton}
-              variant='menu'
-              src={flagSolidSrc}
-              tinted={true}
-              onSelect={bindings.reportScreenshot}
-              selectSound='bulldoze'>
-              <span>{translate('HallOfFame.UI.Menu.MenuControls.ACTION[Report]')}</span>
-            </Button>
-          </Tooltip>
-
-          <Tooltip
-            direction='down'
-            tooltip={translate(
-              'HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Open Mod Settings]'
-            )}>
-            <Button
-              className={classNames(styles.sectionActionButton, styles.sectionSettingsButton)}
-              variant='menu'
-              src='Media/Glyphs/Gear.svg'
-              tinted={true}
-              onSelect={openGeneralModSettings}
-            />
-          </Tooltip>
+          <MenuControlsMoreActionsMenu
+            isSaving={menuState.isSaving}
+            saveDirectory={modSettings.creatorsScreenshotSaveDirectory}
+          />
         </div>
       </div>
     </div>

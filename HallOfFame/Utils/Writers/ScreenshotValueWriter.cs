@@ -67,6 +67,14 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
     writer.PropertyName("imageUrl4K");
     writer.Write(value.ImageUrl4K);
 
+    // Two links to the same viewer page: the tracked redirect for a click the counter should see,
+    // and the clean page URL for a link the player copies, which unfurlers would otherwise inflate.
+    writer.PropertyName("viewerUrl");
+    writer.Write(value.ViewerUrl);
+
+    writer.PropertyName("viewerShareUrl");
+    writer.Write(WebViewer.ScreenshotPageUrl(value.Id));
+
     writer.PropertyName("shareRenderSettings");
     writer.Write(value.ShareRenderSettings);
 

@@ -78,6 +78,22 @@ export function openSocialLink({ platform, link }: CreatorSocialLink): void {
 }
 
 /**
+ * Opens a web viewer link in the player's default browser, {@link url} being the server's tracked
+ * redirect so that the visit is counted.
+ */
+export function openViewerLink(url: string): void {
+  trigger(GROUP, 'openViewerLink', url);
+}
+
+/**
+ * Puts a web viewer link on the system clipboard, {@link url} being the plain viewer page rather
+ * than the tracked redirect, which is what belongs in a shared link.
+ */
+export function copyViewerLink(url: string): void {
+  trigger(GROUP, 'copyViewerLink', url);
+}
+
+/**
  * Logs a JavaScript error to the mod's C# logs (not only the UI console), and shows an error dialog
  * when {@link fatal} is set.
  */

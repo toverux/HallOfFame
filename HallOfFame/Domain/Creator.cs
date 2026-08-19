@@ -27,6 +27,14 @@ internal record Creator {
   [DecodeAlias("creatorNameTranslated")]
   internal string? CreatorNameTranslated { get; [UsedImplicitly] set; }
 
+  /// <summary>
+  /// Tracked redirect to this creator's page on the web viewer: it counts the click, then 307s to
+  /// <see cref="HallOfFame.Utils.WebViewer.CreatorPageUrl"/>.
+  /// Use it for a real human click; use the clean page URL for a link the player copies.
+  /// </summary>
+  [DecodeAlias("viewerUrl")]
+  internal string ViewerUrl { get; [UsedImplicitly] set; } = string.Empty;
+
   [DecodeAlias("socials")]
   // ReSharper disable once CollectionNeverUpdated.Global
   internal CreatorSocialLink[] Socials { get; [UsedImplicitly] set; } = [];

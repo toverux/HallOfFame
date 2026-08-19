@@ -1,4 +1,4 @@
-import type { Screenshot } from '../common';
+import type { Creator, Screenshot } from '../common';
 import type { ModSettings } from '../utils/bindings';
 
 /**
@@ -84,6 +84,8 @@ export function makeScreenshot(overrides: Partial<Screenshot> = {}): Screenshot 
     description: '',
     imageUrlFHD: 'fhd.png',
     imageUrl4K: '4k.png',
+    viewerUrl: 'https://api.test/screenshots/id/viewer',
+    viewerShareUrl: 'https://viewer.test/city/id',
     shareRenderSettings: false,
     renderSettings: {},
     createdAt: '',
@@ -94,14 +96,25 @@ export function makeScreenshot(overrides: Partial<Screenshot> = {}): Screenshot 
     uniqueViewsCount: 0,
     likingPercentage: 0,
     isLiked: false,
-    creator: {
-      id: 'creator',
-      creatorName: null,
-      creatorNameLocale: null,
-      creatorNameLatinized: null,
-      creatorNameTranslated: null,
-      socials: []
-    },
+    creator: makeCreator(),
+    ...overrides
+  };
+}
+
+/**
+ * Builds a {@link Creator} with placeholder defaults, overridable per field.
+ * The default is anonymous, matching a creator who never set a name.
+ */
+export function makeCreator(overrides: Partial<Creator> = {}): Creator {
+  return {
+    id: 'creator',
+    creatorName: null,
+    creatorNameLocale: null,
+    creatorNameLatinized: null,
+    creatorNameTranslated: null,
+    viewerUrl: 'https://api.test/creators/creator/viewer',
+    viewerShareUrl: 'https://viewer.test/?creator=creator',
+    socials: [],
     ...overrides
   };
 }

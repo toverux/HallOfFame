@@ -137,9 +137,12 @@ Donations are very welcome and will help keep the service running.
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
   <ModVersion Value="2026.2.4" />
   <GameVersion Value="1.6.*" />
-  <ChangeLog>- Improved image caching in the slideshow, as well as the image transitioning logic.
-  Overall, the slideshow will feel smoother.
+  <ChangeLog>- City and creator names in the main menu are now links: open or copy a link to the screenshot, or to the creator's gallery, on the Hall of Fame Web Viewer by foxxy.
+- Restyled the main menu buttons with a frosted glass look.
+- Improved image caching in the slideshow, as well as the image transitioning logic. Overall, the slideshow will feel smoother.
 - Fixed liking and unliking a screenshot sometimes not working ("button does nothing one or more times").
+- The save, report and mod settings actions in the main menu moved into a proper "more actions" menu.
+- Tooltips now open on the side they are meant to, instead of always upwards (game broke tooltip positioning some time ago).
 - Fixed some rare potential bugs.
 - Many internal improvements on overall robustness and modularity for future maintainability.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />

@@ -190,6 +190,16 @@ export interface KeepAliveScreenshotsState {
 }
 
 /**
+ * Subscribes to the screenshot the slideshow will show next, which the conductor resolves while the
+ * current one is still on screen.
+ *
+ * It is the seam for anything that must be ready before a slide arrives rather than once it has.
+ */
+export function useNextNeighbor(): Screenshot | null {
+  return useValue(nextNeighbor$());
+}
+
+/**
  * Imperatively subscribes to the keep-alive screenshot window (current, neighbors, and in-menu
  * flag), invoking [listener] once with the current values and again on every change.
  *

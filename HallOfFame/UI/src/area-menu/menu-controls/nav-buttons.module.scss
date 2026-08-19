@@ -1,9 +1,12 @@
 @use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
 
-// The round nav/menu buttons (previous, next, like, toggle visibility, more-actions). The base and
-// its variants must stay in this one file: the base `[class*="icon"]` transition is overridden by
-// `--like` purely on source order.
+// The round nav/menu buttons (previous, next, like, toggle visibility, more-actions).
+// The base and its variants must stay in this one file: the base `[class*="icon"]` transition is
+// overridden by `--like` purely on source order.
 .button {
+  --icon-size: 34rem;
+
   margin-top: 8rem;
   margin-bottom: 8rem;
 
@@ -13,17 +16,52 @@
   border-radius: 50%;
   justify-content: center;
   padding: 0 !important;
-  backdrop-filter: brightness(80%) contrast(90%) blur(25px);
+
+  // Frosted glass: the disc keeps the colour and the light of whatever it sits on without keeping
+  // its detail, which is what makes one disc work over every screenshot. The drop shadow separates
+  // it from a backdrop of its own tone, and the inset rim is the lit edge of the pane.
+  background-color: rgba(255, 255, 255, 0.05);
+  @include shared.glass(108%);
+  box-shadow:
+    0 1rem 5rem rgba(0, 0, 0, 0.3),
+    inset 0 0 0 2rem rgba(255, 255, 255, 0.25);
 
   &[disabled],
-  &[disabled]:hover {
-    background-color: rgba(16, 19, 29, 0.2) !important;
+  &[disabled]:hover,
+  &[disabled]:active {
+    // The glass surface stays at its resting brightness: it is restated here rather than inherited
+    // because the hover and press rules below light it, and a button that does nothing must not
+    // answer the cursor.
+    background-color: transparent !important;
+    @include shared.glass(108%);
+
+    [class*="icon"] {
+      // A dimmed white rather than the vanilla disabled token, which is a mid grey meant to sit on
+      // the opaque menu panels and has nothing to read against on a disc made of the screenshot.
+      // The `!important` clears the vanilla disabled rules, which are more specific than this one.
+      --iconColor: rgba(255, 255, 255, 0.4) !important;
+    }
   }
 
+  // A hover lifts the glass.
+  // No `!important` anywhere below: these rules tie with the vanilla ones on specificity and win on
+  // source order.
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.14);
+    @include shared.glass(135%);
+  }
+
+  &:active,
   &--active {
-    // Class set when the related action is performed via keypress and not via the button.
-    // Values taken from the vanilla :active button style.
-    background-color: vanilla.$menu-active-color-bright;
+    // `--active` is set when the action is performed by keypress rather than through the button.
+    background-color: rgba(255, 255, 255, 0.22);
+    @include shared.glass(165%);
+  }
+
+  &:hover [class*="icon"],
+  &:active [class*="icon"],
+  &--active [class*="icon"] {
+    --iconColor: rgb(255, 255, 255);
   }
 
   [class*="label"] {
@@ -31,13 +69,19 @@
   }
 
   [class*="icon"] {
+    // Opaque white, the vanilla menu token being white at 80% alpha: the icons are masked, so that
+    // alpha compounds with the mask's own and washes the glyph out. Only the resting color is ours,
+    // the vanilla hover/disabled rules outweighing this one.
+    --iconColor: rgb(255, 255, 255);
+
+    width: var(--icon-size);
+    height: var(--icon-size);
     margin: 0;
     transition: all 0.1s ease-in-out;
   }
 
   &--previous [class*="icon"] {
-    // The X translation is a slight visual adjustment to make the icon appear better
-    // centered.
+    // The X translation is a slight visual adjustment to make the icon appear better centered.
     transform: translateX(-2rem) rotate(180deg);
   }
 
@@ -47,25 +91,30 @@
   }
 
   &--like {
+    // Bigger than the shared size: the chirper is an avatar carrying its own detail and margins,
+    // where the others are glyphs drawn to fill the box they are given.
+    --icon-size: 40rem;
+
     transition: all 0.1s ease-in-out;
 
     [class*="icon"] {
-      width: calc(var(--button-size) - 30rem);
-      height: calc(var(--button-size) - 30rem);
       transition: transform 0.15s ease-in-out;
     }
 
     &:hover [class*="icon"],
     &--liked [class*="icon"] {
-      transform: rotate(-10deg) scale(1.6) translateX(3rem);
+      transform: rotate(-10deg) scale(1.4) translateX(3rem);
     }
 
     &:active [class*="icon"] {
-      transform: rotate(-5deg) scale(1.45) translateX(3rem);
+      transform: rotate(-5deg) scale(1.27) translateX(3rem);
     }
 
     &--liked {
-      box-shadow: 0 0 0 2rem rgb(226 85 112) !important;
+      // The pink ring, plus the base shadow repeated.
+      box-shadow:
+        0 0 0 2rem rgb(226 85 112),
+        0 1rem 5rem rgba(0, 0, 0, 0.3) !important;
       background-color: rgba(226, 85, 112, 0.67) !important;
       color: vanilla.$menu-text-1-normal !important;
 

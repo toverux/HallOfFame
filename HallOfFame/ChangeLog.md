@@ -1,5 +1,8 @@
-﻿- Improved image caching in the slideshow, as well as the image transitioning logic.
-  Overall, the slideshow will feel smoother.
+﻿- City and creator names in the main menu are now links: open or copy a link to the screenshot, or to the creator's gallery, on the Hall of Fame Web Viewer by foxxy.
+- Restyled the main menu buttons with a frosted glass look.
+- Improved image caching in the slideshow, as well as the image transitioning logic. Overall, the slideshow will feel smoother.
 - Fixed liking and unliking a screenshot sometimes not working ("button does nothing one or more times").
+- The save, report and mod settings actions in the main menu moved into a proper "more actions" menu.
+- Tooltips now open on the side they are meant to, instead of always upwards (game broke tooltip positioning some time ago).
 - Fixed some rare potential bugs.
 - Many internal improvements on overall robustness and modularity for future maintainability.

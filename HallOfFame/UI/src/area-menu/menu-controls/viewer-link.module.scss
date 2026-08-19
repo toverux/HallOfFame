@@ -1,0 +1,17 @@
+@use "../../vanilla-vars" as vanilla;
+
+// The name itself. It carries no colour, font or shadow of its own: it is the surrounding name
+// text, and everything but the hover affordance is inherited.
+.link {
+  // No `display` of its own: the link stands in for the element it replaced, and the intrinsic
+  // width a flex row gives it depends on that display, which is what decides whether a long name
+  // wraps inside the phrase or squeezes the social icons up beside it.
+
+  &:hover,
+  &[data-open] {
+    // Cohtml defaults the decoration to black instead of following the text colour, so the colour
+    // has to be stated.
+    text-decoration: underline;
+    text-decoration-color: vanilla.$menu-active-color-bright;
+  }
+}

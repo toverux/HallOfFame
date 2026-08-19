@@ -1,16 +1,18 @@
 import classNames from 'classnames';
 import { ControlIcons } from 'cs2/input';
 import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
-import { MenuButton, Tooltip, type TooltipProps } from 'cs2/ui';
-import { memo, type ReactElement } from 'react';
+import { MenuButton } from 'cs2/ui';
+import { memo, type ReactElement, useContext } from 'react';
 import type { Screenshot } from '../../common';
+import { Tooltip, type TooltipProps } from '../../components/tooltip';
 import ellipsisSolidSrc from '../../icons/fontawesome/ellipsis-solid.svg';
 import loveChirperSrc from '../../icons/love-chirper.png';
-import doubleArrowRightTriangleSrc from '../../icons/uil/colored/double-arrow-right-triangle.svg';
-import eyeClosedSrc from '../../icons/uil/colored/eye-closed.svg';
-import eyeOpenSrc from '../../icons/uil/colored/eye-open.svg';
+import doubleArrowRightTriangleSrc from '../../icons/uil/double-arrow-right-triangle.svg';
+import eyeClosedSrc from '../../icons/uil/eye-closed.svg';
+import eyeOpenSrc from '../../icons/uil/eye-open.svg';
 import { snappyOnSelect, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
+import { DropdownContext } from '../../vanilla-modules/game-ui/common/input/dropdown/dropdown';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 import * as styles from './nav-buttons.module.scss';
 
@@ -33,6 +35,17 @@ const toggleMenuInputAction = bindings.bindInputAction(
   'hallOfFame.slideshow',
   'toggleMenuInputAction'
 );
+
+/**
+ * The buttons' icons that are not on screen when the controls mount, for the preloading the
+ * controls do on their behalf.
+ *
+ * Only the eye qualifies: every other button shows its icon from the first frame, while the toggle
+ * starts on the open eye, so the closed one would not be fetched until the player first hides the
+ * menu, on the very frame it is meant to be drawn.
+ */
+// oxlint-disable-next-line react/only-export-components - no Fast Refresh in a Cohtml bundle
+export const navButtonsPreloadedIcons: readonly string[] = [eyeClosedSrc];
 
 export const MenuControlsNextButton = memo(
   ({
@@ -66,7 +79,7 @@ export const MenuControlsNextButton = memo(
         <MenuButton
           className={classNames(styles.button, styles.buttonNext, activeClass)}
           src={doubleArrowRightTriangleSrc}
-          tinted={isLoading}
+          tinted={true}
           disabled={isLoading}
           {...snappyOnSelect(bindings.nextScreenshot)}
         />
@@ -109,7 +122,7 @@ export const MenuControlsPreviousButton = memo(
         <MenuButton
           className={classNames(styles.button, styles.buttonPrevious, activeClass)}
           src={doubleArrowRightTriangleSrc}
-          tinted={disabled}
+          tinted={true}
           disabled={disabled}
           {...snappyOnSelect(bindings.previousScreenshot)}
         />
@@ -149,7 +162,7 @@ function MenuControlsToggleMenuVisibilityButtonBase({
       <MenuButton
         className={classNames(styles.button, activeClass)}
         src={isMenuVisible ? eyeOpenSrc : eyeClosedSrc}
-        tinted={false}
+        tinted={true}
         {...snappyOnSelect(toggleMenuVisibility, selectSound)}
       />
     </MenuButtonTooltip>
@@ -217,20 +230,27 @@ export const MenuControlsLikeButton = memo(
   }
 );
 
-export const MenuControlsMoreActionsButton = memo(
-  ({
-    onToggle
-  }: Readonly<{
-    onToggle: () => void;
-  }>): ReactElement => (
+/**
+ * The toggle of the more-actions menu, driven through the enclosing dropdown's context rather than
+ * through a prop: the vanilla `DropdownToggle` renders a button of its own, and this one has to be
+ * one of the round buttons in the column.
+ *
+ * The select sound is dropped because the vanilla `toggle` plays the dropdown's own, and the two
+ * would otherwise land together.
+ */
+export const MenuControlsMoreActionsButton = memo((): ReactElement => {
+  const { visible, toggle } = useContext(DropdownContext);
+
+  return (
     <MenuButton
-      className={styles.button}
+      className={classNames(styles.button, { [styles.buttonActive]: visible })}
       src={ellipsisSolidSrc}
       tinted={true}
-      onSelect={onToggle}
+      selectSound={null}
+      onSelect={toggle}
     />
-  )
-);
+  );
+});
 
 function MenuButtonTooltip({
   tooltip,

@@ -46,6 +46,14 @@ internal record Screenshot {
   [DecodeAlias("imageUrl4K")]
   internal string ImageUrl4K { get; [UsedImplicitly] set; } = string.Empty;
 
+  /// <summary>
+  /// Tracked redirect to this screenshot's page on the web viewer: it counts the click, then 307s
+  /// to <see cref="HallOfFame.Utils.WebViewer.ScreenshotPageUrl"/>.
+  /// Use it for a real human click; use the clean page URL for a link the player copies.
+  /// </summary>
+  [DecodeAlias("viewerUrl")]
+  internal string ViewerUrl { get; [UsedImplicitly] set; } = string.Empty;
+
   [DecodeAlias("shareRenderSettings")]
   internal bool ShareRenderSettings { get; [UsedImplicitly] set; }
 

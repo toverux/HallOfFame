@@ -32,6 +32,10 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
   private TriggerBinding<string> openCreatorPageBinding = null!;
 
+  private TriggerBinding<string> openViewerLinkBinding = null!;
+
+  private TriggerBinding<string> copyViewerLinkBinding = null!;
+
   private TriggerBinding<bool, string> logJavaScriptErrorBinding = null!;
 
   private GetterValueBinding<string> localeBinding = null!;
@@ -83,6 +87,18 @@ internal sealed partial class CommonUISystem : UISystemBase {
         this.OpenCreatorPage
       );
 
+      this.openViewerLinkBinding = new TriggerBinding<string>(
+        CommonUISystem.BindingGroup,
+        "openViewerLink",
+        url => CommonUISystem.RunWebViewerAction(() => Application.OpenURL(url))
+      );
+
+      this.copyViewerLinkBinding = new TriggerBinding<string>(
+        CommonUISystem.BindingGroup,
+        "copyViewerLink",
+        url => CommonUISystem.RunWebViewerAction(() => GUIUtility.systemCopyBuffer = url)
+      );
+
       this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
         CommonUISystem.BindingGroup,
         "logJavaScriptError",
@@ -95,6 +111,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
       this.AddBinding(this.openWebPageBinding);
       this.AddBinding(this.openModPageBinding);
       this.AddBinding(this.openCreatorPageBinding);
+      this.AddBinding(this.openViewerLinkBinding);
+      this.AddBinding(this.copyViewerLinkBinding);
       this.AddBinding(this.logJavaScriptErrorBinding);
 
       this.localizationManager.onActiveDictionaryChanged +=
@@ -234,6 +252,38 @@ internal sealed partial class CommonUISystem : UISystemBase {
         Application.OpenURL(url);
       }
     }
+  }
+
+  /// <summary>
+  /// Opens or copies a web viewer link, behind the one-time notice telling that the viewer is a
+  /// third-party website.
+  /// The action is deferred to the dismissal of the notice so that the browser does not steal the
+  /// focus from a dialog the player has not read yet.
+  /// </summary>
+  private static void RunWebViewerAction(Action action) {
+    if (Mod.Settings.HasSeenWebViewerDialog) {
+      action();
+
+      return;
+    }
+
+    var dialog = new MessageDialog(
+      LocalizedString.Id("HallOfFame.Systems.CommonUI.WEB_VIEWER_DIALOG[Title]"),
+      LocalizedString.Id("HallOfFame.Systems.CommonUI.WEB_VIEWER_DIALOG[Message]"),
+      LocalizedString.Id("HallOfFame.Systems.CommonUI.WEB_VIEWER_DIALOG[ConfirmAction]")
+    );
+
+    // The notice carries a single acknowledge button and no way to refuse, so its every outcome,
+    // that button or an Escape, means the same thing: it has been read, and the action the player
+    // asked for goes ahead. Recording it only once the dialog closes leaves it to be shown again
+    // if the game quits while it is up.
+    GameManager.instance.userInterface.appBindings
+      .ShowMessageDialog(dialog, _ => {
+        Mod.Settings.HasSeenWebViewerDialog = true;
+        Mod.Settings.ApplyAndSave();
+
+        action();
+      });
   }
 
   /// <summary>
