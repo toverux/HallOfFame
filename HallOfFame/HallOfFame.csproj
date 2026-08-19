@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Version>2026.2.4</Version>
-        <FileVersion>2026.2.4</FileVersion>
+        <Version>2026.3.0</Version>
+        <FileVersion>2026.3.0</FileVersion>
 
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
