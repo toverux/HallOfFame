@@ -44,12 +44,13 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `HallOfFame/Locales`: Localization files, one JSON per language, keyed `HallOfFame.<Area>.<KEY>`.
 - `HallOfFame/Mod.cs` and `HallOfFame/Settings.cs`: Mod entry point and user-facing settings.
 - `HallOfFame.Tests`: C# unit tests (xUnit, `net48`, run off-engine).
-- `HallOfFame/UI/src`: TypeScript/React frontend, split into `area-game` (in-game HUD panels), `area-menu` (main-menu integration), `area-overlay` (loading screen modification), `utils` (shared hooks/helpers, plus `bindings/`, the typed C#<->TS binding facade, one module per binding group), and `vanilla-modules` (typed stubs for game UI internals).
+- `HallOfFame/UI/src`: TypeScript/React frontend, split into `area-game` (in-game HUD panels), `area-menu` (main-menu integration), `area-overlay` (loading screen modification), `components` (UI components shared across areas), `utils` (shared hooks/helpers, plus `bindings/`, the typed C#<->TS binding facade, one module per binding group), and `vanilla-modules` (typed stubs for game UI internals).
   UI tests are colocated `*.test.ts` / `*.test.tsx` files.
 
 ## Commands
 
-- `mise build`: Check that the UI part of the mod compiles fine.
+- `mise build`: Build and deploy the whole mod, C# and UI both (the csproj runs `build:ui` itself). The game must be closed, since it holds the deployed assembly open. Anything outside `UI/src` needs this, locale files included.
+- `mise build:ui`: Build the UI alone and deploy it to the game's Mods folder. This is the one to run while iterating with the game open: reload the UI afterwards and the change is live.
 - `mise build:css-types`: Regenerate the gitignored `*.module.scss.d.ts` files. `mise check` and `mise fix` run this automatically; run it by hand if your editor needs the CSS module types refreshed.
 - `mise check:agents`: Verify type checking, linting, and formatting read-only, with optimized output. Writes nothing.
 - `mise check:agents:tsc`: Only type-checks the code, optimized output.
@@ -70,6 +71,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 
 - **Slideshow**: the main-menu screenshot rotation (`SlideshowUISystem`, `SlideshowConductor`, `area-menu`). It was once called the "presenter"; it is the slideshow everywhere now.
 - **Creator**: the player account that uploaded a screenshot. The mod calls players creators, not users or authors.
+- **Creator ID**: `Settings.CreatorID` is the mod's API credential, never a public identifier and never in a URL. The creator's public identifier is `Domain/Creator.Id`, persisted as `Settings.PublicCreatorID`.
 - **Vanilla**: the unmodded game's own code and UI (`vanilla-modules`).
 - **Area**: one `area-*` UI folder per place in the game's UI the mod hooks into: `area-game` (HUD), `area-menu` (main menu), `area-overlay` (loading screen).
 
@@ -79,6 +81,8 @@ Always run the appropriate check/test commands after changes, at the end of the 
 - Create value bindings with `lazyBindValue` (not eager `bindValue`) so that importing a module or component does not instantiate engine bindings; call the returned accessor inside the hook, e.g. `useValue(foo$())`.
 - Domain records carry only inbound `[DecodeAlias]` data: a type's outbound UI wire format lives in a `HallOfFame/Utils/Writers` writer, not on the record.
 - One `*.module.scss` per component file, colocated with its `*.tsx`, class names following the BEM-derived convention in `.agents/rules/css-modules-bem.md`.
+- Tooltips come from `HallOfFame/UI/src/components/tooltip.tsx`, never from `cs2/ui`: the vanilla one silently drops `direction` and `alignment`, so every tooltip placed through it opens upwards.
+- A `vanilla-modules` stub may declare more of the vanilla API than the mod calls today: its unused members are kept on purpose, for the next consumer.
 - User-facing strings are localized: add keys to `HallOfFame/Locales/en-US.json`, the other locale files are translations synced from Crowdin.
 - The decompiled game source, the third-party mod corpus, and the readable copy of the game's UI bundle are machine-local: read their paths from `~/.cs2-modding/setup.md` instead of hardcoding them here. A missing key or a `(none)` value means that source does not exist.
 - When writing or running C# tests, debugging an engine-bound type that won't load off-engine, or deciding where to put logic so it stays testable, use the `hof-cs-offengine-testing` skill.

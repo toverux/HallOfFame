@@ -42,6 +42,7 @@ Drive the component through the mock engine exported by `../testing/game-setup`:
   Assert on these instead of mocking the binding layer.
 - `resetBindings()` clears configured bindings and recorded triggers; call it in `afterEach` alongside `@testing-library/react`'s `cleanup()`.
 - `useLocalization().translate(id, fallback)` returns the fallback, or the id when none is given, so a rendered label's text is its localization id; match on that.
+- A tooltip is invisible here: its balloon portals into a container only the booted game app creates, so an assertion that one is or is not shown passes either way. Verify tooltips in the running game.
 
 See `panel-city-info.test.tsx` for a binding-driven render and `panel-footer.test.tsx` for a click-fires-a-trigger assertion.
 
