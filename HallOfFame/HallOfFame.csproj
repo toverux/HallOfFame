@@ -7,7 +7,6 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
         <IsPackable>false</IsPackable>
-        <IsPublishable>false</IsPublishable>
 
         <Configurations>Debug;Release</Configurations>
 
@@ -151,7 +150,10 @@
     </Target>
 
     <Target Name="BuildUI" AfterTargets="DeployWIP" Condition="'$(SkipBuildUI)' != 'true'">
-        <Exec Command="mise build:ui" WorkingDirectory="$(SolutionDir)" />
+        <!-- Not $(SolutionDir): MSBuild only defines it when the build enters through the
+             solution, and sets it to the literal "*Undefined*" otherwise, which fails the Exec.
+             `dotnet publish` runs on the project, not the solution. -->
+        <Exec Command="mise build:ui" WorkingDirectory="$(MSBuildProjectDirectory)\.." />
     </Target>
 
     <!-- The mod contains no Burst jobs, so the per-platform native Burst compile the toolchain runs
