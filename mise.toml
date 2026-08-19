@@ -153,6 +153,14 @@ run = "bun webpack --config HallOfFame/UI/webpack.config.js"
 description = "Generates the gitignored *.module.scss.d.ts so tsc catches stale styles.* references."
 run = 'bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType named --nameFormat camel'
 
+# PUBLISH TASKS
+# =============
+
+[tasks."publish"]
+description = "Builds the mod in Release and publishes it as a new version on Paradox Mods."
+raw = true
+run = "dotnet publish HallOfFame/HallOfFame.csproj -p:PublishProfile=PublishNewVersion"
+
 # TEST TASKS
 # ==========
 

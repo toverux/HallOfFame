@@ -170,8 +170,7 @@ Logs are situated in either:
 - Update `version` in `HallOfFame/UI/mod.json`;
 - Update `HallOfFame/ChangeLog.md` _with only what's changed since the last version_;
 - Update `HallOfFame/LongDescription.md` if needed;
-- Run the `PublishNewVersion` publish configuration from the IDE or with
-  `dotnet publish /p:ModPublisherCommand=NewVersion`;
+- Run the `PublishNewVersion` publish configuration from the IDE or `mise publish`;
 - Tag version in git with `vX.Y.Z`.
 
 ## Code style
