@@ -10,6 +10,10 @@ $control-border-radius: 5rem; // vanilla is 3rem
 $control-background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
 $control-background-color-focused: rgba(255, 255, 255, 0.4);
 
+// Stated rather than left to Cohtml's `normal`, so that a control's height is computable from its
+// font size alone. The dropdown and the textarea rely on this to agree on a single-line height.
+$control-line-height: 1.5;
+
 .form {
   padding: 10rem;
 
@@ -94,15 +98,19 @@ $control-background-color-focused: rgba(255, 255, 255, 0.4);
   }
 
   &-item {
-    height: 50px;
     display: flex;
     align-items: center;
     font-size: vanilla.$font-size-xl;
+
+    // The row's line box is the unit every other dimension here derives from: the thumbnail is one
+    // line tall, and the textarea below shares this font size and line height so that the dropdown
+    // toggle and the collapsed textarea end up the same height.
+    line-height: $control-line-height;
   }
 
   &-itemImage {
-    width: 40rem;
-    height: 40rem;
+    width: 1em * $control-line-height;
+    height: 1em * $control-line-height;
     margin-right: 10rem;
     border-radius: 5rem;
     background-color: lightgrey;
@@ -121,7 +129,10 @@ $control-background-color-focused: rgba(255, 255, 255, 0.4);
   // An item NOT in the popup menu but 'adopted' by the toggle to show the current value.
   &-previewItem {
     pointer-events: none; // suppress hover effect, the toggle takes pointer events.
-    padding: 0; // the toggle already has padding.
+
+    // Mirrors the textarea's vertical padding. The toggle contributes only its border, so this is
+    // what makes the two controls the same height on a single line.
+    padding: 10rem 0;
   }
 
   &-popup {
@@ -171,6 +182,10 @@ $control-background-color-focused: rgba(255, 255, 255, 0.4);
       border-radius: $control-border-radius;
       padding: 10rem;
       background-color: $control-background-color;
+
+      // Shared with the dropdown item so that both controls are the same height on a single line.
+      font-size: vanilla.$font-size-xl;
+      line-height: $control-line-height;
 
       &:hover,
       &:focus {
