@@ -13,3 +13,14 @@ $separator-shadow-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.8);
 
 // The padding shared by the panel's header, footer, content, and warning sections.
 $section-padding: 20rem;
+
+// The look shared by the info form's controls: its checkbox, its textarea, and the asset dropdown.
+$control-border: 2rem solid transparent;
+$control-border-color: #61a0b9;
+$control-border-radius: 5rem; // vanilla is 3rem
+$control-background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
+$control-background-color-focused: rgba(255, 255, 255, 0.4);
+
+// Stated rather than left to Cohtml's `normal`, so that a control's height is computable from its
+// font size alone. The dropdown and the textarea rely on this to agree on a single-line height.
+$control-line-height: 1.5;

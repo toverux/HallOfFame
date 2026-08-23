@@ -1,60 +1,27 @@
 import classNames from 'classnames';
-import { FocusSymbol } from 'cs2/input';
-import {
-  Button,
-  Dropdown,
-  DropdownItem,
-  type DropdownTheme,
-  DropdownToggle,
-  type Element,
-  Scrollable
-} from 'cs2/ui';
-import { memo, type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, type Element, Scrollable } from 'cs2/ui';
+import { memo, type ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { getClassesModule, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { useScrollController } from '../../vanilla-modules/game-ui/common/hooks/use-scroll-controller';
-import { defaultButtonSounds } from '../../vanilla-modules/game-ui/common/input/button/button';
+import { TextInput } from '../../vanilla-modules/game-ui/common/input/text/text-input';
 import {
   Checkbox,
   type CheckboxTheme
 } from '../../vanilla-modules/game-ui/common/input/toggle/checkbox/checkbox';
+import { AssetModDropdown } from './asset-mod-dropdown';
 import type { ScreenshotInfoFormValue } from './form-state';
 import * as styles from './panel-info-form.module.scss';
-import * as shared from './shared.module.scss';
 
 const coCheckboxTheme = getClassesModule(
   'game-ui/common/input/toggle/checkbox/checkbox.module.scss',
   ['toggle', 'checkmark']
 );
 
-const coDropdownTheme = getClassesModule(
-  'game-ui/common/input/dropdown/themes/default.module.scss',
-  [
-    'dropdownItem',
-    'dropdownMenu',
-    'dropdownPopup',
-    'dropdownToggle',
-    'indicator',
-    'label',
-    'scrollable'
-  ]
-);
-
 const checkboxTheme: CheckboxTheme = {
   ...coCheckboxTheme,
   toggle: classNames(coCheckboxTheme.toggle, styles.checkboxToggle),
   checkmark: classNames(coCheckboxTheme.checkmark, styles.checkboxCheckmark)
-};
-
-const dropdownTheme: DropdownTheme = {
-  ...coDropdownTheme,
-  dropdownToggle: classNames(coDropdownTheme.dropdownToggle, styles.dropdownToggle),
-  dropdownPopup: classNames(
-    coDropdownTheme.dropdownPopup,
-    styles.dropdownPopup,
-    shared.scrollableTrackCustomization
-  ),
-  dropdownItem: classNames(coDropdownTheme.dropdownItem, styles.dropdownItem)
 };
 
 export const ScreenshotUploadPanelContentScreenshotInfo = memo(
@@ -114,6 +81,13 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
   const clearDescription = useCallback(() => patchFormValue({ description: '' }), [patchFormValue]);
 
+  // Headings of the virtual keyboard console and handheld players type on.
+  const descriptionVkTitle =
+    translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_LABEL') ?? '';
+
+  const descriptionVkDescription =
+    translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_DESCRIPTION') ?? '';
+
   const textareaContainerRef = useRef<HTMLDivElement>(null);
 
   const [textareaFocused, setTextareaFocused] = useState(false);
@@ -129,24 +103,6 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
       scrollController?.scrollIntoView(textareaContainerRef.current as unknown as Element);
     }, 100 /* for some reason the textarea takes ages to resize */);
   }, [textareaContainerRef, scrollController, textareaFocused]);
-
-  const assetModsDropdownItems = useMemo(
-    () =>
-      assetMods.map(mod => (
-        <DropdownItem
-          key={mod.id}
-          value={mod}
-          focusKey={new FocusSymbol(`mod-${mod.id}`)}
-          onChange={selectShowcasedMod}>
-          <div
-            className={styles.dropdownItemImage}
-            style={{ backgroundImage: `url(${mod.thumbnailPath})` }}
-          />
-          <div className={styles.dropdownItemText}>{mod.displayName}</div>
-        </DropdownItem>
-      )),
-    [assetMods, selectShowcasedMod]
-  );
 
   // noinspection HtmlRequiredAltAttribute
   return (
@@ -221,8 +177,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
         {assetMods.length > 0 && (
           <div
             className={classNames(styles.formField, styles.formFieldInline, {
-              [styles.formFieldChecked]: formValue.isShowcasingAsset,
-              [styles.formFieldInvalid]: formValue.isShowcasingAsset && !formValue.showcasedMod
+              [styles.formFieldChecked]: formValue.isShowcasingAsset
             })}
             onMouseEnter={playHoverSound}
             onClick={() => {
@@ -249,35 +204,12 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
                 </small>
               </label>
 
-              <Dropdown theme={dropdownTheme} content={assetModsDropdownItems}>
-                <DropdownToggle sounds={{ ...defaultButtonSounds, hover: null }}>
-                  {formValue.showcasedMod ? (
-                    <div
-                      className={classNames(
-                        dropdownTheme.dropdownItem,
-                        styles.dropdownPreviewItem
-                      )}>
-                      <div
-                        className={styles.dropdownItemImage}
-                        style={{ backgroundImage: `url(${formValue.showcasedMod.thumbnailPath})` }}
-                      />
-                      <div className={styles.dropdownItemText}>
-                        {formValue.showcasedMod.displayName}
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      className={classNames(
-                        dropdownTheme.dropdownItem,
-                        styles.dropdownPreviewItem
-                      )}>
-                      {translate(
-                        'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_SELECT_ASSET'
-                      )}
-                    </div>
-                  )}
-                </DropdownToggle>
-              </Dropdown>
+              <AssetModDropdown
+                assetMods={assetMods}
+                showcasedMod={formValue.showcasedMod}
+                isInvalid={formValue.isShowcasingAsset && !formValue.showcasedMod}
+                onSelect={selectShowcasedMod}
+              />
             </div>
           </div>
         )}
@@ -296,11 +228,16 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
           </label>
 
           <div className={styles.textareaWrapper}>
-            <textarea
+            <TextInput
+              // A defined `multiline` is what makes this a `<textarea>`, of that many rows.
               // oxlint-disable-next-line no-magic-numbers - expanded vs collapsed textarea row count
-              rows={textareaFocused || formValue.description.length > 0 ? 5 : 1}
+              multiline={textareaFocused || formValue.description.length > 0 ? 5 : 1}
               maxLength={4000}
               value={formValue.description}
+              // A description is edited rather than replaced, so the caret belongs at the end.
+              selectAllOnFocus={false}
+              vkTitle={descriptionVkTitle}
+              vkDescription={descriptionVkDescription}
               onFocus={() => setTextareaFocused(true)}
               onBlur={() => setTextareaFocused(false)}
               onChange={event => patchFormValue({ description: event.target.value })}

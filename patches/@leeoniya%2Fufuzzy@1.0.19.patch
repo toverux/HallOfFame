@@ -1,0 +1,32 @@
+diff --git a/dist/uFuzzy.cjs b/dist/uFuzzy.cjs
+index 9fe9a5721ead7a815a9c065261994d4a1a4c1318..7710d838d153f676155bbbb44e5ea24457a6e5dc 100644
+--- a/dist/uFuzzy.cjs
++++ b/dist/uFuzzy.cjs
+@@ -19,7 +19,10 @@ const escapeRegExp = str => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ // meh, magic tmp placeholder, must be tolerant to toLocaleLowerCase(), interSplit, and intraSplit
+ const EXACT_HERE = 'eexxaacctt';
+ 
+-const PUNCT_RE = /\p{P}/gu;
++// Patched for Coherent Gameface: its V8 is built without ICU, so a `\p{...}` property escape is a
++// parse error that takes down the whole bundle. This literal is only used to strip punctuation off
++// a negative search term, so an ASCII punctuation class covers every use the mod makes of it.
++const PUNCT_RE = /[!-\/:-@\[-`{-~]/g;
+ 
+ const LATIN_UPPER = 'A-Z';
+ const LATIN_LOWER = 'a-z';
+diff --git a/dist/uFuzzy.mjs b/dist/uFuzzy.mjs
+index 7103bd55f12ded0145e42340a83d055f0448af2c..2f594b8bb22b87fd85e28a6e3c36ade0a32b8d5e 100644
+--- a/dist/uFuzzy.mjs
++++ b/dist/uFuzzy.mjs
+@@ -17,7 +17,10 @@ const escapeRegExp = str => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ // meh, magic tmp placeholder, must be tolerant to toLocaleLowerCase(), interSplit, and intraSplit
+ const EXACT_HERE = 'eexxaacctt';
+ 
+-const PUNCT_RE = /\p{P}/gu;
++// Patched for Coherent Gameface: its V8 is built without ICU, so a `\p{...}` property escape is a
++// parse error that takes down the whole bundle. This literal is only used to strip punctuation off
++// a negative search term, so an ASCII punctuation class covers every use the mod makes of it.
++const PUNCT_RE = /[!-\/:-@\[-`{-~]/g;
+ 
+ const LATIN_UPPER = 'A-Z';
+ const LATIN_LOWER = 'a-z';

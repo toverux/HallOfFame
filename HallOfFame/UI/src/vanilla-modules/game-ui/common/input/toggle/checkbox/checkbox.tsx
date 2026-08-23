@@ -7,23 +7,32 @@ import { getModuleExport } from '../../../../../../utils';
  */
 export interface ToggleProps {
   readonly focusKey?: FocusKey;
+
   /**
    * @default 'Toggle'
    */
   readonly debugName?: string;
+
   readonly checked?: boolean | undefined;
+
   /**
    * @default false
    */
   readonly disabled?: boolean | undefined;
+
   readonly style?: CSSProperties;
+
   /**
    * @default 'select-toggle'
    */
   readonly toggleSound?: UISound;
+
   readonly className?: string;
+
   readonly onChange?: (value: boolean) => void;
+
   readonly onMouseOver?: MouseEventHandler<HTMLElement>;
+
   readonly onMouseLeave?: MouseEventHandler<HTMLElement>;
 }
 

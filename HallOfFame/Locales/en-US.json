@@ -66,6 +66,8 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_LABEL": "I am showcasing an asset or map",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_DESCRIPTION": "Check this if you want to demo how you used a Paradox Mods asset. You do not have to be the asset author. The featured asset must be the most obvious subject of your screenshot.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_SELECT_ASSET": "Select an asset…",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_FILTER": "Type to filter…",
+  "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_FILTER_EMPTY": "No asset matches this filter.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_LABEL": "Description",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_DESCRIPTION": "Write something about your picture if you desire so. The story of your city, detailing techniques you’ve used, a poem, anything. You can use basic markdown syntax for formatting (no links, no images).",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_RESTORE": "Restore latest description",

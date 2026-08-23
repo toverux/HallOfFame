@@ -13,6 +13,7 @@ const baseForm: ScreenshotInfoFormValue = {
 const someMod: JsonMod = {
   id: 'mod-123',
   displayName: 'Some Mod',
+  author: 'Some Creator',
   thumbnailPath: 'thumb.png'
 };
 

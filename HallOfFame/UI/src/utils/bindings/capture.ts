@@ -9,6 +9,7 @@ const GROUP = 'hallOfFame.capture';
 export interface JsonMod {
   readonly id: string;
   readonly displayName: string;
+  readonly author: string;
   readonly thumbnailPath: string;
 }
 
