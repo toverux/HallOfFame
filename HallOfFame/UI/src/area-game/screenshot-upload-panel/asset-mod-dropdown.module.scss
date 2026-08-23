@@ -63,8 +63,10 @@
     margin-right: 10rem;
     border-radius: 5rem;
     background-color: lightgrey;
-    background-size: cover;
-    background-position: center;
+
+    // The thumbnail variant the row loads is a fixed 240x135 every cover was squashed into, so
+    // painting it to this square box is what gives a square cover its proportions back.
+    background-size: 100% 100%;
     background-repeat: no-repeat;
   }
 
@@ -175,6 +177,13 @@
   &-popup {
     // Set a scrollbar color that looks like the panel's main scrollbar.
     --scrollbarColor: 24, 33, 51;
+
+    // The engine sizes the popup to the space below the toggle, but only from its fourth frame:
+    // until then the popup is as tall as its content, and the virtual list, reading its viewport
+    // from that, asks for a row per row of it. Over a large playset that is hundreds of rows built
+    // and dropped the frame after, each one a CDN thumbnail. Capping the popup at the screen bounds
+    // that to what could ever be shown, and the engine's own limit takes over once it lands.
+    max-height: 100vh;
 
     // So that the dropdown menu, attached to the same root as the panel, appears on top.
     z-index: 1;
