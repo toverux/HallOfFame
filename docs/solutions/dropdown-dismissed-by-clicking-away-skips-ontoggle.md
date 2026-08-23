@@ -5,6 +5,7 @@ symptoms:
   - 'State reset in the `onToggle` of a vanilla `Dropdown` survives a dismissal by clicking outside it'
   - 'A dropdown resets correctly on Escape or on picking an item, but not on click-away'
 tags: [cs2-ui, dropdown, vanilla, focus]
+updated: 2026-08-23
 ---
 
 # A dropdown dismissed by clicking away skips `onToggle`
@@ -45,3 +46,9 @@ A layout effect rather than a plain one, so reopening never paints the stale val
 
 Read `onToggle(false)` as "the consumer closed it", not as "it closed". Per-open state resets on
 open; anything that genuinely must run at close needs a cleanup keyed on `visible`.
+
+The reset has to cover every piece of state derived from the one being cleared, not just the field
+itself. A debounced copy of a filter outlived the reset here: the field was emptied on open while
+the debounced value still held the last search, so the first character typed after reopening
+searched the previous session's needle until the timer caught up. Derived state that is scheduled
+rather than assigned is the case to watch, since the next keystroke cancels the pending reset.

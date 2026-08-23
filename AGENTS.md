@@ -87,6 +87,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 - A `vanilla-modules` stub may declare more of the vanilla API than the mod calls today: its unused members are kept on purpose, for the next consumer.
 - User-facing strings are localized: add keys to `HallOfFame/Locales/en-US.json`, the other locale files are translations synced from Crowdin.
 - The decompiled game source, the third-party mod corpus, and the readable copy of the game's UI bundle are machine-local: read their paths from `~/.cs2-modding/setup.md` instead of hardcoding them here. A missing key or a `(none)` value means that source does not exist.
+- Reading that source settles what the engine does, never what it costs. Measure a claim about the running game before asserting one.
 - When writing or running C# tests, debugging an engine-bound type that won't load off-engine, or deciding where to put logic so it stays testable, use the `hof-cs-offengine-testing` skill.
 - When writing or running UI tests, configuring bindings or asserting triggers in a test, or fixing the harness after a game update, use the `hof-ui-testing` skill.
 
