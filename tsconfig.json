@@ -1,7 +1,8 @@
 {
   "include": [
     "HallOfFame/UI/src/**/*",
-    ".agents/hooks/*",
+    ".agents/hooks/**/*",
+    ".agents/scripts/**/*",
     "node_modules/@csmodding/urbandevkit/cs2-types"
   ],
   "compilerOptions": {

@@ -61,6 +61,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `mise test`: Run the full test suite, C# and UI.
 - `mise test:cs`: Run only the C# unit tests.
 - `mise test:ui`: Run only the UI tests.
+- `mise l10n:push`: Preview which locale-file edits would be pushed to Crowdin and approved. Needs `CROWDIN_PERSONAL_TOKEN`. Adding `--push` writes to the shared Crowdin project, which the Boundaries below gate.
 
 Run `mise tasks` to see the full shortcut list; append arguments freely, mise passes them through (ex. `mise some:task --some-arg`).
 Do NOT use npx to run commands; prefer mise shortcuts, or bun/bunx when no shortcut exists.
@@ -85,7 +86,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 - Tooltips come from `HallOfFame/UI/src/components/tooltip.tsx`, never from `cs2/ui`: the vanilla one silently drops `direction` and `alignment`, so every tooltip placed through it opens upwards.
 - Focus keys are compared by value, so a plain string like `` `mod-${mod.id}` `` keeps a list row attached across re-renders, where a `FocusSymbol` memoized per row costs more for the same result.
 - A `vanilla-modules` stub may declare more of the vanilla API than the mod calls today: its unused members are kept on purpose, for the next consumer.
-- User-facing strings are localized: add keys to `HallOfFame/Locales/en-US.json`, the other locale files are translations synced from Crowdin.
+- User-facing strings are localized: add keys to `HallOfFame/Locales/en-US.json`, the other locale files are translations synced from Crowdin. Fixing a translation in the repo also takes `mise l10n:push --push`, which approves the edit at the source: Crowdin re-exports its own approved version over an unpushed one.
 - The decompiled game source, the third-party mod corpus, and the readable copy of the game's UI bundle are machine-local: read their paths from `~/.cs2-modding/setup.md` instead of hardcoding them here. A missing key or a `(none)` value means that source does not exist.
 - Reading that source settles what the engine does, never what it costs. Measure a claim about the running game before asserting one.
 - When writing or running C# tests, debugging an engine-bound type that won't load off-engine, or deciding where to put logic so it stays testable, use the `hof-cs-offengine-testing` skill.
@@ -104,6 +105,7 @@ Ask first before:
 - Adding a dependency.
 - Changing the HTTP wire format shared with the server, or the bindings wire format shared with the UI.
 - Performing destructive file or data operations.
+- Running `mise l10n:push --push`. It approves translations on the shared Crowdin project, which stamps a proofreading verdict volunteer translators see and cannot easily undo. Preview first, and keep `--base` to the commits you wrote: a base reaching back across a merged Crowdin sync approves that sync's translations as though they were yours.
 
 ## Preferred agent behavior
 

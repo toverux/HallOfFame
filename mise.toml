@@ -161,6 +161,14 @@ description = "Builds the mod in Release and publishes it as a new version on Pa
 raw = true
 run = "dotnet publish HallOfFame/HallOfFame.csproj -p:PublishProfile=PublishNewVersion"
 
+# LOCALIZATION TASKS
+# ==================
+
+[tasks."l10n:push"]
+description = "Pushes the locale-file edits to Crowdin and approves only the strings that changed, so a repo edit survives the next Crowdin sync. Previews by default; pass `--push` to apply. Needs CROWDIN_PERSONAL_TOKEN."
+raw = true
+run = "bun .agents/scripts/crowdin-push-translations.ts"
+
 # TEST TASKS
 # ==========
 
