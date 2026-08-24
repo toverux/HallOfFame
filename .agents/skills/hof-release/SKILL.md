@@ -11,7 +11,7 @@ Nine steps run by hand — there is no release script — around one human gate:
 ## 1. Preflight
 
 ```
-git switch main && git pull
+git switch main && git pull --rebase
 git status -s
 git tag --sort=-v:refname | head -1
 git log --oneline <last-tag>..HEAD
@@ -20,6 +20,9 @@ git log --oneline <last-tag>..HEAD
 The release commit goes on `main`, on a clean tree, at the pushed tip: the tag names that commit, and a pushed tag is not moved afterwards.
 Stop and ask the user where the tree is dirty, the branch has diverged, or a tag for the version already exists.
 
+Every pull in this procedure is `--rebase`, here and in step 2.
+The repo keeps a linear history and this branch is `main`: a plain `git pull` over an unpushed local commit writes a `Merge branch 'main' of …` commit into the release range, which then has to be undone before the release commit lands on top.
+
 ## 2. Merge the pending Crowdin translations
 
 Crowdin keeps its work in one open PR titled "New Crowdin updates", off the `l10n-main` branch:
@@ -27,7 +30,7 @@ Crowdin keeps its work in one open PR titled "New Crowdin updates", off the `l10
 ```
 gh pr list --state open --head l10n-main
 gh pr merge <n> --squash --delete-branch --subject "feat(i18n): new Crowdin updates (#<n>)" --body ""
-git pull
+git pull --rebase
 ```
 
 Go straight to the build where no such PR is open.
