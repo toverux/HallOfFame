@@ -121,6 +121,13 @@ public sealed class Mod : IMod {
 
       AssetDatabase.global.LoadSettings(nameof(HallOfFame), this.settingsValue, defaultSettings);
 
+      // The settings file can hold an explicit null over a string the defaults always set, and the
+      // game's loader applies it verbatim, which breaks the whole options page.
+      // Repairing the in-memory instance is enough, as the game dumps ModSetting properties to file
+      // on close, so no ApplyAndSave() here. Keep it that way: a save placed after the
+      // onSettingsApplied subscription below fires it, cancelling the creator sync it starts.
+      this.settingsValue.RestoreNullStrings(defaultSettings);
+
       // Set singleton instance only when OnLoad is likely to complete.
       Mod.instanceValue = this;
 

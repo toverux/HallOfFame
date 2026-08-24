@@ -251,7 +251,7 @@ public sealed class ScreenshotUploaderTests {
     bool shareModIds = false,
     bool shareRenderSettings = false,
     string? showcasedModId = null,
-    string? description = null
+    string description = ""
   ) =>
     new() {
       ShareModIds = shareModIds,

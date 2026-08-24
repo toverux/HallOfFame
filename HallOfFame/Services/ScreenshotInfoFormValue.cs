@@ -16,7 +16,7 @@ internal sealed record ScreenshotInfoFormValue : IJsonReadable {
 
   internal string? ShowcasedModId;
 
-  internal string? Description;
+  internal string Description = string.Empty;
 
   public void Read(IJsonReader reader) {
     reader.ReadMapBegin();

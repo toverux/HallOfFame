@@ -516,7 +516,7 @@ public sealed class
   /// It is restored when it opens.
   /// </summary>
   [SettingsUIHidden]
-  public string? SavedScreenshotDescription { get; set; }
+  public string SavedScreenshotDescription { get; set; } = null!;
 
   internal string BaseUrlWithScheme =>
     this.BaseUrl.StartsWith("http")
@@ -606,6 +606,46 @@ public sealed class
     this.SavedShareModIdsPreference = true;
     this.SavedShareRenderSettingsPreference = true;
     this.SavedScreenshotDescription = string.Empty;
+  }
+
+  /// <summary>
+  /// <para>
+  /// Restores the default of every string setting that came back null from the settings file.
+  /// Call it right after loading, passing an instance that has only been through
+  /// <see cref="SetDefaults"/>.
+  /// </para>
+  /// <para>
+  /// The game loads a <c>.coc</c> file with <c>JSON.WriteInto</c>, which applies every key present
+  /// in the file over the values the constructor just defaulted, an explicit JSON <c>null</c>
+  /// included.
+  /// A null that reaches the file therefore outlives every restart: <see cref="SetDefaults"/> runs,
+  /// the file overwrites it with null again, and the next save writes that null right back.
+  /// </para>
+  /// <para>
+  /// The vanilla options UI renders a <c>[SettingsUIDropdown]</c> string as
+  /// <c>DropdownField&lt;string&gt;</c>, which writes the value through the non-nullable
+  /// <c>StringWriter</c>, so such a null throws in <c>OptionsUISystem.OnUpdate</c> and the whole
+  /// options page stops rendering, ours and every other mod's alike, leaving the user no way to fix
+  /// the setting from the UI.
+  /// </para>
+  /// <para>
+  /// Only strings are repaired.
+  /// A value type sitting at <c>default(T)</c> is indistinguishable from a deliberate choice, so a
+  /// disabled slideshow or a zeroed weight cannot be told apart from corruption and is left alone.
+  /// </para>
+  /// <para>
+  /// Keep this list in step with the strings <see cref="SetDefaults"/> assigns: a new one missing
+  /// here is a new way to lock the user out of the options page.
+  /// </para>
+  /// </summary>
+  internal void RestoreNullStrings(Settings defaults) {
+    this.CreatorName ??= defaults.CreatorName;
+    this.NamesTranslationMode ??= defaults.NamesTranslationMode;
+    this.ScreenshotResolution ??= defaults.ScreenshotResolution;
+    this.CreatorsScreenshotSaveDirectory ??= defaults.CreatorsScreenshotSaveDirectory;
+    this.BaseUrl ??= defaults.BaseUrl;
+    this.ParadoxModsBrowsingPreference ??= defaults.ParadoxModsBrowsingPreference;
+    this.SavedScreenshotDescription ??= defaults.SavedScreenshotDescription;
   }
 
   internal Settings Clone() => (Settings) this.MemberwiseClone();

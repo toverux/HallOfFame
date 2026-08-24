@@ -44,7 +44,7 @@ export interface JsonUploadProgress {
 export interface JsonUploadFormMemory {
   readonly shareModIds: boolean;
   readonly shareRenderSettings: boolean;
-  readonly description: string | null;
+  readonly description: string;
 }
 
 /**
@@ -55,7 +55,7 @@ export interface UploadPayload {
   readonly shareModIds: boolean;
   readonly shareRenderSettings: boolean;
   readonly showcasedModId: string | null;
-  readonly description: string | null;
+  readonly description: string;
 }
 
 const assetMods$ = lazyBindValue<JsonMod[]>(GROUP, 'assetMods');
@@ -73,7 +73,7 @@ const uploadProgress$ = lazyBindValue<JsonUploadProgress | null>(GROUP, 'uploadP
 const uploadFormMemory$ = lazyBindValue<JsonUploadFormMemory>(GROUP, 'uploadFormMemory', {
   shareModIds: true,
   shareRenderSettings: true,
-  description: null
+  description: ''
 });
 
 export function useAssetMods(): JsonMod[] {

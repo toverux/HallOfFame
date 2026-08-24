@@ -28,6 +28,6 @@ export function buildUploadPayload(formValue: ScreenshotInfoFormValue): UploadPa
     shareRenderSettings: formValue.shareRenderSettings,
     showcasedModId:
       formValue.isShowcasingAsset && formValue.showcasedMod ? formValue.showcasedMod.id : null,
-    description: formValue.description.trim() || null
+    description: formValue.description.trim()
   };
 }

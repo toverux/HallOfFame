@@ -16,7 +16,7 @@ internal sealed record UploadScreenshotParams {
 
   internal required string? ShowcasedModId { get; init; }
 
-  internal required string? Description { get; init; }
+  internal required string Description { get; init; }
 
   internal required bool ShareModIds { get; init; }
 

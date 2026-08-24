@@ -29,16 +29,16 @@ describe('buildUploadPayload', () => {
       shareModIds: true,
       shareRenderSettings: true,
       showcasedModId: null,
-      description: null
+      description: ''
     });
   });
 
-  it(`trims the description, mapping empty or whitespace-only text to null`, () => {
+  it(`trims the description, mapping whitespace-only text to the empty string`, () => {
     expect(buildUploadPayload({ ...baseForm, description: '  hello  ' })?.description).toBe(
       'hello'
     );
-    expect(buildUploadPayload({ ...baseForm, description: '   ' })?.description).toBe(null);
-    expect(buildUploadPayload({ ...baseForm, description: '' })?.description).toBe(null);
+    expect(buildUploadPayload({ ...baseForm, description: '   ' })?.description).toBe('');
+    expect(buildUploadPayload({ ...baseForm, description: '' })?.description).toBe('');
   });
 
   it(`includes the showcased mod id when showcasing an asset with a picked mod`, () => {

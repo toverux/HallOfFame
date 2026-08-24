@@ -49,7 +49,10 @@ internal partial class HttpQueries {
       multipart.AddField("showcasedModId", @params.ShowcasedModId);
     }
 
-    if (@params.Description is not null) {
+    // The description is a plain string everywhere inside the mod; the wire is the only place the
+    // absence of one is a distinct value, so a blank description omits the field here rather than
+    // sending an empty one, which the server would store as an empty description.
+    if (!string.IsNullOrWhiteSpace(@params.Description)) {
       multipart.AddField("description", @params.Description);
     }
 

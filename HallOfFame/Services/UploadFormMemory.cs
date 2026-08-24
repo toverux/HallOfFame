@@ -11,7 +11,7 @@ namespace HallOfFame.Services;
 internal readonly struct UploadFormMemory(
   bool shareModIds,
   bool shareRenderSettings,
-  string? description
+  string description
 ) : IJsonWritable {
   public void Write(IJsonWriter writer) {
     writer.TypeBegin(this.GetType().FullName);

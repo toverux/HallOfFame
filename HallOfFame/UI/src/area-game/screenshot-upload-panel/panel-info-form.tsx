@@ -75,7 +75,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
   );
 
   const restoreSavedDescription = useCallback(
-    () => patchFormValue({ description: uploadFormMemory.description ?? '' }),
+    () => patchFormValue({ description: uploadFormMemory.description }),
     [patchFormValue, uploadFormMemory.description]
   );
 
