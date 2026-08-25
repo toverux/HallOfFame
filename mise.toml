@@ -2,7 +2,6 @@
 
 [tools]
 bun = "1.4.0"
-node = "26.3.1"
 
 # DEVELOPMENT TASKS
 # =================
@@ -30,14 +29,14 @@ description = "Watches and recompiles the UI bundle with webpack."
 # Depends on a one-shot `build:css-types` so the *.module.scss.d.ts exist before ts-loader
 # type-checks the style imports (mirrors build:webpack).
 depends = ["build:css-types"]
-run = "bun webpack --config HallOfFame/UI/webpack.config.js --watch"
+run = "bun --bun webpack --config HallOfFame/UI/webpack.config.js --watch"
 
 [tasks."dev:css-types"]
 description = "Watches and regenerates the CSS module type definitions."
 # `build:css-types` does the full initial generation once; `--ignoreInitial` then makes this
 # watcher skip its redundant startup pass and only react to later file additions/changes.
 depends = ["build:css-types"]
-run = 'bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType named --nameFormat camel --ignoreInitial --watch'
+run = 'bun --bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType named --nameFormat camel --ignoreInitial --watch'
 
 # CHECK TASKS
 # ===========
@@ -145,13 +144,11 @@ depends = ["build:css-types", "build:webpack"]
 [tasks."build:webpack"]
 description = "Compiles the UI bundle with webpack."
 depends = ["build:css-types"]
-# No `--bun`: bun's runtime cannot run webpack yet (https://github.com/oven-sh/bun/issues/10768),
-# so plain `bun webpack` runs it on Node through its shebang.
-run = "bun webpack --config HallOfFame/UI/webpack.config.js"
+run = "bun --bun webpack --config HallOfFame/UI/webpack.config.js"
 
 [tasks."build:css-types"]
 description = "Generates the gitignored *.module.scss.d.ts so tsc catches stale styles.* references."
-run = 'bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType named --nameFormat camel'
+run = 'bun --bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType named --nameFormat camel'
 
 # PUBLISH TASKS
 # =============
