@@ -30,6 +30,7 @@ export function MenuControlsSocialsPreloader(): ReactElement {
 
     // Returning the previous set when the slide brings nothing new skips the state update, and
     // with it the render, on the many slides that add no platform.
+    // oxlint-disable-next-line react/set-state-in-effect - the set accumulates across slides
     setLogos(prev =>
       upcoming.every(logo => prev.has(logo)) ? prev : new Set([...prev, ...upcoming])
     );

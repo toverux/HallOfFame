@@ -49,6 +49,7 @@ export function PhotoModePanelPortal({ children }: Props): ReactElement {
 
     // This will render the portal!
     // We pass the Vanilla Take Photo button as a template for our own button.
+    // oxlint-disable-next-line react/set-state-in-effect - the target only exists after mount
     setPortalInfo({
       target: span,
       htmlTemplate: takePictureButton.outerHTML

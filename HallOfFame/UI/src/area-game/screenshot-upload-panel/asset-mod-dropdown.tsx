@@ -147,6 +147,7 @@ function AssetModMenu({
     if (scrollableRef.current) {
       scrollableRef.current.scrollTop = 0;
     }
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies - `matches` is the trigger
   }, [matches]);
 
   const rowHeight = useMeasuredRowHeight(scrollableRef);

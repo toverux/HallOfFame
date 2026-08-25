@@ -24,6 +24,11 @@ export default defineConfig({
 
     // Useless in HoF as we can't use React DevTools.
     'react/display-name': 'off',
+    // The rule enforces the React Compiler's Rules of Hooks, which want every hook call to resolve
+    // statically to an import. The mod's input actions come from a `bindInputAction` factory, so
+    // its hooks reach components through an object and never can. The game pins React 18 and runs
+    // no compiler, so the analysis buys nothing here.
+    'react/hooks': 'off',
     // In HoF we routinely pass typed binding command functions (e.g. `bindings.clearScreenshot`)
     // directly as `onSelect`/`onChange` handlers; those command names cannot follow the rule's
     // `handle*` convention, so enforcing it here only fights the binding pattern.

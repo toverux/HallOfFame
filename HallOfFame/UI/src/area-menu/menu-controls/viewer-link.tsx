@@ -142,6 +142,7 @@ function ViewerLinkToggle({
   // because the parent handed down a fresh callback.
   const onVisibleChangeRef = useRef(onVisibleChange);
 
+  // oxlint-disable-next-line react/refs - the latest-ref idiom writes during render by design
   onVisibleChangeRef.current = onVisibleChange;
 
   useEffect(() => {

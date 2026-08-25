@@ -195,10 +195,9 @@ function loadGameBundle(): void {
     source = source.replace(from, to);
   }
 
-  // Indirect eval hands the raw script to JavaScriptCore; a direct `import()` is rejected by bun.
-  const indirectEval = eval;
-
-  indirectEval(source);
+  // Bun rejects a direct `import()` of the bundle, so the harness evaluates its source.
+  // oxlint-disable-next-line no-eval - there is no other way to load it
+  eval(source);
 
   aliasGameModules();
   overrideLocalization();

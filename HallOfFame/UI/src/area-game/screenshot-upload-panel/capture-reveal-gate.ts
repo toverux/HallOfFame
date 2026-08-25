@@ -24,6 +24,7 @@ export function useCaptureRevealGate(
 
   useEffect(() => {
     if (previewImageUri == null) {
+      // oxlint-disable-next-line react/set-state-in-effect - clearing the gate is the effect's job
       setRevealedUri(null);
 
       return;

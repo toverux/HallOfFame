@@ -1,5 +1,7 @@
 {
   "include": [
+    "oxfmt.config.ts",
+    "oxlint.config.ts",
     "HallOfFame/UI/src/**/*",
     ".agents/hooks/**/*",
     ".agents/scripts/**/*",
