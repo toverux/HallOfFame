@@ -1,7 +1,7 @@
 {
   "HallOfFame.Common.OOPS": "Oeps!",
-  "HallOfFame.Common.BASE_ERROR": "Hall of Fame heeft een onverwachte fout ondervonden. Rapporteer het probleem bij de ontwikkelaar van de mod op Paradox Mods/Forum of via Discord/GitHub (@toverux).",
-  "HallOfFame.Common.RECOVERABLE_ERROR": "De fout is herstelbaar en je zou in staat moeten zijn deze te kunnen negeren en verder te gaan met spelen.",
+  "HallOfFame.Common.BASE_ERROR": "Hall of Fame heeft een onverwachte fout ondervonden. Graag het probleem melden bij de ontwikkelaar van de mod op Paradox Mods/Forum of via Discord/GitHub (@toverux).",
+  "HallOfFame.Common.RECOVERABLE_ERROR": "De fout is herstelbaar en je zou deze moeten kunnen negeren en verder gaan met spelen.",
   "HallOfFame.Common.FATAL_ERROR": "Deze fout is niet herstelbaar en kan onbedoelde bijwerkingen hebben. Het wordt aanbevolen het spel op te slaan en opnieuw te starten, en de mod uit te schakelen als dit probleem zich herhaalt.",
   "HallOfFame.Common.LOADING": "Laden…",
   "HallOfFame.Common.ERROR_MESSAGE[HallOfFame.Http.HttpNetworkException]": "Onze server is niet bereikbaar. Controleer je internetverbinding. Als deze werkt, is het waarschijnlijk een tijdelijk probleem aan onze kant. Foutdetails: {ERROR_MESSAGE}",
