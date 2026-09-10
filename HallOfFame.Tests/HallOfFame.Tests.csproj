@@ -8,8 +8,10 @@
         <IsPublishable>false</IsPublishable>
 
         <!-- Resolve the game's managed assemblies the same way the mod does, from the User-scoped
-             CSII_MANAGEDPATH environment variable. -->
+             CSII_MANAGEDPATH environment variable, or the process one on Linux, which has no user
+             scope. -->
         <ManagedPath>$([System.Environment]::GetEnvironmentVariable('CSII_MANAGEDPATH', 'EnvironmentVariableTarget.User'))</ManagedPath>
+        <ManagedPath Condition="'$(ManagedPath)' == ''">$(CSII_MANAGEDPATH)</ManagedPath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,19 +28,22 @@
     </ItemGroup>
 
     <!-- Game assemblies pulled in by the mod's domain types, referenced for compilation only and
-         resolved at runtime by the AssemblyResolve probe (see GameAssemblyResolver). -->
+         resolved at runtime by the AssemblyResolve probe (see GameAssemblyResolver).
+         Mono (Linux) skips that probe for a reference met while loading a type, ex. a mod type
+         implementing a game interface, so there they are copied next to the tests instead, along
+         with the non-framework dependencies MSBuild finds for them. -->
     <ItemGroup>
         <Reference Include="Colossal.Core">
             <HintPath>$(ManagedPath)\Colossal.Core.dll</HintPath>
-            <Private>false</Private>
+            <Private Condition="'$(OS)' == 'Windows_NT'">false</Private>
         </Reference>
         <Reference Include="Colossal.UI.Binding">
             <HintPath>$(ManagedPath)\Colossal.UI.Binding.dll</HintPath>
-            <Private>false</Private>
+            <Private Condition="'$(OS)' == 'Windows_NT'">false</Private>
         </Reference>
         <Reference Include="Game">
             <HintPath>$(ManagedPath)\Game.dll</HintPath>
-            <Private>false</Private>
+            <Private Condition="'$(OS)' == 'Windows_NT'">false</Private>
         </Reference>
     </ItemGroup>
 

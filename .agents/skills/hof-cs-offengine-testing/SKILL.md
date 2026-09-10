@@ -19,6 +19,7 @@ mise test:cs
 
 This runs `dotnet test` with `-p:SkipBuildUI=true -p:SkipModPostProcess=true`, so the TypeScript UI build and the mod post-processor are skipped (the tests need neither).
 Prefer it over a bare `dotnet test`.
+On Linux, Mono hosts the `net48` test process and needs `mono-devel`: without its framework facades the test host crashes before any test runs.
 
 ## Where testable logic goes
 
@@ -33,6 +34,7 @@ Prefer it over a bare `dotnet test`.
 
 A `[ModuleInitializer]` `AssemblyResolve` probe (`GameAssemblyResolver`) loads game DLLs on demand from `CSII_MANAGEDPATH` (the game's `Managed` folder).
 Pure managed assemblies load fine this way: `Colossal.Core`, `Colossal.UI.Binding`, and `Game.dll`.
+Mono (Linux) skips the probe for a reference met while loading a type (a mod type implementing a game interface), so there `HallOfFame.Tests.csproj` copies the game assemblies next to the tests instead.
 So domain records (`Screenshot`, `CreatorStats`, ...) and pure managed structs like `Game.UI.Localization.LocalizedString` are test-constructible (the test project has `InternalsVisibleTo`).
 
 ### Caveat: engine enums in `[InlineData]` break discovery

@@ -14,8 +14,11 @@ namespace HallOfFame.Tests;
 /// any test method JITs a game type.
 /// </summary>
 internal static class GameAssemblyResolver {
+  // The user scope lives in the Windows registry, so it reads null on Linux, where the variable
+  // comes from the process environment instead.
   private static readonly string ManagedPath =
     Environment.GetEnvironmentVariable("CSII_MANAGEDPATH", EnvironmentVariableTarget.User) ??
+    Environment.GetEnvironmentVariable("CSII_MANAGEDPATH") ??
     string.Empty;
 
   [ModuleInitializer]
