@@ -91,6 +91,30 @@ describe('searchAssetMods', () => {
     expect(matches).toHaveLength(manyMods.length);
     expect(matches.every(match => match.displayNameRanges.length == 0)).toBeTrue();
   });
+
+  it(`loads under a global Intl that has no Collator`, async () => {
+    // Cohtml ships no Intl, and some mods install the Intl.js polyfill, which has no Collator.
+    // The module builds its matcher on load, so it is imported afresh under that Intl.
+    const { Collator } = Intl;
+    const specifier = './asset-mod-search?intl-without-collator';
+
+    Reflect.deleteProperty(Intl, 'Collator');
+
+    try {
+      // Dynamic specifier: TypeScript cannot resolve a module behind a query string.
+      const module = (await import(specifier)) as { searchAssetMods: typeof searchAssetMods };
+
+      expect(module.searchAssetMods(mods, 'trees')[0]?.mod.displayName).toBe(
+        'Realistic Trees Pack'
+      );
+    } finally {
+      Object.defineProperty(Intl, 'Collator', {
+        value: Collator,
+        writable: true,
+        configurable: true
+      });
+    }
+  });
 });
 
 function createMod(displayName: string, author: string): bindings.JsonMod {

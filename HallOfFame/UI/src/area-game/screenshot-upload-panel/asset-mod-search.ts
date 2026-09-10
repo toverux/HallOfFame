@@ -55,7 +55,13 @@ const fuzzy = new uFuzzy({
   intraIns: 1,
   intraSub: 1,
   intraTrn: 1,
-  intraDel: 1
+  intraDel: 1,
+
+  // The library's default tie-break is `Intl.Collator`, which Cohtml lacks, and some mods install
+  // an Intl polyfill with no Collator that fails the library's guard, making this module throw on
+  // load and the game drop the whole mod UI. Code point order is what the library's own fallback
+  // does.
+  compare: (a, b) => (a > b ? 1 : a < b ? -1 : 0)
 });
 
 /**
