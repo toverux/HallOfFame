@@ -26,7 +26,7 @@ if (!userDataPath) {
   throw 'CSII_USERDATAPATH environment variable is not set, ensure the CSII Modding Toolchain is installed correctly';
 }
 
-const outputDir = `${userDataPath}\\Mods\\${mod.id}`;
+const outputDir = path.join(userDataPath, 'Mods', mod.id);
 
 const banner = `
  * Cities: Skylines II UI Module

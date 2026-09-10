@@ -104,9 +104,9 @@ Special thanks to:
 
 ### Installation
 
-1. Standard CS2 modding toolchain;
-2. (Recommended) Install [mise-en-place](https://mise.jdx.dev) for per-project Node.js & Bun
-   version management. Without mise, just match the required versions specified in `mise.toml`.
+1. Standard CS2 modding toolchain (on Linux, see [below](#linux) instead);
+2. (Recommended) Install [mise-en-place](https://mise.jdx.dev) for per-project .NET SDK, Node.js &
+   Bun version management. Without mise, just match the required versions specified in `mise.toml`.
    For now, Node is still and only needed alongside Bun to run Webpack
    (https://github.com/oven-sh/bun/issues/10768).
 3. `bun i` to install UI mod dependencies.
@@ -121,6 +121,25 @@ executable:
 
 Point that at `Cities2.exe` under your install to also skip the launcher. The modding toolchain
 exports the install path as `CSII_INSTALLATIONPATH`.
+
+### Linux
+
+The in-game toolchain installer is Windows-only, so `mise setup:linux` stands in for it. It needs:
+
+- the game installed through Steam, launched once under Proton, and closed while the setup runs;
+- Unity Hub (the Flatpak works) signed in with a Personal license, since a licensed editor has to
+  open the toolchain's Unity project once;
+- mise, for the pinned .NET SDK.
+
+The mod then builds on native .NET; only the Windows-only post-processor and publisher run under
+the game's own Proton. The setup installs the Unity version the game pins twice, about 8 GB of
+downloads: a Linux editor to open the Unity project, and the Windows editor into the Proton prefix
+for the IL post-processor runner. It writes the `CSII_*` variables to
+`~/.config/environment.d/60-cs2-modding.conf`, so log out and back in once it is done. Rerun it
+after a game update.
+
+The C# tests target `net48`, which takes Mono on Linux: `sudo apt install mono-devel`, whose
+framework facades the test host needs.
 
 ### Coding agents
 

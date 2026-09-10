@@ -2,6 +2,7 @@
 
 [tools]
 bun = "1.4.0"
+dotnet = "10.0.401"
 
 # DEVELOPMENT TASKS
 # =================
@@ -128,6 +129,14 @@ dotnet jb cleanupcode HallOfFame.slnx \
   --properties:SkipBuildUI=true --properties:SkipModPostProcess=true \
   --exclude="**/obj/**;**/bin/**"
 """]
+
+# SETUP TASKS
+# ===========
+
+[tasks."setup:linux"]
+description = "Sets up the CS2 modding toolchain on Linux, where the in-game installer cannot run. Idempotent, rerun it after a game update. Requires the game to be closed."
+raw = true
+run = "bash scripts/setup-linux-toolchain.sh"
 
 # BUILD TASKS
 # ===========

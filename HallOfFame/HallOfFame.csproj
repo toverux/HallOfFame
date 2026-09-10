@@ -14,9 +14,16 @@
         <PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
     </PropertyGroup>
 
+    <!-- The toolchain writes CSII_* as Windows user environment variables and reads them back from
+         the registry. Linux has no user scope, so fall back to the process environment there. -->
+    <PropertyGroup>
+        <CSIIToolPath>$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))</CSIIToolPath>
+        <CSIIToolPath Condition="'$(CSIIToolPath)' == ''">$(CSII_TOOLPATH)</CSIIToolPath>
+    </PropertyGroup>
+
     <!--Imports must be after PropertyGroup block-->
-    <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.props" />
-    <Import Project="$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))\Mod.targets" />
+    <Import Project="$(CSIIToolPath)\Mod.props" />
+    <Import Project="$(CSIIToolPath)\Mod.targets" />
 
     <!-- Override LangVersion set by Mod.props -->
     <PropertyGroup>
@@ -127,7 +134,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="CS2-ModdingTools" Version="1.0.5" />
         <PackageReference Include="PolySharp" Version="1.15.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

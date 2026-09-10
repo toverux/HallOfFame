@@ -61,6 +61,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `mise test`: Run the full test suite, C# and UI.
 - `mise test:cs`: Run only the C# unit tests.
 - `mise test:ui`: Run only the UI tests.
+- `mise setup:linux`: Install the modding toolchain on Linux, where the in-game installer cannot run. Idempotent, rerun it after a game update; the game must be closed.
 - `mise l10n:push`: Preview which locale-file edits would be pushed to Crowdin and approved. Needs `CROWDIN_PERSONAL_TOKEN`. Adding `--push` writes to the shared Crowdin project, which the Boundaries below gate.
 
 Run `mise tasks` to see the full shortcut list; append arguments freely, mise passes them through (ex. `mise some:task --some-arg`).
@@ -89,6 +90,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 - User-facing strings are localized: add keys to `HallOfFame/Locales/en-US.json`, the other locale files are translations synced from Crowdin. Fixing a translation in the repo also takes `mise l10n:push --push`, which approves the edit at the source: Crowdin re-exports its own approved version over an unpushed one.
 - The decompiled game source, the third-party mod corpus, and the readable copy of the game's UI bundle are machine-local: read their paths from `~/.cs2-modding/setup.md` instead of hardcoding them here. A missing key or a `(none)` value means that source does not exist.
 - Reading that source settles what the engine does, never what it costs. Measure a claim about the running game before asserting one.
+- The toolchain's `CSII_*` variables are Windows user-scope environment variables, a scope Linux lacks: read one from the user scope with a process-environment fallback, the shape `HallOfFame.csproj` and `GameAssemblyResolver.cs` use.
 - When writing or running C# tests, debugging an engine-bound type that won't load off-engine, or deciding where to put logic so it stays testable, use the `hof-cs-offengine-testing` skill.
 - When writing or running UI tests, configuring bindings or asserting triggers in a test, or fixing the harness after a game update, use the `hof-ui-testing` skill.
 
