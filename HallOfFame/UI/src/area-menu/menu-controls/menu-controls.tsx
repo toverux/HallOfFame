@@ -1,11 +1,12 @@
 import classNames from 'classnames';
 import { LocalizedString } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
-import { type ReactElement, useCallback, useEffect } from 'react';
+import { type ReactElement, useCallback, useEffect, useState } from 'react';
 import { PreloadImages } from '../../components/preload-images';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { cityNamePreloadedIcons, MenuControlsCityName } from './city-name';
+import { MenuControlsDetailsRow } from './details-row';
 import { MenuControlsError } from './error';
 import { MenuControlsMoreActionsMenu, moreActionsPreloadedIcons } from './more-actions-menu';
 import {
@@ -15,6 +16,8 @@ import {
   MenuControlsToggleMenuVisibilityButton,
   navButtonsPreloadedIcons
 } from './nav-buttons';
+import { selectScreenshotDetails } from './screenshot-details';
+import { ScreenshotDetailsWindow } from './screenshot-details-window';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
 import { MenuControlsSocialsPreloader } from './socials-preloader';
 import { viewerLinkPreloadedIcons } from './viewer-link';
@@ -85,6 +88,18 @@ export function MenuControlsContent(): ReactElement {
     [setMenuState]
   );
 
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const openDetails = useCallback(() => setIsDetailsOpen(true), []);
+
+  const closeDetails = useCallback(() => setIsDetailsOpen(false), []);
+
+  // The error view and the empty state below unmount the window without closing it, which would
+  // leave it to pop back open on the next screenshot.
+  if (isDetailsOpen && (menuState.loadError || !menuState.screenshot)) {
+    setIsDetailsOpen(false);
+  }
+
   if (menuState.loadError) {
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
@@ -101,8 +116,16 @@ export function MenuControlsContent(): ReactElement {
     return <></>;
   }
 
+  const details = selectScreenshotDetails(menuState.screenshot);
+
   return (
     <div className={classNames(styles.controls, styles.controlsApplyButtonsOffset)}>
+      <ScreenshotDetailsWindow
+        screenshot={menuState.screenshot}
+        isOpen={isDetailsOpen}
+        onClose={closeDetails}
+      />
+
       {modSettings.showFeaturedAsset && menuState.screenshot.showcasedMod && (
         <Button variant='menu' className={styles.assetButton} onSelect={openShowcasedModPage}>
           <div
@@ -160,6 +183,10 @@ export function MenuControlsContent(): ReactElement {
             modSettings={modSettings}
             screenshot={menuState.screenshot}
           />
+
+          {details.row && (
+            <MenuControlsDetailsRow preview={details.row.preview} onOpen={openDetails} />
+          )}
         </div>
       </div>
 

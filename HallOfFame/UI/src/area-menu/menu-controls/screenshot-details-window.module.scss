@@ -1,0 +1,61 @@
+// The durations of the panel's own transition, which the backdrop fades in step with.
+$enter-duration: 250ms;
+$exit-duration: 150ms;
+
+$padding-horizontal: 30rem;
+$paragraph-gap: 12rem;
+
+.backdrop {
+  animation: backdrop-enter $enter-duration ease-out;
+  transition: opacity $exit-duration;
+
+  &--exiting {
+    opacity: 0;
+  }
+}
+
+.window {
+  // The game's windows take their body's opacity from the interface opacity setting, which leaves
+  // it see-through at the lower values. This one sits over the screenshot and the main menu, so its
+  // body stays dense whatever the setting.
+  --uiOpacity: 0.9;
+
+  // Keeps the description's lines to a readable length.
+  width: 800rem;
+  max-width: 90vw;
+  max-height: 80vh;
+
+  &-content {
+    flex: 0 1 auto;
+  }
+
+  &-paragraphs {
+    // Each paragraph carries the gap below it, the last one's included, on top of the panel's own
+    // bottom padding.
+    padding: 0 $padding-horizontal;
+    margin-bottom: -$paragraph-gap;
+
+    line-height: 1.5;
+  }
+
+  &-text {
+    margin: 0 0 $paragraph-gap;
+  }
+
+  &-empty {
+    margin: 0;
+    padding: 0 $padding-horizontal;
+
+    opacity: 0.7;
+  }
+}
+
+@keyframes backdrop-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

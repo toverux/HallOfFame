@@ -37,14 +37,27 @@ Drive the component through the mock engine exported by `../testing/game-setup`:
 
 - `setBinding(group, name, value)` BEFORE `render` configures what a `bindValue(group, name, default)` returns.
   An unconfigured binding keeps its `bindValue` default; a default-less binding throws, which is the intended "you forgot to configure this" signal.
+  The harness answers the game's tutorial bindings itself, since every vanilla tutorial target (a `Tab`, for one) reads them.
 - `setMapBinding(group, name, key, value)` configures one MapEntry binding (e.g. `cs2/ui` input hints); unconfigured entries resolve to `null`, which is enough for game widgets to render.
 - `getTriggers()` returns the outbound command triggers (`{ event, args }`) recorded since the last reset.
   Assert on these instead of mocking the binding layer.
+- `emitEvent(name, ...args)` sends the UI an event the game would, calling every handler the bundle registered for it.
+  An event binding listens on its name suffixed with `.update`: an input action is `emitEvent('input.onActionPerformed.update', { action: 'Back', value: null })`, delivered only to consumers inside an `EventInputProvider` from `cs2/input`, which reads the `input.actionNames` binding (see `screenshot-details-window.test.tsx`).
 - `resetBindings()` clears configured bindings and recorded triggers; call it in `afterEach` alongside `@testing-library/react`'s `cleanup()`.
 - `useLocalization().translate(id, fallback)` returns the fallback, or the id when none is given, so a rendered label's text is its localization id; match on that.
 - A tooltip is invisible here: its balloon portals into a container only the booted game app creates, so an assertion that one is or is not shown passes either way. Verify tooltips in the running game.
 
 See `panel-city-info.test.tsx` for a binding-driven render and `panel-footer.test.tsx` for a click-fires-a-trigger assertion.
+
+## In the running game
+
+Check live what a component test cannot show (layout, tooltips, transitions, native input), faking the data from `game_eval` rather than hunting for a screenshot that has it:
+
+- Patch a field of the slideshow's screenshot: `engine.trigger('hallOfFame.slideshow.screenshot.patch', ['description'], 'A **city**.')`.
+- Set any value binding: `engine.trigger('<group>.<name>.update', value)`, e.g. `hallOfFame.slideshow.loadError`.
+- Send an input action `game_key` cannot reach, such as Back: `window['cs2/input'].onInputActionPerformed$.onUpdate({ action: 'Back', value: null })`.
+
+A fake lasts until the game updates that binding or the UI reloads.
 
 ## Best-effort loading and harness repair
 

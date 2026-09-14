@@ -59,6 +59,13 @@ const recordedTriggers: RecordedTrigger[] = [];
 // Localization id -> string, consulted by `translate` before its echo-the-id default.
 const translations = new Map<string, string>();
 
+// Game state every tutorial target (a vanilla tab, for one) reads from a default-less binding,
+// answered unless a test configures it: null is no running tutorial.
+const gameBindingValues: ReadonlyMap<string, unknown> = new Map([
+  ['tutorials.activeTutorial', null],
+  ['tutorials.activeTutorialPhase', null]
+]);
+
 /**
  * Configures the value a `bindValue(group, name, default)` binding returns.
  * Call before rendering; after the first render this also live-updates already-subscribed
@@ -69,7 +76,7 @@ export function setBinding(group: string, name: string, value: unknown): void {
 
   valueBindings.set(base, value);
 
-  dispatch(`${base}.update`, value);
+  emitEvent(`${base}.update`, value);
 }
 
 /**
@@ -90,7 +97,7 @@ export function setMapBinding(group: string, name: string, key: unknown, value: 
 
   entries.set(String(key), value);
 
-  dispatch(`${base}.updateMapEntry`, key, value);
+  emitEvent(`${base}.updateMapEntry`, key, value);
 }
 
 /**
@@ -122,6 +129,21 @@ export function resetBindings(): void {
   mapBindings.clear();
   translations.clear();
   recordedTriggers.length = 0;
+}
+
+/**
+ * Sends the UI an event the game would, calling every handler the bundle registered for it.
+ * An event binding listens on its name suffixed with `.update`, so the game's input actions arrive
+ * as `input.onActionPerformed.update`.
+ */
+export function emitEvent(name: string, ...args: readonly unknown[]): void {
+  const set = handlers.get(name);
+
+  if (set) {
+    for (const fn of Array.from(set)) {
+      fn(...args);
+    }
+  }
 }
 
 /**
@@ -276,16 +298,6 @@ function removeHandler(name: string, fn: Handler): void {
   handlers.get(name)?.delete(fn);
 }
 
-function dispatch(name: string, ...args: readonly unknown[]): void {
-  const set = handlers.get(name);
-
-  if (set) {
-    for (const fn of Array.from(set)) {
-      fn(...args);
-    }
-  }
-}
-
 /**
  * Receives every `engine.trigger(...)` from the bundle. Answers binding subscribe requests with
  * configured (or default) values and records everything else as a command trigger.
@@ -294,10 +306,13 @@ function triggerEvent(name: string, ...args: readonly unknown[]): void {
   if (name.endsWith('.subscribe')) {
     const base = name.slice(0, -'.subscribe'.length);
 
-    // When unconfigured, do nothing: the binding keeps its `bindValue` default. Only a default-less
-    // binding throws, which is the intended "you forgot to configure this" signal.
+    // When unconfigured, a game binding answers with its fixed value and any other keeps its
+    // `bindValue` default. Only a default-less binding throws, which is the intended "you forgot
+    // to configure this" signal.
     if (valueBindings.has(base)) {
-      dispatch(`${base}.update`, valueBindings.get(base));
+      emitEvent(`${base}.update`, valueBindings.get(base));
+    } else if (gameBindingValues.has(base)) {
+      emitEvent(`${base}.update`, gameBindingValues.get(base));
     }
 
     return;
@@ -312,7 +327,7 @@ function triggerEvent(name: string, ...args: readonly unknown[]): void {
     // `null` is a safe default that keeps game widgets (e.g., input hints) from throwing.
     const value = entries?.has(stringKey) ? entries.get(stringKey) : null;
 
-    dispatch(`${base}.updateMapEntry`, key, value);
+    emitEvent(`${base}.updateMapEntry`, key, value);
 
     return;
   }

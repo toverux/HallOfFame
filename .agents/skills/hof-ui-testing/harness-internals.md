@@ -32,4 +32,5 @@ The bundle talks to C# through a cohtml `engine` global the harness defines befo
 Defining it first flips the bundle to its "attached" mode, and a no-op `BindingsReady` keeps the app's `whenReady` from firing so it never auto-boots and only test trees render.
 
 The engine answers `*.subscribe` / `*.subscribeMapEntry` requests synchronously from the values configured via `setBinding` / `setMapBinding` (an unconfigured value binding is left at its `bindValue` default; an unconfigured map entry resolves to `null`), and records every other `trigger` as a command for `getTriggers()`.
+`emitEvent(name, ...args)` goes the other way, calling the handlers the bundle registered for an event the game sends; the value bindings' updates go through it too.
 `overrideLocalization()` repoints the `LocalizationContext` no-provider default so `translate(id, fallback)` returns the fallback or the id without the real, binding-driven localization provider.
