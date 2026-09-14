@@ -13,6 +13,7 @@ This repository contains the game-side code, while the server-side code is locat
 - C# 14 on `net48`, built with the CS2 modding toolchain; the mod's runtime types are Unity/ECS systems living in the game's world, and the unit tests are xUnit running off-engine.
 - React 18 and TypeScript with SCSS modules, bundled by webpack, packaged and tested with bun, formatted and linted with oxfmt/oxlint.
 - The UI runs in Coherent Gameface (cohtml), not a browser: web features can be missing or behave differently, so check the `gameface` skill before relying on one.
+- The csmodding plugins are a prerequisite: `coherent-gameface` (the `gameface` skills and the `game_*` MCP tools), `cs2-modding`, and `unity-devtools`. When any of them is missing from the session, stop before starting work and ask the user to load it.
 
 ## Project settings
 

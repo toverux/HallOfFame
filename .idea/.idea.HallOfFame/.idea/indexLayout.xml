@@ -3,6 +3,7 @@
   <component name="UserContentModel">
     <attachedFolders />
     <explicitIncludes>
+      <Path>.agents</Path>
       <Path>.gitattributes</Path>
       <Path>.gitignore</Path>
       <Path>.lefthook.yml</Path>
