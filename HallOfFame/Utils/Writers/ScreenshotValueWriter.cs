@@ -75,11 +75,17 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
     writer.PropertyName("viewerShareUrl");
     writer.Write(WebViewer.ScreenshotPageUrl(value.Id));
 
+    writer.PropertyName("paradoxModIds");
+    writer.Write(value.ParadoxModIds);
+
     writer.PropertyName("shareRenderSettings");
     writer.Write(value.ShareRenderSettings);
 
     writer.PropertyName("renderSettings");
     writer.Write(value.RenderSettings);
+
+    writer.PropertyName("capabilities");
+    writer.Write(value.Capabilities);
 
     writer.PropertyName("createdAt");
     writer.Write(value.CreatedAt.ToLocalTime().ToString("o"));

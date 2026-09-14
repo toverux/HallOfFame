@@ -52,8 +52,12 @@ export interface Screenshot {
   readonly viewerUrl: string;
   // The viewer page itself, untracked. This is the link to hand to a human.
   readonly viewerShareUrl: string;
+  // The playset's Paradox Mods IDs, empty when the creator did not share it or it has none.
+  readonly paradoxModIds: readonly number[];
   readonly shareRenderSettings: boolean;
   readonly renderSettings: Readonly<Record<string, string>>;
+  // A field missing from it holds a default: the screenshot predates the mod release capturing it.
+  readonly capabilities: readonly ScreenshotCapability[];
   readonly createdAt: string;
   readonly createdAtFormatted: string;
   readonly createdAtFormattedDistance: string;
@@ -68,6 +72,16 @@ export interface Screenshot {
   readonly creator: Creator;
   readonly showcasedMod?: Mod;
 }
+
+/**
+ * A server field of a screenshot holding what the uploading mod captured.
+ */
+export type ScreenshotCapability =
+  | 'description'
+  | 'shareParadoxModIds'
+  | 'paradoxModIds'
+  | 'shareRenderSettings'
+  | 'renderSettings';
 
 /**
  * Serialization of C# `HallOfFame.Domain.Mod`

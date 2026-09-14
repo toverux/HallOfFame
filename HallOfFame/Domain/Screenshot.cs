@@ -54,12 +54,25 @@ internal record Screenshot {
   [DecodeAlias("viewerUrl")]
   internal string ViewerUrl { get; [UsedImplicitly] set; } = string.Empty;
 
+  /// <summary>
+  /// The playset's Paradox Mods IDs, empty when the creator did not share it or it has none.
+  /// </summary>
+  [DecodeAlias("paradoxModIds")]
+  internal int[] ParadoxModIds { get; [UsedImplicitly] set; } = [];
+
   [DecodeAlias("shareRenderSettings")]
   internal bool ShareRenderSettings { get; [UsedImplicitly] set; }
 
   [DecodeAlias("renderSettings")]
   // ReSharper disable once CollectionNeverUpdated.Global
   internal Dictionary<string, string> RenderSettings { get; [UsedImplicitly] set; } = new();
+
+  /// <summary>
+  /// The server fields holding what the uploading mod captured, e.g. "description".
+  /// A field missing from it holds a default: the screenshot predates the mod release capturing it.
+  /// </summary>
+  [DecodeAlias("capabilities")]
+  internal string[] Capabilities { get; [UsedImplicitly] set; } = [];
 
   [DecodeAlias("createdAt")]
   internal DateTime CreatedAt { get; [UsedImplicitly] set; } = default;
