@@ -55,6 +55,7 @@
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Open]": "Otwórz w przeglądarce",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copy]": "Kopiuj link do schowka",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copied]": "Link skopiowany do schowka!",
+  "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]": "Opis",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\nWygląda niesamowicie!\nŚwietny kadr!\nWygląda rewelacyjnie!\nCo za zdjęcie!\nPo prostu perfekcja!\nWow, jakie piękne!\nWygląda wspaniale!\nPodzielisz się?\nNie mogę się napatrzeć!\nIdealne do galerii!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Podgląd w formacie 16:9.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "Zdecydowanie najpopularniejszą rozdzielczością ekranu jest 16:9. Ten prostokąt pokazuje, jak obraz zostanie przycięty na takich ekranach, dzięki czemu możesz upewnić się, że wszystkie ważne szczegóły są w nim umieszczone.",
