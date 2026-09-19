@@ -55,6 +55,7 @@
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Open]": "Im Browser öffnen",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copy]": "Link in die Zwischenablage kopieren",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copied]": "Link in die Zwischenablage kopiert!",
+  "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]": "Beschreibung",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\nHall of Fame Material!\nDieses Meisterstück teilen?\nTolle Aussicht!\nTolles Foto!\nDas sollte man doch teilen!\nWas eine Momentaufnahme!\nGleich einrahmen!\nZeig es der Community!\nDas würde ich behalten!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Vorschau im 16:9 Seitenverhältnis.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 ist mit Abstand das häufigste Seitenverhältnis. Dieses Rechteck zeigt dir, wie dein Bild auf solchen Bildschirmen zugeschnitten wird, sodass du sicher sein kannst, dass alle wichtigen Details darin enthalten sind.",
