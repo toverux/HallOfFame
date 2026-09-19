@@ -55,6 +55,7 @@
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Open]": "Ouvrir dans le navigateur",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copy]": "Copier le lien dans le presse-papiers",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copied]": "Lien copié dans le presse-papiers !",
+  "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]": "Description",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\nVue magnifique !\nLa fierté de votre ville !\nSpectaculaire !\nPrêt à partager ?\nQuelle vue splendide !\nPartagez votre création !\nVotre ville en lumière !\nUn instant magique !\nFaites-en profiter tout le monde !\nIl semble y faire bon vivre !",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Prévisualisation en 16:9",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 est de loin le ratio d’écran le plus répandu. Ce rectangle vous montre comment votre image sera recadrée sur ces écrans, pour que vous puissiez vous assurer que le cadrage vous convienne.",
