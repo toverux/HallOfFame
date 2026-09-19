@@ -55,6 +55,7 @@
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Open]": "Abrir en el navegador",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copy]": "Copiar enlace al portapapeles",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copied]": "¡Enlace copiado al portapapeles!",
+  "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]": "Descripción",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "¡Material para una muestra!\n¿Compartir esta obra de arte?\n¡Maravillosa vista!\n¡Gran toma!\n¡Esto vale la pena mostrarlo!\n¡Captura gloriosa!\n¡Está para enmarcar!\n¡Muéstrala a la comunidad!\n¡Muy buena toma!\n¿A caso eres fotógrafo profesional?\n¡Esta imagen esta de pelos!\n¡Que vista!\n¡Realmente impresionante!\n¡Es grandiosa!\n¡Que maravilla!\n¡Deberías dedicarte a esto!\n¡Es una obra maestra!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Vista previa en proporción 16:9.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "La proporción 16:9 es por mucho la más común. Este rectángulo muestra como tu imagen será recortada en tales pantallas, así puedes asegurarte que todos los detalles importantes quepan en estas.",
