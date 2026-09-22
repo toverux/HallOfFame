@@ -55,6 +55,7 @@
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Open]": "在浏览器中打开",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copy]": "复制链接到剪贴板",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copied]": "链接已复制到剪贴板！",
+  "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]": "描述",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "名画素材！\n分享此杰作？\n令人惊叹的景色！\n好拍！\n独乐乐不如众乐乐！\n辉煌瞬间！\n将这段美好定格！\n快让大伙看看！\n别让这张溜走了！\n壮丽天际线！",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "16:9 宽高比预览。",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 是目前最常见的宽高比。此矩形显示了截图在此类屏幕上的裁剪方式，因此您可以确保所有重要细节都包含在内。",

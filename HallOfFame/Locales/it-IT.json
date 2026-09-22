@@ -55,6 +55,7 @@
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Open]": "Apri nel browser",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copy]": "Copia il link negli appunti",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copied]": "Link copiato negli appunti!",
+  "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]": "Descrizione",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\nChe vista!\nUna vista da togliere il fiato!\nSplendida città!\nUna vera opera d’arte!\nQuesta è una città ideale!\nCondividi subito!\nMostralo a tutti!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Anteprima in16:9.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 è il rapporto d’aspetto più comune. Questo rettangolo ti mostra come verrà ritagliata la tua immagine su tali schermi, così puoi assicurarti che tutti i dettagli importanti siano presenti.",

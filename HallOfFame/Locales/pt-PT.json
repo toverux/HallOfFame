@@ -55,6 +55,7 @@
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Open]": "Abrir no navegador",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copy]": "Copiar link para a área de transferência",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copied]": "Link copiado para a área de transferência!",
+  "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]": "Descrição",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTA AOS TRADUTORES: Estas são variantes da mesma mensagem.\n// Não traduzam literalmente, sejam criativos ou usem o ChatGPT.\n// Separem cada mensagem diferente com uma linha.\nMaterial para o Hall of Fame!\nPartilhar esta obra-prima?\nVista deslumbrante!\nBela foto!\nUma imagem que merece ser partilhada!\nMomento de glória!\nRegista esta memória!\nMostra à comunidade!\nEsta vale a pena guardar!\nVista muito bonita!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Pré-visualização de Proporção de Aspeto 16:9.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 é de longe a proporção de aspeto mais comum. Este retângulo mostra-te como a tua imagem será cortada nesses ecrãs, para que possas garantir que todos os detalhes importantes estão incluídos.",

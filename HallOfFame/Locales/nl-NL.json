@@ -55,6 +55,7 @@
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Open]": "Openen in browser",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copy]": "Link naar klembord kopiëren",
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copied]": "Link gekopieerd naar klembord!",
+  "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]": "Beschrijving",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\nHall of Fame-materiaal!\nDeze moet je delen!\nAdembenemend uitzicht!\nMooie foto!\nEen plaatje om te delen!\nKek kiekje!\nLijst deze foto in!\nLaat het de community zien!\nBewaar dit plaatje!\nPrachtige compositie!\nWe willen dit zien!\nDit is kunst!\nNetjes!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Voorbeeld 16:9 beeldverhouding.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_DESCRIPTION": "16:9 is verreweg de meest voorkomende beeldverhouding. Deze rechthoek laat jou zien hoe je afbeelding zal worden bijgesneden op dergelijke schermen, zodat je ervoor kunt zorgen dat alle belangrijke details erin staan.",
