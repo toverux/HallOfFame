@@ -30,26 +30,10 @@ public sealed class SlideshowConductorTests {
     Assert.False(SlideshowConductor.IsNetworkError(new InvalidOperationException()));
   }
 
-  [Fact]
-  public void ShouldRefreshOnReturnToMenu_OnlyWhenReturningFromAnotherMode() {
-    // A Theory with [InlineData(GameMode...)] cannot be used here: xUnit's discovery resolves the
-    // engine-bound Game assembly to parse enum values out of the attribute blob, which fails
-    // off-engine. GameMode in the test body is fine.
-    Assert.True(SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.Game, GameMode.MainMenu));
-
-    Assert.True(SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.Editor, GameMode.MainMenu));
-
-    Assert.False(
-      SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.MainMenu, GameMode.MainMenu)
-    );
-
-    Assert.False(SlideshowConductor.ShouldRefreshOnReturnToMenu(GameMode.MainMenu, GameMode.Game));
-  }
-
   // NEXT
 
   [Fact]
-  public async Task Next_FirstAdvance_PublishesScreenshot_RecordsView_AndSettlesTheLock() {
+  public async Task FirstAdvance_PublishesScreenshot_RecordsView_AndSettlesTheLock() {
     var screenshots = new Queue<Screenshot>(
       [SlideshowConductorTests.MakeScreenshot("s0"), SlideshowConductorTests.MakeScreenshot("s1")]
     );
@@ -68,7 +52,9 @@ public sealed class SlideshowConductorTests {
     var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
 
-    await conductor.Next();
+    // The mount report is how the first screenshot reaches the screen: it serves the load owed from
+    // construction, which is the apply path every later Next shares.
+    await conductor.OnSlideshowMounted();
 
     Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
 
@@ -294,8 +280,8 @@ public sealed class SlideshowConductorTests {
     var conductor = SlideshowConductorTests.CreateConductor(api: api);
 
     // Three forward steps before scrolling back twice: two Previous moves need the cursor at index
-    // >= 2.
-    await conductor.Next();
+    // >= 2. The mount report is the first of the three, as it is in the menu.
+    await conductor.OnSlideshowMounted();
     await conductor.Next();
     await conductor.Next();
     await conductor.Previous();
@@ -581,11 +567,13 @@ public sealed class SlideshowConductorTests {
 
     Assert.Empty(reported);
     Assert.Equal(0, sink.ReportSuccessCount);
-    Assert.Equal(0, sink.RefreshCount);
+
+    // The declined screenshot stays on screen.
+    Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
   }
 
   [Fact]
-  public async Task Report_WhenConfirmed_Reports_ShowsSuccess_AndRefreshes() {
+  public async Task Report_WhenConfirmed_Reports_ShowsSuccess_AndMovesOff() {
     var reported = new List<string>();
     var api = SlideshowConductorTests.ReportableApi(reported);
 
@@ -599,12 +587,14 @@ public sealed class SlideshowConductorTests {
 
     Assert.Equal("s0", Assert.Single(reported));
     Assert.Equal(1, sink.ReportSuccessCount);
-    Assert.Equal(1, sink.RefreshCount);
     Assert.Empty(sink.ShownErrors);
+
+    // The reported screenshot does not stay on screen: the slideshow advances onto the look-ahead.
+    Assert.Equal("s1", sink.LastPublishedScreenshot!.Id);
   }
 
   [Fact]
-  public async Task Report_WhenConfirmedAndApiFails_ShowsError_WithoutSuccessOrRefresh() {
+  public async Task Report_WhenConfirmedAndApiFails_ShowsError_WithoutSuccessOrAdvancing() {
     var n = 0;
 
     var api = new FakeApi {
@@ -624,7 +614,9 @@ public sealed class SlideshowConductorTests {
 
     Assert.Single(sink.ShownErrors);
     Assert.Equal(0, sink.ReportSuccessCount);
-    Assert.Equal(0, sink.RefreshCount);
+
+    // A failed report leaves the screenshot in place.
+    Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
   }
 
   [Fact]
@@ -660,42 +652,259 @@ public sealed class SlideshowConductorTests {
     Assert.Equal(0, sink.ReportSuccessCount);
   }
 
-  // GAME MODE
+  // GAME MODE AND THE MOUNT HANDSHAKE
 
   [Fact]
-  public void OnGameModeChanged_ReturningToMainMenu_RequestsRefresh() {
+  public async Task OnSlideshowMounted_FirstMount_LoadsTheFirstScreenshot() {
     var sink = new FakeSlideshowPresentationSink();
-    var conductor = SlideshowConductorTests.CreateConductor(sink: sink);
+
+    var conductor = SlideshowConductorTests.CreateConductor(
+      api: SlideshowConductorTests.SequentialApi(),
+      sink: sink
+    );
+
+    await conductor.OnSlideshowMounted();
+
+    // Nothing is published before the UI says it can display it, and the first mount is what
+    // releases that first load.
+    Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
+  }
+
+  [Fact]
+  public async Task OnSlideshowMounted_RepeatedMount_KeepsTheSameScreenshot() {
+    var fetches = 0;
+    var sink = new FakeSlideshowPresentationSink();
+
+    var conductor = SlideshowConductorTests.CreateConductor(
+      api: SlideshowConductorTests.SequentialApi(() => fetches++),
+      sink: sink
+    );
+
+    await conductor.OnSlideshowMounted();
+
+    var fetchesAfterFirstMount = fetches;
+
+    await conductor.OnSlideshowMounted();
+
+    // A remount is not a request for a new screenshot: a menu sub-screen round trip, and a UI
+    // reload in development, must both hold the screenshot already on screen.
+    Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
+    Assert.Equal(fetchesAfterFirstMount, fetches);
+  }
+
+  [Fact]
+  public async Task OnSlideshowMounted_AfterReturnToMainMenu_LoadsAFreshScreenshot() {
+    var sink = new FakeSlideshowPresentationSink();
+
+    var conductor = SlideshowConductorTests.CreateConductor(
+      api: SlideshowConductorTests.SequentialApi(),
+      sink: sink
+    );
+
+    await conductor.OnSlideshowMounted();
 
     conductor.OnGameModeChanged(GameMode.Game);
     conductor.OnGameModeChanged(GameMode.MainMenu);
 
-    Assert.Equal(1, sink.RefreshCount);
+    await conductor.OnSlideshowMounted();
+
+    Assert.Equal("s1", sink.LastPublishedScreenshot!.Id);
 
     // Each game-mode change mirrors the main-menu flag: false entering the game, true on return.
     Assert.Equal([false, true], sink.InMainMenuLog);
   }
 
   [Fact]
-  public void OnGameModeChanged_OnBoot_DoesNotRefresh() {
-    // The previous-mode baseline is seeded to MainMenu, so the first MainMenu is not a return.
+  public async Task OnSlideshowMounted_BeforeTheReturnIsAnnounced_LoadsAFreshScreenshot() {
     var sink = new FakeSlideshowPresentationSink();
-    var conductor = SlideshowConductorTests.CreateConductor(sink: sink);
 
-    conductor.OnGameModeChanged(GameMode.MainMenu);
+    var conductor = SlideshowConductorTests.CreateConductor(
+      api: SlideshowConductorTests.SequentialApi(),
+      sink: sink
+    );
 
-    Assert.Equal(0, sink.RefreshCount);
-    Assert.Equal([true], sink.InMainMenuLog);
-  }
-
-  [Fact]
-  public void OnGameModeChanged_EnteringGame_DoesNotRefresh() {
-    var sink = new FakeSlideshowPresentationSink();
-    var conductor = SlideshowConductorTests.CreateConductor(sink: sink);
+    await conductor.OnSlideshowMounted();
 
     conductor.OnGameModeChanged(GameMode.Game);
 
-    Assert.Equal(0, sink.RefreshCount);
+    // The engine activates the menu UI before it announces the return, and the debt was incurred on
+    // the way out, so the mount report settles it without waiting for the mode change.
+    await conductor.OnSlideshowMounted();
+
+    Assert.Equal("s1", sink.LastPublishedScreenshot!.Id);
+  }
+
+  [Fact]
+  public async Task OnGameModeChanged_WhenTheLockIsHeld_RefreshesOnceThePrefetchReleasesIt() {
+    var prefetchGate = new TaskCompletionSource<Screenshot>();
+    var fetches = 0;
+    var sink = new FakeSlideshowPresentationSink();
+
+    // Gate the look-ahead prefetch, so the navigation lock stays held after the first screenshot is
+    // published.
+    var api = new FakeApi {
+      GetRandomScreenshotWeightedImpl = () => ++fetches switch {
+        1 => Task.FromResult(SlideshowConductorTests.MakeScreenshot("s0")),
+        2 => prefetchGate.Task,
+        _ => Task.FromResult(SlideshowConductorTests.MakeScreenshot($"s{fetches}"))
+      },
+      MarkScreenshotViewedImpl = _ => Task.FromResult(new View())
+    };
+
+    var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
+
+    var firstMount = conductor.OnSlideshowMounted();
+
+    conductor.OnGameModeChanged(GameMode.Game);
+    conductor.OnGameModeChanged(GameMode.MainMenu);
+
+    // The lock is still held by the gated prefetch, so this refresh is dropped. The owed refresh
+    // must outlive the drop, which is why it is cleared once a screenshot is applied and not when
+    // it is requested.
+    await conductor.OnSlideshowMounted();
+
+    Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
+
+    prefetchGate.SetResult(SlideshowConductorTests.MakeScreenshot("s1"));
+
+    await firstMount;
+
+    // Releasing the lock is what serves what was owed: the UI sends no further mount report, so the
+    // prefetch's own completion has to be the second chance.
+    Assert.Equal("s1", sink.LastPublishedScreenshot!.Id);
+  }
+
+  [Fact]
+  public async Task ApplyStep_WhenTheLoadLandsUnmounted_SpendsNoViewAndKeepsTheLoadOwed() {
+    var fetchGate = new TaskCompletionSource<Screenshot>();
+    var viewed = new List<string>();
+    var fetches = 0;
+    var sink = new FakeSlideshowPresentationSink();
+
+    // Gate the very first fetch, so the load is still in flight when the game mode changes.
+    var api = new FakeApi {
+      GetRandomScreenshotWeightedImpl = () => ++fetches switch {
+        1 => fetchGate.Task,
+        _ => Task.FromResult(SlideshowConductorTests.MakeScreenshot($"s{fetches - 1}"))
+      },
+      MarkScreenshotViewedImpl = id => {
+        viewed.Add(id);
+
+        return Task.FromResult(new View());
+      }
+    };
+
+    var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
+
+    var firstMount = conductor.OnSlideshowMounted();
+
+    // The user starts a game before the gated load lands, tearing the menu UI down under it.
+    conductor.OnGameModeChanged(GameMode.Game);
+
+    fetchGate.SetResult(SlideshowConductorTests.MakeScreenshot("s0"));
+
+    await firstMount;
+
+    // The load landed with nothing on screen, so it may neither spend a view on a screenshot
+    // nobody saw nor settle the debt it was meant to pay.
+    Assert.Empty(viewed);
+
+    // Back in the menu: the debt survived, so the mount report serves a screenshot of its own.
+    await conductor.OnSlideshowMounted();
+
+    Assert.Equal("s1", sink.LastPublishedScreenshot!.Id);
+    Assert.Equal(["s1"], viewed);
+  }
+
+  [Fact]
+  public async Task OnGameModeChanged_WhenTheSlideshowIsUnmounted_SpendsNothing() {
+    var prefetchGate = new TaskCompletionSource<Screenshot>();
+    var viewed = new List<string>();
+    var fetches = 0;
+    var sink = new FakeSlideshowPresentationSink();
+
+    // Gate the look-ahead prefetch, so the navigation lock stays held after the first screenshot is
+    // published.
+    var api = new FakeApi {
+      GetRandomScreenshotWeightedImpl = () => ++fetches switch {
+        1 => Task.FromResult(SlideshowConductorTests.MakeScreenshot("s0")),
+        2 => prefetchGate.Task,
+        _ => Task.FromResult(SlideshowConductorTests.MakeScreenshot($"s{fetches}"))
+      },
+      MarkScreenshotViewedImpl = id => {
+        viewed.Add(id);
+
+        return Task.FromResult(new View());
+      }
+    };
+
+    var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
+
+    var firstMount = conductor.OnSlideshowMounted();
+
+    // A refresh comes to be owed by the return to the menu, and the mount report that would serve
+    // it is turned away while the gated prefetch holds the navigation lock.
+    conductor.OnGameModeChanged(GameMode.Game);
+    conductor.OnGameModeChanged(GameMode.MainMenu);
+
+    await conductor.OnSlideshowMounted();
+
+    // The user starts another game, tearing the menu UI down with the refresh still owed.
+    conductor.OnGameModeChanged(GameMode.Game);
+
+    prefetchGate.SetResult(SlideshowConductorTests.MakeScreenshot("s1"));
+
+    await firstMount;
+
+    // Freeing the lock is an opportunity to serve the owed refresh, but there is nothing on screen
+    // to show it, so neither a request nor a view is spent on a screenshot nobody sees.
+    Assert.Equal(["s0"], viewed);
+    Assert.Equal(2, fetches);
+    Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
+  }
+
+  [Fact]
+  public async Task OnGameModeChanged_ReturnToMenu_WhenTheMountServed_LoadsNothingMore() {
+    var fetches = 0;
+    var sink = new FakeSlideshowPresentationSink();
+
+    var conductor = SlideshowConductorTests.CreateConductor(
+      api: SlideshowConductorTests.SequentialApi(() => fetches++),
+      sink: sink
+    );
+
+    // The user starts a game with the first load still owed, which is what happens when the
+    // slideshow was never mounted that session (the setting was off) or its first load failed.
+    conductor.OnGameModeChanged(GameMode.Game);
+
+    // The engine activates the menu UI before it announces the return, so the mount report is what
+    // serves the owed load.
+    await conductor.OnSlideshowMounted();
+
+    var fetchesAfterMount = fetches;
+
+    conductor.OnGameModeChanged(GameMode.MainMenu);
+
+    // The debt was settled by the mount, so the mode change must not owe a second one: one return
+    // to the menu publishes exactly one screenshot.
+    Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
+    Assert.Equal(fetchesAfterMount, fetches);
+  }
+
+  [Fact]
+  public async Task OnGameModeChanged_EnteringGame_DoesNotRefresh() {
+    var sink = new FakeSlideshowPresentationSink();
+
+    var conductor = SlideshowConductorTests.CreateConductor(
+      api: SlideshowConductorTests.SequentialApi(),
+      sink: sink
+    );
+
+    await conductor.OnSlideshowMounted();
+
+    conductor.OnGameModeChanged(GameMode.Game);
+
+    Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
     Assert.Equal([false], sink.InMainMenuLog);
   }
 
@@ -735,6 +944,25 @@ public sealed class SlideshowConductorTests {
 
         return Task.FromResult(SlideshowConductorTests.MakeScreenshot(id));
       }
+    };
+  }
+
+  /// <summary>
+  /// An API that serves distinct screenshots ("s0", "s1", ...), so a test can tell a fresh load
+  /// from a screenshot that stayed put.
+  /// Distinct IDs keep the carousel's look-ahead dedupe from spinning.
+  /// </summary>
+  /// <param name="onFetch">Called on each random-screenshot fetch, to count them.</param>
+  private static FakeApi SequentialApi(Action? onFetch = null) {
+    var n = 0;
+
+    return new FakeApi {
+      GetRandomScreenshotWeightedImpl = () => {
+        onFetch?.Invoke();
+
+        return Task.FromResult(SlideshowConductorTests.MakeScreenshot($"s{n++}"));
+      },
+      MarkScreenshotViewedImpl = _ => Task.FromResult(new View())
     };
   }
 

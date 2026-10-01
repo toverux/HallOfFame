@@ -10,15 +10,16 @@ namespace HallOfFame.Services;
 /// <summary>
 /// Owns the main-menu slideshow orchestration lifted out of <c>SlideshowUISystem</c>: it sequences
 /// the navigation lock (begin, settle or abort, background prefetch), applies each navigation step
-/// onto the UI, drives the like/save/report flows, owns their error policy, and decides when to
-/// refresh on return to the main menu.
+/// onto the UI, drives the like/save/report flows, owns their error policy, and decides when a
+/// fresh screenshot is owed and when to serve it.
 /// <para>
 /// It constructs and owns the deep leaves it sequences (<see cref="ScreenshotCarousel"/>,
-/// <see cref="NavigationState"/>, <see cref="ScreenshotLiker"/>, <see cref="ScreenshotViewRecorder"/>,
-/// <see cref="ScreenshotExporter"/>) and reaches the engine only through the narrow
+/// <see cref="NavigationState"/>, <see cref="ScreenshotLiker"/>,
+/// <see cref="ScreenshotViewRecorder"/>, <see cref="ScreenshotExporter"/>), and reaches the engine
+/// only through the narrow seams it is handed:
 /// <see cref="ISlideshowPresentationSink"/> (value pushes and dialogs),
 /// <see cref="ISlideshowSettings"/> (resolution and save directory),
-/// <see cref="IHallOfFameApi"/>, and <see cref="IModLog"/> seams.
+/// <see cref="IHallOfFameApi"/>, and <see cref="IModLog"/>.
 /// Carrying no engine-bound binding or dialog types, it constructs and runs off-engine under test,
 /// where the sequencing bugs finally have a test surface.
 /// </para>
@@ -56,12 +57,24 @@ internal sealed class SlideshowConductor {
   private bool isSaving;
 
   /// <summary>
-  /// The previous game mode, used to refresh the screenshot when the user returns to the main menu.
-  /// It is initialized with <see cref="GameMode.MainMenu"/> and not the default value, it is
-  /// intentional: it prevents a refresh when the game boots and mods are initialized before the
-  /// first game mode is set.
+  /// The conductor's own memory of a load that is owed: nothing has been published yet, the
+  /// published screenshot predates the current main-menu session, or the user just reported it.
+  /// Owning that memory here is what makes the load survive a UI that is not mounted yet, a
+  /// navigation lock held by an in-flight load, and a failed fetch.
+  /// Cleared in <see cref="ApplyStep"/> once a screenshot is actually on screen, never when the
+  /// load is requested, so a request turned away on the navigation lock is still owed when the
+  /// lock frees.
   /// </summary>
-  private GameMode previousGameMode = GameMode.MainMenu;
+  private bool isRefreshPending = true;
+
+  /// <summary>
+  /// Whether the slideshow UI is mounted and able to display a screenshot, reported by the UI
+  /// through <see cref="OnSlideshowMounted"/> and cleared whenever the game leaves the main menu,
+  /// which tears the menu UI down.
+  /// It gates <see cref="ServeRefresh"/>, so an owed load is never spent on a request and a view
+  /// count while there is nothing on screen to show the result.
+  /// </summary>
+  private bool isSlideshowMounted;
 
   /// <param name="api">Server API used by the leaves this conductor drives.</param>
   /// <param name="log">
@@ -214,8 +227,8 @@ internal sealed class SlideshowConductor {
   }
 
   /// <summary>
-  /// Reports the current screenshot after the user confirms, then shows a success dialog and
-  /// requests a refresh, or surfaces the failure.
+  /// Reports the current screenshot after the user confirms, then shows a success dialog and moves
+  /// off the reported screenshot, or surfaces the failure.
   /// A missing current screenshot is a silent no-op.
   /// Designed never to throw, so the shell can fire-and-forget it.
   /// </summary>
@@ -234,7 +247,13 @@ internal sealed class SlideshowConductor {
       await this.api.ReportScreenshot(screenshot.Id);
 
       this.sink.ShowReportSuccess();
-      this.sink.RequestRefresh();
+
+      // The reported screenshot must not stay on screen. The UI is necessarily mounted here (the
+      // user just acted on it), so this is served right away, or once the prefetch holding the
+      // navigation lock releases it.
+      this.isRefreshPending = true;
+
+      await this.Next();
     }
     catch (HttpException ex) {
       this.sink.ShowError(ex.GetUserFriendlyMessage());
@@ -271,8 +290,12 @@ internal sealed class SlideshowConductor {
   #endif
 
   /// <summary>
-  /// Forwards a game-mode change: refreshes the slideshow when the user returns to the main menu
-  /// from another mode, then advances the previous-mode baseline.
+  /// Forwards a game-mode change: mirrors the main-menu flag onto the UI, and on the way out of the
+  /// menu forgets the mount and owes the next menu session a fresh screenshot.
+  /// The debt is incurred on the way out rather than on the way back so that it is incurred exactly
+  /// once, leaving <see cref="OnSlideshowMounted"/> as the only thing that can settle it.
+  /// That also lands the refresh when the menu UI mounts, rather than whenever the engine gets
+  /// around to announcing the return.
   /// </summary>
   internal void OnGameModeChanged(GameMode mode) {
     // The keep-alive set narrows to the current image only while playing, so the UI needs to know
@@ -280,20 +303,29 @@ internal sealed class SlideshowConductor {
     // in-game pause menu (which stays GameMode.Game).
     this.sink.SetInMainMenu(mode is GameMode.MainMenu);
 
-    if (SlideshowConductor.ShouldRefreshOnReturnToMenu(this.previousGameMode, mode)) {
-      this.sink.RequestRefresh();
+    if (mode is GameMode.MainMenu) {
+      return;
     }
 
-    this.previousGameMode = mode;
+    this.isSlideshowMounted = false;
+    this.isRefreshPending = true;
   }
 
   /// <summary>
-  /// Whether the carousel should refresh on a game-mode change: only when returning to the main
-  /// menu from another mode, never on boot (the baseline starts at <see cref="GameMode.MainMenu"/>)
-  /// or when entering a game.
+  /// Takes the slideshow UI's report that it is mounted and able to display a screenshot, and
+  /// serves the refresh it is owed, if any.
+  /// It is the seam that keeps the first load from happening before anything can show it, and the
+  /// only thing the UI has to say about when a screenshot is loaded.
+  /// Idempotent by design: it is the UI's mount that is reported, not an event, so a remount (a
+  /// menu sub-screen round trip, a development UI reload) holds the screenshot already on screen
+  /// rather than loading a new one.
+  /// Designed never to throw, so the shell can fire-and-forget it.
   /// </summary>
-  internal static bool ShouldRefreshOnReturnToMenu(GameMode previousMode, GameMode currentMode) =>
-    currentMode is GameMode.MainMenu && previousMode is not GameMode.MainMenu;
+  internal Task OnSlideshowMounted() {
+    this.isSlideshowMounted = true;
+
+    return this.ServeRefresh();
+  }
 
   /// <summary>
   /// Classifies an exception as a network error (vs. an unexpected, recoverable one), driving the
@@ -302,9 +334,19 @@ internal sealed class SlideshowConductor {
   internal static bool IsNetworkError(Exception ex) => ex is HttpException;
 
   /// <summary>
+  /// Loads a screenshot when one is owed and the slideshow is mounted to show it, and does nothing
+  /// otherwise.
+  /// Gating on the mount here rather than at each call site is what keeps an owed load from being
+  /// spent on a request and a view count nobody sees: the flag outlives the menu session.
+  /// </summary>
+  private Task ServeRefresh() =>
+    this.isRefreshPending && this.isSlideshowMounted ? this.Next() : Task.CompletedTask;
+
+  /// <summary>
   /// Mirrors a successful <see cref="NavigationStep"/> onto the UI and enacts the side effects
-  /// around it: it publishes the screenshot, settles the navigation lock, records the view, and
-  /// prefetches the next image when the step calls for it.
+  /// around it: it publishes the screenshot, clears the owed load, settles the navigation lock,
+  /// records the view, prefetches the next image when the step calls for it, and serves any load
+  /// the prefetch's lock turned away.
   /// The screenshot is published before the prefetch is awaited, so the display stays immediate
   /// while the lock is held throughout the prefetch.
   /// This is the single apply path shared by next, previous, and (in debug) load-by-id.
@@ -314,6 +356,17 @@ internal sealed class SlideshowConductor {
     this.sink.PublishLoadError(null);
     this.sink.PublishScreenshot(step.Current);
     this.PublishNeighbors();
+
+    // A load landing after the user left the menu reaches no screen, so it settles nothing: the
+    // debt outlives it, and the view stays unspent rather than marking a screenshot nobody saw as
+    // shown, which the server's weighting would then hide from other players' rotations.
+    // Every apply path that does reach a screen records the view, scrollback re-displays included:
+    // the recorder owns the at-most-once dedupe, so the conductor does not pre-filter here.
+    if (this.isSlideshowMounted) {
+      this.isRefreshPending = false;
+
+      _ = this.viewRecorder.RecordView(step.Current.Id);
+    }
 
     // The cursor has settled onto the new screenshot. When the step lands at the front of the
     // window, the navigation settles into the background prefetch below, which keeps the lock held;
@@ -327,20 +380,20 @@ internal sealed class SlideshowConductor {
       $"(carousel idx {this.carousel.CurrentIndex}/{this.carousel.Count - 1})."
     );
 
-    // Every apply path records the displayed screenshot as viewed, scrollback re-displays included:
-    // the recorder owns the at-most-once dedupe, so the conductor does not pre-filter here.
-    _ = this.viewRecorder.RecordView(step.Current.Id);
-
     if (step.ShouldPreloadAhead) {
       // We are viewing the front of the window: prepare the next screenshot in the background,
-      // which keeps the refresh lock held until the prefetch settles.
+      // which keeps the navigation lock held until the prefetch settles.
       await this.PreloadAhead();
+
+      // That held lock is what turns an owed load away, so serve one now it is free. The clear
+      // above runs first, so a chain here only continues while loads keep being owed.
+      await this.ServeRefresh();
     }
   }
 
   /// <summary>
   /// Background look-ahead prefetch, designed never to throw.
-  /// Releases the refresh lock in its finally, so the lock stays held throughout the prefetch.
+  /// Releases the navigation lock in its finally, so the lock stays held throughout the prefetch.
   /// </summary>
   private async Task PreloadAhead() {
     try {

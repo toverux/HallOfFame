@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { LocalizedString } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
-import { type ReactElement, useCallback, useEffect, useState } from 'react';
+import { type ReactElement, useCallback, useState } from 'react';
 import { PreloadImages } from '../../components/preload-images';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
@@ -36,14 +36,6 @@ const preloadedIcons: readonly string[] = [
   ...cityNamePreloadedIcons
 ];
 
-// Deliberately module-scoped, not a per-instance `useRef`. `MenuControls` is mounted via a
-// portal in `MasterScreenPortal` and remounts fresh when returning to the menu from a game.
-// C# bumps `forcedRefreshIndex` on exactly that transition to request a new screenshot, so the
-// value must outlive the remount: a `useRef` would reset to 0, and the return-to-menu refresh
-// would never fire. The right place to revisit this C#<->UI refresh round-trip is the
-// SlideshowConductor (architecture candidate #1).
-let lastForcedRefreshIndex = 0;
-
 /**
  * Component that renders the menu controls and city/creator information.
  */
@@ -66,14 +58,6 @@ export function MenuControlsContent(): ReactElement {
   const modSettings = bindings.useModSettings();
 
   const [menuState, setMenuState] = bindings.useHofMenuState();
-
-  useEffect(() => {
-    if (menuState.forcedRefreshIndex != lastForcedRefreshIndex) {
-      // oxlint-disable-next-line no-magic-numbers
-      setTimeout(() => bindings.nextScreenshot(), 500);
-      lastForcedRefreshIndex = menuState.forcedRefreshIndex;
-    }
-  }, [menuState.forcedRefreshIndex]);
 
   const openShowcasedModPage = useCallback(
     // oxlint-disable-next-line typescript/no-non-null-assertion - set when asset button renders

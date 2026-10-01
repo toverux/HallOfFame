@@ -46,8 +46,6 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
 
   private ValueBinding<bool> isInMainMenuBinding = null!;
 
-  private ValueBinding<int> forcedRefreshIndexBinding = null!;
-
   private ValueBinding<bool> canAdvanceBinding = null!;
 
   private ValueBinding<Screenshot?> screenshotBinding = null!;
@@ -73,6 +71,8 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
   private TriggerBinding saveScreenshotBinding = null!;
 
   private TriggerBinding reportScreenshotBinding = null!;
+
+  private TriggerBinding slideshowMountedBinding = null!;
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -121,12 +121,6 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         true
       );
 
-      this.forcedRefreshIndexBinding = new ValueBinding<int>(
-        SlideshowUISystem.BindingGroup,
-        "forcedRefreshIndex",
-        1
-      );
-
       this.canAdvanceBinding = new ValueBinding<bool>(
         SlideshowUISystem.BindingGroup,
         "canAdvance",
@@ -157,7 +151,6 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
       this.AddBinding(this.previousNeighborBinding);
       this.AddBinding(this.nextNeighborBinding);
       this.AddBinding(this.isInMainMenuBinding);
-      this.AddBinding(this.forcedRefreshIndexBinding);
       this.AddBinding(this.canAdvanceBinding);
       this.AddBinding(this.screenshotBinding);
       this.AddBinding(this.loadErrorBinding);
@@ -226,11 +219,18 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         () => { _ = this.conductor.Report(); }
       );
 
+      this.slideshowMountedBinding = new TriggerBinding(
+        SlideshowUISystem.BindingGroup,
+        "slideshowMounted",
+        () => { _ = this.conductor.OnSlideshowMounted(); }
+      );
+
       this.AddBinding(this.previousScreenshotBinding);
       this.AddBinding(this.nextScreenshotBinding);
       this.AddBinding(this.likeScreenshotBinding);
       this.AddBinding(this.saveScreenshotBinding);
       this.AddBinding(this.reportScreenshotBinding);
+      this.AddBinding(this.slideshowMountedBinding);
 
       // Wire force-enable main menu slideshow.
       Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
@@ -255,9 +255,8 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
   }
 
   /// <summary>
-  /// Lifecycle method used for changing the current screenshot when the user returns to the main
-  /// menu: forwards the game-mode change to the conductor (which owns the refresh decision) and
-  /// re-gates the force-enable keybinding.
+  /// Lifecycle method forwarding the game-mode change to the conductor, which owns the refresh
+  /// decision, and re-gating the force-enable keybinding.
   /// </summary>
   protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode) {
     this.conductor.OnGameModeChanged(mode);
@@ -338,10 +337,6 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
 
     GameManager.instance.userInterface.appBindings
       .ShowMessageDialog(successDialog, _ => {});
-  }
-
-  void ISlideshowPresentationSink.RequestRefresh() {
-    this.forcedRefreshIndexBinding.Update(this.forcedRefreshIndexBinding.value + 1);
   }
 
   private void OnSettingsApplied(Setting _) {

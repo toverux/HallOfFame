@@ -25,21 +25,6 @@ interface ReadonlyMenuState {
   readonly hasPreviousScreenshot: boolean;
 
   /**
-   * Index of the current refresh cycle. Used to force the UI to request a new screenshot.
-   *
-   * @default 0
-   */
-  readonly forcedRefreshIndex: number;
-
-  /**
-   * Whether the slideshow can advance to another screenshot, i.e., no navigation is moving the
-   * cursor, and no image is being preloaded.
-   *
-   * @default true
-   */
-  readonly canAdvance: boolean;
-
-  /**
    * Current screenshot data, or `null` when no data is available yet.
    */
   readonly screenshot: Screenshot | null;
@@ -83,8 +68,6 @@ const nextNeighbor$ = lazyBindValue<Screenshot | null>(GROUP, 'nextNeighbor', nu
 
 const isInMainMenu$ = lazyBindValue<boolean>(GROUP, 'isInMainMenu', true);
 
-const forcedRefreshIndex$ = lazyBindValue<number>(GROUP, 'forcedRefreshIndex', 0);
-
 const canAdvance$ = lazyBindValue<boolean>(GROUP, 'canAdvance', true);
 
 const screenshot$ = lazyBindValue<Screenshot | null>(GROUP, 'screenshot', null);
@@ -107,8 +90,6 @@ export function useHofMenuState(): [
 
   const enableMainMenuSlideshow = useValue(enableMainMenuSlideshow$());
   const hasPreviousScreenshot = useValue(previousNeighbor$()) != null;
-  const canAdvance = useValue(canAdvance$());
-  const forcedRefreshIndex = useValue(forcedRefreshIndex$());
   const screenshot = useValue(screenshot$());
   const loadError = useValue(loadError$());
   const isSaving = useValue(isSaving$());
@@ -117,8 +98,6 @@ export function useHofMenuState(): [
     ...settableMenuState,
     isSlideshowEnabled: enableMainMenuSlideshow,
     hasPreviousScreenshot,
-    forcedRefreshIndex,
-    canAdvance,
     imageUri: deriveImageUri(screenshot, settings),
     screenshot,
     loadError,
@@ -233,6 +212,16 @@ export function subscribeToKeepAliveScreenshots(
       subscription.dispose();
     }
   };
+}
+
+/**
+ * Reports that the slideshow is mounted and able to display a screenshot.
+ *
+ * C# decides what that warrants and answers it idempotently, which is what lets this side carry no
+ * memory of its own across a reload, which wipes the JS context.
+ */
+export function slideshowMounted(): void {
+  trigger(GROUP, 'slideshowMounted');
 }
 
 export function previousScreenshot(): void {

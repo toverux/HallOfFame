@@ -7,7 +7,7 @@ namespace HallOfFame.Services;
 /// <summary>
 /// Narrow outbound-effects seam through which <see cref="SlideshowConductor"/> enacts the engine
 /// side effects its orchestration decides but does not perform itself: the value pushes onto the UI
-/// bindings, the two user-facing dialogs, and the forced-refresh bump.
+/// bindings and the two user-facing dialogs.
 /// It replaces the scattered callbacks the system used to wire in <c>OnCreate</c>, keeping the
 /// conductor free of engine-bound binding and dialog types so it constructs and runs off-engine
 /// under test.
@@ -70,10 +70,4 @@ internal interface ISlideshowPresentationSink {
   /// Shows the "report submitted" success dialog.
   /// </summary>
   void ShowReportSuccess();
-
-  /// <summary>
-  /// Requests a slideshow refresh by bumping the forced-refresh binding, used both after a report
-  /// and on return to the main menu.
-  /// </summary>
-  void RequestRefresh();
 }

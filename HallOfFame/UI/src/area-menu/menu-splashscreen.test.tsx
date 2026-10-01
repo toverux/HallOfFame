@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 import type { Screenshot } from '../common';
 import { iconsole } from '../iconsole';
 import { createFakePreloader, makeScreenshot, makeSettings } from '../testing/fixtures';
-import { resetBindings, setBinding } from '../testing/game-setup';
+import { getTriggers, resetBindings, setBinding } from '../testing/game-setup';
 import { getClassesModule } from '../utils';
 import * as bindings from '../utils/bindings';
 import { register } from './index';
@@ -227,6 +227,27 @@ describe('MenuSplashscreen transition machine', () => {
   });
 });
 
+describe(`slideshow mount report`, () => {
+  it(`reports the mount once, and only once per mount`, () => {
+    renderSplashscreen();
+
+    expect(mountReportCount()).toBe(1);
+
+    // A re-render is not a remount: C# must not be asked again.
+    act(() => setBinding(SLIDESHOW, 'canAdvance', false));
+
+    expect(mountReportCount()).toBe(1);
+  });
+
+  it(`reports the mount again after a remount, which C# answers idempotently`, () => {
+    renderSplashscreen();
+    cleanup();
+    renderSplashscreen();
+
+    expect(mountReportCount()).toBe(2);
+  });
+});
+
 describe(`menu backdrop gating (area-menu/index)`, () => {
   it(`hides the Vanilla backdrop when the slideshow is enabled`, () => {
     const MenuUIBackdrops = captureExtension('MenuUIBackdrops')(VanillaBackdrops);
@@ -288,6 +309,10 @@ function ReadinessProbe(): ReactElement {
 
 function readiness(): string {
   return screen.getByTestId('ready').textContent ?? '';
+}
+
+function mountReportCount(): number {
+  return getTriggers().filter(({ event }) => event == `${SLIDESHOW}.slideshowMounted`).length;
 }
 
 function splashscreenDivs(container: HTMLElement): readonly HTMLElement[] {

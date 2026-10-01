@@ -45,6 +45,10 @@ export function MenuSplashscreen({
   // the mod starts and the Vanilla slideshow was not shown at all.
   const [state, dispatch] = useReducer(reducer, imageUri, initState);
 
+  // This component is the display surface, so its mount is when a screenshot can actually be
+  // shown, and reporting it is what releases the load.
+  useEffect(() => bindings.slideshowMounted(), []);
+
   // The UI is ready for the next image only when the slideshow can advance (no C# navigation or
   // preload in progress), no transition is in flight here, and we have settled on the current
   // `imageUri`.

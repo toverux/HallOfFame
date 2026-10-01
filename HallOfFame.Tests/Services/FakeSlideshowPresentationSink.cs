@@ -67,11 +67,6 @@ internal sealed class FakeSlideshowPresentationSink : ISlideshowPresentationSink
   /// </summary>
   internal int ReportSuccessCount { get; private set; }
 
-  /// <summary>
-  /// Number of times <see cref="RequestRefresh"/> was called.
-  /// </summary>
-  internal int RefreshCount { get; private set; }
-
   public void PublishScreenshot(Screenshot? screenshot) =>
     this.LastPublishedScreenshot = screenshot;
 
@@ -94,6 +89,4 @@ internal sealed class FakeSlideshowPresentationSink : ISlideshowPresentationSink
     this.ConfirmReportImpl?.Invoke(screenshot) ?? Task.FromResult(false);
 
   public void ShowReportSuccess() => this.ReportSuccessCount++;
-
-  public void RequestRefresh() => this.RefreshCount++;
 }
