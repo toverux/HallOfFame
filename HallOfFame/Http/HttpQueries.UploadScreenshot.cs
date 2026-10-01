@@ -64,6 +64,10 @@ internal partial class HttpQueries {
       multipart
     );
 
-    return await HttpQueries.Send<Screenshot>(request, @params.UploadProgressHandler);
+    return await HttpQueries.Send<Screenshot>(
+      request,
+      @params.UploadProgressHandler,
+      HttpQueries.NoTimeout
+    );
   }
 }

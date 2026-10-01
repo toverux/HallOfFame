@@ -7,6 +7,7 @@ using Game.Settings;
 using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Menu;
+using HallOfFame.Http;
 using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using PDX.ModsUI;
@@ -161,7 +162,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
   /// Even if the page is opened in-game, the click is registered on the server.
   /// </summary>
   private void OpenModPage(int modId) {
-    var url = $"{Mod.Settings.BaseUrlWithScheme}/api/v1/mods/{modId}";
+    var url = HttpQueries.PrependApiUrl($"/mods/{modId}");
 
     this.OpenParadoxModsPage(
       url,
@@ -169,8 +170,13 @@ internal sealed partial class CommonUISystem : UISystemBase {
         PdxSdkPlatformProxy.ShowModsUI(view => view.Show(ModsUIScreen.ModDetails, modId));
 
         // Send a GET request to our server so that the click count is still incremented.
-        // We don't care about the result, success or not.
-        UnityWebRequest.Get(url).SendWebRequest();
+        // We don't care about the result, success or not, but it still needs a timeout: a stalled
+        // request would never complete and would hold its native handle for the session.
+        var request = UnityWebRequest.Get(url);
+
+        request.timeout = HttpQueries.RequestTimeoutSeconds;
+
+        request.SendWebRequest();
       }
     );
   }

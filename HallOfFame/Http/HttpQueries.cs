@@ -12,6 +12,30 @@ namespace HallOfFame.Http;
 internal sealed partial class HttpQueries : IHallOfFameApi {
   private const string BaseApiPath = "/api/v1";
 
+  /// <summary>
+  /// Wall-clock budget for an API call, in seconds.
+  /// Unity defaults to none, which leaves a stalled connection never completing and the awaiting
+  /// caller hung with no error, since the error policy only runs on a thrown result.
+  /// </summary>
+  internal const int RequestTimeoutSeconds = 30;
+
+  /// <summary>
+  /// Wall-clock budget for a request that moves an image rather than metadata.
+  /// Unity's timeout caps the whole exchange rather than its idle time, so a transfer needs a
+  /// budget loose enough not to cancel one that is merely slow: a 4K image on a modest connection
+  /// legitimately runs past the budget a metadata call gets.
+  /// </summary>
+  private const int TransferTimeoutSeconds = 300;
+
+  /// <summary>
+  /// No wall-clock budget, for the one request whose duration cannot be predicted: a screenshot
+  /// upload is of unbounded size, so any budget would abort a legitimate slow upload.
+  /// This is deliberate, and the trade is that the request can hang. It is the safe side to err on
+  /// here: an aborted upload the server had already begun committing would be republished by the
+  /// user's retry, and a hang holds no lock and shows as a stalled progress bar.
+  /// </summary>
+  private const int NoTimeout = 0;
+
   private static ushort lastRequestId;
 
   /// <summary>
@@ -22,7 +46,7 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   private static readonly ConditionalWeakTable<UnityWebRequest, string>
     RequestIdsMap = new();
 
-  private static string PrependApiUrl(string path) =>
+  internal static string PrependApiUrl(string path) =>
     $"{Mod.Settings.BaseUrlWithScheme}{HttpQueries.BaseApiPath}{path}";
 
   /// <summary>
@@ -37,14 +61,20 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
 
   private static async Task SendRequest(
     UnityWebRequest request,
-    ProgressHandler? progressHandler = null
+    int timeoutSeconds,
+    ProgressHandler? progressHandler = null,
+    bool withModHeaders = true
   ) {
     // When using directly the UnityWebRequest constructor directly, for example, when making POST
     // requests with an empty body, the download handler is not set, which prevents us from reading
     // the response.
     request.downloadHandler ??= new DownloadHandlerBuffer();
 
-    HttpQueries.AddModHeaders(request);
+    request.timeout = timeoutSeconds;
+
+    if (withModHeaders) {
+      HttpQueries.AddModHeaders(request);
+    }
 
     var requestId = (++HttpQueries.lastRequestId).ToString();
 
@@ -52,49 +82,41 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
 
     Mod.Log.Verbose($"HTTP: Sending request #{requestId} {request.method} {request.url}");
 
-    Task? trackerTask = null;
+    // Polling rather than awaiting the operation, to avoid Game's UnityWebRequestAwaiter: it
+    // subscribes to `completed` in its constructor and fires again inline from `OnCompleted`, with
+    // neither an unsubscribe nor an already-invoked guard, so it can resume the caller twice, and
+    // the second resume throws out of Unity's completion pump where no mod code can catch it.
+    // Holding the operation in a local also keeps it from being finalized while in flight.
+    var operation = request.SendWebRequest();
 
-    if (progressHandler is not null) {
-      trackerTask = TrackRequestProgress();
-    }
+    var uploadProgress = -1f;
+    var downloadProgress = -1f;
 
-    await request.SendWebRequest();
+    while (!operation.isDone) {
+      // ReSharper disable CompareOfFloatsByEqualityOperator
+      // We don't derive floats from any calculations so this is fine.
+      if (
+        progressHandler is not null &&
+        (uploadProgress != request.uploadProgress ||
+          downloadProgress != request.downloadProgress)) {
+        uploadProgress = request.uploadProgress;
+        downloadProgress = request.downloadProgress;
 
-    if (trackerTask is not null) {
-      await trackerTask;
-    }
-
-    Mod.Log.Verbose($"HTTP: Request #{requestId} completed ({request.responseCode}).");
-
-    return;
-
-    async Task TrackRequestProgress() {
-      var uploadProgress = -1f;
-      var downloadProgress = -1f;
-
-      while (!request.isDone) {
-        // ReSharper disable CompareOfFloatsByEqualityOperator
-        // We don't derive floats from any calculations so this is fine.
-        if (
-          uploadProgress != request.uploadProgress ||
-          downloadProgress != request.downloadProgress) {
-          uploadProgress = request.uploadProgress;
-          downloadProgress = request.downloadProgress;
-
-          progressHandler(uploadProgress, downloadProgress);
-        }
-
-        // ReSharper restore CompareOfFloatsByEqualityOperator
-
-        // 1. We execute this Task on the main thread, so we *need* to yield to the main thread to
-        //    let it do its work.
-        // 2. No need to update continuously, so even if this was in the thread pool, we can wait
-        //    some time between updates.
-        await Task.Yield();
+        progressHandler(uploadProgress, downloadProgress);
       }
 
-      progressHandler(1f, 1f);
+      // ReSharper restore CompareOfFloatsByEqualityOperator
+
+      // 1. We execute this Task on the main thread, so we *need* to yield to the main thread to
+      //    let it do its work.
+      // 2. No need to update continuously, so even if this was in the thread pool, we can wait
+      //    some time between updates.
+      await Task.Yield();
     }
+
+    progressHandler?.Invoke(1f, 1f);
+
+    Mod.Log.Verbose($"HTTP: Request #{requestId} completed ({request.responseCode}).");
   }
 
   /// <summary>
@@ -103,9 +125,10 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   /// </summary>
   private static async Task<T> Send<T>(
     UnityWebRequest request,
-    ProgressHandler? progressHandler = null
+    ProgressHandler? progressHandler = null,
+    int timeoutSeconds = HttpQueries.RequestTimeoutSeconds
   ) where T : new() {
-    await HttpQueries.SendRequest(request, progressHandler);
+    await HttpQueries.SendRequest(request, timeoutSeconds, progressHandler);
 
     return HttpQueries.ParseResponse<T>(request);
   }
@@ -117,7 +140,7 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   /// logged and rethrown as a <see cref="HttpNetworkException"/>.
   /// </summary>
   private static async Task<byte[]> SendForBytes(UnityWebRequest request) {
-    await HttpQueries.SendRequest(request);
+    await HttpQueries.SendRequest(request, HttpQueries.TransferTimeoutSeconds);
 
     if (request.result is UnityWebRequest.Result.Success) {
       return request.downloadHandler.data;
@@ -125,11 +148,15 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
 
     // The verbose send/complete tracing may be disabled at the default log level, so the failing
     // URL has to stay in this always-on error line.
+    // The body is capped because an aborted transfer leaves a partial one: a CDN error page is
+    // worth reading, several megabytes of half-downloaded image are not.
+    var body = request.downloadHandler.text;
+
     Mod.Log.ErrorSilent(
       $"HTTP: Downloading {request.url} failed ({request.responseCode}): " +
-      (string.IsNullOrEmpty(request.downloadHandler.text)
+      (string.IsNullOrEmpty(body)
         ? request.error
-        : request.downloadHandler.text)
+        : body.Substring(0, Math.Min(body.Length, 500)))
     );
 
     throw new HttpNetworkException(HttpQueries.GetRequestId(request), request.error);
@@ -139,9 +166,19 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   /// Sends a request and returns its final URL after any redirects (the request is typically a HEAD
   /// whose only purpose is to follow the redirect chain).
   /// A non-success result is thrown as a <see cref="HttpNetworkException"/>.
+  /// <para>
+  /// The mod headers are deliberately withheld: the engine follows the chain in native code, which
+  /// would replay them onto the third-party host the chain ends on, and these carry the creator
+  /// credential. Nothing is lost by withholding them, as the endpoint resolves a creator by public
+  /// name and does not authenticate.
+  /// </para>
   /// </summary>
   private static async Task<string> SendForRedirect(UnityWebRequest request) {
-    await HttpQueries.SendRequest(request);
+    await HttpQueries.SendRequest(
+      request,
+      HttpQueries.RequestTimeoutSeconds,
+      withModHeaders: false
+    );
 
     if (request.result is not UnityWebRequest.Result.Success) {
       throw new HttpNetworkException(
@@ -153,8 +190,27 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
     return request.url;
   }
 
+  /// <summary>
+  /// Attaches the mod's headers, the creator credential among them, to a request bound for our own
+  /// API.
+  /// The whole origin is checked and not just the path, because these headers carry an API
+  /// credential and several requests take a URL the server supplies (a CDN image, a social link):
+  /// a path-only check would hand the credential to any other host serving a
+  /// <see cref="BaseApiPath"/> path, and a host-only check would hand it to a cleartext scheme on
+  /// our own host.
+  /// </summary>
   private static void AddModHeaders(UnityWebRequest request) {
-    if (!request.uri.AbsolutePath.StartsWith(HttpQueries.BaseApiPath)) {
+    var apiUri = new Uri(HttpQueries.PrependApiUrl("/"));
+
+    // Comparing the parsed base rather than the raw setting, so a trailing slash on it cannot shift
+    // the prefix this is matched against.
+    var isOurApi =
+      request.uri.Scheme == apiUri.Scheme &&
+      request.uri.Port == apiUri.Port &&
+      string.Equals(request.uri.Host, apiUri.Host, StringComparison.OrdinalIgnoreCase) &&
+      request.uri.AbsolutePath.StartsWith(apiUri.AbsolutePath.TrimEnd('/'));
+
+    if (!isOurApi) {
       return;
     }
 
