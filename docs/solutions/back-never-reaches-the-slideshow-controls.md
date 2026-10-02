@@ -4,7 +4,8 @@ area: UI
 symptoms:
   - 'Escape does not close a panel opened from the main-menu slideshow controls'
   - 'A vanilla dropdown in the slideshow controls stays open on Escape'
-tags: [cs2-ui, cs2-input, input-action, focus, main-menu, escape]
+  - 'The shoulder buttons do not switch the tabs of a window opened from the slideshow controls'
+tags: [cs2-ui, cs2-input, input-action, focus, main-menu, escape, switch-tab]
 ---
 
 # Back never reaches the slideshow controls
@@ -20,7 +21,7 @@ In the main menu Escape arrives as the `Back` input action, and a plain input co
 `ActiveOnFocus` (`index.js:32942-32943`): it hears an action only while the focus sits on its
 branch. The slideshow controls are mounted outside the focus path the main menu drives, so nothing
 in them ever holds the focus, and every focus-bound consumer there stays deaf, the vanilla
-`Panel`'s own close handling included.
+`Panel`'s own close handling and the vanilla `TabNav`'s `Switch Tab` included.
 
 ## Fix
 
@@ -36,5 +37,5 @@ const backActions = useMemo(() => ({ Back: onClose }), [onClose]);
 
 ## Prevention
 
-Anything the slideshow controls open binds its own dismissal this way. `screenshot-details-window.test.tsx`
-covers it by sending `Back` through an `EventInputProvider` with nothing focused.
+Anything the slideshow controls open binds its own dismissal, and its own tab switching, this way. `screenshot-details-window.test.tsx`
+covers it by sending `Back` and `Switch Tab` through an `EventInputProvider` with nothing focused.

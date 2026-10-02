@@ -58,6 +58,8 @@ Check live what a component test cannot show (layout, tooltips, transitions, nat
 - Send an input action `game_key` cannot reach, such as Back: `window['cs2/input'].onInputActionPerformed$.onUpdate({ action: 'Back', value: null })`.
 
 A fake lasts until the game updates that binding or the UI reloads.
+For a scenario that must survive reloads, load a real screenshot instead, in a Debug build, with the `unity` `eval` tool: `world.GetExistingSystemManaged<HallOfFame.Systems.SlideshowUISystem>().LoadScreenshotById("<id>")`.
+When no screenshot has the state you need, edit one into it: the local dev database (`mongodb://localhost/halloffame`, started by `mise dev:db:start` in `../HallOfFameServer`) is throwaway and free to edit.
 
 ## Best-effort loading and harness repair
 
