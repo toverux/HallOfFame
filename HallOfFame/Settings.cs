@@ -41,6 +41,7 @@ namespace HallOfFame;
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingNext), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingLike), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
+[SettingsUIKeyboardAction(nameof(Settings.KeyBindingScreenshotDetails), Usages.kMenuUsage)]
 public sealed class
   Settings : ModSetting, IJsonWritable, ICreatorIdentityStore, ISlideshowSettings {
   private const string GroupYourProfile = "YourProfile";
@@ -288,6 +289,13 @@ public sealed class
     nameof(Settings.KeyBindingToggleMenu)
   )]
   public ProxyBinding KeyBindingToggleMenu { get; set; }
+
+  [SettingsUISection(Settings.GroupKeyBindings)]
+  [SettingsUIKeyboardBinding(
+    BindingKeyboard.D,
+    nameof(Settings.KeyBindingScreenshotDetails)
+  )]
+  public ProxyBinding KeyBindingScreenshotDetails { get; set; }
 
   /// <summary>
   /// Text explaining the algorithms' weight selection mechanism.

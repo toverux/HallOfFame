@@ -62,6 +62,8 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
 
   private InputActionBinding toggleMenuInputActionBinding = null!;
 
+  private InputActionBinding screenshotDetailsInputActionBinding = null!;
+
   private TriggerBinding previousScreenshotBinding = null!;
 
   private TriggerBinding nextScreenshotBinding = null!;
@@ -181,10 +183,17 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         Mod.Settings.KeyBindingToggleMenu
       );
 
+      this.screenshotDetailsInputActionBinding = new InputActionBinding(
+        SlideshowUISystem.BindingGroup,
+        "screenshotDetailsInputAction",
+        Mod.Settings.KeyBindingScreenshotDetails
+      );
+
       this.AddBinding(this.previousScreenshotInputActionBinding);
       this.AddBinding(this.nextScreenshotInputActionBinding);
       this.AddBinding(this.likeScreenshotInputActionBinding);
       this.AddBinding(this.toggleMenuInputActionBinding);
+      this.AddBinding(this.screenshotDetailsInputActionBinding);
 
       // TRIGGER BINDINGS
       // Fire-and-forget edges: the conductor entry points are designed never to throw, so the

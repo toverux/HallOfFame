@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Colossal.Json;
+using Game.Input;
 using Game.SceneFlow;
 using Game.Settings;
 using HallOfFame.Domain;
@@ -22,6 +23,8 @@ internal partial class HttpQueries {
           { "screenWidth", Screen.width },
           { "screenHeight", Screen.height },
           { "useLegacyInterface", SharedSettings.instance.userInterface.useLegacyInterface },
+          // Weighs how much controller support is worth to the mod's players.
+          { "isGamepadConnected", InputManager.IsGamepadConnected },
           // Some mod settings
           { "enableMainMenuSlideshow", Mod.Settings.EnableMainMenuSlideshow },
           { "enableLoadingScreenBackground", Mod.Settings.EnableLoadingScreenBackground },

@@ -5,6 +5,10 @@ $exit-duration: 150ms;
 $padding-horizontal: 30rem;
 $paragraph-gap: 12rem;
 
+// Lighter than the grey of the game's empty panels, which reads poorly over the window's body.
+$empty-color: #b7bec8;
+$empty-line-height: 1.4em;
+
 .backdrop {
   animation: backdrop-enter $enter-duration ease-out;
   transition: opacity $exit-duration;
@@ -35,18 +39,43 @@ $paragraph-gap: 12rem;
     padding: 0 $padding-horizontal;
     margin-bottom: -$paragraph-gap;
 
+    font-size: var(--fontSizeL);
     line-height: 1.5;
   }
 
   &-text {
     margin: 0 0 $paragraph-gap;
   }
+}
 
-  &-empty {
+// The vanilla empty panels' look (Chirper, the notifications), sized by its own padding rather than
+// filling a fixed-height panel, so the window keeps fitting its content.
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40rem $padding-horizontal 30rem;
+
+  color: $empty-color;
+
+  &-icon {
+    // The colour a vanilla tinted icon paints its glyph with.
+    --iconColor: #{$empty-color};
+
+    width: 64rem;
+    height: 64rem;
+    margin-bottom: 20rem;
+  }
+
+  &-text {
+    // Two lines held whether or not the text wraps, so the window keeps its height and the centred
+    // window its icon in place from one empty tab to the next.
+    min-height: 2 * $empty-line-height;
     margin: 0;
-    padding: 0 $padding-horizontal;
 
-    opacity: 0.7;
+    font-size: var(--fontSizeL);
+    line-height: $empty-line-height;
+    text-align: center;
   }
 }
 

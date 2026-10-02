@@ -16,6 +16,15 @@ function noop(): void {
   // Closing is not what these tests look at.
 }
 
+function nextFrame(): Promise<void> {
+  // oxlint-disable-next-line promise/avoid-new - requestAnimationFrame only takes a callback
+  return new Promise(resolve => {
+    requestAnimationFrame(() => {
+      resolve();
+    });
+  });
+}
+
 describe('ScreenshotDetailsWindow', () => {
   it(`renders the description's bold, leading heading, and explicit line breaks`, () => {
     render(
@@ -44,6 +53,85 @@ describe('ScreenshotDetailsWindow', () => {
 
     expect(nextLine.tagName).toBe('P');
     expect(nextLine).not.toBe(body);
+  });
+
+  it(`shows a tab for the description, the photo mode settings, and the playset`, () => {
+    render(
+      <ScreenshotDetailsWindow
+        screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
+        isOpen={true}
+        onClose={noop}
+      />
+    );
+
+    expect(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]')).toBeDefined();
+    expect(
+      screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]')
+    ).toBeDefined();
+    expect(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]')).toBeDefined();
+  });
+
+  it(`says the photo mode settings and the playset are coming when selected`, async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ScreenshotDetailsWindow
+        screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
+        isOpen={true}
+        onClose={noop}
+      />
+    );
+
+    await user.click(
+      screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]')
+    );
+
+    expect(
+      screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]')
+    ).toBeDefined();
+    expect(screen.queryByText('A city.')).toBeNull();
+
+    await user.click(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]'));
+
+    expect(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]')).toBeDefined();
+  });
+
+  it(`switches tabs on Switch Tab, although the controls never hold the focus`, async () => {
+    // The actions the game reports as bound, which the input root reads before it listens.
+    setBinding('input', 'actionNames', ['Switch Tab']);
+
+    render(
+      <EventInputProvider>
+        <ScreenshotDetailsWindow
+          screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
+          isOpen={true}
+          onClose={noop}
+        />
+      </EventInputProvider>
+    );
+
+    const photoModeSettings = 'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]';
+    const playset = 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]';
+
+    // The input stack takes in a new consumer on the next frame.
+    await nextFrame();
+
+    emitEvent('input.onActionPerformed.update', { action: 'Switch Tab', value: 1 });
+
+    expect(await screen.findByText(photoModeSettings)).toBeDefined();
+
+    emitEvent('input.onActionPerformed.update', { action: 'Switch Tab', value: 1 });
+
+    expect(await screen.findByText(playset)).toBeDefined();
+
+    // Past the last tab, it wraps around to the first, both ways.
+    emitEvent('input.onActionPerformed.update', { action: 'Switch Tab', value: 1 });
+
+    expect(await screen.findByText('A city.')).toBeDefined();
+
+    emitEvent('input.onActionPerformed.update', { action: 'Switch Tab', value: -1 });
+
+    expect(await screen.findByText(playset)).toBeDefined();
   });
 
   it(`leaves unsupported markdown as literal text`, () => {

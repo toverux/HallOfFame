@@ -19,7 +19,7 @@ describe('MenuControlsContent', () => {
 
     render(<MenuControlsContent />);
 
-    fireEvent.mouseDown(screen.getByText('A city.'));
+    fireEvent.click(screen.getByText('A city.'));
 
     // The row's preview and the window's body.
     expect(screen.getAllByText('A city.')).toHaveLength(2);

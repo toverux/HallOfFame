@@ -3,12 +3,15 @@ import { InputActionConsumer } from 'cs2/input';
 import {
   FormattedParagraphs,
   type FormattedTextTheme,
+  Icon,
   MarkdownRenderer,
   Portal,
   Scrollable
 } from 'cs2/ui';
-import { memo, type ReactElement, useContext, useMemo } from 'react';
+import { memo, type ReactElement, type ReactNode, useContext, useMemo, useState } from 'react';
 import type { Screenshot } from '../../common';
+import { PreloadImages } from '../../components/preload-images';
+import cameraRetroSolidSrc from '../../icons/fontawesome/camera-retro-solid.svg';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import {
@@ -24,6 +27,17 @@ import { Tab, TabBar } from '../../vanilla-modules/game-ui/common/tabs/tabs';
 import { type DetailsTabState, selectScreenshotDetails } from './screenshot-details';
 import { selectLocalizedName } from './select-localized-name';
 import * as styles from './screenshot-details-window.module.scss';
+
+const penSrc = 'Media/Glyphs/Pen.svg';
+
+const paradoxModsSrc = 'Media/Glyphs/ParadoxMods.svg';
+
+/**
+ * Every icon the window's empty states can show, preloaded while it is open rather than with the
+ * controls, so they cost nothing until the window is used.
+ * Each tab still draws its icon blank the first time it shows before the icon has landed.
+ */
+const preloadedIcons: readonly string[] = [penSrc, cameraRetroSolidSrc, paradoxModsSrc];
 
 /**
  * The window holding everything known about a screenshot, a modal built from the same parts as the
@@ -81,7 +95,33 @@ function DetailsModal({
     locale: screenshot.cityNameLocale
   });
 
-  const backActions = useMemo(() => ({ Back: onClose }), [onClose]);
+  // Not kept across openings: the window reopens on the description.
+  const [selectedTab, setSelectedTab] = useState<DetailsTabId>('description');
+
+  // Switch Tab is handled here rather than by the vanilla tab bar, which waits for the focus the
+  // way Back would. It wraps around at either end.
+  const actions = useMemo(
+    () => ({
+      'Back': onClose,
+      'Switch Tab': (direction: number) => {
+        if (direction == 0) {
+          return;
+        }
+
+        // From the state rather than the render: the input stack keeps this handler until its
+        // next rebuild, which a second press can beat.
+        setSelectedTab(currentTab => {
+          const index = detailsTabs.findIndex(tab => tab.id == currentTab);
+          const count = detailsTabs.length;
+
+          return detailsTabs[(index + (direction < 0 ? count - 1 : 1)) % count]?.id ?? currentTab;
+        });
+
+        bindings.playSound(direction < 0 ? 'select-previous-item' : 'select-next-item');
+      }
+    }),
+    [onClose]
+  );
 
   // The backdrop fades out alongside the panel's exit, which the transition group drives.
   const isExiting = useContext(TransitionContext).state == TransitionState.exit;
@@ -89,7 +129,7 @@ function DetailsModal({
   return (
     // The slideshow controls sit outside the focus path Back travels along, so a consumer waiting
     // for focus would never hear it: this one listens whatever holds the focus.
-    <InputActionConsumer actions={backActions} ignoreFocusState={true}>
+    <InputActionConsumer actions={actions} ignoreFocusState={true}>
       <PanelBackdrop
         className={classNames(styles.backdrop, isExiting && styles.backdropExiting)}
         onMouseDown={onClose}>
@@ -101,19 +141,32 @@ function DetailsModal({
               <PanelTitleBar>{city.name ?? screenshot.cityName}</PanelTitleBar>
 
               <TabBar>
-                <Tab id='description' selectedId='description' onSelect={keepSelectedTab}>
-                  {translate(
-                    'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]',
-                    'Description'
-                  )}
-                </Tab>
+                {detailsTabs.map(tab => (
+                  <Tab key={tab.id} id={tab.id} selectedId={selectedTab} onSelect={setSelectedTab}>
+                    {translate(tab.labelId)}
+                  </Tab>
+                ))}
               </TabBar>
             </>
           }
           onClose={onClose}>
-          {/* Keyed on the screenshot, so the next one starts scrolled to its top. */}
-          <Scrollable key={screenshot.id} className={styles.windowContent}>
-            <DescriptionTab state={details.description} />
+          <PreloadImages srcs={preloadedIcons} />
+
+          {/* Keyed on the screenshot and the tab, so each starts scrolled to its top. */}
+          <Scrollable key={`${screenshot.id}-${selectedTab}`} className={styles.windowContent}>
+            {selectedTab == 'description' && <DescriptionTab state={details.description} />}
+
+            {selectedTab == 'photoModeSettings' && (
+              <EmptyState iconSrc={cameraRetroSolidSrc}>
+                {translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]')}
+              </EmptyState>
+            )}
+
+            {selectedTab == 'playset' && (
+              <EmptyState iconSrc={paradoxModsSrc}>
+                {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]')}
+              </EmptyState>
+            )}
           </Scrollable>
         </Panel>
       </PanelBackdrop>
@@ -141,16 +194,16 @@ function DescriptionTab({ state }: Readonly<{ state: DetailsTabState }>): ReactE
     }
     case 'notShared': {
       return (
-        <p className={styles.windowEmpty}>
+        <EmptyState iconSrc={penSrc}>
           {translate('HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Not Shared]')}
-        </p>
+        </EmptyState>
       );
     }
     case 'predatesFeature': {
       return (
-        <p className={styles.windowEmpty}>
+        <EmptyState iconSrc={penSrc}>
           {translate('HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Predates Feature]')}
-        </p>
+        </EmptyState>
       );
     }
     default: {
@@ -160,9 +213,44 @@ function DescriptionTab({ state }: Readonly<{ state: DetailsTabState }>): ReactE
   }
 }
 
-function keepSelectedTab(): void {
-  // The Description tab is the only one, so selecting it changes nothing.
+/**
+ * A tab with nothing to show, laid out like the game's own empty panels under the tab's icon.
+ */
+function EmptyState({
+  iconSrc,
+  children
+}: Readonly<{ iconSrc: string; children: ReactNode }>): ReactElement {
+  return (
+    <div className={styles.emptyState}>
+      <Icon src={iconSrc} tinted={true} className={styles.emptyStateIcon} />
+      <p className={styles.emptyStateText}>{children}</p>
+    </div>
+  );
 }
+
+type DetailsTabId = 'description' | 'photoModeSettings' | 'playset';
+
+/**
+ * The window's tabs, in display order.
+ * The photo mode settings and the playset show a placeholder until their tabs ship.
+ */
+const detailsTabs: ReadonlyArray<{
+  readonly id: DetailsTabId;
+  readonly labelId: string;
+}> = [
+  {
+    id: 'description',
+    labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]'
+  },
+  {
+    id: 'photoModeSettings',
+    labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]'
+  },
+  {
+    id: 'playset',
+    labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]'
+  }
+];
 
 // Headings keep the game's own styles; paragraphs get room between them.
 const descriptionTheme: Partial<FormattedTextTheme> = {

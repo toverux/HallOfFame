@@ -10,6 +10,8 @@ import * as bindings from './bindings';
  * This function replaces onSelect or onClick with onMouseDown to make the UI feel more responsive.
  * Unlike Carmack, I think onClick is still better as a default, but I agree that onMouseDown is
  * nice for low-stakes interactions and games, as the difference is really noticeable and pleasant.
+ * It replaces a vanilla button's `onSelect` rather than joining it: the button's own click would
+ * run the handler and play its sound a second time.
  */
 export function snappyOnSelect(
   handler: () => void,

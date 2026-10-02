@@ -3,6 +3,12 @@
 .row {
   margin-bottom: 15rem;
   max-width: 100%;
+  padding: 0;
+
+  // A button element, which would otherwise draw its text black and centred. Cohtml ignores
+  // `inherit` on a button's colour, so it repeats the controls' own.
+  color: white;
+  text-align: left;
 
   display: flex;
   flex-direction: row;

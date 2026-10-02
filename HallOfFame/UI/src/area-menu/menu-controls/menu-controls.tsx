@@ -20,8 +20,14 @@ import { selectScreenshotDetails } from './screenshot-details';
 import { ScreenshotDetailsWindow } from './screenshot-details-window';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
 import { MenuControlsSocialsPreloader } from './socials-preloader';
+import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 import { viewerLinkPreloadedIcons } from './viewer-link';
 import * as styles from './menu-controls.module.scss';
+
+const screenshotDetailsInputAction = bindings.bindInputAction(
+  'hallOfFame.slideshow',
+  'screenshotDetailsInputAction'
+);
 
 // The icons the controls only show on demand, gathered from the components that own them.
 //
@@ -77,6 +83,22 @@ export function MenuControlsContent(): ReactElement {
   const openDetails = useCallback(() => setIsDetailsOpen(true), []);
 
   const closeDetails = useCallback(() => setIsDetailsOpen(false), []);
+
+  // The key opens the window whether or not the details row shows, so it does the same thing on
+  // every screenshot, and closes it again.
+  useMenuControlsInputAction(
+    screenshotDetailsInputAction.useInputPhase(),
+    () => {
+      if (!menuState.screenshot || menuState.loadError) {
+        return false;
+      }
+
+      setIsDetailsOpen(isOpen => !isOpen);
+
+      return true;
+    },
+    'select-item'
+  );
 
   // The error view and the empty state below unmount the window without closing it, which would
   // leave it to pop back open on the next screenshot.

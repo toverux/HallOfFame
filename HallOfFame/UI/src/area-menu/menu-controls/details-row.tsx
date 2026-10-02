@@ -1,6 +1,5 @@
-import { FormattedText, type FormattedTextTheme, MarkdownRenderer } from 'cs2/ui';
+import { Button, FormattedText, type FormattedTextTheme, MarkdownRenderer } from 'cs2/ui';
 import { memo, type ReactElement, useMemo } from 'react';
-import { snappyOnSelect } from '../../utils';
 import * as styles from './details-row.module.scss';
 
 /**
@@ -18,8 +17,10 @@ export const MenuControlsDetailsRow = memo(
     // the whole mod UI.
     const renderer = useMemo(() => new MarkdownRenderer(), []);
 
+    // Opens on click rather than on press like the round buttons, for the reason `snappyOnSelect`
+    // gives.
     return (
-      <div className={styles.row} {...snappyOnSelect(onOpen)}>
+      <Button theme={rowTheme} onSelect={onOpen}>
         <FormattedText
           className={styles.rowPreview}
           text={preview}
@@ -27,10 +28,13 @@ export const MenuControlsDetailsRow = memo(
           theme={previewTheme}
           nonInline={true}
         />
-      </div>
+      </Button>
     );
   }
 );
+
+// Replaces the vanilla button look, which the row does not wear.
+const rowTheme = { button: styles.row };
 
 // Every paragraph style reads as the surrounding line: a heading keeps its words but not its size,
 // which would otherwise blow the one-line preview up.
