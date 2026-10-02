@@ -27,7 +27,8 @@
       "source": {
         "source": "github",
         "repo": "CitiesSkylinesModding/agents-plugins"
-      }
+      },
+      "autoUpdate": true
     }
   }
 }
