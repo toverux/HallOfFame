@@ -1,11 +1,25 @@
-// The glass the mod's surfaces over the slideshow are made of: the round nav buttons and the
-// dropdown menus.
+// The materials the mod's surfaces over the slideshow are made of.
 
-// Frosted, not clear.
+// The glass of the round nav buttons and the dropdown menus: frosted, not clear.
 $glass-blur: 56px;
 
 // Only the brightness varies between the resting, hovered and pressed states: a surface is lit
 // harder, not remade.
 @mixin glass($brightness) {
   backdrop-filter: saturate(135%) brightness($brightness) blur($glass-blur);
+}
+
+// The glass's lit edge. A border rather than an inset shadow, which Cohtml snaps outward to whole
+// pixels on the sides ending between two, drawing them thicker.
+$glass-rim-color: rgba(255, 255, 255, 0.25);
+$glass-rim: 2rem solid $glass-rim-color;
+
+// The label pills' height, and the gap they leave after them on both axes.
+$label-height: 40rem;
+$label-spacing: 15rem;
+
+// The frost the label pills are made of: it greys the screenshot behind rather than lighting it, so
+// a pill keeps one tone over any screenshot.
+@mixin label-frost {
+  backdrop-filter: contrast(80%) blur(25px);
 }

@@ -1,10 +1,8 @@
 import classNames from 'classnames';
-import { ControlIcons } from 'cs2/input';
 import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
 import { MenuButton } from 'cs2/ui';
 import { memo, type ReactElement, useContext } from 'react';
 import type { Screenshot } from '../../common';
-import { Tooltip, type TooltipProps } from '../../components/tooltip';
 import ellipsisSolidSrc from '../../icons/fontawesome/ellipsis-solid.svg';
 import loveChirperSrc from '../../icons/love-chirper.png';
 import doubleArrowRightTriangleSrc from '../../icons/uil/double-arrow-right-triangle.svg';
@@ -13,6 +11,7 @@ import eyeOpenSrc from '../../icons/uil/eye-open.svg';
 import { snappyOnSelect, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { DropdownContext } from '../../vanilla-modules/game-ui/common/input/dropdown/dropdown';
+import { MenuControlsInputHintTooltip } from './input-hint-tooltip';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 import * as styles from './nav-buttons.module.scss';
 
@@ -73,7 +72,8 @@ export const MenuControlsNextButton = memo(
     const activeClass = phase == 'Performed' && !disabled ? styles.buttonActive : '';
 
     return (
-      <MenuButtonTooltip
+      <MenuControlsInputHintTooltip
+        direction='right'
         binding={binding}
         tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Next]')}>
         <MenuButton
@@ -83,7 +83,7 @@ export const MenuControlsNextButton = memo(
           disabled={isLoading}
           {...snappyOnSelect(bindings.nextScreenshot)}
         />
-      </MenuButtonTooltip>
+      </MenuControlsInputHintTooltip>
     );
   }
 );
@@ -116,7 +116,8 @@ export const MenuControlsPreviousButton = memo(
     const activeClass = phase == 'Performed' && !disabled ? styles.buttonActive : '';
 
     return (
-      <MenuButtonTooltip
+      <MenuControlsInputHintTooltip
+        direction='right'
         binding={binding}
         tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Previous]')}>
         <MenuButton
@@ -126,7 +127,7 @@ export const MenuControlsPreviousButton = memo(
           disabled={disabled}
           {...snappyOnSelect(bindings.previousScreenshot)}
         />
-      </MenuButtonTooltip>
+      </MenuControlsInputHintTooltip>
     );
   }
 );
@@ -156,7 +157,8 @@ function MenuControlsToggleMenuVisibilityButtonBase({
   const activeClass = phase == 'Performed' ? styles.buttonActive : '';
 
   return (
-    <MenuButtonTooltip
+    <MenuControlsInputHintTooltip
+      direction='right'
       binding={binding}
       tooltip={translate('HallOfFame.UI.Menu.MenuControls.ACTION_TOOLTIP[Toggle Menu]')}>
       <MenuButton
@@ -165,7 +167,7 @@ function MenuControlsToggleMenuVisibilityButtonBase({
         tinted={true}
         {...snappyOnSelect(toggleMenuVisibility, selectSound)}
       />
-    </MenuButtonTooltip>
+    </MenuControlsInputHintTooltip>
   );
 }
 
@@ -192,7 +194,8 @@ export const MenuControlsLikeButton = memo(
         : '';
 
     return (
-      <MenuButtonTooltip
+      <MenuControlsInputHintTooltip
+        direction='right'
         binding={binding}
         tooltip={
           <LocalizedString
@@ -225,7 +228,7 @@ export const MenuControlsLikeButton = memo(
           onSelect={bindings.likeScreenshot}
           selectSound={selectSound}
         />
-      </MenuButtonTooltip>
+      </MenuControlsInputHintTooltip>
     );
   }
 );
@@ -251,27 +254,3 @@ export const MenuControlsMoreActionsButton = memo((): ReactElement => {
     />
   );
 });
-
-function MenuButtonTooltip({
-  tooltip,
-  binding,
-  children
-}: Readonly<{
-  tooltip: TooltipProps['tooltip'];
-  binding: bindings.ProxyBinding;
-  children: TooltipProps['children'];
-}>): ReactElement {
-  return (
-    <Tooltip
-      direction='right'
-      tooltip={
-        <div className={styles.buttonTooltip}>
-          {tooltip}
-
-          <ControlIcons bindings={[binding.binding]} modifiers={binding.modifiers} />
-        </div>
-      }>
-      {children}
-    </Tooltip>
-  );
-}

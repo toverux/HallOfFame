@@ -17,10 +17,8 @@
     // The round nav buttons' glass, at rest, through the shared mixin.
     background-color: rgba(255, 255, 255, 0.05);
     @include shared.glass(108%);
-    border: none;
-    box-shadow:
-      0 2rem 10rem rgba(0, 0, 0, 0.35),
-      inset 0 0 0 2rem rgba(255, 255, 255, 0.25);
+    border: shared.$glass-rim;
+    box-shadow: 0 2rem 10rem rgba(0, 0, 0, 0.35);
   }
 
   // For an anchor sitting in the button column: there is never room below it there, so the popup

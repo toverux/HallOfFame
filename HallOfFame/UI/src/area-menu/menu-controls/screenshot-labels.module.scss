@@ -1,4 +1,5 @@
 @use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
 
 .labels {
   display: flex;
@@ -8,18 +9,18 @@
   align-items: flex-start;
 
   &-label {
-    margin-right: 15rem;
-    margin-bottom: 15rem;
+    margin-right: shared.$label-spacing;
+    margin-bottom: shared.$label-spacing;
 
     // Normally we would not have to use a hardcoded height here, but this circumvents a cohtml
     // layout bug where images have trouble stretching to the height of this container (and that
     // depended on the flex configuration of the parents too, so this seems to be the most
     // robust way to deal with it).
-    height: 40rem;
+    height: shared.$label-height;
     display: flex;
     align-items: center;
-    border-radius: 20rem;
-    backdrop-filter: contrast(80%) blur(25px);
+    border-radius: shared.$label-height * 0.5;
+    @include shared.label-frost;
     padding: 0 12rem;
 
     // This circumvents a rare bug where a span element can collapse in a random way, a bug in

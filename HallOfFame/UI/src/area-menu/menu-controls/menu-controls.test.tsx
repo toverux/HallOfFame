@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { makeScreenshot } from '../../testing/fixtures';
+import { makeScreenshot, makeSettings } from '../../testing/fixtures';
 import { resetBindings, setBinding } from '../../testing/game-setup';
 import { MenuControlsContent } from './menu-controls';
 
@@ -36,6 +36,52 @@ describe('MenuControlsContent', () => {
       setBinding('hallOfFame.slideshow', 'loadError', null);
     });
 
+    expect(screen.getAllByText('A city.')).toHaveLength(1);
+  });
+
+  it(`closes the details window on navigating to another screenshot`, () => {
+    setBinding(
+      'hallOfFame.slideshow',
+      'screenshot',
+      makeScreenshot({ id: 'first', description: 'A city.', capabilities: ['description'] })
+    );
+
+    render(<MenuControlsContent />);
+
+    fireEvent.click(screen.getByText('A city.'));
+
+    expect(screen.getAllByText('A city.')).toHaveLength(2);
+
+    act(() => {
+      setBinding(
+        'hallOfFame.slideshow',
+        'screenshot',
+        makeScreenshot({ id: 'second', description: 'A town.', capabilities: ['description'] })
+      );
+    });
+
+    // The row's preview alone.
+    expect(screen.getAllByText('A town.')).toHaveLength(1);
+  });
+
+  it(`hides the details row by setting while the key still opens the window`, () => {
+    setBinding('hallOfFame.common', 'settings', makeSettings({ showScreenshotDetails: false }));
+
+    setBinding(
+      'hallOfFame.slideshow',
+      'screenshot',
+      makeScreenshot({ description: 'A city.', capabilities: ['description'] })
+    );
+
+    render(<MenuControlsContent />);
+
+    expect(screen.queryByText('A city.')).toBeNull();
+
+    act(() => {
+      setBinding('hallOfFame.slideshow', 'screenshotDetailsInputAction.phase', 'Performed');
+    });
+
+    // The window's body alone.
     expect(screen.getAllByText('A city.')).toHaveLength(1);
   });
 });

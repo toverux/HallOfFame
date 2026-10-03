@@ -48,6 +48,76 @@ $empty-line-height: 1.4em;
   }
 }
 
+// The tabs share the width of the body's text column equally, rather than huddling at the centre
+// at their labels' widths.
+.tabBar {
+  --tabGap: 10rem;
+  // Cohtml leaves a tab with a zero flex basis at its minimum width rather than growing it, and
+  // lays the row out shifted off the bar's start.
+  --minTabWidth: 0rem;
+
+  // The header would otherwise size the bar to its tabs, which have no width of their own to give.
+  align-self: stretch;
+  padding: 0 $padding-horizontal;
+
+  // Outranks the vanilla bar's own sizing of its tabs.
+  > .tab {
+    flex: 1 1 0;
+  }
+}
+
+// A vanilla tab, its label led by the glyph of the details row button opening it.
+.tab {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  // The vanilla tab centres its label with `text-align`, which no longer reaches a flex row.
+  justify-content: center;
+
+  &-icon {
+    // The tab's own label colours, which a tinted icon does not inherit.
+    --iconColor: rgba(255, 255, 255, 0.8);
+
+    flex-shrink: 0;
+    width: 20rem;
+    height: 20rem;
+    margin-right: 8rem;
+
+    @at-root :global(.selected) > & {
+      --iconColor: rgb(255, 255, 255);
+    }
+
+    // A disc fills its box where the other glyphs leave room around them, and a hexagon, wider
+    // than tall, more: each is resized to read as the same size.
+    &--disc {
+      width: 18rem;
+      height: 18rem;
+      margin-left: 1rem;
+      margin-right: 9rem;
+    }
+
+    &--hexagon {
+      width: 22rem;
+      height: 22rem;
+      margin-left: -1rem;
+      margin-right: 7rem;
+    }
+  }
+
+  // Ellipsized in place of the vanilla tab, whose ellipsis a flex row no longer draws, so a label
+  // longer than its share neither spills nor pushes the icon out. Cohtml draws the ellipsis only in
+  // a text box laid out as a column, a span being a row.
+  &-label {
+    flex: 0 1 auto;
+    min-width: 0;
+
+    flex-direction: column;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
+
 // The vanilla empty panels' look (Chirper, the notifications), sized by its own padding rather than
 // filling a fixed-height panel, so the window keeps fitting its content.
 .emptyState {

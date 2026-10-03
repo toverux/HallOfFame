@@ -1,0 +1,20 @@
+.inputHintTooltip {
+  display: flex;
+  flex-direction: column;
+
+  &-binding {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 5rem;
+  }
+
+  // The key's own glyph, smaller than the text around it.
+  &-bindingIcons {
+    font-size: 0.8em;
+  }
+
+  &-bindingLabel {
+    margin-left: 8rem;
+  }
+}

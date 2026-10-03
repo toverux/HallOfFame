@@ -19,12 +19,11 @@
 
   // Frosted glass: the disc keeps the colour and the light of whatever it sits on without keeping
   // its detail, which is what makes one disc work over every screenshot. The drop shadow separates
-  // it from a backdrop of its own tone, and the inset rim is the lit edge of the pane.
+  // it from a backdrop of its own tone, and the rim is the lit edge of the pane.
   background-color: rgba(255, 255, 255, 0.05);
   @include shared.glass(108%);
-  box-shadow:
-    0 1rem 5rem rgba(0, 0, 0, 0.3),
-    inset 0 0 0 2rem rgba(255, 255, 255, 0.25);
+  border: shared.$glass-rim;
+  box-shadow: 0 1rem 5rem rgba(0, 0, 0, 0.3);
 
   &[disabled],
   &[disabled]:hover,
@@ -111,10 +110,8 @@
     }
 
     &--liked {
-      // The pink ring, plus the base shadow repeated.
-      box-shadow:
-        0 0 0 2rem rgb(226 85 112),
-        0 1rem 5rem rgba(0, 0, 0, 0.3) !important;
+      // The pink ring, in place of the rim.
+      border-color: rgb(226 85 112) !important;
       background-color: rgba(226, 85, 112, 0.67) !important;
       color: vanilla.$menu-text-1-normal !important;
 
@@ -123,15 +120,5 @@
         background-color: rgba(226, 85, 112, 0.8) !important;
       }
     }
-  }
-}
-
-.button-tooltip {
-  display: flex;
-  flex-direction: column;
-
-  [class*="hint"] {
-    font-size: 0.8em;
-    margin-top: 5rem;
   }
 }

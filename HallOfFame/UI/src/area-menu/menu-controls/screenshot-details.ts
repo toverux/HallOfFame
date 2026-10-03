@@ -23,39 +23,68 @@ export interface ScreenshotDetails {
 
 export interface DetailsRow {
   /**
-   * The description's first line, still in markdown: the row renders it with the game's renderer.
+   * The description's first line as plain text: Cohtml only ellipsizes a text box laid out as a
+   * column, which would stack the runs the game's markdown renderer splits a line into.
+   * `undefined` when the description draws no text, the row then being only icons.
    */
-  readonly preview: string;
+  readonly preview: string | undefined;
+
+  readonly hasPhotoModeSettings: boolean;
+
+  readonly hasPlayset: boolean;
 }
 
 /**
  * Decides what the details window and the controls row show for a screenshot.
  *
- * An empty description means the creator wrote none, unless the screenshot predates the mod
- * release capturing descriptions, which its capabilities tell.
+ * A description that draws no text means the creator wrote none, unless the screenshot predates
+ * the mod release capturing descriptions, which its capabilities tell.
+ *
+ * The row shows a kind of data only when there is some to show: the server blanks what the creator
+ * did not share, and a screenshot predating a kind holds it blank too, so neither needs its own
+ * check here.
  */
 export function selectScreenshotDetails(
-  screenshot: Pick<Screenshot, 'description' | 'capabilities'>
+  screenshot: Pick<Screenshot, 'description' | 'capabilities' | 'paradoxModIds' | 'renderSettings'>
 ): ScreenshotDetails {
-  if (screenshot.description) {
-    return {
-      description: { kind: 'content', text: screenshot.description },
-      row: { preview: firstLine(screenshot.description) }
-    };
-  }
+  // Guarded rather than trusting the type: the server sends `null` for a screenshot without a
+  // description, which reaches the UI as `undefined`.
+  const preview = screenshot.description ? previewLine(screenshot.description) : undefined;
+
+  // A description that draws no text is no description, in the window as in the row.
+  const description: DetailsTabState =
+    preview == undefined
+      ? screenshot.capabilities.includes('description')
+        ? { kind: 'notShared' }
+        : { kind: 'predatesFeature' }
+      : { kind: 'content', text: screenshot.description };
+
+  const hasPhotoModeSettings = Object.keys(screenshot.renderSettings).length > 0;
+
+  const hasPlayset = screenshot.paradoxModIds.length > 0;
+
+  const isRowShown = preview != undefined || hasPhotoModeSettings || hasPlayset;
 
   return {
-    description: screenshot.capabilities.includes('description')
-      ? { kind: 'notShared' }
-      : { kind: 'predatesFeature' },
-    row: undefined
+    description,
+    row: isRowShown ? { preview, hasPhotoModeSettings, hasPlayset } : undefined
   };
 }
 
 /**
- * The first line the game's paragraphs component would render: it splits on newlines and drops
- * blank lines.
+ * A description's first line as plain text, for the row's preview.
+ *
+ * The game's paragraphs component splits on newlines and drops blank paragraphs, and its markdown
+ * renderer reads leading hashes as a heading and `**` pairs as bold: those forms are stripped,
+ * anything else being kept as written.
+ * The preview also stops at a `<br>`, on purpose, though the renderer draws one as a space.
+ * `undefined` when no line holds any text.
  */
-function firstLine(text: string): string {
-  return text.split(/\r\n|\r|\n/u).find(line => line.trim() != '') ?? '';
+function previewLine(text: string): string | undefined {
+  const lines = text
+    .split(/\r\n|\r|\n/u)
+    .flatMap(paragraph => paragraph.replace(/^#+\s+/u, '').split(/<br>/iu))
+    .map(line => line.replaceAll(/\*\*(?<text>.+?)\*\*/gu, '$<text>').trim());
+
+  return lines.find(line => line != '');
 }

@@ -33,7 +33,7 @@ describe('ScreenshotDetailsWindow', () => {
           description: '# Harbour\nA **tram** loop.\nBy the quay.',
           capabilities: ['description']
         })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -59,7 +59,7 @@ describe('ScreenshotDetailsWindow', () => {
     render(
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -77,7 +77,7 @@ describe('ScreenshotDetailsWindow', () => {
     render(
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -104,7 +104,7 @@ describe('ScreenshotDetailsWindow', () => {
       <EventInputProvider>
         <ScreenshotDetailsWindow
           screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
-          isOpen={true}
+          openTab='description'
           onClose={noop}
         />
       </EventInputProvider>
@@ -141,7 +141,7 @@ describe('ScreenshotDetailsWindow', () => {
           description: 'The *night* lighting.',
           capabilities: ['description']
         })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -153,7 +153,7 @@ describe('ScreenshotDetailsWindow', () => {
     render(
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: '', capabilities: ['description'] })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -167,7 +167,7 @@ describe('ScreenshotDetailsWindow', () => {
     render(
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: '', capabilities: [] })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -192,7 +192,7 @@ describe('ScreenshotDetailsWindow', () => {
           cityNameTranslated: 'City of Light',
           cityNameLocale: 'fr-FR'
         })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -212,7 +212,7 @@ describe('ScreenshotDetailsWindow', () => {
     render(
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ cityName: 'Ville-Lumière', cityNameLocale: 'fr-FR' })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -224,7 +224,7 @@ describe('ScreenshotDetailsWindow', () => {
     render(
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
-        isOpen={false}
+        openTab={undefined}
         onClose={noop}
       />
     );
@@ -238,7 +238,7 @@ describe('ScreenshotDetailsWindow', () => {
     const { rerender } = render(
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ id: 'a', description: 'First.', capabilities })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -246,7 +246,7 @@ describe('ScreenshotDetailsWindow', () => {
     rerender(
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ id: 'b', description: 'Second.', capabilities })}
-        isOpen={true}
+        openTab='description'
         onClose={noop}
       />
     );
@@ -265,14 +265,14 @@ describe('ScreenshotDetailsWindow', () => {
     const { rerender, unmount } = render(
       // oxlint-disable-next-line react/jsx-no-constructed-context-values - one fixture, reused below
       <TransitionContext.Provider value={groupContext}>
-        <ScreenshotDetailsWindow screenshot={screenshot} isOpen={true} onClose={noop} />
+        <ScreenshotDetailsWindow screenshot={screenshot} openTab='description' onClose={noop} />
       </TransitionContext.Provider>
     );
 
     rerender(
       // oxlint-disable-next-line react/jsx-no-constructed-context-values - the fixture from above
       <TransitionContext.Provider value={groupContext}>
-        <ScreenshotDetailsWindow screenshot={screenshot} isOpen={false} onClose={noop} />
+        <ScreenshotDetailsWindow screenshot={screenshot} openTab={undefined} onClose={noop} />
       </TransitionContext.Provider>
     );
 
@@ -297,7 +297,7 @@ describe('ScreenshotDetailsWindow', () => {
           description: 'A city.',
           capabilities: ['description']
         })}
-        isOpen={true}
+        openTab='description'
         onClose={onClose}
       />
     );
@@ -324,7 +324,7 @@ describe('ScreenshotDetailsWindow', () => {
       <EventInputProvider>
         <ScreenshotDetailsWindow
           screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
-          isOpen={true}
+          openTab='description'
           onClose={onClose}
         />
       </EventInputProvider>

@@ -1,12 +1,12 @@
 import classNames from 'classnames';
 import { LocalizedString } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
-import { type ReactElement, useCallback, useState } from 'react';
+import { type ReactElement, useCallback, useMemo, useState } from 'react';
 import { PreloadImages } from '../../components/preload-images';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { cityNamePreloadedIcons, MenuControlsCityName } from './city-name';
-import { MenuControlsDetailsRow } from './details-row';
+import { detailsRowPreloadedIcons, MenuControlsDetailsRow } from './details-row';
 import { MenuControlsError } from './error';
 import { MenuControlsMoreActionsMenu, moreActionsPreloadedIcons } from './more-actions-menu';
 import {
@@ -17,7 +17,11 @@ import {
   navButtonsPreloadedIcons
 } from './nav-buttons';
 import { selectScreenshotDetails } from './screenshot-details';
-import { ScreenshotDetailsWindow } from './screenshot-details-window';
+import {
+  type DetailsTabId,
+  detailsTabsPreloadedIcons,
+  ScreenshotDetailsWindow
+} from './screenshot-details-window';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
 import { MenuControlsSocialsPreloader } from './socials-preloader';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
@@ -39,7 +43,9 @@ const preloadedIcons: readonly string[] = [
   ...navButtonsPreloadedIcons,
   ...moreActionsPreloadedIcons,
   ...viewerLinkPreloadedIcons,
-  ...cityNamePreloadedIcons
+  ...cityNamePreloadedIcons,
+  ...detailsRowPreloadedIcons,
+  ...detailsTabsPreloadedIcons
 ];
 
 /**
@@ -78,33 +84,63 @@ export function MenuControlsContent(): ReactElement {
     [setMenuState]
   );
 
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  // The tab the details window is open on, `undefined` while it is closed.
+  const [detailsTab, setDetailsTab] = useState<DetailsTabId | undefined>();
 
-  const openDetails = useCallback(() => setIsDetailsOpen(true), []);
+  const closeDetails = useCallback(() => setDetailsTab(undefined), []);
 
-  const closeDetails = useCallback(() => setIsDetailsOpen(false), []);
+  const detailsInputBinding = screenshotDetailsInputAction.useInputBinding();
+
+  // `undefined` while the error view or the empty state below take the controls' place.
+  const shownScreenshotId = menuState.loadError ? undefined : menuState.screenshot?.id;
 
   // The key opens the window whether or not the details row shows, so it does the same thing on
   // every screenshot, and closes it again.
   useMenuControlsInputAction(
     screenshotDetailsInputAction.useInputPhase(),
     () => {
-      if (!menuState.screenshot || menuState.loadError) {
+      if (shownScreenshotId == undefined) {
         return false;
       }
 
-      setIsDetailsOpen(isOpen => !isOpen);
+      setDetailsTab(tab => (tab == undefined ? 'description' : undefined));
 
       return true;
     },
     'select-item'
   );
 
-  // The error view and the empty state below unmount the window without closing it, which would
+  // The window closes whenever the screenshot it shows goes: on navigation, and when the error view
+  // or the empty state take the controls' place, which would otherwise unmount it unclosed and
   // leave it to pop back open on the next screenshot.
-  if (isDetailsOpen && (menuState.loadError || !menuState.screenshot)) {
-    setIsDetailsOpen(false);
+  const [detailsScreenshotId, setDetailsScreenshotId] = useState(shownScreenshotId);
+
+  if (shownScreenshotId != detailsScreenshotId) {
+    setDetailsScreenshotId(shownScreenshotId);
+    setDetailsTab(undefined);
   }
+
+  // Memoized on the screenshot, so the memoized row and labels keep their props across the renders
+  // the rest of the slideshow state causes.
+  const details = useMemo(
+    () => menuState.screenshot && selectScreenshotDetails(menuState.screenshot),
+    [menuState.screenshot]
+  );
+
+  // Without a description to preview, the row is only icons, a pill among the labels; with one, it
+  // takes a line of its own. The setting hides only the row: the key still opens the window.
+  const detailsRow = useMemo(
+    () =>
+      modSettings.showScreenshotDetails &&
+      details?.row && (
+        <MenuControlsDetailsRow
+          row={details.row}
+          inputBinding={detailsInputBinding}
+          onOpen={setDetailsTab}
+        />
+      ),
+    [modSettings.showScreenshotDetails, details, detailsInputBinding]
+  );
 
   if (menuState.loadError) {
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
@@ -118,17 +154,15 @@ export function MenuControlsContent(): ReactElement {
     );
   }
 
-  if (!menuState.screenshot) {
+  if (!menuState.screenshot || !details) {
     return <></>;
   }
-
-  const details = selectScreenshotDetails(menuState.screenshot);
 
   return (
     <div className={classNames(styles.controls, styles.controlsApplyButtonsOffset)}>
       <ScreenshotDetailsWindow
         screenshot={menuState.screenshot}
-        isOpen={isDetailsOpen}
+        openTab={detailsTab}
         onClose={closeDetails}
       />
 
@@ -185,14 +219,11 @@ export function MenuControlsContent(): ReactElement {
         <div className={styles.sectionContent} style={{ alignSelf: 'flex-start' }}>
           <MenuControlsCityName screenshot={menuState.screenshot} />
 
-          <MenuControlsScreenshotLabels
-            modSettings={modSettings}
-            screenshot={menuState.screenshot}
-          />
+          <MenuControlsScreenshotLabels modSettings={modSettings} screenshot={menuState.screenshot}>
+            {details.row?.preview == undefined && detailsRow}
+          </MenuControlsScreenshotLabels>
 
-          {details.row && (
-            <MenuControlsDetailsRow preview={details.row.preview} onOpen={openDetails} />
-          )}
+          {details.row?.preview != undefined && detailsRow}
         </div>
       </div>
 

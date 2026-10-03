@@ -11,7 +11,11 @@ import {
 import { memo, type ReactElement, type ReactNode, useContext, useMemo, useState } from 'react';
 import type { Screenshot } from '../../common';
 import { PreloadImages } from '../../components/preload-images';
-import cameraRetroSolidSrc from '../../icons/fontawesome/camera-retro-solid.svg';
+import apertureDuotoneLightSrc from '../../icons/fontawesome/aperture-duotone-light.svg';
+import apertureSharpSolidSrc from '../../icons/fontawesome/aperture-sharp-solid.svg';
+import penLineDuotoneLightSrc from '../../icons/fontawesome/pen-line-duotone-light.svg';
+import penLineSolidSrc from '../../icons/fontawesome/pen-line-solid.svg';
+import paradoxModsSolidSrc from '../../icons/paradox/paradox-mods-solid.svg';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import {
@@ -28,16 +32,18 @@ import { type DetailsTabState, selectScreenshotDetails } from './screenshot-deta
 import { selectLocalizedName } from './select-localized-name';
 import * as styles from './screenshot-details-window.module.scss';
 
-const penSrc = 'Media/Glyphs/Pen.svg';
-
-const paradoxModsSrc = 'Media/Glyphs/ParadoxMods.svg';
+const vanillaParadoxModsSrc = 'Media/Glyphs/ParadoxMods.svg';
 
 /**
  * Every icon the window's empty states can show, preloaded while it is open rather than with the
  * controls, so they cost nothing until the window is used.
  * Each tab still draws its icon blank the first time it shows before the icon has landed.
  */
-const preloadedIcons: readonly string[] = [penSrc, cameraRetroSolidSrc, paradoxModsSrc];
+const preloadedIcons: readonly string[] = [
+  penLineDuotoneLightSrc,
+  apertureDuotoneLightSrc,
+  vanillaParadoxModsSrc
+];
 
 /**
  * The window holding everything known about a screenshot, a modal built from the same parts as the
@@ -45,18 +51,18 @@ const preloadedIcons: readonly string[] = [penSrc, cameraRetroSolidSrc, paradoxM
  *
  * It stays mounted while closed, so the transition group it holds can play the game's panel
  * transition both ways, keeping a closing window on screen until its exit has played.
- *
- * It follows the screenshot it is handed, so navigating while it is open re-targets it rather than
- * closing it.
  */
 export const ScreenshotDetailsWindow = memo(
   ({
     screenshot,
-    isOpen,
+    openTab,
     onClose
   }: Readonly<{
     screenshot: Screenshot;
-    isOpen: boolean;
+    /**
+     * The tab the window opens on, `undefined` while it is closed.
+     */
+    openTab: DetailsTabId | undefined;
     onClose: () => void;
   }>): ReactElement => (
     <Portal>
@@ -66,7 +72,14 @@ export const ScreenshotDetailsWindow = memo(
         along with the closing window.
       */}
       <TransitionGroupCoordinator>
-        {isOpen && <DetailsModal key='details' screenshot={screenshot} onClose={onClose} />}
+        {openTab != undefined && (
+          <DetailsModal
+            key='details'
+            screenshot={screenshot}
+            initialTab={openTab}
+            onClose={onClose}
+          />
+        )}
       </TransitionGroupCoordinator>
     </Portal>
   )
@@ -74,9 +87,11 @@ export const ScreenshotDetailsWindow = memo(
 
 function DetailsModal({
   screenshot,
+  initialTab,
   onClose
 }: Readonly<{
   screenshot: Screenshot;
+  initialTab: DetailsTabId;
   onClose: () => void;
 }>): ReactElement {
   const translate = useTranslate();
@@ -95,8 +110,8 @@ function DetailsModal({
     locale: screenshot.cityNameLocale
   });
 
-  // Not kept across openings: the window reopens on the description.
-  const [selectedTab, setSelectedTab] = useState<DetailsTabId>('description');
+  // Not kept across openings: the window reopens on the tab it is opened on.
+  const [selectedTab, setSelectedTab] = useState(initialTab);
 
   // Switch Tab is handled here rather than by the vanilla tab bar, which waits for the focus the
   // way Back would. It wraps around at either end.
@@ -140,10 +155,20 @@ function DetailsModal({
             <>
               <PanelTitleBar>{city.name ?? screenshot.cityName}</PanelTitleBar>
 
-              <TabBar>
+              <TabBar className={styles.tabBar}>
                 {detailsTabs.map(tab => (
-                  <Tab key={tab.id} id={tab.id} selectedId={selectedTab} onSelect={setSelectedTab}>
-                    {translate(tab.labelId)}
+                  <Tab
+                    key={tab.id}
+                    id={tab.id}
+                    selectedId={selectedTab}
+                    className={styles.tab}
+                    onSelect={setSelectedTab}>
+                    <Icon
+                      src={tab.iconSrc}
+                      tinted={true}
+                      className={classNames(styles.tabIcon, tab.iconClassName)}
+                    />
+                    <span className={styles.tabLabel}>{translate(tab.labelId)}</span>
                   </Tab>
                 ))}
               </TabBar>
@@ -157,13 +182,13 @@ function DetailsModal({
             {selectedTab == 'description' && <DescriptionTab state={details.description} />}
 
             {selectedTab == 'photoModeSettings' && (
-              <EmptyState iconSrc={cameraRetroSolidSrc}>
+              <EmptyState iconSrc={apertureDuotoneLightSrc}>
                 {translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]')}
               </EmptyState>
             )}
 
             {selectedTab == 'playset' && (
-              <EmptyState iconSrc={paradoxModsSrc}>
+              <EmptyState iconSrc={vanillaParadoxModsSrc}>
                 {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]')}
               </EmptyState>
             )}
@@ -194,14 +219,14 @@ function DescriptionTab({ state }: Readonly<{ state: DetailsTabState }>): ReactE
     }
     case 'notShared': {
       return (
-        <EmptyState iconSrc={penSrc}>
+        <EmptyState iconSrc={penLineDuotoneLightSrc}>
           {translate('HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Not Shared]')}
         </EmptyState>
       );
     }
     case 'predatesFeature': {
       return (
-        <EmptyState iconSrc={penSrc}>
+        <EmptyState iconSrc={penLineDuotoneLightSrc}>
           {translate('HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Predates Feature]')}
         </EmptyState>
       );
@@ -228,7 +253,7 @@ function EmptyState({
   );
 }
 
-type DetailsTabId = 'description' | 'photoModeSettings' | 'playset';
+export type DetailsTabId = 'description' | 'photoModeSettings' | 'playset';
 
 /**
  * The window's tabs, in display order.
@@ -237,20 +262,34 @@ type DetailsTabId = 'description' | 'photoModeSettings' | 'playset';
 const detailsTabs: ReadonlyArray<{
   readonly id: DetailsTabId;
   readonly labelId: string;
+  readonly iconSrc: string;
+  readonly iconClassName?: string;
 }> = [
   {
     id: 'description',
-    labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]'
+    labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]',
+    iconSrc: penLineSolidSrc
   },
   {
     id: 'photoModeSettings',
-    labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]'
+    labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]',
+    iconSrc: apertureSharpSolidSrc,
+    iconClassName: styles.tabIconDisc
   },
   {
     id: 'playset',
-    labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]'
+    labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]',
+    iconSrc: paradoxModsSolidSrc,
+    iconClassName: styles.tabIconHexagon
   }
 ];
+
+/**
+ * The tabs' icons, for the controls to preload: unlike the empty states' icons, they show on the
+ * frame the window opens.
+ */
+// oxlint-disable-next-line react/only-export-components - no Fast Refresh in a Cohtml bundle
+export const detailsTabsPreloadedIcons: readonly string[] = detailsTabs.map(tab => tab.iconSrc);
 
 // Headings keep the game's own styles; paragraphs get room between them.
 const descriptionTheme: Partial<FormattedTextTheme> = {

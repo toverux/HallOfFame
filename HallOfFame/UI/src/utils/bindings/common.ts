@@ -12,7 +12,9 @@ export interface ModSettings {
   readonly enableLoadingScreenBackground: boolean;
   readonly showFeaturedAsset: boolean;
   readonly showCreatorSocials: boolean;
+  readonly showCityInfo: boolean;
   readonly showViewCount: boolean;
+  readonly showScreenshotDetails: boolean;
   readonly screenshotResolution: 'fhd' | '4k';
   readonly namesTranslationMode: 'disabled' | 'transliterate' | 'translate';
   readonly creatorsScreenshotSaveDirectory: string;
@@ -24,7 +26,9 @@ const settings$ = lazyBindValue<ModSettings>(GROUP, 'settings', {
   enableLoadingScreenBackground: true,
   showFeaturedAsset: true,
   showCreatorSocials: true,
+  showCityInfo: true,
   showViewCount: false,
+  showScreenshotDetails: true,
   screenshotResolution: 'fhd',
   namesTranslationMode: 'translate',
   creatorsScreenshotSaveDirectory: '',

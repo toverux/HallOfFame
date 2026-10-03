@@ -1,37 +1,138 @@
 @use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
 
+// The labels' height, so the row lines up with their rhythm.
+$height: shared.$label-height;
+
+// The rim and the dividers are one hairline.
+$hairline-width: 1rem;
+$hairline: $hairline-width solid shared.$glass-rim-color;
+
+// The segments' height, inside the rim.
+$inner-height: $height - 2 * $hairline-width;
+
+// A group of buttons on the labels' frost, among which it can sit: the rim and the segments' own
+// hover light are what tell it apart as something to press.
 .row {
-  margin-bottom: 15rem;
+  // Hugs its content like the labels do, a short line leaving no empty glass behind it.
+  align-self: flex-start;
+  margin-bottom: shared.$label-spacing;
   max-width: 100%;
-  padding: 0;
 
-  // A button element, which would otherwise draw its text black and centred. Cohtml ignores
-  // `inherit` on a button's colour, so it repeats the controls' own.
-  color: white;
-  text-align: left;
+  height: $height;
+  border-radius: $height * 0.5;
+
+  // Clips the segments' hover light to the pane's rounding.
+  overflow: hidden;
 
   display: flex;
   flex-direction: row;
-  align-items: center;
 
-  text-shadow: 1rem 1rem 4rem vanilla.$panel-color-dark;
-  font-size: vanilla.$font-size-l;
+  @include shared.label-frost;
+  // A border rather than an inset shadow, for the reason `shared.$glass-rim` gives.
+  border: $hairline;
 
-  &:hover &-preview {
-    // Cohtml defaults the decoration to black instead of following the text colour.
-    text-decoration: underline;
-    text-decoration-color: vanilla.$menu-active-color-bright;
+  // Spaced like a label, among which it sits.
+  &--inline {
+    margin-right: shared.$label-spacing;
   }
 
-  &-preview {
-    flex: 1 1 auto;
+  &-segment {
+    height: 100%;
+    padding: 0;
 
+    // A button element, which would otherwise draw its text black and centred. Cohtml ignores
+    // `inherit` on a button's colour, so it repeats the controls' own.
+    color: white;
+    text-align: left;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    // Only the segment under the cursor lights up, the pane staying as it is.
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    &:active {
+      background-color: rgba(255, 255, 255, 0.22);
+    }
+  }
+
+  &-segmentText {
+    flex: 0 1 auto;
+    padding: 0 16rem;
+
+    font-size: vanilla.$font-size-l;
+  }
+
+  &-segmentHost {
+    flex: 0 0 auto;
+
+    // Shrinks first, so a long preview gives way to the icons rather than pushing them off the
+    // row.
+    &--text {
+      flex: 0 1 auto;
+      min-width: 0;
+    }
+
+    &--divided {
+      border-left: $hairline;
+    }
+  }
+
+  // As wide as the row is tall inside its rim, so a lone icon is a disc.
+  &-segmentIcon {
+    width: $inner-height;
+    justify-content: center;
+
+    // An icon against one rounded end is pushed off it: centred, the curve hugs it on that side
+    // while the divider leaves it room on the other.
+    &--leading,
+    &--trailing {
+      width: $inner-height + 6rem;
+    }
+
+    &--leading {
+      padding-left: 6rem;
+    }
+
+    &--trailing {
+      padding-right: 6rem;
+    }
+  }
+
+  &-text {
+    flex: 0 1 auto;
+
+    // Cohtml draws the ellipsis only in a text box laid out as a column, a span being a row.
+    flex-direction: column;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 
-  &-previewText {
-    margin: 0;
+  &-icon {
+    --iconColor: rgb(255, 255, 255);
+
+    filter: drop-shadow(0 1rem 0.4rem #{vanilla.$panel-color-normal});
+
+    // A disc fills its box where a hexagon, wider than tall and cut by its glyph, leaves room
+    // around it: the disc is drawn smaller and the hexagon larger so the two read as one size.
+    &--disc {
+      width: 20rem;
+      height: 20rem;
+    }
+
+    &--hexagon {
+      width: 24rem;
+      height: 24rem;
+
+      // As far off the divider before it as a disc would be, a gap its larger box eats into.
+      .row-segmentIcon--trailing > & {
+        margin-left: 4rem;
+      }
+    }
   }
 }

@@ -1,5 +1,6 @@
 @use "../../common";
 @use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
 
 .controls-container {
   --button-size: 65rem;
@@ -44,6 +45,9 @@
   }
 }
 
+// Tight, so it outlines the card's text and icon rather than haloing them.
+$asset-button-shadow: 1rem 1rem 2rem vanilla.$panel-color-dark;
+
 .assetButton {
   align-self: flex-start;
   max-width: 100%;
@@ -62,15 +66,16 @@
   text-transform: none;
   font-variant: normal;
 
-  /* Some glassomorphism */
-  border: 1rem solid rgba(255, 255, 255, 0.3);
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20rem);
-  box-shadow:
-    0 8rem 32rem rgba(0, 0, 0, 0.1),
-    inset 0 1rem 0 rgba(255, 255, 255, 0.5),
-    inset 0 -1rem 0 rgba(255, 255, 255, 0.1),
-    inset 40rem 20rem 20rem rgba(255, 255, 255, 0.1);
+  // The glass's rim and shadow, on a clearer pane than the discs': a panel this large would
+  // otherwise read as a slab over the screenshot it advertises an asset of.
+  // Clears the vanilla menu button's dark fill, which would close the pane up again.
+  background-color: transparent;
+  backdrop-filter: saturate(110%) blur(16px);
+  border: shared.$glass-rim;
+  box-shadow: 0 2rem 10rem rgba(0, 0, 0, 0.35);
+
+  // The pane lets the screenshot's detail through, which the text alone would not read against.
+  text-shadow: $asset-button-shadow;
 
   &-thumbnail {
     margin-right: 20rem;
@@ -107,6 +112,9 @@
     // Targets <Icon>.
     > [class*="icon"] {
       margin-right: 5rem;
+
+      // The text's shadow, which a masked icon does not take.
+      filter: drop-shadow($asset-button-shadow);
 
       // Make the icon 10% smaller.
       > [class*="icon"] {
@@ -147,9 +155,14 @@
   }
 
   &:hover {
-    // Neutralize the glassomorphism.
+    // Gives way to the vanilla menu hover, which paints the card opaque.
     border-color: transparent;
     box-shadow: none;
+    text-shadow: none;
+  }
+
+  &:hover &-textHeader > [class*="icon"] {
+    filter: none;
   }
 
   &:hover &-textHeader > [class*="icon"] > [class*="icon"] {

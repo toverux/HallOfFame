@@ -235,15 +235,19 @@ public sealed class
   /// Whether to show the featured asset info block in the main menu UI.
   /// </summary>
   [SettingsUISection(Settings.GroupUIPreferences)]
-  [SettingsUIAdvanced]
   public bool ShowFeaturedAsset { get; set; }
 
   /// <summary>
   /// Whether to show creators' social links in the main menu UI.
   /// </summary>
   [SettingsUISection(Settings.GroupUIPreferences)]
-  [SettingsUIAdvanced]
   public bool ShowCreatorSocials { get; set; }
+
+  /// <summary>
+  /// Whether to show the city's milestone and population labels in the main menu UI.
+  /// </summary>
+  [SettingsUISection(Settings.GroupUIPreferences)]
+  public bool ShowCityInfo { get; set; }
 
   /// <summary>
   /// Whether to show the view count of screenshots in the main menu UI.
@@ -251,6 +255,13 @@ public sealed class
   [SettingsUISection(Settings.GroupUIPreferences)]
   [SettingsUIAdvanced]
   public bool ShowViewCount { get; set; }
+
+  /// <summary>
+  /// Whether to show the screenshot details row in the main menu UI.
+  /// Its window still opens with <see cref="KeyBindingScreenshotDetails"/> when hidden.
+  /// </summary>
+  [SettingsUISection(Settings.GroupUIPreferences)]
+  public bool ShowScreenshotDetails { get; set; }
 
   /// <summary>
   /// Translation mode for city and creator names.
@@ -588,7 +599,9 @@ public sealed class
     this.EnableLoadingScreenBackground = true;
     this.ShowFeaturedAsset = true;
     this.ShowCreatorSocials = true;
+    this.ShowCityInfo = true;
     this.ShowViewCount = false;
+    this.ShowScreenshotDetails = true;
 
     this.PopularScreenshotWeight = 10;
     this.TrendingScreenshotWeight = 10;
@@ -676,8 +689,14 @@ public sealed class
     writer.PropertyName("showCreatorSocials");
     writer.Write(this.ShowCreatorSocials);
 
+    writer.PropertyName("showCityInfo");
+    writer.Write(this.ShowCityInfo);
+
     writer.PropertyName("showViewCount");
     writer.Write(this.ShowViewCount);
+
+    writer.PropertyName("showScreenshotDetails");
+    writer.Write(this.ShowScreenshotDetails);
 
     writer.PropertyName("namesTranslationMode");
     writer.Write(this.NamesTranslationMode);
