@@ -1,4 +1,4 @@
-// Version: 2.0.0
+// Version: 2.1.0
 
 // oxlint-disable no-console -- a CLI talks on stdout.
 // oxlint-disable no-await-in-loop -- one request at a time, in key order, is what this wants.
@@ -10,10 +10,18 @@
 // keeps winning the export and the repo edit is silently dropped on the next round trip. Approving
 // is what makes an edit stick, so this approves the keys it pushed, and only those.
 //
+// `--no-approve` adds the changed keys as unapproved translations instead, for machine translations
+// a proofreader should still review: approving those would stamp a verdict on them that deters
+// volunteers. They are flagged as AI-translated and kept out of the translation memory. Crowdin
+// exports an unapproved translation only while no other one of that string is approved, so an edit
+// to an approved string is still reverted by the next sync; the preview flags those keys. When no
+// translation is approved, the newest wins unless another has more votes. This mode refuses to run
+// on a project set to export approved translations only.
+//
 // Run it by hand, from the repo root, through `mise l10n:push`. It previews by default; `--push`
 // performs the writes, and `--base <ref>` compares against something other than `HEAD`. Keep that
 // ref close: a base reaching back across a merged Crowdin sync makes that sync's translations look
-// like local edits and approves other people's work along with yours.
+// like local edits and pushes other people's work along with yours.
 //
 // `CROWDIN_PERSONAL_TOKEN` needs project write scope. Anything unexpected throws, which is the
 // right behaviour for a script whose operator is watching it run: read the error and run it again.
@@ -27,6 +35,7 @@ const localesDirectory = 'HallOfFame/Locales';
 const sourceFileName = 'en-US.json';
 
 const isPush = Bun.argv.includes('--push');
+const isApproving = !Bun.argv.includes('--no-approve');
 
 interface Change {
   readonly fileName: string;
@@ -35,10 +44,26 @@ interface Change {
   readonly text: string;
 }
 
+interface Translation {
+  readonly id: number;
+  readonly text: string;
+}
+
+interface Project {
+  readonly targetLanguages: ReadonlyArray<{ id: string; locale: string }>;
+  readonly languageMapping: Record<string, { locale?: string }> | null;
+  // Only sent to owners and managers: under a translator's token, the export guard cannot fire.
+  readonly exportApprovedOnly?: boolean;
+}
+
 await run();
 
 async function run(): Promise<void> {
   const base = await resolveCommit(baseRef());
+  const mode = isApproving ? 'approved' : 'unapproved';
+
+  console.info(`${isPush ? 'Pushing' : 'Previewing'} ${mode} translations against ${base}.`);
+
   const fileNames = await changedLocaleFiles(base);
 
   if (fileNames.length == 0) {
@@ -47,7 +72,17 @@ async function run(): Promise<void> {
     return;
   }
 
-  const languageIds = await languageIdsByFileName();
+  const project = await fetchProject();
+
+  // The next sync would then export the pushed strings as untranslated, reverting the repo too.
+  if (!isApproving && project.exportApprovedOnly) {
+    throw new Error(
+      `Crowdin project ${projectId} exports approved translations only: unapproved ones would ` +
+        `never reach the repo. Push without --no-approve, or change the export settings.`
+    );
+  }
+
+  const languageIds = languageIdsByFileName(project);
   const stringIds = await stringIdsByKey();
   let pushed = 0;
 
@@ -80,31 +115,37 @@ async function run(): Promise<void> {
         continue;
       }
 
-      await push({ fileName, languageId, key, text }, stringId);
-
-      pushed++;
+      if (await push({ fileName, languageId, key, text }, stringId)) {
+        pushed++;
+      }
     }
   }
 
-  console.info(`Done: ${pushed} translation(s) ${isPush ? 'approved' : 'to approve'}.`);
+  const outcome = isPush ? `${mode} translation(s) pushed` : `${mode} translation(s) to push`;
+
+  console.info(`Done: ${pushed} ${outcome}.`);
 }
 
 // Reuses the matching translation when Crowdin already holds one, which it usually does: the
 // GitHub sync uploads repo edits as unapproved variants, and posting the same text again is
-// rejected as a duplicate.
-async function push(change: Change, stringId: number): Promise<void> {
+// rejected as a duplicate. Returns whether the change takes a write.
+async function push(change: Change, stringId: number): Promise<boolean> {
   const query = `stringId=${stringId}&languageId=${change.languageId}&limit=500`;
   const existing = (await api('GET', `/projects/${projectId}/translations?${query}`)) as {
-    data: Array<{ data: { id: number; text: string } }>;
+    data: Array<{ data: Translation }>;
   };
 
   const match = existing.data.find(item => item.data.text == change.text)?.data;
   const label = `[${change.fileName}] ${change.key}`;
 
+  if (!isApproving) {
+    return suggest({ change, stringId, label, match });
+  }
+
   if (!isPush) {
     console.info(`${label}: ${match ? `approve existing #${match.id}` : 'add and approve'}`);
 
-    return;
+    return true;
   }
 
   const translationId = match?.id ?? (await addTranslation(change, stringId));
@@ -114,32 +155,83 @@ async function push(change: Change, stringId: number): Promise<void> {
   await api('POST', `/projects/${projectId}/approvals`, { translationId });
 
   console.info(`${label}: approved #${translationId}${match ? '' : ' (new)'}`);
+
+  return true;
 }
 
+// An approved translation outranks every unapproved one in the export, so a repo edit pushed next
+// to it is reverted by the next sync: the operator is told, and decides whether to approve.
+async function suggest(target: {
+  readonly change: Change;
+  readonly stringId: number;
+  readonly label: string;
+  readonly match: Translation | undefined;
+}): Promise<boolean> {
+  const { change, stringId, label, match } = target;
+  const approvedId = await approvedTranslationId(change.languageId, stringId);
+
+  const warning =
+    approvedId == undefined || approvedId == match?.id
+      ? ''
+      : ` (approved #${approvedId} still wins the export)`;
+
+  if (match) {
+    console.info(`${label}: already on Crowdin as #${match.id}${warning}`);
+
+    return false;
+  }
+
+  if (!isPush) {
+    console.info(`${label}: add unapproved${warning}`);
+
+    return true;
+  }
+
+  const translationId = await addTranslation(change, stringId);
+
+  console.info(`${label}: added unapproved #${translationId}${warning}`);
+
+  return true;
+}
+
+async function approvedTranslationId(
+  languageId: string,
+  stringId: number
+): Promise<number | undefined> {
+  const query = `stringId=${stringId}&languageId=${languageId}`;
+  const approvals = (await api('GET', `/projects/${projectId}/approvals?${query}`)) as {
+    data: Array<{ data: { translationId: number } }>;
+  };
+
+  return approvals.data[0]?.data.translationId;
+}
+
+// Unapproved text is machine output awaiting review: flagged as such for proofreaders, and kept out
+// of the translation memory so it does not seed suggestions before a human vetted it.
 async function addTranslation(change: Change, stringId: number): Promise<number> {
   const added = (await api('POST', `/projects/${projectId}/translations`, {
     stringId,
     languageId: change.languageId,
-    text: change.text
+    text: change.text,
+    ...(isApproving ? {} : { addToTm: false, provider: 'ai', isPreTranslated: true })
   })) as { data: { id: number } };
 
   return added.data.id;
 }
 
+async function fetchProject(): Promise<Project> {
+  const project = (await api('GET', `/projects/${projectId}`)) as { data: Project };
+
+  return project.data;
+}
+
 // Crowdin names an exported file after the target language's `locale`, unless the project remaps
 // that name, which this reads back rather than assuming.
-async function languageIdsByFileName(): Promise<Map<string, string>> {
-  const project = (await api('GET', `/projects/${projectId}`)) as {
-    data: {
-      targetLanguages: Array<{ id: string; locale: string }>;
-      languageMapping: Record<string, { locale?: string }> | null;
-    };
-  };
-
-  const mapping = project.data.languageMapping ?? {};
+function languageIdsByFileName(project: Project): Map<string, string> {
+  const mapping = project.languageMapping ?? {};
 
   return new Map(
-    project.data.targetLanguages.map(language => [
+    project.targetLanguages.map(language => [
       `${mapping[language.id]?.locale ?? language.locale}.json`,
       language.id
     ])
