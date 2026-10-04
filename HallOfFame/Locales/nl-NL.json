@@ -64,7 +64,6 @@
   "HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Predates Feature]": "Deze screenshot is gemaakt voordat Hall of Fame beschrijvingen ondersteunde.",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]": "Foto-instellingen",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]": "Playset",
-  "HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]": "De fotomodusinstellingen waarmee deze screenshot is gemaakt, verschijnen hier in een aankomende update.",
   "HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]": "De playset waarmee deze screenshot is gemaakt, verschijnt hier in een latere update.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\nHall of Fame-materiaal!\nDeze moet je delen!\nAdembenemend uitzicht!\nMooie foto!\nEen plaatje om te delen!\nKek kiekje!\nLijst deze foto in!\nLaat het de community zien!\nBewaar dit plaatje!\nPrachtige compositie!\nWe willen dit zien!\nDit is kunst!\nNetjes!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Voorbeeld 16:9 beeldverhouding.",
