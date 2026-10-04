@@ -1,5 +1,5 @@
 ---
-version: 2.0.0
+version: 2.1.0
 paths:
   - '**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}'
 ---
@@ -33,7 +33,7 @@ When settings differ across projects, record them as a table with one row per pr
 - Write member signatures property-style over method-style — property-style gets stricter checking under `strictFunctionTypes` — keeping method shorthand for object literals.
 - Model closed value sets as string-literal unions, not `enum`. When you also need the values at runtime, declare an `as const` object and derive the union with `type X = (typeof X)[keyof typeof X]`.
 - Model variant data as discriminated unions with literal discriminant, checked exhaustively (see `never` default below), not optional-field grab-bags or class hierarchies.
-- `Map`/`Set` for dynamic or non-string-keyed collections that grow, shrink, or need ordered iteration; object types or `Record<K, V>` for fixed-shape or known-key records.
+- `Map`/`Set` for dynamic or non-string-keyed collections that grow, shrink, or need ordered iteration; object types or `Record<K, V>` for fixed-shape or known-key records, unless read with keys from outside, which an object answers from its prototype (`constructor`).
 - Simple element types as `T[]`, complex ones (unions, function types) as `Array<T>`. Same for readonly forms `readonly T[]` and `ReadonlyArray<T>`.
 - Annotate return types on named functions, methods, standalone function declarations; let short expression-arrow callbacks (`.map(x => …)`) infer theirs.
 - Prove types through guards and validation, not `as`. Reserve `as` for a type the compiler genuinely cannot infer (poorly-typed dependencies, real inference gaps), never to silence a mismatch.
