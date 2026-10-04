@@ -22,3 +22,17 @@ What is already known, checked against game 1.6.2f1:
 - The details window handles Switch Tab in its always-active input consumer, so the shoulder buttons should switch tabs. That has not been tested on a controller either.
 
 To read the game's live binding table, run `Game.Input.InputManager.instance.GetBindings(PathType.Effective, BindingOptions.ExcludeDummy)` over the Unity debugger and write it to a file with `String.Concat<ProxyBinding>`. In the output, usage `0` is the main menu.
+
+## Saved photo mode settings
+
+The details window's photo mode settings tab is read-only. The follow-up is letting a player keep a screenshot's settings and apply them in their own photo mode:
+
+- A save action on the photo mode settings tab, writing a preset to `ModsData/HallOfFame/SavedPhotoModeSettings`.
+- An in-game management UI, reachable from photo mode, to list, rename, delete, and apply the saved presets.
+
+What is already known from the decompile, not yet measured in a running game:
+
+- The game has no photo mode preset of its own: its "presets" are only the sensor size dropdown.
+- A value is applied with `PhotoModeRenderSystem.photoModeProperties[id].setEnabled(true)` then `.setValue(v)`, and only shows while photo mode is active. Closing photo mode clears every override.
+- "Time of Day" and "Simulation Speed" write to the simulation itself, so applying them has side effects outside photo mode.
+- A preset never reproduces a look by itself: the hour, the map's latitude, the season, and the weather decide the light. The apply flow has to say so, as the tab does.
