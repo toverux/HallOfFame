@@ -61,7 +61,7 @@
   "HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Copied]": "Link skopiowany do schowka!",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Description]": "Opis",
   "HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Not Shared]": "Twórca nie napisał opisu do tego zrzutu ekranu.",
-  "HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Predates Feature]": "Ten zrzut ekranu został wykonany, zanim Hall of Fame obsługiwał opisy.",
+  "HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Predates Feature]": "Ten zrzut ekranu został wykonany, zanim Hall of Fame zaczęła obsługiwać opisy.",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]": "Ustawienia zdjęcia",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]": "Zestaw",
   "HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]": "Ustawienia trybu fotograficznego, z którymi wykonano ten zrzut ekranu, pojawią się tutaj w nadchodzącej aktualizacji.",
