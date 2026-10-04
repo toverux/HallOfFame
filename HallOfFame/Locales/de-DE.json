@@ -64,7 +64,6 @@
   "HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Predates Feature]": "Dieser Screenshot wurde aufgenommen, bevor Hall of Fame Beschreibungen unterstützt hat.",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]": "Fotoeinstellungen",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]": "Spielset",
-  "HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]": "Die Fotomodus-Einstellungen, mit denen dieser Screenshot aufgenommen wurde, werden in einem kommenden Update hier angezeigt.",
   "HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]": "Das Spielset, mit dem dieser Screenshot aufgenommen wurde, wird in einem späteren Update hier angezeigt.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\nHall of Fame Material!\nDieses Meisterstück teilen?\nTolle Aussicht!\nTolles Foto!\nDas sollte man doch teilen!\nWas eine Momentaufnahme!\nGleich einrahmen!\nZeig es der Community!\nDas würde ich behalten!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "Vorschau im 16:9 Seitenverhältnis.",
