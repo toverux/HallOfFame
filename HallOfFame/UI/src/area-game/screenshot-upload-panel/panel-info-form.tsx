@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { Button, type Element, Scrollable } from 'cs2/ui';
 import { memo, type ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { Tooltip } from '../../components/tooltip';
 import { getClassesModule, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { useScrollController } from '../../vanilla-modules/game-ui/common/hooks/use-scroll-controller';
@@ -9,6 +10,7 @@ import {
   Checkbox,
   type CheckboxTheme
 } from '../../vanilla-modules/game-ui/common/input/toggle/checkbox/checkbox';
+import { TooltipLayout } from '../../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
 import { AssetModDropdown } from './asset-mod-dropdown';
 import type { ScreenshotInfoFormValue } from './form-state';
 import * as styles from './panel-info-form.module.scss';
@@ -23,6 +25,9 @@ const checkboxTheme: CheckboxTheme = {
   toggle: classNames(coCheckboxTheme.toggle, styles.checkboxToggle),
   checkmark: classNames(coCheckboxTheme.checkmark, styles.checkboxCheckmark)
 };
+
+// The server refuses a longer description.
+const DESCRIPTION_MAX_LENGTH = 4000;
 
 export const ScreenshotUploadPanelContentScreenshotInfo = memo(
   ScreenshotUploadPanelContentScreenshotInfoBase
@@ -81,12 +86,24 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
   const clearDescription = useCallback(() => patchFormValue({ description: '' }), [patchFormValue]);
 
-  // Headings of the virtual keyboard console and handheld players type on.
-  const descriptionVkTitle =
+  // Also the headings of the virtual keyboard console and handheld players type on.
+  const descriptionLabel =
     translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_LABEL') ?? '';
 
-  const descriptionVkDescription =
+  const descriptionHint =
     translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_DESCRIPTION') ?? '';
+
+  const formattingHelpLabel = translate(
+    'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_FORMATTING'
+  );
+
+  // Plain paragraphs rather than the tooltip's `description`, which renders markdown and would
+  // turn the syntax it explains into the formatting it produces.
+  const formattingHelpLines = translate(
+    'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_FORMATTING_TOOLTIP'
+  )
+    ?.split('\n')
+    .map(line => <p key={line}>{line}</p>);
 
   const textareaContainerRef = useRef<HTMLDivElement>(null);
 
@@ -220,10 +237,30 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
           style={{ margin: 0 }}
           onMouseEnter={playHoverSound}>
           <label>
-            {`${translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_LABEL')} β`}
+            {descriptionLabel}
             <br />
             <small>
-              {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_DESCRIPTION')}
+              {/* Cohtml's inline layout, so the link flows on after the hint's last word.
+                  Spread because the attribute is not in React's typings. */}
+              <p {...{ cohinline: 'cohinline' }}>
+                {descriptionHint}{' '}
+                <Tooltip
+                  direction='down'
+                  tooltip={
+                    <TooltipLayout title={formattingHelpLabel} content={formattingHelpLines} />
+                  }>
+                  <span className={styles.formattingHelp}>
+                    {/* Inline SVG: the inline layout draws no mask, so a tinted `Icon` vanishes,
+                        and the game's `Media/Glyphs/Info.svg` as an `<img>` is black. */}
+                    <svg viewBox='0 0 32 32' className={styles.formattingHelpIcon}>
+                      <path d='m14.5 10h3v3h-3z' />
+                      <path d='m14.5 14.5h3v7.5h-3z' />
+                      <circle cx='16' cy='16' r='11.5' fill='none' strokeWidth='3' />
+                    </svg>
+                    {formattingHelpLabel}
+                  </span>
+                </Tooltip>
+              </p>
             </small>
           </label>
 
@@ -232,12 +269,12 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
               // A defined `multiline` is what makes this a `<textarea>`, of that many rows.
               // oxlint-disable-next-line no-magic-numbers - expanded vs collapsed textarea row count
               multiline={textareaFocused || formValue.description.length > 0 ? 5 : 1}
-              maxLength={4000}
+              maxLength={DESCRIPTION_MAX_LENGTH}
               value={formValue.description}
               // A description is edited rather than replaced, so the caret belongs at the end.
               selectAllOnFocus={false}
-              vkTitle={descriptionVkTitle}
-              vkDescription={descriptionVkDescription}
+              vkTitle={descriptionLabel}
+              vkDescription={descriptionHint}
               onFocus={() => setTextareaFocused(true)}
               onBlur={() => setTextareaFocused(false)}
               onChange={event => patchFormValue({ description: event.target.value })}
@@ -266,7 +303,9 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
                 <div style={{ flex: 1 }} />
 
-                <span>{formValue.description.length}&thinsp;/&thinsp;4000</span>
+                <span>
+                  {formValue.description.length}&thinsp;/&thinsp;{DESCRIPTION_MAX_LENGTH}
+                </span>
               </div>
             )}
           </div>

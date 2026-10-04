@@ -117,6 +117,27 @@
   }
 }
 
+// Hover target of the description's formatting tooltip, a link flowing on after the hint.
+.formattingHelp {
+  color: vanilla.$accent-color-dark;
+  white-space: nowrap; // The icon wraps with its label, never apart.
+
+  &:hover {
+    // Cohtml defaults the decoration to black instead of following the text colour.
+    text-decoration: underline;
+    text-decoration-color: vanilla.$accent-color-dark;
+  }
+
+  &-icon {
+    width: 1em;
+    height: 1em;
+    margin-right: 0.2em;
+    vertical-align: middle;
+    fill: vanilla.$accent-color-dark;
+    stroke: vanilla.$accent-color-dark;
+  }
+}
+
 .warning {
   padding: shared.$section-padding;
   background-color: vanilla.$warning-color;
