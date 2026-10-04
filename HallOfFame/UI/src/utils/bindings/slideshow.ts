@@ -1,7 +1,7 @@
 import { trigger, useValue } from 'cs2/api';
 import type { LocalizedString } from 'cs2/l10n';
 import type { Dispatch, SetStateAction } from 'react';
-import type { Screenshot } from '../../common';
+import type { PhotoModeProperty, Screenshot } from '../../common';
 import { createSingletonHook } from '../singleton-hook';
 import { type ModSettings, useModSettings } from './common';
 import { lazyBindValue } from './lazy-value-binding';
@@ -75,6 +75,12 @@ const screenshot$ = lazyBindValue<Screenshot | null>(GROUP, 'screenshot', null);
 const loadError$ = lazyBindValue<LocalizedString | null>(GROUP, 'loadError', null);
 
 const isSaving$ = lazyBindValue<boolean>(GROUP, 'isSaving', false);
+
+const photoModeCatalog$ = lazyBindValue<readonly PhotoModeProperty[]>(
+  GROUP,
+  'photoModeCatalog',
+  []
+);
 
 const useSingletonMenuState = createSingletonHook<SettableMenuState>({
   isMenuVisible: true,
@@ -212,6 +218,14 @@ export function subscribeToKeepAliveScreenshots(
       subscription.dispose();
     }
   };
+}
+
+/**
+ * Subscribes to the game's photo mode properties, in the game's order, empty until the mod has
+ * read them, which it does once, on its first loading screen.
+ */
+export function usePhotoModeCatalog(): readonly PhotoModeProperty[] {
+  return useValue(photoModeCatalog$());
 }
 
 /**

@@ -16,6 +16,7 @@ $font-size-l: var(--fontSizeL); // calc(14rem * var(--fontScale) + 4rem)
 $font-size-m: var(--fontSizeM); // calc(14rem * var(--fontScale) + 2rem + var(--fontScaleChange) * 1.05 * 14rem)
 $font-size-s: var(--fontSizeS); // calc(14rem * var(--fontScale) + var(--fontScaleChange) * 1.1 * 14rem)
 $font-size-xl: var(--fontSizeXL); // calc(14rem * var(--fontScale) + 6rem)
+$highlight-bright-blue: var(--highlightBrightBlue); // #4ac0f0
 $highlight-green: #41d880; // #41d880
 $menu-active-color-bright: var(--menuActiveColorBright); // white
 $menu-blur: var(--menuBlur); // brightness(60%) contrast(90%) blur(7px)

@@ -19,6 +19,10 @@ export interface ModSettings {
   readonly namesTranslationMode: 'disabled' | 'transliterate' | 'translate';
   readonly creatorsScreenshotSaveDirectory: string;
   readonly baseUrl: string;
+  /**
+   * The player's public creator ID, `null` until the mod first logs in.
+   */
+  readonly publicCreatorId: string | null;
 }
 
 const settings$ = lazyBindValue<ModSettings>(GROUP, 'settings', {
@@ -32,7 +36,8 @@ const settings$ = lazyBindValue<ModSettings>(GROUP, 'settings', {
   screenshotResolution: 'fhd',
   namesTranslationMode: 'translate',
   creatorsScreenshotSaveDirectory: '',
-  baseUrl: ''
+  baseUrl: '',
+  publicCreatorId: null
 });
 
 export function useModSettings(): ModSettings {

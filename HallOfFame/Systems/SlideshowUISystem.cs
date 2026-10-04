@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
 using Game.Input;
+using Game.Rendering;
 using Game.SceneFlow;
 using Game.Settings;
 using Game.UI;
@@ -53,6 +55,11 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
   private ValueBinding<LocalizedString?> loadErrorBinding = null!;
 
   private ValueBinding<bool> isSavingBinding = null!;
+
+  private ValueBinding<IReadOnlyList<PhotoModeCatalogEntry>> photoModeCatalogBinding = null!;
+
+  // Set by the first read, failed or not, so a failing read shows its error once per session.
+  private bool isPhotoModeCatalogRead;
 
   private InputActionBinding previousScreenshotInputActionBinding = null!;
 
@@ -149,6 +156,14 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         false
       );
 
+      // Empty until the first loading screen, see OnGameLoadingComplete.
+      this.photoModeCatalogBinding = new ValueBinding<IReadOnlyList<PhotoModeCatalogEntry>>(
+        SlideshowUISystem.BindingGroup,
+        "photoModeCatalog",
+        [],
+        new CollectionWriter<PhotoModeCatalogEntry>(new PhotoModeCatalogValueWriter())
+      );
+
       this.AddBinding(this.enableMainMenuSlideshowBinding);
       this.AddBinding(this.previousNeighborBinding);
       this.AddBinding(this.nextNeighborBinding);
@@ -157,6 +172,7 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
       this.AddBinding(this.screenshotBinding);
       this.AddBinding(this.loadErrorBinding);
       this.AddBinding(this.isSavingBinding);
+      this.AddBinding(this.photoModeCatalogBinding);
 
       // INPUT ACTION BINDINGS
       this.previousScreenshotInputActionBinding = new InputActionBinding(
@@ -266,11 +282,31 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
   /// <summary>
   /// Lifecycle method forwarding the game-mode change to the conductor, which owns the refresh
   /// decision, and re-gating the force-enable keybinding.
+  /// The first one also reads the photo mode catalog, late enough that every mod has had the chance
+  /// to add its own properties.
   /// </summary>
   protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode) {
     this.conductor.OnGameModeChanged(mode);
 
+    if (!this.isPhotoModeCatalogRead) {
+      this.isPhotoModeCatalogRead = true;
+
+      this.ReadPhotoModeCatalog();
+    }
+
     this.EnableOrDisableEnableMainMenuSlideshowAction();
+  }
+
+  private void ReadPhotoModeCatalog() {
+    try {
+      this.photoModeCatalogBinding.Update(
+        PhotoModeCatalogEntry.Read(this.World.GetOrCreateSystemManaged<PhotoModeRenderSystem>())
+      );
+    }
+    catch (Exception ex) {
+      // The details window then lists every setting under "Other", by its raw code.
+      Mod.Log.ErrorRecoverable(ex);
+    }
   }
 
   #if DEBUG

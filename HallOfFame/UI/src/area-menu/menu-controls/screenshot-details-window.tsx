@@ -11,6 +11,7 @@ import {
 import { memo, type ReactElement, type ReactNode, useContext, useMemo, useState } from 'react';
 import type { Screenshot } from '../../common';
 import { PreloadImages } from '../../components/preload-images';
+import { Tooltip } from '../../components/tooltip';
 import apertureDuotoneLightSrc from '../../icons/fontawesome/aperture-duotone-light.svg';
 import apertureSharpSolidSrc from '../../icons/fontawesome/aperture-sharp-solid.svg';
 import penLineDuotoneLightSrc from '../../icons/fontawesome/pen-line-duotone-light.svg';
@@ -28,8 +29,18 @@ import { PanelBackdrop } from '../../vanilla-modules/game-ui/common/panel/panel-
 import { PanelTitleBar } from '../../vanilla-modules/game-ui/common/panel/panel-title-bar';
 import { iceflakePanelTheme } from '../../vanilla-modules/game-ui/common/panel/themes/iceflake-panel';
 import { Tab, TabBar } from '../../vanilla-modules/game-ui/common/tabs/tabs';
-import { type DetailsTabState, selectScreenshotDetails } from './screenshot-details';
+import { TooltipLayout } from '../../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
+import { photoModeContainerClasses } from '../../vanilla-modules/game-ui/game/components/photo-mode/widgets/photo-mode-container';
+import {
+  type DetailsTabState,
+  type PhotoModeSection,
+  type PhotoModeSetting,
+  type PhotoModeTabState,
+  selectScreenshotDetails,
+  toPhotoModeColorSliders
+} from './screenshot-details';
 import { selectLocalizedName } from './select-localized-name';
+import { useDetailsContext } from './use-details-context';
 import * as styles from './screenshot-details-window.module.scss';
 
 const vanillaParadoxModsSrc = 'Media/Glyphs/ParadoxMods.svg';
@@ -100,7 +111,7 @@ function DetailsModal({
 
   const modSettings = bindings.useModSettings();
 
-  const details = selectScreenshotDetails(screenshot);
+  const details = selectScreenshotDetails(screenshot, useDetailsContext());
 
   // The same form of the name the controls show, or the native one when that form is missing.
   const city = selectLocalizedName(modSettings.namesTranslationMode, gameLocale, {
@@ -182,9 +193,7 @@ function DetailsModal({
             {selectedTab == 'description' && <DescriptionTab state={details.description} />}
 
             {selectedTab == 'photoModeSettings' && (
-              <EmptyState iconSrc={apertureDuotoneLightSrc}>
-                {translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]')}
-              </EmptyState>
+              <PhotoModeSettingsTab state={details.photoModeSettings} />
             )}
 
             {selectedTab == 'playset' && (
@@ -238,6 +247,239 @@ function DescriptionTab({ state }: Readonly<{ state: DetailsTabState }>): ReactE
   }
 }
 
+function PhotoModeSettingsTab({ state }: Readonly<{ state: PhotoModeTabState }>): ReactElement {
+  const translate = useTranslate();
+
+  switch (state.kind) {
+    case 'content': {
+      return (
+        <div className={styles.photoMode}>
+          <p className={styles.photoModeNotice}>
+            {translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Notice]')}
+          </p>
+
+          {state.groups.map(group => (
+            <section key={group.id ?? ''} className={styles.photoModeGroup}>
+              <h2 className={styles.photoModeGroupTitle}>
+                {group.id == undefined
+                  ? translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Other]')
+                  : translate(`PhotoMode.TAB[${group.id}]`, group.id)}
+              </h2>
+
+              {group.sections.map(section => (
+                <PhotoModeSectionView key={section.id ?? ''} section={section} />
+              ))}
+            </section>
+          ))}
+        </div>
+      );
+    }
+    case 'notShared': {
+      return (
+        <EmptyState iconSrc={apertureDuotoneLightSrc}>
+          {state.isViewerCreator
+            ? translate(
+                'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Not Shared By You]'
+              )
+            : translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Not Shared]')}
+        </EmptyState>
+      );
+    }
+    case 'predatesFeature': {
+      return (
+        <EmptyState iconSrc={apertureDuotoneLightSrc}>
+          {translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Predates Feature]')}
+        </EmptyState>
+      );
+    }
+    case 'sharedEmpty': {
+      return (
+        <EmptyState iconSrc={apertureDuotoneLightSrc}>
+          {translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Default Settings]')}
+        </EmptyState>
+      );
+    }
+    default: {
+      // oxlint-disable-next-line typescript/only-throw-error
+      throw state satisfies never;
+    }
+  }
+}
+
+/**
+ * A section's title and settings, as the game's photo mode panel lays them out.
+ */
+function PhotoModeSectionView({ section }: Readonly<{ section: PhotoModeSection }>): ReactElement {
+  return (
+    <div>
+      {section.id != undefined && (
+        <div
+          className={classNames(
+            photoModeContainerClasses.container,
+            photoModeContainerClasses.group
+          )}>
+          <div className={photoModeContainerClasses.children}>
+            <PhotoModeTitle
+              code={section.id}
+              className={classNames(
+                photoModeContainerClasses.groupTitle,
+                styles.photoModeSectionTitle
+              )}
+            />
+          </div>
+        </div>
+      )}
+
+      {section.settings.map(setting => (
+        <PhotoModeSettingRow key={setting.code} setting={setting} />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * A setting as the game's photo mode panel names and lays it out, and the mod's note on it.
+ */
+function PhotoModeSettingRow({ setting }: Readonly<{ setting: PhotoModeSetting }>): ReactElement {
+  const translate = useTranslate();
+
+  return (
+    <>
+      {/* Active, as every listed setting was switched on: the panel dims the name of a setting
+          that is not. */}
+      <div
+        className={classNames(
+          photoModeContainerClasses.container,
+          photoModeContainerClasses.active
+        )}>
+        <div className={classNames(photoModeContainerClasses.children, styles.photoModeRow)}>
+          <PhotoModeTitle code={setting.code} className={styles.photoModeRowName} />
+          <div className={styles.photoModeRowValue}>
+            <PhotoModeValueView setting={setting} />
+          </div>
+        </div>
+      </div>
+
+      {setting.noteId != undefined && (
+        <p className={styles.photoModeNote}>{translate(setting.noteId)}</p>
+      )}
+    </>
+  );
+}
+
+/**
+ * A photo mode property's or section's name with the game's tooltip for it, the way the game's
+ * photo mode panel shows it: on the name alone, the name over the description, opening away from
+ * the values.
+ */
+function PhotoModeTitle({
+  code,
+  className
+}: Readonly<{ code: string; className: string }>): ReactElement {
+  const translate = useTranslate();
+
+  const name = translate(`PhotoMode.PROPERTY_TITLE[${code}]`, code);
+
+  // No tooltip for a property the game has no text for: the game's own would only repeat the
+  // name, or show the raw code.
+  const description = translate(`PhotoMode.PROPERTY_TOOLTIP[${code}]`, '');
+
+  return (
+    <Tooltip
+      direction='left'
+      alignment='start'
+      tooltip={description ? <TooltipLayout title={name} description={description} /> : undefined}>
+      <div className={classNames(photoModeContainerClasses.title, className)}>{name}</div>
+    </Tooltip>
+  );
+}
+
+function PhotoModeValueView({
+  setting: { code, value }
+}: Readonly<{ setting: PhotoModeSetting }>): ReactNode {
+  const translate = useTranslate();
+
+  switch (value.kind) {
+    case 'number': {
+      return formatPhotoModeNumber(value.value, value.fractionDigits);
+    }
+    case 'enum': {
+      return value.option == undefined
+        ? String(value.value)
+        : translate(`PhotoMode.${value.enumType.toUpperCase()}[${value.option}]`, value.option);
+    }
+    case 'checkbox': {
+      return value.isOn
+        ? translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[On]')
+        : translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Off]');
+    }
+    case 'color': {
+      const channels = [value.red, value.green, value.blue].map(channel =>
+        Math.round(Math.min(Math.max(channel, 0), 1) * MAX_CSS_CHANNEL)
+      );
+
+      const sliders = toPhotoModeColorSliders(value);
+
+      // The letters are the picker's own labels, which the game does not localize.
+      const components = [
+        { name: 'H', value: sliders.hue },
+        { name: 'S', value: sliders.saturation },
+        { name: 'V', value: sliders.value },
+        ...(sliders.alpha == undefined ? [] : [{ name: 'A', value: sliders.alpha }])
+      ];
+
+      return (
+        <>
+          <div
+            className={styles.photoModeSwatch}
+            style={{ backgroundColor: `rgba(${channels.join(', ')}, ${value.alpha ?? 1})` }}
+          />
+
+          {components.map(component => (
+            <PhotoModeComponentView key={component.name} {...component} />
+          ))}
+        </>
+      );
+    }
+    case 'vector': {
+      return value.components.map(component => (
+        <PhotoModeComponentView
+          key={component.name}
+          name={translate(`PhotoMode.PROPERTY_TITLE[${code}/${component.name}]`, component.name)}
+          value={formatPhotoModeNumber(component.value, value.fractionDigits)}
+        />
+      ));
+    }
+    default: {
+      // oxlint-disable-next-line typescript/only-throw-error
+      throw value satisfies never;
+    }
+  }
+}
+
+function PhotoModeComponentView({
+  name,
+  value
+}: Readonly<{ name: ReactNode; value: ReactNode }>): ReactElement {
+  return (
+    <span className={styles.photoModeComponent}>
+      <span className={styles.photoModeComponentName}>{name}</span>
+      <span>{value}</span>
+    </span>
+  );
+}
+
+/**
+ * A number as the game's photo mode fields write it, so a player can type it back in as read;
+ * `undefined` fraction digits keep it as stored.
+ * Negative fraction digits, which a mod can set, read as none, as the game shows an integer field.
+ */
+function formatPhotoModeNumber(value: number, fractionDigits: number | undefined): string {
+  return fractionDigits == undefined ? String(value) : value.toFixed(Math.max(fractionDigits, 0));
+}
+
+const MAX_CSS_CHANNEL = 255;
+
 /**
  * A tab with nothing to show, laid out like the game's own empty panels under the tab's icon.
  */
@@ -257,7 +499,7 @@ export type DetailsTabId = 'description' | 'photoModeSettings' | 'playset';
 
 /**
  * The window's tabs, in display order.
- * The photo mode settings and the playset show a placeholder until their tabs ship.
+ * The playset shows a placeholder until its tab ships.
  */
 const detailsTabs: ReadonlyArray<{
   readonly id: DetailsTabId;

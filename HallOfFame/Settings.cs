@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -111,7 +112,20 @@ public sealed class
   /// The login sync fills it in, so it is null until the first one succeeds.
   /// </summary>
   [SettingsUIHidden]
-  public string? PublicCreatorID { get; set; }
+  public string? PublicCreatorID {
+    get;
+    set {
+      field = value;
+
+      // The sync sets it without applying the settings, so onSettingsApplied misses it.
+      this.PublicCreatorIDChanged?.Invoke();
+    }
+  }
+
+  /// <summary>
+  /// Raised when <see cref="PublicCreatorID"/> is set.
+  /// </summary>
+  internal event Action? PublicCreatorIDChanged;
 
   /// <summary>
   /// Text explaining the algorithms' weight selection mechanism.
@@ -709,6 +723,10 @@ public sealed class
 
     writer.PropertyName("baseUrl");
     writer.Write(this.BaseUrlWithScheme);
+
+    // Lets the UI tell the player's own screenshots apart.
+    writer.PropertyName("publicCreatorId");
+    writer.Write(this.PublicCreatorID);
 
     writer.TypeEnd();
   }

@@ -1,4 +1,4 @@
-import type { Creator, Screenshot } from '../common';
+import type { Creator, PhotoModeProperty, Screenshot } from '../common';
 import type { ModSettings } from '../utils/bindings';
 
 /**
@@ -66,6 +66,7 @@ export function makeSettings(overrides: Partial<ModSettings> = {}): ModSettings 
     namesTranslationMode: 'translate',
     creatorsScreenshotSaveDirectory: '',
     baseUrl: '',
+    publicCreatorId: null,
     ...overrides
   };
 }
@@ -122,3 +123,126 @@ export function makeCreator(overrides: Partial<Creator> = {}): Creator {
     ...overrides
   };
 }
+
+/**
+ * Builds a {@link PhotoModeProperty}, a number with the game's default fraction digits unless
+ * overridden.
+ */
+function makePhotoModeProperty(
+  overrides: Partial<PhotoModeProperty> & Pick<PhotoModeProperty, 'code' | 'group'>
+): PhotoModeProperty {
+  return {
+    section: null,
+    kind: 'number',
+    fractionDigits: 3,
+    enumType: null,
+    enumOptions: [],
+    ...overrides
+  };
+}
+
+/**
+ * A slice of the game's photo mode property catalog, in the game's order, covering every value
+ * kind, sections, and a group without any.
+ */
+export const photoModeCatalog: readonly PhotoModeProperty[] = [
+  makePhotoModeProperty({
+    code: 'PhotoModeRenderSystem.sensorSize/x',
+    group: 'Camera',
+    section: 'CameraBody',
+    kind: 'vectorComponent'
+  }),
+  makePhotoModeProperty({
+    code: 'PhotoModeRenderSystem.sensorSize/y',
+    group: 'Camera',
+    section: 'CameraBody',
+    kind: 'vectorComponent'
+  }),
+  makePhotoModeProperty({
+    code: 'PhotoModeRenderSystem.iso',
+    group: 'Camera',
+    section: 'CameraBody',
+    fractionDigits: 0
+  }),
+  makePhotoModeProperty({
+    code: 'PhotoModeRenderSystem.gateFitMode',
+    group: 'Camera',
+    section: 'CameraBody',
+    kind: 'enum',
+    enumType: 'GateFitMode',
+    enumOptions: [
+      { name: 'None', value: 0 },
+      { name: 'Vertical', value: 1 },
+      { name: 'Horizontal', value: 2 }
+    ]
+  }),
+  makePhotoModeProperty({
+    code: 'PhotoModeRenderSystem.focalLength',
+    group: 'Camera',
+    section: 'CameraLens'
+  }),
+  makePhotoModeProperty({
+    code: 'Vignette.color/r',
+    group: 'Lens',
+    section: 'Vignette',
+    kind: 'colorComponent'
+  }),
+  makePhotoModeProperty({
+    code: 'Vignette.color/g',
+    group: 'Lens',
+    section: 'Vignette',
+    kind: 'colorComponent'
+  }),
+  makePhotoModeProperty({
+    code: 'Vignette.color/b',
+    group: 'Lens',
+    section: 'Vignette',
+    kind: 'colorComponent'
+  }),
+  makePhotoModeProperty({
+    code: 'Vignette.rounded',
+    group: 'Lens',
+    section: 'Vignette',
+    kind: 'checkbox'
+  }),
+  makePhotoModeProperty({
+    code: 'ColorAdjustments.postExposure',
+    group: 'Color',
+    section: 'ColorAdjustments'
+  }),
+  makePhotoModeProperty({
+    code: 'WhiteBalance.temperature',
+    group: 'Color',
+    section: 'WhiteBalance'
+  }),
+  makePhotoModeProperty({
+    code: 'WhiteBalance.tint',
+    group: 'Color',
+    section: 'WhiteBalance'
+  }),
+  makePhotoModeProperty({
+    code: 'Fog.albedo/r',
+    group: 'Weather',
+    section: 'Fog',
+    kind: 'colorComponent'
+  }),
+  makePhotoModeProperty({
+    code: 'Fog.albedo/g',
+    group: 'Weather',
+    section: 'Fog',
+    kind: 'colorComponent'
+  }),
+  makePhotoModeProperty({
+    code: 'Fog.albedo/b',
+    group: 'Weather',
+    section: 'Fog',
+    kind: 'colorComponent'
+  }),
+  makePhotoModeProperty({
+    code: 'Fog.albedo/a',
+    group: 'Weather',
+    section: 'Fog',
+    kind: 'colorComponent'
+  }),
+  makePhotoModeProperty({ code: 'Time of Day', group: 'Environment' })
+];

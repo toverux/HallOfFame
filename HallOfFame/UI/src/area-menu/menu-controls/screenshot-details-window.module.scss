@@ -1,3 +1,5 @@
+@use "../../vanilla-vars" as vanilla;
+
 // The durations of the panel's own transition, which the backdrop fades in step with.
 $enter-duration: 250ms;
 $exit-duration: 150ms;
@@ -39,7 +41,7 @@ $empty-line-height: 1.4em;
     padding: 0 $padding-horizontal;
     margin-bottom: -$paragraph-gap;
 
-    font-size: var(--fontSizeL);
+    font-size: vanilla.$font-size-l;
     line-height: 1.5;
   }
 
@@ -118,6 +120,87 @@ $empty-line-height: 1.4em;
   }
 }
 
+// The creator's photo mode settings, one scrolling page grouped as the game's photo mode panel
+// groups them, its rows and section titles wearing the panel's own classes.
+.photoMode {
+  padding: 0 $padding-horizontal;
+
+  &-notice {
+    margin: 0 0 16rem;
+
+    color: $empty-color;
+    font-size: vanilla.$font-size-m;
+    line-height: 1.4;
+  }
+
+  &-group {
+    margin-bottom: 20rem;
+  }
+
+  &-groupTitle {
+    margin: 0;
+
+    font-size: vanilla.$font-size-l;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  // Set apart from the settings below it, which the panel does with the checkbox leading each
+  // setting, a control a read-only list has no use for. The blue is the window title's.
+  &-sectionTitle {
+    color: vanilla.$highlight-bright-blue;
+  }
+
+  &-row {
+    flex: 1 1 auto;
+  }
+
+  &-rowName {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &-rowValue {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex: 0 0 auto;
+    margin-left: 16rem;
+
+    font-size: 0.8em;
+  }
+
+  // A band under the row, like the indented lines the game's panel lists a setting's components
+  // on.
+  &-note {
+    margin: 0 0 6rem 6rem;
+    padding: 6rem 10rem;
+    border-radius: 3rem;
+
+    background-color: rgba(0, 0, 0, 0.22);
+    color: $empty-color;
+    font-size: vanilla.$font-size-s;
+    line-height: 1.4;
+  }
+
+  &-swatch {
+    width: 40rem;
+    height: 16rem;
+    border-radius: 3rem;
+  }
+
+  &-component {
+    margin-left: 12rem;
+  }
+
+  &-componentName {
+    margin-right: 4rem;
+
+    opacity: 0.6;
+    text-transform: uppercase;
+  }
+}
+
 // The vanilla empty panels' look (Chirper, the notifications), sized by its own padding rather than
 // filling a fixed-height panel, so the window keeps fitting its content.
 .emptyState {
@@ -143,7 +226,7 @@ $empty-line-height: 1.4em;
     min-height: 2 * $empty-line-height;
     margin: 0;
 
-    font-size: var(--fontSizeL);
+    font-size: vanilla.$font-size-l;
     line-height: $empty-line-height;
     text-align: center;
   }

@@ -120,6 +120,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
         this.OnActiveDictionaryChanged;
 
       Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
+
+      Mod.Settings.PublicCreatorIDChanged += this.OnPublicCreatorIDChanged;
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
@@ -132,6 +134,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
     this.localizationManager.onActiveDictionaryChanged -= this.OnActiveDictionaryChanged;
 
     Mod.Settings.onSettingsApplied -= this.OnSettingsApplied;
+
+    Mod.Settings.PublicCreatorIDChanged -= this.OnPublicCreatorIDChanged;
   }
 
   private void OnActiveDictionaryChanged() {
@@ -139,6 +143,10 @@ internal sealed partial class CommonUISystem : UISystemBase {
   }
 
   private void OnSettingsApplied(Setting setting) {
+    this.settingsBinding.Update();
+  }
+
+  private void OnPublicCreatorIDChanged() {
     this.settingsBinding.Update();
   }
 

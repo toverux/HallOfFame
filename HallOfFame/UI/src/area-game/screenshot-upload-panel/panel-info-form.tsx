@@ -179,9 +179,9 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
           />
 
           <label>
-            {`${translate(
+            {translate(
               'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PHOTO_MODE_SETTINGS_LABEL'
-            )} β`}
+            )}
             <br />
             <small>
               {translate(

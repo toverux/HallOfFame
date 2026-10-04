@@ -84,6 +84,31 @@ export type ScreenshotCapability =
   | 'renderSettings';
 
 /**
+ * Serialization of C# `HallOfFame.Systems.PhotoModeCatalogEntry`: one property of the game's photo
+ * mode, the catalog listing them in the game's order.
+ * A color or a vector has one entry per component, its code ending with the component's suffix
+ * (`/r`, `/x`...).
+ */
+export interface PhotoModeProperty {
+  readonly code: string;
+  // The photo mode tab holding the property.
+  readonly group: string;
+  // The section title the property sits under in its tab, `null` when it precedes any title.
+  readonly section: string | null;
+  readonly kind: 'number' | 'enum' | 'checkbox' | 'colorComponent' | 'vectorComponent';
+  // For numbers and vector components.
+  readonly fractionDigits: number;
+  // For enums, the enum's type name, as the game's option localization keys use it.
+  readonly enumType: string | null;
+  readonly enumOptions: readonly PhotoModeEnumOption[];
+}
+
+export interface PhotoModeEnumOption {
+  readonly name: string;
+  readonly value: number;
+}
+
+/**
  * Serialization of C# `HallOfFame.Domain.Mod`
  */
 export interface Mod {

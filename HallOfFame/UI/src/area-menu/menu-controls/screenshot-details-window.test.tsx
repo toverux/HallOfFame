@@ -2,7 +2,12 @@ import { afterEach, describe, expect, it, mock } from 'bun:test';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EventInputProvider } from 'cs2/input';
-import { makeScreenshot, makeSettings } from '../../testing/fixtures';
+import {
+  makeCreator,
+  makeScreenshot,
+  makeSettings,
+  photoModeCatalog
+} from '../../testing/fixtures';
 import { emitEvent, resetBindings, setBinding } from '../../testing/game-setup';
 import { TransitionContext } from '../../vanilla-modules/game-ui/common/animations/transition-context';
 import { ScreenshotDetailsWindow } from './screenshot-details-window';
@@ -71,7 +76,7 @@ describe('ScreenshotDetailsWindow', () => {
     expect(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]')).toBeDefined();
   });
 
-  it(`says the photo mode settings and the playset are coming when selected`, async () => {
+  it(`shows the photo mode settings and says the playset is coming when selected`, async () => {
     const user = userEvent.setup();
 
     render(
@@ -87,7 +92,7 @@ describe('ScreenshotDetailsWindow', () => {
     );
 
     expect(
-      screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]')
+      screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Predates Feature]')
     ).toBeDefined();
     expect(screen.queryByText('A city.')).toBeNull();
 
@@ -110,7 +115,8 @@ describe('ScreenshotDetailsWindow', () => {
       </EventInputProvider>
     );
 
-    const photoModeSettings = 'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]';
+    const photoModeSettings =
+      'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Predates Feature]';
     const playset = 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]';
 
     // The input stack takes in a new consumer on the next frame.
@@ -338,5 +344,170 @@ describe('ScreenshotDetailsWindow', () => {
     });
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  describe('photo mode settings tab', () => {
+    // Every photo mode capability, so the tab's state follows the share flag.
+    const capabilities = ['shareRenderSettings', 'renderSettings'] as const;
+
+    function renderTab(
+      screenshot: Parameters<typeof makeScreenshot>[0],
+      settings: Parameters<typeof makeSettings>[0] = {}
+    ): void {
+      setBinding('hallOfFame.slideshow', 'photoModeCatalog', photoModeCatalog);
+      setBinding('hallOfFame.common', 'settings', makeSettings(settings));
+
+      render(
+        <ScreenshotDetailsWindow
+          screenshot={makeScreenshot({ capabilities, ...screenshot })}
+          openTab='photoModeSettings'
+          onClose={noop}
+        />
+      );
+    }
+
+    it(`lists the settings under their tab and section, after the notice`, () => {
+      renderTab({
+        shareRenderSettings: true,
+        renderSettings: { 'PhotoModeRenderSystem.iso': '400', 'Time of Day': '9.5' }
+      });
+
+      const texts = [
+        'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Notice]',
+        'Camera',
+        'CameraBody',
+        'PhotoModeRenderSystem.iso',
+        '400',
+        'Environment',
+        'Time of Day',
+        '9.500'
+      ];
+
+      const content = document.body.textContent;
+
+      // Each present, and in that order in the document.
+      const positions = texts.map(text => {
+        expect(screen.getByText(text)).toBeDefined();
+
+        return content.indexOf(text);
+      });
+
+      expect(positions).toEqual(positions.toSorted((a, b) => a - b));
+    });
+
+    it(`shows each value in its form`, () => {
+      renderTab({
+        shareRenderSettings: true,
+        renderSettings: {
+          'PhotoModeRenderSystem.gateFitMode': '2',
+          'Vignette.rounded': '1',
+          'Vignette.color/r': '1',
+          'Vignette.color/g': '0.5',
+          'Vignette.color/b': '0',
+          'PhotoModeRenderSystem.sensorSize/x': '24.892',
+          'PhotoModeRenderSystem.sensorSize/y': '18.669'
+        }
+      });
+
+      expect(screen.getByText('Horizontal')).toBeDefined();
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[On]')
+      ).toBeDefined();
+
+      // A color is one setting, under the color's name, read as the picker's sliders.
+      expect(screen.getByText('Vignette.color')).toBeDefined();
+      expect(screen.queryByText('Vignette.color/r')).toBeNull();
+      expect(screen.getByText('H').nextSibling?.textContent).toBe('30');
+      expect(screen.getByText('S').nextSibling?.textContent).toBe('100');
+      expect(screen.queryByText('A')).toBeNull();
+
+      // A vector is one setting listing its components.
+      expect(screen.getByText('PhotoModeRenderSystem.sensorSize')).toBeDefined();
+      expect(screen.getByText('24.892')).toBeDefined();
+      expect(screen.getByText('18.669')).toBeDefined();
+    });
+
+    it(`lists a code the game lacks under "Other", raw`, () => {
+      renderTab({ shareRenderSettings: true, renderSettings: { 'Env.TimeOfDayEase': '0.25' } });
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Other]')
+      ).toBeDefined();
+      expect(screen.getByText('Env.TimeOfDayEase')).toBeDefined();
+      expect(screen.getByText('0.25')).toBeDefined();
+    });
+
+    it(`notes the light-dependent settings when they are listed`, () => {
+      renderTab({
+        shareRenderSettings: true,
+        renderSettings: {
+          'ColorAdjustments.postExposure': '0.5',
+          'WhiteBalance.temperature': '10',
+          'Time of Day': '9.5'
+        }
+      });
+
+      for (const note of ['Post Exposure Note', 'White Balance Note', 'Time Of Day Note']) {
+        expect(
+          screen.getByText(`HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[${note}]`)
+        ).toBeDefined();
+      }
+    });
+
+    it(`notes no setting that is not listed`, () => {
+      renderTab({
+        shareRenderSettings: true,
+        renderSettings: { 'PhotoModeRenderSystem.iso': '400' }
+      });
+
+      expect(screen.queryByText(/Note\]$/u)).toBeNull();
+    });
+
+    it(`says the game's default settings were used when none were switched on`, () => {
+      renderTab({ shareRenderSettings: true });
+
+      expect(
+        screen.getByText(
+          'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Default Settings]'
+        )
+      ).toBeDefined();
+    });
+
+    it(`says the creator did not share them, showing none of those that arrived`, () => {
+      renderTab({ shareRenderSettings: false, renderSettings: { 'Time of Day': '9.5' } });
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Not Shared]')
+      ).toBeDefined();
+      expect(screen.queryByText('Time of Day')).toBeNull();
+    });
+
+    it(`addresses the creator viewing their own unshared settings`, () => {
+      renderTab(
+        {
+          shareRenderSettings: false,
+          renderSettings: { 'Time of Day': '9.5' },
+          creator: makeCreator({ id: 'me' })
+        },
+        { publicCreatorId: 'me' }
+      );
+
+      expect(
+        screen.getByText(
+          'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Not Shared By You]'
+        )
+      ).toBeDefined();
+      expect(screen.queryByText('Time of Day')).toBeNull();
+    });
+
+    it(`says the screenshot predates photo mode settings when it could not carry them`, () => {
+      renderTab({ capabilities: [], shareRenderSettings: true });
+
+      expect(
+        screen.getByText(
+          'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Predates Feature]'
+        )
+      ).toBeDefined();
+    });
   });
 });

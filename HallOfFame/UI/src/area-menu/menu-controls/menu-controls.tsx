@@ -24,6 +24,7 @@ import {
 } from './screenshot-details-window';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
 import { MenuControlsSocialsPreloader } from './socials-preloader';
+import { useDetailsContext } from './use-details-context';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 import { viewerLinkPreloadedIcons } from './viewer-link';
 import * as styles from './menu-controls.module.scss';
@@ -120,11 +121,13 @@ export function MenuControlsContent(): ReactElement {
     setDetailsTab(undefined);
   }
 
+  const detailsContext = useDetailsContext();
+
   // Memoized on the screenshot, so the memoized row and labels keep their props across the renders
   // the rest of the slideshow state causes.
   const details = useMemo(
-    () => menuState.screenshot && selectScreenshotDetails(menuState.screenshot),
-    [menuState.screenshot]
+    () => menuState.screenshot && selectScreenshotDetails(menuState.screenshot, detailsContext),
+    [menuState.screenshot, detailsContext]
   );
 
   // Without a description to preview, the row is only icons, a pill among the labels; with one, it
