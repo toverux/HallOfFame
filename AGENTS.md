@@ -85,6 +85,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 - Domain records carry only inbound `[DecodeAlias]` data: a type's outbound UI wire format lives in a `HallOfFame/Utils/Writers` writer, not on the record.
 - One `*.module.scss` per component file, colocated with its `*.tsx`, class names following the BEM-derived convention in `.agents/rules/css-modules-bem.md`.
 - Every layout length is in `rem` or `em`, which scale with the viewport: `px` is only correct at 1920 wide, where `1rem` happens to equal `1px`, and drifts both ways at every other resolution.
+- SCSS reaches a vanilla color only through its `vanilla.$…` variable in `HallOfFame/UI/src/vanilla-vars.scss`, never a raw `var(--…)`: add a missing one there with its latest known value in a trailing comment, so a game update that moves a color shows in one file.
 - Tooltips come from `HallOfFame/UI/src/components/tooltip.tsx`, never from `cs2/ui`: the vanilla one silently drops `direction` and `alignment`, so every tooltip placed through it opens upwards.
 - Focus keys are compared by value, so a plain string like `` `mod-${mod.id}` `` keeps a list row attached across re-renders, where a `FocusSymbol` memoized per row costs more for the same result.
 - A `vanilla-modules` stub may declare more of the vanilla API than the mod calls today: its unused members are kept on purpose, for the next consumer.

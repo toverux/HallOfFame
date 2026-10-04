@@ -9,8 +9,8 @@
 
 // The panel's surface look, mixed onto the header, the city info, and the info pane.
 .panel-surface {
-  background-color: var(--menuFocusedColor);
-  color: var(--menuText1Inverted);
+  background-color: vanilla.$menu-focused-color;
+  color: vanilla.$menu-text-1-inverted;
 
   @include common.on-new-ui {
     background-color: shared.$game-panel-white;
