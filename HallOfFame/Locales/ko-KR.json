@@ -64,7 +64,6 @@
   "HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Predates Feature]": "이 스크린샷은 Hall of Fame이 설명 기능을 지원하기 전에 촬영되었습니다.",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]": "사진 세팅",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]": "플레이셋",
-  "HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]": "이 스크린샷을 촬영할 때 사용된 사진 모드 세팅은 향후 업데이트에서 이곳에 표시될 예정입니다.",
   "HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]": "이 스크린샷을 촬영할 때 사용된 플레이셋은 이후 업데이트에서 이곳에 표시될 예정입니다.",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// 원주 - 번역자들에게 알림: 이 메세지들은 같은 메세지의 여러 가지 형태입니다.\n// 직역하지 마세요. 창의성을 발휘하시거나 ChatGPT를 사용하세요.\n// 각각의 메세지들은 줄 바꿈으로 구분해주세요.\n// 이 문서의 메세지 목록에는 원하시는 만큼 새 메세지를 추가하셔도 됩니다.\n명예의 전당에 걸맞는 사진이네요!\n혼자만 보시기는 아깝잖아요?\n다같이 봅시다!\n나이스 샷!\n아주 멋져요!\n좋… 좋은 사진이다!\n추억을 남겨주세요!\n스카이라인이 아주 멋져요!",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "16:9 비율 미리 보기",
