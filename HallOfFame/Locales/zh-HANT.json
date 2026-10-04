@@ -64,7 +64,6 @@
   "HallOfFame.UI.Menu.ScreenshotDetails.DESCRIPTION[Predates Feature]": "這張螢幕截圖拍攝時，Hall of Fame 尚未支援描述功能。",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Photo Mode Settings]": "照相設定",
   "HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]": "Playset",
-  "HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Coming]": "拍攝這張螢幕截圖時使用的照相模式設定，將在即將推出的更新中顯示於此。",
   "HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]": "拍攝這張螢幕截圖時使用的 Playset，將在之後的更新中顯示於此。",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.CONGRATULATIONS": "// NOTE TO TRANSLATORS: These are variants for a same message.\n// Do not translate literally, be creative, or use ChatGPT.\n// Separate each different message with a line break.\n// You can have as much messages as you want.\n夠格登上 Hall of Fame 了！\n要分享這幅傑作嗎？\n景色美呆了！\n拍得真好！\n這張不分享太可惜了！\n榮耀的一刻！\n把這一刻裱框起來！\n秀給大家看吧！\n這張值得珍藏！\n天際線超美的！",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.ASPECT_RATIO_TOOLTIP_TITLE": "16:9 長寬比預覽。",
