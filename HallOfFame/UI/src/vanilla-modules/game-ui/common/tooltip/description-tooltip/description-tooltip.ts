@@ -2,8 +2,16 @@ import type { FC, ReactNode } from 'react';
 import { getModuleExport } from '../../../../../utils';
 
 export interface TooltipLayoutProps {
+  /**
+   * Without one, the header the layout always renders leaves a gap above the body.
+   */
   readonly title?: ReactNode;
+
+  /**
+   * Rendered as markdown by `FormattedParagraphs`: text shown literally goes in `content`.
+   */
   readonly description?: ReactNode;
+
   readonly content?: ReactNode;
 }
 
