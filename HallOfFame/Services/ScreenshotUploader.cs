@@ -73,6 +73,7 @@ internal sealed class ScreenshotUploader(
           ModIds = snapshot.ModIds,
           ShareRenderSettings = form.ShareRenderSettings,
           RenderSettings = snapshot.RenderSettings,
+          RenderConditions = snapshot.RenderConditions,
           ScreenshotData = snapshot.ImageBytes,
           UploadProgressHandler = (upload, download) => {
             progressModel.ReportUploadProgress(upload);

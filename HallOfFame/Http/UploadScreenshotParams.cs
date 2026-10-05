@@ -26,6 +26,11 @@ internal sealed record UploadScreenshotParams {
 
   internal required IDictionary<string, float> RenderSettings { get; init; }
 
+  /// <summary>
+  /// Names to numbers, text, or booleans, shared under <see cref="ShareRenderSettings"/>.
+  /// </summary>
+  internal required IReadOnlyDictionary<string, object> RenderConditions { get; init; }
+
   internal required byte[] ScreenshotData { get; init; }
 
   internal required ProgressHandler? UploadProgressHandler { get; init; }

@@ -1,2 +1,1 @@
-- Fixed Hall of Fame not loading at all in some playsets since 2026.4.0: no screenshots in the main menu, no Hall of Fame button in Photo Mode, and no error shown. It was a conflict with InfoLoom.
-- Updated the Dutch translation.
+- Worked around a game bug: after you opened photo mode once, the exposure and white balance the game picks, and probably its clouds and fog, stopped following the seasons and the weather until you restarted the game. Hall of Fame now undoes this each time photo mode opens. Photo mode in the scenario editor is still affected.

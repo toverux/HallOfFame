@@ -113,6 +113,11 @@ public sealed class ScreenshotUploaderTests {
       ["bloom"] = 1.5f
     };
     var modIds = new[] { "mod.a", "mod.b" };
+    var renderConditions = new Dictionary<string, object> {
+      ["time.hour"] = 14.5f,
+      ["climate.season"] = "Summer",
+      ["options.dayNightVisuals"] = true
+    };
 
     var snapshot = ScreenshotUploaderTests.MakeSnapshot(
       achievedMilestone: 7,
@@ -120,6 +125,7 @@ public sealed class ScreenshotUploaderTests {
       mapName: "Map A",
       imageBytes: imageBytes,
       renderSettings: renderSettings,
+      renderConditions: renderConditions,
       modIds: modIds
     );
 
@@ -145,6 +151,7 @@ public sealed class ScreenshotUploaderTests {
     Assert.Equal("Map A", sent.MapName);
     Assert.Same(modIds, sent.ModIds);
     Assert.Same(renderSettings, sent.RenderSettings);
+    Assert.Same(renderConditions, sent.RenderConditions);
     Assert.Same(imageBytes, sent.ScreenshotData);
 
     // From the user's form input.
@@ -232,6 +239,7 @@ public sealed class ScreenshotUploaderTests {
     string? mapName = null,
     byte[]? imageBytes = null,
     IDictionary<string, float>? renderSettings = null,
+    IReadOnlyDictionary<string, object>? renderConditions = null,
     string[]? modIds = null
   ) =>
     new(
@@ -244,6 +252,7 @@ public sealed class ScreenshotUploaderTests {
       false,
       false,
       renderSettings ?? new Dictionary<string, float>(),
+      renderConditions ?? new Dictionary<string, object>(),
       modIds ?? []
     );
 

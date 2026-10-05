@@ -10,6 +10,7 @@ import {
 } from '../../testing/fixtures';
 import { emitEvent, resetBindings, setBinding } from '../../testing/game-setup';
 import { TransitionContext } from '../../vanilla-modules/game-ui/common/animations/transition-context';
+import { photoModeContainerClasses } from '../../vanilla-modules/game-ui/game/components/photo-mode/widgets/photo-mode-container';
 import { ScreenshotDetailsWindow } from './screenshot-details-window';
 
 afterEach(() => {
@@ -348,7 +349,22 @@ describe('ScreenshotDetailsWindow', () => {
 
   describe('photo mode settings tab', () => {
     // Every photo mode capability, so the tab's state follows the share flag.
-    const capabilities = ['shareRenderSettings', 'renderSettings'] as const;
+    const capabilities = ['shareRenderSettings', 'renderSettings', 'renderConditions'] as const;
+
+    // The conditions of a shot in summer daylight, as the mod records them.
+    const renderConditions = {
+      'time.hour': 14.5,
+      'map.latitude': -33.9,
+      'climate.season': 'Summer',
+      'climate.weather': 'Scattered',
+      'climate.temperature': 21.5,
+      'sun.elevation': 52.3,
+      'post.exposure': 0.75,
+      'post.temperature': 15,
+      // A tint of 0 is hidden, as every vanilla climate picks it.
+      'post.tint': 2,
+      'options.dayNightVisuals': true
+    };
 
     function renderTab(
       screenshot: Parameters<typeof makeScreenshot>[0],
@@ -390,6 +406,107 @@ describe('ScreenshotDetailsWindow', () => {
         expect(screen.getByText(text)).toBeDefined();
 
         return content.indexOf(text);
+      });
+
+      expect(positions).toEqual(positions.toSorted((a, b) => a - b));
+    });
+
+    it(`shows the conditions between the notice and the settings`, () => {
+      renderTab({
+        shareRenderSettings: true,
+        renderSettings: { 'PhotoModeRenderSystem.iso': '400' },
+        renderConditions
+      });
+
+      const texts = [
+        'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Notice]',
+        'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Title]',
+        'Summer',
+        'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Weather Scattered]',
+        '14:30',
+        'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Latitude South]',
+        'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Sun Elevation]',
+        'ColorAdjustments.postExposure',
+        'WhiteBalance.temperature',
+        'WhiteBalance.tint',
+        'Camera'
+      ];
+
+      const content = document.body.textContent;
+
+      const positions = texts.map(text => {
+        expect(screen.getByText(text)).toBeDefined();
+
+        return content.indexOf(text);
+      });
+
+      expect(positions).toEqual(positions.toSorted((a, b) => a - b));
+    });
+
+    it(`styles the section titles as the panel does, on their name`, () => {
+      renderTab({
+        shareRenderSettings: true,
+        renderSettings: { 'PhotoModeRenderSystem.iso': '400' },
+        renderConditions
+      });
+
+      for (const title of [
+        'CameraBody',
+        'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Game Chosen]'
+      ]) {
+        expect(screen.getByText(title).className).toContain(photoModeContainerClasses.groupTitle);
+      }
+    });
+
+    it(`shows the sun or the moon behind a few clouds, as the game's climate widget does`, () => {
+      renderTab({
+        shareRenderSettings: true,
+        renderConditions: { ...renderConditions, 'climate.weather': 'Few' }
+      });
+
+      const sources = [...document.querySelectorAll('img')].map(img => img.getAttribute('src'));
+
+      expect(sources).toContain('Media/Game/Climate/Sun.svg');
+      expect(sources).toContain('Media/Game/Climate/Few.svg');
+    });
+
+    it(`notes that the conditions were not recorded when it shows only the stored hour`, () => {
+      const note = 'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Not Recorded]';
+
+      renderTab({ shareRenderSettings: true, renderSettings: { 'Time of Day': '11.2' } });
+
+      expect(screen.getByText(note)).toBeDefined();
+
+      cleanup();
+
+      renderTab({ shareRenderSettings: true, renderConditions });
+
+      expect(screen.queryByText(note)).toBeNull();
+    });
+
+    it(`says Day/Night visuals was off in place of the hour and the latitude`, () => {
+      renderTab({
+        shareRenderSettings: true,
+        renderConditions: { ...renderConditions, 'options.dayNightVisuals': false }
+      });
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Day Night Visuals Off]')
+      ).toBeDefined();
+      expect(screen.queryByText('14:30')).toBeNull();
+      expect(screen.queryByText(/CONDITIONS\[Latitude/u)).toBeNull();
+    });
+
+    it(`shows the conditions above the default settings statement`, () => {
+      renderTab({ shareRenderSettings: true, renderConditions });
+
+      const positions = [
+        'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Title]',
+        'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Default Settings]'
+      ].map(text => {
+        expect(screen.getByText(text)).toBeDefined();
+
+        return document.body.textContent.indexOf(text);
       });
 
       expect(positions).toEqual(positions.toSorted((a, b) => a - b));

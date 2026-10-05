@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'bun:test';
-import type { Screenshot, ScreenshotCapability } from '../../common';
+import type { RenderConditionValue, Screenshot, ScreenshotCapability } from '../../common';
 import { makeCreator, makeScreenshot, photoModeCatalog } from '../../testing/fixtures';
 import {
   type DetailsContext,
+  type PhotoModeConditions,
   type PhotoModeSetting,
   type PhotoModeValue,
   type ScreenshotDetails,
+  formatClockTime,
   selectScreenshotDetails as selectWithContext,
   toPhotoModeColorSliders
 } from './screenshot-details';
@@ -16,7 +18,8 @@ const allCapabilities: readonly ScreenshotCapability[] = [
   'shareParadoxModIds',
   'paradoxModIds',
   'shareRenderSettings',
-  'renderSettings'
+  'renderSettings',
+  'renderConditions'
 ];
 
 // A screenshot uploaded before the share choices and descriptions, but after playsets and photo
@@ -28,6 +31,24 @@ const playset: readonly number[] = [1];
 
 // Any photo mode setting off the game's defaults, its value irrelevant to the row.
 const photoModeSettings: Readonly<Record<string, string>> = { 'dof.focusDistance': '3' };
+
+// The conditions of a shot in summer daylight, as the mod records them, with names the block does
+// not show.
+const recordedConditions: Readonly<Record<string, RenderConditionValue>> = {
+  'time.hour': 14.5,
+  'time.isOverridden': false,
+  'map.latitude': 45,
+  'climate.season': 'Summer',
+  'climate.weather': 'Scattered',
+  'climate.temperature': 21.5,
+  'sun.elevation': 52.3,
+  'light.dayPhase': 'Day',
+  'post.exposure': 0.75,
+  'post.temperature': 15,
+  'post.tint': 0,
+  'options.dayNightVisuals': true,
+  'camera.fieldOfView': 60
+};
 
 // The server sends `null` for a missing description, which reaches the UI as `undefined` although
 // `Screenshot.description` is a `string`.
@@ -133,7 +154,7 @@ describe('selectScreenshotDetails', () => {
 
       expect(details.row).toEqual({
         preview: undefined,
-        hasPhotoModeSettings: false,
+        hasPhotoMode: false,
         hasPlayset: true
       });
     });
@@ -157,7 +178,7 @@ describe('selectScreenshotDetails', () => {
 
       expect(details.row).toEqual({
         preview: undefined,
-        hasPhotoModeSettings: false,
+        hasPhotoMode: false,
         hasPlayset: true
       });
     });
@@ -169,7 +190,7 @@ describe('selectScreenshotDetails', () => {
 
       expect(details.row).toEqual({
         preview: 'A city.',
-        hasPhotoModeSettings: false,
+        hasPhotoMode: false,
         hasPlayset: false
       });
     });
@@ -187,7 +208,7 @@ describe('selectScreenshotDetails', () => {
 
       expect(details.row).toEqual({
         preview: 'A city.',
-        hasPhotoModeSettings: true,
+        hasPhotoMode: true,
         hasPlayset: true
       });
     });
@@ -203,7 +224,7 @@ describe('selectScreenshotDetails', () => {
 
       expect(details.row).toEqual({
         preview: undefined,
-        hasPhotoModeSettings: true,
+        hasPhotoMode: true,
         hasPlayset: false
       });
     });
@@ -215,7 +236,7 @@ describe('selectScreenshotDetails', () => {
 
       expect(details.row).toEqual({
         preview: undefined,
-        hasPhotoModeSettings: false,
+        hasPhotoMode: false,
         hasPlayset: true
       });
     });
@@ -232,7 +253,7 @@ describe('selectScreenshotDetails', () => {
 
       expect(details.row).toEqual({
         preview: undefined,
-        hasPhotoModeSettings: true,
+        hasPhotoMode: true,
         hasPlayset: true
       });
     });
@@ -248,7 +269,20 @@ describe('selectScreenshotDetails', () => {
         })
       );
 
-      expect(details.row).toMatchObject({ hasPhotoModeSettings: false });
+      expect(details.row).toMatchObject({ hasPhotoMode: false });
+    });
+
+    it(`shows the photo mode icon for conditions with no setting switched on`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({
+          description: 'A city.',
+          capabilities: allCapabilities,
+          shareRenderSettings: true,
+          renderConditions: recordedConditions
+        })
+      );
+
+      expect(details.row).toMatchObject({ hasPhotoMode: true });
     });
 
     it(`shows no icon for photo mode settings left at the game's defaults`, () => {
@@ -261,7 +295,7 @@ describe('selectScreenshotDetails', () => {
         })
       );
 
-      expect(details.row).toMatchObject({ hasPhotoModeSettings: false });
+      expect(details.row).toMatchObject({ hasPhotoMode: false });
     });
   });
 
@@ -313,7 +347,7 @@ describe('selectScreenshotDetails', () => {
         makeScreenshot({ capabilities: allCapabilities, shareRenderSettings: true })
       );
 
-      expect(details.photoModeSettings).toEqual({ kind: 'sharedEmpty' });
+      expect(details.photoModeSettings).toEqual({ kind: 'sharedEmpty', conditions: undefined });
     });
 
     it(`lists the settings of a screenshot predating the share choice, public back then`, () => {
@@ -342,7 +376,7 @@ describe('selectScreenshotDetails', () => {
         })
       );
 
-      expect(details.photoModeSettings).toEqual({
+      expect(details.photoModeSettings).toMatchObject({
         kind: 'content',
         groups: [
           {
@@ -520,7 +554,7 @@ describe('selectScreenshotDetails', () => {
         })
       );
 
-      expect(details.photoModeSettings).toEqual({
+      expect(details.photoModeSettings).toMatchObject({
         kind: 'content',
         groups: [
           {
@@ -574,7 +608,195 @@ describe('selectScreenshotDetails', () => {
       });
     });
   });
+
+  describe('conditions block', () => {
+    it(`shows the scene and the light the shot was taken in`, () => {
+      expect(conditionsOf({}, recordedConditions)).toEqual({
+        time: { kind: 'clock', hour: 14.5, latitude: 45 },
+        season: 'Summer',
+        weather: 'Scattered',
+        isNight: false,
+        temperature: 21.5,
+        sunElevation: 52.3,
+        gameChosen: [
+          gameChosen({ code: 'ColorAdjustments.postExposure', value: 0.75 }),
+          gameChosen({ code: 'WhiteBalance.temperature', value: 15 })
+        ],
+        isRecorded: true
+      });
+    });
+
+    it(`hides a game-chosen tint of 0, which every vanilla climate picks`, () => {
+      for (const { tint, isShown } of [
+        { tint: 0, isShown: false },
+        { tint: 5, isShown: true }
+      ]) {
+        const conditions = conditionsOf({}, { ...recordedConditions, 'post.tint': tint });
+
+        expect(conditions?.gameChosen.some(setting => setting.code == 'WhiteBalance.tint')).toBe(
+          isShown
+        );
+      }
+    });
+
+    it(`leaves out the exposure and white balance the creator set, listed as settings`, () => {
+      expect(
+        conditionsOf(
+          { 'ColorAdjustments.postExposure': '1', 'WhiteBalance.temperature': '20' },
+          { ...recordedConditions, 'post.tint': 5 }
+        )
+      ).toMatchObject({ gameChosen: [gameChosen({ code: 'WhiteBalance.tint', value: 5 })] });
+    });
+
+    it(`tells night from day the way the game's climate widget does`, () => {
+      for (const { dayPhase, isNight } of [
+        { dayPhase: 'Dawn', isNight: true },
+        { dayPhase: 'Sunrise', isNight: false },
+        { dayPhase: 'Sunset', isNight: false },
+        { dayPhase: 'Dusk', isNight: true },
+        { dayPhase: 'Night', isNight: true }
+      ]) {
+        expect(
+          conditionsOf({}, { ...recordedConditions, 'light.dayPhase': dayPhase })
+        ).toMatchObject({ isNight });
+      }
+    });
+
+    it(`says Day/Night visuals was off in place of the hour and the latitude`, () => {
+      expect(
+        conditionsOf({}, { ...recordedConditions, 'options.dayNightVisuals': false })
+      ).toMatchObject({ time: { kind: 'dayNightVisualsOff' }, sunElevation: 52.3 });
+    });
+
+    it(`shows the hour and the latitude the creator set, Day/Night visuals off or not`, () => {
+      expect(
+        conditionsOf(
+          { 'Time of Day': '18' },
+          {
+            ...recordedConditions,
+            'time.hour': 18,
+            'time.isOverridden': true,
+            'options.dayNightVisuals': false
+          }
+        )
+      ).toMatchObject({ time: { kind: 'clock', hour: 18, latitude: 45 } });
+    });
+
+    it(`wraps a recorded hour past midnight, as the stored Time of Day`, () => {
+      expect(
+        conditionsOf({}, { ...recordedConditions, 'time.hour': 100.5, 'time.isOverridden': true })
+      ).toMatchObject({ time: { kind: 'clock', hour: 4.5 } });
+    });
+
+    it(`shows only the stored hour for a screenshot predating the conditions`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({
+          capabilities: allCapabilities.filter(capability => capability != 'renderConditions'),
+          shareRenderSettings: true,
+          renderSettings: { 'Time of Day': '100.5' },
+          // A stray map the capability does not vouch for.
+          renderConditions: recordedConditions
+        })
+      );
+
+      expect(details.photoModeSettings).toMatchObject({
+        conditions: onlyTime({ kind: 'clock', hour: 4.5, latitude: undefined })
+      });
+    });
+
+    it(`shows only the stored hour when the conditions are missing`, () => {
+      expect(conditionsOf({ 'Time of Day': '9' }, {})).toEqual(
+        onlyTime({ kind: 'clock', hour: 9, latitude: undefined })
+      );
+    });
+
+    it(`is absent when nothing of it is known`, () => {
+      expect(conditionsOf({ 'Vignette.rounded': '1' }, {})).toBeUndefined();
+    });
+
+    it(`ignores the names it does not know, and values of another type`, () => {
+      expect(
+        conditionsOf(
+          {},
+          {
+            'time.hour': '14',
+            'climate.season': 3,
+            'climate.weather': 'Meteor Shower',
+            'sun.elevation': 30,
+            'some.future.condition': 1
+          }
+        )
+      ).toEqual({ ...onlyTime(), sunElevation: 30, isRecorded: true });
+    });
+
+    it(`shows in the shared-but-empty state, beside the default settings`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({
+          capabilities: allCapabilities,
+          shareRenderSettings: true,
+          renderConditions: recordedConditions
+        })
+      );
+
+      expect(details.photoModeSettings).toMatchObject({
+        kind: 'sharedEmpty',
+        conditions: { season: 'Summer' }
+      });
+    });
+
+    it(`is withheld with the settings when the creator did not share them`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({
+          capabilities: allCapabilities,
+          shareRenderSettings: false,
+          renderConditions: recordedConditions
+        })
+      );
+
+      expect(details.photoModeSettings).toEqual({ kind: 'notShared', isViewerCreator: false });
+    });
+  });
 });
+
+/**
+ * The conditions block of a shared screenshot carrying every capability.
+ */
+function conditionsOf(
+  renderSettings: Readonly<Record<string, string>>,
+  renderConditions: Readonly<Record<string, RenderConditionValue>>
+): PhotoModeConditions | undefined {
+  const { photoModeSettings: tab } = selectScreenshotDetails(
+    makeScreenshot({
+      capabilities: allCapabilities,
+      shareRenderSettings: true,
+      renderSettings,
+      renderConditions
+    })
+  );
+
+  return tab.kind == 'content' || tab.kind == 'sharedEmpty' ? tab.conditions : undefined;
+}
+
+function onlyTime(time?: PhotoModeConditions['time']): PhotoModeConditions {
+  return {
+    time,
+    season: undefined,
+    weather: undefined,
+    isNight: undefined,
+    temperature: undefined,
+    sunElevation: undefined,
+    gameChosen: [],
+    isRecorded: false
+  };
+}
+
+/**
+ * A value the game chose, as the conditions block lists it, with the fixture catalog's fraction
+ * digits.
+ */
+function gameChosen({ code, value }: Readonly<{ code: string; value: number }>): PhotoModeSetting {
+  return { code, value: { kind: 'number', value, fractionDigits: 3 }, noteId: undefined };
+}
 
 describe('toPhotoModeColorSliders', () => {
   it(`reads a color as the game picker's hue, saturation, and value sliders`, () => {
@@ -630,3 +852,20 @@ function listedSettings(
     group.sections.flatMap(section => section.settings)
   );
 }
+
+describe('formatClockTime', () => {
+  it(`reads an hour as a 24-hour clock, to the minute`, () => {
+    for (const { hour, clock } of [
+      { hour: 9.5, clock: '09:30' },
+      { hour: 14.258, clock: '14:15' }
+    ]) {
+      expect(formatClockTime(hour)).toBe(clock);
+    }
+  });
+
+  it(`rounds the last minute of the day over to midnight`, () => {
+    const { hour } = { hour: 23.9999 };
+
+    expect(formatClockTime(hour)).toBe('00:00');
+  });
+});

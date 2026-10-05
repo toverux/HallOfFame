@@ -1,4 +1,5 @@
-import type { PhotoModeProperty, Screenshot } from '../../common';
+import type { climate, time } from 'cs2/bindings';
+import type { PhotoModeProperty, RenderConditionValue, Screenshot } from '../../common';
 
 /**
  * What a details tab shows: the data itself, or which of the two reasons explains its absence.
@@ -13,11 +14,83 @@ export type DetailsTabState =
  * from whether settings arrived: the server sends a creator their own unshared ones.
  */
 export type PhotoModeTabState =
-  | { readonly kind: 'content'; readonly groups: readonly PhotoModeGroup[] }
+  | {
+      readonly kind: 'content';
+      readonly groups: readonly PhotoModeGroup[];
+      readonly conditions: PhotoModeConditions | undefined;
+    }
   | { readonly kind: 'notShared'; readonly isViewerCreator: boolean }
   | { readonly kind: 'predatesFeature' }
   // Shared, with no setting switched on: the game's defaults.
-  | { readonly kind: 'sharedEmpty' };
+  | { readonly kind: 'sharedEmpty'; readonly conditions: PhotoModeConditions | undefined };
+
+/**
+ * The scene and the light a shot was taken in, as the tab shows them above the settings, each
+ * `undefined` when not recorded.
+ */
+export interface PhotoModeConditions {
+  readonly time: PhotoModeConditionsTime | undefined;
+
+  /**
+   * The name the game localizes the season with.
+   */
+  readonly season: string | undefined;
+
+  readonly weather: PhotoModeWeather | undefined;
+
+  /**
+   * Whether the sun was down or about to rise, by the rule the game's climate widget shows a moon
+   * rather than a sun with.
+   */
+  readonly isNight: boolean | undefined;
+
+  // In degrees Celsius.
+  readonly temperature: number | undefined;
+
+  // The sun's height above the horizon, in degrees.
+  readonly sunElevation: number | undefined;
+
+  /**
+   * The exposure and white balance the game chose, as the settings overriding them, but those the
+   * creator set, which the settings list then shows.
+   */
+  readonly gameChosen: readonly PhotoModeSetting[];
+
+  /**
+   * Whether the mod recorded the conditions at capture: without them, the block shows only the
+   * hour photo mode's Time of Day stored.
+   */
+  readonly isRecorded: boolean;
+}
+
+/**
+ * The hour and the latitude placing the sun, unless the Day/Night visuals option was off with no
+ * hour set by the creator: the game then draws the same afternoon sun everywhere.
+ */
+export type PhotoModeConditionsTime =
+  | {
+      readonly kind: 'clock';
+      readonly hour: number;
+      readonly latitude: number | undefined;
+    }
+  | { readonly kind: 'dayNightVisualsOff' };
+
+/**
+ * The weather as the game's toolbar tells it apart.
+ */
+export type PhotoModeWeather = (typeof photoModeWeathers)[number];
+
+const photoModeWeathers = [
+  'Clear',
+  'Few',
+  'Scattered',
+  'Broken',
+  'Overcast',
+  'Rain',
+  'Snow',
+  'Hail',
+  'Storm'
+] as const satisfies ReadonlyArray<keyof typeof climate.WeatherType>;
 
 /**
  * A photo mode tab's listed settings.
@@ -129,7 +202,8 @@ export interface DetailsRow {
    */
   readonly preview: string | undefined;
 
-  readonly hasPhotoModeSettings: boolean;
+  // Whether the screenshot carries photo mode settings or conditions to show.
+  readonly hasPhotoMode: boolean;
 
   readonly hasPlayset: boolean;
 }
@@ -150,6 +224,7 @@ export function selectScreenshotDetails(
     | 'paradoxModIds'
     | 'shareRenderSettings'
     | 'renderSettings'
+    | 'renderConditions'
     | 'creator'
   >,
   context: DetailsContext
@@ -168,16 +243,18 @@ export function selectScreenshotDetails(
 
   const photoModeSettings = selectPhotoModeTab(screenshot, context);
 
-  const hasPhotoModeSettings = photoModeSettings.kind == 'content';
+  const hasPhotoMode =
+    photoModeSettings.kind == 'content' ||
+    (photoModeSettings.kind == 'sharedEmpty' && photoModeSettings.conditions != undefined);
 
   const hasPlayset = screenshot.paradoxModIds.length > 0;
 
-  const isRowShown = preview != undefined || hasPhotoModeSettings || hasPlayset;
+  const isRowShown = preview != undefined || hasPhotoMode || hasPlayset;
 
   return {
     description,
     photoModeSettings,
-    row: isRowShown ? { preview, hasPhotoModeSettings, hasPlayset } : undefined
+    row: isRowShown ? { preview, hasPhotoMode, hasPlayset } : undefined
   };
 }
 
@@ -204,6 +281,23 @@ export function toPhotoModeColorSliders(
   };
 }
 
+/**
+ * An hour of the day as a 24-hour clock reads it, to the minute, for a viewer to set it back in
+ * photo mode's Time of Day.
+ */
+export function formatClockTime(hour: number): string {
+  const minutesPerDay = HOURS_PER_DAY * MINUTES_PER_HOUR;
+
+  // Rounded first, so 23:59.7 reads 00:00 rather than 23:60.
+  const minutes = Math.round(hour * MINUTES_PER_HOUR) % minutesPerDay;
+
+  return `${pad(Math.floor(minutes / MINUTES_PER_HOUR))}:${pad(minutes % MINUTES_PER_HOUR)}`;
+
+  function pad(value: number): string {
+    return String(value).padStart(2, '0');
+  }
+}
+
 export interface PhotoModeColorSliders {
   readonly hue: number;
   readonly saturation: number;
@@ -215,7 +309,7 @@ export interface PhotoModeColorSliders {
 function selectPhotoModeTab(
   screenshot: Pick<
     Screenshot,
-    'capabilities' | 'shareRenderSettings' | 'renderSettings' | 'creator'
+    'capabilities' | 'shareRenderSettings' | 'renderSettings' | 'renderConditions' | 'creator'
   >,
   { photoModeCatalog, viewerCreatorId }: DetailsContext
 ): PhotoModeTabState {
@@ -229,7 +323,107 @@ function selectPhotoModeTab(
 
   const groups = groupPhotoModeSettings(screenshot.renderSettings, photoModeCatalog);
 
-  return groups.length > 0 ? { kind: 'content', groups } : { kind: 'sharedEmpty' };
+  const conditions = selectConditions(screenshot, photoModeCatalog);
+
+  return groups.length > 0
+    ? { kind: 'content', groups, conditions }
+    : { kind: 'sharedEmpty', conditions };
+}
+
+/**
+ * Reads the conditions block from the recorded conditions, by name, a value of another type than
+ * expected counting as unknown.
+ * A screenshot predating the recording, or whose upload recorded none, still tells its hour when
+ * the creator set Time of Day.
+ */
+function selectConditions(
+  screenshot: Pick<Screenshot, 'capabilities' | 'renderSettings' | 'renderConditions'>,
+  catalog: readonly PhotoModeProperty[]
+): PhotoModeConditions | undefined {
+  // A map the capability does not vouch for is ignored, to show the same for every screenshot of
+  // an era.
+  const recorded = screenshot.capabilities.includes('renderConditions')
+    ? screenshot.renderConditions
+    : {};
+
+  const settings = screenshot.renderSettings;
+
+  const weather = readCondition(recorded, 'climate.weather', 'string');
+
+  const dayPhase = readCondition(recorded, 'light.dayPhase', 'string');
+
+  const gameChosen = gameChosenSettings.flatMap(([code, conditionName]): PhotoModeSetting[] => {
+    const value = readCondition(recorded, conditionName, 'number');
+
+    // Every vanilla climate picks a tint of 0, which tells nothing.
+    if (value == undefined || settings[code] != undefined || (code == TINT_CODE && value == 0)) {
+      return [];
+    }
+
+    const { fractionDigits } = catalog.find(property => property.code == code) ?? {};
+
+    return [{ code, value: { kind: 'number', value, fractionDigits }, noteId: undefined }];
+  });
+
+  const scene = {
+    time: selectTime(recorded, settings),
+    season: readCondition(recorded, 'climate.season', 'string'),
+    weather: photoModeWeathers.find(known => known == weather),
+    isNight: dayPhase == undefined ? undefined : nightDayPhases.has(dayPhase),
+    temperature: readCondition(recorded, 'climate.temperature', 'number'),
+    sunElevation: readCondition(recorded, 'sun.elevation', 'number')
+  };
+
+  return gameChosen.length > 0 || Object.values(scene).some(value => value != undefined)
+    ? { ...scene, gameChosen, isRecorded: Object.keys(recorded).length > 0 }
+    : undefined;
+}
+
+/**
+ * The hour the sun was placed at, the stored Time of Day standing in for a missing recording.
+ */
+function selectTime(
+  recorded: Readonly<Record<string, RenderConditionValue>>,
+  settings: Readonly<Record<string, string>>
+): PhotoModeConditionsTime | undefined {
+  const settingHour = settings[TIME_OF_DAY_CODE];
+
+  const isHourSet =
+    settingHour != undefined || readCondition(recorded, 'time.isOverridden', 'boolean') == true;
+
+  if (readCondition(recorded, 'options.dayNightVisuals', 'boolean') == false && !isHourSet) {
+    return { kind: 'dayNightVisualsOff' };
+  }
+
+  const hour =
+    readCondition(recorded, 'time.hour', 'number') ??
+    (settingHour == undefined ? undefined : Number(settingHour));
+
+  if (hour == undefined) {
+    return undefined;
+  }
+
+  return {
+    kind: 'clock',
+    hour: hour % HOURS_PER_DAY,
+    latitude: readCondition(recorded, 'map.latitude', 'number')
+  };
+}
+
+function readCondition<T extends 'number' | 'string' | 'boolean'>(
+  conditions: Readonly<Record<string, RenderConditionValue>>,
+  name: string,
+  type: T
+): ConditionType[T] | undefined {
+  const value = conditions[name];
+
+  return typeof value == type ? (value as ConditionType[T]) : undefined;
+}
+
+interface ConditionType {
+  readonly number: number;
+  readonly string: string;
+  readonly boolean: boolean;
 }
 
 /**
@@ -433,7 +627,29 @@ function splitComponent(code: string): readonly [code: string, component: string
 
 const TIME_OF_DAY_CODE = 'Time of Day';
 
+const TINT_CODE = 'WhiteBalance.tint';
+
+/**
+ * The settings overriding a value the game chooses, with the name its choice is recorded under.
+ */
+const gameChosenSettings: ReadonlyArray<readonly [code: string, conditionName: string]> = [
+  ['ColorAdjustments.postExposure', 'post.exposure'],
+  ['WhiteBalance.temperature', 'post.temperature'],
+  [TINT_CODE, 'post.tint']
+];
+
+/**
+ * The game's day phases outside sunrise, day, and sunset.
+ */
+const nightDayPhases: ReadonlySet<string> = new Set([
+  'Dawn',
+  'Dusk',
+  'Night'
+] satisfies ReadonlyArray<keyof typeof time.LightingState>);
+
 const HOURS_PER_DAY = 24;
+
+const MINUTES_PER_HOUR = 60;
 
 /**
  * The mod's notes on the settings whose effect depends on the scene's light, by setting code.

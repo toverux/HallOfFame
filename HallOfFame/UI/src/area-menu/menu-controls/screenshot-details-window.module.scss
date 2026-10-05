@@ -201,6 +201,79 @@ $empty-line-height: 1.4em;
   }
 }
 
+// The summary of the scene and the light opening the photo mode settings, led by the weather icon
+// of the game's climate widget.
+.conditions {
+  &-summary {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10rem 6rem;
+  }
+
+  &-icon {
+    position: relative;
+    flex-shrink: 0;
+    width: 40rem;
+    height: 40rem;
+    margin-right: 14rem;
+  }
+
+  // The climate widget's layout, scaled to the icon: the sun or the moon peeking out from behind
+  // the clouds.
+  &-sun,
+  &-moon,
+  &-weather {
+    position: absolute;
+  }
+
+  &-sun {
+    top: 4rem;
+    left: 4rem;
+    width: 31rem;
+    height: 31rem;
+  }
+
+  &-moon {
+    top: 10rem;
+    left: 9rem;
+    width: 20rem;
+    height: 20rem;
+  }
+
+  &-weather {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    filter: drop-shadow(0 0 1rem rgba(0, 0, 0, 0.2));
+  }
+
+  &-headline,
+  &-details {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  &-headline {
+    font-size: vanilla.$font-size-l;
+    font-weight: bold;
+  }
+
+  &-details {
+    margin-top: 4rem;
+
+    color: $empty-color;
+    font-size: vanilla.$font-size-m;
+  }
+
+  &-separator {
+    margin: 0 0.4em;
+  }
+}
+
 // The vanilla empty panels' look (Chirper, the notifications), sized by its own padding rather than
 // filling a fixed-height panel, so the window keeps fitting its content.
 .emptyState {
@@ -229,6 +302,9 @@ $empty-line-height: 1.4em;
     font-size: vanilla.$font-size-l;
     line-height: $empty-line-height;
     text-align: center;
+    // A message breaks its own lines where a sentence reads better alone. Cohtml has no
+    // `pre-line`.
+    white-space: pre-wrap;
   }
 }
 

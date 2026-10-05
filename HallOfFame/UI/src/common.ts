@@ -56,6 +56,9 @@ export interface Screenshot {
   readonly paradoxModIds: readonly number[];
   readonly shareRenderSettings: boolean;
   readonly renderSettings: Readonly<Record<string, string>>;
+  // The scene and light the shot was taken in, by name, each value keeping its type. The mod adds
+  // names over its releases: read one by name, ignoring the rest.
+  readonly renderConditions: Readonly<Record<string, RenderConditionValue>>;
   // A field missing from it holds a default: the screenshot predates the mod release capturing it.
   readonly capabilities: readonly ScreenshotCapability[];
   readonly createdAt: string;
@@ -73,6 +76,8 @@ export interface Screenshot {
   readonly showcasedMod?: Mod;
 }
 
+export type RenderConditionValue = number | string | boolean;
+
 /**
  * A server field of a screenshot holding what the uploading mod captured.
  */
@@ -81,7 +86,8 @@ export type ScreenshotCapability =
   | 'shareParadoxModIds'
   | 'paradoxModIds'
   | 'shareRenderSettings'
-  | 'renderSettings';
+  | 'renderSettings'
+  | 'renderConditions';
 
 /**
  * Serialization of C# `HallOfFame.Systems.PhotoModeCatalogEntry`: one property of the game's photo

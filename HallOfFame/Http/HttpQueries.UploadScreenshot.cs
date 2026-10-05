@@ -28,6 +28,8 @@ internal partial class HttpQueries {
 
     multipart.AddField("renderSettings", JSON.Dump(@params.RenderSettings));
 
+    multipart.AddField("renderConditions", JSON.Dump(@params.RenderConditions));
+
     multipart.AddField(
       "metadata",
       JSON.Dump(

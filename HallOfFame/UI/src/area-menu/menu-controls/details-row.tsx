@@ -26,7 +26,7 @@ const rowIcons: ReadonlyArray<{
     src: apertureSharpSolidSrc,
     iconClassName: styles.rowIconDisc,
     tooltipId: 'HallOfFame.UI.Menu.MenuControls.DETAILS_ROW_TOOLTIP[Photo Mode Settings]',
-    isShown: row => row.hasPhotoModeSettings
+    isShown: row => row.hasPhotoMode
   },
   {
     tab: 'playset',

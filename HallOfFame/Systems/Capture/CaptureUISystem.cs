@@ -42,6 +42,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   private CitySnapshotProvider citySnapshotProvider = null!;
 
+  private RenderConditionsReader renderConditionsReader = null!;
+
   private ScreenshotUploader screenshotUploader = null!;
 
   /// <summary>
@@ -99,6 +101,11 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       var milestoneLevelQuery = this.GetEntityQuery(ComponentType.ReadOnly<MilestoneLevel>());
 
       this.citySnapshotProvider = new CitySnapshotProvider(this.World, milestoneLevelQuery);
+
+      this.renderConditionsReader = new RenderConditionsReader(this.World);
+
+      // Kept alive by its subscription to the game's panel event.
+      _ = new ClimateVolumeUnfreezer(this.World);
 
       // The uploader owns the capture -> assemble -> upload -> progress workflow, reporting back
       // through callbacks so this system keeps owning the UI binding and the (engine-bound) error
@@ -226,7 +233,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   }
 
   private async Task DoTakeScreenshot() {
-    var captured = await ScreenshotCapturer.Capture();
+    var captured = await ScreenshotCapturer.Capture(this.renderConditionsReader);
 
     // Prepare full size and preview images in a background thread.
     await Task.Run(() => {
@@ -261,6 +268,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       captured.WasGlobalIlluminationDisabled,
       captured.AreSettingsTopQuality,
       this.citySnapshotProvider.GetPhotoModePropertiesSnapshot(),
+      captured.RenderConditions,
       modIds
     );
 

@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import { InputActionConsumer } from 'cs2/input';
+import { LocalizedNumber, LocalizedString, Unit } from 'cs2/l10n';
 import {
   FormattedParagraphs,
   type FormattedTextTheme,
@@ -33,6 +34,9 @@ import { TooltipLayout } from '../../vanilla-modules/game-ui/common/tooltip/desc
 import { photoModeContainerClasses } from '../../vanilla-modules/game-ui/game/components/photo-mode/widgets/photo-mode-container';
 import {
   type DetailsTabState,
+  formatClockTime,
+  type PhotoModeConditions,
+  type PhotoModeWeather,
   type PhotoModeSection,
   type PhotoModeSetting,
   type PhotoModeTabState,
@@ -188,8 +192,15 @@ function DetailsModal({
           onClose={onClose}>
           <PreloadImages srcs={preloadedIcons} />
 
-          {/* Keyed on the screenshot and the tab, so each starts scrolled to its top. */}
-          <Scrollable key={`${screenshot.id}-${selectedTab}`} className={styles.windowContent}>
+          {/*
+            Keyed on the screenshot and the tab, so each starts scrolled to its top.
+            The scrollbar's room is reserved, as it otherwise comes two frames after the content
+            and rewraps it.
+          */}
+          <Scrollable
+            key={`${screenshot.id}-${selectedTab}`}
+            className={styles.windowContent}
+            trackVisibility='reserve'>
             {selectedTab == 'description' && <DescriptionTab state={details.description} />}
 
             {selectedTab == 'photoModeSettings' && (
@@ -258,6 +269,8 @@ function PhotoModeSettingsTab({ state }: Readonly<{ state: PhotoModeTabState }>)
             {translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Notice]')}
           </p>
 
+          {state.conditions && <ConditionsBlock conditions={state.conditions} />}
+
           {state.groups.map(group => (
             <section key={group.id ?? ''} className={styles.photoModeGroup}>
               <h2 className={styles.photoModeGroupTitle}>
@@ -294,9 +307,19 @@ function PhotoModeSettingsTab({ state }: Readonly<{ state: PhotoModeTabState }>)
     }
     case 'sharedEmpty': {
       return (
-        <EmptyState iconSrc={apertureDuotoneLightSrc}>
-          {translate('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Default Settings]')}
-        </EmptyState>
+        <>
+          {state.conditions && (
+            <div className={styles.photoMode}>
+              <ConditionsBlock conditions={state.conditions} />
+            </div>
+          )}
+
+          <EmptyState iconSrc={apertureDuotoneLightSrc}>
+            {translate(
+              'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Default Settings]'
+            )}
+          </EmptyState>
+        </>
       );
     }
     default: {
@@ -307,27 +330,146 @@ function PhotoModeSettingsTab({ state }: Readonly<{ state: PhotoModeTabState }>)
 }
 
 /**
+ * The scene and the light the shot was taken in: a summary led by the weather icon of the game's
+ * climate widget, then the values the game chose, named and laid out as the settings overriding
+ * them.
+ */
+function ConditionsBlock({
+  conditions
+}: Readonly<{ conditions: PhotoModeConditions }>): ReactElement {
+  const translate = useTranslate();
+
+  const { time, season, weather, isNight, temperature, sunElevation, gameChosen, isRecorded } =
+    conditions;
+
+  const headline = [
+    season != undefined && translate(`Climate.SEASON[${season}]`, season),
+    weather != undefined &&
+      translate(`HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Weather ${weather}]`),
+    temperature != undefined && (
+      <LocalizedNumber key='temperature' value={temperature} unit={Unit.Temperature} />
+    )
+  ];
+
+  const details = [
+    time?.kind == 'clock' && formatClockTime(time.hour),
+    time?.kind == 'clock' && time.latitude != undefined && (
+      <LocalizedString
+        key='latitude'
+        id={
+          time.latitude < 0
+            ? 'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Latitude South]'
+            : 'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Latitude North]'
+        }
+        args={{ ANGLE: <LocalizedNumber value={Math.abs(time.latitude)} unit={Unit.Angle} /> }}
+      />
+    ),
+    sunElevation != undefined && (
+      <LocalizedString
+        key='sunElevation'
+        id='HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Sun Elevation]'
+        args={{ ANGLE: <LocalizedNumber value={sunElevation} unit={Unit.Angle} /> }}
+      />
+    )
+  ];
+
+  return (
+    <section className={styles.photoModeGroup}>
+      <h2 className={styles.photoModeGroupTitle}>
+        {translate('HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Title]')}
+      </h2>
+
+      <div className={styles.conditionsSummary}>
+        {weather != undefined && <ConditionsIcon weather={weather} isNight={isNight} />}
+
+        <div>
+          <ConditionsLine className={styles.conditionsHeadline}>{headline}</ConditionsLine>
+          <ConditionsLine className={styles.conditionsDetails}>{details}</ConditionsLine>
+        </div>
+      </div>
+
+      {!isRecorded && (
+        <p className={styles.photoModeNote}>
+          {translate('HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Not Recorded]')}
+        </p>
+      )}
+
+      {time?.kind == 'dayNightVisualsOff' && (
+        <p className={styles.photoModeNote}>
+          {translate('HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Day Night Visuals Off]')}
+        </p>
+      )}
+
+      {gameChosen.length > 0 && (
+        <PhotoModeSectionTitle>
+          <div className={classNames(photoModeContainerClasses.title, sectionTitleClassName())}>
+            {translate('HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Game Chosen]')}
+          </div>
+        </PhotoModeSectionTitle>
+      )}
+
+      {gameChosen.map(setting => (
+        <PhotoModeSettingRow key={setting.code} setting={setting} />
+      ))}
+    </section>
+  );
+}
+
+function ConditionsIcon({
+  weather,
+  isNight
+}: Readonly<{ weather: PhotoModeWeather; isNight: boolean | undefined }>): ReactElement {
+  return (
+    <div className={styles.conditionsIcon}>
+      {/* As the game's climate widget: clouds beyond a few hide the sun or the moon. */}
+      {(weather == 'Clear' || weather == 'Few') && (
+        <img
+          src={isNight ? 'Media/Game/Climate/Moon.svg' : 'Media/Game/Climate/Sun.svg'}
+          className={isNight ? styles.conditionsMoon : styles.conditionsSun}
+        />
+      )}
+      {weather != 'Clear' && (
+        <img src={`Media/Game/Climate/${weather}.svg`} className={styles.conditionsWeather} />
+      )}
+    </div>
+  );
+}
+
+/**
+ * The known items of a summary line, separated by dots, nothing when none is known.
+ * Each item has a span of its own: Cohtml lays out a div's children as a column.
+ */
+function ConditionsLine({
+  className,
+  children
+}: Readonly<{ className: string; children: readonly ReactNode[] }>): ReactNode {
+  const items = children.filter(Boolean);
+
+  return (
+    items.length > 0 && (
+      <div className={className}>
+        {items.map((item, index) => (
+          // oxlint-disable-next-line react/no-array-index-key - fixed items, never reordered
+          <span key={index}>
+            {index > 0 && <span className={styles.conditionsSeparator}>·</span>}
+            {item}
+          </span>
+        ))}
+      </div>
+    )
+  );
+}
+
+/**
  * A section's title and settings, as the game's photo mode panel lays them out.
  */
 function PhotoModeSectionView({ section }: Readonly<{ section: PhotoModeSection }>): ReactElement {
   return (
     <div>
       {section.id != undefined && (
-        <div
-          className={classNames(
-            photoModeContainerClasses.container,
-            photoModeContainerClasses.group
-          )}>
-          <div className={photoModeContainerClasses.children}>
-            <PhotoModeTitle
-              code={section.id}
-              className={classNames(
-                photoModeContainerClasses.groupTitle,
-                styles.photoModeSectionTitle
-              )}
-            />
-          </div>
-        </div>
+        <PhotoModeSectionTitle>
+          <PhotoModeTitle code={section.id} className={sectionTitleClassName()} />
+        </PhotoModeSectionTitle>
       )}
 
       {section.settings.map(setting => (
@@ -345,8 +487,7 @@ function PhotoModeSettingRow({ setting }: Readonly<{ setting: PhotoModeSetting }
 
   return (
     <>
-      {/* Active, as every listed setting was switched on: the panel dims the name of a setting
-          that is not. */}
+      {/* Active, as the panel marks a setting switched on: it dims the name of one that is not. */}
       <div
         className={classNames(
           photoModeContainerClasses.container,
@@ -365,6 +506,27 @@ function PhotoModeSettingRow({ setting }: Readonly<{ setting: PhotoModeSetting }
       )}
     </>
   );
+}
+
+/**
+ * A section title's row as the game's photo mode panel lays it out, around a title element wearing
+ * the section title's classes, {@link sectionTitleClassName}.
+ */
+function PhotoModeSectionTitle({ children }: Readonly<{ children: ReactNode }>): ReactElement {
+  return (
+    <div
+      className={classNames(photoModeContainerClasses.container, photoModeContainerClasses.group)}>
+      <div className={photoModeContainerClasses.children}>{children}</div>
+    </div>
+  );
+}
+
+/**
+ * The classes of a section title's name, which go on the panel's title element itself: they
+ * override its dimmed color.
+ */
+function sectionTitleClassName(): string {
+  return classNames(photoModeContainerClasses.groupTitle, styles.photoModeSectionTitle);
 }
 
 /**

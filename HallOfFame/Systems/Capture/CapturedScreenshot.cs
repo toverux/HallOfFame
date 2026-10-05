@@ -1,10 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace HallOfFame.Systems.Capture;
 
 /// <summary>
-/// Result of a screenshot capture: the encoded images, their size, and the graphics-state facts the
-/// capturer observed while rendering.
+/// Result of a screenshot capture: the encoded images, their size, the graphics-state facts the
+/// capturer observed while rendering, and the conditions of the shot.
 /// </summary>
 internal readonly struct CapturedScreenshot {
   /// <summary>
@@ -32,4 +33,10 @@ internal readonly struct CapturedScreenshot {
   /// Whether all relevant graphics settings were at their highest quality when capturing.
   /// </summary>
   internal required bool AreSettingsTopQuality { get; init; }
+
+  /// <summary>
+  /// The conditions of the shot, see <see cref="RenderConditionsReader"/>, empty when they could
+  /// not be read.
+  /// </summary>
+  internal required IReadOnlyDictionary<string, object> RenderConditions { get; init; }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Game.SceneFlow;
@@ -18,10 +19,13 @@ namespace HallOfFame.Systems.Capture;
 /// </summary>
 internal static class ScreenshotCapturer {
   /// <summary>
-  /// Renders the screenshot and its preview, returning the encoded images and the graphics-state
-  /// facts observed during the capture.
+  /// Renders the screenshot and its preview, returning the encoded images, the graphics-state facts
+  /// observed during the capture, and the conditions of the shot.
+  /// The conditions are read here, once the shot has rendered and before the forced graphics
+  /// options are restored, as a read after the capture would see the restored options and a scene
+  /// that may have moved on.
   /// </summary>
-  internal static async Task<CapturedScreenshot> Capture() {
+  internal static async Task<CapturedScreenshot> Capture(RenderConditionsReader conditionsReader) {
     // Read everything needed up front before changing any state. If any of this fails, there is
     // nothing to restore and the UI was not hidden yet, so it is intentionally outside the
     // try/finally below.
@@ -47,10 +51,16 @@ internal static class ScreenshotCapturer {
     var previousDynResLevel = dynResSettings.GetLevel();
     var previousSsgiQualityLevel = ssgiSettings.GetLevel();
 
+    var wasGlobalIlluminationDisabled =
+      Mod.Settings.DisableGlobalIllumination &&
+      previousSsgiQualityLevel != QualitySetting.Level.Disabled;
+
     var width = Screen.width * scaleFactor;
     var height = Screen.height * scaleFactor;
     var renderTexture = new RenderTexture(width, height, 24);
     var screenshotTexture = new Texture2D(width, height, TextureFormat.RGB24, false);
+
+    Dictionary<string, object> renderConditions;
 
     // Hide the UI, otherwise it will be captured in the screenshot.
     GameManager.instance.userInterface.view.enabled = false;
@@ -104,6 +114,17 @@ internal static class ScreenshotCapturer {
       RenderTexture.active = renderTexture;
       screenshotTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
       screenshotTexture.Apply();
+
+      renderConditions = conditionsReader.Read(
+        camera,
+        new RenderConditionsReader.CaptureOverrides(
+          // The camera allows DLSS by default, which only renders with it when the player turned
+          // it on.
+          IsDlssForcedOff: previousDlssValue && SharedSettings.instance.graphics.isDlssActive,
+          IsDynamicResolutionForcedOff: previousDynResLevel != QualitySetting.Level.High,
+          IsGlobalIlluminationForcedOff: wasGlobalIlluminationDisabled
+        )
+      );
     }
     finally {
       // Reset DLSS.
@@ -150,16 +171,13 @@ internal static class ScreenshotCapturer {
     Object.DestroyImmediate(screenshotTexture);
     Object.DestroyImmediate(previewTexture);
 
-    var wasGlobalIlluminationDisabled =
-      Mod.Settings.DisableGlobalIllumination &&
-      previousSsgiQualityLevel != QualitySetting.Level.Disabled;
-
     return new CapturedScreenshot {
       PngBytes = pngScreenshotBytes,
       JpgPreviewBytes = jpgPreviewBytes,
       Size = new Vector2Int(width, height),
       WasGlobalIlluminationDisabled = wasGlobalIlluminationDisabled,
-      AreSettingsTopQuality = ScreenshotCapturer.AreSettingsTopQuality()
+      AreSettingsTopQuality = ScreenshotCapturer.AreSettingsTopQuality(),
+      RenderConditions = renderConditions
     };
   }
 

@@ -68,6 +68,14 @@ internal record Screenshot {
   internal Dictionary<string, string> RenderSettings { get; [UsedImplicitly] set; } = new();
 
   /// <summary>
+  /// Shared under <see cref="ShareRenderSettings"/>, empty for a screenshot whose upload recorded
+  /// none.
+  /// </summary>
+  [DecodeAlias("renderConditions")]
+  // ReSharper disable once CollectionNeverUpdated.Global
+  internal RenderConditions RenderConditions { get; [UsedImplicitly] set; } = new();
+
+  /// <summary>
   /// The server fields holding what the uploading mod captured, e.g. "description".
   /// A field missing from it holds a default: the screenshot predates the mod release capturing it.
   /// </summary>

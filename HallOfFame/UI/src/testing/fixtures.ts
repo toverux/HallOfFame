@@ -92,6 +92,7 @@ export function makeScreenshot(overrides: Partial<Screenshot> = {}): Screenshot 
     paradoxModIds: [],
     shareRenderSettings: false,
     renderSettings: {},
+    renderConditions: {},
     capabilities: [],
     createdAt: '',
     createdAtFormatted: '',

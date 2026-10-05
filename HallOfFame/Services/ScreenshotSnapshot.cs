@@ -21,6 +21,7 @@ internal readonly struct ScreenshotSnapshot(
   bool wasGlobalIlluminationDisabled,
   bool areSettingsTopQuality,
   IDictionary<string, float> renderSettings,
+  IReadOnlyDictionary<string, object> renderConditions,
   string[] modIds
 ) : IJsonWritable {
   /// <summary>
@@ -54,6 +55,8 @@ internal readonly struct ScreenshotSnapshot(
 
   internal IDictionary<string, float> RenderSettings { get; } =
     renderSettings;
+
+  internal IReadOnlyDictionary<string, object> RenderConditions { get; } = renderConditions;
 
   internal string[] ModIds { get; } = modIds;
 

@@ -1,3 +1,4 @@
+using System;
 using Colossal.UI.Binding;
 using HallOfFame.Domain;
 
@@ -84,6 +85,9 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
     writer.PropertyName("renderSettings");
     writer.Write(value.RenderSettings);
 
+    writer.PropertyName("renderConditions");
+    ScreenshotValueWriter.WriteRenderConditions(writer, value.RenderConditions);
+
     writer.PropertyName("capabilities");
     writer.Write(value.Capabilities);
 
@@ -122,5 +126,31 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
     }
 
     writer.TypeEnd();
+  }
+
+  /// <summary>
+  /// Writes the conditions as a map, each value as its own type, unlike the settings, which reach
+  /// the UI as text: the UI tells a number from text and from a boolean.
+  /// A map, not a type, so its varying names leave the screenshot's cached shape alone.
+  /// </summary>
+  private static void WriteRenderConditions(IJsonWriter writer, RenderConditions conditions) {
+    writer.MapBegin((uint) conditions.Count);
+
+    foreach (var condition in conditions) {
+      writer.Write(condition.Key);
+
+      switch (condition.Value) {
+        case double number: writer.Write(number); break;
+        case string text: writer.Write(text); break;
+        case bool boolean: writer.Write(boolean); break;
+        default:
+          // The decoder keeps no other kind of value.
+          throw new InvalidOperationException(
+            $"Unexpected render condition value type {condition.Value.GetType()}."
+          );
+      }
+    }
+
+    writer.MapEnd();
   }
 }
