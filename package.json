@@ -4,7 +4,6 @@
     "// We use mise-en-place to manage tasks. See mise.toml for more info.": ""
   },
   "dependencies": {
-    "@csmodding/urbandevkit": "^0.2.1",
     "@leeoniya/ufuzzy": "1.0.19",
     "classnames": "^2.5.1",
     "common-tags": "^1.8.2",

@@ -7,7 +7,7 @@ The file's own comments are the authority; this is the map.
 ## How it loads the bundle
 
 1. It reads the minified webpack bundle from `$CSII_INSTALLATIONPATH/Cities2_Data/Content/Game/UI/index.js`.
-2. `cs2/*` are ambient TYPE-only declarations in this repo (`@csmodding/urbandevkit/cs2-types`); the real runtime implementations live only in that bundle.
+2. `cs2/*` are ambient TYPE-only declarations in this repo (`HallOfFame/UI/cs2-types`); the real runtime implementations live only in that bundle.
 3. bun cannot `import()` the bundle (its hot-reload setters reassign `const` bindings, which bun's transpiler rejects), so the source is handed to JavaScriptCore via indirect `eval`.
 4. The bundle exposes each game module on `window` (e.g. `window['cs2/api']`); each bare specifier is aliased to its window export with `mock.module`.
    react and react-dom are intentionally NOT aliased this way (see below).

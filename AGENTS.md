@@ -47,6 +47,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `HallOfFame.Tests`: C# unit tests (xUnit, `net48`, run off-engine).
 - `HallOfFame/UI/src`: TypeScript/React frontend, split into `area-game` (in-game HUD panels), `area-menu` (main-menu integration), `area-overlay` (loading screen modification), `components` (UI components shared across areas), `utils` (shared hooks/helpers, plus `bindings/`, the typed C#<->TS binding facade, one module per binding group), and `vanilla-modules` (typed stubs for game UI internals).
   UI tests are colocated `*.test.ts` / `*.test.tsx` files.
+- `HallOfFame/UI/cs2-types`: The game's own `cs2/*` type declarations: the `.d.ts` files of `$CSII_INSTALLATIONPATH/Cities2_Data/Content/Game/.ModdingToolchain/npx-create-csii-ui-mod/template/types`, copied as they are. Copy them again after a game update, never edit them by hand.
 
 ## Commands
 

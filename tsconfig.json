@@ -5,7 +5,7 @@
     "HallOfFame/UI/src/**/*",
     ".agents/hooks/**/*",
     ".agents/scripts/**/*",
-    "node_modules/@csmodding/urbandevkit/cs2-types"
+    "HallOfFame/UI/cs2-types"
   ],
   "compilerOptions": {
     "target": "ESNext",

@@ -7,6 +7,8 @@ import { defineConfig } from 'oxlint';
 // oxlint-disable-next-line import/no-default-export - oxlint interface
 export default defineConfig({
   extends: [all, agnostic, react, reactPerfRelaxed],
+  // The cs2 types are the game's own files, copied as they are.
+  ignorePatterns: ['HallOfFame/UI/cs2-types'],
   plugins: ['jest'],
   rules: {
     // Jest (bun test) rules that conflict with production code, that we re-enable below with an

@@ -4,7 +4,6 @@
   "workspaces": {
     "": {
       "dependencies": {
-        "@csmodding/urbandevkit": "^0.2.1",
         "@leeoniya/ufuzzy": "1.0.19",
         "classnames": "^2.5.1",
         "common-tags": "^1.8.2",
@@ -57,8 +56,6 @@
     "@babel/runtime": ["@babel/runtime@7.28.4", "", {}, "sha512-Q/N6JNWvIvPnLDvjlE1OUBLPQHH6l3CltCEsHIujp45zQUSSh8K+gHnaEX45yAT1nyngnINhvWtzN+Nb9D8RAQ=="],
 
     "@bufbuild/protobuf": ["@bufbuild/protobuf@1.10.1", "", {}, "sha512-wJ8ReQbHxsAfXhrf9ixl0aYbZorRuOWpBNzm8pL8ftmSxQx/wnJD5Eg861NwJU/czy2VXFIebCeZnZrI9rktIQ=="],
-
-    "@csmodding/urbandevkit": ["@csmodding/urbandevkit@0.2.1", "", { "peerDependencies": { "react": "^18.0.0", "react-dom": "^18.0.0" } }, "sha512-wNEosrF8XtRkgesOER+Ac7AupBo3zcPjhdDjyQ6HK27MKLN0KP8qggFcmNHDSWFVuvGyUD/qEmCRiW6q5otzvQ=="],
 
     "@discoveryjs/json-ext": ["@discoveryjs/json-ext@1.1.0", "", {}, "sha512-Xc3VhU02wqZ1HvHRJUwL09HkZSTvidqY5Ya0NXBSYOxAp+Ln9dcJr9fySI+CkONzP3PekQo9WdzCv0PGER/mOA=="],
 
