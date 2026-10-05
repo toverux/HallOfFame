@@ -6,7 +6,8 @@ symptoms:
   - 'Reading a member of a `cs2/*` enum throws "Cannot read properties of undefined"'
   - 'Focus errors in UI.log: "Cannot register child … Children are not allowed in this focus node!"'
   - 'Focus errors in UI.log: "Attempted to unregister mismatching focus key …"'
-tags: [cs2-ui, cs2-input, typings, focus, enums, urbandevkit]
+tags: [cs2-ui, cs2-input, typings, focus, enums, cs2-types]
+updated: 2026-10-05
 ---
 
 # A `cs2/*` value import is undefined in the game
@@ -29,18 +30,19 @@ looked deployed while `Se.FOCUS_DISABLED` was `undefined`, and the error came ba
 
 ## Root cause
 
-`@csmodding/urbandevkit`'s `cs2-types/` declares more than the game exports, and a declaration alone
-gives tsc no way to notice. Each `cs2/<name>` module reaches the page as `window["cs2/<name>"]`, and
-reading a missing key off one of those namespace objects yields `undefined` rather than throwing, so
-nothing fails loudly either.
+The game's own typings, copied in `HallOfFame/UI/cs2-types`, declare more than the game exports,
+and a declaration alone gives tsc no way to notice. Each `cs2/<name>` module reaches the page as
+`window["cs2/<name>"]`, and reading a missing key off one of those namespace objects yields
+`undefined` rather than throwing, so nothing fails loudly either.
 
 Two families of declaration have no runtime counterpart:
 
 - **Misattributed values.** `ui.d.ts` declares the whole focus surface (`FOCUS_DISABLED`,
   `FOCUS_AUTO`, `FocusSymbol`, `FocusKey`, `UniqueFocusKey`) on `cs2/ui`. The game exports none of it
   there: every focus symbol belongs to `cs2/input`.
-- **Enums.** No `cs2/*` enum exists at runtime, `UISound` and `LocElementType` included. Only the
-  type survives.
+- **Enums.** Most `cs2/*` enums do not exist at runtime, `UISound` and `LocElementType` included:
+  only the type survives. A few are exported, like `Unit` from `cs2/l10n`, so check the export map
+  as Prevention says before calling an enum import a bug.
 
 Types erase, so only the values bite.
 

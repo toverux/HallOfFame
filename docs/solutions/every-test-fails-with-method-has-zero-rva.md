@@ -4,6 +4,7 @@ area: HallOfFame.Tests
 symptoms:
   - 'System.BadImageFormatException : Method has zero rva'
 tags: [build, msbuild, test-harness]
+updated: 2026-10-05
 ---
 
 # Every test fails with "Method has zero rva"
@@ -24,6 +25,9 @@ Stale build output under `HallOfFame.Tests/obj`. The incremental build reuses ar
 longer match the sources, most readily after a bulk edit that rewrites many files at once.
 
 ## Fix
+
+Rerun the suite first: the failure is often transient and a second `mise test:cs` passes. When it
+does not:
 
 ```bash
 rm -rf HallOfFame.Tests/obj HallOfFame.Tests/bin
