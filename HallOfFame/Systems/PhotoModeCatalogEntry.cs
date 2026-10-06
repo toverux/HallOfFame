@@ -60,20 +60,22 @@ internal sealed record PhotoModeCatalogEntry {
 
       var kind = PhotoModeCatalogEntry.KindOf(property);
 
-      catalog.Add(new PhotoModeCatalogEntry {
-        Code = property.id,
-        Group = property.group,
-        Section = sectionsByGroup.TryGetValue(property.group, out var section) ? section : null,
-        Kind = kind,
-        FractionDigits = property.fractionDigits,
-        EnumType = kind is PhotoModeCatalogEntryKind.Enum ? property.enumType.Name : null,
-        EnumOptions = kind is PhotoModeCatalogEntryKind.Enum
-          ? Enum.GetValues(property.enumType)
-            .Cast<object>()
-            .Select(value => (Enum.GetName(property.enumType, value), Convert.ToInt32(value)))
-            .ToList()
-          : []
-      });
+      catalog.Add(
+        new PhotoModeCatalogEntry {
+          Code = property.id,
+          Group = property.group,
+          Section = sectionsByGroup.TryGetValue(property.group, out var section) ? section : null,
+          Kind = kind,
+          FractionDigits = property.fractionDigits,
+          EnumType = kind is PhotoModeCatalogEntryKind.Enum ? property.enumType.Name : null,
+          EnumOptions = kind is PhotoModeCatalogEntryKind.Enum
+            ? Enum.GetValues(property.enumType)
+              .Cast<object>()
+              .Select(value => (Enum.GetName(property.enumType, value), Convert.ToInt32(value)))
+              .ToList()
+            : []
+        }
+      );
     }
 
     return catalog;
@@ -97,8 +99,12 @@ internal sealed record PhotoModeCatalogEntry {
 
 internal enum PhotoModeCatalogEntryKind {
   Number,
+
   Enum,
+
   Checkbox,
+
   ColorComponent,
+
   VectorComponent
 }

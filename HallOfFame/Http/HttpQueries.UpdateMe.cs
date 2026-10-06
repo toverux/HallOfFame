@@ -13,39 +13,37 @@ namespace HallOfFame.Http;
 internal partial class HttpQueries {
   public async Task<Creator> UpdateMe() {
     var payload = new Dictionary<string, object> {
-      { "locale", GameManager.instance.localizationManager.activeLocaleId },
+      ["locale"] = GameManager.instance.localizationManager.activeLocaleId,
       // Free-form object we can use for debugging/analytics.
-      {
-        "metadata", new Dictionary<string, object> {
-          // General info
-          { "modVersion", typeof(HttpQueries).Assembly.GetName().Version.ToString(3) },
-          { "isNvidiaGpu", Settings.IsNvidiaGpu() },
-          { "screenWidth", Screen.width },
-          { "screenHeight", Screen.height },
-          { "useLegacyInterface", SharedSettings.instance.userInterface.useLegacyInterface },
-          // Weighs how much controller support is worth to the mod's players.
-          { "isGamepadConnected", InputManager.IsGamepadConnected },
-          // Some mod settings
-          { "enableMainMenuSlideshow", Mod.Settings.EnableMainMenuSlideshow },
-          { "enableLoadingScreenBackground", Mod.Settings.EnableLoadingScreenBackground },
-          { "showFeaturedAsset", Mod.Settings.ShowFeaturedAsset },
-          { "showCreatorSocials", Mod.Settings.ShowCreatorSocials },
-          { "showCityInfo", Mod.Settings.ShowCityInfo },
-          { "showViewCount", Mod.Settings.ShowViewCount },
-          { "showScreenshotDetails", Mod.Settings.ShowScreenshotDetails },
-          { "namesTranslationMode", Mod.Settings.NamesTranslationMode },
-          { "popularScreenshotWeight", Mod.Settings.PopularScreenshotWeight },
-          { "trendingScreenshotWeight", Mod.Settings.TrendingScreenshotWeight },
-          { "recentScreenshotWeight", Mod.Settings.RecentScreenshotWeight },
-          { "archeologistScreenshotWeight", Mod.Settings.ArcheologistScreenshotWeight },
-          { "randomScreenshotWeight", Mod.Settings.RandomScreenshotWeight },
-          { "supporterScreenshotWeight", Mod.Settings.SupporterScreenshotWeight },
-          { "viewMaxAge", Mod.Settings.ViewMaxAge },
-          { "screenshotResolution", Mod.Settings.ScreenshotResolution },
-          { "createLocalScreenshot", Mod.Settings.CreateLocalScreenshot },
-          { "disableGlobalIllumination", Mod.Settings.DisableGlobalIllumination },
-          { "paradoxModsBrowsingPreference", Mod.Settings.ParadoxModsBrowsingPreference }
-        }
+      ["metadata"] = new Dictionary<string, object> {
+        // General info
+        ["modVersion"] = typeof(HttpQueries).Assembly.GetName().Version.ToString(3),
+        ["isNvidiaGpu"] = Settings.IsNvidiaGpu(),
+        ["screenWidth"] = Screen.width,
+        ["screenHeight"] = Screen.height,
+        ["useLegacyInterface"] = SharedSettings.instance.userInterface.useLegacyInterface,
+        // Weighs how much controller support is worth to the mod's players.
+        ["isGamepadConnected"] = InputManager.IsGamepadConnected,
+        // Some mod settings
+        ["enableMainMenuSlideshow"] = Mod.Settings.EnableMainMenuSlideshow,
+        ["enableLoadingScreenBackground"] = Mod.Settings.EnableLoadingScreenBackground,
+        ["showFeaturedAsset"] = Mod.Settings.ShowFeaturedAsset,
+        ["showCreatorSocials"] = Mod.Settings.ShowCreatorSocials,
+        ["showCityInfo"] = Mod.Settings.ShowCityInfo,
+        ["showViewCount"] = Mod.Settings.ShowViewCount,
+        ["showScreenshotDetails"] = Mod.Settings.ShowScreenshotDetails,
+        ["namesTranslationMode"] = Mod.Settings.NamesTranslationMode,
+        ["popularScreenshotWeight"] = Mod.Settings.PopularScreenshotWeight,
+        ["trendingScreenshotWeight"] = Mod.Settings.TrendingScreenshotWeight,
+        ["recentScreenshotWeight"] = Mod.Settings.RecentScreenshotWeight,
+        ["archeologistScreenshotWeight"] = Mod.Settings.ArcheologistScreenshotWeight,
+        ["randomScreenshotWeight"] = Mod.Settings.RandomScreenshotWeight,
+        ["supporterScreenshotWeight"] = Mod.Settings.SupporterScreenshotWeight,
+        ["viewMaxAge"] = Mod.Settings.ViewMaxAge,
+        ["screenshotResolution"] = Mod.Settings.ScreenshotResolution,
+        ["createLocalScreenshot"] = Mod.Settings.CreateLocalScreenshot,
+        ["disableGlobalIllumination"] = Mod.Settings.DisableGlobalIllumination,
+        ["paradoxModsBrowsingPreference"] = Mod.Settings.ParadoxModsBrowsingPreference
       }
     };
 

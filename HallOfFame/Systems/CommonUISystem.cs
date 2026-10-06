@@ -292,12 +292,15 @@ internal sealed partial class CommonUISystem : UISystemBase {
     // asked for goes ahead. Recording it only once the dialog closes leaves it to be shown again
     // if the game quits while it is up.
     GameManager.instance.userInterface.appBindings
-      .ShowMessageDialog(dialog, _ => {
-        Mod.Settings.HasSeenWebViewerDialog = true;
-        Mod.Settings.ApplyAndSave();
+      .ShowMessageDialog(
+        dialog,
+        _ => {
+          Mod.Settings.HasSeenWebViewerDialog = true;
+          Mod.Settings.ApplyAndSave();
 
-        action();
-      });
+          action();
+        }
+      );
   }
 
   /// <summary>

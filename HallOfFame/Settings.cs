@@ -777,19 +777,11 @@ public sealed class
       Dictionary<string, int> indexCounts
     ) =>
       new Dictionary<string, string> {
-        {
-          "Options.GROUP[HallOfFame.HallOfFame.Mod.Development]",
-          "{ Development }"
-        }, {
-          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]",
-          "Screenshot ID"
-        }, {
-          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]",
-          "Load Screenshot"
-        }, {
-          "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]",
+        ["Options.GROUP[HallOfFame.HallOfFame.Mod.Development]"] = "{ Development }",
+        ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]"] = "Screenshot ID",
+        ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]"] = "Load Screenshot",
+        ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]"] =
           "Dump Locales as JSON"
-        }
       };
 
     public void Unload() {
