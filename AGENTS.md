@@ -126,3 +126,4 @@ Ask first before:
 - Make the smallest safe change, but speak up when a refactor is overdue.
 - When uncertain, state the assumption and proceed conservatively.
 - Actively propose updates to `AGENTS.md`, comments, or other docs when you detect drift.
+- Where a spec contradicts a design iterated with the user in the running game, the design stands: annotate the spec with it, without asking.
