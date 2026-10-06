@@ -20,7 +20,10 @@ internal sealed record UploadScreenshotParams {
 
   internal required bool ShareModIds { get; init; }
 
-  internal required IEnumerable<string> ModIds { get; init; }
+  /// <summary>
+  /// Null when the playset could not be read at capture.
+  /// </summary>
+  internal required IEnumerable<string>? ModIds { get; init; }
 
   internal required bool ShareRenderSettings { get; init; }
 

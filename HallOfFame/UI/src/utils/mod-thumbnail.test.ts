@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { deriveModThumbnailUri as derive } from './asset-mod-thumbnail';
+import { deriveModThumbnailUri as derive } from './mod-thumbnail';
 
 const cdn = 'https://modscontent.paradox-interactive.com';
 const content = `${cdn}/cities_skylines_2/a1817808-995e-4eaf-a5e3-2b4cdf0633e4/content`;

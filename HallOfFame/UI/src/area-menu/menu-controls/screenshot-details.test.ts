@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'bun:test';
 import type { RenderConditionValue, Screenshot, ScreenshotCapability } from '../../common';
-import { makeCreator, makeScreenshot, photoModeCatalog } from '../../testing/fixtures';
+import { makeCreator, makeMod, makeScreenshot, photoModeCatalog } from '../../testing/fixtures';
 import {
   type DetailsContext,
   type PhotoModeConditions,
   type PhotoModeSetting,
   type PhotoModeValue,
+  type PlaysetTabState,
   type ScreenshotDetails,
   formatClockTime,
+  isOlderGameVersion,
   selectScreenshotDetails as selectWithContext,
   toPhotoModeColorSliders
 } from './screenshot-details';
@@ -55,7 +57,7 @@ const recordedConditions: Readonly<Record<string, RenderConditionValue>> = {
 const missingDescription = undefined as unknown as string;
 
 // A viewer who is not the creator of any screenshot below.
-const viewer: DetailsContext = { photoModeCatalog, viewerCreatorId: 'viewer' };
+const viewer: DetailsContext = { photoModeCatalog, viewerCreatorId: 'viewer', playset: undefined };
 
 function selectScreenshotDetails(
   screenshot: Screenshot,
@@ -148,7 +150,8 @@ describe('selectScreenshotDetails', () => {
         makeScreenshot({
           description: missingDescription,
           capabilities: allCapabilities,
-          paradoxModIds: playset
+          paradoxModIds: playset,
+          shareParadoxModIds: true
         })
       );
 
@@ -172,7 +175,8 @@ describe('selectScreenshotDetails', () => {
         makeScreenshot({
           description: '<br>',
           capabilities: allCapabilities,
-          paradoxModIds: playset
+          paradoxModIds: playset,
+          shareParadoxModIds: true
         })
       );
 
@@ -201,6 +205,7 @@ describe('selectScreenshotDetails', () => {
           description: 'A city.',
           capabilities: allCapabilities,
           paradoxModIds: playset,
+          shareParadoxModIds: true,
           shareRenderSettings: true,
           renderSettings: photoModeSettings
         })
@@ -231,7 +236,11 @@ describe('selectScreenshotDetails', () => {
 
     it(`shows only icons without a description when a playset is attached`, () => {
       const details = selectScreenshotDetails(
-        makeScreenshot({ capabilities: allCapabilities, paradoxModIds: playset })
+        makeScreenshot({
+          capabilities: allCapabilities,
+          shareParadoxModIds: true,
+          paradoxModIds: playset
+        })
       );
 
       expect(details.row).toEqual({
@@ -246,6 +255,7 @@ describe('selectScreenshotDetails', () => {
         makeScreenshot({
           capabilities: preShareCapabilities,
           paradoxModIds: playset,
+          shareParadoxModIds: true,
           shareRenderSettings: true,
           renderSettings: photoModeSettings
         })
@@ -270,6 +280,20 @@ describe('selectScreenshotDetails', () => {
       );
 
       expect(details.row).toMatchObject({ hasPhotoMode: false });
+    });
+
+    it(`shows no playset icon for an unshared playset sent to its own creator`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({
+          description: 'A city.',
+          capabilities: allCapabilities,
+          shareParadoxModIds: false,
+          paradoxModIds: playset,
+          creator: makeCreator({ id: 'viewer' })
+        })
+      );
+
+      expect(details.row).toMatchObject({ hasPlayset: false });
     });
 
     it(`shows the photo mode icon for conditions with no setting switched on`, () => {
@@ -336,7 +360,7 @@ describe('selectScreenshotDetails', () => {
     it(`does not take a viewer whose creator ID is unknown for the creator`, () => {
       const details = selectScreenshotDetails(
         makeScreenshot({ capabilities: allCapabilities, creator: makeCreator({ id: 'viewer' }) }),
-        { photoModeCatalog, viewerCreatorId: undefined }
+        { ...viewer, viewerCreatorId: undefined }
       );
 
       expect(details.photoModeSettings).toEqual({ kind: 'notShared', isViewerCreator: false });
@@ -599,7 +623,7 @@ describe('selectScreenshotDetails', () => {
           shareRenderSettings: true,
           renderSettings: { 'Time of Day': '12' }
         }),
-        { photoModeCatalog: [], viewerCreatorId: 'viewer' }
+        { ...viewer, photoModeCatalog: [] }
       );
 
       expect(details.photoModeSettings).toMatchObject({
@@ -756,6 +780,142 @@ describe('selectScreenshotDetails', () => {
       expect(details.photoModeSettings).toEqual({ kind: 'notShared', isViewerCreator: false });
     });
   });
+
+  describe('playset tab', () => {
+    // The playset's mods, as the server returns them, most subscribed first.
+    const playsetMods = [
+      makeMod({ paradoxModId: 30, subscribersCount: 900 }),
+      makeMod({ paradoxModId: 20, subscribersCount: 40 }),
+      makeMod({ paradoxModId: 10, subscribersCount: 5 })
+    ];
+
+    const modIds = playsetMods.map(mod => mod.paradoxModId);
+
+    // A shared playset listing three mods, as the window receives it.
+    const shared = makeScreenshot({
+      id: 's0',
+      capabilities: allCapabilities,
+      shareParadoxModIds: true,
+      paradoxModIds: modIds
+    });
+
+    function withPlayset(state: DetailsContext['playset']): DetailsContext {
+      return { ...viewer, playset: state };
+    }
+
+    it(`says the screenshot predates playsets when it could not carry one`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({ capabilities: [], shareParadoxModIds: true })
+      );
+
+      expect(details.playset).toEqual({ kind: 'predatesFeature' });
+      expect(details.shouldLoadPlayset).toBe(false);
+    });
+
+    it(`says the creator did not share it, although its mod IDs arrived`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({
+          capabilities: allCapabilities,
+          shareParadoxModIds: false,
+          paradoxModIds: modIds
+        })
+      );
+
+      expect(details.playset).toEqual({ kind: 'notShared', isViewerCreator: false });
+      expect(details.shouldLoadPlayset).toBe(false);
+    });
+
+    it(`addresses the creator viewing their own unshared playset`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({
+          capabilities: allCapabilities,
+          shareParadoxModIds: false,
+          paradoxModIds: modIds,
+          creator: makeCreator({ id: 'viewer' })
+        })
+      );
+
+      expect(details.playset).toEqual({ kind: 'notShared', isViewerCreator: true });
+    });
+
+    it(`lists a playset predating the share choice, public back then`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({
+          capabilities: preShareCapabilities,
+          shareParadoxModIds: true,
+          paradoxModIds: modIds
+        })
+      );
+
+      expect(details.shouldLoadPlayset).toBe(true);
+    });
+
+    it(`says no mods were recorded when the screenshot lists none, whatever was loaded`, () => {
+      const details = selectScreenshotDetails(
+        makeScreenshot({ id: 's0', capabilities: allCapabilities, shareParadoxModIds: true }),
+        withPlayset({ screenshotId: 's0', status: 'loaded', mods: playsetMods })
+      );
+
+      expect(details.playset).toEqual({ kind: 'sharedEmpty', reason: 'notRecorded' });
+      expect(details.shouldLoadPlayset).toBe(false);
+    });
+
+    it(`asks for the playset of a shared screenshot listing mod IDs`, () => {
+      expect(selectScreenshotDetails(shared).shouldLoadPlayset).toBe(true);
+    });
+
+    it(`shows a placeholder per mod ID while nothing answered for this screenshot`, () => {
+      const loading: PlaysetTabState = { kind: 'loading', placeholderCount: 3 };
+
+      expect(selectScreenshotDetails(shared).playset).toEqual(loading);
+
+      expect(
+        selectScreenshotDetails(
+          shared,
+          withPlayset({ screenshotId: 's0', status: 'loading', mods: [] })
+        ).playset
+      ).toEqual(loading);
+
+      // A late answer for another screenshot is not this one's.
+      expect(
+        selectScreenshotDetails(
+          shared,
+          withPlayset({ screenshotId: 'other', status: 'loaded', mods: playsetMods })
+        ).playset
+      ).toEqual(loading);
+    });
+
+    it(`says the playset failed to load`, () => {
+      const details = selectScreenshotDetails(
+        shared,
+        withPlayset({ screenshotId: 's0', status: 'failed', mods: [] })
+      );
+
+      expect(details.playset).toEqual({ kind: 'failed' });
+      expect(details.shouldLoadPlayset).toBe(true);
+    });
+
+    it(`lists the loaded mods in the server's order, the left-out ones unmentioned`, () => {
+      // The server left out the second mod, which Paradox removed.
+      const mods = playsetMods.filter((_, index) => index != 1);
+
+      const details = selectScreenshotDetails(
+        shared,
+        withPlayset({ screenshotId: 's0', status: 'loaded', mods })
+      );
+
+      expect(details.playset).toEqual({ kind: 'content', mods });
+    });
+
+    it(`says none of its mods are available anymore when the loaded list is empty`, () => {
+      const details = selectScreenshotDetails(
+        shared,
+        withPlayset({ screenshotId: 's0', status: 'loaded', mods: [] })
+      );
+
+      expect(details.playset).toEqual({ kind: 'sharedEmpty', reason: 'noneAvailable' });
+    });
+  });
 });
 
 /**
@@ -867,5 +1027,35 @@ describe('formatClockTime', () => {
     const { hour } = { hour: 23.9999 };
 
     expect(formatClockTime(hour)).toBe('00:00');
+  });
+});
+
+describe('isOlderGameVersion', () => {
+  // The vanilla `menu.gameVersion` binding's shape.
+  const gameVersion = '1.6.2f1 (8573.1a2b) [2026.09.01.1200]';
+
+  it.each(['1.3.*', '1.1.12*', '1.5.0f1*', '0.9.*'])(
+    'is true for %p, whose major.minor is older',
+    target => {
+      expect(isOlderGameVersion(target, gameVersion)).toBe(true);
+    }
+  );
+
+  it.each(['1.6.*', '1.6.2', '1.6.0f1*', '1.7.*', '2.0.*'])(
+    'is false for %p, made for this game version or a newer one',
+    target => {
+      expect(isOlderGameVersion(target, gameVersion)).toBe(false);
+    }
+  );
+
+  it.each(['1.*', '1*', '*.*.*', '', 'latest'])(
+    'is false for %p, which names no minor version',
+    target => {
+      expect(isOlderGameVersion(target, gameVersion)).toBe(false);
+    }
+  );
+
+  it('is false when the game version cannot be read', () => {
+    expect(isOlderGameVersion('1.3.*', '')).toBe(false);
   });
 });

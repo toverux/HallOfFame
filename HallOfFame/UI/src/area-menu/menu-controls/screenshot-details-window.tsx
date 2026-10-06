@@ -1,7 +1,8 @@
 import classNames from 'classnames';
-import { InputActionConsumer } from 'cs2/input';
+import { AutoNavigationScope, InputActionConsumer } from 'cs2/input';
 import { LocalizedNumber, LocalizedString, Unit } from 'cs2/l10n';
 import {
+  Button,
   FormattedParagraphs,
   type FormattedTextTheme,
   Icon,
@@ -9,8 +10,18 @@ import {
   Portal,
   Scrollable
 } from 'cs2/ui';
-import { memo, type ReactElement, type ReactNode, useContext, useMemo, useState } from 'react';
-import type { Screenshot } from '../../common';
+import {
+  memo,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
+import type { Mod, Screenshot } from '../../common';
 import { PreloadImages } from '../../components/preload-images';
 import { Tooltip } from '../../components/tooltip';
 import apertureDuotoneLightSrc from '../../icons/fontawesome/aperture-duotone-light.svg';
@@ -18,7 +29,13 @@ import apertureSharpSolidSrc from '../../icons/fontawesome/aperture-sharp-solid.
 import penLineDuotoneLightSrc from '../../icons/fontawesome/pen-line-duotone-light.svg';
 import penLineSolidSrc from '../../icons/fontawesome/pen-line-solid.svg';
 import paradoxModsSolidSrc from '../../icons/paradox/paradox-mods-solid.svg';
-import { useTranslate } from '../../utils';
+import populationSrc from '../../icons/paradox/population.svg';
+import {
+  deriveModThumbnailUri,
+  findScrollableContent,
+  useMeasuredRowHeight,
+  useTranslate
+} from '../../utils';
 import * as bindings from '../../utils/bindings';
 import {
   TransitionContext,
@@ -29,17 +46,23 @@ import { Panel } from '../../vanilla-modules/game-ui/common/panel/panel';
 import { PanelBackdrop } from '../../vanilla-modules/game-ui/common/panel/panel-backdrop';
 import { PanelTitleBar } from '../../vanilla-modules/game-ui/common/panel/panel-title-bar';
 import { iceflakePanelTheme } from '../../vanilla-modules/game-ui/common/panel/themes/iceflake-panel';
+import {
+  useUniformSizeProvider,
+  useVirtualList
+} from '../../vanilla-modules/game-ui/common/scrolling/virtual-list/virtual-list';
 import { Tab, TabBar } from '../../vanilla-modules/game-ui/common/tabs/tabs';
 import { TooltipLayout } from '../../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
 import { photoModeContainerClasses } from '../../vanilla-modules/game-ui/game/components/photo-mode/widgets/photo-mode-container';
 import {
   type DetailsTabState,
   formatClockTime,
+  isOlderGameVersion,
   type PhotoModeConditions,
   type PhotoModeWeather,
   type PhotoModeSection,
   type PhotoModeSetting,
   type PhotoModeTabState,
+  type PlaysetTabState,
   selectScreenshotDetails,
   toPhotoModeColorSliders
 } from './screenshot-details';
@@ -192,6 +215,9 @@ function DetailsModal({
           onClose={onClose}>
           <PreloadImages srcs={preloadedIcons} />
 
+          {/* Above the body's scrolling content, so the labels stay as the list scrolls. */}
+          {selectedTab == 'playset' && details.playset.kind == 'content' && <PlaysetColumns />}
+
           {/*
             Keyed on the screenshot and the tab, so each starts scrolled to its top.
             The scrollbar's room is reserved, as it otherwise comes two frames after the content
@@ -208,9 +234,11 @@ function DetailsModal({
             )}
 
             {selectedTab == 'playset' && (
-              <EmptyState iconSrc={vanillaParadoxModsSrc}>
-                {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]')}
-              </EmptyState>
+              <PlaysetTab
+                screenshotId={screenshot.id}
+                state={details.playset}
+                shouldLoad={details.shouldLoadPlayset}
+              />
             )}
           </Scrollable>
         </Panel>
@@ -643,16 +671,316 @@ function formatPhotoModeNumber(value: number, fractionDigits: number | undefined
 const MAX_CSS_CHANNEL = 255;
 
 /**
- * A tab with nothing to show, laid out like the game's own empty panels under the tab's icon.
+ * The creator's playset, asked for when the tab opens: the mod answers at once with one it already
+ * holds.
+ */
+function PlaysetTab({
+  screenshotId,
+  state,
+  shouldLoad
+}: Readonly<{
+  screenshotId: string;
+  state: PlaysetTabState;
+  shouldLoad: boolean;
+}>): ReactElement {
+  const translate = useTranslate();
+
+  useEffect(() => {
+    if (shouldLoad) {
+      bindings.loadPlayset(screenshotId);
+    }
+  }, [screenshotId, shouldLoad]);
+
+  switch (state.kind) {
+    case 'loading': {
+      return (
+        <PlaysetList
+          count={state.placeholderCount}
+          renderRow={index => <PlaysetPlaceholderRow key={index} index={index} />}
+        />
+      );
+    }
+    case 'failed': {
+      return (
+        <EmptyState
+          iconSrc={vanillaParadoxModsSrc}
+          action={
+            <Button
+              variant='primary'
+              className={styles.emptyStateAction}
+              onSelect={() => bindings.loadPlayset(screenshotId)}>
+              {translate('HallOfFame.UI.Menu.MenuControls.ACTION[Retry]')}
+            </Button>
+          }>
+          {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Load Error]')}
+        </EmptyState>
+      );
+    }
+    case 'content': {
+      const { mods } = state;
+
+      return (
+        <PlaysetList
+          count={mods.length}
+          renderRow={index => {
+            const mod = mods[index];
+
+            // Keyed on the mod, so a row scrolled from one slot to the next keeps its element, and
+            // with it the thumbnail it already loaded.
+            return mod && <PlaysetModRow key={mod.id} mod={mod} index={index} />;
+          }}
+        />
+      );
+    }
+    case 'notShared': {
+      return (
+        <EmptyState iconSrc={vanillaParadoxModsSrc}>
+          {state.isViewerCreator
+            ? translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Not Shared By You]')
+            : translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Not Shared]')}
+        </EmptyState>
+      );
+    }
+    case 'predatesFeature': {
+      return (
+        <EmptyState iconSrc={vanillaParadoxModsSrc}>
+          {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Predates Feature]')}
+        </EmptyState>
+      );
+    }
+    case 'sharedEmpty': {
+      return (
+        <EmptyState iconSrc={vanillaParadoxModsSrc}>
+          {state.reason == 'notRecorded'
+            ? translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Not Recorded]')
+            : translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[None Available]')}
+        </EmptyState>
+      );
+    }
+    default: {
+      // oxlint-disable-next-line typescript/only-throw-error
+      throw state satisfies never;
+    }
+  }
+}
+
+/**
+ * The playset's rows in the game's virtual list, only those in view built: a playset runs to
+ * hundreds of mods, each row a remote thumbnail.
+ * It scrolls inside the window's own body, bounded by the window's height from the first frame.
+ */
+function PlaysetList({
+  count,
+  renderRow
+}: Readonly<{
+  count: number;
+  renderRow: (index: number) => ReactNode;
+}>): ReactElement {
+  const scrollableRef = useRef<HTMLElement | null>(null);
+
+  // The body's `Scrollable` is the window's.
+  const findScrollable = useCallback((node: HTMLElement | null) => {
+    scrollableRef.current = findScrollableContent(node);
+  }, []);
+
+  const rowHeight = useMeasuredRowHeight(
+    scrollableRef,
+    PLAYSET_ROW_SELECTOR,
+    ESTIMATED_ROW_HEIGHT_PX
+  );
+
+  const sizeProvider = useUniformSizeProvider(rowHeight, count, PLAYSET_OVERSCAN);
+
+  const { list } = useVirtualList(
+    scrollableRef,
+    sizeProvider,
+    'vertical',
+    styles.playset,
+    renderRow
+  );
+
+  return (
+    <>
+      {/* The node `findScrollable` climbs out of. */}
+      <div ref={findScrollable} />
+
+      {/* The rows' own focus scope: the panel's content hosts a single focusable child. */}
+      <AutoNavigationScope>{list}</AutoNavigationScope>
+    </>
+  );
+}
+
+// Every row of the list, placeholders included: their class names are hashed.
+const PLAYSET_ROW_SELECTOR = '[data-playset-row]';
+
+/**
+ * Rows kept rendered past each edge of the viewport, low as each is a thumbnail fetched from the
+ * CDN.
+ */
+const PLAYSET_OVERSCAN = 3;
+
+/**
+ * What the first frames assume a row measures, before {@link useMeasuredRowHeight} reads a real
+ * one: the row's height at the resolution where a `rem` is a pixel.
+ */
+const ESTIMATED_ROW_HEIGHT_PX = 52;
+
+/**
+ * The labels over the playset's columns, lined up with a row's cells.
+ */
+function PlaysetColumns(): ReactElement {
+  const translate = useTranslate();
+
+  return (
+    <div className={styles.playsetColumns}>
+      <div className={classNames(styles.playsetColumnsLabel, styles.playsetColumnsLabelVersion)}>
+        {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Game Version Column]')}
+      </div>
+
+      <div className={classNames(styles.playsetColumnsLabel, styles.playsetColumnsLabelRelease)}>
+        {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Updated Column]')}
+      </div>
+
+      <div className={classNames(styles.playsetColumnsLabel, styles.playsetColumnsLabelSize)}>
+        {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Size Column]')}
+      </div>
+
+      <div
+        className={classNames(styles.playsetColumnsLabel, styles.playsetColumnsLabelSubscribers)}>
+        {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Subscribers Column]')}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A mod of the playset, opening its Paradox Mods page, its short description in a tooltip.
+ * A mod Paradox Mods no longer publishes is dimmed, the server listing those last.
+ */
+function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): ReactElement {
+  const translate = useTranslate();
+
+  const gameVersion = bindings.useGameVersion();
+
+  const stateLabelId = playsetStateLabelIds.get(mod.state);
+
+  const isOlderVersion =
+    mod.requiredGameVersion != null && isOlderGameVersion(mod.requiredGameVersion, gameVersion);
+
+  return (
+    <Tooltip
+      direction='right'
+      tooltip={
+        mod.shortDescription ? (
+          <TooltipLayout title={mod.name} description={mod.shortDescription} />
+        ) : undefined
+      }>
+      {/* The tooltip's own host element, which the vanilla button would not lend it. */}
+      <div
+        className={classNames(
+          playsetRowClassName(index),
+          stateLabelId != undefined && styles.playsetRowUnavailable
+        )}
+        data-playset-row={true}>
+        <Button
+          theme={playsetRowButtonTheme}
+          // Compared by value, so a row keeps its focus across the list's re-renders.
+          focusKey={`mod-${mod.id}`}
+          onSelect={() => bindings.openModPage(mod)}>
+          <div
+            className={styles.playsetRowThumbnail}
+            style={{ backgroundImage: `url(${deriveModThumbnailUri(mod.thumbnailUrl)})` }}
+          />
+
+          <div className={styles.playsetRowText}>
+            <div className={styles.playsetRowName}>{mod.name}</div>
+            <div className={styles.playsetRowAuthor}>{mod.authorName}</div>
+          </div>
+
+          {/* Every cell rendered, empty or not, so the columns line up from row to row. */}
+          {stateLabelId == undefined ? (
+            <div
+              className={classNames(
+                styles.playsetRowCell,
+                isOlderVersion && styles.playsetRowCellOlderVersion
+              )}
+              data-is-older-game-version={isOlderVersion || undefined}>
+              {mod.requiredGameVersion}
+            </div>
+          ) : (
+            <div className={styles.playsetRowCell}>{translate(stateLabelId)}</div>
+          )}
+
+          <div className={classNames(styles.playsetRowCell, styles.playsetRowCellRelease)}>
+            {mod.knownLastReleasedAtFormattedDistance}
+          </div>
+
+          <div className={classNames(styles.playsetRowCell, styles.playsetRowCellSize)}>
+            {mod.sizeFormatted}
+          </div>
+
+          <div className={styles.playsetRowSubscribers}>
+            <Icon src={populationSrc} tinted={true} className={styles.playsetRowSubscribersIcon} />
+            <LocalizedNumber value={mod.subscribersCount} unit={Unit.IntegerRounded} />
+          </div>
+        </Button>
+      </div>
+    </Tooltip>
+  );
+}
+
+/**
+ * A row's classes, every other one banded by its place in the whole list: a CSS `nth-child` would
+ * count the rows the virtual list happens to have built, and flip as it scrolls.
+ */
+function playsetRowClassName(index: number): string {
+  return classNames(styles.playsetRow, index % 2 == 1 && styles.playsetRowAlternate);
+}
+
+// The label shown in place of the game version of a mod Paradox Mods no longer serves.
+const playsetStateLabelIds: ReadonlyMap<Mod['state'], string> = new Map([
+  ['removed', 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Removed]'],
+  ['blocked', 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Blocked]'],
+  // Any other Paradox Mods state, under review for one.
+  ['unknown', 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Unavailable]']
+]);
+
+// Replaces the vanilla button look, which a row does not wear.
+const playsetRowButtonTheme = { button: styles.playsetRowButton };
+
+/**
+ * A row's shape while the playset loads, one per mod the screenshot lists.
+ */
+function PlaysetPlaceholderRow({ index }: Readonly<{ index: number }>): ReactElement {
+  return (
+    <div
+      className={classNames(playsetRowClassName(index), styles.playsetRowPlaceholder)}
+      data-playset-row={true}
+      aria-busy='true'>
+      <div className={styles.playsetRowThumbnail} />
+
+      <div className={styles.playsetRowText}>
+        <div className={styles.playsetRowPlaceholderLine} />
+        <div className={styles.playsetRowPlaceholderLine} />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * A tab with nothing to show, laid out like the game's own empty panels under the tab's icon, and
+ * the action that can change that.
  */
 function EmptyState({
   iconSrc,
+  action,
   children
-}: Readonly<{ iconSrc: string; children: ReactNode }>): ReactElement {
+}: Readonly<{ iconSrc: string; action?: ReactNode; children: ReactNode }>): ReactElement {
   return (
     <div className={styles.emptyState}>
       <Icon src={iconSrc} tinted={true} className={styles.emptyStateIcon} />
       <p className={styles.emptyStateText}>{children}</p>
+      {action}
     </div>
   );
 }
@@ -661,7 +989,6 @@ export type DetailsTabId = 'description' | 'photoModeSettings' | 'playset';
 
 /**
  * The window's tabs, in display order.
- * The playset shows a placeholder until its tab ships.
  */
 const detailsTabs: ReadonlyArray<{
   readonly id: DetailsTabId;

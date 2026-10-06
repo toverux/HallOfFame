@@ -1,5 +1,5 @@
-import type { Creator, PhotoModeProperty, Screenshot } from '../common';
-import type { ModSettings } from '../utils/bindings';
+import type { Creator, Mod, PhotoModeProperty, Screenshot } from '../common';
+import type { JsonScreenshotSnapshot, ModSettings } from '../utils/bindings';
 
 /**
  * A deferred preload call recorded by {@link createFakePreloader}: the requested URL plus the
@@ -90,6 +90,7 @@ export function makeScreenshot(overrides: Partial<Screenshot> = {}): Screenshot 
     viewerUrl: 'https://api.test/screenshots/id/viewer',
     viewerShareUrl: 'https://viewer.test/city/id',
     paradoxModIds: [],
+    shareParadoxModIds: false,
     shareRenderSettings: false,
     renderSettings: {},
     renderConditions: {},
@@ -121,6 +122,49 @@ export function makeCreator(overrides: Partial<Creator> = {}): Creator {
     viewerUrl: 'https://api.test/creators/creator/viewer',
     viewerShareUrl: 'https://viewer.test/?creator=creator',
     socials: [],
+    ...overrides
+  };
+}
+
+/**
+ * Builds a {@link JsonScreenshotSnapshot} with placeholder defaults, overridable per field, its
+ * render settings the ones the upload panel raises no warning for.
+ */
+export function makeScreenshotSnapshot(
+  overrides: Partial<JsonScreenshotSnapshot> = {}
+): JsonScreenshotSnapshot {
+  return {
+    achievedMilestone: 0,
+    population: 0,
+    previewImageUri: '',
+    imageUri: '',
+    imageFileSize: 0,
+    imageWidth: 0,
+    imageHeight: 0,
+    wasGlobalIlluminationDisabled: false,
+    areSettingsTopQuality: true,
+    ...overrides
+  };
+}
+
+/**
+ * Builds a {@link Mod} with placeholder defaults, its ID and name derived from its Paradox Mods ID.
+ */
+export function makeMod(overrides: Partial<Mod> & Pick<Mod, 'paradoxModId'>): Mod {
+  const { paradoxModId } = overrides;
+
+  return {
+    id: `mod-${paradoxModId}`,
+    name: `Mod ${paradoxModId}`,
+    authorName: '',
+    shortDescription: '',
+    thumbnailUrl: '',
+    subscribersCount: 0,
+    tags: [],
+    state: 'published',
+    requiredGameVersion: null,
+    sizeFormatted: null,
+    knownLastReleasedAtFormattedDistance: null,
     ...overrides
   };
 }

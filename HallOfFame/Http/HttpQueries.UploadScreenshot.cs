@@ -22,7 +22,7 @@ internal partial class HttpQueries {
 
     multipart.AddField("shareModIds", @params.ShareModIds ? "true" : "false");
 
-    multipart.AddField("modIds", string.Join(",", @params.ModIds));
+    multipart.AddField("modIds", string.Join(",", @params.ModIds ?? []));
 
     multipart.AddField("shareRenderSettings", @params.ShareRenderSettings ? "true" : "false");
 
@@ -30,18 +30,21 @@ internal partial class HttpQueries {
 
     multipart.AddField("renderConditions", JSON.Dump(@params.RenderConditions));
 
-    multipart.AddField(
-      "metadata",
-      JSON.Dump(
-        new Dictionary<string, string> {
-          { "platform", Application.platform.ToString() },
-          { "cpu", SystemInfo.processorType },
-          { "gpuName", SystemInfo.graphicsDeviceName },
-          { "gpuVendor", SystemInfo.graphicsDeviceVendor },
-          { "gpuVersion", SystemInfo.graphicsDeviceVersion }
-        }
-      )
-    );
+    var metadata = new Dictionary<string, string> {
+      ["platform"] = Application.platform.ToString(),
+      ["cpu"] = SystemInfo.processorType,
+      ["gpuName"] = SystemInfo.graphicsDeviceName,
+      ["gpuVendor"] = SystemInfo.graphicsDeviceVendor,
+      ["gpuVersion"] = SystemInfo.graphicsDeviceVersion
+    };
+
+    // The server has no field telling a playset that could not be read from one with no mod, both
+    // reaching it as no mod IDs; the metadata it stores as sent keeps the difference on record.
+    if (@params.ModIds is null) {
+      metadata.Add("playsetReadFailed", "true");
+    }
+
+    multipart.AddField("metadata", JSON.Dump(metadata));
 
     if (@params.MapName is not null) {
       multipart.AddField("mapName", @params.MapName);

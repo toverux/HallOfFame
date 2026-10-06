@@ -246,10 +246,11 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     // Collect playset.
     var mods = await this.citySnapshotProvider.GetActiveMods();
-    var modIds = mods.Select(mod => mod.id).ToArray();
+    var modIds = mods?.Select(mod => mod.id).ToArray();
 
-    // If the asset mods value binding is not set yet, initialize it.
-    if (this.assetModsBinding.value is null) {
+    // If the asset mods value binding is not set yet, initialize it, unless the playset could not
+    // be read, so that the next capture tries again.
+    if (mods is not null && this.assetModsBinding.value is null) {
       var assetMods = mods
         .Where(mod => mod.tags.Contains("Prefab") || mod.tags.Contains("Map"))
         .OrderBy(mod => mod.displayName)

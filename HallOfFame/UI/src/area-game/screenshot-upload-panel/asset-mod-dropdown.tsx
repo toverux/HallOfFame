@@ -4,7 +4,6 @@ import { Dropdown, DropdownItem, type DropdownTheme, DropdownToggle } from 'cs2/
 import {
   memo,
   type KeyboardEvent,
-  type MutableRefObject,
   type ReactElement,
   type ReactNode,
   type SyntheticEvent,
@@ -16,7 +15,14 @@ import {
   useRef,
   useState
 } from 'react';
-import { getClassesModule, selector, useTranslate } from '../../utils';
+import {
+  deriveModThumbnailUri,
+  getClassesModule,
+  selector,
+  findScrollableContent,
+  useMeasuredRowHeight,
+  useTranslate
+} from '../../utils';
 import type * as bindings from '../../utils/bindings';
 import { defaultButtonSounds } from '../../vanilla-modules/game-ui/common/input/button/button';
 import { DropdownContext } from '../../vanilla-modules/game-ui/common/input/dropdown/dropdown';
@@ -26,15 +32,8 @@ import {
   useVirtualList
 } from '../../vanilla-modules/game-ui/common/scrolling/virtual-list/virtual-list';
 import { type AssetModMatch, type HighlightRange, searchAssetMods } from './asset-mod-search';
-import { deriveModThumbnailUri } from './asset-mod-thumbnail';
 import * as styles from './asset-mod-dropdown.module.scss';
 import * as shared from './shared.module.scss';
-
-// A `Scrollable` is a wrapper holding the scrollbar tracks around the element that actually
-// scrolls, and it is that inner element the menu has to read its scroll position from.
-const coScrollableClasses = getClassesModule('game-ui/common/scrolling/scrollable.module.scss', [
-  'content'
-]);
 
 const coDropdownTheme = getClassesModule(
   'game-ui/common/input/dropdown/themes/default.module.scss',
@@ -130,13 +129,9 @@ function AssetModMenu({
 }>): ReactElement {
   const scrollableRef = useRef<HTMLElement | null>(null);
 
-  // The scroll container is vanilla's, built by `Dropdown` around whatever content it is given and
-  // never handed out as a ref, so the menu climbs out of a node of its own to reach it. What the
-  // climb looks for is the `Scrollable`'s inner content element, not the `Scrollable` itself: the
-  // outer one carries the scrollbar tracks and never moves, so a scroll position read from it is
-  // always zero.
+  // The scroll container is vanilla's, built by `Dropdown` around whatever content it is given.
   const findScrollable = useCallback((node: HTMLElement | null) => {
-    scrollableRef.current = node?.closest(selector(coScrollableClasses.content)) ?? null;
+    scrollableRef.current = findScrollableContent(node);
   }, []);
 
   // A new match set is a new list, so it has to start at the top. Neither vanilla's `Scrollable`
@@ -150,7 +145,11 @@ function AssetModMenu({
     // oxlint-disable-next-line react/exhaustive-effect-dependencies - `matches` is the trigger
   }, [matches]);
 
-  const rowHeight = useMeasuredRowHeight(scrollableRef);
+  const rowHeight = useMeasuredRowHeight(
+    scrollableRef,
+    selector(dropdownTheme.dropdownItem),
+    ESTIMATED_ROW_HEIGHT_PX
+  );
 
   const sizeProvider = useUniformSizeProvider(rowHeight, matches.length, MENU_OVERSCAN);
 
@@ -217,43 +216,6 @@ function AssetModMenuItem({
       </div>
     </DropdownItem>
   );
-}
-
-/**
- * Measures how tall one row is, which the virtual list needs in pixels to place rows it never
- * renders.
- *
- * A row's height is a line of `--fontSizeXL` over vanilla's own padding, both scaled by the
- * player's font-size setting on top of the viewport scaling every `rem` in the mod already follows,
- * so it is read off a rendered row rather than computed.
- *
- * Cohtml lays out on its own frame rather than on demand, so a row measures zero for as long as the
- * engine has not reached it, and no read taken while React is still committing can see it. The
- * measurement therefore retries on animation frames until a row answers with a height, leaving the
- * opening frames on the estimate.
- */
-function useMeasuredRowHeight(scrollable: MutableRefObject<HTMLElement | null>): number {
-  const [rowHeight, setRowHeight] = useState(ESTIMATED_ROW_HEIGHT_PX);
-
-  useEffect(() => {
-    let frame = 0;
-
-    function measure(): void {
-      const row = scrollable.current?.querySelector(selector(dropdownTheme.dropdownItem));
-
-      if (row instanceof HTMLElement && row.offsetHeight > 0) {
-        setRowHeight(row.offsetHeight);
-      } else {
-        frame = requestAnimationFrame(measure);
-      }
-    }
-
-    measure();
-
-    return () => cancelAnimationFrame(frame);
-  }, [scrollable]);
-
-  return rowHeight;
 }
 
 /**

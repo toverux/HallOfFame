@@ -1,5 +1,6 @@
 import type { climate, time } from 'cs2/bindings';
-import type { PhotoModeProperty, RenderConditionValue, Screenshot } from '../../common';
+import type { Mod, PhotoModeProperty, RenderConditionValue, Screenshot } from '../../common';
+import type { PlaysetState } from '../../utils/bindings';
 
 /**
  * What a details tab shows: the data itself, or which of the two reasons explains its absence.
@@ -23,6 +24,20 @@ export type PhotoModeTabState =
   | { readonly kind: 'predatesFeature' }
   // Shared, with no setting switched on: the game's defaults.
   | { readonly kind: 'sharedEmpty'; readonly conditions: PhotoModeConditions | undefined };
+
+/**
+ * What the playset tab shows, decided from the share flag, the capabilities, and the screenshot's
+ * own mod IDs, the loaded list deciding only among a playset listing some.
+ */
+export type PlaysetTabState =
+  | { readonly kind: 'loading'; readonly placeholderCount: number }
+  | { readonly kind: 'failed' }
+  // The mods the server returned, in its order, most subscribed first.
+  | { readonly kind: 'content'; readonly mods: readonly Mod[] }
+  | { readonly kind: 'notShared'; readonly isViewerCreator: boolean }
+  | { readonly kind: 'predatesFeature' }
+  // Never a vanilla city: an empty playset most likely records a failed read at capture.
+  | { readonly kind: 'sharedEmpty'; readonly reason: 'notRecorded' | 'noneAvailable' };
 
 /**
  * The scene and the light a shot was taken in, as the tab shows them above the settings, each
@@ -177,6 +192,11 @@ export interface DetailsContext {
    * The viewer's public creator ID, `undefined` until the mod first logs in.
    */
   readonly viewerCreatorId: string | undefined;
+
+  /**
+   * The playset last asked for, of this screenshot or another, `undefined` until one was.
+   */
+  readonly playset: PlaysetState | undefined;
 }
 
 /**
@@ -187,6 +207,13 @@ export interface ScreenshotDetails {
   readonly description: DetailsTabState;
 
   readonly photoModeSettings: PhotoModeTabState;
+
+  readonly playset: PlaysetTabState;
+
+  /**
+   * Whether the playset tab asks the mod for the playset: shared, and listing mod IDs.
+   */
+  readonly shouldLoadPlayset: boolean;
 
   /**
    * The controls row, `undefined` when it is hidden.
@@ -205,6 +232,7 @@ export interface DetailsRow {
   // Whether the screenshot carries photo mode settings or conditions to show.
   readonly hasPhotoMode: boolean;
 
+  // Whether the screenshot carries a shared playset listing mods.
   readonly hasPlayset: boolean;
 }
 
@@ -226,6 +254,8 @@ export function selectScreenshotDetails(
     | 'renderSettings'
     | 'renderConditions'
     | 'creator'
+    | 'id'
+    | 'shareParadoxModIds'
   >,
   context: DetailsContext
 ): ScreenshotDetails {
@@ -247,14 +277,21 @@ export function selectScreenshotDetails(
     photoModeSettings.kind == 'content' ||
     (photoModeSettings.kind == 'sharedEmpty' && photoModeSettings.conditions != undefined);
 
-  const hasPlayset = screenshot.paradoxModIds.length > 0;
+  const shouldLoadPlayset =
+    screenshot.capabilities.includes('paradoxModIds') &&
+    screenshot.shareParadoxModIds &&
+    screenshot.paradoxModIds.length > 0;
 
-  const isRowShown = preview != undefined || hasPhotoMode || hasPlayset;
+  const playset = selectPlaysetTab(screenshot, shouldLoadPlayset, context);
+
+  const isRowShown = preview != undefined || hasPhotoMode || shouldLoadPlayset;
 
   return {
     description,
     photoModeSettings,
-    row: isRowShown ? { preview, hasPhotoMode, hasPlayset } : undefined
+    playset,
+    shouldLoadPlayset,
+    row: isRowShown ? { preview, hasPhotoMode, hasPlayset: shouldLoadPlayset } : undefined
   };
 }
 
@@ -282,6 +319,27 @@ export function toPhotoModeColorSliders(
 }
 
 /**
+ * Whether a mod targets a game version whose major.minor is older than the running game's, the
+ * one case its version hint is worth highlighting.
+ * A target naming no minor version (ex. "1.*") is not older, nor is any version that cannot be
+ * read.
+ */
+export function isOlderGameVersion(target: string, gameVersion: string): boolean {
+  const targetVersion = parseMajorMinor(target);
+
+  const runningVersion = parseMajorMinor(gameVersion);
+
+  if (targetVersion == undefined || runningVersion == undefined) {
+    return false;
+  }
+
+  return (
+    targetVersion.major < runningVersion.major ||
+    (targetVersion.major == runningVersion.major && targetVersion.minor < runningVersion.minor)
+  );
+}
+
+/**
  * An hour of the day as a 24-hour clock reads it, to the minute, for a viewer to set it back in
  * photo mode's Time of Day.
  */
@@ -304,6 +362,40 @@ export interface PhotoModeColorSliders {
   readonly value: number;
   // `undefined` for a color without an alpha channel, which the picker shows no slider for.
   readonly alpha: number | undefined;
+}
+
+function selectPlaysetTab(
+  screenshot: Pick<
+    Screenshot,
+    'id' | 'capabilities' | 'shareParadoxModIds' | 'paradoxModIds' | 'creator'
+  >,
+  shouldLoad: boolean,
+  { playset, viewerCreatorId }: DetailsContext
+): PlaysetTabState {
+  if (!screenshot.capabilities.includes('paradoxModIds')) {
+    return { kind: 'predatesFeature' };
+  }
+
+  if (!screenshot.shareParadoxModIds) {
+    return { kind: 'notShared', isViewerCreator: screenshot.creator.id == viewerCreatorId };
+  }
+
+  if (!shouldLoad) {
+    return { kind: 'sharedEmpty', reason: 'notRecorded' };
+  }
+
+  // A state for another screenshot is a late answer, this one's being on its way.
+  if (playset?.screenshotId != screenshot.id || playset.status == 'loading') {
+    return { kind: 'loading', placeholderCount: screenshot.paradoxModIds.length };
+  }
+
+  if (playset.status == 'failed') {
+    return { kind: 'failed' };
+  }
+
+  return playset.mods.length > 0
+    ? { kind: 'content', mods: playset.mods }
+    : { kind: 'sharedEmpty', reason: 'noneAvailable' };
 }
 
 function selectPhotoModeTab(
@@ -693,4 +785,16 @@ function previewLine(text: string): string | undefined {
     .map(line => line.replaceAll(/\*\*(?<text>.+?)\*\*/gu, '$<text>').trim());
 
   return lines.find(line => line != '');
+}
+
+/**
+ * The major and minor numbers a version opens with, `undefined` when it does not open with both:
+ * "1.6.2f1 (…)" and "1.6.*" give 1.6, "1.*" gives none.
+ */
+function parseMajorMinor(version: string): { major: number; minor: number } | undefined {
+  const match = /^(?<major>\d+)\.(?<minor>\d+)/u.exec(version);
+
+  return match?.groups
+    ? { major: Number(match.groups.major), minor: Number(match.groups.minor) }
+    : undefined;
 }

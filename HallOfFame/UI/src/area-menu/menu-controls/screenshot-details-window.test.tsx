@@ -4,11 +4,18 @@ import userEvent from '@testing-library/user-event';
 import { EventInputProvider } from 'cs2/input';
 import {
   makeCreator,
+  makeMod,
   makeScreenshot,
   makeSettings,
   photoModeCatalog
 } from '../../testing/fixtures';
-import { emitEvent, resetBindings, setBinding } from '../../testing/game-setup';
+import {
+  emitEvent,
+  getTriggers,
+  resetBindings,
+  setBinding,
+  setTranslations
+} from '../../testing/game-setup';
 import { TransitionContext } from '../../vanilla-modules/game-ui/common/animations/transition-context';
 import { photoModeContainerClasses } from '../../vanilla-modules/game-ui/game/components/photo-mode/widgets/photo-mode-container';
 import { ScreenshotDetailsWindow } from './screenshot-details-window';
@@ -77,7 +84,7 @@ describe('ScreenshotDetailsWindow', () => {
     expect(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]')).toBeDefined();
   });
 
-  it(`shows the photo mode settings and says the playset is coming when selected`, async () => {
+  it(`shows the photo mode settings and the playset when selected`, async () => {
     const user = userEvent.setup();
 
     render(
@@ -99,7 +106,9 @@ describe('ScreenshotDetailsWindow', () => {
 
     await user.click(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]'));
 
-    expect(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]')).toBeDefined();
+    expect(
+      screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Predates Feature]')
+    ).toBeDefined();
   });
 
   it(`switches tabs on Switch Tab, although the controls never hold the focus`, async () => {
@@ -118,7 +127,7 @@ describe('ScreenshotDetailsWindow', () => {
 
     const photoModeSettings =
       'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Predates Feature]';
-    const playset = 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Coming]';
+    const playset = 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Predates Feature]';
 
     // The input stack takes in a new consumer on the next frame.
     await nextFrame();
@@ -625,6 +634,277 @@ describe('ScreenshotDetailsWindow', () => {
           'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Predates Feature]'
         )
       ).toBeDefined();
+    });
+  });
+
+  describe('playset tab', () => {
+    const SLIDESHOW = 'hallOfFame.slideshow';
+
+    // The playset's mods, as the server returns them, most subscribed first.
+    const traffic = makeMod({
+      paradoxModId: 30,
+      name: 'Traffic',
+      authorName: 'Ann',
+      subscribersCount: 4200
+    });
+
+    const trees = makeMod({
+      paradoxModId: 10,
+      name: 'Trees',
+      authorName: 'Bob',
+      subscribersCount: 7
+    });
+
+    // A shared playset listing those mods.
+    const shared = {
+      id: 's0',
+      capabilities: ['paradoxModIds', 'shareParadoxModIds'],
+      shareParadoxModIds: true,
+      paradoxModIds: [traffic.paradoxModId, trees.paradoxModId]
+    } as const;
+
+    function renderTab(
+      screenshot: Parameters<typeof makeScreenshot>[0],
+      settings: Parameters<typeof makeSettings>[0] = {}
+    ): void {
+      setBinding('hallOfFame.common', 'settings', makeSettings(settings));
+
+      render(
+        <ScreenshotDetailsWindow
+          screenshot={makeScreenshot(screenshot)}
+          openTab='playset'
+          onClose={noop}
+        />
+      );
+    }
+
+    function loadTriggers(): readonly unknown[] {
+      return getTriggers()
+        .filter(({ event }) => event == `${SLIDESHOW}.loadPlayset`)
+        .map(({ args }) => args[0]);
+    }
+
+    function placeholders(): readonly Element[] {
+      return [...document.querySelectorAll('[aria-busy="true"]')];
+    }
+
+    it(`asks for the playset when opened, and shows placeholders until it arrives`, () => {
+      renderTab(shared);
+
+      expect(loadTriggers()).toEqual(['s0']);
+      expect(placeholders().length).toBeGreaterThan(0);
+    });
+
+    it(`shows placeholders while the playset loaded is another screenshot's`, () => {
+      setBinding(SLIDESHOW, 'playset', {
+        screenshotId: 'other',
+        status: 'loaded',
+        mods: [trees]
+      });
+
+      renderTab(shared);
+
+      expect(placeholders().length).toBeGreaterThan(0);
+      expect(screen.queryByText('Trees')).toBeNull();
+    });
+
+    it(`lists the mods with their author, game version, last release, size and subscribers`, () => {
+      setTranslations({
+        'Common.DECIMAL_SEPARATOR': '.',
+        'Common.VALUE_THOUSAND': '{SIGN}{VALUE}K'
+      });
+
+      setBinding(SLIDESHOW, 'playset', {
+        screenshotId: 's0',
+        status: 'loaded',
+        mods: [
+          {
+            ...traffic,
+            requiredGameVersion: '1.6.*',
+            knownLastReleasedAtFormattedDistance: '13 days ago',
+            sizeFormatted: '996.4 kB'
+          },
+          trees
+        ]
+      });
+
+      renderTab(shared);
+
+      expect(placeholders()).toHaveLength(0);
+
+      const content = document.body.textContent;
+
+      // Each present, in the server's order.
+      const positions = [
+        'Traffic',
+        'Ann',
+        '1.6.*',
+        '13 days ago',
+        '996.4 kB',
+        '4.2K',
+        'Trees',
+        'Bob'
+      ].map(text => {
+        expect(screen.getByText(text)).toBeDefined();
+
+        return content.indexOf(text);
+      });
+
+      expect(positions).toEqual(positions.toSorted((a, b) => a - b));
+    });
+
+    const columnLabels = [
+      'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Game Version Column]',
+      'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Updated Column]',
+      'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Size Column]',
+      'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Subscribers Column]'
+    ];
+
+    it(`labels the columns once the mods are listed`, () => {
+      setBinding(SLIDESHOW, 'playset', { screenshotId: 's0', status: 'loaded', mods: [traffic] });
+
+      renderTab(shared);
+
+      for (const label of columnLabels) {
+        expect(screen.getByText(label)).toBeDefined();
+      }
+    });
+
+    it(`labels no columns while the playset loads`, () => {
+      renderTab(shared);
+
+      for (const label of columnLabels) {
+        expect(screen.queryByText(label)).toBeNull();
+      }
+    });
+
+    it(`marks a game version older than the running game's, and only that one`, () => {
+      setBinding('menu', 'gameVersion', '1.6.2f1 (8573.1a2b) [2026.09.01.1200]');
+
+      setBinding(SLIDESHOW, 'playset', {
+        screenshotId: 's0',
+        status: 'loaded',
+        mods: [
+          { ...traffic, requiredGameVersion: '1.3.*' },
+          { ...trees, requiredGameVersion: '1.6.*' }
+        ]
+      });
+
+      renderTab(shared);
+
+      expect(screen.getByText('1.3.*').dataset.isOlderGameVersion).toBe('true');
+      expect(screen.getByText('1.6.*').dataset.isOlderGameVersion).toBeUndefined();
+    });
+
+    it(`says which mods are no longer published, in place of their game version`, () => {
+      setBinding(SLIDESHOW, 'playset', {
+        screenshotId: 's0',
+        status: 'loaded',
+        mods: [
+          { ...traffic, state: 'removed', requiredGameVersion: '1.6.*' },
+          { ...trees, state: 'blocked', requiredGameVersion: '1.6.*' },
+          makeMod({
+            paradoxModId: 20,
+            name: 'Roads',
+            state: 'unknown',
+            requiredGameVersion: '1.6.*'
+          })
+        ]
+      });
+
+      renderTab(shared);
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Removed]')
+      ).toBeDefined();
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Blocked]')
+      ).toBeDefined();
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Unavailable]')
+      ).toBeDefined();
+      expect(screen.queryByText('1.6.*')).toBeNull();
+    });
+
+    it(`opens a mod's page when its row is clicked`, async () => {
+      setBinding(SLIDESHOW, 'playset', {
+        screenshotId: 's0',
+        status: 'loaded',
+        mods: [traffic]
+      });
+
+      renderTab(shared);
+
+      await userEvent.setup().click(screen.getByText('Traffic'));
+
+      expect(getTriggers()).toContainEqual({
+        event: 'hallOfFame.common.openModPage',
+        args: [traffic.paradoxModId]
+      });
+    });
+
+    it(`says the playset failed to load, and retries on demand`, async () => {
+      setBinding(SLIDESHOW, 'playset', { screenshotId: 's0', status: 'failed', mods: [] });
+
+      renderTab(shared);
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Load Error]')
+      ).toBeDefined();
+
+      await userEvent
+        .setup()
+        .click(screen.getByText('HallOfFame.UI.Menu.MenuControls.ACTION[Retry]'));
+
+      expect(loadTriggers()).toEqual(['s0', 's0']);
+    });
+
+    it(`says none of its mods are available anymore when the loaded list is empty`, () => {
+      setBinding(SLIDESHOW, 'playset', { screenshotId: 's0', status: 'loaded', mods: [] });
+
+      renderTab(shared);
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[None Available]')
+      ).toBeDefined();
+    });
+
+    it(`says no mods were recorded, without asking for any, when it lists none`, () => {
+      renderTab({ ...shared, paradoxModIds: [] });
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Not Recorded]')
+      ).toBeDefined();
+      expect(loadTriggers()).toEqual([]);
+    });
+
+    it(`says the creator did not share it, without asking for it`, () => {
+      renderTab({ ...shared, shareParadoxModIds: false });
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Not Shared]')
+      ).toBeDefined();
+      expect(loadTriggers()).toEqual([]);
+    });
+
+    it(`addresses the creator viewing their own unshared playset`, () => {
+      renderTab(
+        { ...shared, shareParadoxModIds: false, creator: makeCreator({ id: 'me' }) },
+        { publicCreatorId: 'me' }
+      );
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Not Shared By You]')
+      ).toBeDefined();
+    });
+
+    it(`says the screenshot predates playsets, without asking for one`, () => {
+      renderTab({ ...shared, capabilities: [] });
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Predates Feature]')
+      ).toBeDefined();
+      expect(loadTriggers()).toEqual([]);
     });
   });
 });

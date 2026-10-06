@@ -155,7 +155,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
           />
 
           <label>
-            {`${translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PLAYSET_LABEL')} β`}
+            {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PLAYSET_LABEL')}
             <br />
             <small>
               {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PLAYSET_DESCRIPTION')}
@@ -315,9 +315,6 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
       <div style={{ flex: 1 }} />
 
       <div className={styles.notes}>
-        <p>
-          {`β ${translate('HallOfFame.UI.Game.ScreenshotUploadPanel.PARTIALLY_IMPLEMENTED_FEATURES')}`}
-        </p>
         {screenshotSnapshot.wasGlobalIlluminationDisabled && (
           <p>
             {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED')}

@@ -1,7 +1,7 @@
 import { trigger, useValue } from 'cs2/api';
 import type { LocalizedString } from 'cs2/l10n';
 import type { Dispatch, SetStateAction } from 'react';
-import type { PhotoModeProperty, Screenshot } from '../../common';
+import type { Mod, PhotoModeProperty, Screenshot } from '../../common';
 import { createSingletonHook } from '../singleton-hook';
 import { type ModSettings, useModSettings } from './common';
 import { lazyBindValue } from './lazy-value-binding';
@@ -81,6 +81,8 @@ const photoModeCatalog$ = lazyBindValue<readonly PhotoModeProperty[]>(
   'photoModeCatalog',
   []
 );
+
+const playset$ = lazyBindValue<PlaysetState | null>(GROUP, 'playset', null);
 
 const useSingletonMenuState = createSingletonHook<SettableMenuState>({
   isMenuVisible: true,
@@ -226,6 +228,32 @@ export function subscribeToKeepAliveScreenshots(
  */
 export function usePhotoModeCatalog(): readonly PhotoModeProperty[] {
   return useValue(photoModeCatalog$());
+}
+
+/**
+ * Serialization of C# `HallOfFame.Services.PlaysetState`: where the playset of the screenshot
+ * {@link screenshotId} stands.
+ */
+export interface PlaysetState {
+  readonly screenshotId: string;
+  readonly status: 'loading' | 'loaded' | 'failed';
+  // Most subscribed first, empty unless loaded.
+  readonly mods: readonly Mod[];
+}
+
+/**
+ * Subscribes to the playset last asked for with {@link loadPlayset}, `null` until then.
+ */
+export function usePlayset(): PlaysetState | null {
+  return useValue(playset$());
+}
+
+/**
+ * Asks for a screenshot's playset, answered through {@link usePlayset} at once when the mod already
+ * holds it; also the retry after a failure.
+ */
+export function loadPlayset(screenshotId: string): void {
+  trigger(GROUP, 'loadPlayset', screenshotId);
 }
 
 /**

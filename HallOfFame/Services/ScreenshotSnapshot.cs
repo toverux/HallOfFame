@@ -22,7 +22,7 @@ internal readonly struct ScreenshotSnapshot(
   bool areSettingsTopQuality,
   IDictionary<string, float> renderSettings,
   IReadOnlyDictionary<string, object> renderConditions,
-  string[] modIds
+  string[]? modIds
 ) : IJsonWritable {
   /// <summary>
   /// File name of the screenshot, shared between the on-disk file the capture system writes and the
@@ -58,7 +58,10 @@ internal readonly struct ScreenshotSnapshot(
 
   internal IReadOnlyDictionary<string, object> RenderConditions { get; } = renderConditions;
 
-  internal string[] ModIds { get; } = modIds;
+  /// <summary>
+  /// Null when the playset could not be read, which is not the same as a playset with no mod.
+  /// </summary>
+  internal string[]? ModIds { get; } = modIds;
 
   internal string PreviewImageUri =>
     $"coui://halloffame/{ScreenshotSnapshot.ScreenshotPreviewFileName}" +

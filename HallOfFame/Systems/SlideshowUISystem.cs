@@ -36,6 +36,8 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
 
   private SlideshowConductor conductor = null!;
 
+  private PlaysetLoader playsetLoader = null!;
+
   private bool forceEnableMainMenuSlideshow;
 
   private ProxyAction forceEnableMainMenuSlideshowAction = null!;
@@ -57,6 +59,8 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
   private ValueBinding<bool> isSavingBinding = null!;
 
   private ValueBinding<IReadOnlyList<PhotoModeCatalogEntry>> photoModeCatalogBinding = null!;
+
+  private ValueBinding<PlaysetState?> playsetBinding = null!;
 
   // Set by the first read, failed or not, so a failing read shows its error once per session.
   private bool isPhotoModeCatalogRead;
@@ -83,6 +87,8 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
 
   private TriggerBinding slideshowMountedBinding = null!;
 
+  private TriggerBinding<string> loadPlaysetBinding = null!;
+
   protected override void OnCreate() {
     base.OnCreate();
 
@@ -98,6 +104,12 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         Mod.Log,
         Mod.Settings,
         this
+      );
+
+      this.playsetLoader = new PlaysetLoader(
+        Mod.Api,
+        Mod.Log,
+        state => this.playsetBinding.Update(state)
       );
 
       this.forceEnableMainMenuSlideshowAction =
@@ -164,6 +176,13 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         new CollectionWriter<PhotoModeCatalogEntry>(new PhotoModeCatalogValueWriter())
       );
 
+      this.playsetBinding = new ValueBinding<PlaysetState?>(
+        SlideshowUISystem.BindingGroup,
+        "playset",
+        null,
+        new PlaysetStateValueWriter()
+      );
+
       this.AddBinding(this.enableMainMenuSlideshowBinding);
       this.AddBinding(this.previousNeighborBinding);
       this.AddBinding(this.nextNeighborBinding);
@@ -173,6 +192,7 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
       this.AddBinding(this.loadErrorBinding);
       this.AddBinding(this.isSavingBinding);
       this.AddBinding(this.photoModeCatalogBinding);
+      this.AddBinding(this.playsetBinding);
 
       // INPUT ACTION BINDINGS
       this.previousScreenshotInputActionBinding = new InputActionBinding(
@@ -250,12 +270,20 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         () => { _ = this.conductor.OnSlideshowMounted(); }
       );
 
+      // Asks for a screenshot's playset when its Playset tab opens, and again on a retry.
+      this.loadPlaysetBinding = new TriggerBinding<string>(
+        SlideshowUISystem.BindingGroup,
+        "loadPlayset",
+        screenshotId => { _ = this.playsetLoader.Load(screenshotId); }
+      );
+
       this.AddBinding(this.previousScreenshotBinding);
       this.AddBinding(this.nextScreenshotBinding);
       this.AddBinding(this.likeScreenshotBinding);
       this.AddBinding(this.saveScreenshotBinding);
       this.AddBinding(this.reportScreenshotBinding);
       this.AddBinding(this.slideshowMountedBinding);
+      this.AddBinding(this.loadPlaysetBinding);
 
       // Wire force-enable main menu slideshow.
       Mod.Settings.onSettingsApplied += this.OnSettingsApplied;

@@ -58,7 +58,8 @@ export interface UploadPayload {
   readonly description: string;
 }
 
-const assetMods$ = lazyBindValue<JsonMod[]>(GROUP, 'assetMods');
+// Null until a capture reads the playset, which fails for a player not logged into Paradox.
+const assetMods$ = lazyBindValue<JsonMod[] | null>(GROUP, 'assetMods', null);
 
 const cityName$ = lazyBindValue<string>(GROUP, 'cityName');
 
@@ -76,8 +77,8 @@ const uploadFormMemory$ = lazyBindValue<JsonUploadFormMemory>(GROUP, 'uploadForm
   description: ''
 });
 
-export function useAssetMods(): JsonMod[] {
-  return useValue(assetMods$());
+export function useAssetMods(): readonly JsonMod[] {
+  return useValue(assetMods$()) ?? [];
 }
 
 export function useCityName(): string {

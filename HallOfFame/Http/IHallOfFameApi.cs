@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using HallOfFame.Domain;
 
@@ -31,6 +32,13 @@ internal interface IHallOfFameApi {
   Task<View> MarkScreenshotViewed(string screenshotId);
 
   Task<Screenshot> ReportScreenshot(string screenshotId);
+
+  /// <summary>
+  /// The mods of a screenshot's shared playset, most subscribed first, those Paradox Mods no
+  /// longer publishes listed last with their <see cref="Domain.Mod.State"/>.
+  /// Mods Paradox Mods deleted or banned, or the server failed to fetch, are left out.
+  /// </summary>
+  Task<IReadOnlyList<Domain.Mod>> GetPlayset(string screenshotId);
 
   Task<Screenshot> UploadScreenshot(UploadScreenshotParams @params);
 

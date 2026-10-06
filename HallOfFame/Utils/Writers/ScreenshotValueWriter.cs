@@ -79,6 +79,9 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
     writer.PropertyName("paradoxModIds");
     writer.Write(value.ParadoxModIds);
 
+    writer.PropertyName("shareParadoxModIds");
+    writer.Write(value.ShareParadoxModIds);
+
     writer.PropertyName("shareRenderSettings");
     writer.Write(value.ShareRenderSettings);
 

@@ -11,6 +11,24 @@ $paragraph-gap: 12rem;
 $empty-color: #b7bec8;
 $empty-line-height: 1.4em;
 
+$playset-row-height: 52rem;
+$playset-row-padding: 6rem;
+$playset-thumbnail-size: 40rem;
+
+// The playset's columns, shared by the rows and the header labelling them.
+$playset-column-gap: 16rem;
+$playset-version-width: 80rem;
+$playset-release-width: 110rem;
+$playset-size-width: 70rem;
+$playset-subscribers-width: 60rem;
+
+// The room the window body's scrollbar reserves, which the header, outside the body, makes up for
+// to line up with the rows.
+$scrollbar-track-width: 16rem;
+
+// The top padding of the vanilla panel's body.
+$panel-content-padding-top: 25rem;
+
 .backdrop {
   animation: backdrop-enter $enter-duration ease-out;
   transition: opacity $exit-duration;
@@ -274,6 +292,197 @@ $empty-line-height: 1.4em;
   }
 }
 
+// The creator's playset, one compact row per mod in the game's virtual list, which lays the rows
+// out under padding standing in for those not built.
+.playset {
+  padding: 0 $padding-horizontal;
+
+  // Every row the same height, which the virtual list places the absent ones by.
+  &-row {
+    height: $playset-row-height;
+    padding: 2rem 0;
+    border-radius: 3rem;
+
+    &--alternate {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    // A mod Paradox Mods no longer serves.
+    &--unavailable {
+      opacity: 0.5;
+    }
+
+    // A row's shape while the playset loads, its text and thumbnail as blank bars.
+    &--placeholder {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      padding: 2rem $playset-row-padding;
+      opacity: 0.4;
+    }
+  }
+
+  &-rowButton {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 0 $playset-row-padding;
+    border-radius: 3rem;
+
+    // A button inherits no color in Cohtml.
+    color: vanilla.$text-color;
+    text-align: left;
+
+    &:hover,
+    &:focus {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  }
+
+  &-rowThumbnail {
+    flex-shrink: 0;
+    width: $playset-thumbnail-size;
+    height: $playset-thumbnail-size;
+    margin-right: 12rem;
+    border-radius: 3rem;
+    background-color: rgba(255, 255, 255, 0.15);
+
+    // The CDN's thumbnail variant squashes every cover into 16:9, which painting it to this square
+    // box undoes for the square covers most mods have.
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+  }
+
+  &-rowText {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  // Cohtml ellipsizes only a text box laid out as a column.
+  &-rowName,
+  &-rowAuthor {
+    flex-direction: column;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &-rowName {
+    font-size: vanilla.$font-size-m;
+  }
+
+  &-rowAuthor {
+    color: $empty-color;
+    font-size: vanilla.$font-size-s;
+  }
+
+  // A fixed-width column, so the cells line up from row to row, ellipsized as the server's
+  // localized strings run longer in some languages.
+  &-rowCell {
+    flex-direction: column;
+    flex-shrink: 0;
+    // The game version, or a removed mod's state in its place.
+    width: $playset-version-width;
+    margin-left: $playset-column-gap;
+    overflow: hidden;
+
+    color: $empty-color;
+    font-size: vanilla.$font-size-s;
+    text-align: right;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    &--olderVersion {
+      color: vanilla.$warning-color;
+    }
+
+    &--release {
+      width: $playset-release-width;
+    }
+
+    &--size {
+      width: $playset-size-width;
+    }
+  }
+
+  &-rowSubscribers {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    width: $playset-subscribers-width;
+    margin-left: $playset-column-gap;
+
+    color: $empty-color;
+    font-size: vanilla.$font-size-s;
+  }
+
+  &-rowSubscribersIcon {
+    --iconColor: #{$empty-color};
+
+    width: 16rem;
+    height: 16rem;
+    margin-right: 4rem;
+  }
+
+  &-rowPlaceholderLine {
+    width: 50%;
+    height: 10rem;
+    margin: 4rem 0;
+    border-radius: 3rem;
+    background-color: rgba(255, 255, 255, 0.15);
+
+    & + & {
+      width: 25%;
+    }
+  }
+}
+
+// The labels over the playset's columns, outside the body's scrollable so they stay as the list
+// scrolls: Cohtml has no `position: sticky`.
+.playsetColumns {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-self: stretch;
+  // Close under the tabs, the body's top padding otherwise leaving the labels apart from the rows.
+  margin-top: 8rem - $panel-content-padding-top;
+  padding: 0 ($padding-horizontal + $playset-row-padding + $scrollbar-track-width) 6rem;
+
+  color: $empty-color;
+  font-size: vanilla.$font-size-s;
+
+  &-label {
+    flex-direction: column;
+    flex-shrink: 0;
+    margin-left: $playset-column-gap;
+    overflow: hidden;
+
+    text-align: right;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    &--version {
+      width: $playset-version-width;
+    }
+
+    &--release {
+      width: $playset-release-width;
+    }
+
+    &--size {
+      width: $playset-size-width;
+    }
+
+    &--subscribers {
+      width: $playset-subscribers-width;
+    }
+  }
+}
+
 // The vanilla empty panels' look (Chirper, the notifications), sized by its own padding rather than
 // filling a fixed-height panel, so the window keeps fitting its content.
 .emptyState {
@@ -305,6 +514,10 @@ $empty-line-height: 1.4em;
     // A message breaks its own lines where a sentence reads better alone. Cohtml has no
     // `pre-line`.
     white-space: pre-wrap;
+  }
+
+  &-action {
+    margin-top: 16rem;
   }
 }
 

@@ -33,6 +33,18 @@ internal sealed class ModValueWriter : IWriter<Domain.Mod> {
     writer.PropertyName("tags");
     writer.Write(value.Tags);
 
+    writer.PropertyName("state");
+    writer.Write(value.State);
+
+    writer.PropertyName("requiredGameVersion");
+    writer.Write(value.RequiredGameVersion);
+
+    writer.PropertyName("sizeFormatted");
+    writer.Write(value.SizeFormatted);
+
+    writer.PropertyName("knownLastReleasedAtFormattedDistance");
+    writer.Write(value.KnownLastReleasedAtFormattedDistance);
+
     writer.TypeEnd();
   }
 }

@@ -11,8 +11,10 @@ export function useDetailsContext(): DetailsContext {
 
   const viewerCreatorId = bindings.useModSettings().publicCreatorId ?? undefined;
 
+  const playset = bindings.usePlayset() ?? undefined;
+
   return useMemo(
-    () => ({ photoModeCatalog, viewerCreatorId }),
-    [photoModeCatalog, viewerCreatorId]
+    () => ({ photoModeCatalog, viewerCreatorId, playset }),
+    [photoModeCatalog, viewerCreatorId, playset]
   );
 }

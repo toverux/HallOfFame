@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using HallOfFame.Domain;
 using HallOfFame.Http;
@@ -29,6 +30,8 @@ internal sealed class FakeApi : IHallOfFameApi {
   internal Func<string, Task<Screenshot>>? ReportScreenshotImpl { get; init; }
 
   internal Func<string, Task<byte[]>>? DownloadImageImpl { get; init; }
+
+  internal Func<string, Task<IReadOnlyList<HallOfFame.Domain.Mod>>>? GetPlaysetImpl { get; init; }
 
   #if DEBUG
   internal Func<string, Task<Screenshot>>? GetScreenshotImpl { get; init; }
@@ -61,6 +64,9 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   public Task<Screenshot> UploadScreenshot(UploadScreenshotParams @params) =>
     this.UploadScreenshotImpl?.Invoke(@params) ?? throw new NotImplementedException();
+
+  public Task<IReadOnlyList<HallOfFame.Domain.Mod>> GetPlayset(string screenshotId) =>
+    this.GetPlaysetImpl?.Invoke(screenshotId) ?? throw new NotImplementedException();
 
   public Task<byte[]> DownloadImage(string url) =>
     this.DownloadImageImpl?.Invoke(url) ?? throw new NotImplementedException();

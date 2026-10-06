@@ -104,8 +104,9 @@ internal sealed class CitySnapshotProvider {
   /// <summary>
   /// Gets the mods from the current playset.
   /// It DOES NOT return HoF among the list.
+  /// Null when the playset could not be read, which is not cached, so the next call tries again.
   /// </summary>
-  internal async Task<Colossal.PSI.Common.Mod[]> GetActiveMods() {
+  internal async Task<Colossal.PSI.Common.Mod[]?> GetActiveMods() {
     if (this.activeModsCache is not null) {
       return this.activeModsCache;
     }
@@ -114,7 +115,13 @@ internal sealed class CitySnapshotProvider {
       var pdxSdk = PdxSdkPlatformProxy.PdxSdk;
 
       // This will return null if the player is not logged in or in other error cases.
-      var mods = pdxSdk is not null ? await pdxSdk.GetModsInActivePlayset() ?? [] : [];
+      var mods = pdxSdk is not null ? await pdxSdk.GetModsInActivePlayset() : null;
+
+      if (mods is null) {
+        Mod.Log.Warn($"{nameof(CitySnapshotProvider)}: Could not read the active playset.");
+
+        return null;
+      }
 
       return this.activeModsCache = mods
         // Ignore Hall of Fame's ID
@@ -124,7 +131,7 @@ internal sealed class CitySnapshotProvider {
     catch (Exception ex) {
       Mod.Log.ErrorRecoverable(ex);
 
-      return [];
+      return null;
     }
   }
 

@@ -52,8 +52,10 @@ export interface Screenshot {
   readonly viewerUrl: string;
   // The viewer page itself, untracked. This is the link to hand to a human.
   readonly viewerShareUrl: string;
-  // The playset's Paradox Mods IDs, empty when the creator did not share it or it has none.
+  // The playset's Paradox Mods IDs, empty when the creator did not share it or none was recorded.
   readonly paradoxModIds: readonly number[];
+  // The server still sends a creator their own unshared playset's IDs.
+  readonly shareParadoxModIds: boolean;
   readonly shareRenderSettings: boolean;
   readonly renderSettings: Readonly<Record<string, string>>;
   // The scene and light the shot was taken in, by name, each value keeping its type. The mod adds
@@ -126,4 +128,17 @@ export interface Mod {
   readonly thumbnailUrl: string;
   readonly subscribersCount: number;
   readonly tags: readonly string[];
+  readonly state: 'published' | 'removed' | 'blocked' | 'unknown';
+
+  /**
+   * The game version the mod targets, as its author wrote it (ex. "1.6.*"): a hint, the game
+   * installs a mod targeting another version with a warning.
+   */
+  readonly requiredGameVersion: string | null;
+
+  // Localized by the server, as Cohtml has no Intl.
+  readonly sizeFormatted: string | null;
+
+  // How long ago the mod's latest version was released, localized by the server.
+  readonly knownLastReleasedAtFormattedDistance: string | null;
 }

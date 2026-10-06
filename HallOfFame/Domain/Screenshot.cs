@@ -55,10 +55,17 @@ internal record Screenshot {
   internal string ViewerUrl { get; [UsedImplicitly] set; } = string.Empty;
 
   /// <summary>
-  /// The playset's Paradox Mods IDs, empty when the creator did not share it or it has none.
+  /// The playset's Paradox Mods IDs, empty when the creator did not share it or none was recorded.
   /// </summary>
   [DecodeAlias("paradoxModIds")]
   internal int[] ParadoxModIds { get; [UsedImplicitly] set; } = [];
+
+  /// <summary>
+  /// Whether the creator shared the playset; the server still sends a creator their own unshared
+  /// <see cref="ParadoxModIds"/>.
+  /// </summary>
+  [DecodeAlias("shareParadoxModIds")]
+  internal bool ShareParadoxModIds { get; [UsedImplicitly] set; }
 
   [DecodeAlias("shareRenderSettings")]
   internal bool ShareRenderSettings { get; [UsedImplicitly] set; }
