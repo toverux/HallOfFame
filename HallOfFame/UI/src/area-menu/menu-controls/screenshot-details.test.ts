@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'bun:test';
-import type { RenderConditionValue, Screenshot, ScreenshotCapability } from '../../common';
-import { makeCreator, makeMod, makeScreenshot, photoModeCatalog } from '../../testing/fixtures';
+import type { Mod, RenderConditionValue, Screenshot, ScreenshotCapability } from '../../common';
+import {
+  makeCreator,
+  makeMod,
+  makeScreenshot,
+  makeSkyveVerdict,
+  photoModeCatalog
+} from '../../testing/fixtures';
 import {
   type DetailsContext,
   type PhotoModeConditions,
@@ -10,6 +16,8 @@ import {
   type ScreenshotDetails,
   formatClockTime,
   isOlderGameVersion,
+  type ModHints,
+  selectModHints,
   selectScreenshotDetails as selectWithContext,
   toPhotoModeColorSliders
 } from './screenshot-details';
@@ -1027,6 +1035,244 @@ describe('formatClockTime', () => {
     const { hour } = { hour: 23.9999 };
 
     expect(formatClockTime(hour)).toBe('00:00');
+  });
+});
+
+describe('selectModHints', () => {
+  // The vanilla `menu.gameVersion` binding's shape.
+  const gameVersion = '1.6.2f1 (8573.1a2b) [2026.09.01.1200]';
+
+  function select(overrides: Partial<Mod> = {}): ModHints {
+    return selectModHints(makeMod({ paradoxModId: 1, ...overrides }), gameVersion);
+  }
+
+  describe('cell', () => {
+    it.each([
+      ['stable', 'Stable', 'dimmed'],
+      ['stableNoNewFeatures', 'Stable', 'dimmed'],
+      ['stableNoFutureUpdates', 'Stable', 'dimmed'],
+      ['breaksOnPatch', 'Caution', 'warning'],
+      ['numerousReports', 'Caution', 'warning'],
+      ['cautionWhenUsing', 'Caution', 'warning'],
+      ['hasIssues', 'HasIssues', 'warning'],
+      ['hasIssuesNoFutureUpdates', 'HasIssues', 'warning'],
+      ['obsolete', 'Obsolete', 'warning'],
+      ['broken', 'Broken', 'negative'],
+      ['brokenFromPatch', 'Broken', 'negative'],
+      ['brokenFromNewVersion', 'Broken', 'negative']
+    ] as const)(`files %p under %p, in the %p tone`, (stability, group, tone) => {
+      expect(select({ skyve: makeSkyveVerdict({ stability }) }).cell).toEqual({
+        labelId: `HallOfFame.Skyve.${group}`,
+        tone
+      });
+    });
+
+    it(`is empty for a mod Skyve has not reviewed`, () => {
+      expect(select({ skyve: null }).cell).toBeUndefined();
+    });
+
+    it(`is empty for a mod Skyve lacks the information to review`, () => {
+      expect(
+        select({ skyve: makeSkyveVerdict({ stability: 'notEnoughInformation' }) }).cell
+      ).toBeUndefined();
+    });
+
+    it(`shows an unpublished mod's state in place of its verdict`, () => {
+      const hints = select({ state: 'removed', skyve: makeSkyveVerdict({ stability: 'broken' }) });
+
+      expect(hints.cell).toEqual({
+        labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Removed]',
+        tone: 'dimmed'
+      });
+
+      // The verdict is still there to read.
+      expect(hints.skyve?.labelId).toBe('HallOfFame.Skyve.Broken');
+    });
+
+    it.each([
+      ['blocked', 'Blocked'],
+      ['unknown', 'Unavailable']
+    ] as const)(`shows the %p state as %p`, (state, label) => {
+      expect(select({ state }).cell?.labelId).toBe(
+        `HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[${label}]`
+      );
+    });
+  });
+
+  describe('a stability value the mod does not know', () => {
+    const hints = (): ModHints =>
+      select({ skyve: makeSkyveVerdict({ stability: 'brokenOnTuesdays' }) });
+
+    it(`leaves the cell empty`, () => {
+      expect(hints().cell).toBeUndefined();
+    });
+
+    it(`shows no Skyve block and no card line`, () => {
+      expect(hints().skyve).toBeUndefined();
+      expect(hints().card).toBeUndefined();
+    });
+  });
+
+  describe('a mod broken by a patch', () => {
+    const brokenFromPatch = makeSkyveVerdict({
+      stability: 'brokenFromPatch',
+      reviewedAt: '2026-09-15T16:16:02.537Z'
+    });
+
+    it(`shows as a caution once released since its review, under the mod's own label`, () => {
+      const hints = select({
+        skyve: brokenFromPatch,
+        knownLastReleasedAt: '2026-09-18T14:48:50.000Z'
+      });
+
+      expect(hints.cell).toEqual({ labelId: 'HallOfFame.Skyve.Caution', tone: 'warning' });
+
+      expect(hints.skyve).toMatchObject({
+        labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Broken From Patch Updated]',
+        tone: 'warning'
+      });
+    });
+
+    it(`stays broken when last released before its review`, () => {
+      const hints = select({
+        skyve: brokenFromPatch,
+        knownLastReleasedAt: '2026-09-12T02:40:07.000Z'
+      });
+
+      expect(hints.cell).toEqual({ labelId: 'HallOfFame.Skyve.Broken', tone: 'negative' });
+      expect(hints.skyve?.labelId).toBe('HallOfFame.Skyve.BrokenFromPatch');
+    });
+
+    it(`stays broken when its last release is unknown`, () => {
+      const hints = select({ skyve: brokenFromPatch, knownLastReleasedAt: null });
+
+      expect(hints.cell?.tone).toBe('negative');
+    });
+
+    it(`stays broken when its review date is unknown`, () => {
+      const hints = select({
+        skyve: { ...brokenFromPatch, reviewedAt: null, reviewedAtFormattedDistance: null },
+        knownLastReleasedAt: '2026-09-18T14:48:50.000Z'
+      });
+
+      expect(hints.cell?.tone).toBe('negative');
+    });
+  });
+
+  describe('Skyve block', () => {
+    it(`is absent for a mod Skyve has not reviewed`, () => {
+      expect(select({ skyve: null }).skyve).toBeUndefined();
+    });
+
+    it(`names Skyve's exact label, in the cell's tone`, () => {
+      expect(
+        select({ skyve: makeSkyveVerdict({ stability: 'stableNoNewFeatures' }) }).skyve
+      ).toMatchObject({
+        labelId: 'HallOfFame.Skyve.StableNoNewFeatures',
+        tone: 'dimmed'
+      });
+
+      expect(
+        select({ skyve: makeSkyveVerdict({ stability: 'cautionWhenUsing' }) }).skyve
+      ).toMatchObject({
+        labelId: 'HallOfFame.Skyve.CautionWhenUsing',
+        tone: 'warning'
+      });
+    });
+
+    it(`is dimmed for a mod Skyve lacks the information to review`, () => {
+      expect(
+        select({ skyve: makeSkyveVerdict({ stability: 'notEnoughInformation' }) }).skyve
+      ).toMatchObject({ labelId: 'HallOfFame.Skyve.NotEnoughInformation', tone: 'dimmed' });
+    });
+
+    it(`keeps the reviewer's note whole`, () => {
+      const note = 'Known issue:\nSome cranes are rotated.\n\nAnother line.';
+
+      expect(select({ skyve: makeSkyveVerdict({ note }) }).skyve?.note).toBe(note);
+      expect(select({ skyve: makeSkyveVerdict({ note: null }) }).skyve?.note).toBeUndefined();
+    });
+
+    it(`tells when and on which game version the mod was reviewed`, () => {
+      expect(select({ skyve: makeSkyveVerdict() }).skyve?.review).toEqual({
+        labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Reviewed]',
+        args: { WHEN: '22 days ago', VERSION: '1.6.2f1' }
+      });
+    });
+
+    it(`tells only when the mod was reviewed, without a game version`, () => {
+      expect(
+        select({ skyve: makeSkyveVerdict({ reviewedGameVersion: null }) }).skyve?.review
+      ).toEqual({
+        labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Reviewed When]',
+        args: { WHEN: '22 days ago' }
+      });
+    });
+
+    it(`tells only the game version, without a review date`, () => {
+      const skyve = makeSkyveVerdict({ reviewedAt: null, reviewedAtFormattedDistance: null });
+
+      expect(select({ skyve }).skyve?.review).toEqual({
+        labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Reviewed On Version]',
+        args: { VERSION: '1.6.2f1' }
+      });
+    });
+
+    it(`has no review line without either`, () => {
+      const skyve = makeSkyveVerdict({
+        reviewedAt: null,
+        reviewedAtFormattedDistance: null,
+        reviewedGameVersion: null
+      });
+
+      expect(select({ skyve }).skyve?.review).toBeUndefined();
+    });
+  });
+
+  describe('game version line', () => {
+    it(`is absent for a mod naming no game version`, () => {
+      expect(select({ requiredGameVersion: null }).gameVersion).toBeUndefined();
+    });
+
+    it(`flags a game version older than the running game's`, () => {
+      expect(select({ requiredGameVersion: '1.3.*' }).gameVersion).toEqual({
+        version: '1.3.*',
+        isOlder: true
+      });
+    });
+
+    it(`does not flag the running game's version`, () => {
+      expect(select({ requiredGameVersion: '1.6.*' }).gameVersion).toEqual({
+        version: '1.6.*',
+        isOlder: false
+      });
+    });
+  });
+
+  describe('showcased mod card', () => {
+    it(`has no Skyve line for a mod Skyve has not reviewed`, () => {
+      expect(select({ skyve: null }).card).toBeUndefined();
+    });
+
+    it(`has no Skyve line for a mod Skyve lacks the information to review`, () => {
+      expect(
+        select({ skyve: makeSkyveVerdict({ stability: 'notEnoughInformation' }) }).card
+      ).toBeUndefined();
+    });
+
+    it(`has a Skyve line telling the verdict, without a tooltip for a stable mod`, () => {
+      const hints = select({ skyve: makeSkyveVerdict({ stability: 'stableNoFutureUpdates' }) });
+
+      expect(hints.card?.block).toBe(hints.skyve);
+      expect(hints.card?.hasTooltip).toBe(false);
+    });
+
+    it.each(['cautionWhenUsing', 'hasIssues', 'obsolete', 'broken', 'brokenFromNewVersion'])(
+      `has a Skyve line and a tooltip for %p`,
+      stability => {
+        expect(select({ skyve: makeSkyveVerdict({ stability }) }).card?.hasTooltip).toBe(true);
+      }
+    );
   });
 });
 

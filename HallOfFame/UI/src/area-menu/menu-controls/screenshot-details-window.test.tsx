@@ -7,6 +7,7 @@ import {
   makeMod,
   makeScreenshot,
   makeSettings,
+  makeSkyveVerdict,
   photoModeCatalog
 } from '../../testing/fixtures';
 import {
@@ -708,7 +709,7 @@ describe('ScreenshotDetailsWindow', () => {
       expect(screen.queryByText('Trees')).toBeNull();
     });
 
-    it(`lists the mods with their author, game version, last release, size and subscribers`, () => {
+    it(`lists the mods with their author, Skyve verdict, last release, size and subscribers`, () => {
       setTranslations({
         'Common.DECIMAL_SEPARATOR': '.',
         'Common.VALUE_THOUSAND': '{SIGN}{VALUE}K'
@@ -720,7 +721,7 @@ describe('ScreenshotDetailsWindow', () => {
         mods: [
           {
             ...traffic,
-            requiredGameVersion: '1.6.*',
+            skyve: makeSkyveVerdict({ stability: 'stable' }),
             knownLastReleasedAtFormattedDistance: '13 days ago',
             sizeFormatted: '996.4 kB'
           },
@@ -738,7 +739,7 @@ describe('ScreenshotDetailsWindow', () => {
       const positions = [
         'Traffic',
         'Ann',
-        '1.6.*',
+        'HallOfFame.Skyve.Stable',
         '13 days ago',
         '996.4 kB',
         '4.2K',
@@ -754,7 +755,7 @@ describe('ScreenshotDetailsWindow', () => {
     });
 
     const columnLabels = [
-      'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Game Version Column]',
+      'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Skyve Column]',
       'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Updated Column]',
       'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Size Column]',
       'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Subscribers Column]'
@@ -778,36 +779,73 @@ describe('ScreenshotDetailsWindow', () => {
       }
     });
 
-    it(`marks a game version older than the running game's, and only that one`, () => {
-      setBinding('menu', 'gameVersion', '1.6.2f1 (8573.1a2b) [2026.09.01.1200]');
-
+    it(`shows the group of each mod's Skyve verdict, in its tone`, () => {
       setBinding(SLIDESHOW, 'playset', {
         screenshotId: 's0',
         status: 'loaded',
         mods: [
-          { ...traffic, requiredGameVersion: '1.3.*' },
-          { ...trees, requiredGameVersion: '1.6.*' }
+          { ...traffic, skyve: makeSkyveVerdict({ stability: 'stableNoNewFeatures' }) },
+          { ...trees, skyve: makeSkyveVerdict({ stability: 'cautionWhenUsing' }) },
+          makeMod({
+            paradoxModId: 20,
+            name: 'Roads',
+            skyve: makeSkyveVerdict({ stability: 'hasIssues' })
+          }),
+          makeMod({
+            paradoxModId: 21,
+            name: 'Rails',
+            skyve: makeSkyveVerdict({ stability: 'obsolete' })
+          }),
+          makeMod({
+            paradoxModId: 22,
+            name: 'Ports',
+            skyve: makeSkyveVerdict({ stability: 'brokenFromPatch' })
+          })
         ]
       });
 
       renderTab(shared);
 
-      expect(screen.getByText('1.3.*').dataset.isOlderGameVersion).toBe('true');
-      expect(screen.getByText('1.6.*').dataset.isOlderGameVersion).toBeUndefined();
+      expect(screen.getByText('HallOfFame.Skyve.Stable').dataset.tone).toBe('dimmed');
+      expect(screen.getByText('HallOfFame.Skyve.Caution').dataset.tone).toBe('warning');
+      expect(screen.getByText('HallOfFame.Skyve.HasIssues').dataset.tone).toBe('warning');
+      expect(screen.getByText('HallOfFame.Skyve.Obsolete').dataset.tone).toBe('warning');
+      expect(screen.getByText('HallOfFame.Skyve.Broken').dataset.tone).toBe('negative');
     });
 
-    it(`says which mods are no longer published, in place of their game version`, () => {
+    it(`leaves the Skyve cell empty without a verdict, or one lacking information`, () => {
       setBinding(SLIDESHOW, 'playset', {
         screenshotId: 's0',
         status: 'loaded',
         mods: [
-          { ...traffic, state: 'removed', requiredGameVersion: '1.6.*' },
-          { ...trees, state: 'blocked', requiredGameVersion: '1.6.*' },
+          { ...traffic, skyve: null },
+          { ...trees, skyve: makeSkyveVerdict({ stability: 'notEnoughInformation' }) }
+        ]
+      });
+
+      renderTab(shared);
+
+      for (const name of ['Traffic', 'Trees']) {
+        const row = screen.getByText(name).closest('[data-playset-row]');
+
+        expect(row?.querySelector('[data-tone]')).toBeNull();
+      }
+
+      expect(screen.queryByText('HallOfFame.Skyve.NotEnoughInformation')).toBeNull();
+    });
+
+    it(`says which mods are no longer published, in place of their Skyve verdict`, () => {
+      setBinding(SLIDESHOW, 'playset', {
+        screenshotId: 's0',
+        status: 'loaded',
+        mods: [
+          { ...traffic, state: 'removed', skyve: makeSkyveVerdict({ stability: 'broken' }) },
+          { ...trees, state: 'blocked', skyve: makeSkyveVerdict({ stability: 'broken' }) },
           makeMod({
             paradoxModId: 20,
             name: 'Roads',
             state: 'unknown',
-            requiredGameVersion: '1.6.*'
+            skyve: makeSkyveVerdict({ stability: 'broken' })
           })
         ]
       });
@@ -823,7 +861,7 @@ describe('ScreenshotDetailsWindow', () => {
       expect(
         screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Unavailable]')
       ).toBeDefined();
-      expect(screen.queryByText('1.6.*')).toBeNull();
+      expect(screen.queryByText('HallOfFame.Skyve.Broken')).toBeNull();
     });
 
     it(`opens a mod's page when its row is clicked`, async () => {

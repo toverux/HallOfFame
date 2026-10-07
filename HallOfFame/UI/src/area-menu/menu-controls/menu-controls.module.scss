@@ -113,8 +113,9 @@ $asset-button-shadow: 1rem 1rem 2rem vanilla.$panel-color-dark;
     > [class*="icon"] {
       margin-right: 5rem;
 
-      // The text's shadow, which a masked icon does not take.
-      filter: drop-shadow($asset-button-shadow);
+      // The text's shadow, which a masked icon does not take, less blurred: the glyph's cut-outs
+      // let the full blur darken the hexagon's inside, where text only gets its edges darkened.
+      filter: drop-shadow(1rem 1rem 1rem vanilla.$panel-color-dark);
 
       // Make the icon 10% smaller.
       > [class*="icon"] {
@@ -136,6 +137,8 @@ $asset-button-shadow: 1rem 1rem 2rem vanilla.$panel-color-dark;
     font-size: vanilla.$font-size-l;
   }
 
+  // Both revealed on hover only.
+  &-textSkyve,
   &-textDescription {
     transition:
       max-width,
@@ -169,12 +172,20 @@ $asset-button-shadow: 1rem 1rem 2rem vanilla.$panel-color-dark;
     background-color: vanilla.$menu-text-1-inverted;
   }
 
+  &:hover &-textSkyve,
   &:hover &-textDescription {
     // Set a high bound for the width/height transition.
     max-width: 1000rem;
     max-height: 1000rem;
-    margin-top: 10rem;
     opacity: 1;
+  }
+
+  &:hover &-textSkyve {
+    margin-top: 5rem;
+  }
+
+  &:hover &-textDescription {
+    margin-top: 10rem;
   }
 }
 

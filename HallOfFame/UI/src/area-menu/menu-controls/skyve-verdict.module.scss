@@ -1,0 +1,72 @@
+@use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
+
+.heading {
+  @include shared.tone-colors;
+}
+
+.logo {
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 4rem;
+}
+
+// A pale wash of the verdict's tone with a solid bar of it on the left, under dark text, which
+// reads on the hovered card's light background where the tone itself as text or fill does not.
+@mixin pill-tone($color) {
+  border-left-color: $color;
+  background-color: rgba($color, 0.22);
+
+  &.pill--interactive:hover {
+    background-color: rgba($color, 0.45);
+  }
+}
+
+.pill {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 2rem 8rem 2rem 4rem;
+  border-left: 4rem solid;
+  border-radius: 4rem;
+
+  color: vanilla.$menu-text-1-inverted;
+
+  // Lit up on hover by the tone's mixin, as it opens a tooltip.
+  &--interactive {
+    transition: background-color 0.15s;
+  }
+
+  &--dimmed {
+    @include pill-tone(shared.$dimmed-color);
+  }
+
+  &--warning {
+    @include pill-tone(vanilla.$warning-color);
+  }
+
+  &--negative {
+    @include pill-tone(vanilla.$negative-color);
+  }
+}
+
+.skyve {
+  display: flex;
+  flex-direction: column;
+
+  &-heading {
+    font-weight: bold;
+  }
+
+  &-note {
+    margin: 4rem 0 0;
+
+    // The note keeps the reviewer's line breaks. Cohtml has no `pre-line`.
+    white-space: pre-wrap;
+  }
+
+  &-review {
+    margin: 4rem 0 0;
+    opacity: 0.75;
+  }
+}

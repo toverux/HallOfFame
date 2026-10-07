@@ -1,0 +1,16 @@
+{
+  "Stable": "稳定",
+  "StableNoNewFeatures": "稳定，仅补丁更新",
+  "StableNoFutureUpdates": "稳定，不再更新",
+  "NotEnoughInformation": "没有足够的信息",
+  "Caution": "注意事项",
+  "BreaksOnPatch": "稳定，但游戏更新可能会损坏",
+  "NumerousReports": "有多个报告",
+  "CautionWhenUsing": "使用注意事项",
+  "HasIssues": "存在问题",
+  "HasIssuesNoFutureUpdates": "存在问题，但不再更新",
+  "Obsolete": "过时的",
+  "Broken": "已损坏",
+  "BrokenFromPatch": "在上次游戏更新后损坏",
+  "BrokenFromNewVersion": "在该模组的上次更新后损坏"
+}

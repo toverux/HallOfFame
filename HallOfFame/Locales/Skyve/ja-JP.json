@@ -1,0 +1,16 @@
+{
+  "Stable": "安定版",
+  "StableNoNewFeatures": "安定版 - バグ修正のみの更新",
+  "StableNoFutureUpdates": "安定版 - これ以上の更新はありません",
+  "NotEnoughInformation": "情報が不足",
+  "Caution": "注意",
+  "BreaksOnPatch": "安定していますが、アップデートで動作しなくなる可能性があります",
+  "NumerousReports": "複数のレポートがあります",
+  "CautionWhenUsing": "使用時の注意",
+  "HasIssues": "問題あり",
+  "HasIssuesNoFutureUpdates": "問題あり - アップデートはありません",
+  "Obsolete": "廃止済み",
+  "Broken": "破損",
+  "BrokenFromPatch": "最後のパッチから壊れました",
+  "BrokenFromNewVersion": "最新バージョンから壊れています"
+}

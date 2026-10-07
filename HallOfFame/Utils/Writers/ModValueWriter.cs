@@ -6,6 +6,8 @@ namespace HallOfFame.Utils.Writers;
 /// Outbound C# to cohtml UI-binding writer for <see cref="HallOfFame.Domain.Mod"/>.
 /// </summary>
 internal sealed class ModValueWriter : IWriter<Domain.Mod> {
+  private static readonly SkyveVerdictValueWriter skyveWriter = new();
+
   public void Write(IJsonWriter writer, Domain.Mod value) {
     writer.TypeBegin(typeof(Domain.Mod).FullName);
 
@@ -44,6 +46,12 @@ internal sealed class ModValueWriter : IWriter<Domain.Mod> {
 
     writer.PropertyName("knownLastReleasedAtFormattedDistance");
     writer.Write(value.KnownLastReleasedAtFormattedDistance);
+
+    writer.PropertyName("knownLastReleasedAt");
+    writer.Write(value.KnownLastReleasedAt);
+
+    writer.PropertyName("skyve");
+    ModValueWriter.skyveWriter.Write(writer, value.Skyve);
 
     writer.TypeEnd();
   }

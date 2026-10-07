@@ -152,7 +152,9 @@ export function emitEvent(name: string, ...args: readonly unknown[]): void {
  * load is allowed to fail gracefully.
  */
 function bootstrap(): void {
-  GlobalRegistrator.register();
+  // The game's own origin, against which a relative image source parses. On `about:blank` none
+  // does, and the error fired loops the vanilla `<Icon>`, which falls back to a relative source.
+  GlobalRegistrator.register({ url: 'coui://ui-mods/' });
 
   // Happy-dom does not provide this; the bundle's chart.js module needs it at load.
   // oxlint-disable-next-line typescript/no-extraneous-class - minimal stub the bundle needs at load

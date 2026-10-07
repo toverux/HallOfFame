@@ -1,3 +1,5 @@
+@use "../../vanilla-vars" as vanilla;
+
 // The materials the mod's surfaces over the slideshow are made of.
 
 // The glass of the round nav buttons and the dropdown menus: frosted, not clear.
@@ -22,4 +24,23 @@ $label-spacing: 15rem;
 // a pill keeps one tone over any screenshot.
 @mixin label-frost {
   backdrop-filter: contrast(80%) blur(25px);
+}
+
+// The details window's dimmed text: lighter than the grey of the game's empty panels, which reads
+// poorly over the window's body.
+$dimmed-color: #b7bec8;
+
+// The text colors of a Skyve verdict's tones: `--dimmed`, `--warning`, and `--negative` modifiers.
+@mixin tone-colors {
+  &--dimmed {
+    color: $dimmed-color;
+  }
+
+  &--warning {
+    color: vanilla.$warning-color;
+  }
+
+  &--negative {
+    color: vanilla.$negative-color;
+  }
 }

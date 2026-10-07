@@ -1,0 +1,16 @@
+{
+  "Stable": "안정적",
+  "StableNoNewFeatures": "안정적임, 버그 픽스 업데이트 있을 수 있음",
+  "StableNoFutureUpdates": "안정적임, 더 이상 업데이트 없음",
+  "NotEnoughInformation": "충분한 정보 없음",
+  "Caution": "주의",
+  "BreaksOnPatch": "안정적이나 패치 시 손상될 수 있음",
+  "NumerousReports": "여러 건의 신고 있음",
+  "CautionWhenUsing": "사용 시 주의",
+  "HasIssues": "문제 있음",
+  "HasIssuesNoFutureUpdates": "문제 있음, 더 이상 업데이트 없음",
+  "Obsolete": "구식",
+  "Broken": "망가짐",
+  "BrokenFromPatch": "최신 패치로 인해 손상됨",
+  "BrokenFromNewVersion": "최신 버전에서 손상됨"
+}

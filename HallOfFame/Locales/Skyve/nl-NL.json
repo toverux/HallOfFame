@@ -1,0 +1,16 @@
+{
+  "Stable": "Stabiel",
+  "StableNoNewFeatures": "Stabiel, alleen bug-fix updates",
+  "StableNoFutureUpdates": "Stabiel, geen updates meer",
+  "NotEnoughInformation": "Niet genoeg informatie",
+  "Caution": "Voorzichtigheid",
+  "BreaksOnPatch": "Stabiel, breekt mogelijks bij patch",
+  "NumerousReports": "Heeft meerdere rapporten",
+  "CautionWhenUsing": "Opgelet bij gebruik ervan",
+  "HasIssues": "Heeft problemen",
+  "HasIssuesNoFutureUpdates": "Heeft problemen, geen updates meer",
+  "Obsolete": "Verouderde",
+  "Broken": "Gebroken",
+  "BrokenFromPatch": "Gebroken van de laatste patch",
+  "BrokenFromNewVersion": "Gebroken van de nieuwste versie"
+}

@@ -1,4 +1,5 @@
 @use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
 
 // The durations of the panel's own transition, which the backdrop fades in step with.
 $enter-duration: 250ms;
@@ -7,8 +8,7 @@ $exit-duration: 150ms;
 $padding-horizontal: 30rem;
 $paragraph-gap: 12rem;
 
-// Lighter than the grey of the game's empty panels, which reads poorly over the window's body.
-$empty-color: #b7bec8;
+$empty-color: shared.$dimmed-color;
 $empty-line-height: 1.4em;
 
 $playset-row-height: 52rem;
@@ -17,7 +17,7 @@ $playset-thumbnail-size: 40rem;
 
 // The playset's columns, shared by the rows and the header labelling them.
 $playset-column-gap: 16rem;
-$playset-version-width: 80rem;
+$playset-skyve-width: 80rem;
 $playset-release-width: 110rem;
 $playset-size-width: 70rem;
 $playset-subscribers-width: 60rem;
@@ -383,8 +383,8 @@ $panel-content-padding-top: 25rem;
   &-rowCell {
     flex-direction: column;
     flex-shrink: 0;
-    // The game version, or a removed mod's state in its place.
-    width: $playset-version-width;
+    // Skyve's verdict, or an unpublished mod's state in its place.
+    width: $playset-skyve-width;
     margin-left: $playset-column-gap;
     overflow: hidden;
 
@@ -394,9 +394,7 @@ $panel-content-padding-top: 25rem;
     white-space: nowrap;
     text-overflow: ellipsis;
 
-    &--olderVersion {
-      color: vanilla.$warning-color;
-    }
+    @include shared.tone-colors;
 
     &--release {
       width: $playset-release-width;
@@ -441,6 +439,25 @@ $panel-content-padding-top: 25rem;
   }
 }
 
+// The lines a playset row's tooltip adds under the mod's short description.
+.playsetTooltip {
+  display: flex;
+  flex-direction: column;
+
+  &-gameVersion {
+    margin: 0;
+
+    &--older {
+      color: vanilla.$warning-color;
+    }
+  }
+
+  // Apart from the Skyve block above it.
+  & > * + &-gameVersion {
+    margin-top: 8rem;
+  }
+}
+
 // The labels over the playset's columns, outside the body's scrollable so they stay as the list
 // scrolls: Cohtml has no `position: sticky`.
 .playsetColumns {
@@ -465,8 +482,13 @@ $panel-content-padding-top: 25rem;
     white-space: nowrap;
     text-overflow: ellipsis;
 
-    &--version {
-      width: $playset-version-width;
+    // A row, the logo before the label: too short to need the column the others ellipsize in.
+    &--skyve {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      align-items: center;
+      width: $playset-skyve-width;
     }
 
     &--release {

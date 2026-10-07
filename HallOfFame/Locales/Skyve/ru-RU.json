@@ -1,0 +1,16 @@
+{
+  "Stable": "Стабильная версия",
+  "StableNoNewFeatures": "Стабильное обновление, только исправление ошибок",
+  "StableNoFutureUpdates": "Стабильное обновление, нет обновлений",
+  "NotEnoughInformation": "Недостаточно информации",
+  "Caution": "Внимание",
+  "BreaksOnPatch": "Стабильный, потенциально сломается на патче",
+  "NumerousReports": "Имеет несколько отчетов",
+  "CautionWhenUsing": "Внимание при использовании",
+  "HasIssues": "Имеет проблемы",
+  "HasIssuesNoFutureUpdates": "Имеет проблемы, больше нет обновлений",
+  "Obsolete": "Устаревший",
+  "Broken": "Сломано",
+  "BrokenFromPatch": "Сломано с последнего патча",
+  "BrokenFromNewVersion": "Сломано в последней версии"
+}

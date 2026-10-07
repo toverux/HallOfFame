@@ -58,6 +58,19 @@ internal record Mod {
   [DecodeAlias("knownLastReleasedAtFormattedDistance")]
   internal string? KnownLastReleasedAtFormattedDistance { get; [UsedImplicitly] set; }
 
+  /// <summary>
+  /// When the mod's latest version was released, as an ISO 8601 date, which the UI compares with
+  /// <see cref="SkyveVerdict.ReviewedAt"/>.
+  /// </summary>
+  [DecodeAlias("knownLastReleasedAt")]
+  internal string? KnownLastReleasedAt { get; [UsedImplicitly] set; }
+
+  /// <summary>
+  /// Null when Skyve has not reviewed the mod.
+  /// </summary>
+  [DecodeAlias("skyve")]
+  internal SkyveVerdict? Skyve { get; [UsedImplicitly] set; }
+
   public override string ToString() =>
     $"Mod #{this.Id} (Paradox ID={this.ParadoxModId}) {this.Name} by {this.AuthorName}";
 }

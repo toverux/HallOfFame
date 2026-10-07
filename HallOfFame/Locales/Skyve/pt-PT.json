@@ -1,0 +1,16 @@
+{
+  "Stable": "Estável",
+  "StableNoNewFeatures": "Estável, apenas atualizações de correções",
+  "StableNoFutureUpdates": "Estável, mas sem atualizações",
+  "NotEnoughInformation": "Não há informação suficiente",
+  "Caution": "Cuidado",
+  "BreaksOnPatch": "Estável, mas pode falhar com o patch",
+  "NumerousReports": "Possui vários relatórios",
+  "CautionWhenUsing": "Cuidado ao usar isso",
+  "HasIssues": "Tem problemas",
+  "HasIssuesNoFutureUpdates": "Tem problemas, sem mais atualizações",
+  "Obsolete": "Obsoleto",
+  "Broken": "Corrompido",
+  "BrokenFromPatch": "Incompatível com o último patch",
+  "BrokenFromNewVersion": "Incompatível com a versão mais recente"
+}

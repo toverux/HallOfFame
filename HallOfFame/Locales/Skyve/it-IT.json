@@ -1,0 +1,16 @@
+{
+  "Stable": "Stabile",
+  "StableNoNewFeatures": "Stabile, solo aggiornamenti per correzioni di bug",
+  "StableNoFutureUpdates": "Stabile, nessun altro aggiornamento",
+  "NotEnoughInformation": "Informazioni insufficienti",
+  "Caution": "Con cautela",
+  "BreaksOnPatch": "Stabile, potrebbe smettere di funzionare dopo la patch di aggiornamento",
+  "NumerousReports": "Ha molteplici report",
+  "CautionWhenUsing": "Attenzione all'utilizzo",
+  "HasIssues": "Ha problemi",
+  "HasIssuesNoFutureUpdates": "Ha problemi, niente più aggiornamenti",
+  "Obsolete": "Obsoleto",
+  "Broken": "Non funziona",
+  "BrokenFromPatch": "Corrotto dall'ultima patch",
+  "BrokenFromNewVersion": "Corrotto dall'ultima versione"
+}

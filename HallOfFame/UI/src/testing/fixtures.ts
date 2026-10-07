@@ -1,4 +1,4 @@
-import type { Creator, Mod, PhotoModeProperty, Screenshot } from '../common';
+import type { Creator, Mod, PhotoModeProperty, Screenshot, SkyveVerdict } from '../common';
 import type { JsonScreenshotSnapshot, ModSettings } from '../utils/bindings';
 
 /**
@@ -165,6 +165,23 @@ export function makeMod(overrides: Partial<Mod> & Pick<Mod, 'paradoxModId'>): Mo
     requiredGameVersion: null,
     sizeFormatted: null,
     knownLastReleasedAtFormattedDistance: null,
+    knownLastReleasedAt: null,
+    skyve: null,
+    ...overrides
+  };
+}
+
+/**
+ * Builds a {@link SkyveVerdict} as the server sends it, stable and reviewed on the running game's
+ * version, overridable per field.
+ */
+export function makeSkyveVerdict(overrides: Partial<SkyveVerdict> = {}): SkyveVerdict {
+  return {
+    stability: 'stable',
+    note: null,
+    reviewedAt: '2026-09-15T16:16:02.537Z',
+    reviewedAtFormattedDistance: '22 days ago',
+    reviewedGameVersion: '1.6.2f1',
     ...overrides
   };
 }

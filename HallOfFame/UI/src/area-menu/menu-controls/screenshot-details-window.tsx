@@ -56,17 +56,20 @@ import { photoModeContainerClasses } from '../../vanilla-modules/game-ui/game/co
 import {
   type DetailsTabState,
   formatClockTime,
-  isOlderGameVersion,
+  type ModHints,
+  type ModHintTone,
   type PhotoModeConditions,
   type PhotoModeWeather,
   type PhotoModeSection,
   type PhotoModeSetting,
   type PhotoModeTabState,
   type PlaysetTabState,
+  selectModHints,
   selectScreenshotDetails,
   toPhotoModeColorSliders
 } from './screenshot-details';
 import { selectLocalizedName } from './select-localized-name';
+import { SkyveLogo, SkyveVerdictBlock } from './skyve-verdict';
 import { useDetailsContext } from './use-details-context';
 import * as styles from './screenshot-details-window.module.scss';
 
@@ -833,9 +836,21 @@ function PlaysetColumns(): ReactElement {
 
   return (
     <div className={styles.playsetColumns}>
-      <div className={classNames(styles.playsetColumnsLabel, styles.playsetColumnsLabelVersion)}>
-        {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Game Version Column]')}
-      </div>
+      <Tooltip
+        direction='down'
+        tooltip={
+          <TooltipLayout
+            title={translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Skyve Column]')}
+            description={translate(
+              'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Skyve Column Tooltip]'
+            )}
+          />
+        }>
+        <div className={classNames(styles.playsetColumnsLabel, styles.playsetColumnsLabelSkyve)}>
+          <SkyveLogo />
+          {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Skyve Column]')}
+        </div>
+      </Tooltip>
 
       <div className={classNames(styles.playsetColumnsLabel, styles.playsetColumnsLabelRelease)}>
         {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Updated Column]')}
@@ -854,7 +869,8 @@ function PlaysetColumns(): ReactElement {
 }
 
 /**
- * A mod of the playset, opening its Paradox Mods page, its short description in a tooltip.
+ * A mod of the playset, opening its Paradox Mods page, its short description, Skyve's verdict and
+ * the game version it was made for in a tooltip.
  * A mod Paradox Mods no longer publishes is dimmed, the server listing those last.
  */
 function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): ReactElement {
@@ -862,24 +878,30 @@ function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): R
 
   const gameVersion = bindings.useGameVersion();
 
-  const stateLabelId = playsetStateLabelIds.get(mod.state);
+  const hints = selectModHints(mod, gameVersion);
 
-  const isOlderVersion =
-    mod.requiredGameVersion != null && isOlderGameVersion(mod.requiredGameVersion, gameVersion);
+  const hasDescription = mod.shortDescription != '';
+
+  const hasHints = hints.skyve != undefined || hints.gameVersion != undefined;
 
   return (
     <Tooltip
       direction='right'
+      delayTime={0}
       tooltip={
-        mod.shortDescription ? (
-          <TooltipLayout title={mod.name} description={mod.shortDescription} />
+        hasDescription || hasHints ? (
+          <TooltipLayout
+            title={mod.name}
+            description={hasDescription ? mod.shortDescription : undefined}
+            content={hasHints ? <PlaysetModRowTooltipContent hints={hints} /> : undefined}
+          />
         ) : undefined
       }>
       {/* The tooltip's own host element, which the vanilla button would not lend it. */}
       <div
         className={classNames(
           playsetRowClassName(index),
-          stateLabelId != undefined && styles.playsetRowUnavailable
+          mod.state != 'published' && styles.playsetRowUnavailable
         )}
         data-playset-row={true}>
         <Button
@@ -898,18 +920,14 @@ function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): R
           </div>
 
           {/* Every cell rendered, empty or not, so the columns line up from row to row. */}
-          {stateLabelId == undefined ? (
-            <div
-              className={classNames(
-                styles.playsetRowCell,
-                isOlderVersion && styles.playsetRowCellOlderVersion
-              )}
-              data-is-older-game-version={isOlderVersion || undefined}>
-              {mod.requiredGameVersion}
-            </div>
-          ) : (
-            <div className={styles.playsetRowCell}>{translate(stateLabelId)}</div>
-          )}
+          <div
+            className={classNames(
+              styles.playsetRowCell,
+              hints.cell && playsetRowCellToneClassNames[hints.cell.tone]
+            )}
+            data-tone={hints.cell?.tone}>
+            {hints.cell && translate(hints.cell.labelId)}
+          </div>
 
           <div className={classNames(styles.playsetRowCell, styles.playsetRowCellRelease)}>
             {mod.knownLastReleasedAtFormattedDistance}
@@ -930,20 +948,44 @@ function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): R
 }
 
 /**
+ * The lines of a playset row's tooltip under the mod's short description.
+ */
+function PlaysetModRowTooltipContent({ hints }: Readonly<{ hints: ModHints }>): ReactElement {
+  const { skyve, gameVersion } = hints;
+
+  return (
+    <div className={styles.playsetTooltip}>
+      {skyve && <SkyveVerdictBlock block={skyve} />}
+
+      {gameVersion && (
+        <p
+          className={classNames(
+            styles.playsetTooltipGameVersion,
+            gameVersion.isOlder && styles.playsetTooltipGameVersionOlder
+          )}>
+          <LocalizedString
+            id='HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Made For Game Version]'
+            args={{ VERSION: gameVersion.version }}
+          />
+        </p>
+      )}
+    </div>
+  );
+}
+
+const playsetRowCellToneClassNames: Readonly<Record<ModHintTone, string>> = {
+  dimmed: styles.playsetRowCellDimmed,
+  warning: styles.playsetRowCellWarning,
+  negative: styles.playsetRowCellNegative
+};
+
+/**
  * A row's classes, every other one banded by its place in the whole list: a CSS `nth-child` would
  * count the rows the virtual list happens to have built, and flip as it scrolls.
  */
 function playsetRowClassName(index: number): string {
   return classNames(styles.playsetRow, index % 2 == 1 && styles.playsetRowAlternate);
 }
-
-// The label shown in place of the game version of a mod Paradox Mods no longer serves.
-const playsetStateLabelIds: ReadonlyMap<Mod['state'], string> = new Map([
-  ['removed', 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Removed]'],
-  ['blocked', 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Blocked]'],
-  // Any other Paradox Mods state, under review for one.
-  ['unknown', 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Unavailable]']
-]);
 
 // Replaces the vanilla button look, which a row does not wear.
 const playsetRowButtonTheme = { button: styles.playsetRowButton };

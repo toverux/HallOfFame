@@ -1,0 +1,16 @@
+{
+  "Stable": "Stabil",
+  "StableNoNewFeatures": "Stabil, nur Bugfix-Updates",
+  "StableNoFutureUpdates": "Stabil, keine weiteren Updates",
+  "NotEnoughInformation": "Nicht genügend Informationen",
+  "Caution": "Vorsicht",
+  "BreaksOnPatch": "Stabil, kann beim Patch kaputtgehen",
+  "NumerousReports": "Hat mehrere Meldungen",
+  "CautionWhenUsing": "Vorsicht bei Verwendung",
+  "HasIssues": "Hat Probleme",
+  "HasIssuesNoFutureUpdates": "Hat Probleme, keine weiteren Updates",
+  "Obsolete": "Veraltet",
+  "Broken": "Defekt",
+  "BrokenFromPatch": "Kaputt aus dem letzten Patch",
+  "BrokenFromNewVersion": "Kaputt aus der neuesten Version"
+}

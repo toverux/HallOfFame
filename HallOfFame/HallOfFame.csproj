@@ -35,6 +35,7 @@
 
     <ItemGroup>
         <EmbeddedResource Include="Locales\*.json" />
+        <EmbeddedResource Include="Locales\Skyve\*.json" />
     </ItemGroup>
 
     <ItemGroup>

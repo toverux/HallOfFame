@@ -42,7 +42,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `HallOfFame/Reflection`: Proxy/accessor classes reaching into private game internals via reflection (screen utilities, error dialogs, Paradox SDK platform).
 - `HallOfFame/Logging`: The mod-owned logging seam (`IModLog` + `ModLog`, reached through `Mod.Log`) wrapping the engine's `Colossal.Logging.ILog` so logging logic stays unit-testable off-engine.
 - `HallOfFame/Utils`: Small helpers and extensions (localization, input bindings, etc.), plus `Writers/`, the outbound C# to cohtml binding writers (`IWriter<T>` implementations).
-- `HallOfFame/Locales`: Localization files, one JSON per language, keyed `HallOfFame.<Area>.<KEY>`.
+- `HallOfFame/Locales`: Localization files, one JSON per language, keyed `HallOfFame.<Area>.<KEY>`, plus `Skyve/`, Skyve's own labels, keyed bare (see Guidelines).
 - `HallOfFame/Mod.cs` and `HallOfFame/Settings.cs`: Mod entry point and user-facing settings.
 - `HallOfFame.Tests`: C# unit tests (xUnit, `net48`, run off-engine).
 - `HallOfFame/UI/src`: TypeScript/React frontend, split into `area-game` (in-game HUD panels), `area-menu` (main-menu integration), `area-overlay` (loading screen modification), `components` (UI components shared across areas), `utils` (shared hooks/helpers, plus `bindings/`, the typed C#<->TS binding facade, one module per binding group), and `vanilla-modules` (typed stubs for game UI internals).
@@ -65,6 +65,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `mise test:ui`: Run only the UI tests.
 - `mise setup:linux`: Install the modding toolchain on Linux, where the in-game installer cannot run. Idempotent, rerun it after a game update; the game must be closed.
 - `mise l10n:push`: Preview which locale-file edits would be pushed to Crowdin and approved; with `--no-approve`, pushed unapproved and flagged as AI-translated instead, for machine translations a proofreader should still review. Needs `CROWDIN_PERSONAL_TOKEN`. Adding `--push` writes to the shared Crowdin project, which the Boundaries below gate.
+- `mise l10n:skyve`: Copy Skyve's stability labels, for every locale the mod ships, into `HallOfFame/Locales/Skyve` from Skyve's repository at the commit `.agents/scripts/import-skyve-labels.ts` pins. Move the pin to pick up Skyve's newer translations.
 
 Run `mise tasks` to see the full shortcut list; append arguments freely, mise passes them through (ex. `mise some:task --some-arg`).
 Do NOT use npx to run commands; prefer mise shortcuts, or bun/bunx when no shortcut exists.
@@ -95,6 +96,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
   - Unapproved and AI-flagged (`--no-approve --push`) for a locale with no volunteer translations, and for older keys a partial locale never had, so proofreaders still review them.
   - Push `--no-approve` before the commit reaches GitHub: the sync uploads repo translations unflagged, and the script then skips them as duplicates.
   - The script diffs `--base` against the working tree, so run each mode from a tree holding only that mode's edits.
+- `HallOfFame/Locales/Skyve` holds Skyve's own labels, registered under `HallOfFame.Skyve.`: it stays out of Crowdin and `mise l10n:push`, and changes only through `mise l10n:skyve`.
 - The decompiled game source, the third-party mod corpus, and the readable copy of the game's UI bundle are machine-local: read their paths from `~/.cs2-modding/setup.md` instead of hardcoding them here. A missing key or a `(none)` value means that source does not exist.
 - Reading that source settles what the engine does, never what it costs. Measure a claim about the running game before asserting one.
 - To put a given screenshot on screen in the running game, load it by ID with `SlideshowUISystem.LoadScreenshotById` (debug builds), through the unity-devtools `eval` tool: `world.GetOrCreateSystemManaged<HallOfFame.Systems.SlideshowUISystem>().LoadScreenshotById("<id>")`.

@@ -141,4 +141,33 @@ export interface Mod {
 
   // How long ago the mod's latest version was released, localized by the server.
   readonly knownLastReleasedAtFormattedDistance: string | null;
+
+  // When the mod's latest version was released, as an ISO 8601 date.
+  readonly knownLastReleasedAt: string | null;
+
+  // `null` when Skyve has not reviewed the mod.
+  readonly skyve: SkyveVerdict | null;
+}
+
+/**
+ * Serialization of C# `HallOfFame.Domain.SkyveVerdict`, Skyve's compatibility review of a mod.
+ */
+export interface SkyveVerdict {
+  /**
+   * One of Skyve's stability values in camelCase (ex. "brokenFromPatch"), or one Skyve added since
+   * that the mod does not know.
+   */
+  readonly stability: string;
+
+  // In English.
+  readonly note: string | null;
+
+  // As an ISO 8601 date.
+  readonly reviewedAt: string | null;
+
+  // Localized by the server, present exactly when `reviewedAt` is.
+  readonly reviewedAtFormattedDistance: string | null;
+
+  // Build suffix included (ex. "1.5.2f1").
+  readonly reviewedGameVersion: string | null;
 }

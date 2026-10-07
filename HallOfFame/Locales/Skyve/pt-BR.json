@@ -1,0 +1,16 @@
+{
+  "Stable": "Estável",
+  "StableNoNewFeatures": "Estável, somente atualizações de correções",
+  "StableNoFutureUpdates": "Estável, sem novas atualizações",
+  "NotEnoughInformation": "Não há informação suficiente",
+  "Caution": "Cuidado",
+  "BreaksOnPatch": "Estável, potencialmente quebrará no patch",
+  "NumerousReports": "Tem vários relatórios",
+  "CautionWhenUsing": "Cuidado ao usar",
+  "HasIssues": "Tem problemas",
+  "HasIssuesNoFutureUpdates": "Tem problemas, sem mais atualizações",
+  "Obsolete": "Obsoleto",
+  "Broken": "Quebrado",
+  "BrokenFromPatch": "Quebrado deste a última atualização",
+  "BrokenFromNewVersion": "Quebrado desde a sua última versão"
+}

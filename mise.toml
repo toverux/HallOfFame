@@ -175,6 +175,11 @@ description = "Pushes the locale-file edits to Crowdin and approves only the str
 raw = true
 run = "bun .agents/scripts/crowdin-push-translations.ts"
 
+[tasks."l10n:skyve"]
+description = "Copies Skyve's stability labels, in every locale the mod ships, from Skyve's repository at the commit the script pins into HallOfFame/Locales/Skyve. They stay out of Crowdin."
+raw = true
+run = "bun .agents/scripts/import-skyve-labels.ts"
+
 # TEST TASKS
 # ==========
 

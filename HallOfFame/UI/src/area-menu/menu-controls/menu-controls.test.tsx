@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { makeScreenshot, makeSettings } from '../../testing/fixtures';
-import { resetBindings, setBinding } from '../../testing/game-setup';
+import { makeMod, makeScreenshot, makeSettings, makeSkyveVerdict } from '../../testing/fixtures';
+import { resetBindings, setBinding, setTranslations } from '../../testing/game-setup';
 import { MenuControlsContent } from './menu-controls';
 
 afterEach(() => {
@@ -83,5 +83,54 @@ describe('MenuControlsContent', () => {
 
     // The window's body alone.
     expect(screen.getAllByText('A city.')).toHaveLength(1);
+  });
+
+  describe('showcased mod', () => {
+    function showcase(stability?: string): void {
+      setTranslations({
+        'HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Verdict]': 'Skyve: {LABEL}',
+        'HallOfFame.Skyve.CautionWhenUsing': 'Caution when using it',
+        'HallOfFame.Skyve.NotEnoughInformation': 'Not enough information'
+      });
+
+      setBinding(
+        'hallOfFame.slideshow',
+        'screenshot',
+        makeScreenshot({
+          showcasedMod: makeMod({
+            paradoxModId: 1,
+            name: 'Traffic',
+            skyve: stability == undefined ? null : makeSkyveVerdict({ stability })
+          })
+        })
+      );
+
+      render(<MenuControlsContent />);
+    }
+
+    function skyveLine(): Element | null {
+      return document.querySelector('[data-tone]');
+    }
+
+    it(`shows Skyve's exact verdict under its author`, () => {
+      showcase('cautionWhenUsing');
+
+      expect(skyveLine()?.textContent).toBe('Skyve: Caution when using it');
+      expect(skyveLine()?.getAttribute('data-tone')).toBe('warning');
+    });
+
+    it(`shows no Skyve line without a verdict`, () => {
+      showcase();
+
+      expect(screen.getByText('Traffic')).toBeDefined();
+      expect(skyveLine()).toBeNull();
+    });
+
+    it(`shows no Skyve line for a verdict lacking information`, () => {
+      showcase('notEnoughInformation');
+
+      expect(screen.getByText('Traffic')).toBeDefined();
+      expect(skyveLine()).toBeNull();
+    });
   });
 });

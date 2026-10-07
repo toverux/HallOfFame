@@ -1,0 +1,16 @@
+{
+  "Stable": "穩定的",
+  "StableNoNewFeatures": "穩定版，僅包含錯誤修復更新",
+  "StableNoFutureUpdates": "穩定版，不再更新",
+  "NotEnoughInformation": "沒有足夠的資訊",
+  "Caution": "注意事項",
+  "BreaksOnPatch": "穩定版，但可能在補丁更新時出現問題",
+  "NumerousReports": "有數個報告",
+  "CautionWhenUsing": "使用時須注意",
+  "HasIssues": "存在問題",
+  "HasIssuesNoFutureUpdates": "有問題，不再更新",
+  "Obsolete": "過時的",
+  "Broken": "損壞的",
+  "BrokenFromPatch": "在最近的更新後損壞",
+  "BrokenFromNewVersion": "在該模組最近的更新後損壞"
+}

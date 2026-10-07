@@ -1,0 +1,16 @@
+{
+  "Stable": "Estable",
+  "StableNoNewFeatures": "Estable, sólo correcciones de errores",
+  "StableNoFutureUpdates": "Estable, no más actualizaciones",
+  "NotEnoughInformation": "No hay suficiente información",
+  "Caution": "Precaución",
+  "BreaksOnPatch": "Estable, es probable que deje de funcionar al actualizarse el juego",
+  "NumerousReports": "Tiene múltiples reportes",
+  "CautionWhenUsing": "Precaución al usarlo",
+  "HasIssues": "Tiene problemas",
+  "HasIssuesNoFutureUpdates": "Tiene problemas, no hay más actualizaciones",
+  "Obsolete": "Obsoleto",
+  "Broken": "Dañado",
+  "BrokenFromPatch": "Roto desde el último parche",
+  "BrokenFromNewVersion": "Roto de su última versión"
+}

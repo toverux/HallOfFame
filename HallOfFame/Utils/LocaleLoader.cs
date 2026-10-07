@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Colossal.Json;
@@ -14,6 +13,12 @@ namespace HallOfFame.Utils;
 /// locale set by the user.
 /// </summary>
 internal static class LocaleLoader {
+  private const string ResourcePrefix = "HallOfFame.Locales.";
+
+  private const string SkyveResourcePrefix = "HallOfFame.Locales.Skyve.";
+
+  private const string SkyveKeyPrefix = "HallOfFame.Skyve.";
+
   private static readonly List<string> LoadedLocales = [];
 
   /// <seealso cref="PostprocessLocaleDictionary"/>
@@ -25,21 +30,27 @@ internal static class LocaleLoader {
     new(@"^\s*//.*(?:\r?\n)?", RegexOptions.Compiled | RegexOptions.Multiline);
 
   internal static void Setup() {
+    // The game fills the gaps of the active locale from its fallback locale, which holds the mod's
+    // strings only once they are registered under it: a locale the mod does not ship, or does not
+    // translate fully, then reads them in English rather than as keys.
+    // Their `{KEY=...}` game strings come from the active locale, the English one being private: a
+    // player who switches to English mid-session keeps the start language's until a restart.
+    LocaleLoader.LoadLocale(GameManager.instance.localizationManager.fallbackLocaleId);
+
     LocaleLoader.RefreshLocale();
 
     GameManager.instance.localizationManager.onActiveDictionaryChanged +=
       LocaleLoader.RefreshLocale;
   }
 
-  /// <summary>
-  /// Refreshes the current locale by identifying the active locale, loading the corresponding
-  /// locale dictionary, processing interpolations, and registering the locale dictionary into the
-  /// localization manager.
-  /// </summary>
-  private static void RefreshLocale() {
-    var localeId =
-      GameManager.instance.localizationManager.activeLocaleId;
+  private static void RefreshLocale() =>
+    LocaleLoader.LoadLocale(GameManager.instance.localizationManager.activeLocaleId);
 
+  /// <summary>
+  /// Loads the mod's dictionary for a locale, processes its interpolations, and registers it into
+  /// the localization manager, along with Skyve's labels.
+  /// </summary>
+  private static void LoadLocale(string localeId) {
     // Check locale wasn't loaded yet.
     if (LocaleLoader.LoadedLocales.Contains(localeId)) {
       return;
@@ -49,7 +60,17 @@ internal static class LocaleLoader {
     LocaleLoader.LoadedLocales.Add(localeId);
 
     // Load locale dictionary.
-    var localeDictionary = LocaleLoader.LoadLocale(localeId);
+    var localeDictionary =
+      LocaleLoader.ReadDictionary($"{LocaleLoader.ResourcePrefix}{localeId}.json");
+
+    // Oops, we do not support this one.
+    if (localeDictionary is null) {
+      Mod.Log.Info(
+        $"{nameof(LocaleLoader)}: Skipping locale {localeId}, it is not supported by HoF."
+      );
+
+      return;
+    }
 
     // Manual patches -- strings that can't go into the JSON files.
     localeDictionary.Add(
@@ -65,6 +86,15 @@ internal static class LocaleLoader {
     // Remove comments and process interpolations in the dictionary.
     var processedLocaleDictionary = LocaleLoader.PostprocessLocaleDictionary(localeDictionary);
 
+    // Skyve's labels, as Skyve words them, under keys of their own.
+    var skyveDictionary = LocaleLoader.ReadDictionary(
+      $"{LocaleLoader.SkyveResourcePrefix}{localeId}.json"
+    );
+
+    foreach (var entry in skyveDictionary ?? []) {
+      processedLocaleDictionary[$"{LocaleLoader.SkyveKeyPrefix}{entry.Key}"] = entry.Value;
+    }
+
     // Register the locale dictionary.
     var source = new MemorySource(processedLocaleDictionary);
 
@@ -74,30 +104,19 @@ internal static class LocaleLoader {
   }
 
   /// <summary>
-  /// Loads a locale dictionary for the specified locale identifier by locating the corresponding
-  /// JSON resource bundled in the assembly, loading its contents, and parsing them into a
-  /// localization dictionary.
+  /// Loads the JSON resource of the given name bundled in the assembly and parses it into a
+  /// localization dictionary, null when there is no such resource.
+  /// The name is matched exactly, so the mod's own strings and Skyve's labels, which share their
+  /// file names, never stand in for one another.
   /// </summary>
-  private static Dictionary<string, string> LoadLocale(string localeId) {
-    // Find a .json resource for this locale.
+  private static Dictionary<string, string>? ReadDictionary(string resourceName) {
     var assembly = typeof(LocaleLoader).Assembly;
 
-    var resourceName = assembly
-      .GetManifestResourceNames()
-      .FirstOrDefault(name =>
-        name.ToLowerInvariant()
-          .EndsWith(localeId.ToLowerInvariant() + ".json")
-      );
+    var resourceStream = assembly.GetManifestResourceStream(resourceName);
 
-    // Oops, we do not support this one.
-    if (resourceName is null) {
-      Mod.Log.Info(
-        $"{nameof(LocaleLoader)}: Skipping locale {localeId}, it is not supported by HoF."
-      );
+    if (resourceStream is null) {
+      return null;
     }
-
-    // Load locale resource and parse JSON.
-    var resourceStream = assembly.GetManifestResourceStream(resourceName)!;
 
     using var reader = new StreamReader(resourceStream, Encoding.UTF8);
 

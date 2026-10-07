@@ -1,8 +1,10 @@
 import classNames from 'classnames';
 import { LocalizedString } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
-import { type ReactElement, useCallback, useMemo, useState } from 'react';
+import { memo, type ReactElement, useCallback, useMemo, useState } from 'react';
+import type { Mod } from '../../common';
 import { PreloadImages } from '../../components/preload-images';
+import { Tooltip } from '../../components/tooltip';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { cityNamePreloadedIcons, MenuControlsCityName } from './city-name';
@@ -16,13 +18,14 @@ import {
   MenuControlsToggleMenuVisibilityButton,
   navButtonsPreloadedIcons
 } from './nav-buttons';
-import { selectScreenshotDetails } from './screenshot-details';
+import { selectModHints, selectScreenshotDetails } from './screenshot-details';
 import {
   type DetailsTabId,
   detailsTabsPreloadedIcons,
   ScreenshotDetailsWindow
 } from './screenshot-details-window';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
+import { SkyveHeading, SkyveVerdictBlock, skyveVerdictPreloadedIcons } from './skyve-verdict';
 import { MenuControlsSocialsPreloader } from './socials-preloader';
 import { useDetailsContext } from './use-details-context';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
@@ -46,7 +49,8 @@ const preloadedIcons: readonly string[] = [
   ...viewerLinkPreloadedIcons,
   ...cityNamePreloadedIcons,
   ...detailsRowPreloadedIcons,
-  ...detailsTabsPreloadedIcons
+  ...detailsTabsPreloadedIcons,
+  ...skyveVerdictPreloadedIcons
 ];
 
 /**
@@ -71,12 +75,6 @@ export function MenuControlsContent(): ReactElement {
   const modSettings = bindings.useModSettings();
 
   const [menuState, setMenuState] = bindings.useHofMenuState();
-
-  const openShowcasedModPage = useCallback(
-    // oxlint-disable-next-line typescript/no-non-null-assertion - set when asset button renders
-    () => bindings.openModPage(menuState.screenshot!.showcasedMod!),
-    [menuState.screenshot]
-  );
 
   // Stable thanks to the functional update and the singleton's stable setter, so the memoized
   // toggle button only re-renders when `isMenuVisible` actually changes.
@@ -170,38 +168,7 @@ export function MenuControlsContent(): ReactElement {
       />
 
       {modSettings.showFeaturedAsset && menuState.screenshot.showcasedMod && (
-        <Button variant='menu' className={styles.assetButton} onSelect={openShowcasedModPage}>
-          <div
-            className={styles.assetButtonThumbnail}
-            style={{ backgroundImage: `url(${menuState.screenshot.showcasedMod.thumbnailUrl})` }}
-          />
-
-          <section className={styles.assetButtonText}>
-            <span className={styles.assetButtonTextHeader}>
-              <Icon src='Media/Glyphs/ParadoxMods.svg' tinted={true} />
-              {menuState.screenshot.showcasedMod.tags.includes('Map')
-                ? translate('HallOfFame.UI.Menu.MenuControls.SHOWCASED_MAP')
-                : translate('HallOfFame.UI.Menu.MenuControls.SHOWCASED_ASSET')}
-            </span>
-
-            <span className={styles.assetButtonTextTitle}>
-              {menuState.screenshot.showcasedMod.name}
-            </span>
-
-            <span className={styles.assetButtonTextAuthor}>
-              <LocalizedString
-                id='HallOfFame.Common.CITY_BY'
-                args={{ CREATOR_NAME: menuState.screenshot.showcasedMod.authorName }}
-              />
-            </span>
-
-            {menuState.screenshot.showcasedMod.shortDescription && (
-              <span className={styles.assetButtonTextDescription}>
-                {menuState.screenshot.showcasedMod.shortDescription}
-              </span>
-            )}
-          </section>
-        </Button>
+        <MenuControlsShowcasedMod mod={menuState.screenshot.showcasedMod} />
       )}
 
       <div className={styles.section}>
@@ -263,3 +230,62 @@ export function MenuControlsContent(): ReactElement {
     </div>
   );
 }
+
+/**
+ * The mod the creator showcased with the screenshot, opening its Paradox Mods page.
+ * A verdict from Skyve is shown under its author on hover, its details in a tooltip over it when it
+ * is a problem.
+ */
+const MenuControlsShowcasedMod = memo(({ mod }: Readonly<{ mod: Mod }>): ReactElement => {
+  const translate = useTranslate();
+
+  const { card } = selectModHints(mod, bindings.useGameVersion());
+
+  const verdictTooltip = card?.hasTooltip ? <SkyveVerdictBlock block={card.block} /> : undefined;
+
+  return (
+    <Button
+      variant='menu'
+      className={styles.assetButton}
+      onSelect={() => bindings.openModPage(mod)}>
+      <div
+        className={styles.assetButtonThumbnail}
+        style={{ backgroundImage: `url(${mod.thumbnailUrl})` }}
+      />
+
+      <section className={styles.assetButtonText}>
+        <span className={styles.assetButtonTextHeader}>
+          <Icon src='Media/Glyphs/ParadoxMods.svg' tinted={true} />
+          {mod.tags.includes('Map')
+            ? translate('HallOfFame.UI.Menu.MenuControls.SHOWCASED_MAP')
+            : translate('HallOfFame.UI.Menu.MenuControls.SHOWCASED_ASSET')}
+        </span>
+
+        <span className={styles.assetButtonTextTitle}>{mod.name}</span>
+
+        <span className={styles.assetButtonTextAuthor}>
+          <LocalizedString id='HallOfFame.Common.CITY_BY' args={{ CREATOR_NAME: mod.authorName }} />
+        </span>
+
+        {card && (
+          <span className={styles.assetButtonTextSkyve}>
+            <Tooltip direction='right' delayTime={0} tooltip={verdictTooltip}>
+              {/* The tooltip's own host element, which a component would not lend it. */}
+              <span>
+                <SkyveHeading
+                  label={card.block}
+                  variant='pill'
+                  isInteractive={verdictTooltip != undefined}
+                />
+              </span>
+            </Tooltip>
+          </span>
+        )}
+
+        {mod.shortDescription && (
+          <span className={styles.assetButtonTextDescription}>{mod.shortDescription}</span>
+        )}
+      </section>
+    </Button>
+  );
+});

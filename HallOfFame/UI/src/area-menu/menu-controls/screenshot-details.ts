@@ -1,5 +1,11 @@
 import type { climate, time } from 'cs2/bindings';
-import type { Mod, PhotoModeProperty, RenderConditionValue, Screenshot } from '../../common';
+import type {
+  Mod,
+  PhotoModeProperty,
+  RenderConditionValue,
+  Screenshot,
+  SkyveVerdict
+} from '../../common';
 import type { PlaysetState } from '../../utils/bindings';
 
 /**
@@ -296,6 +302,92 @@ export function selectScreenshotDetails(
 }
 
 /**
+ * What a mod's playset row and showcased mod card show besides its name and author.
+ */
+export interface ModHints {
+  /**
+   * The playset's Skyve cell: an unpublished mod's state, else the verdict's group, `undefined`
+   * when empty.
+   */
+  readonly cell: ModHintLabel | undefined;
+
+  /**
+   * Skyve's verdict as the tooltips tell it, `undefined` when there is none the mod knows.
+   */
+  readonly skyve: SkyveBlock | undefined;
+
+  /**
+   * The game version the mod was made for, `undefined` when its author named none.
+   */
+  readonly gameVersion: { readonly version: string; readonly isOlder: boolean } | undefined;
+
+  /**
+   * The showcased mod card's Skyve line, `undefined` when it has none.
+   */
+  readonly card: { readonly block: SkyveBlock; readonly hasTooltip: boolean } | undefined;
+}
+
+export interface ModHintLabel {
+  readonly labelId: string;
+  readonly tone: ModHintTone;
+}
+
+/**
+ * Only problems stand out: a stable verdict reads in the cells' usual dimmed color.
+ */
+export type ModHintTone = 'dimmed' | 'warning' | 'negative';
+
+export interface SkyveBlock extends ModHintLabel {
+  // In English.
+  readonly note: string | undefined;
+
+  // When and on which game version Skyve reviewed the mod, as far as known.
+  readonly review: SkyveReview | undefined;
+}
+
+export interface SkyveReview {
+  readonly labelId: string;
+  readonly args: Readonly<Record<string, string>>;
+}
+
+/**
+ * Decides how a mod's playset row and the showcased mod card tell its Skyve verdict, and the game
+ * version it was made for.
+ *
+ * Skyve's verdicts are grouped into five for the cell, the tooltip naming the exact one.
+ * A verdict the mod does not know shows nothing, nor does `notEnoughInformation` in the cell.
+ * Of the rules Skyve's app applies at runtime, one is: a mod broken by a patch and released since
+ * its review is a caution, its author possibly having fixed it.
+ */
+export function selectModHints(
+  mod: Pick<Mod, 'state' | 'requiredGameVersion' | 'knownLastReleasedAt' | 'skyve'>,
+  gameVersion: string
+): ModHints {
+  const stateLabelId = modStateLabelIds.get(mod.state);
+
+  const skyve = mod.skyve && selectSkyveBlock(mod.skyve, mod.knownLastReleasedAt);
+
+  const group = skyve?.group;
+
+  const groupLabel: ModHintLabel | undefined = group && {
+    labelId: `${SKYVE_KEY_PREFIX}${skyveGroups[group].labelKey}`,
+    tone: skyveGroups[group].tone
+  };
+
+  return {
+    cell: stateLabelId == undefined ? groupLabel : { labelId: stateLabelId, tone: 'dimmed' },
+    skyve: skyve?.block,
+    gameVersion: mod.requiredGameVersion
+      ? {
+          version: mod.requiredGameVersion,
+          isOlder: isOlderGameVersion(mod.requiredGameVersion, gameVersion)
+        }
+      : undefined,
+    card: skyve?.group && { block: skyve.block, hasTooltip: skyve.group != 'stable' }
+  };
+}
+
+/**
  * A color as the sliders of the game's photo mode color picker set it, the only way the game
  * offers: hue in degrees, the others in percent, rounded to the sliders' step.
  * Hue reads 0 for a grey, which has none, where the picker leaves its hue slider.
@@ -363,6 +455,120 @@ export interface PhotoModeColorSliders {
   // `undefined` for a color without an alpha channel, which the picker shows no slider for.
   readonly alpha: number | undefined;
 }
+
+/**
+ * Skyve's verdict and the group it is filed under, `undefined` for a stability value the mod does
+ * not know, the group `undefined` for `notEnoughInformation`.
+ */
+function selectSkyveBlock(
+  verdict: SkyveVerdict,
+  knownLastReleasedAt: string | null
+): { readonly block: SkyveBlock; readonly group: SkyveGroup | undefined } | undefined {
+  const stability = skyveStabilities.get(verdict.stability);
+
+  if (!stability) {
+    return undefined;
+  }
+
+  const isUpdatedSinceBroken =
+    verdict.stability == 'brokenFromPatch' &&
+    verdict.reviewedAt != null &&
+    knownLastReleasedAt != null &&
+    Date.parse(knownLastReleasedAt) > Date.parse(verdict.reviewedAt);
+
+  const group = isUpdatedSinceBroken ? 'caution' : stability.group;
+
+  return {
+    group,
+    block: {
+      labelId: isUpdatedSinceBroken
+        ? 'HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Broken From Patch Updated]'
+        : `${SKYVE_KEY_PREFIX}${stability.labelKey}`,
+      tone: group ? skyveGroups[group].tone : 'dimmed',
+      note: verdict.note ?? undefined,
+      review: selectSkyveReview(verdict)
+    }
+  };
+}
+
+function selectSkyveReview({
+  reviewedAtFormattedDistance: when,
+  reviewedGameVersion: version
+}: SkyveVerdict): SkyveReview | undefined {
+  if (when != null && version != null) {
+    return {
+      labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Reviewed]',
+      args: { WHEN: when, VERSION: version }
+    };
+  }
+
+  if (when != null) {
+    return {
+      labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Reviewed When]',
+      args: { WHEN: when }
+    };
+  }
+
+  return version == null
+    ? undefined
+    : {
+        labelId: 'HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Reviewed On Version]',
+        args: { VERSION: version }
+      };
+}
+
+/**
+ * The prefix the mod's locale loader registers Skyve's own labels under.
+ */
+const SKYVE_KEY_PREFIX = 'HallOfFame.Skyve.';
+
+type SkyveGroup = 'stable' | 'caution' | 'hasIssues' | 'obsolete' | 'broken';
+
+/**
+ * Each group's label, Skyve's own, and tone.
+ */
+const skyveGroups: Readonly<
+  Record<SkyveGroup, { readonly labelKey: string; readonly tone: ModHintTone }>
+> = {
+  stable: { labelKey: 'Stable', tone: 'dimmed' },
+  caution: { labelKey: 'Caution', tone: 'warning' },
+  hasIssues: { labelKey: 'HasIssues', tone: 'warning' },
+  obsolete: { labelKey: 'Obsolete', tone: 'warning' },
+  broken: { labelKey: 'Broken', tone: 'negative' }
+};
+
+/**
+ * Skyve's stability values, with the key of Skyve's label for each and the group the cell files it
+ * under.
+ */
+const skyveStabilities: ReadonlyMap<
+  string,
+  { readonly labelKey: string; readonly group: SkyveGroup | undefined }
+> = new Map([
+  ['stable', { labelKey: 'Stable', group: 'stable' }],
+  ['stableNoNewFeatures', { labelKey: 'StableNoNewFeatures', group: 'stable' }],
+  ['stableNoFutureUpdates', { labelKey: 'StableNoFutureUpdates', group: 'stable' }],
+  ['notEnoughInformation', { labelKey: 'NotEnoughInformation', group: undefined }],
+  ['breaksOnPatch', { labelKey: 'BreaksOnPatch', group: 'caution' }],
+  ['numerousReports', { labelKey: 'NumerousReports', group: 'caution' }],
+  ['cautionWhenUsing', { labelKey: 'CautionWhenUsing', group: 'caution' }],
+  ['hasIssues', { labelKey: 'HasIssues', group: 'hasIssues' }],
+  ['hasIssuesNoFutureUpdates', { labelKey: 'HasIssuesNoFutureUpdates', group: 'hasIssues' }],
+  ['obsolete', { labelKey: 'Obsolete', group: 'obsolete' }],
+  ['broken', { labelKey: 'Broken', group: 'broken' }],
+  ['brokenFromPatch', { labelKey: 'BrokenFromPatch', group: 'broken' }],
+  ['brokenFromNewVersion', { labelKey: 'BrokenFromNewVersion', group: 'broken' }]
+]);
+
+/**
+ * The label shown in the Skyve cell of a mod Paradox Mods no longer publishes.
+ */
+const modStateLabelIds: ReadonlyMap<Mod['state'], string> = new Map([
+  ['removed', 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Removed]'],
+  ['blocked', 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Blocked]'],
+  // Any other Paradox Mods state, under review for one.
+  ['unknown', 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Unavailable]']
+]);
 
 function selectPlaysetTab(
   screenshot: Pick<
