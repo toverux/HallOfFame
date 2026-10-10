@@ -46,7 +46,7 @@ Drive the component through the mock engine exported by `../testing/game-setup`:
   An event binding listens on its name suffixed with `.update`: an input action is `emitEvent('input.onActionPerformed.update', { action: 'Back', value: null })`, delivered only to consumers inside an `EventInputProvider` from `cs2/input`, which reads the `input.actionNames` binding (see `screenshot-details-window.test.tsx`).
 - `resetBindings()` clears configured bindings and recorded triggers; call it in `afterEach` alongside `@testing-library/react`'s `cleanup()`.
 - `useLocalization().translate(id, fallback)` returns the fallback, or the id when none is given, so a rendered label's text is its localization id; match on that.
-- A tooltip is invisible here: its balloon portals into a container only the booted game app creates, so an assertion that one is or is not shown passes either way. Verify tooltips in the running game.
+- A tooltip renders here: its balloon portals into `document.body`, so a test finds its content by text. The balloon leaves through an exit transition, so assert it hidden inside `waitFor`, as `tooltip.test.tsx` does. A `wheel` holds every tooltip closed until a `mousemove`: end a test that dispatches one on a move.
 - A CSS module class is invisible too: a `*.module.scss` import resolves to the file's path, so every `styles.*` reads `undefined`. Expose a state the test checks as a `data-*` attribute instead (`data-is-older-game-version` in `screenshot-details-window.tsx`).
 
 See `panel-city-info.test.tsx` for a binding-driven render and `panel-footer.test.tsx` for a click-fires-a-trigger assertion.

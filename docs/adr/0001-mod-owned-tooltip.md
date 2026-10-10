@@ -31,4 +31,5 @@ tooltips is a trap that pays off only in the moment it is made.
 - Tooltips no longer show on gamepad focus: the vanilla one drives that off an input observable the
   bundle does not export. This is the price of the decision, accepted.
 - The mod tracks the balloon's API rather than the tooltip's, a narrower and more stable surface.
-- A tooltip cannot be observed in a component test — see the `hof-ui-testing` skill.
+- A component test can observe a tooltip: its balloon portals into `document.body`, where the
+  test finds it by its text. The `hof-ui-testing` skill shows how.
