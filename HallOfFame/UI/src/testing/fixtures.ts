@@ -159,6 +159,7 @@ export function makeMod(overrides: Partial<Mod> & Pick<Mod, 'paradoxModId'>): Mo
     authorName: '',
     shortDescription: '',
     thumbnailUrl: '',
+    previewUrls: [],
     subscribersCount: 0,
     tags: [],
     state: 'published',

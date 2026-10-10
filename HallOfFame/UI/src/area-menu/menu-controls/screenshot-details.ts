@@ -302,6 +302,140 @@ export function selectScreenshotDetails(
 }
 
 /**
+ * The toggles narrowing the playset tab's list, as the window holds them: the kind of mod, the
+ * asset category within the Assets kind, and whether to keep only the mods the viewer lacks.
+ */
+export interface PlaysetFilter {
+  readonly kind: PlaysetKind;
+
+  readonly category: AssetCategory;
+
+  readonly isMissingOnly: boolean;
+}
+
+export type PlaysetKind = 'all' | 'codeMods' | 'assets' | 'maps';
+
+export const defaultPlaysetFilter: PlaysetFilter = {
+  kind: 'all',
+  category: 'all',
+  isMissingOnly: false
+};
+
+export type AssetCategory =
+  | 'all'
+  | 'buildings'
+  | 'props'
+  | 'vehicles'
+  | 'roads'
+  | 'vegetation'
+  | 'surfaces'
+  | 'creatures'
+  | 'assetPacks';
+
+/**
+ * What the playset tab shows of a loaded list under a filter.
+ */
+export interface PlaysetView {
+  /**
+   * The filter in effect: the given one, each toggle holding nothing fallen back to All.
+   */
+  readonly filter: PlaysetFilter;
+
+  /**
+   * The kind toggles to show, with their counts: every kind holding a mod, and All whatever it
+   * holds.
+   */
+  readonly kinds: ReadonlyArray<PlaysetToggle<PlaysetKind>>;
+
+  /**
+   * The category toggles, on the same terms, `undefined` unless the Assets kind is active.
+   */
+  readonly categories: ReadonlyArray<PlaysetToggle<AssetCategory>> | undefined;
+
+  readonly rows: readonly PlaysetRow[];
+
+  /**
+   * How many of the playset's mods the viewer has, `undefined` while the viewer's playset is
+   * unknown.
+   */
+  readonly overlap: PlaysetOverlap | undefined;
+}
+
+interface PlaysetOverlap {
+  readonly owned: number;
+
+  readonly total: number;
+}
+
+interface PlaysetToggle<T extends string> {
+  readonly id: T;
+
+  readonly count: number;
+}
+
+interface PlaysetRow {
+  readonly mod: Mod;
+
+  // Whether the viewer has the mod, always false while the viewer's playset is unknown.
+  readonly isOwned: boolean;
+}
+
+/**
+ * Whether the playset tab shows its toolbox and column labels: with the loaded list, and in their
+ * place while the list loads or failed to, so the rows land where the labels already stand and a
+ * retry does not reshape the window.
+ */
+export function isPlaysetToolboxShown(state: Pick<PlaysetTabState, 'kind'>): boolean {
+  return state.kind == 'content' || state.kind == 'loading' || state.kind == 'failed';
+}
+
+/**
+ * Narrows a loaded playset to what its toggles select, and counts what each toggle holds.
+ *
+ * A toggle is a plain tag match: a mod counts under every kind it carries, and under All only when
+ * it carries none, so the counts are not expected to add up.
+ * The missing-only toggle narrows the list the others count over, and means nothing while the
+ * viewer's playset is unknown.
+ */
+export function selectPlaysetView(
+  mods: readonly Mod[],
+  viewerModIds: ReadonlySet<number> | undefined,
+  filter: PlaysetFilter
+): PlaysetView {
+  const isOwned = (mod: Mod): boolean => viewerModIds?.has(mod.paradoxModId) ?? false;
+
+  const isMissingOnly = filter.isMissingOnly && viewerModIds != undefined;
+
+  const overlap = viewerModIds && {
+    owned: mods.filter(mod => isOwned(mod)).length,
+    total: mods.length
+  };
+
+  const wanted = isMissingOnly ? mods.filter(mod => !isOwned(mod)) : mods;
+
+  const kinds = countToggles(playsetKinds, wanted, (kind, mod) => hasKind(mod, kind));
+
+  const kind = kinds.some(toggle => toggle.id == filter.kind) ? filter.kind : 'all';
+
+  const ofKind = wanted.filter(mod => hasKind(mod, kind));
+
+  const categories =
+    kind == 'assets'
+      ? countToggles(assetCategories, ofKind, (category, mod) => hasCategory(mod, category))
+      : undefined;
+
+  const category = categories?.some(toggle => toggle.id == filter.category)
+    ? filter.category
+    : 'all';
+
+  const rows = ofKind
+    .filter(mod => hasCategory(mod, category))
+    .map(mod => ({ mod, isOwned: isOwned(mod) }));
+
+  return { filter: { kind, category, isMissingOnly }, kinds, categories, rows, overlap };
+}
+
+/**
  * What a mod's playset row and showcased mod card show besides its name and author.
  */
 export interface ModHints {
@@ -974,6 +1108,80 @@ const colorChannels: ReadonlyMap<string, 'red' | 'green' | 'blue' | 'alpha'> = n
   ['b', 'blue'],
   ['a', 'alpha']
 ]);
+
+/**
+ * The toggles of `ids`, All first with the whole list's count, then each other one holding at
+ * least a mod.
+ */
+function countToggles<T extends string>(
+  ids: ReadonlyArray<Exclude<T, 'all'>>,
+  mods: readonly Mod[],
+  matches: (id: Exclude<T, 'all'>, mod: Mod) => boolean
+): ReadonlyArray<PlaysetToggle<T | 'all'>> {
+  const counted = ids.map(id => ({ id, count: mods.filter(mod => matches(id, mod)).length }));
+
+  return [{ id: 'all', count: mods.length }, ...counted.filter(toggle => toggle.count > 0)];
+}
+
+function hasKind(mod: Mod, kind: PlaysetKind): boolean {
+  return kind == 'all' || playsetKindMatches[kind](mod.tags);
+}
+
+/**
+ * The kinds in their toggle order, each a match over the Paradox Mods tags.
+ * A savegame counts under All only: a toggle for the few of them was judged not worth its room,
+ * and the `Map` tag many of them also carry does not make them maps.
+ * Exported for the scan the `hof-playset-filters-rescan` skill runs over the tag data.
+ */
+export const playsetKindMatches: Readonly<Record<Exclude<PlaysetKind, 'all'>, TagsMatch>> = {
+  codeMods: tags => tags.includes('Code Mod'),
+  assets: tags => tags.includes('Prefab'),
+  maps: tags => tags.includes('Map') && !tags.includes('Savegame')
+};
+
+const playsetKinds = Object.keys(playsetKindMatches) as ReadonlyArray<Exclude<PlaysetKind, 'all'>>;
+
+function hasCategory(mod: Mod, category: AssetCategory): boolean {
+  return category == 'all' || assetCategoryMatches[category](mod.tags);
+}
+
+export type TagsMatch = (tags: readonly string[]) => boolean;
+
+/**
+ * The categories in their toggle order, each a match over the Paradox Mods tags it stands for.
+ *
+ * Paradox tags a building, a vehicle, or a road asset `Prop` as well when it ships its own props:
+ * Props keeps only what is nothing else. Roads takes the game's roads toolbar tags too, since
+ * intersections and many road packs carry those and no `Net` tag, but not the parking lots the
+ * toolbar files under roads: those are the buildings and props they are also tagged as.
+ */
+export const assetCategoryMatches: Readonly<Record<Exclude<AssetCategory, 'all'>, TagsMatch>> = {
+  buildings: tags => tags.includes('Building'),
+  props: tags =>
+    tags.includes('Prop') &&
+    !tags.includes('Building') &&
+    !tags.includes('Vehicle') &&
+    !isRoadAsset(tags),
+  vehicles: tags => tags.includes('Vehicle'),
+  roads: isRoadAsset,
+  vegetation: tags => tags.some(tag => tag == 'Tree' || tag == 'Plant' || tag == 'UIVegetation'),
+  surfaces: tags => tags.includes('UISurfaces'),
+  creatures: tags =>
+    tags.some(tag => tag == 'Creature' || tag == 'Wildlife' || tag == 'Animal' || tag == 'Pet'),
+  assetPacks: tags => tags.includes('AssetPack')
+};
+
+function isRoadAsset(tags: readonly string[]): boolean {
+  return (
+    tags.some(
+      tag => tag == 'Net' || tag == 'Roads' || tag == 'Bridge' || tag.startsWith('UIRoads')
+    ) && !tags.includes('UIRoadsParking')
+  );
+}
+
+const assetCategories = Object.keys(assetCategoryMatches) as ReadonlyArray<
+  Exclude<AssetCategory, 'all'>
+>;
 
 /**
  * A description's first line as plain text, for the row's preview.

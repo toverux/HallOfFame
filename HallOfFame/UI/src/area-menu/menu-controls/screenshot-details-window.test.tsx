@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, mock } from 'bun:test';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EventInputProvider } from 'cs2/input';
 import {
@@ -771,12 +771,18 @@ describe('ScreenshotDetailsWindow', () => {
       }
     });
 
-    it(`labels no columns while the playset loads`, () => {
+    it(`labels the columns and stands the toolbox disabled while the playset loads`, () => {
       renderTab(shared);
 
       for (const label of columnLabels) {
-        expect(screen.queryByText(label)).toBeNull();
+        expect(screen.getByText(label)).toBeDefined();
       }
+
+      // Only All, with no count to show, until the list arrives.
+      const kinds = document.querySelector('[data-toolbox-row="kind"]');
+
+      expect(kinds?.textContent).toBe(`${KIND}[All]`);
+      expect(kinds?.querySelector('button')?.hasAttribute('disabled')).toBe(true);
     });
 
     it(`shows the group of each mod's Skyve verdict, in its tone`, () => {
@@ -879,6 +885,178 @@ describe('ScreenshotDetailsWindow', () => {
         event: 'hallOfFame.common.openModPage',
         args: [traffic.paradoxModId]
       });
+    });
+
+    const KIND = 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_KIND';
+
+    const CATEGORY = 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY';
+
+    const MISSING_ONLY = 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Missing Only]';
+
+    // The loaded playset: a code mod and a prop asset.
+    const loaded = {
+      screenshotId: 's0',
+      status: 'loaded',
+      mods: [
+        { ...traffic, tags: ['Code Mod'] },
+        { ...trees, tags: ['Prefab', 'Prop'] }
+      ]
+    } as const;
+
+    function toggle(id: string): HTMLElement {
+      return screen.getByText(id);
+    }
+
+    it(`narrows the rows to the kind chosen, with each kind's count`, async () => {
+      setBinding(SLIDESHOW, 'playset', loaded);
+
+      renderTab(shared);
+
+      expect(screen.getByText('Traffic')).toBeDefined();
+      expect(screen.getByText('Trees')).toBeDefined();
+
+      // Every kind holding a mod, All first, with its count after its label.
+      const kinds = document.querySelector('[data-toolbox-row="kind"]');
+
+      expect(kinds?.textContent).toBe(`${KIND}[All]2${KIND}[Code Mods]1${KIND}[Assets]1`);
+      expect(screen.queryByText(`${KIND}[Maps]`)).toBeNull();
+
+      await userEvent.setup().click(toggle(`${KIND}[Assets]`));
+
+      expect(screen.queryByText('Traffic')).toBeNull();
+      expect(screen.getByText('Trees')).toBeDefined();
+      expect(toggle(`${KIND}[Assets]`).closest('button')?.dataset.selected).toBe('true');
+    });
+
+    it(`offers the asset categories within Assets, and narrows the rows to the one chosen`, async () => {
+      setBinding(SLIDESHOW, 'playset', loaded);
+
+      renderTab(shared);
+
+      expect(document.querySelector('[data-toolbox-row="category"]')).toBeNull();
+
+      const user = userEvent.setup();
+
+      await user.click(toggle(`${KIND}[Assets]`));
+
+      const categories = document.querySelector('[data-toolbox-row="category"]');
+
+      expect(categories?.textContent).toBe(`${CATEGORY}[All]1${CATEGORY}[Props]1`);
+
+      await user.click(toggle(`${CATEGORY}[Props]`));
+
+      expect(screen.getByText('Trees')).toBeDefined();
+      expect(toggle(`${CATEGORY}[Props]`).closest('button')?.dataset.selected).toBe('true');
+    });
+
+    it(`reads the viewer's playset when opened`, () => {
+      renderTab(shared);
+
+      expect(getTriggers().some(({ event }) => event == `${SLIDESHOW}.readViewerPlayset`)).toBe(
+        true
+      );
+    });
+
+    it(`marks the mods the viewer has, and states the overlap`, () => {
+      setBinding(SLIDESHOW, 'playset', loaded);
+      setBinding(SLIDESHOW, 'viewerPlayset', [traffic.paradoxModId]);
+
+      renderTab(shared);
+
+      const owned = [...document.querySelectorAll<HTMLElement>('[data-playset-row]')].map(
+        row => row.dataset.isOwned
+      );
+
+      expect(owned).toEqual(['true', 'false']);
+      expect(screen.getByText(/PLAYSET\[Overlap\]/u)).toBeDefined();
+    });
+
+    it(`keeps only the mods the viewer lacks under its toggle, or says they have them all`, async () => {
+      setBinding(SLIDESHOW, 'playset', loaded);
+      setBinding(SLIDESHOW, 'viewerPlayset', [traffic.paradoxModId]);
+
+      renderTab(shared);
+
+      const user = userEvent.setup();
+
+      await user.click(screen.getByText(MISSING_ONLY));
+
+      expect(screen.queryByText('Traffic')).toBeNull();
+      expect(screen.getByText('Trees')).toBeDefined();
+
+      // The kind the viewer's mod was alone in is gone from the toggles.
+      expect(screen.queryByText(`${KIND}[Code Mods]`)).toBeNull();
+
+      cleanup();
+      resetBindings();
+
+      setBinding(SLIDESHOW, 'playset', loaded);
+      setBinding(SLIDESHOW, 'viewerPlayset', [traffic.paradoxModId, trees.paradoxModId]);
+
+      renderTab(shared);
+
+      await user.click(screen.getByText(MISSING_ONLY));
+
+      expect(
+        screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[All Owned]')
+      ).toBeDefined();
+    });
+
+    it(`brings a kind back once the missing-only toggle that emptied it is off again`, async () => {
+      setBinding(SLIDESHOW, 'playset', loaded);
+      setBinding(SLIDESHOW, 'viewerPlayset', [traffic.paradoxModId]);
+
+      renderTab(shared);
+
+      const user = userEvent.setup();
+
+      await user.click(toggle(`${KIND}[Code Mods]`));
+      await user.click(screen.getByText(MISSING_ONLY));
+
+      // The viewer has the only code mod, so the kind fell back to All.
+      expect(screen.queryByText(`${KIND}[Code Mods]`)).toBeNull();
+      expect(screen.getByText('Trees')).toBeDefined();
+
+      await user.click(screen.getByText(MISSING_ONLY));
+
+      expect(toggle(`${KIND}[Code Mods]`).closest('button')?.dataset.selected).toBe('true');
+      expect(screen.queryByText('Trees')).toBeNull();
+    });
+
+    it(`leaves the Description tab's scroller in place when the playset lands`, () => {
+      setBinding(SLIDESHOW, 'playset', { screenshotId: 's0', status: 'loading', mods: [] });
+      setBinding('hallOfFame.common', 'settings', makeSettings({}));
+
+      render(
+        <ScreenshotDetailsWindow
+          screenshot={makeScreenshot({
+            ...shared,
+            description: 'A quay.',
+            capabilities: [...shared.capabilities, 'description']
+          })}
+          openTab='description'
+          onClose={noop}
+        />
+      );
+
+      // A mark on the rendered paragraph: a remount of the scroller would draw a fresh one.
+      screen.getByText('A quay.').dataset.probe = 'kept';
+
+      act(() => {
+        setBinding(SLIDESHOW, 'playset', loaded);
+      });
+
+      expect(screen.getByText('A quay.').dataset.probe).toBe('kept');
+    });
+
+    it(`marks nothing and offers no comparison while the viewer's playset is unknown`, () => {
+      setBinding(SLIDESHOW, 'playset', loaded);
+
+      renderTab(shared);
+
+      expect(document.querySelector('[data-playset-row][data-is-owned="true"]')).toBeNull();
+      expect(screen.queryByText(/PLAYSET\[Overlap\]/u)).toBeNull();
+      expect(screen.queryByText(MISSING_ONLY)).toBeNull();
     });
 
     it(`says the playset failed to load, and retries on demand`, async () => {

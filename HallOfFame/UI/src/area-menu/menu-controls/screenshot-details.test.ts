@@ -17,7 +17,11 @@ import {
   formatClockTime,
   isOlderGameVersion,
   type ModHints,
+  type AssetCategory,
+  type PlaysetFilter,
+  type PlaysetView,
   selectModHints,
+  selectPlaysetView,
   selectScreenshotDetails as selectWithContext,
   toPhotoModeColorSliders
 } from './screenshot-details';
@@ -1303,5 +1307,248 @@ describe('isOlderGameVersion', () => {
 
   it('is false when the game version cannot be read', () => {
     expect(isOlderGameVersion('1.3.*', '')).toBe(false);
+  });
+});
+
+describe('selectPlaysetView', () => {
+  // Every kind the toggles know, one mod each, plus a savegame, which has no toggle, one carrying
+  // two kinds, and one carrying none.
+  const codeMod = makeMod({ paradoxModId: 1, tags: ['Code Mod'] });
+  const building = makeMod({ paradoxModId: 2, tags: ['Prefab', 'Building'] });
+  const map = makeMod({ paradoxModId: 3, tags: ['Map'] });
+  const savegame = makeMod({ paradoxModId: 4, tags: ['Savegame'] });
+  const mapAndCodeMod = makeMod({ paradoxModId: 5, tags: ['Map', 'Code Mod'] });
+  const untagged = makeMod({ paradoxModId: 6, tags: [] });
+
+  const mixed = [codeMod, building, map, savegame, mapAndCodeMod, untagged];
+
+  const everything: PlaysetFilter = { kind: 'all', category: 'all', isMissingOnly: false };
+
+  function selectView(
+    mods: readonly Mod[],
+    filter: Partial<PlaysetFilter> = {},
+    viewerModIds?: ReadonlySet<number>
+  ): PlaysetView {
+    return selectPlaysetView(mods, viewerModIds, { ...everything, ...filter });
+  }
+
+  it(`counts a mod under every kind it carries, and one carrying none under All only`, () => {
+    expect(selectView(mixed).kinds).toEqual([
+      { id: 'all', count: 6 },
+      { id: 'codeMods', count: 2 },
+      { id: 'assets', count: 1 },
+      { id: 'maps', count: 2 }
+    ]);
+  });
+
+  it(`hides a kind holding nothing, All excepted`, () => {
+    expect(selectView([codeMod, untagged]).kinds).toEqual([
+      { id: 'all', count: 2 },
+      { id: 'codeMods', count: 1 }
+    ]);
+
+    expect(selectView([]).kinds).toEqual([{ id: 'all', count: 0 }]);
+  });
+
+  // Assets of every category, one carrying two, one tagged only by the game's roads toolbar, and
+  // one carrying no category.
+  const prop = makeMod({ paradoxModId: 10, tags: ['Prefab', 'Prop'] });
+  const vehicle = makeMod({ paradoxModId: 11, tags: ['Prefab', 'Vehicle'] });
+  const road = makeMod({ paradoxModId: 12, tags: ['Prefab', 'Net', 'Roads'] });
+  const intersection = makeMod({ paradoxModId: 13, tags: ['Prefab', 'UIRoadsIntersections'] });
+  const assetPack = makeMod({ paradoxModId: 14, tags: ['Prefab', 'AssetPack'] });
+  const propPack = makeMod({ paradoxModId: 15, tags: ['Prefab', 'Prop', 'AssetPack'] });
+  const tree = makeMod({ paradoxModId: 16, tags: ['Prefab', 'Tree'] });
+  const surface = makeMod({ paradoxModId: 17, tags: ['Prefab', 'UISurfaces'] });
+  const pet = makeMod({ paradoxModId: 18, tags: ['Prefab', 'Pet'] });
+  const bridge = makeMod({ paradoxModId: 19, tags: ['Prefab', 'Bridge'] });
+  const theme = makeMod({ paradoxModId: 20, tags: ['Prefab', 'Theme'] });
+
+  const assets = [
+    prop,
+    vehicle,
+    road,
+    intersection,
+    assetPack,
+    propPack,
+    tree,
+    surface,
+    pet,
+    bridge,
+    theme
+  ];
+
+  // Assets Paradox tags `Prop` as well, for the props they ship, and a parking lot the game's
+  // toolbar files under roads.
+  const buildingWithProps = makeMod({ paradoxModId: 30, tags: ['Prefab', 'Building', 'Prop'] });
+  const vehicleWithProps = makeMod({ paradoxModId: 31, tags: ['Prefab', 'Vehicle', 'Prop'] });
+  const barrier = makeMod({ paradoxModId: 32, tags: ['Prefab', 'Prop', 'UIRoads', 'Roads'] });
+  const parking = makeMod({
+    paradoxModId: 33,
+    tags: ['Prefab', 'Building', 'UIRoads', 'UIRoadsParking']
+  });
+
+  it(`offers the categories only within Assets`, () => {
+    expect(selectView([...mixed, ...assets]).categories).toBeUndefined();
+    expect(selectView([...mixed, ...assets], { kind: 'maps' }).categories).toBeUndefined();
+  });
+
+  it(`counts an asset under every category it carries, and one carrying none under All assets only`, () => {
+    expect(selectView([...mixed, ...assets], { kind: 'assets' }).categories).toEqual([
+      { id: 'all', count: 12 },
+      { id: 'buildings', count: 1 },
+      { id: 'props', count: 2 },
+      { id: 'vehicles', count: 1 },
+      { id: 'roads', count: 3 },
+      { id: 'vegetation', count: 1 },
+      { id: 'surfaces', count: 1 },
+      { id: 'creatures', count: 1 },
+      { id: 'assetPacks', count: 2 }
+    ]);
+  });
+
+  it(`keeps under Props only what is nothing else, the tag marking shipped props elsewhere`, () => {
+    const view = selectView([prop, buildingWithProps, vehicleWithProps, barrier], {
+      kind: 'assets',
+      category: 'props'
+    });
+
+    expect(view.categories).toEqual([
+      { id: 'all', count: 4 },
+      { id: 'buildings', count: 1 },
+      { id: 'props', count: 1 },
+      { id: 'vehicles', count: 1 },
+      { id: 'roads', count: 1 }
+    ]);
+    expect(view.rows.map(row => row.mod)).toEqual([prop]);
+  });
+
+  it(`files a parking lot under Buildings, not under the roads toolbar it is placed from`, () => {
+    expect(selectView([parking], { kind: 'assets' }).categories).toEqual([
+      { id: 'all', count: 1 },
+      { id: 'buildings', count: 1 }
+    ]);
+  });
+
+  it(`lists a savegame under All only, although it is tagged as a map too`, () => {
+    const savedMap = makeMod({ paradoxModId: 40, tags: ['Savegame', 'Map'] });
+
+    expect(selectView([savedMap, map]).kinds).toEqual([
+      { id: 'all', count: 2 },
+      { id: 'maps', count: 1 }
+    ]);
+  });
+
+  it(`hides a category holding nothing, All assets excepted`, () => {
+    expect(selectView([theme, prop], { kind: 'assets' }).categories).toEqual([
+      { id: 'all', count: 2 },
+      { id: 'props', count: 1 }
+    ]);
+  });
+
+  it(`lists only a category's assets under it, and every asset under All assets`, () => {
+    const rowsOf = (category: AssetCategory): readonly Mod[] =>
+      selectView([...mixed, ...assets], { kind: 'assets', category }).rows.map(row => row.mod);
+
+    expect(rowsOf('all')).toEqual([building, ...assets]);
+    expect(rowsOf('roads')).toEqual([road, intersection, bridge]);
+    expect(rowsOf('buildings')).toEqual([building]);
+    expect(rowsOf('vegetation')).toEqual([tree]);
+  });
+
+  it(`falls back to All when the chosen kind holds nothing`, () => {
+    const view = selectView([codeMod, untagged], { kind: 'assets', category: 'props' });
+
+    expect(view.filter).toEqual({ kind: 'all', category: 'all', isMissingOnly: false });
+    expect(view.categories).toBeUndefined();
+    expect(view.rows.map(row => row.mod)).toEqual([codeMod, untagged]);
+  });
+
+  it(`falls back to All assets when the chosen category holds nothing`, () => {
+    const view = selectView([tree, prop], { kind: 'assets', category: 'vehicles' });
+
+    expect(view.filter).toEqual({ kind: 'assets', category: 'all', isMissingOnly: false });
+    expect(view.rows.map(row => row.mod)).toEqual([tree, prop]);
+  });
+
+  it(`keeps a chosen toggle holding something`, () => {
+    const view = selectView(assets, { kind: 'assets', category: 'vehicles' });
+
+    expect(view.filter).toEqual({ kind: 'assets', category: 'vehicles', isMissingOnly: false });
+    expect(view.rows.map(row => row.mod)).toEqual([vehicle]);
+  });
+
+  // A viewer holding the code mod, the map, and a mod outside this playset.
+  const elsewhere = makeMod({ paradoxModId: 99 });
+
+  const viewerModIds: ReadonlySet<number> = new Set(
+    [codeMod, map, elsewhere].map(mod => mod.paradoxModId)
+  );
+
+  it(`marks the mods the viewer has, and states the overlap over the whole playset`, () => {
+    const view = selectView(mixed, { kind: 'maps' }, viewerModIds);
+
+    expect(view.overlap).toEqual({ owned: 2, total: 6 });
+    expect(view.rows).toEqual([
+      { mod: map, isOwned: true },
+      { mod: mapAndCodeMod, isOwned: false }
+    ]);
+  });
+
+  it(`keeps only the mods the viewer lacks, the counts following`, () => {
+    const view = selectView(mixed, { isMissingOnly: true }, viewerModIds);
+
+    expect(view.filter.isMissingOnly).toBe(true);
+    expect(view.kinds).toEqual([
+      { id: 'all', count: 4 },
+      { id: 'codeMods', count: 1 },
+      { id: 'assets', count: 1 },
+      { id: 'maps', count: 1 }
+    ]);
+    expect(view.rows.map(row => row.mod)).toEqual([building, savegame, mapAndCodeMod, untagged]);
+    expect(view.overlap).toEqual({ owned: 2, total: 6 });
+  });
+
+  it(`combines the missing-only toggle with a kind, falling back when it empties the kind`, () => {
+    expect(
+      selectView(mixed, { kind: 'maps', isMissingOnly: true }, viewerModIds).rows.map(
+        row => row.mod
+      )
+    ).toEqual([mapAndCodeMod]);
+
+    const emptied = selectView(
+      [codeMod, building],
+      { kind: 'codeMods', isMissingOnly: true },
+      viewerModIds
+    );
+
+    expect(emptied.filter.kind).toBe('all');
+  });
+
+  it(`shows nothing under the missing-only toggle when the viewer has every mod`, () => {
+    const view = selectView([codeMod, map], { isMissingOnly: true }, viewerModIds);
+
+    expect(view.rows).toEqual([]);
+    expect(view.kinds).toEqual([{ id: 'all', count: 0 }]);
+    expect(view.overlap).toEqual({ owned: 2, total: 2 });
+  });
+
+  it(`marks nothing, states no overlap and ignores the toggle while the viewer's playset is unknown`, () => {
+    const view = selectView(mixed, { isMissingOnly: true });
+
+    expect(view.overlap).toBeUndefined();
+    expect(view.filter.isMissingOnly).toBe(false);
+    expect(view.rows.map(row => row.mod)).toEqual(mixed);
+    expect(view.rows.every(row => !row.isOwned)).toBe(true);
+  });
+
+  it(`lists every mod under All, in the given order, and only a kind's mods under it`, () => {
+    expect(selectView(mixed).rows.map(row => row.mod)).toEqual(mixed);
+    expect(selectView(mixed).rows.every(row => !row.isOwned)).toBe(true);
+
+    expect(selectView(mixed, { kind: 'maps' }).rows.map(row => row.mod)).toEqual([
+      map,
+      mapAndCodeMod
+    ]);
   });
 });

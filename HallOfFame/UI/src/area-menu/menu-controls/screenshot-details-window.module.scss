@@ -11,6 +11,13 @@ $paragraph-gap: 12rem;
 $empty-color: shared.$dimmed-color;
 $empty-line-height: 1.4em;
 
+// A blank bar standing where a line of text will land once loaded.
+@mixin placeholder-bar {
+  height: 10rem;
+  border-radius: 3rem;
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
 $playset-row-height: 52rem;
 $playset-row-padding: 6rem;
 $playset-thumbnail-size: 40rem;
@@ -49,8 +56,18 @@ $panel-content-padding-top: 25rem;
   max-width: 90vw;
   max-height: 80vh;
 
+  // With the playset's list, the window stands at its limit from the loading state on, whatever
+  // the toggles leave in the list: narrowed to a few rows, it would otherwise shrink around them.
+  &--list {
+    height: 80vh;
+  }
+
   &-content {
     flex: 0 1 auto;
+
+    &--list {
+      flex: 1 1 auto;
+    }
   }
 
   &-paragraphs {
@@ -360,6 +377,22 @@ $panel-content-padding-top: 25rem;
     min-width: 0;
   }
 
+  // The name and, after it, the mark of a mod the viewer has.
+  &-rowNameLine {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  &-rowOwned {
+    --iconColor: #{vanilla.$highlight-green};
+
+    flex-shrink: 0;
+    width: 14rem;
+    height: 14rem;
+    margin-left: 6rem;
+  }
+
   // Cohtml ellipsizes only a text box laid out as a column.
   &-rowName,
   &-rowAuthor {
@@ -370,6 +403,9 @@ $panel-content-padding-top: 25rem;
   }
 
   &-rowName {
+    flex: 0 1 auto;
+    min-width: 0;
+
     font-size: vanilla.$font-size-m;
   }
 
@@ -427,16 +463,29 @@ $panel-content-padding-top: 25rem;
   }
 
   &-rowPlaceholderLine {
+    @include placeholder-bar;
+
     width: 50%;
-    height: 10rem;
     margin: 4rem 0;
-    border-radius: 3rem;
-    background-color: rgba(255, 255, 255, 0.15);
 
     & + & {
       width: 25%;
     }
   }
+}
+
+// The 16:9 slot a mod's preview images fill and crop to, at a width the tooltip grows to: previews
+// are the creator's own uploads, mostly 16:9 and sometimes not, and one size keeps every tooltip
+// the same. The slot is drawn faintly until its first image loads.
+.playsetTooltipPreview {
+  width: 360rem;
+  height: 202.5rem;
+  margin-bottom: 8rem;
+  border-radius: 3rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
 // The lines a playset row's tooltip adds under the mod's short description.
@@ -458,6 +507,137 @@ $panel-content-padding-top: 25rem;
   }
 }
 
+// The toolbox narrowing the playset, in the look of the game's tool options panel: a band of its
+// own under the tabs, edge to edge, each row a bold label then its toggles. Its rounded buttons,
+// lowercase labels, and counts set it apart from the tabs above it. Outside the body's scrollable,
+// like the column labels under it, so it stays as the list scrolls.
+.toolbox {
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  margin-top: -$panel-content-padding-top;
+  padding: 6rem $padding-horizontal;
+  border-bottom: 1rem solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
+
+  &-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-height: 40rem;
+  }
+
+  &-label {
+    flex: 0 0 auto;
+    width: 90rem;
+
+    color: vanilla.$text-color;
+    font-size: vanilla.$font-size-m;
+    font-weight: 600;
+  }
+
+  &-toggles {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 2rem 0;
+  }
+
+  &-overlap {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+
+    color: $empty-color;
+    font-size: vanilla.$font-size-m;
+  }
+
+  // A blank bar the length the sentence will take, while the playset loads.
+  &-overlapPlaceholder {
+    @include placeholder-bar;
+
+    width: 200rem;
+  }
+
+  // The checkbox and its label as one control, as the upload form's share choices.
+  &-checkbox {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 12rem;
+    cursor: pointer;
+
+    &:hover {
+      --textColor: #{vanilla.$menu-active-color-bright};
+    }
+
+    &--disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+  }
+
+  &-checkboxLabel {
+    margin-left: 8rem;
+
+    color: vanilla.$text-color;
+    font-size: vanilla.$font-size-m;
+  }
+}
+
+// A toolbox button, the tool options' rounded button widened for a label and a count.
+.toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 32rem;
+  // Room between two lines when a row wraps, as much as between two buttons on a line.
+  margin: 4rem 8rem 4rem 0;
+  padding: 0 12rem;
+  border-radius: 6rem;
+  background-color: #587286;
+
+  // A button inherits no color in Cohtml.
+  color: vanilla.$text-color;
+  font-size: vanilla.$font-size-m;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus {
+    background-color: #6a86a0;
+  }
+
+  &--selected,
+  &--selected:hover,
+  &--selected:focus {
+    background-image: linear-gradient(
+      180deg,
+      vanilla.$gradient-highlight-start,
+      vanilla.$gradient-highlight-end
+    );
+    color: white;
+  }
+
+  &[disabled] {
+    opacity: 0.5;
+  }
+
+  // The category row's buttons, one step smaller under the kind they narrow.
+  &--secondary {
+    height: 28rem;
+    padding: 0 10rem;
+
+    font-size: vanilla.$font-size-s;
+  }
+
+  &-count {
+    margin-left: 7rem;
+    opacity: 0.6;
+  }
+}
+
 // The labels over the playset's columns, outside the body's scrollable so they stay as the list
 // scrolls: Cohtml has no `position: sticky`.
 .playsetColumns {
@@ -465,8 +645,8 @@ $panel-content-padding-top: 25rem;
   flex-direction: row;
   justify-content: flex-end;
   align-self: stretch;
-  // Close under the tabs, the body's top padding otherwise leaving the labels apart from the rows.
-  margin-top: 8rem - $panel-content-padding-top;
+  // Close under the toolbox.
+  margin-top: 6rem;
   padding: 0 ($padding-horizontal + $playset-row-padding + $scrollbar-track-width) 6rem;
 
   color: $empty-color;

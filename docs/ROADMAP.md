@@ -36,3 +36,7 @@ What is already known from the decompile, not yet measured in a running game:
 - A value is applied with `PhotoModeRenderSystem.photoModeProperties[id].setEnabled(true)` then `.setValue(v)`, and only shows while photo mode is active. Closing photo mode clears every override.
 - "Time of Day" and "Simulation Speed" write to the simulation itself, so applying them has side effects outside photo mode.
 - A preset never reproduces a look by itself: the hour, the map's latitude, the season, and the weather decide the light. The apply flow has to say so, as the tab does.
+
+## Skyve playset download
+
+A button on the details window's Playset tab that saves the screenshot's mod IDs as a text file, one ID per line, for Skyve to import as a playset. Skyve's import format and where the file should land are still to check against Skyve's own documentation and source.

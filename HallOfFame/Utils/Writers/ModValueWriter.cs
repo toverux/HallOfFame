@@ -29,6 +29,9 @@ internal sealed class ModValueWriter : IWriter<Domain.Mod> {
     writer.PropertyName("thumbnailUrl");
     writer.Write(value.ThumbnailUrl);
 
+    writer.PropertyName("previewUrls");
+    writer.Write(value.PreviewUrls);
+
     writer.PropertyName("subscribersCount");
     writer.Write(value.SubscribersCount);
 

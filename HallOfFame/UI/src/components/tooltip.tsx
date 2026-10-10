@@ -46,17 +46,41 @@ export function Tooltip({
   className,
   children
 }: Readonly<TooltipProps>): ReactElement {
-  const [isHovered, setIsHovered] = useState(false);
+  // Hidden by a wheel notch, or kept from opening by one, until the next mouse movement: a scroll
+  // carries the anchor away under the balloon, and the engine then re-runs its hit test and fires
+  // `mouseover` on whatever the scroll brought under the still cursor, with no `mousemove`.
+  const [state, setState] = useState(hidden);
 
   const anchorElRef = useRef<HTMLElement | null>(null);
 
-  const show = useCallback(() => setIsHovered(true), []);
+  // Each listener returns the state it got where nothing changes, so React skips the update: the
+  // mouse moves far more often than the hold is released.
+  const show = useCallback(() => {
+    const opened = isWheelHeld ? heldClosed : shown;
 
-  const hide = useCallback(() => setIsHovered(false), []);
+    setState(current => (current.isHovered || current.isHeldClosed ? current : opened));
+  }, []);
+
+  // A press hides the tooltip until the next `mouseover`, a child's of the anchor included: it is
+  // in the way of whatever the press just opened.
+  const hide = useCallback(
+    () => setState(current => (current.isHovered || current.isHeldClosed ? hidden : current)),
+    []
+  );
+
+  // Only a shown tooltip is held: one a press hid stays hidden through the move releasing the hold.
+  const holdClosed = useCallback(
+    () => setState(current => (current.isHovered ? heldClosed : current)),
+    []
+  );
+
+  const release = useCallback(
+    () => setState(current => (current.isHeldClosed ? shown : current)),
+    []
+  );
 
   // Native listeners rather than React props, because the anchor is whatever element the children
   // happen to render, which this component never gets to hand props to.
-  // A pointer press hides the tooltip too: it is in the way of whatever the press just opened.
   const setAnchorEl = useCallback(
     (element: HTMLElement | null): void => {
       if (anchorElRef.current == element) {
@@ -66,14 +90,18 @@ export function Tooltip({
       anchorElRef.current?.removeEventListener('mouseover', show);
       anchorElRef.current?.removeEventListener('mouseleave', hide);
       anchorElRef.current?.removeEventListener('mousedown', hide);
+      anchorElRef.current?.removeEventListener('wheel', holdClosed);
+      anchorElRef.current?.removeEventListener('mousemove', release);
 
       element?.addEventListener('mouseover', show);
       element?.addEventListener('mouseleave', hide);
       element?.addEventListener('mousedown', hide);
+      element?.addEventListener('wheel', holdClosed);
+      element?.addEventListener('mousemove', release);
 
       anchorElRef.current = element;
     },
-    [show, hide]
+    [show, hide, holdClosed, release]
   );
 
   // The balloon redoes its placement whenever this changes identity, so it cannot be a fresh object
@@ -88,14 +116,50 @@ export function Tooltip({
       // An absent tooltip is gated here, as the vanilla one does it: the balloon treats a null
       // content as content and draws itself empty, and `translate` returns null for a key the
       // active locale lacks.
-      visible={(forceVisible || isHovered) && !disabled && Boolean(tooltip)}
+      visible={(forceVisible || state.isHovered) && !disabled && Boolean(tooltip)}
       content={tooltip}
       balloonUiTarget={balloonUiTarget}
       theme={vanillaTooltipTheme}
-      delayTime={delayTime}
+      delayTime={state.isHeldClosed ? 0 : delayTime}
       className={className}
       anchorElRef={anchorElRef}>
       <DOMNodeModifier ref={setAnchorEl}>{children}</DOMNodeModifier>
     </AnchoredBalloon>
   );
 }
+
+interface TooltipState {
+  readonly isHovered: boolean;
+  readonly isHeldClosed: boolean;
+}
+
+const hidden: TooltipState = { isHovered: false, isHeldClosed: false };
+
+const shown: TooltipState = { isHovered: true, isHeldClosed: false };
+
+const heldClosed: TooltipState = { isHovered: false, isHeldClosed: true };
+
+// One hold for every tooltip: the notch lands on the anchor under the cursor, and the one the
+// scroll then brings under it never saw the notch, so its `mouseover` has to be held too.
+// A notch over the game world holds them as well, until the first move; holding only on an anchor
+// would miss a notch between two rows.
+// Each tooltip keeps its own hold beside this one, so a move re-shows only the one it is over.
+let isWheelHeld = false;
+
+// Never removed: a UI reload resets the script context.
+// Capture phase, so a scrollable stopping the notch's propagation cannot hide it.
+document.addEventListener(
+  'wheel',
+  () => {
+    isWheelHeld = true;
+  },
+  true
+);
+
+document.addEventListener(
+  'mousemove',
+  () => {
+    isWheelHeld = false;
+  },
+  true
+);

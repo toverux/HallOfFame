@@ -114,7 +114,8 @@ internal sealed class CitySnapshotProvider {
     try {
       var pdxSdk = PdxSdkPlatformProxy.PdxSdk;
 
-      // This will return null if the player is not logged in or in other error cases.
+      // Null on an SDK error outside its mod range, an empty set within it; a player signed out or
+      // offline still gets the playset the SDK keeps on disk.
       var mods = pdxSdk is not null ? await pdxSdk.GetModsInActivePlayset() : null;
 
       if (mods is null) {

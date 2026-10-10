@@ -126,6 +126,10 @@ export interface Mod {
   readonly authorName: string;
   readonly shortDescription: string;
   readonly thumbnailUrl: string;
+
+  // The mod's Paradox Mods preview images, full size, in the creator's order; empty without any.
+  readonly previewUrls: readonly string[];
+
   readonly subscribersCount: number;
   readonly tags: readonly string[];
   readonly state: 'published' | 'removed' | 'blocked' | 'unknown';

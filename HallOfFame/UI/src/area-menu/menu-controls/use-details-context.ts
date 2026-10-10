@@ -18,3 +18,13 @@ export function useDetailsContext(): DetailsContext {
     [photoModeCatalog, viewerCreatorId, playset]
   );
 }
+
+/**
+ * The viewer's active playset as a set of Paradox mod IDs, `undefined` while unknown, stable
+ * across renders until the mod publishes another read.
+ */
+export function useViewerModIds(): ReadonlySet<number> | undefined {
+  const viewerPlayset = bindings.useViewerPlayset();
+
+  return useMemo(() => (viewerPlayset ? new Set(viewerPlayset) : undefined), [viewerPlayset]);
+}

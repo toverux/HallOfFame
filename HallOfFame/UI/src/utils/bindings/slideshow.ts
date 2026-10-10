@@ -84,6 +84,8 @@ const photoModeCatalog$ = lazyBindValue<readonly PhotoModeProperty[]>(
 
 const playset$ = lazyBindValue<PlaysetState | null>(GROUP, 'playset', null);
 
+const viewerPlayset$ = lazyBindValue<readonly number[] | null>(GROUP, 'viewerPlayset', null);
+
 const useSingletonMenuState = createSingletonHook<SettableMenuState>({
   isMenuVisible: true,
   isReadyForNextImage: true
@@ -254,6 +256,22 @@ export function usePlayset(): PlaysetState | null {
  */
 export function loadPlayset(screenshotId: string): void {
   trigger(GROUP, 'loadPlayset', screenshotId);
+}
+
+/**
+ * The Paradox mod IDs of the viewer's active playset, `null` until read and when the read failed,
+ * which the details window shows alike: no comparison.
+ */
+export function useViewerPlayset(): readonly number[] | null {
+  return useValue(viewerPlayset$());
+}
+
+/**
+ * Asks the mod to read the viewer's active playset afresh, which the details window does each
+ * time it opens.
+ */
+export function readViewerPlayset(): void {
+  trigger(GROUP, 'readViewerPlayset');
 }
 
 /**

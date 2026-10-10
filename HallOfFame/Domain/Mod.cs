@@ -27,6 +27,13 @@ internal record Mod {
   [DecodeAlias("thumbnailUrl")]
   internal string ThumbnailUrl { get; [UsedImplicitly] set; } = string.Empty;
 
+  /// <summary>
+  /// The mod's Paradox Mods preview images, full size, in the order the creator set; empty for a
+  /// mod without any.
+  /// </summary>
+  [DecodeAlias("previewUrls")]
+  internal string[] PreviewUrls { get; [UsedImplicitly] set; } = [];
+
   [DecodeAlias("subscribersCount")]
   internal int SubscribersCount { get; [UsedImplicitly] set; }
 

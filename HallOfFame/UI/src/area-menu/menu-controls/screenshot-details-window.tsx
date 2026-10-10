@@ -33,6 +33,7 @@ import populationSrc from '../../icons/paradox/population.svg';
 import {
   deriveModThumbnailUri,
   findScrollableContent,
+  getClassesModule,
   useMeasuredRowHeight,
   useTranslate
 } from '../../utils';
@@ -42,6 +43,10 @@ import {
   TransitionState
 } from '../../vanilla-modules/game-ui/common/animations/transition-context';
 import { TransitionGroupCoordinator } from '../../vanilla-modules/game-ui/common/animations/transition-group-coordinator';
+import {
+  Checkbox,
+  type CheckboxTheme
+} from '../../vanilla-modules/game-ui/common/input/toggle/checkbox/checkbox';
 import { Panel } from '../../vanilla-modules/game-ui/common/panel/panel';
 import { PanelBackdrop } from '../../vanilla-modules/game-ui/common/panel/panel-backdrop';
 import { PanelTitleBar } from '../../vanilla-modules/game-ui/common/panel/panel-title-bar';
@@ -54,6 +59,7 @@ import { Tab, TabBar } from '../../vanilla-modules/game-ui/common/tabs/tabs';
 import { TooltipLayout } from '../../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
 import { photoModeContainerClasses } from '../../vanilla-modules/game-ui/game/components/photo-mode/widgets/photo-mode-container';
 import {
+  type AssetCategory,
   type DetailsTabState,
   formatClockTime,
   type ModHints,
@@ -63,17 +69,25 @@ import {
   type PhotoModeSection,
   type PhotoModeSetting,
   type PhotoModeTabState,
+  defaultPlaysetFilter,
+  isPlaysetToolboxShown,
+  type PlaysetFilter,
+  type PlaysetKind,
   type PlaysetTabState,
+  type PlaysetView,
   selectModHints,
+  selectPlaysetView,
   selectScreenshotDetails,
   toPhotoModeColorSliders
 } from './screenshot-details';
 import { selectLocalizedName } from './select-localized-name';
 import { SkyveLogo, SkyveVerdictBlock } from './skyve-verdict';
-import { useDetailsContext } from './use-details-context';
+import { useDetailsContext, useViewerModIds } from './use-details-context';
 import * as styles from './screenshot-details-window.module.scss';
 
 const vanillaParadoxModsSrc = 'Media/Glyphs/ParadoxMods.svg';
+
+const vanillaCheckmarkSrc = 'Media/Glyphs/Checkmark.svg';
 
 /**
  * Every icon the window's empty states can show, preloaded while it is open rather than with the
@@ -83,7 +97,8 @@ const vanillaParadoxModsSrc = 'Media/Glyphs/ParadoxMods.svg';
 const preloadedIcons: readonly string[] = [
   penLineDuotoneLightSrc,
   apertureDuotoneLightSrc,
-  vanillaParadoxModsSrc
+  vanillaParadoxModsSrc,
+  vanillaCheckmarkSrc
 ];
 
 /**
@@ -143,6 +158,37 @@ function DetailsModal({
 
   const details = selectScreenshotDetails(screenshot, useDetailsContext());
 
+  const viewerModIds = useViewerModIds();
+
+  // Read afresh each time the window opens: the modal mounts on each opening.
+  useEffect(() => {
+    bindings.readViewerPlayset();
+  }, []);
+
+  // The playset's toggles, forgotten when the screenshot changes: the next screenshot's playset is
+  // another list, and a filter emptying it would only fall back.
+  const [filterState, setFilterState] = useState<{
+    screenshotId: string;
+    filter: PlaysetFilter;
+  }>();
+
+  const filter =
+    filterState?.screenshotId == screenshot.id ? filterState.filter : defaultPlaysetFilter;
+
+  // A toggle changes its own part of the filter as chosen: a kind the missing-only toggle emptied
+  // falls back to All in the view, and comes back once that toggle is off.
+  const changeFilter = (change: Partial<PlaysetFilter>): void => {
+    setFilterState({ screenshotId: screenshot.id, filter: { ...filter, ...change } });
+  };
+
+  // Recomputed on each render, rare and cheap: one pass over the list per toggle.
+  const playsetTab: PlaysetTabProps =
+    details.playset.kind == 'content'
+      ? { kind: 'content', view: selectPlaysetView(details.playset.mods, viewerModIds, filter) }
+      : details.playset;
+
+  const playsetView = playsetTab.kind == 'content' ? playsetTab.view : undefined;
+
   // The same form of the name the controls show, or the native one when that form is missing.
   const city = selectLocalizedName(modSettings.namesTranslationMode, gameLocale, {
     value: screenshot.cityName,
@@ -182,6 +228,13 @@ function DetailsModal({
   // The backdrop fades out alongside the panel's exit, which the transition group drives.
   const isExiting = useContext(TransitionContext).state == TransitionState.exit;
 
+  // The playset's list states keep the window at one height whatever the toggles leave in it.
+  const isListShown = selectedTab == 'playset' && isPlaysetToolboxShown(playsetTab);
+
+  // Only on the playset tab: elsewhere a playset landing meanwhile would remount the tab shown.
+  const playsetFilterKey =
+    selectedTab == 'playset' && playsetView ? Object.values(playsetView.filter).join('-') : '';
+
   return (
     // The slideshow controls sit outside the focus path Back travels along, so a consumer waiting
     // for focus would never hear it: this one listens whatever holds the focus.
@@ -190,7 +243,7 @@ function DetailsModal({
         className={classNames(styles.backdrop, isExiting && styles.backdropExiting)}
         onMouseDown={onClose}>
         <Panel
-          className={styles.window}
+          className={classNames(styles.window, isListShown && styles.windowList)}
           theme={iceflakePanelTheme}
           header={
             <>
@@ -218,32 +271,52 @@ function DetailsModal({
           onClose={onClose}>
           <PreloadImages srcs={preloadedIcons} />
 
-          {/* Above the body's scrolling content, so the labels stay as the list scrolls. */}
-          {selectedTab == 'playset' && details.playset.kind == 'content' && <PlaysetColumns />}
-
           {/*
-            Keyed on the screenshot and the tab, so each starts scrolled to its top.
-            The scrollbar's room is reserved, as it otherwise comes two frames after the content
-            and rewraps it.
+            The panel's content hosts a single focusable child: this scope holds the toolbox's
+            buttons along with the list's own scope.
           */}
-          <Scrollable
-            key={`${screenshot.id}-${selectedTab}`}
-            className={styles.windowContent}
-            trackVisibility='reserve'>
-            {selectedTab == 'description' && <DescriptionTab state={details.description} />}
+          <AutoNavigationScope>
+            {/*
+              Above the body's scrolling content, so the toolbox and the labels stay as the list
+              scrolls.
+            */}
+            {isListShown && (
+              <>
+                <PlaysetToolbox
+                  view={playsetView}
+                  hasViewerPlayset={viewerModIds != undefined}
+                  onChange={changeFilter}
+                />
 
-            {selectedTab == 'photoModeSettings' && (
-              <PhotoModeSettingsTab state={details.photoModeSettings} />
+                <PlaysetColumns />
+              </>
             )}
 
-            {selectedTab == 'playset' && (
-              <PlaysetTab
-                screenshotId={screenshot.id}
-                state={details.playset}
-                shouldLoad={details.shouldLoadPlayset}
-              />
-            )}
-          </Scrollable>
+            {/*
+              Keyed on the screenshot, the tab and the playset's filter, so each starts scrolled to
+              its top.
+              The scrollbar's room is reserved, as it otherwise comes two frames after the content
+              and rewraps it.
+            */}
+            <Scrollable
+              key={`${screenshot.id}-${selectedTab}-${playsetFilterKey}`}
+              className={classNames(styles.windowContent, isListShown && styles.windowContentList)}
+              trackVisibility='reserve'>
+              {selectedTab == 'description' && <DescriptionTab state={details.description} />}
+
+              {selectedTab == 'photoModeSettings' && (
+                <PhotoModeSettingsTab state={details.photoModeSettings} />
+              )}
+
+              {selectedTab == 'playset' && (
+                <PlaysetTab
+                  screenshotId={screenshot.id}
+                  state={playsetTab}
+                  shouldLoad={details.shouldLoadPlayset}
+                />
+              )}
+            </Scrollable>
+          </AutoNavigationScope>
         </Panel>
       </PanelBackdrop>
     </InputActionConsumer>
@@ -674,6 +747,14 @@ function formatPhotoModeNumber(value: number, fractionDigits: number | undefined
 const MAX_CSS_CHANNEL = 255;
 
 /**
+ * The tab's state as the window hands it down: the loaded list replaced by what the toolbox's
+ * filter selects of it.
+ */
+type PlaysetTabProps =
+  | Exclude<PlaysetTabState, { kind: 'content' }>
+  | { readonly kind: 'content'; readonly view: PlaysetView };
+
+/**
  * The creator's playset, asked for when the tab opens: the mod answers at once with one it already
  * holds.
  */
@@ -683,11 +764,14 @@ function PlaysetTab({
   shouldLoad
 }: Readonly<{
   screenshotId: string;
-  state: PlaysetTabState;
+  state: PlaysetTabProps;
   shouldLoad: boolean;
 }>): ReactElement {
   const translate = useTranslate();
 
+  // The scroller's key carries the filter on the playset tab, so a toggle remounts this tab and
+  // sends the request again: the loader answers a loaded playset from memory with an equal record,
+  // which the binding does not publish again.
   useEffect(() => {
     if (shouldLoad) {
       bindings.loadPlayset(screenshotId);
@@ -720,17 +804,30 @@ function PlaysetTab({
       );
     }
     case 'content': {
-      const { mods } = state;
+      const { rows } = state.view;
+
+      // Only the missing-only toggle empties a loaded list: the other toggles fall back.
+      if (state.view.filter.isMissingOnly && rows.length == 0) {
+        return (
+          <EmptyState iconSrc={vanillaCheckmarkSrc}>
+            {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[All Owned]')}
+          </EmptyState>
+        );
+      }
 
       return (
         <PlaysetList
-          count={mods.length}
+          count={rows.length}
           renderRow={index => {
-            const mod = mods[index];
+            const row = rows[index];
 
             // Keyed on the mod, so a row scrolled from one slot to the next keeps its element, and
             // with it the thumbnail it already loaded.
-            return mod && <PlaysetModRow key={mod.id} mod={mod} index={index} />;
+            return (
+              row && (
+                <PlaysetModRow key={row.mod.id} mod={row.mod} isOwned={row.isOwned} index={index} />
+              )
+            );
           }}
         />
       );
@@ -829,6 +926,188 @@ const PLAYSET_OVERSCAN = 3;
 const ESTIMATED_ROW_HEIGHT_PX = 52;
 
 /**
+ * The toggles narrowing the playset and the comparison with the viewer's own, in the look of the
+ * game's tool options: a row per group, its label then its buttons.
+ * Without a view, while the playset loads or failed to, it stands disabled where it will be, so
+ * the window keeps its shape.
+ */
+function PlaysetToolbox({
+  view,
+  hasViewerPlayset,
+  onChange
+}: Readonly<{
+  view: PlaysetView | undefined;
+  hasViewerPlayset: boolean;
+  onChange: (change: Partial<PlaysetFilter>) => void;
+}>): ReactElement {
+  const translate = useTranslate();
+
+  const isDisabled = view == undefined;
+
+  // The default stands in while the playset loads or failed to, before any toggle could be chosen:
+  // a loaded playset is kept and never loads again.
+  const filter = view?.filter ?? defaultPlaysetFilter;
+
+  const kinds = view?.kinds ?? [{ id: 'all', count: undefined }];
+
+  return (
+    <div className={styles.toolbox}>
+      <div className={styles.toolboxRow}>
+        <div className={styles.toolboxLabel}>
+          {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Kind Row]')}
+        </div>
+
+        <div className={styles.toolboxToggles} data-toolbox-row='kind'>
+          {kinds.map(toggle => (
+            <PlaysetToggleButton
+              key={toggle.id}
+              labelId={playsetKindLabelIds[toggle.id]}
+              count={toggle.count}
+              isSelected={toggle.id == filter.kind}
+              isDisabled={isDisabled}
+              onSelect={() => onChange({ kind: toggle.id, category: 'all' })}
+            />
+          ))}
+        </div>
+      </div>
+
+      {view?.categories && (
+        <div className={styles.toolboxRow}>
+          <div className={styles.toolboxLabel}>
+            {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Category Row]')}
+          </div>
+
+          <div className={styles.toolboxToggles} data-toolbox-row='category'>
+            {view.categories.map(toggle => (
+              <PlaysetToggleButton
+                key={toggle.id}
+                labelId={assetCategoryLabelIds[toggle.id]}
+                count={toggle.count}
+                isSelected={toggle.id == filter.category}
+                isDisabled={false}
+                isSecondary={true}
+                onSelect={() => onChange({ category: toggle.id })}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Mounts once the viewer's read lands, and unmounts if a later read fails: keeping its place
+          would need the binding to tell a read not yet answered from a failed one. */}
+      {hasViewerPlayset && (
+        <div className={styles.toolboxRow}>
+          <div className={styles.toolboxLabel}>
+            {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Viewer Row]')}
+          </div>
+
+          <div className={styles.toolboxOverlap}>
+            {/* The string has no plural: a one-mod playset reads "1 of these 1 mods". */}
+            {view?.overlap ? (
+              <LocalizedString
+                id='HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Overlap]'
+                args={{
+                  OWNED: <LocalizedNumber value={view.overlap.owned} />,
+                  TOTAL: <LocalizedNumber value={view.overlap.total} />
+                }}
+              />
+            ) : (
+              <div className={styles.toolboxOverlapPlaceholder} />
+            )}
+          </div>
+
+          <div
+            className={classNames(
+              styles.toolboxCheckbox,
+              isDisabled && styles.toolboxCheckboxDisabled
+            )}
+            onClick={() => {
+              if (isDisabled) {
+                return;
+              }
+
+              onChange({ isMissingOnly: !filter.isMissingOnly });
+              bindings.playSound('select-toggle');
+            }}>
+            <Checkbox theme={checkboxTheme} checked={filter.isMissingOnly} disabled={isDisabled} />
+
+            <label className={styles.toolboxCheckboxLabel}>
+              {translate('HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET[Missing Only]')}
+            </label>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * One of the toolbox's buttons, its label then how many mods it holds, the count unknown while
+ * the playset loads.
+ */
+function PlaysetToggleButton({
+  labelId,
+  count,
+  isSelected,
+  isDisabled,
+  isSecondary = false,
+  onSelect
+}: Readonly<{
+  labelId: string;
+  count: number | undefined;
+  isSelected: boolean;
+  isDisabled: boolean;
+  // A category, drawn one step smaller than the kinds.
+  isSecondary?: boolean;
+  onSelect: () => void;
+}>): ReactElement {
+  const translate = useTranslate();
+
+  return (
+    <Button
+      theme={toggleButtonTheme}
+      className={classNames(
+        isSelected && styles.toggleSelected,
+        isSecondary && styles.toggleSecondary
+      )}
+      selected={isSelected}
+      disabled={isDisabled}
+      onSelect={onSelect}
+      data-selected={isSelected}>
+      <span>{translate(labelId)}</span>
+
+      {count != undefined && <span className={styles.toggleCount}>{count}</span>}
+    </Button>
+  );
+}
+
+const toggleButtonTheme = { button: styles.toggle };
+
+const checkboxTheme: CheckboxTheme = getClassesModule(
+  'game-ui/common/input/toggle/checkbox/checkbox.module.scss',
+  ['toggle', 'checkmark']
+);
+
+const playsetKindLabelIds: Readonly<Record<PlaysetKind, string>> = {
+  all: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_KIND[All]',
+  codeMods: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_KIND[Code Mods]',
+  assets: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_KIND[Assets]',
+  maps: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_KIND[Maps]'
+};
+
+const assetCategoryLabelIds: Readonly<Record<AssetCategory, string>> = {
+  all: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY[All]',
+  buildings: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY[Buildings]',
+  props: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY[Props]',
+  vehicles: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY[Vehicles]',
+  roads: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY[Roads]',
+  vegetation: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY[Vegetation]',
+  surfaces: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY[Surfaces]',
+  creatures: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY[Creatures]',
+  assetPacks: 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_CATEGORY[Asset Packs]'
+};
+
+/**
  * The labels over the playset's columns, lined up with a row's cells.
  */
 function PlaysetColumns(): ReactElement {
@@ -873,7 +1152,15 @@ function PlaysetColumns(): ReactElement {
  * the game version it was made for in a tooltip.
  * A mod Paradox Mods no longer publishes is dimmed, the server listing those last.
  */
-function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): ReactElement {
+function PlaysetModRow({
+  mod,
+  isOwned,
+  index
+}: Readonly<{
+  mod: Mod;
+  isOwned: boolean;
+  index: number;
+}>): ReactElement {
   const translate = useTranslate();
 
   const gameVersion = bindings.useGameVersion();
@@ -884,16 +1171,27 @@ function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): R
 
   const hasHints = hints.skyve != undefined || hints.gameVersion != undefined;
 
+  const hasPreviews = mod.previewUrls.length > 0;
+
+  const hasContent = hasPreviews || hasHints;
+
   return (
     <Tooltip
       direction='right'
-      delayTime={0}
       tooltip={
-        hasDescription || hasHints ? (
+        hasDescription || hasContent ? (
           <TooltipLayout
             title={mod.name}
             description={hasDescription ? mod.shortDescription : undefined}
-            content={hasHints ? <PlaysetModRowTooltipContent hints={hints} /> : undefined}
+            content={
+              hasContent ? (
+                <>
+                  {hasPreviews && <PlaysetPreview urls={mod.previewUrls} />}
+
+                  {hasHints && <PlaysetModRowTooltipContent hints={hints} />}
+                </>
+              ) : undefined
+            }
           />
         ) : undefined
       }>
@@ -903,7 +1201,8 @@ function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): R
           playsetRowClassName(index),
           mod.state != 'published' && styles.playsetRowUnavailable
         )}
-        data-playset-row={true}>
+        data-playset-row={true}
+        data-is-owned={isOwned}>
         <Button
           theme={playsetRowButtonTheme}
           // Compared by value, so a row keeps its focus across the list's re-renders.
@@ -915,7 +1214,13 @@ function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): R
           />
 
           <div className={styles.playsetRowText}>
-            <div className={styles.playsetRowName}>{mod.name}</div>
+            <div className={styles.playsetRowNameLine}>
+              <div className={styles.playsetRowName}>{mod.name}</div>
+
+              {isOwned && (
+                <Icon src={vanillaCheckmarkSrc} tinted={true} className={styles.playsetRowOwned} />
+              )}
+            </div>
             <div className={styles.playsetRowAuthor}>{mod.authorName}</div>
           </div>
 
@@ -946,6 +1251,42 @@ function PlaysetModRow({ mod, index }: Readonly<{ mod: Mod; index: number }>): R
     </Tooltip>
   );
 }
+
+/**
+ * A mod's preview images in a playset row's tooltip, as a 16:9 slot each image fills and crops to,
+ * cycling through them while the tooltip stays open.
+ * The slot is drawn before the first image arrives, so the tooltip keeps its size while the CDN
+ * answers.
+ */
+function PlaysetPreview({ urls }: Readonly<{ urls: readonly string[] }>): ReactElement {
+  const [index, setIndex] = useState(0);
+
+  // The image after the shown one, `undefined` with a single image, which never switches.
+  const nextIndex = urls.length > 1 ? (index + 1) % urls.length : undefined;
+
+  const nextUrl = nextIndex == undefined ? undefined : urls[nextIndex];
+
+  useEffect(() => {
+    const timer =
+      nextIndex == undefined ? undefined : setTimeout(() => setIndex(nextIndex), PREVIEW_CYCLE_MS);
+
+    return () => clearTimeout(timer);
+  }, [nextIndex]);
+
+  return (
+    <>
+      <div
+        className={styles.playsetTooltipPreview}
+        style={{ backgroundImage: `url(${urls[index] ?? ''})` }}
+      />
+
+      {/* Fetched ahead so the switch paints at once instead of blank while the CDN answers. */}
+      {nextUrl != undefined && <PreloadImages srcs={[nextUrl]} />}
+    </>
+  );
+}
+
+const PREVIEW_CYCLE_MS = 3000;
 
 /**
  * The lines of a playset row's tooltip under the mod's short description.

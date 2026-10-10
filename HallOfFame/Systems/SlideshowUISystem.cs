@@ -62,6 +62,8 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
 
   private ValueBinding<PlaysetState?> playsetBinding = null!;
 
+  private ValueBinding<IReadOnlyList<int>?> viewerPlaysetBinding = null!;
+
   // Set by the first read, failed or not, so a failing read shows its error once per session.
   private bool isPhotoModeCatalogRead;
 
@@ -88,6 +90,8 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
   private TriggerBinding slideshowMountedBinding = null!;
 
   private TriggerBinding<string> loadPlaysetBinding = null!;
+
+  private TriggerBinding readViewerPlaysetBinding = null!;
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -183,6 +187,13 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         new PlaysetStateValueWriter()
       );
 
+      this.viewerPlaysetBinding = new ValueBinding<IReadOnlyList<int>?>(
+        SlideshowUISystem.BindingGroup,
+        "viewerPlayset",
+        null,
+        new CollectionWriter<int>().Nullable()
+      );
+
       this.AddBinding(this.enableMainMenuSlideshowBinding);
       this.AddBinding(this.previousNeighborBinding);
       this.AddBinding(this.nextNeighborBinding);
@@ -193,6 +204,7 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
       this.AddBinding(this.isSavingBinding);
       this.AddBinding(this.photoModeCatalogBinding);
       this.AddBinding(this.playsetBinding);
+      this.AddBinding(this.viewerPlaysetBinding);
 
       // INPUT ACTION BINDINGS
       this.previousScreenshotInputActionBinding = new InputActionBinding(
@@ -277,6 +289,13 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         screenshotId => { _ = this.playsetLoader.Load(screenshotId); }
       );
 
+      // Reads the viewer's own playset afresh each time the details window opens.
+      this.readViewerPlaysetBinding = new TriggerBinding(
+        SlideshowUISystem.BindingGroup,
+        "readViewerPlayset",
+        () => { _ = this.ReadViewerPlayset(); }
+      );
+
       this.AddBinding(this.previousScreenshotBinding);
       this.AddBinding(this.nextScreenshotBinding);
       this.AddBinding(this.likeScreenshotBinding);
@@ -284,6 +303,7 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
       this.AddBinding(this.reportScreenshotBinding);
       this.AddBinding(this.slideshowMountedBinding);
       this.AddBinding(this.loadPlaysetBinding);
+      this.AddBinding(this.readViewerPlaysetBinding);
 
       // Wire force-enable main menu slideshow.
       Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
@@ -334,6 +354,24 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
     catch (Exception ex) {
       // The details window then lists every setting under "Other", by its raw code.
       Mod.Log.ErrorRecoverable(ex);
+    }
+  }
+
+  /// <summary>
+  /// Publishes the viewer's active playset, or null when it could not be read: the details window
+  /// then shows no comparison.
+  /// A read that fails after one that succeeded withdraws the earlier answer, which may be stale.
+  /// </summary>
+  private async Task ReadViewerPlayset() {
+    try {
+      this.viewerPlaysetBinding.Update(await PdxSdkPlatformProxy.ReadActivePlaysetModIds());
+    }
+    // The proxy catches the SDK's failures but not its own: a game update renaming an SDK member it
+    // calls throws before its try runs, and the caller discards this task.
+    catch (Exception ex) {
+      Mod.Log.Warn(ex, $"{nameof(SlideshowUISystem)}: Could not read the viewer's playset.");
+
+      this.viewerPlaysetBinding.Update(null);
     }
   }
 
