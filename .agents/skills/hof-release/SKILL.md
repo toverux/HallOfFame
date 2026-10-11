@@ -20,25 +20,24 @@ git log --oneline <last-tag>..HEAD
 The release commit goes on `main`, on a clean tree, at the pushed tip: the tag names that commit, and a pushed tag is not moved afterwards.
 Stop and ask the user where the tree is dirty, the branch has diverged, or a tag for the version already exists.
 
-Every pull in this procedure is `--rebase`, here and in step 2.
+Every git pull in this procedure is `--rebase`.
 The repo keeps a linear history and this branch is `main`: a plain `git pull` over an unpushed local commit writes a `Merge branch 'main' of …` commit into the release range, which then has to be undone before the release commit lands on top.
 
-## 2. Merge the pending Crowdin translations
+## 2. Pull the pending Crowdin translations
 
-Crowdin keeps its work in one open PR titled "New Crowdin updates", off the `l10n-main` branch:
+Nothing syncs Crowdin to the repo on its own: volunteers' work arrives when it is pulled, and a release is when.
 
 ```
-gh pr list --state open --head l10n-main
-gh pr merge <n> --squash --delete-branch --subject "feat(i18n): new Crowdin updates (#<n>)" --body ""
-git pull --rebase
+mise l10n:pull --all
+mise l10n:pull --all --write
+git diff --stat HallOfFame/Locales
 ```
 
-Go straight to the build where no such PR is open.
+The preview names each changed string's translator and date; read it before writing, since a pull takes Crowdin's current text whole, a volunteer's fix and a volunteer's regression alike.
+Go straight to the build where it lists nothing.
 
-Squash, always, and set the subject by hand: GitHub would otherwise squash under the PR's own title, which carries no conventional-commit prefix (`git log --oneline --grep=Crowdin` shows the shape the repo keeps).
-Deleting the branch is routine — Crowdin recreates it on its next sync.
-
-The languages this brings in are changelog material; note them for step 5.
+Commit the pulled files on their own, before the release commit, as `feat(i18n): new Crowdin translations`, the body naming the languages and the translators' handles.
+Those languages and handles are changelog material; note them for step 5.
 
 ## 3. Build Release
 

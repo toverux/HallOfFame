@@ -64,7 +64,8 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `mise test:cs`: Run only the C# unit tests.
 - `mise test:ui`: Run only the UI tests.
 - `mise setup:linux`: Install the modding toolchain on Linux, where the in-game installer cannot run. Idempotent, rerun it after a game update; the game must be closed.
-- `mise l10n:push`: Preview which locale-file edits would be pushed to Crowdin and approved; with `--no-approve`, pushed unapproved and flagged as AI-translated instead, for machine translations a proofreader should still review. Needs `CROWDIN_PERSONAL_TOKEN`. Adding `--push` writes to the shared Crowdin project, which the Boundaries below gate.
+- `mise l10n:push`: Preview which locale-file edits would be pushed to Crowdin and approved, after the source file is uploaded so new keys exist before their translations; with `--no-approve`, pushed unapproved and flagged as AI-translated instead, for machine translations a proofreader should still review. Needs `CROWDIN_PERSONAL_TOKEN`. Adding `--push` writes to the shared Crowdin project, which the Boundaries below gate.
+- `mise l10n:pull`: Preview Crowdin's current translations of the source keys added or changed since `--base`, with author and date, where they differ from the locale files, or of every key with `--all`; `--write` puts them into the files. Run before translating a feature's keys, so a volunteer's pending work is kept rather than pushed over, and with `--all` before a release, since nothing else brings volunteers' work into the repo. Needs `CROWDIN_PERSONAL_TOKEN`.
 - `mise l10n:skyve`: Copy Skyve's stability labels, for every locale the mod ships, into `HallOfFame/Locales/Skyve` from Skyve's repository at the commit `.agents/scripts/import-skyve-labels.ts` pins. Move the pin to pick up Skyve's newer translations.
 
 Run `mise tasks` to see the full shortcut list; append arguments freely, mise passes them through (ex. `mise some:task --some-arg`).
@@ -91,10 +92,11 @@ Always run the appropriate check/test commands after changes, at the end of the 
 - Tooltips come from `HallOfFame/UI/src/components/tooltip.tsx`, never from `cs2/ui`: the vanilla one silently drops `direction` and `alignment`, so every tooltip placed through it opens upwards.
 - Focus keys are compared by value, so a plain string like `` `mod-${mod.id}` `` keeps a list row attached across re-renders, where a `FocusSymbol` memoized per row costs more for the same result.
 - A `vanilla-modules` stub may declare more of the vanilla API than the mod calls today: its unused members are kept on purpose, for the next consumer.
-- User-facing strings are localized: add keys to `HallOfFame/Locales/en-US.json` and translate a mod key with no fallback, the other locale files are translations synced from Crowdin. A feature stays open until every locale file holds a translation of each key it added or changed, pushed through `mise l10n:push`:
-  - Approved (`--push`) for a feature's keys in a locale volunteers translate, and for fixes to volunteer strings: Crowdin re-exports its own approved version over an unpushed one.
+- User-facing strings are localized: add keys to `HallOfFame/Locales/en-US.json` and translate a mod key with no fallback, the other locale files are translations pulled from Crowdin. A feature stays open until every locale file holds a translation of each key it added or changed, pushed through `mise l10n:push`:
+  - A feature's keys go through the `hof-translate` skill: it pulls the volunteers' pending Crowdin work first, then translates, cross-reviews and previews the push.
+  - Approved (`--push`) for a feature's keys in a locale volunteers translate, and for fixes to volunteer strings: a pull brings back Crowdin's approved version over an unapproved one.
   - Unapproved and AI-flagged (`--no-approve --push`) for a locale with no volunteer translations, and for older keys a partial locale never had, so proofreaders still review them.
-  - Push `--no-approve` before the commit reaches GitHub: the sync uploads repo translations unflagged, and the script then skips them as duplicates.
+  - The Crowdin GitHub integration is off: nothing moves between Crowdin and the repo but `mise l10n:push`, which carries the source and the repo's translations out, and `mise l10n:pull`, which brings volunteers' work in.
   - The script diffs `--base` against the working tree, so run each mode from a tree holding only that mode's edits.
 - `HallOfFame/Locales/Skyve` holds Skyve's own labels, registered under `HallOfFame.Skyve.`: it stays out of Crowdin and `mise l10n:push`, and changes only through `mise l10n:skyve`.
 - The decompiled game source, the third-party mod corpus, and the readable copy of the game's UI bundle are machine-local: read their paths from `~/.cs2-modding/setup.md` instead of hardcoding them here. A missing key or a `(none)` value means that source does not exist.
@@ -119,7 +121,7 @@ Ask first before:
 - Adding a dependency.
 - Changing the HTTP wire format shared with the server, or the bindings wire format shared with the UI.
 - Performing destructive file or data operations.
-- Running `mise l10n:push --push`, in either mode. It writes to the shared Crowdin project: by default it approves translations, which stamps a proofreading verdict volunteer translators see and cannot easily undo, and `--no-approve` adds them unapproved, for volunteers to review. Preview first, and keep `--base` to the commits you wrote: a base reaching back across a merged Crowdin sync pushes that sync's translations as though they were yours.
+- Running `mise l10n:push --push`, in either mode. It writes to the shared Crowdin project: by default it approves translations, which stamps a proofreading verdict volunteer translators see and cannot easily undo, and `--no-approve` adds them unapproved, for volunteers to review. Preview first, and keep `--base` to the commits you wrote: a base reaching back across a pull commit pushes volunteers' translations as though they were yours.
 
 ## Preferred agent behavior
 

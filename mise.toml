@@ -170,8 +170,13 @@ run = "dotnet publish HallOfFame/HallOfFame.csproj -p:PublishProfile=PublishNewV
 # LOCALIZATION TASKS
 # ==================
 
+[tasks."l10n:pull"]
+description = "Pulls Crowdin's current translations of the source keys added or changed since `--base` into the locale files, so a volunteer's pending work is seen before the repo gets translations of its own. Previews by default; pass `--write` to apply. Needs CROWDIN_PERSONAL_TOKEN."
+raw = true
+run = "bun .agents/scripts/crowdin-pull-translations.ts"
+
 [tasks."l10n:push"]
-description = "Pushes the locale-file edits to Crowdin and approves only the strings that changed, so a repo edit survives the next Crowdin sync; `--no-approve` pushes them unapproved, left for proofreaders. Previews by default; pass `--push` to apply. Needs CROWDIN_PERSONAL_TOKEN."
+description = "Pushes the locale-file edits to Crowdin and approves only the strings that changed, so a repo edit survives the next pull; `--no-approve` pushes them unapproved, left for proofreaders. Previews by default; pass `--push` to apply. Needs CROWDIN_PERSONAL_TOKEN."
 raw = true
 run = "bun .agents/scripts/crowdin-push-translations.ts"
 

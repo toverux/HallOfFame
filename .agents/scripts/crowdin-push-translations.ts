@@ -1,38 +1,47 @@
-// Version: 2.1.0
+// Version: 3.0.0
 
 // oxlint-disable no-console -- a CLI talks on stdout.
 // oxlint-disable no-await-in-loop -- one request at a time, in key order, is what this wants.
 
 // Pushes locale-file edits to Crowdin and approves exactly the strings that changed.
 //
-// The Crowdin GitHub integration already uploads `HallOfFame/Locales/*.json` on sync, but it
-// uploads them unapproved: when a string already carries an approved translation, that older one
-// keeps winning the export and the repo edit is silently dropped on the next round trip. Approving
-// is what makes an edit stick, so this approves the keys it pushed, and only those.
+// Nothing syncs the repo to Crowdin on its own: this uploads the source file first, so a key new
+// to Crowdin exists for its translations to attach to and a reworded key carries its new text,
+// then the changed translations. An approved translation is what a pull brings back over an
+// unapproved one, so this approves the keys it pushed, and only those.
 //
 // `--no-approve` adds the changed keys as unapproved translations instead, for machine translations
 // a proofreader should still review: approving those would stamp a verdict on them that deters
 // volunteers. They are flagged as AI-translated and kept out of the translation memory. Crowdin
 // exports an unapproved translation only while no other one of that string is approved, so an edit
-// to an approved string is still reverted by the next sync; the preview flags those keys. When no
+// to an approved string is still reverted by the next pull; the preview flags those keys. When no
 // translation is approved, the newest wins unless another has more votes. This mode refuses to run
 // on a project set to export approved translations only.
 //
 // Run it by hand, from the repo root, through `mise l10n:push`. It previews by default; `--push`
 // performs the writes, and `--base <ref>` compares against something other than `HEAD`. Keep that
-// ref close: a base reaching back across a merged Crowdin sync makes that sync's translations look
+// ref close: a base reaching back across a pull commit makes the volunteers' translations look
 // like local edits and pushes other people's work along with yours.
 //
 // `CROWDIN_PERSONAL_TOKEN` needs project write scope. Anything unexpected throws, which is the
 // right behaviour for a script whose operator is watching it run: read the error and run it again.
 
-const projectId = 705_701;
-const apiUrl = 'https://api.crowdin.com/api/v2';
-
-// Duplicated from `crowdin.yml` on purpose: reading them from there means modelling that file's
-// schema, which is more machinery than the drift is worth.
-const localesDirectory = 'HallOfFame/Locales';
-const sourceFileName = 'en-US.json';
+import {
+  api,
+  baseRef,
+  fetchProject,
+  languageIdsByFileName,
+  localesDirectory,
+  projectId,
+  readAtRef,
+  readLocale,
+  resolveCommit,
+  sourceFileName,
+  sourceStrings,
+  stringIdsByKey,
+  uploadSourceFile,
+  git
+} from './crowdin';
 
 const isPush = Bun.argv.includes('--push');
 const isApproving = !Bun.argv.includes('--no-approve');
@@ -49,13 +58,6 @@ interface Translation {
   readonly text: string;
 }
 
-interface Project {
-  readonly targetLanguages: ReadonlyArray<{ id: string; locale: string }>;
-  readonly languageMapping: Record<string, { locale?: string }> | null;
-  // Only sent to owners and managers: under a translator's token, the export guard cannot fire.
-  readonly exportApprovedOnly?: boolean;
-}
-
 await run();
 
 async function run(): Promise<void> {
@@ -65,16 +67,9 @@ async function run(): Promise<void> {
   console.info(`${isPush ? 'Pushing' : 'Previewing'} ${mode} translations against ${base}.`);
 
   const fileNames = await changedLocaleFiles(base);
-
-  if (fileNames.length == 0) {
-    console.info(`No locale file changed against ${base}.`);
-
-    return;
-  }
-
   const project = await fetchProject();
 
-  // The next sync would then export the pushed strings as untranslated, reverting the repo too.
+  // A pull would then bring the pushed strings back untranslated, reverting the repo too.
   if (!isApproving && project.exportApprovedOnly) {
     throw new Error(
       `Crowdin project ${projectId} exports approved translations only: unapproved ones would ` +
@@ -83,6 +78,15 @@ async function run(): Promise<void> {
   }
 
   const languageIds = languageIdsByFileName(project);
+  const addedKeys = await syncSource();
+
+  // After the source upload: an edit to the source file alone is a push too.
+  if (fileNames.length == 0) {
+    console.info(`No locale file changed against ${base}.`);
+
+    return;
+  }
+
   const stringIds = await stringIdsByKey();
   let pushed = 0;
 
@@ -96,10 +100,7 @@ async function run(): Promise<void> {
     }
 
     const before = await readAtRef(base, fileName);
-    const after = (await Bun.file(`${localesDirectory}/${fileName}`).json()) as Record<
-      string,
-      string
-    >;
+    const after = await readLocale(fileName);
 
     for (const [key, text] of Object.entries(after)) {
       // An emptied value is how Crowdin represents an untranslated string, not an edit to push.
@@ -110,7 +111,16 @@ async function run(): Promise<void> {
       const stringId = stringIds.get(key);
 
       if (stringId == undefined) {
-        console.warn(`[${fileName}] ${key}: not on Crowdin yet, skipped. Sync, then push again.`);
+        if (!isPush && addedKeys.has(key)) {
+          const action = isApproving ? 'add and approve' : 'add unapproved';
+
+          console.info(`[${fileName}] ${key}: ${action}, after the source upload`);
+          pushed++;
+
+          continue;
+        }
+
+        console.warn(`[${fileName}] ${key}: not on Crowdin, skipped.`);
 
         continue;
       }
@@ -126,9 +136,45 @@ async function run(): Promise<void> {
   console.info(`Done: ${pushed} ${outcome}.`);
 }
 
-// Reuses the matching translation when Crowdin already holds one, which it usually does: the
-// GitHub sync uploads repo edits as unapproved variants, and posting the same text again is
-// rejected as a duplicate. Returns whether the change takes a write.
+// Uploads the source file where the repo's differs from Crowdin's, before any translation, and
+// returns the keys new to Crowdin, which a preview can then count as pushable.
+async function syncSource(): Promise<Set<string>> {
+  const local = await readLocale(sourceFileName);
+  const remote = await sourceStrings();
+  const added = Object.keys(local).filter(key => !remote.has(key));
+  const reworded = Object.keys(local).filter(key => {
+    const text = remote.get(key)?.text;
+
+    return text != undefined && text != local[key];
+  });
+  const removed = [...remote.keys()].filter(key => !(key in local));
+
+  if (added.length + reworded.length + removed.length == 0) {
+    console.info(`Source file: in step with Crowdin.`);
+
+    return new Set();
+  }
+
+  const summary = `${added.length} new, ${reworded.length} reworded, ${removed.length} removed`;
+
+  if (!isPush) {
+    console.info(`Source file: ${summary} key(s) to upload.`);
+
+    return new Set(added);
+  }
+
+  const uploaded = await uploadSourceFile();
+
+  console.info(
+    `Source file: ${summary} key(s), ${uploaded ? 'uploaded' : 'unchanged for Crowdin'}.`
+  );
+
+  return new Set(added);
+}
+
+// Reuses the matching translation when Crowdin already holds one, as it does for a volunteer's
+// text a pull brought in: posting the same text again is rejected as a duplicate. Returns whether
+// the change takes a write.
 async function push(change: Change, stringId: number): Promise<boolean> {
   const query = `stringId=${stringId}&languageId=${change.languageId}&limit=500`;
   const existing = (await api('GET', `/projects/${projectId}/translations?${query}`)) as {
@@ -140,6 +186,13 @@ async function push(change: Change, stringId: number): Promise<boolean> {
 
   if (!isApproving) {
     return suggest({ change, stringId, label, match });
+  }
+
+  // A push is rerun after a partial one, or after a pull: what it approved already stays as is.
+  if (match && (await approvedTranslationId(change.languageId, stringId, match)) == match.id) {
+    console.info(`${label}: already approved #${match.id}`);
+
+    return false;
   }
 
   if (!isPush) {
@@ -160,7 +213,7 @@ async function push(change: Change, stringId: number): Promise<boolean> {
 }
 
 // An approved translation outranks every unapproved one in the export, so a repo edit pushed next
-// to it is reverted by the next sync: the operator is told, and decides whether to approve.
+// to it is reverted by the next pull: the operator is told, and decides whether to approve.
 async function suggest(target: {
   readonly change: Change;
   readonly stringId: number;
@@ -194,11 +247,17 @@ async function suggest(target: {
   return true;
 }
 
+// Asked by translation where the question is whether that one is approved: Crowdin files a
+// duplicate source string's approvals under its master string, so a lookup by the duplicate's own
+// id misses them. Asked by string where the question is whether any translation of it is.
 async function approvedTranslationId(
   languageId: string,
-  stringId: number
+  stringId: number,
+  match?: Translation
 ): Promise<number | undefined> {
-  const query = `stringId=${stringId}&languageId=${languageId}`;
+  const query = match
+    ? `translationId=${match.id}`
+    : `stringId=${stringId}&languageId=${languageId}`;
   const approvals = (await api('GET', `/projects/${projectId}/approvals?${query}`)) as {
     data: Array<{ data: { translationId: number } }>;
   };
@@ -219,73 +278,8 @@ async function addTranslation(change: Change, stringId: number): Promise<number>
   return added.data.id;
 }
 
-async function fetchProject(): Promise<Project> {
-  const project = (await api('GET', `/projects/${projectId}`)) as { data: Project };
-
-  return project.data;
-}
-
-// Crowdin names an exported file after the target language's `locale`, unless the project remaps
-// that name, which this reads back rather than assuming.
-function languageIdsByFileName(project: Project): Map<string, string> {
-  const mapping = project.languageMapping ?? {};
-
-  return new Map(
-    project.targetLanguages.map(language => [
-      `${mapping[language.id]?.locale ?? language.locale}.json`,
-      language.id
-    ])
-  );
-}
-
-// The JSON parser stores each key as its quoted source text, so `"HallOfFame.Common.OOPS"` is the
-// identifier of the key `HallOfFame.Common.OOPS`.
-async function stringIdsByKey(): Promise<Map<string, number>> {
-  const files = (await api('GET', `/projects/${projectId}/files?limit=500`)) as {
-    data: Array<{ data: { id: number; name: string } }>;
-  };
-
-  const source = files.data.find(file => file.data.name == sourceFileName)?.data;
-
-  if (source == undefined) {
-    throw new Error(`No ${sourceFileName} in Crowdin project ${projectId}.`);
-  }
-
-  const strings = (await api(
-    'GET',
-    `/projects/${projectId}/strings?fileId=${source.id}&limit=500`
-  )) as {
-    data: Array<{ data: { id: number; identifier: string } }>;
-  };
-
-  return new Map(strings.data.map(item => [JSON.parse(item.data.identifier), item.data.id]));
-}
-
-async function api(method: string, path: string, body?: unknown): Promise<unknown> {
-  const token = Bun.env.CROWDIN_PERSONAL_TOKEN;
-
-  if (!token) {
-    throw new Error(
-      `CROWDIN_PERSONAL_TOKEN is not set. Create one with project write scope at ` +
-        `https://crowdin.com/settings#api-key and export it before running.`
-    );
-  }
-
-  const response = await fetch(`${apiUrl}${path}`, {
-    method,
-    headers: { 'authorization': `Bearer ${token}`, 'content-type': 'application/json' },
-    ...(body == undefined ? {} : { body: JSON.stringify(body) })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Crowdin ${method} ${path}: ${response.status} ${await response.text()}`);
-  }
-
-  return response.json();
-}
-
 // Locale files directly in the directory, the source file aside: editing that one changes the
-// source strings, which is the GitHub sync's job. Untracked files count, since `git diff` reports
+// source strings, which `syncSource` uploads whole. Untracked files count, since `git diff` reports
 // none and a locale file added but not yet staged is an edit like any other.
 async function changedLocaleFiles(base: string): Promise<string[]> {
   const listUntracked = ['ls-files', '--others', '--exclude-standard', '--', localesDirectory];
@@ -295,63 +289,4 @@ async function changedLocaleFiles(base: string): Promise<string[]> {
   const names = [...paths].map(path => path.slice(localesDirectory.length + 1));
 
   return names.filter(name => name != sourceFileName && !name.includes('/'));
-}
-
-// A file absent from the ref is a locale added since, whose every key then reads as changed. That
-// is proved with `cat-file -e` rather than inferred from a failed read: every other way of failing
-// would otherwise read as "no previous version", which turns one unreadable file into an approval
-// of the whole locale.
-async function readAtRef(base: string, fileName: string): Promise<Record<string, string>> {
-  const revision = `${base}:${localesDirectory}/${fileName}`;
-  const child = Bun.spawn(['git', 'cat-file', '-e', revision], { stderr: 'ignore' });
-
-  if ((await child.exited) != 0) {
-    return {};
-  }
-
-  return JSON.parse(await git(['show', revision])) as Record<string, string>;
-}
-
-// A range is valid to `git diff` but not to `git show <ref>:<path>`, which would make every
-// baseline read as an absent file, every key read as new, and the whole locale get approved.
-async function resolveCommit(ref: string): Promise<string> {
-  const resolved = await git(['rev-parse', '--verify', `${ref}^{commit}`]).catch(() => null);
-
-  if (resolved == null) {
-    throw new Error(`--base ${ref} does not name one commit. A range cannot be a baseline.`);
-  }
-
-  return resolved.trim();
-}
-
-function baseRef(): string {
-  const index = Bun.argv.indexOf('--base');
-
-  if (index == -1) {
-    return 'HEAD';
-  }
-
-  const value = Bun.argv[index + 1];
-
-  if (value == undefined || value.startsWith('--')) {
-    throw new Error(`--base needs a value.`);
-  }
-
-  return value;
-}
-
-async function git(args: string[]): Promise<string> {
-  const child = Bun.spawn(['git', ...args], { stdout: 'pipe', stderr: 'pipe' });
-
-  const [stdout, stderr, exitCode] = await Promise.all([
-    new Response(child.stdout).text(),
-    new Response(child.stderr).text(),
-    child.exited
-  ]);
-
-  if (exitCode != 0) {
-    throw new Error(`git ${args.join(' ')} failed: ${stderr.trim()}`);
-  }
-
-  return stdout;
 }
