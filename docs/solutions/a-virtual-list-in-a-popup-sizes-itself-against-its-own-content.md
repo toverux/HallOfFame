@@ -55,13 +55,19 @@ meanwhile:
 function measure(): void {
   const row = scrollable.current?.querySelector(selector(dropdownTheme.dropdownItem));
 
-  if (row instanceof HTMLElement && row.offsetHeight > 0) {
-    setRowHeight(row.offsetHeight);
+  // Unrounded: `offsetHeight` rounds, and a fraction lost per row shows as a stray scrollbar.
+  const height = row instanceof HTMLElement ? row.getBoundingClientRect().height : 0;
+
+  if (height > 0) {
+    setRowHeight(height);
   } else {
     frame = requestAnimationFrame(measure);
   }
 }
 ```
+
+The mod's `useMeasuredRowHeight` in `HallOfFame/UI/src/utils/virtual-list.ts` carries this retry and
+also undoes an ancestor's opening scale: copy the hook, not this sketch.
 
 Gating the list's first render on that measurement also works, and is worse: it shows a blank menu
 filling in with the scrollbar arriving late.

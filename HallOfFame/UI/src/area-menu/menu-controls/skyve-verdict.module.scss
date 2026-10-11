@@ -29,8 +29,15 @@
   padding: 2rem 8rem 2rem 4rem;
   border-left: 4rem solid;
   border-radius: 4rem;
+  // Never wider than its host: a long label wraps rather than running into the host's padding.
+  max-width: 100%;
 
   color: vanilla.$menu-text-1-inverted;
+
+  &-text {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
 
   // Lit up on hover by the tone's mixin, as it opens a tooltip.
   &--interactive {

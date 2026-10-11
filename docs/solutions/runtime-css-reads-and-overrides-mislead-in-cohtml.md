@@ -47,9 +47,10 @@ const popupClass = [...popup.classList].find(c => c.startsWith('hof-dropdown-pop
 style.textContent = `.${popupClass} { max-height: none !important; }`;
 ```
 
-For a length, measure a real element's `offsetHeight` instead of computing one from `rem`. There is
-no reading the layout's own units back without restating the game's `@media (min-height: 56.25vw)`
-scaling rule, which is not worth owning.
+For a length, measure a real element's `getBoundingClientRect().height`, which keeps the fraction
+`offsetHeight` rounds off and includes an ancestor's transform (`virtual-list.ts` divides a uniform
+scale out), instead of computing one from `rem`. There is no reading the layout's own units back
+without restating the game's `@media (min-height: 56.25vw)` scaling rule, which is not worth owning.
 
 ## Prevention
 

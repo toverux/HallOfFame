@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { AutoNavigationScope, InputActionConsumer } from 'cs2/input';
-import { LocalizedNumber, LocalizedString, Unit } from 'cs2/l10n';
+import { type Localization, LocalizedNumber, LocalizedString, Unit } from 'cs2/l10n';
 import {
   Button,
   FormattedParagraphs,
@@ -222,14 +222,18 @@ function DetailsModal({
         bindings.playSound(direction < 0 ? 'select-previous-item' : 'select-next-item');
       }
     }),
-    [onClose]
+    [onClose, setSelectedTab]
   );
 
   // The backdrop fades out alongside the panel's exit, which the transition group drives.
   const isExiting = useContext(TransitionContext).state == TransitionState.exit;
 
-  // The playset's list states keep the window at one height whatever the toggles leave in it.
+  // The playset's list states, the toolbox standing above them all.
   const isListShown = selectedTab == 'playset' && isPlaysetToolboxShown(playsetTab);
+
+  // The labels head rows: a list the toggles emptied shows its statement under the toolbox alone.
+  const areColumnsShown =
+    isListShown && (playsetTab.kind != 'content' || playsetTab.view.rows.length > 0);
 
   // Only on the playset tab: elsewhere a playset landing meanwhile would remount the tab shown.
   const playsetFilterKey =
@@ -243,7 +247,7 @@ function DetailsModal({
         className={classNames(styles.backdrop, isExiting && styles.backdropExiting)}
         onMouseDown={onClose}>
         <Panel
-          className={classNames(styles.window, isListShown && styles.windowList)}
+          className={styles.window}
           theme={iceflakePanelTheme}
           header={
             <>
@@ -288,7 +292,7 @@ function DetailsModal({
                   onChange={changeFilter}
                 />
 
-                <PlaysetColumns />
+                {areColumnsShown && <PlaysetColumns />}
               </>
             )}
 
@@ -465,14 +469,14 @@ function ConditionsBlock({
             ? 'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Latitude South]'
             : 'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Latitude North]'
         }
-        args={{ ANGLE: <LocalizedNumber value={Math.abs(time.latitude)} unit={Unit.Angle} /> }}
+        args={{ ANGLE: formatConditionsAngle(Math.abs(time.latitude), translate) }}
       />
     ),
     sunElevation != undefined && (
       <LocalizedString
         key='sunElevation'
         id='HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Sun Elevation]'
-        args={{ ANGLE: <LocalizedNumber value={sunElevation} unit={Unit.Angle} /> }}
+        args={{ ANGLE: formatConditionsAngle(sunElevation, translate) }}
       />
     )
   ];
@@ -512,10 +516,26 @@ function ConditionsBlock({
         </PhotoModeSectionTitle>
       )}
 
-      {gameChosen.map(setting => (
-        <PhotoModeSettingRow key={setting.code} setting={setting} />
+      {gameChosen.map((setting, index) => (
+        <PhotoModeSettingRow key={setting.code} setting={setting} index={index} />
       ))}
     </section>
+  );
+}
+
+/**
+ * An angle's number alone, to one decimal, its degree sign left to the string around it: the
+ * game's own angle unit spaces the sign off (`45.8 °`), which jars beside the temperature's `11°C`
+ * on the line above.
+ * A string rather than a `LocalizedNumber`, which only the game's own units render as a
+ * `LocalizedString` argument, formatted as the game formats a number: a whole value without its
+ * fraction, the game's decimal separator otherwise.
+ * Through `Number`, so a tiny negative, which rounds to `-0.0`, reads `0`.
+ */
+function formatConditionsAngle(value: number, translate: Localization['translate']): string {
+  return String(Number(value.toFixed(1))).replace(
+    '.',
+    translate('Common.DECIMAL_SEPARATOR', '.') ?? '.'
   );
 }
 
@@ -576,18 +596,24 @@ function PhotoModeSectionView({ section }: Readonly<{ section: PhotoModeSection 
         </PhotoModeSectionTitle>
       )}
 
-      {section.settings.map(setting => (
-        <PhotoModeSettingRow key={setting.code} setting={setting} />
+      {section.settings.map((setting, index) => (
+        <PhotoModeSettingRow key={setting.code} setting={setting} index={index} />
       ))}
     </div>
   );
 }
 
 /**
- * A setting as the game's photo mode panel names and lays it out, and the mod's note on it.
+ * A setting as the game's photo mode panel names and lays it out, every other one of a section
+ * banded, and the mod's note on it under the row.
  */
-function PhotoModeSettingRow({ setting }: Readonly<{ setting: PhotoModeSetting }>): ReactElement {
+function PhotoModeSettingRow({
+  setting,
+  index
+}: Readonly<{ setting: PhotoModeSetting; index: number }>): ReactElement {
   const translate = useTranslate();
+
+  const isBanded = index % 2 == 1;
 
   return (
     <>
@@ -595,7 +621,10 @@ function PhotoModeSettingRow({ setting }: Readonly<{ setting: PhotoModeSetting }
       <div
         className={classNames(
           photoModeContainerClasses.container,
-          photoModeContainerClasses.active
+          photoModeContainerClasses.active,
+          styles.photoModeSetting,
+          index > 0 && styles.photoModeSettingFollowing,
+          isBanded && styles.photoModeSettingAlternate
         )}>
         <div className={classNames(photoModeContainerClasses.children, styles.photoModeRow)}>
           <PhotoModeTitle code={setting.code} className={styles.photoModeRowName} />
@@ -606,7 +635,9 @@ function PhotoModeSettingRow({ setting }: Readonly<{ setting: PhotoModeSetting }
       </div>
 
       {setting.noteId != undefined && (
-        <p className={styles.photoModeNote}>{translate(setting.noteId)}</p>
+        <p className={classNames(styles.photoModeNote, isBanded && styles.photoModeNoteBanded)}>
+          {translate(setting.noteId)}
+        </p>
       )}
     </>
   );
@@ -619,7 +650,11 @@ function PhotoModeSettingRow({ setting }: Readonly<{ setting: PhotoModeSetting }
 function PhotoModeSectionTitle({ children }: Readonly<{ children: ReactNode }>): ReactElement {
   return (
     <div
-      className={classNames(photoModeContainerClasses.container, photoModeContainerClasses.group)}>
+      className={classNames(
+        photoModeContainerClasses.container,
+        photoModeContainerClasses.group,
+        styles.photoModeSectionRow
+      )}>
       <div className={photoModeContainerClasses.children}>{children}</div>
     </div>
   );

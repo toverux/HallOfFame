@@ -40,10 +40,10 @@ export function useMeasuredRowHeight(
     let frame = 0;
 
     function measure(): void {
-      const row = scrollable.current?.querySelector(rowSelector);
+      const height = measuredHeight(scrollable.current?.querySelector(rowSelector));
 
-      if (row instanceof HTMLElement && row.offsetHeight > 0) {
-        setRowHeight(row.offsetHeight);
+      if (height > 0) {
+        setRowHeight(height);
       } else {
         frame = requestAnimationFrame(measure);
       }
@@ -55,4 +55,23 @@ export function useMeasuredRowHeight(
   }, [scrollable, rowSelector]);
 
   return rowHeight;
+}
+
+/**
+ * A row's height as laid out, zero where there is no row or the engine has not laid it out yet.
+ * Unrounded: `offsetHeight` rounds it, and a fraction lost per row adds up to a list a few pixels
+ * shorter than its rows, which overflows and shows a scrollbar.
+ * Divided by the scale an ancestor's transform gives the rect but not the layout width,
+ * so a row read during a panel's opening transition does not keep its scaled height.
+ * The ratio is the width's: it undoes a uniform scale and nothing else.
+ */
+function measuredHeight(row: Element | null | undefined): number {
+  if (!(row instanceof HTMLElement)) {
+    return 0;
+  }
+
+  const rect = row.getBoundingClientRect();
+  const scale = row.offsetWidth > 0 ? rect.width / row.offsetWidth : 1;
+
+  return rect.height / scale;
 }

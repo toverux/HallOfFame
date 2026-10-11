@@ -184,6 +184,12 @@ $asset-button-shadow: 1rem 1rem 2rem vanilla.$panel-color-dark;
     margin-top: 5rem;
   }
 
+  // The column's width rather than the pill's: the pill then wraps its label inside the card's
+  // padding, where sizing to the pill let a long label run to the card's border.
+  &-textSkyve {
+    width: 100%;
+  }
+
   &:hover &-textDescription {
     margin-top: 10rem;
   }

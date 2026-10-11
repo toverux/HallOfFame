@@ -41,10 +41,13 @@ export function SkyveHeading({
       data-tone={label.tone}>
       {variant == 'pill' && <SkyveLogo />}
 
-      <LocalizedString
-        id='HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Verdict]'
-        args={{ LABEL: <LocalizedString id={label.labelId} /> }}
-      />
+      {/* Its own flex item, so a long label wraps inside the pill instead of widening it. */}
+      <span className={styles.pillText}>
+        <LocalizedString
+          id='HallOfFame.UI.Menu.ScreenshotDetails.SKYVE[Verdict]'
+          args={{ LABEL: <LocalizedString id={label.labelId} /> }}
+        />
+      </span>
     </div>
   );
 }

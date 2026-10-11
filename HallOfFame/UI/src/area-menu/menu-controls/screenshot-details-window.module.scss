@@ -20,6 +20,9 @@ $empty-line-height: 1.4em;
 
 $playset-row-height: 52rem;
 $playset-row-padding: 6rem;
+
+// How far a photo mode setting's band reaches past its text on each side.
+$setting-band-bleed: 6rem;
 $playset-thumbnail-size: 40rem;
 
 // The playset's columns, shared by the rows and the header labelling them.
@@ -54,13 +57,8 @@ $panel-content-padding-top: 25rem;
   // Keeps the description's lines to a readable length.
   width: 800rem;
   max-width: 90vw;
+  // The cap the playset's list scrolls within: the window closes around a shorter list.
   max-height: 80vh;
-
-  // With the playset's list, the window stands at its limit from the loading state on, whatever
-  // the toggles leave in the list: narrowed to a few rows, it would otherwise shrink around them.
-  &--list {
-    height: 80vh;
-  }
 
   &-content {
     flex: 0 1 auto;
@@ -181,9 +179,37 @@ $panel-content-padding-top: 25rem;
   }
 
   // Set apart from the settings below it, which the panel does with the checkbox leading each
-  // setting, a control a read-only list has no use for. The blue is the window title's.
+  // setting, a control a read-only list has no use for: bold, spaced, a step larger than a
+  // setting's name, and in the window title's blue.
   &-sectionTitle {
     color: vanilla.$highlight-bright-blue;
+    font-size: 0.9em;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+  }
+
+  // Room above a section title, more than between two settings.
+  &-sectionRow {
+    padding-top: 12rem;
+  }
+
+  // The rows banded every other one, like the playset's, in place of the panel's lines between
+  // them: the first row keeps its line, which underlines the section title. The band bleeds past
+  // the text on both sides, so names and values stay aligned with the titles; the panel's own
+  // vertical padding stays, as it centers the name between two rows.
+  &-setting {
+    margin: 0 (-$setting-band-bleed);
+    padding-right: $setting-band-bleed + 6rem;
+    padding-left: $setting-band-bleed;
+    border-radius: 3rem;
+
+    &--following {
+      border-top-width: 0;
+    }
+
+    &--alternate {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
   }
 
   &-row {
@@ -205,17 +231,21 @@ $panel-content-padding-top: 25rem;
     font-size: 0.8em;
   }
 
-  // A band under the row, like the indented lines the game's panel lists a setting's components
-  // on.
+  // An annotation under the row, a bar down its left like a quote, hanging from the row: pulled
+  // up against the text of a plain row, kept just clear of a banded row's band. A box of its own
+  // read as an alert on a banded row, and as a stray block under a plain one.
   &-note {
-    margin: 0 0 6rem 6rem;
-    padding: 6rem 10rem;
-    border-radius: 3rem;
+    margin: -2rem 0 8rem $setting-band-bleed;
+    padding: 0 0 0 10rem;
+    border-left: 2rem solid rgba(255, 255, 255, 0.25);
 
-    background-color: rgba(0, 0, 0, 0.22);
     color: $empty-color;
     font-size: vanilla.$font-size-s;
     line-height: 1.4;
+
+    &--banded {
+      margin-top: 6rem;
+    }
   }
 
   &-swatch {
