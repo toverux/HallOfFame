@@ -23,7 +23,7 @@ Stop and ask the user where the tree is dirty, the branch has diverged, or a tag
 Every git pull in this procedure is `--rebase`.
 The repo keeps a linear history and this branch is `main`: a plain `git pull` over an unpushed local commit writes a `Merge branch 'main' of …` commit into the release range, which then has to be undone before the release commit lands on top.
 
-## 2. Pull the pending Crowdin translations
+## 2. Pull the pending Crowdin translations and credit their translators
 
 Nothing syncs Crowdin to the repo on its own: volunteers' work arrives when it is pulled, and a release is when.
 
@@ -34,10 +34,14 @@ git diff --stat HallOfFame/Locales
 ```
 
 The preview names each changed string's translator and date; read it before writing, since a pull takes Crowdin's current text whole, a volunteer's fix and a volunteer's regression alike.
-Go straight to the build where it lists nothing.
 
-Commit the pulled files on their own, before the release commit, as `feat(i18n): new Crowdin translations`, the body naming the languages and the translators' handles.
+Then bring the translators in the thanks list of `HallOfFame/LongDescription.md` up to date from Crowdin's top-members report, the Crowdin MCP's `generate_report_top_members` in unit `strings` over the project's whole life, run once per target language (`languageId`): a row's `languages` names every language the member ever suggested in, and its `winning` sums them all.
+The list holds, alphabetically, the members with at least one translation still the current one (`winning` above zero), each under the languages where they have one: add the missing, drop those left with none.
+toverux stays under French alone, its other languages holding the AI translations it pushed; Andeeta is ThemisC2's second account, already listed; a `REMOVED_USER` has no name to credit.
+
+Commit the pulled files and the list on their own, before the release commit: as `feat(i18n): new Crowdin translations` where the pull changed files, the body naming the languages and the translators' handles; as `docs: update the translators credited in the mod description` where only the list changed.
 Those languages and handles are changelog material; note them for step 5.
+Go straight to the build where neither changed.
 
 ## 3. Build Release
 
