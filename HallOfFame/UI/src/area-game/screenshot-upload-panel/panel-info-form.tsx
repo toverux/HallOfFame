@@ -304,6 +304,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
                 <div style={{ flex: 1 }} />
 
                 <span>
+                  {/* oxlint-disable-next-line react/jsx-no-literals - typographic symbol, not translatable */}
                   {formValue.description.length}&thinsp;/&thinsp;{DESCRIPTION_MAX_LENGTH}
                 </span>
               </div>

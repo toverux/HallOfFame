@@ -109,6 +109,7 @@ export default {
   },
   output: {
     path: path.resolve(import.meta.dirname, outputDir),
+    module: true,
     library: {
       type: 'module'
     },
@@ -125,9 +126,6 @@ export default {
         }
       })
     ]
-  },
-  experiments: {
-    outputModule: true
   },
   plugins: [new MiniCssExtractPlugin()]
 };

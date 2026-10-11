@@ -67,6 +67,7 @@ export const ScreenshotUploadPanelImage = memo(
                 [styles.imageHidden]: uploadProgress != null
               })}
               style={ratioPreviewInfo.style}>
+              {/* oxlint-disable-next-line react/jsx-no-literals - typographic symbol, not translatable */}
               16:9
             </div>
           </Tooltip>

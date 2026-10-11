@@ -575,6 +575,7 @@ function ConditionsLine({
         {items.map((item, index) => (
           // oxlint-disable-next-line react/no-array-index-key - fixed items, never reordered
           <span key={index}>
+            {/* oxlint-disable-next-line react/jsx-no-literals - typographic symbol, not translatable */}
             {index > 0 && <span className={styles.conditionsSeparator}>·</span>}
             {item}
           </span>
