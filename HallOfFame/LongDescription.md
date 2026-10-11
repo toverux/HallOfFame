@@ -110,12 +110,12 @@ Donations are very welcome and will help keep the service running.
 - **Translators:**
   baka-gourd (Chinese Simplified),
   elGendo87 (Spanish),
-  Finn (Dutch),
   Fuchs23 (German),
-  Hendrix_ (German)
+  GeraspteGatenKaas (Dutch),
   karmel68 (Polish),
-  Konsi (German),
+  krugl1y (Russian),
   Pectus Solentis (Korean),
+  redlabracer (German),
   RilkeXS (Chinese Simplified),
   ThemisC2 (Italian),
   Tiago Correia (Portuguese),
