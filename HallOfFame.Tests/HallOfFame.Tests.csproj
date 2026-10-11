@@ -31,23 +31,18 @@
         </PackageReference>
     </ItemGroup>
 
-    <!-- Game assemblies pulled in by the mod's domain types, referenced for compilation only and
-         resolved at runtime by the AssemblyResolve probe (see GameAssemblyResolver).
-         Mono (Linux) skips that probe for a reference met while loading a type, ex. a mod type
-         implementing a game interface, so there they are copied next to the tests instead, along
-         with the non-framework dependencies MSBuild finds for them. -->
+    <!-- Game assemblies pulled in by the mod's domain types, copied next to the tests along with the
+         non-framework dependencies MSBuild finds for them, so the test process loads them like its
+         own. -->
     <ItemGroup>
         <Reference Include="Colossal.Core">
             <HintPath>$(ManagedPath)\Colossal.Core.dll</HintPath>
-            <Private Condition="'$(OS)' == 'Windows_NT'">false</Private>
         </Reference>
         <Reference Include="Colossal.UI.Binding">
             <HintPath>$(ManagedPath)\Colossal.UI.Binding.dll</HintPath>
-            <Private Condition="'$(OS)' == 'Windows_NT'">false</Private>
         </Reference>
         <Reference Include="Game">
             <HintPath>$(ManagedPath)\Game.dll</HintPath>
-            <Private Condition="'$(OS)' == 'Windows_NT'">false</Private>
         </Reference>
     </ItemGroup>
 

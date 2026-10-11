@@ -21,6 +21,7 @@ This runs `dotnet test` with `-p:SkipBuildUI=true -p:SkipModPostProcess=true`, s
 Prefer it over a bare `dotnet test`.
 On Linux, Mono hosts the `net48` test process and needs `mono-devel`: without its framework facades the test host crashes before any test runs.
 `dotnet test` runs through Microsoft.Testing.Platform, which the root `global.json` selects: VSTest no longer hosts .NET Framework tests under Mono.
+The suite does not run on Windows, which is not a target: the generated binding redirect sends every `netstandard` reference to the 2.1 the Unity modules ask for, which .NET Framework lacks, so the test host crashes. Removing that redirect (`SuggestedBindingRedirects` before `GenerateBindingRedirects`) lets it start, and only the Colossal.Json decode tests still fail, on default interface methods the .NET Framework CLR cannot load.
 
 ## Where testable logic goes
 
@@ -33,20 +34,13 @@ On Linux, Mono hosts the `net48` test process and needs `mono-devel`: without it
 
 ## What loads off-engine
 
-A `[ModuleInitializer]` `AssemblyResolve` probe (`GameAssemblyResolver`) loads game DLLs on demand from `CSII_MANAGEDPATH` (the game's `Managed` folder).
+`HallOfFame.Tests.csproj` copies the game assemblies it references from `CSII_MANAGEDPATH` (the game's `Managed` folder) next to the tests, with their dependencies, so they load like the project's own.
 Pure managed assemblies load fine this way: `Colossal.Core`, `Colossal.UI.Binding`, and `Game.dll`.
-Mono (Linux) skips the probe for a reference met while loading a type (a mod type implementing a game interface), so there `HallOfFame.Tests.csproj` copies the game assemblies next to the tests instead.
 So domain records (`Screenshot`, `CreatorStats`, ...) and pure managed structs like `Game.UI.Localization.LocalizedString` are test-constructible (the test project has `InternalsVisibleTo`).
-
-### Caveat: engine enums in `[InlineData]` break discovery
-
-An engine type loads in a test **body** (the probe is active for executing code) but **not** when xUnit parses an attribute's argument blob.
-So a `[Theory]` whose `[InlineData(...)]` embeds an engine-assembly enum value (e.g. `GameMode.MainMenu` from `Game.dll`) fails at **discovery** with `System.IO.FileNotFoundException: Could not load file or assembly 'Game'`: xUnit reads the blob via `CustomAttributeData` reflection, a path `GameAssemblyResolver` does not cover.
-Use a single `[Fact]` with the enum values inside the method body instead, e.g. `conductor.OnGameModeChanged(GameMode.MainMenu)`.
 
 ## What fails off-engine, and the seam to use instead
 
-The probe cannot save you from code that makes Unity **native** calls or loads engine-only types.
+Loading the game assemblies cannot save you from code that makes Unity **native** calls or loads engine-only types.
 Never let a test touch these directly; depend on a mod-owned interface and inject a fake.
 
 - **HTTP / `HttpQueries`.** Its static constructor calls `SystemInfo.deviceUniqueIdentifier` (native) and its methods take `UnityWebRequest`, so instantiating it off-engine fails.

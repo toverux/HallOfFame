@@ -104,7 +104,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 - To put a given screenshot on screen in the running game, load it by ID with `SlideshowUISystem.LoadScreenshotById` (debug builds), through the unity-devtools `eval` tool: `world.GetOrCreateSystemManaged<HallOfFame.Systems.SlideshowUISystem>().LoadScreenshotById("<id>")`.
 - To preview a new or changed locale string in the running game without a `mise build`, push it into the live dictionary through the unity-devtools `eval` tool, then raise the change event the UI listens to; it holds until the game restarts, so the edit still goes into `en-US.json`:
   `var lm = Game.SceneFlow.GameManager.instance.localizationManager; lm.activeDictionary.Add("<key>", "<value>", false); typeof(Colossal.Localization.LocalizationManager).GetMethod("NotifyActiveDictionaryChanged", (System.Reflection.BindingFlags)36).Invoke(lm, null)`.
-- The toolchain's `CSII_*` variables are Windows user-scope environment variables, a scope Linux lacks: read one from the user scope with a process-environment fallback, the shape `HallOfFame.csproj` and `GameAssemblyResolver.cs` use.
+- The toolchain's `CSII_*` variables are Windows user-scope environment variables, a scope Linux lacks: read one from the user scope with a process-environment fallback, the shape `HallOfFame.csproj` and `HallOfFame.Tests.csproj` use.
 - When writing or running C# tests, debugging an engine-bound type that won't load off-engine, or deciding where to put logic so it stays testable, use the `hof-cs-offengine-testing` skill.
 - When writing or running UI tests, configuring bindings or asserting triggers in a test, or fixing the harness after a game update, use the `hof-ui-testing` skill.
 
