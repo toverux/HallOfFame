@@ -52,10 +52,11 @@ interface SettableMenuState {
 
   /**
    * Whether the UI is ready to display a new image, that includes:
+   *
    * - The current image has been fully loaded.
    * - The next image has been fully preloaded.
-   * - The current image has finished its fade-in animation (so there are no "jumps" in the
-   * animation, and there is no need for the user to be able to hit Next every .5 seconds).
+   * - The current image has finished its fade-in animation (so there are no "jumps" in the animation,
+   *   and there is no need for the user to be able to hit Next every .5 seconds).
    */
   readonly isReadyForNextImage: boolean;
 }
