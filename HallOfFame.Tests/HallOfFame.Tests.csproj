@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
+        <!-- xUnit v3 builds the tests as their own executable. On Linux, `dotnet test` runs it under
+             Mono through Microsoft.Testing.Platform, which the root global.json opts into: VSTest
+             dropped its Mono host for .NET Framework tests in 18.10 (microsoft/vstest#16158). -->
+        <OutputType>Exe</OutputType>
         <LangVersion>14</LangVersion>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -16,7 +20,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
-        <PackageReference Include="xunit" Version="2.9.3" />
+        <PackageReference Include="xunit.v3" Version="4.0.2" />
         <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

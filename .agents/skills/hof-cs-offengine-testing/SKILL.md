@@ -20,6 +20,7 @@ mise test:cs
 This runs `dotnet test` with `-p:SkipBuildUI=true -p:SkipModPostProcess=true`, so the TypeScript UI build and the mod post-processor are skipped (the tests need neither).
 Prefer it over a bare `dotnet test`.
 On Linux, Mono hosts the `net48` test process and needs `mono-devel`: without its framework facades the test host crashes before any test runs.
+`dotnet test` runs through Microsoft.Testing.Platform, which the root `global.json` selects: VSTest no longer hosts .NET Framework tests under Mono.
 
 ## Where testable logic goes
 
