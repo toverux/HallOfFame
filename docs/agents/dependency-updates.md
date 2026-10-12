@@ -10,13 +10,6 @@ An entry stays until its blocking condition is gone; the next sweep re-evaluates
 - **Blocked until**: Cities: Skylines II itself ships a different React. The pin follows the game, never the registry.
 - **Date**: 2026-10-11
 
-## typescript
-
-- **Skipped**: 6.0.3 → 7.0.2
-- **Reason**: TypeScript 7 is the native Go port, and `ts-loader` does not support its compiler API in type-checking mode, which is how the webpack build uses it. The maintainer's position on `TypeStrong/ts-loader#1702`: "It's not only that the API has changed, but that the new API is not even stable yet. The API will be part of 7.1". Every other TS 7 change was checked against this repo and none of it bites: the removed compiler options all miss the current `tsconfig.json`, and the `types` and `noUncheckedSideEffectImports` default flips are already satisfied.
-- **Blocked until**: `ts-loader` ships TS 7 support, or the build stops type-checking through it. Swapping `ts-loader` for a transpile-only loader would also lift the block, since `isolatedModules` is already on and nothing here needs cross-file type info to emit.
-- **Date**: 2026-10-11
-
 ## sass
 
 - **Skipped**: 1.78.0 → 1.105.1

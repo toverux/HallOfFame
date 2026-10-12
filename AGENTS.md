@@ -26,7 +26,7 @@ C#, same in `HallOfFame` and `HallOfFame.Tests`:
 
 TypeScript, one root `tsconfig.json` covering `HallOfFame/UI/src` and `.agents/hooks`:
 
-- TypeScript 6.0.3, tsconfig strictest, minus `noPropertyAccessFromIndexSignature`.
+- TypeScript 7.0.2, tsconfig strictest, minus `noPropertyAccessFromIndexSignature`.
 - `verbatimModuleSyntax` off, `isolatedModules` on.
 - The bundle runs in Coherent Gameface; tests and hooks run under bun with happy-dom.
 
