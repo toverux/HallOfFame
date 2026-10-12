@@ -6,7 +6,7 @@ An entry stays until its blocking condition is gone; the next sweep re-evaluates
 ## react, react-dom, @types/react, @types/react-dom
 
 - **Skipped**: 18.3.1 (types 18.3.31 / 18.3.7) → 19.3.0 (types 19.3.0 / 19.3.0)
-- **Reason**: React is a webpack external (`HallOfFame/UI/webpack.config.js`, `'react': 'React'`), so the mod binds to the React the game supplies at runtime rather than to its own copy. The game ships 18.3.1, and the packages here only exist to type and compile against it.
+- **Reason**: React is a `window` external (`windowExternals` in `HallOfFame/UI/build.ts`), so the mod binds to the React the game supplies at runtime rather than to its own copy. The game ships 18.3.1, and the packages here only exist to type and compile against it.
 - **Blocked until**: Cities: Skylines II itself ships a different React. The pin follows the game, never the registry.
 - **Date**: 2026-10-11
 
@@ -17,7 +17,7 @@ An entry stays until its blocking condition is gone; the next sweep re-evaluates
 - **Blocked until**: `ts-loader` ships TS 7 support, or the build stops type-checking through it. Swapping `ts-loader` for a transpile-only loader would also lift the block, since `isolatedModules` is already on and nothing here needs cross-file type info to emit.
 - **Date**: 2026-10-11
 
-## sass, sass-embedded
+## sass
 
 - **Skipped**: 1.78.0 → 1.105.1
 - **Reason**: Versions above 1.78 emit CSS Color 4 syntax wherever it is shorter, which Coherent Gameface cannot parse. The change is invisible to a changelog, which has no reason to call browser-valid output breaking, and invisible to the build, which compiles happily either way; it only shows up rendered in the game.

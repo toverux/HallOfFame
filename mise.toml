@@ -19,18 +19,14 @@ run = [
 ]
 
 [tasks."dev"]
-description = "Watches and rebuilds the UI: the webpack bundle and the CSS module type definitions."
+description = "Watches and rebuilds the UI: the bundle and the CSS module type definitions."
 # Grouping task with no `run`: mise runs independent `depends` in parallel, so both watchers run
-# side by side. Their shared `build:css-types` dep is deduplicated and runs exactly once before
-# either watcher starts, so the *.module.scss.d.ts files exist before ts-loader/tsc type-check.
-depends = ["dev:webpack", "dev:css-types"]
+# side by side.
+depends = ["dev:bundle", "dev:css-types"]
 
-[tasks."dev:webpack"]
-description = "Watches and recompiles the UI bundle with webpack."
-# Depends on a one-shot `build:css-types` so the *.module.scss.d.ts exist before ts-loader
-# type-checks the style imports (mirrors build:webpack).
-depends = ["build:css-types"]
-run = "bun --bun webpack --config HallOfFame/UI/webpack.config.js --watch"
+[tasks."dev:bundle"]
+description = "Watches and rebuilds the UI bundle."
+run = "bun HallOfFame/UI/build.ts --watch"
 
 [tasks."dev:css-types"]
 description = "Watches and regenerates the CSS module type definitions."
@@ -147,13 +143,12 @@ raw = true
 run = "dotnet build HallOfFame.slnx"
 
 [tasks."build:ui"]
-description = "Builds the UI alone: the webpack bundle and the (gitignored) CSS module type definitions. Deploys straight to the game's Mods folder, so it is the task to run while iterating with the game open."
-depends = ["build:css-types", "build:webpack"]
+description = "Builds the UI alone: the bundle and the (gitignored) CSS module type definitions. Deploys straight to the game's Mods folder, so it is the task to run while iterating with the game open."
+depends = ["build:css-types", "build:bundle"]
 
-[tasks."build:webpack"]
-description = "Compiles the UI bundle with webpack."
-depends = ["build:css-types"]
-run = "bun --bun webpack --config HallOfFame/UI/webpack.config.js"
+[tasks."build:bundle"]
+description = "Builds the UI bundle with Bun (`HallOfFame/UI/build.ts`). Does not type-check: `mise check` does."
+run = "bun HallOfFame/UI/build.ts"
 
 [tasks."build:css-types"]
 description = "Generates the gitignored *.module.scss.d.ts so tsc catches stale styles.* references."

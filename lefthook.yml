@@ -9,8 +9,9 @@ pre-commit:
     tsc:
       # One root tsconfig covers both HallOfFame/UI/src and .agents/hooks, so a staged file anywhere
       # runs the task that knows the whole project rather than one tsc over the staged files.
-      # `check:tsc` depends on `build:css-types`, which regenerates the *.module.scss.d.ts first.
-      glob: "*.{ts,tsx,js,json}"
+      # `check:tsc` depends on `build:css-types`, which regenerates the *.module.scss.d.ts first, so
+      # an scss-only change still type-checks the `styles.*` references to its classes.
+      glob: "*.{ts,tsx,js,json,scss}"
       run: mise check:tsc
     oxlint:
       glob: "*.{ts,tsx,js,jsx,mjs,cjs}"

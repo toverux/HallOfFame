@@ -11,7 +11,7 @@ This repository contains the game-side code, while the server-side code is locat
 
 - [mise-en-place](https://mise.jdx.dev): manages dev tools, env vars, and tasks for this repo.
 - C# 14 on `net48`, built with the CS2 modding toolchain; the mod's runtime types are Unity/ECS systems living in the game's world, and the unit tests are xUnit running off-engine.
-- React 18 and TypeScript with SCSS modules, bundled by webpack, packaged and tested with bun, formatted and linted with oxfmt/oxlint.
+- React 18 and TypeScript with SCSS modules, bundled, packaged and tested with bun (`HallOfFame/UI/build.ts`), formatted and linted with oxfmt/oxlint.
 - The UI runs in Coherent Gameface (cohtml), not a browser: web features can be missing or behave differently, so check the `gameface` skill before relying on one.
 - The csmodding plugins are a prerequisite: `coherent-gameface` (the `gameface` skills and the `game_*` MCP tools), `cs2-modding`, and `unity-devtools`. When any of them is missing from a session that touches the game, the UI, or the decompile, stop before starting work and ask the user to load it.
 
@@ -59,7 +59,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `mise check:agents:oxlint`: Only lints the code, optimized output.
 - `mise fix`: Apply the auto-fixes in place (oxlint `--fix`, oxfmt, then the C# cleanup of `fix:cs`).
 - `mise fix:cs`: Format the C# code in place with jb (ReSharper) cleanupcode. There is no read-only C# check, cleanupcode has no dry-run mode.
-- `mise dev`: Watch and rebuild the UI (webpack bundle and CSS module types) on change.
+- `mise dev`: Watch and rebuild the UI (bundle and CSS module types) on change.
 - `mise test`: Run the full test suite, C# and UI.
 - `mise test:cs`: Run only the C# unit tests.
 - `mise test:ui`: Run only the UI tests.

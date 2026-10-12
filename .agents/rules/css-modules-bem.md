@@ -17,7 +17,7 @@ Class names follow a BEM-derived convention written in SCSS and consumed as came
 - Promote a nested structural unit to its own block rather than nesting elements: `checkbox`, `dropdown`, and `textarea` are blocks, not `form-...` elements.
 - In SCSS, build names with `&-` and `&--` concatenation, and keep the source nested for readability even though the generated names stay flat.
 
-Names convert to camelCase in TypeScript (css-loader `camel-case-only`), so `.footer-button--cancel` becomes `styles.footerButtonCancel`.
+Names convert to camelCase in TypeScript (postcss-modules `localsConvention: 'camelCaseOnly'` in `HallOfFame/UI/build.ts`), so `.footer-button--cancel` becomes `styles.footerButtonCancel`.
 Always access them via `import * as styles from './x.module.scss'`.
 
 ## File layout
@@ -27,13 +27,13 @@ Always access them via `import * as styles from './x.module.scss'`.
 - Cross-subcomponent SCSS variables and mixins live in a colocated `shared.scss` partial.
   It must contain only variables and mixins (no top-level rules), so `@use` never re-emits CSS per importer.
 - Cross-subcomponent emitted classes and shared trait blocks live in a colocated `shared.module.scss`, mixed in via `classNames`.
-  Do not `composes` from these SCSS modules: the type generator parses a `composes` target as plain CSS and chokes on its SCSS syntax, though webpack handles it fine.
+  Do not `composes` from these SCSS modules: the type generator parses a `composes` target as plain CSS and chokes on its SCSS syntax.
 - Component-local tokens stay in the component module, not in the shared files.
 
 ## Generated class names
 
-- css-loader emits each class as `hof-[local]_[hash]` (e.g. `.cityInfo-name` becomes `hof-cityInfo-name_aB3`). The `hof-` prefix namespaces every mod class.
-- Because of that prefix, attribute selectors that reach into vanilla game-UI internals, like `[class*="icon"]`, `[class^="track"]`, or `[class^="content"]`, never match our own classes: ours all start with `hof-`. Use them to target the game's generated structure inside a vanilla component (icons, scrollbar tracks, dropdown popups) without colliding with mod classes.
+- `HallOfFame/UI/build.ts` scopes each class as `hof-[local]_[hash]` (e.g. `.cityInfo-name` becomes `hof-cityInfo-name_aB3`). The `hof-` prefix namespaces every mod class.
+- Because of that prefix, prefix selectors that reach into vanilla game-UI internals, like `[class^="track"]` or `[class^="content"]`, never match our own classes: ours all start with `hof-`. Use them to target the game's generated structure inside a vanilla component (scrollbar tracks, dropdown popups) without colliding with mod classes. A substring selector like `[class*="icon"]` gets no such protection: it also matches a mod class containing the word, such as `hof-row-icon_aB3`.
 
 ## Typed CSS modules
 

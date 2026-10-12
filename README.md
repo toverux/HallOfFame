@@ -105,10 +105,8 @@ Special thanks to:
 ### Installation
 
 1. Standard CS2 modding toolchain (on Linux, see [below](#linux) instead);
-2. (Recommended) Install [mise-en-place](https://mise.jdx.dev) for per-project .NET SDK, Node.js &
-   Bun version management. Without mise, just match the required versions specified in `mise.toml`.
-   For now, Node is still and only needed alongside Bun to run Webpack
-   (https://github.com/oven-sh/bun/issues/10768).
+2. (Recommended) Install [mise-en-place](https://mise.jdx.dev) for per-project .NET SDK and Bun
+   version management. Without mise, just match the required versions specified in `mise.toml`.
 3. `bun i` to install UI mod dependencies.
 4. Recommended: enable `--developerMode --uiDeveloperMode` as game launch options.
 
