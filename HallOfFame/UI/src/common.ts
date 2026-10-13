@@ -46,6 +46,7 @@ export interface Screenshot {
   readonly cityPopulation: number;
   readonly mapName: string;
   readonly description: string;
+  readonly imageUrlThumbnail: string;
   readonly imageUrlFHD: string;
   readonly imageUrl4K: string;
   // Tracked redirect to this screenshot's viewer page: it counts the click, then redirects.
@@ -70,6 +71,11 @@ export interface Screenshot {
   readonly viewsCount: number;
   readonly uniqueViewsCount: number;
   readonly likingPercentage: number;
+  readonly viewerClicksCount: number;
+  // `null` while the screenshot has too few viewers or too few likes to be ranked.
+  readonly rank: ScreenshotRank | null;
+  // Reported by a player and not yet cleared by a moderator.
+  readonly isReported: boolean;
   readonly isLiked: boolean;
   // Always present for the endpoints the mod calls. The server omits it only on PUT/DELETE
   // /screenshots, which the mod does not call; if that changes, make this optional and guard the
@@ -77,6 +83,36 @@ export interface Screenshot {
   readonly creator: Creator;
   readonly showcasedMod?: Mod;
 }
+
+/**
+ * The medals a ranked screenshot holds, lowest first.
+ */
+export const screenshotRanks = ['bronze', 'silver', 'gold', 'platinum', 'diamond'] as const;
+
+export type ScreenshotRank = (typeof screenshotRanks)[number];
+
+/**
+ * Serialization of C# `HallOfFame.Domain.DashboardScreenshot`: the fields of a screenshot the
+ * Creator Dashboard's grid reads, under the same names.
+ */
+export type DashboardScreenshot = Pick<
+  Screenshot,
+  | 'id'
+  | 'cityName'
+  | 'cityNameLocale'
+  | 'cityNameLatinized'
+  | 'cityNameTranslated'
+  | 'imageUrlThumbnail'
+  | 'createdAt'
+  | 'createdAtFormatted'
+  | 'createdAtFormattedDistance'
+  | 'likesCount'
+  | 'viewsCount'
+  | 'uniqueViewsCount'
+  | 'rank'
+  | 'viewerClicksCount'
+  | 'isReported'
+>;
 
 export type RenderConditionValue = number | string | boolean;
 
@@ -90,6 +126,19 @@ export type ScreenshotCapability =
   | 'shareRenderSettings'
   | 'renderSettings'
   | 'renderConditions';
+
+/**
+ * Serialization of C# `HallOfFame.Domain.CreatorStats`: the creator's totals, and the thresholds a
+ * screenshot must reach to be ranked.
+ */
+export interface CreatorStats {
+  readonly screenshotsCount: number;
+  readonly viewsCount: number;
+  readonly uniqueViewsCount: number;
+  readonly likesCount: number;
+  readonly rankMinUniqueViewsCount: number;
+  readonly rankMinLikesCount: number;
+}
 
 /**
  * Serialization of C# `HallOfFame.Systems.PhotoModeCatalogEntry`: one property of the game's photo

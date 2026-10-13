@@ -35,6 +35,34 @@ public sealed class ScreenshotTests {
   }
 
   [Fact]
+  public void Decode_ThumbnailRankAndReviewFields_AreRead() {
+    var screenshot = JSON.MakeInto<Screenshot>(
+      JSON.Load(
+        """
+        {
+          "imageUrlThumbnail": "https://cdn/thumb.jpg",
+          "rank": "platinum",
+          "isReported": true,
+          "viewerClicksCount": 7
+        }
+        """
+      )
+    );
+
+    Assert.Equal("https://cdn/thumb.jpg", screenshot.ImageUrlThumbnail);
+    Assert.Equal("platinum", screenshot.Rank);
+    Assert.True(screenshot.IsReported);
+    Assert.Equal(7, screenshot.ViewerClicksCount);
+  }
+
+  [Fact]
+  public void Decode_NullRank_StaysNull() {
+    var screenshot = JSON.MakeInto<Screenshot>(JSON.Load("""{ "id": "1", "rank": null }"""));
+
+    Assert.Null(screenshot.Rank);
+  }
+
+  [Fact]
   public void Decode_NoRenderConditions_GivesAnEmptyMap() {
     var screenshot = JSON.MakeInto<Screenshot>(JSON.Load("""{ "id": "1" }"""));
 

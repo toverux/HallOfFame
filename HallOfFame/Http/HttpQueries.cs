@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading.Tasks;
 using Colossal.Json;
 using Game.SceneFlow;
@@ -122,14 +123,22 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   /// Sends a request expecting a JSON body, then parses and status-maps it into
   /// <typeparamref name="T"/> (see <see cref="ParseResponse{T}"/>).
   /// </summary>
+  /// <param name="isDecodedOffMainThread">
+  /// Parses and maps the body on a worker thread,
+  /// for a response large enough that decoding it would freeze a frame:
+  /// Colossal.Json's reflection-based mapping takes seconds on a few megabytes.
+  /// Only for a <typeparamref name="T"/> without type hints or decode hooks,
+  /// as those reach state shared with the main thread.
+  /// </param>
   private static async Task<T> Send<T>(
     UnityWebRequest request,
     ProgressHandler? progressHandler = null,
-    int timeoutSeconds = HttpQueries.RequestTimeoutSeconds
+    int timeoutSeconds = HttpQueries.RequestTimeoutSeconds,
+    bool isDecodedOffMainThread = false
   ) where T : new() {
     await HttpQueries.SendRequest(request, timeoutSeconds, progressHandler);
 
-    return HttpQueries.ParseResponse<T>(request);
+    return await HttpQueries.ParseResponse<T>(request, isDecodedOffMainThread);
   }
 
   /// <summary>
@@ -234,7 +243,10 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
     );
   }
 
-  private static T ParseResponse<T>(UnityWebRequest request) where T : new() {
+  private static async Task<T> ParseResponse<T>(
+    UnityWebRequest request,
+    bool isDecodedOffMainThread
+  ) where T : new() {
     var requestId = HttpQueries.GetRequestId(request);
 
     if (!request.isDone) {
@@ -252,7 +264,7 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
       // Unity's client is high-level and interprets non-2xx status codes as "protocol errors".
       // ReSharper disable once InvertIf
       if (request.result is UnityWebRequest.Result.ProtocolError) {
-        var error = HttpQueries.ParseResponseJson<JsonError>(request);
+        var error = HttpQueries.DecodeJson<JsonError>(requestId, request.downloadHandler.text);
 
         throw request.responseCode switch {
           >= 500 =>
@@ -269,7 +281,17 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
 
       // So far so good, we can parse the JSON response.
       // This will throw if the JSON is invalid, our job here is done.
-      return HttpQueries.ParseResponseJson<T>(request);
+      // The body is read here, as the request is native and only answers on the main thread.
+      // Off it, only its bytes are copied here, decoding them into text being part of the work.
+      if (!isDecodedOffMainThread) {
+        return HttpQueries.DecodeJson<T>(requestId, request.downloadHandler.text);
+      }
+
+      var body = request.downloadHandler.data ?? [];
+
+      return await Task.Run(() =>
+        HttpQueries.DecodeJson<T>(requestId, Encoding.UTF8.GetString(body))
+      );
     }
     catch (Exception ex) {
       // If this is a network error (or else), log as-is.
@@ -292,12 +314,12 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
     }
   }
 
-  private static T ParseResponseJson<T>(UnityWebRequest request)
+  /// <summary>
+  /// Parses and maps a JSON body into <typeparamref name="T"/>, touching nothing but its
+  /// arguments, so it also runs off the main thread.
+  /// </summary>
+  private static T DecodeJson<T>(string requestId, string json)
     where T : new() {
-    var requestId = HttpQueries.GetRequestId(request);
-
-    var json = request.downloadHandler.text;
-
     try {
       if (string.IsNullOrWhiteSpace(json)) {
         throw new Exception("Empty body response.");

@@ -85,6 +85,26 @@ describe('MenuControlsContent', () => {
     expect(screen.getAllByText('A city.')).toHaveLength(1);
   });
 
+  it(`leaves the details key to the dashboard while it is open`, () => {
+    setBinding('hallOfFame.common', 'settings', makeSettings({ showScreenshotDetails: false }));
+
+    setBinding(
+      'hallOfFame.slideshow',
+      'screenshot',
+      makeScreenshot({ description: 'A city.', capabilities: ['description'] })
+    );
+
+    setBinding('hallOfFame.dashboard', 'state', { status: 'loading' });
+
+    render(<MenuControlsContent />);
+
+    act(() => {
+      setBinding('hallOfFame.slideshow', 'screenshotDetailsInputAction.phase', 'Performed');
+    });
+
+    expect(screen.queryByText('A city.')).toBeNull();
+  });
+
   describe('showcased mod', () => {
     function showcase(stability?: string): void {
       setTranslations({

@@ -1,0 +1,54 @@
+.medalTooltip {
+  display: flex;
+  flex-direction: column;
+
+  &-popular {
+    margin-top: 6rem;
+  }
+}
+
+// A glint sweeping over the diamond's facets now and then, the light catching the one medal
+// that is cut rather than struck.
+.diamond {
+  position: relative;
+
+  &-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  // The sweep, a streak of light three gems wide so it rests out of sight between passes, cut
+  // to the diamond's own silhouette.
+  &-glint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    mask-size: 100% 100%;
+    background-image: linear-gradient(
+      110deg,
+      rgba(255, 255, 255, 0) 44%,
+      rgba(255, 255, 255, 0.9) 50%,
+      rgba(255, 255, 255, 0) 56%
+    );
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    animation: diamond-glint 2.4s ease-in-out infinite;
+  }
+}
+
+@keyframes diamond-glint {
+  0% {
+    background-position: 100% 0;
+  }
+
+  50% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}

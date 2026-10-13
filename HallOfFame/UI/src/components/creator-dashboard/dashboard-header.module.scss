@@ -1,0 +1,448 @@
+@use "sass:color";
+@use "sass:math";
+@use "../../vanilla-vars" as vanilla;
+@use "../../area-menu/menu-controls/shared" as menu;
+@use "./shared" as shared;
+
+// Above and below the band's contents.
+$band-padding: 28rem;
+
+// Between the band's groups: a rule keeps this much on each side, and a group keeps this much
+// from the group before it.
+$group-gap: 24rem;
+
+// The window's corner, which the band's top corners follow: the window clips nothing, so a square
+// band would stick out of its rounding.
+$window-radius: 12rem;
+
+// The band's edge, the line setting it apart from the body.
+$band-border-width: 1rem;
+
+// The rules setting the band's parts apart, which stop short of its edges.
+$rule-color: rgba(255, 255, 255, 0.2);
+$rule-inset: 20rem;
+
+$tab-medal-size: 28rem;
+$tab-glyph-size: 22rem;
+
+// The width of a medal's disc over its box, the medal icons' own proportion.
+$medal-disc-ratio: math.div(28, 32);
+
+// A tab's own horizontal padding, which the gap before the first tab discounts so its icon sits
+// a group gap from the rule.
+$tab-padding: 12rem;
+
+// A line's height over its font size, stated wherever a blank must stand in for a line of text:
+// a blank's box is this tall in the text's own em, so the skeleton is as tall as the band it
+// stands in for.
+$line-height: 1.2;
+
+// The band's surface, which each of its parts paints for itself rather than the band as a whole:
+// the selected tab paints none of it, and is a gap in the band through which the body shows, so
+// the tab and the grid it narrows are one surface. No flat colour could stand in for the body,
+// a gradient over the blurred menu.
+@mixin band-surface {
+  // Longhands: the engine drops a shorthand holding a custom property.
+  border-bottom-width: $band-border-width;
+  border-bottom-style: solid;
+  border-bottom-color: vanilla.$menu-border-color-1;
+  background-color: shared.$band-color;
+}
+
+@mixin rule {
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 1rem;
+  margin: $rule-inset 0;
+  background-color: $rule-color;
+}
+
+// The window's one band, its title bar and the creator's standing in one: the body's chrome rather
+// than a card among the cards.
+.header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  align-items: stretch;
+  // The tabs' height, which the band keeps while there are none to give it, over an error.
+  min-height: $tab-medal-size + 2 * $band-padding;
+
+  // The band's start: the mod's logo and the window's name, set apart from the rest by a rule.
+  &-brand {
+    @include band-surface;
+
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: center;
+    padding-left: shared.$edge-padding;
+    border-top-left-radius: $window-radius;
+  }
+
+  &-logo {
+    width: 40rem;
+    height: 40rem;
+  }
+
+  // Two lines beside the logo, like a wordmark, where one line would run the band's start long.
+  &-title {
+    margin-left: 12rem;
+
+    font-size: vanilla.$font-size-l;
+    font-weight: bold;
+    line-height: 1.15;
+  }
+
+  // The first line dimmed, the qualifier of the name under it.
+  &-titleKicker {
+    color: menu.$dimmed-color;
+  }
+
+  &-rule {
+    @include rule;
+
+    margin-left: $group-gap;
+    margin-right: $group-gap;
+  }
+
+  // The creator's totals, between the brand and the tabs, with a rule on each side.
+  &-standing {
+    @include band-surface;
+
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    align-items: center;
+
+    // The tabs' own padding takes it the rest of the way to a group gap.
+    > .header-rule:last-child {
+      margin-right: $group-gap - $tab-padding;
+    }
+  }
+
+  &-tabs {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  // A vanilla button, which inherits no text style: the band's is restated here.
+  &-tab {
+    @include band-surface;
+
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+
+    color: vanilla.$menu-text-1-normal;
+    font-size: vanilla.$font-size-l;
+    line-height: $line-height;
+    transition: color 0.1s ease-in-out;
+
+    &:hover {
+      color: vanilla.$menu-active-color-bright;
+    }
+
+    // The border stays, see-through, so the face keeps its box and its content its place: a
+    // dropped border would give the face the border's height and shift what it centres.
+    &--selected {
+      border-bottom-color: transparent;
+      background-color: transparent;
+
+      color: vanilla.$menu-active-color-bright;
+
+      // The band's edge carried up each side of the gap, so the tab is cut into the band rather
+      // than laid flat on it. An overlay rather than the tab's own borders, which would widen the
+      // tab and shift its content.
+      &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        // Through the see-through bottom border, to meet the neighbours' edge.
+        bottom: -$band-border-width;
+        left: 0;
+        border-width: 0 $band-border-width;
+        border-style: solid;
+        border-right-color: vanilla.$menu-border-color-1;
+        border-left-color: vanilla.$menu-border-color-1;
+        pointer-events: none;
+      }
+    }
+
+    // Dimmed in its face alone: a dimmed box would let the body show through the band.
+    &--placeholder > .header-tabFace {
+      opacity: 0.4;
+    }
+  }
+
+  // The tab's content, which takes the hover light over the band the tab's box paints.
+  &-tabFace {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    align-items: center;
+    padding: $band-padding $tab-padding;
+    transition: background-color 0.1s ease-in-out;
+
+    .header-tab:hover > & {
+      background-color: vanilla.$menu-hover-color;
+    }
+
+    .header-tab--selected:hover > & {
+      background-color: transparent;
+    }
+  }
+
+  // The rest of the band after the tabs, where the sort control sits at the end.
+  &-rest {
+    @include band-surface;
+
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    padding-left: $group-gap;
+  }
+
+  // The band's end, the close button's.
+  &-end {
+    @include band-surface;
+
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    padding: 0 shared.$edge-padding 0 $group-gap;
+    border-top-right-radius: $window-radius;
+  }
+
+  // A plain glyph on the band, lit on hover like a tab, where the game's round button would
+  // stamp a disc of its own on the band.
+  &-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36rem;
+    height: 36rem;
+    border-radius: 50%;
+    transition: background-color 0.1s ease-in-out;
+
+    &:hover,
+    &:focus {
+      background-color: vanilla.$menu-hover-color;
+    }
+
+    &Glyph {
+      --iconColor: #{vanilla.$menu-text-1-normal};
+
+      width: 18rem;
+      height: 18rem;
+
+      .header-close:hover > &,
+      .header-close:focus > & {
+        --iconColor: #{vanilla.$menu-active-color-bright};
+      }
+    }
+  }
+
+  &-tabMedal {
+    width: $tab-medal-size;
+    height: $tab-medal-size;
+    margin-right: 7rem;
+  }
+
+  // A glyph, drawn smaller than a medal's disc as the quieter mark of no medal, and scaled in its
+  // box by the disc's own ratio so the ring sits in it as a medal's disc sits in a medal's. Both
+  // glyphs at one scale keep their family's stroke and balance.
+  &-tabGlyph {
+    --iconColor: #{menu.$dimmed-color};
+
+    width: $tab-glyph-size;
+    height: $tab-glyph-size;
+    margin: 0 10rem 0 3rem;
+    mask-size: $medal-disc-ratio * 100%;
+
+    // Lit with the tab's text, which sits beside it in the face.
+    .header-tab:hover &,
+    .header-tab--selected & {
+      --iconColor: #{vanilla.$menu-active-color-bright};
+    }
+  }
+
+  &-totals {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  &-total {
+    display: flex;
+    flex-direction: column;
+
+    & + & {
+      margin-left: 28rem;
+    }
+
+    &Value {
+      font-size: vanilla.$font-size-xl;
+      font-weight: bold;
+      line-height: $line-height;
+    }
+
+    &Label {
+      margin-top: 2rem;
+
+      color: menu.$dimmed-color;
+      font-size: vanilla.$font-size-s;
+      line-height: $line-height;
+    }
+  }
+
+  // The box of the line of text a blank stands in for.
+  &-blank {
+    display: flex;
+    align-items: center;
+    height: #{$line-height}em;
+  }
+
+  &-bar {
+    height: 0.6em;
+    border-radius: 0.3em;
+    background-color: rgba(255, 255, 255, 0.15);
+
+    &--count {
+      width: 1.8em;
+    }
+
+    &--value {
+      width: 3em;
+    }
+
+    &--label {
+      width: 3.5em;
+    }
+
+    &--sort {
+      width: 6em;
+    }
+  }
+}
+
+.tabTooltip {
+  display: flex;
+  flex-direction: column;
+
+  // Held to a paragraph's width, where a tooltip would run its sentences on one line.
+  &-detail {
+    max-width: 320rem;
+    margin-top: 6rem;
+  }
+}
+
+// Set apart from the tabs by a rule: the tabs narrow the grid, the control orders it.
+.sort {
+  display: flex;
+  flex-direction: row;
+  flex-shrink: 0;
+  align-self: stretch;
+  align-items: center;
+
+  &::before {
+    @include rule;
+
+    content: "";
+    margin-right: $group-gap;
+  }
+
+  &-label {
+    margin-right: 10rem;
+
+    color: menu.$dimmed-color;
+    font-size: vanilla.$font-size-m;
+  }
+
+  // A field in the window's own dark, where the game's default toggle is the white of its in-game
+  // forms. A vanilla button inherits no text style, so the label's is restated here.
+  &-toggle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 7rem 10rem 7rem 12rem;
+    border: 1rem solid $rule-color;
+    border-radius: 4rem;
+    background-color: rgba(0, 0, 0, 0.3);
+
+    color: vanilla.$text-color;
+    font-size: vanilla.$font-size-m;
+    line-height: $line-height;
+    text-align: left;
+    transition:
+      border-color 0.1s ease-in-out,
+      background-color 0.1s ease-in-out;
+
+    &:hover,
+    &:focus {
+      border-color: rgba(255, 255, 255, 0.45);
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    &Label {
+      white-space: nowrap;
+    }
+
+    // A label's width without its height: stacked under the shown one, these set the toggle's
+    // width to the widest label's.
+    &Sizer {
+      height: 0;
+      overflow: hidden;
+      visibility: hidden;
+    }
+
+    &Indicator {
+      --iconColor: #{menu.$dimmed-color};
+
+      flex-shrink: 0;
+      width: 1em;
+      height: 1em;
+      margin-left: 8rem;
+    }
+  }
+
+  &-popup {
+    margin-top: 4rem;
+  }
+
+  // The toggle's own dark, opaque so the cards scrolling under it never show through.
+  &-menu {
+    padding: 4rem;
+    border: 1rem solid $rule-color;
+    border-radius: 4rem;
+    background-color: color.change(vanilla.$panel-color-dark, $alpha: 0.98);
+    box-shadow: 0 4rem 16rem rgba(0, 0, 0, 0.4);
+  }
+
+  &-item {
+    padding: 7rem 10rem;
+    border-radius: 3rem;
+
+    color: vanilla.$menu-text-1-normal;
+    font-size: vanilla.$font-size-m;
+    text-align: left;
+    transition: background-color 0.1s ease-in-out;
+
+    &:hover,
+    &:global(.focused) {
+      background-color: vanilla.$menu-hover-color;
+      color: vanilla.$menu-active-color-bright;
+    }
+
+    &:global(.selected) {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: vanilla.$menu-active-color-bright;
+    }
+  }
+}

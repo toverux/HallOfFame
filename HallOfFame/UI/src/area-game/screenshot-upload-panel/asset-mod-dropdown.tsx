@@ -19,18 +19,13 @@ import {
   deriveModThumbnailUri,
   getClassesModule,
   selector,
-  findScrollableContent,
-  useMeasuredRowHeight,
-  useTranslate
+  useTranslate,
+  useUniformVirtualList
 } from '../../utils';
 import type * as bindings from '../../utils/bindings';
 import { defaultButtonSounds } from '../../vanilla-modules/game-ui/common/input/button/button';
 import { DropdownContext } from '../../vanilla-modules/game-ui/common/input/dropdown/dropdown';
 import { TextInput } from '../../vanilla-modules/game-ui/common/input/text/text-input';
-import {
-  useUniformSizeProvider,
-  useVirtualList
-} from '../../vanilla-modules/game-ui/common/scrolling/virtual-list/virtual-list';
 import { type AssetModMatch, type HighlightRange, searchAssetMods } from './asset-mod-search';
 import * as styles from './asset-mod-dropdown.module.scss';
 import * as shared from './shared.module.scss';
@@ -127,32 +122,6 @@ function AssetModMenu({
   matches: readonly AssetModMatch[];
   onSelect: (mod: bindings.JsonMod) => void;
 }>): ReactElement {
-  const scrollableRef = useRef<HTMLElement | null>(null);
-
-  // The scroll container is vanilla's, built by `Dropdown` around whatever content it is given.
-  const findScrollable = useCallback((node: HTMLElement | null) => {
-    scrollableRef.current = findScrollableContent(node);
-  }, []);
-
-  // A new match set is a new list, so it has to start at the top. Neither vanilla's `Scrollable`
-  // nor the virtual list ever rewinds one: the list maps whatever scroll position survived onto the
-  // new rows, which opens a filtered list part-way down, past the very matches ranked best, and
-  // shows nothing at all when the new set is shorter than the position it kept.
-  useEffect(() => {
-    if (scrollableRef.current) {
-      scrollableRef.current.scrollTop = 0;
-    }
-    // oxlint-disable-next-line react/exhaustive-effect-dependencies - `matches` is the trigger
-  }, [matches]);
-
-  const rowHeight = useMeasuredRowHeight(
-    scrollableRef,
-    selector(dropdownTheme.dropdownItem),
-    ESTIMATED_ROW_HEIGHT_PX
-  );
-
-  const sizeProvider = useUniformSizeProvider(rowHeight, matches.length, MENU_OVERSCAN);
-
   const renderItem = useCallback(
     (index: number) => {
       const match = matches[index];
@@ -165,12 +134,32 @@ function AssetModMenu({
     [matches, onSelect]
   );
 
-  const { list } = useVirtualList(scrollableRef, sizeProvider, 'vertical', undefined, renderItem);
+  // The scroll container is vanilla's, built by `Dropdown` around whatever content it is given.
+  const { anchorRef, scrollableRef, list } = useUniformVirtualList({
+    count: matches.length,
+    overscan: MENU_OVERSCAN,
+    rowSelector: selector(dropdownTheme.dropdownItem),
+    estimatedRowHeightPx: ESTIMATED_ROW_HEIGHT_PX,
+    renderRow: renderItem
+  });
+
+  // A new match set is a new list, so it has to start at the top. Neither vanilla's `Scrollable`
+  // nor the virtual list ever rewinds one: the list maps whatever scroll position survived onto the
+  // new rows, which opens a filtered list part-way down, past the very matches ranked best, and
+  // shows nothing at all when the new set is shorter than the position it kept.
+  useEffect(() => {
+    const scrollable = scrollableRef.current;
+
+    if (scrollable) {
+      scrollable.scrollTop = 0;
+    }
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies - `matches` is the trigger
+  }, [matches, scrollableRef]);
 
   return (
     <>
-      {/* The node `findScrollable` climbs out of, which is what puts the menu in the DOM. */}
-      <div ref={findScrollable} />
+      {/* The node the list climbs out of, which is what puts the menu in the DOM. */}
+      <div ref={anchorRef} />
 
       {list}
     </>
@@ -227,9 +216,9 @@ function AssetModMenuItem({
 const MENU_OVERSCAN = 3;
 
 /**
- * What the first render assumes a row measures, before {@link useMeasuredRowHeight} replaces it
- * with the real one: vanilla's row padding plus a line of `--fontSizeXL`, which is what a row
- * measures at the resolution where a `rem` is a pixel.
+ * What the first render assumes a row measures, before a rendered one is measured in its place:
+ * vanilla's row padding plus a line of `--fontSizeXL`, which is what a row measures at the
+ * resolution where a `rem` is a pixel.
  *
  * It is a pixel count where everything else here is in `rem`, because the value it feeds is one:
  * the engine resolves `rem` itself and hands nothing back, so there is no reading this in the

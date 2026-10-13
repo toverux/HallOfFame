@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { iconsole } from '../../iconsole';
+import { useImageLoaded } from '../../utils';
 import * as bindings from '../../utils/bindings';
 
 /**
@@ -19,43 +20,26 @@ export function useCaptureRevealGate(
   previewImageUri: string | null,
   preloadImage: (url: string) => Promise<void>
 ): boolean {
-  // The preview URI whose decoding has completed and may now be revealed.
-  const [revealedUri, setRevealedUri] = useState<string | null>(null);
+  // A failed preload still reveals the panel, but is worth a log.
+  const preloadOrLog = useCallback(
+    async (url: string): Promise<void> => {
+      try {
+        await preloadImage(url);
+      } catch (error) {
+        iconsole.error(`HoF: Failed to preload capture preview "${url}".`, error);
+      }
+    },
+    [preloadImage]
+  );
 
+  const isRevealed = useImageLoaded(previewImageUri, preloadOrLog);
+
+  // Once per capture, as its URI starts gated again.
   useEffect(() => {
-    if (previewImageUri == null) {
-      // oxlint-disable-next-line react/set-state-in-effect - clearing the gate is the effect's job
-      setRevealedUri(null);
-
-      return;
+    if (isRevealed) {
+      bindings.playSound('take-photo');
     }
+  }, [isRevealed]);
 
-    let canceled = false;
-
-    // A React effect callback must return its cleanup synchronously, so this preload runs as a
-    // fire-and-forget chain rather than being awaited.
-    // oxlint-disable-next-line promise/catch-or-return - see above
-    preloadImage(previewImageUri)
-      // oxlint-disable-next-line promise/prefer-await-to-then, promise/prefer-await-to-callbacks - see above
-      .catch((error: unknown) => {
-        iconsole.error(`HoF: Failed to preload capture preview "${previewImageUri}".`, error);
-      })
-      // oxlint-disable-next-line promise/prefer-await-to-then - see above
-      .finally(() => {
-        if (canceled) {
-          return;
-        }
-
-        setRevealedUri(previewImageUri);
-
-        bindings.playSound('take-photo');
-      });
-
-    // oxlint-disable-next-line typescript/consistent-return - effect returns a cleanup fn or nothing (early exit)
-    return () => {
-      canceled = true;
-    };
-  }, [previewImageUri, preloadImage]);
-
-  return previewImageUri != null && revealedUri == previewImageUri;
+  return isRevealed;
 }

@@ -1,5 +1,6 @@
 import type { MutableRefObject, ReactNode } from 'react';
-import { getModuleExport } from '../../../../../utils';
+// The module rather than the index, which re-exports the mod's hooks over this one.
+import { getModuleExport } from '../../../../../utils/vanilla-modules';
 
 /**
  * The slice of a list to render: which items the viewport covers, and where they sit.

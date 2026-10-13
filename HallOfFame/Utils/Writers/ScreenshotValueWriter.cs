@@ -62,6 +62,9 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
     writer.PropertyName("description");
     writer.Write(value.Description);
 
+    writer.PropertyName("imageUrlThumbnail");
+    writer.Write(value.ImageUrlThumbnail);
+
     writer.PropertyName("imageUrlFHD");
     writer.Write(value.ImageUrlFHD);
 
@@ -114,6 +117,15 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
 
     writer.PropertyName("likingPercentage");
     writer.Write(value.LikingPercentage);
+
+    writer.PropertyName("rank");
+    writer.Write(value.Rank);
+
+    writer.PropertyName("viewerClicksCount");
+    writer.Write(value.ViewerClicksCount);
+
+    writer.PropertyName("isReported");
+    writer.Write(value.IsReported);
 
     writer.PropertyName("isLiked");
     writer.Write(value.IsLiked);

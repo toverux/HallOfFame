@@ -1,0 +1,22 @@
+// The durations of the panel's own transition, which the backdrop fades in step with.
+$enter-duration: 250ms;
+$exit-duration: 150ms;
+
+.backdrop {
+  animation: backdrop-enter $enter-duration ease-out;
+  transition: opacity $exit-duration;
+
+  &--exiting {
+    opacity: 0;
+  }
+}
+
+@keyframes backdrop-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

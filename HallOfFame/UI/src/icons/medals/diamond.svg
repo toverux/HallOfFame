@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <!-- Where two facets meet, the one drawn first runs on under the other, so the edge between
+       them is drawn once, over a solid fill, and never shows what lies under the icon. -->
+  <path d="M10 6h4.5l-1 9.5L3 14z" fill="#aee4fb"/>
+  <path d="M17.5 6H22l7 8-10.5 1.5z" fill="#78caf3"/>
+  <path d="M13 6h6l1.19 9.5H11.81z" fill="#e4f7ff"/>
+  <path d="M3 14h10.5L16 29z" fill="#4eb5ea"/>
+  <path d="M18.5 14H29L16 29z" fill="#2577b2"/>
+  <path d="M12 14h8l-4 15z" fill="#96daf8"/>
+</svg>

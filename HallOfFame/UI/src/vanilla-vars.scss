@@ -39,3 +39,5 @@ $panel-gradient-middle: var(--panelGradientMiddle); // var(--gradientDarkBlueMid
 
 // Game's "Legacy interface" vars
 $legacy-panel-color-dark: rgb(24, 33, 51, 0.6); // rgba(24, 33, 51, var(--panelOpacityDark))
+$menu-border-color-1: var(--menuBorderColor1); // rgba(255, 255, 255, 0.1)
+$menu-hover-color: var(--menuHoverColor); // rgba(255, 255, 255, 0.1)

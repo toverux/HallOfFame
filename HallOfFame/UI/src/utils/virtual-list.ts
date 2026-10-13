@@ -1,9 +1,87 @@
-import { type MutableRefObject, useEffect, useState } from 'react';
+import {
+  type MutableRefObject,
+  type ReactNode,
+  type RefCallback,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
+import {
+  useUniformSizeProvider,
+  useVirtualList
+} from '../vanilla-modules/game-ui/common/scrolling/virtual-list/virtual-list';
 import { getClassesModule, selector } from './vanilla-modules';
 
 const coScrollableClasses = getClassesModule('game-ui/common/scrolling/scrollable.module.scss', [
   'content'
 ]);
+
+export interface UniformVirtualListOptions {
+  readonly count: number;
+
+  /**
+   * Rows kept rendered past each edge of the viewport.
+   */
+  readonly overscan: number;
+
+  /**
+   * Matches every row, the first one rendered being measured, see {@link useMeasuredRowHeight}.
+   */
+  readonly rowSelector: string;
+
+  readonly estimatedRowHeightPx: number;
+
+  readonly className?: string | undefined;
+
+  /**
+   * Keep it stable, memoized on what it reads: the list rebuilds its rows whenever it changes, and
+   * it re-renders on every scroll frame.
+   */
+  readonly renderRow: (index: number) => ReactNode;
+}
+
+export interface UniformVirtualList {
+  /**
+   * For an empty node rendered beside the list, inside the vanilla `Scrollable` the list scrolls
+   * in, which the list climbs out of to find its scroll container.
+   */
+  readonly anchorRef: RefCallback<HTMLElement>;
+
+  /**
+   * The list's scroll container once the anchor is mounted.
+   */
+  readonly scrollableRef: MutableRefObject<HTMLElement | null>;
+
+  readonly list: ReactNode;
+}
+
+/**
+ * The game's virtual list over rows of one height, only those in view built, rendered into a
+ * vanilla `Scrollable` around it rather than into one of its own.
+ */
+export function useUniformVirtualList({
+  count,
+  overscan,
+  rowSelector,
+  estimatedRowHeightPx,
+  className,
+  renderRow
+}: UniformVirtualListOptions): UniformVirtualList {
+  const scrollableRef = useRef<HTMLElement | null>(null);
+
+  const anchorRef = useCallback((node: HTMLElement | null) => {
+    scrollableRef.current = findScrollableContent(node);
+  }, []);
+
+  const rowHeight = useMeasuredRowHeight(scrollableRef, rowSelector, estimatedRowHeightPx);
+
+  const sizeProvider = useUniformSizeProvider(rowHeight, count, overscan);
+
+  const { list } = useVirtualList(scrollableRef, sizeProvider, 'vertical', className, renderRow);
+
+  return { anchorRef, scrollableRef, list };
+}
 
 /**
  * The element that scrolls in the vanilla `Scrollable` a virtual list renders into, for the list's
@@ -13,7 +91,7 @@ const coScrollableClasses = getClassesModule('game-ui/common/scrolling/scrollabl
  * The outer one carries the scrollbar tracks and never moves, so a scroll position read from it is
  * always zero.
  */
-export function findScrollableContent(node: HTMLElement | null): HTMLElement | null {
+function findScrollableContent(node: HTMLElement | null): HTMLElement | null {
   return node?.closest(selector(coScrollableClasses.content)) ?? null;
 }
 
@@ -29,7 +107,7 @@ export function findScrollableContent(node: HTMLElement | null): HTMLElement | n
  * measurement therefore retries on animation frames until a row answers with a height, leaving the
  * opening frames on the estimate.
  */
-export function useMeasuredRowHeight(
+function useMeasuredRowHeight(
   scrollable: MutableRefObject<HTMLElement | null>,
   rowSelector: string,
   estimatedHeightPx: number

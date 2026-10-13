@@ -1,24 +1,19 @@
 import type { DropdownTheme } from 'cs2/ui';
-import * as dropdown from '../../vanilla-modules/game-ui/common/input/dropdown/dropdown';
+import { skinDropdownTheme } from '../../vanilla-modules/game-ui/common/input/dropdown/dropdown';
 import * as styles from './dropdown-menu.module.scss';
-
-const vanillaClasses = dropdown.vanillaDropdownClasses;
 
 /**
  * The mod's skin for a vanilla `Dropdown` opened over the slideshow.
- *
- * Every key appends to the vanilla class it skins rather than replacing it, since a `theme` handed
- * to `Dropdown` replaces the default and those classes carry the popup's positioning.
  */
-export const dropdownMenuTheme: Partial<DropdownTheme> = {
-  dropdownPopup: `${vanillaClasses.dropdownPopup} ${styles.menu}`,
-  dropdownMenu: `${vanillaClasses.dropdownMenu} ${styles.menuList}`,
-  scrollable: `${vanillaClasses.scrollable} ${styles.menuScrollable}`,
-  dropdownItem: `${vanillaClasses.dropdownItem} ${styles.menuItem}`,
+export const dropdownMenuTheme: Partial<DropdownTheme> = skinDropdownTheme({
+  dropdownPopup: styles.menu,
+  dropdownMenu: styles.menuList,
+  scrollable: styles.menuScrollable,
+  dropdownItem: styles.menuItem,
   // The vanilla theme carries no `icon` class, so this one stands alone rather than skinning
   // another; without it the icon falls back to the size the game gives an unstyled one.
   icon: styles.menuItemIcon
-};
+});
 
 /**
  * `DropdownItem` types `iconTint` after the C# binding shape, where it is a color, but the `Icon`

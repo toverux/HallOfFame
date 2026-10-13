@@ -1,0 +1,26 @@
+.window {
+  // The game's windows take their body's opacity from the interface opacity setting, which leaves
+  // it see-through at the lower values. This one sits over the main menu, so its body stays dense
+  // whatever the setting.
+  --uiOpacity: 0.9;
+
+  // The screen's own proportions, with the same margin all around. A fixed height rather than a
+  // cap: the grid's virtual list needs a bounded scroll container from its first frame, before the
+  // engine has sized anything, and the panel keeps its size across loading, error, and loaded
+  // alike.
+  width: 84vw;
+  height: 84vh;
+
+  // The band runs edge to edge, so the body's own padding goes.
+  &-content {
+    padding: 0;
+  }
+}
+
+.body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  // Lets the grid's scrollable shrink to the window rather than push it taller.
+  min-height: 0;
+}

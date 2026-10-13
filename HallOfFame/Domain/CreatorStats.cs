@@ -25,4 +25,16 @@ internal record CreatorStats {
 
   [DecodeAlias("favoritesCount")]
   internal int LikesCount { get; [UsedImplicitly] set; }
+
+  /// <summary>
+  /// Unique views a screenshot needs before it can earn a medal.
+  /// </summary>
+  [DecodeAlias("rankMinUniqueViewsCount")]
+  internal int RankMinUniqueViewsCount { get; [UsedImplicitly] set; }
+
+  /// <summary>
+  /// Likes a screenshot needs to earn a medal once it has enough unique views.
+  /// </summary>
+  [DecodeAlias("rankMinFavoritesCount")]
+  internal int RankMinLikesCount { get; [UsedImplicitly] set; }
 }

@@ -3,6 +3,7 @@ import { LocalizedString } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { memo, type ReactElement, useCallback, useMemo, useState } from 'react';
 import type { Mod } from '../../common';
+import { CreatorDashboard } from '../../components/creator-dashboard/creator-dashboard';
 import { PreloadImages } from '../../components/preload-images';
 import { Tooltip } from '../../components/tooltip';
 import { useTranslate } from '../../utils';
@@ -62,6 +63,9 @@ export function MenuControls(): ReactElement {
       <PreloadImages srcs={preloadedIcons} />
 
       <MenuControlsSocialsPreloader />
+
+      {/* Outside the content, so the error view taking the controls' place leaves it open. */}
+      <CreatorDashboard />
 
       {/* Subcomponent just to avoid one stupid level of indentation! */}
       <MenuControlsContent />

@@ -1,0 +1,179 @@
+@use "../../vanilla-vars" as vanilla;
+@use "../../area-menu/menu-controls/shared" as shared;
+@use "./shared" as dashboard;
+
+$padding: 12rem;
+$medal-size: 44rem;
+
+// A framed print: the thumbnail flush in a rim, its caption below in the same frame.
+.card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  // Longhands to the side: the engine drops any shorthand holding a custom property, and
+  // border-color is one.
+  border-width: 1rem;
+  border-style: solid;
+  border-top-color: vanilla.$menu-border-color-1;
+  border-right-color: vanilla.$menu-border-color-1;
+  border-bottom-color: vanilla.$menu-border-color-1;
+  border-left-color: vanilla.$menu-border-color-1;
+  border-radius: 6rem;
+  background-color: rgba(255, 255, 255, 0.06);
+
+  // The server's thumbnails keep the screenshots' 16:9 frame.
+  &-thumbnail {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    aspect-ratio: 16 / 9;
+    padding: 8rem;
+    background-color: rgba(0, 0, 0, 0.25);
+  }
+
+  // The picture itself, faded in once it has loaded, under whatever the frame lays over it.
+  &-thumbnailImage {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+
+    &--loaded {
+      opacity: 1;
+    }
+  }
+
+  // A chip of the window's own chrome over the thumbnail, in the warning color the game flags
+  // trouble with. Positioned, so it paints over the picture rather than under it.
+  &-underReview {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4rem 8rem;
+    border-radius: 4rem;
+    background-color: dashboard.$band-color;
+
+    color: vanilla.$warning-color;
+    font-size: vanilla.$font-size-s;
+
+    &Icon {
+      // The colour a vanilla tinted icon paints its glyph with, which it does not inherit.
+      --iconColor: #{vanilla.$warning-color};
+
+      width: 16rem;
+      height: 16rem;
+      margin-right: 6rem;
+    }
+  }
+
+  &-info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: $padding;
+  }
+
+  &-text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  // Cohtml ellipsizes only a text box laid out as a column.
+  &-cityName {
+    flex-direction: column;
+    overflow: hidden;
+
+    font-size: vanilla.$font-size-m;
+    font-weight: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  // Hugs its figures, so its tooltip opens under them rather than under the card's whole width.
+  &-stats {
+    display: flex;
+    flex-direction: row;
+    align-self: flex-start;
+    margin-top: 5rem;
+
+    font-size: vanilla.$font-size-s;
+  }
+
+  &-statsTooltip {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &-stat {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    & + & {
+      margin-left: 14rem;
+    }
+
+    &Icon {
+      --iconColor: #{shared.$dimmed-color};
+
+      width: 15rem;
+      height: 15rem;
+      margin-right: 5rem;
+    }
+  }
+
+  // Hugs its text, so its tooltip opens under it rather than under the card's whole width.
+  &-date {
+    align-self: flex-start;
+    margin-top: 3rem;
+
+    color: shared.$dimmed-color;
+    font-size: vanilla.$font-size-s;
+  }
+
+  // Sized alike in every state, so the text beside it lines up from card to card. Its contents
+  // sit at the card's edge: a medal fills the slot, and Settling's hourglass ends where its
+  // progress line does.
+  &-medal {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    align-items: flex-end;
+    justify-content: center;
+    min-width: $medal-size;
+    // An empty slot keeps the size of a medal, which its tooltip needs to be hovered at all.
+    min-height: $medal-size;
+    margin-left: $padding;
+
+    &Image {
+      width: $medal-size;
+      height: $medal-size;
+    }
+
+    // Muted: a screenshot still waiting on viewers is no worse off than a medalled one.
+    &Settling {
+      --iconColor: #{shared.$dimmed-color};
+
+      width: 20rem;
+      height: 20rem;
+    }
+
+    &Progress {
+      margin-top: 4rem;
+
+      color: shared.$dimmed-color;
+      font-size: vanilla.$font-size-s;
+      white-space: nowrap;
+    }
+  }
+}

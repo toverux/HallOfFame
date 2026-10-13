@@ -3,6 +3,7 @@ export * from './mod-thumbnail';
 export * from './preload-image';
 export * from './singleton-hook';
 export * from './ui-helpers';
+export * from './use-image-loaded';
 export * from './use-translate';
 export * from './vanilla-modules';
 export * from './virtual-list';

@@ -1,0 +1,33 @@
+@use "./shared" as shared;
+
+// Half the gutter between two cards: each cell carries its share on every side.
+$cell-padding: 8rem;
+
+.grid {
+  // Fills the window's body and no more, so the list scrolls inside it from the first frame.
+  flex: 1 1 auto;
+  min-height: 0;
+
+  // The grid's own breathing room above and below, around the list rather than on its first and
+  // last rows: the list holds only the rows in view, so its first and last are whichever it holds.
+  &-rows {
+    padding: (shared.$edge-padding - $cell-padding) 0;
+  }
+
+  // Every row the same height, which the virtual list places the absent ones by.
+  &-row {
+    display: flex;
+    flex-direction: row;
+    // The list's container is sized from the height it assumes a row has, and would squeeze the
+    // rows into it: a squeezed row then measures at that assumed height and confirms it.
+    flex-shrink: 0;
+    padding: 0 (shared.$edge-padding - $cell-padding);
+  }
+
+  // A share of the row rather than a width of its own, so a partial last row leaves its missing
+  // cards' room empty.
+  &-cell {
+    width: 20%;
+    padding: $cell-padding;
+  }
+}

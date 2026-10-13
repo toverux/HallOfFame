@@ -10,6 +10,10 @@ import { DOMNodeModifier } from '../vanilla-modules/game-ui/common/dom-node/dom-
 export interface TooltipProps {
   readonly tooltip: ReactNode;
   readonly direction?: BalloonDirection | undefined;
+  /**
+   * Where the balloon lies along the anchor's edge: centred on the anchor's middle, or wholly on
+   * the `start` or `end` side of that middle, its own edge at the middle.
+   */
   readonly alignment?: BalloonAlignment | undefined;
   readonly disabled?: boolean | undefined;
   readonly forceVisible?: boolean | undefined;

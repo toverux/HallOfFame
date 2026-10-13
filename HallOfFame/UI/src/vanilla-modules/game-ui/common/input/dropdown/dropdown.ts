@@ -1,17 +1,39 @@
+import type { DropdownTheme } from 'cs2/ui';
 import { type Context, createContext } from 'react';
 import { getClassesModule, getModuleExport } from '../../../../../utils';
 
-/**
- * The default dropdown theme's classes, which carry the popup's positioning and the menu's
- * structure, not just its looks.
- * A `theme` handed to `Dropdown` replaces these rather than adding to them, so a mod class has to
- * be appended to the vanilla one it skins; on its own it would leave the popup unpositioned, which
- * reads as a menu that never opens.
- */
-export const vanillaDropdownClasses = getClassesModule(
+const vanillaDropdownKeys = [
+  'dropdownPopup',
+  'dropdownMenu',
+  'scrollable',
+  'dropdownItem'
+] as const;
+
+const vanillaDropdownClasses = getClassesModule(
   'game-ui/common/input/dropdown/themes/default.module.scss',
-  ['dropdownPopup', 'dropdownMenu', 'scrollable', 'dropdownItem']
+  vanillaDropdownKeys
 );
+
+/**
+ * A `Dropdown` theme from a mod's skin, each class appended to the vanilla one it skins where the
+ * default theme carries the popup's positioning and the menu's structure, not just its looks.
+ * A `theme` handed to `Dropdown` replaces the default rather than adding to it, and a mod class on
+ * its own would leave the popup unpositioned, which reads as a menu that never opens.
+ * The skin's other classes, a toggle's for one, stand alone.
+ */
+export function skinDropdownTheme(skin: Partial<DropdownTheme>): Partial<DropdownTheme> {
+  const theme = { ...skin };
+
+  for (const key of vanillaDropdownKeys) {
+    const className = skin[key];
+
+    if (className != null) {
+      theme[key] = `${vanillaDropdownClasses[key]} ${className}`;
+    }
+  }
+
+  return theme;
+}
 
 /**
  * Inferred from `game-ui/common/input/dropdown/dropdown.tsx`, covering the parts of the context a

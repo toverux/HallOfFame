@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { AutoNavigationScope, InputActionConsumer } from 'cs2/input';
+import { AutoNavigationScope } from 'cs2/input';
 import { type Localization, LocalizedNumber, LocalizedString, Unit } from 'cs2/l10n';
 import {
   Button,
@@ -7,21 +7,11 @@ import {
   type FormattedTextTheme,
   Icon,
   MarkdownRenderer,
-  Portal,
   Scrollable
 } from 'cs2/ui';
-import {
-  memo,
-  type ReactElement,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react';
+import { memo, type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react';
 import type { Mod, Screenshot } from '../../common';
+import { ModalBackdrop, ModalHost } from '../../components/modal';
 import { PreloadImages } from '../../components/preload-images';
 import { Tooltip } from '../../components/tooltip';
 import apertureDuotoneLightSrc from '../../icons/fontawesome/aperture-duotone-light.svg';
@@ -32,29 +22,18 @@ import paradoxModsSolidSrc from '../../icons/paradox/paradox-mods-solid.svg';
 import populationSrc from '../../icons/paradox/population.svg';
 import {
   deriveModThumbnailUri,
-  findScrollableContent,
   getClassesModule,
-  useMeasuredRowHeight,
-  useTranslate
+  useTranslate,
+  useUniformVirtualList
 } from '../../utils';
 import * as bindings from '../../utils/bindings';
-import {
-  TransitionContext,
-  TransitionState
-} from '../../vanilla-modules/game-ui/common/animations/transition-context';
-import { TransitionGroupCoordinator } from '../../vanilla-modules/game-ui/common/animations/transition-group-coordinator';
 import {
   Checkbox,
   type CheckboxTheme
 } from '../../vanilla-modules/game-ui/common/input/toggle/checkbox/checkbox';
 import { Panel } from '../../vanilla-modules/game-ui/common/panel/panel';
-import { PanelBackdrop } from '../../vanilla-modules/game-ui/common/panel/panel-backdrop';
 import { PanelTitleBar } from '../../vanilla-modules/game-ui/common/panel/panel-title-bar';
 import { iceflakePanelTheme } from '../../vanilla-modules/game-ui/common/panel/themes/iceflake-panel';
-import {
-  useUniformSizeProvider,
-  useVirtualList
-} from '../../vanilla-modules/game-ui/common/scrolling/virtual-list/virtual-list';
 import { Tab, TabBar } from '../../vanilla-modules/game-ui/common/tabs/tabs';
 import { TooltipLayout } from '../../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
 import { photoModeContainerClasses } from '../../vanilla-modules/game-ui/game/components/photo-mode/widgets/photo-mode-container';
@@ -121,23 +100,16 @@ export const ScreenshotDetailsWindow = memo(
     openTab: DetailsTabId | undefined;
     onClose: () => void;
   }>): ReactElement => (
-    <Portal>
-      {/*
-        The window's own transition group. The panel registers with it rather than with the main
-        menu's, which would file the panel under the menu screen's key and drop the menu screen
-        along with the closing window.
-      */}
-      <TransitionGroupCoordinator>
-        {openTab != undefined && (
-          <DetailsModal
-            key='details'
-            screenshot={screenshot}
-            initialTab={openTab}
-            onClose={onClose}
-          />
-        )}
-      </TransitionGroupCoordinator>
-    </Portal>
+    <ModalHost>
+      {openTab != undefined && (
+        <DetailsModal
+          key='details'
+          screenshot={screenshot}
+          initialTab={openTab}
+          onClose={onClose}
+        />
+      )}
+    </ModalHost>
   )
 );
 
@@ -225,9 +197,6 @@ function DetailsModal({
     [onClose, setSelectedTab]
   );
 
-  // The backdrop fades out alongside the panel's exit, which the transition group drives.
-  const isExiting = useContext(TransitionContext).state == TransitionState.exit;
-
   // The playset's list states, the toolbox standing above them all.
   const isListShown = selectedTab == 'playset' && isPlaysetToolboxShown(playsetTab);
 
@@ -240,90 +209,84 @@ function DetailsModal({
     selectedTab == 'playset' && playsetView ? Object.values(playsetView.filter).join('-') : '';
 
   return (
-    // The slideshow controls sit outside the focus path Back travels along, so a consumer waiting
-    // for focus would never hear it: this one listens whatever holds the focus.
-    <InputActionConsumer actions={actions} ignoreFocusState={true}>
-      <PanelBackdrop
-        className={classNames(styles.backdrop, isExiting && styles.backdropExiting)}
-        onMouseDown={onClose}>
-        <Panel
-          className={styles.window}
-          theme={iceflakePanelTheme}
-          header={
-            <>
-              <PanelTitleBar>{city.name ?? screenshot.cityName}</PanelTitleBar>
+    <ModalBackdrop actions={actions} onClose={onClose}>
+      <Panel
+        className={styles.window}
+        theme={iceflakePanelTheme}
+        header={
+          <>
+            <PanelTitleBar>{city.name ?? screenshot.cityName}</PanelTitleBar>
 
-              <TabBar className={styles.tabBar}>
-                {detailsTabs.map(tab => (
-                  <Tab
-                    key={tab.id}
-                    id={tab.id}
-                    selectedId={selectedTab}
-                    className={styles.tab}
-                    onSelect={setSelectedTab}>
-                    <Icon
-                      src={tab.iconSrc}
-                      tinted={true}
-                      className={classNames(styles.tabIcon, tab.iconClassName)}
-                    />
-                    <span className={styles.tabLabel}>{translate(tab.labelId)}</span>
-                  </Tab>
-                ))}
-              </TabBar>
-            </>
-          }
-          onClose={onClose}>
-          <PreloadImages srcs={preloadedIcons} />
+            <TabBar className={styles.tabBar}>
+              {detailsTabs.map(tab => (
+                <Tab
+                  key={tab.id}
+                  id={tab.id}
+                  selectedId={selectedTab}
+                  className={styles.tab}
+                  onSelect={setSelectedTab}>
+                  <Icon
+                    src={tab.iconSrc}
+                    tinted={true}
+                    className={classNames(styles.tabIcon, tab.iconClassName)}
+                  />
+                  <span className={styles.tabLabel}>{translate(tab.labelId)}</span>
+                </Tab>
+              ))}
+            </TabBar>
+          </>
+        }
+        onClose={onClose}>
+        <PreloadImages srcs={preloadedIcons} />
 
-          {/*
+        {/*
             The panel's content hosts a single focusable child: this scope holds the toolbox's
             buttons along with the list's own scope.
           */}
-          <AutoNavigationScope>
-            {/*
+        <AutoNavigationScope>
+          {/*
               Above the body's scrolling content, so the toolbox and the labels stay as the list
               scrolls.
             */}
-            {isListShown && (
-              <>
-                <PlaysetToolbox
-                  view={playsetView}
-                  hasViewerPlayset={viewerModIds != undefined}
-                  onChange={changeFilter}
-                />
+          {isListShown && (
+            <>
+              <PlaysetToolbox
+                view={playsetView}
+                hasViewerPlayset={viewerModIds != undefined}
+                onChange={changeFilter}
+              />
 
-                {areColumnsShown && <PlaysetColumns />}
-              </>
-            )}
+              {areColumnsShown && <PlaysetColumns />}
+            </>
+          )}
 
-            {/*
+          {/*
               Keyed on the screenshot, the tab and the playset's filter, so each starts scrolled to
               its top.
               The scrollbar's room is reserved, as it otherwise comes two frames after the content
               and rewraps it.
             */}
-            <Scrollable
-              key={`${screenshot.id}-${selectedTab}-${playsetFilterKey}`}
-              className={classNames(styles.windowContent, isListShown && styles.windowContentList)}
-              trackVisibility='reserve'>
-              {selectedTab == 'description' && <DescriptionTab state={details.description} />}
+          <Scrollable
+            key={`${screenshot.id}-${selectedTab}-${playsetFilterKey}`}
+            className={classNames(styles.windowContent, isListShown && styles.windowContentList)}
+            trackVisibility='reserve'>
+            {selectedTab == 'description' && <DescriptionTab state={details.description} />}
 
-              {selectedTab == 'photoModeSettings' && (
-                <PhotoModeSettingsTab state={details.photoModeSettings} />
-              )}
+            {selectedTab == 'photoModeSettings' && (
+              <PhotoModeSettingsTab state={details.photoModeSettings} />
+            )}
 
-              {selectedTab == 'playset' && (
-                <PlaysetTab
-                  screenshotId={screenshot.id}
-                  state={playsetTab}
-                  shouldLoad={details.shouldLoadPlayset}
-                />
-              )}
-            </Scrollable>
-          </AutoNavigationScope>
-        </Panel>
-      </PanelBackdrop>
-    </InputActionConsumer>
+            {selectedTab == 'playset' && (
+              <PlaysetTab
+                screenshotId={screenshot.id}
+                state={playsetTab}
+                shouldLoad={details.shouldLoadPlayset}
+              />
+            )}
+          </Scrollable>
+        </AutoNavigationScope>
+      </Panel>
+    </ModalBackdrop>
   );
 }
 
@@ -912,33 +875,19 @@ function PlaysetList({
   count: number;
   renderRow: (index: number) => ReactNode;
 }>): ReactElement {
-  const scrollableRef = useRef<HTMLElement | null>(null);
-
-  // The body's `Scrollable` is the window's.
-  const findScrollable = useCallback((node: HTMLElement | null) => {
-    scrollableRef.current = findScrollableContent(node);
-  }, []);
-
-  const rowHeight = useMeasuredRowHeight(
-    scrollableRef,
-    PLAYSET_ROW_SELECTOR,
-    ESTIMATED_ROW_HEIGHT_PX
-  );
-
-  const sizeProvider = useUniformSizeProvider(rowHeight, count, PLAYSET_OVERSCAN);
-
-  const { list } = useVirtualList(
-    scrollableRef,
-    sizeProvider,
-    'vertical',
-    styles.playset,
+  const { anchorRef, list } = useUniformVirtualList({
+    count,
+    overscan: PLAYSET_OVERSCAN,
+    rowSelector: PLAYSET_ROW_SELECTOR,
+    estimatedRowHeightPx: ESTIMATED_ROW_HEIGHT_PX,
+    className: styles.playset,
     renderRow
-  );
+  });
 
   return (
     <>
-      {/* The node `findScrollable` climbs out of. */}
-      <div ref={findScrollable} />
+      {/* In the body's `Scrollable`, which is the window's. */}
+      <div ref={anchorRef} />
 
       {/* The rows' own focus scope: the panel's content hosts a single focusable child. */}
       <AutoNavigationScope>{list}</AutoNavigationScope>
@@ -956,8 +905,8 @@ const PLAYSET_ROW_SELECTOR = '[data-playset-row]';
 const PLAYSET_OVERSCAN = 3;
 
 /**
- * What the first frames assume a row measures, before {@link useMeasuredRowHeight} reads a real
- * one: the row's height at the resolution where a `rem` is a pixel.
+ * What the first frames assume a row measures, before a rendered one is measured: the row's height
+ * at the resolution where a `rem` is a pixel.
  */
 const ESTIMATED_ROW_HEIGHT_PX = 52;
 

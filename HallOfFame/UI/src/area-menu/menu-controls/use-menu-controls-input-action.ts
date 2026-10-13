@@ -11,6 +11,8 @@ import * as bindings from '../../utils/bindings';
  *
  * This is a very specific implementation whose sole role is to provide a good UX for the behavior
  * of the main menu control buttons.
+ * The keys rest while the Creator Dashboard is open: it covers the controls, and their actions
+ * reach the UI as C# input phases that its backdrop cannot consume.
  *
  * @param phase The current input action phase.
  * @param handler The function to call when the input action is performed (key down) AND canceled
@@ -24,7 +26,13 @@ export function useMenuControlsInputAction(
 ): void {
   const [replayOnCanceled, setReplayOnCanceled] = useState(false);
 
+  const isDashboardOpen = bindings.useDashboardState().status != 'closed';
+
   useEffect(() => {
+    if (isDashboardOpen) {
+      return;
+    }
+
     // Performed = keydown
     // Canceled = keyup
     if (phase == 'Performed' || (phase == 'Canceled' && replayOnCanceled)) {
@@ -37,8 +45,9 @@ export function useMenuControlsInputAction(
       }
     }
     // The effect must fire only on phase transitions: `handler` and `sound` are recreated every
-    // render, and `replayOnCanceled` is deliberately a read, not a trigger (re-running on its
-    // change would re-invoke the handler). So the narrow `[phase]` dependency list is intentional.
+    // render, and `replayOnCanceled` and `isDashboardOpen` are deliberately reads, not triggers
+    // (re-running on their change would re-invoke the handler). So the narrow `[phase]` dependency
+    // list is intentional.
     // oxlint-disable-next-line react-hooks/exhaustive-deps - intentional, see above
   }, [phase]);
 }

@@ -1,0 +1,61 @@
+@use "../../common";
+@use "../../vanilla-vars" as vanilla;
+@use "../../area-menu/menu-controls/shared" as shared;
+
+// Centered in the room the grid would take.
+.status {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24rem;
+
+  font-size: vanilla.$font-size-l;
+  text-align: center;
+
+  // Sized to the room it stands in, the whole grid's, where a form's spinner would be lost, and
+  // dimmed under the word that says what it is for.
+  &-spinner {
+    --iconColor: #{shared.$dimmed-color};
+
+    width: 72rem;
+    height: 72rem;
+    margin-bottom: 20rem;
+
+    @include common.spin;
+  }
+
+  // Larger than any vanilla size: the one word on a body otherwise empty.
+  &-loading {
+    font-size: 28rem;
+  }
+
+  &-image {
+    width: 120rem;
+    height: 120rem;
+    margin-bottom: 16rem;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  &-title {
+    font-size: vanilla.$font-size-xl;
+  }
+
+  &-message {
+    max-width: 600rem;
+    margin-top: 8rem;
+
+    color: shared.$dimmed-color;
+  }
+
+  // Sized to the room it stands in, like the spinner: the game's button is cut for a form.
+  &-button {
+    margin-top: 28rem;
+    padding: 12rem 40rem;
+
+    font-size: vanilla.$font-size-l;
+  }
+}

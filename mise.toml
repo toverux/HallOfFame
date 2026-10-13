@@ -180,6 +180,25 @@ description = "Copies Skyve's stability labels, in every locale the mod ships, f
 raw = true
 run = "bun .agents/scripts/import-skyve-labels.ts"
 
+# ASSET TASKS
+# ===========
+
+# Font Awesome serves every style, Pro ones included, from its own site's asset host, which only
+# checks the Referer. The version is the one the folder's NOTICE declares, and the license comment
+# each SVG carries is stripped, the NOTICE covering it.
+# The response is held in a variable rather than piped, so a failed download stops the task
+# (errexit) instead of leaving an empty file.
+[tasks."icons:fontawesome"]
+description = "Downloads a Font Awesome 7.3.1 icon, Free or Pro, into HallOfFame/UI/src/icons/fontawesome as <icon>-<style>.svg. List a Pro icon in that folder's NOTICE."
+usage = '''
+arg "<style>" help="Style folder, e.g. solid, regular, light, duotone-light, sharp-solid"
+arg "<icon>" help="Icon name, e.g. pen-line"
+'''
+run = '''
+svg=$(curl -sSf -H "Referer: https://fontawesome.com" "https://site-assets.fontawesome.com/releases/v7.3.1/svgs/${usage_style}/${usage_icon}.svg")
+printf '%s' "$svg" | sed 's/<!--[^>]*-->//' > "HallOfFame/UI/src/icons/fontawesome/${usage_icon}-${usage_style}.svg"
+'''
+
 # TEST TASKS
 # ==========
 

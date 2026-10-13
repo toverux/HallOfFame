@@ -40,6 +40,9 @@ internal record Screenshot {
   [DecodeAlias("description")]
   internal string Description { get; [UsedImplicitly] set; } = string.Empty;
 
+  [DecodeAlias("imageUrlThumbnail")]
+  internal string ImageUrlThumbnail { get; [UsedImplicitly] set; } = string.Empty;
+
   [DecodeAlias("imageUrlFHD")]
   internal string ImageUrlFHD { get; [UsedImplicitly] set; } = string.Empty;
 
@@ -113,6 +116,25 @@ internal record Screenshot {
   // The favorite/like rename; see the note on LikesCount above.
   [DecodeAlias("favoritingPercentage")]
   internal int LikingPercentage { get; [UsedImplicitly] set; }
+
+  /// <summary>
+  /// The medal tier, "bronze" to "diamond", or null below either of the
+  /// <see cref="CreatorStats"/> rank minimums.
+  /// </summary>
+  [DecodeAlias("rank")]
+  internal string? Rank { get; [UsedImplicitly] set; }
+
+  /// <summary>
+  /// Clicks through <see cref="ViewerUrl"/> to the web viewer.
+  /// </summary>
+  [DecodeAlias("viewerClicksCount")]
+  internal int ViewerClicksCount { get; [UsedImplicitly] set; }
+
+  /// <summary>
+  /// Whether a player reported it: the slideshow stops serving it until a moderator reviews it.
+  /// </summary>
+  [DecodeAlias("isReported")]
+  internal bool IsReported { get; [UsedImplicitly] set; }
 
   /// <summary>
   /// Non-inherent property of screenshot only set on some endpoints.

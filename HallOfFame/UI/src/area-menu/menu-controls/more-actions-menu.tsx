@@ -4,6 +4,7 @@ import { Dropdown, DropdownItem } from 'cs2/ui';
 import { memo, type ReactElement, useCallback } from 'react';
 import { Tooltip } from '../../components/tooltip';
 import flagSolidSrc from '../../icons/fontawesome/flag-solid.svg';
+import grid2SolidSrc from '../../icons/fontawesome/grid-2-solid.svg';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { defaultButtonSounds } from '../../vanilla-modules/game-ui/common/input/button/button';
@@ -27,6 +28,7 @@ const gearSrc = 'Media/Glyphs/Gear.svg';
 // oxlint-disable-next-line react/only-export-components - no Fast Refresh in a Cohtml bundle
 export const moreActionsPreloadedIcons: readonly string[] = [
   flagSolidSrc,
+  grid2SolidSrc,
   saveSrc,
   gearSrc,
   progressSrc
@@ -91,6 +93,14 @@ export const MenuControlsMoreActionsMenu = memo(
                 {translate('HallOfFame.UI.Menu.MenuControls.ACTION[Report]')}
               </DropdownItem>
             </Tooltip>
+
+            <DropdownItem<string>
+              value='dashboard'
+              icon={grid2SolidSrc}
+              iconTint={iconTintFromStylesheet}
+              onChange={bindings.openDashboard}>
+              {translate('HallOfFame.UI.Menu.MenuControls.ACTION[Creator Dashboard]')}
+            </DropdownItem>
 
             <DropdownItem<string>
               value='settings'

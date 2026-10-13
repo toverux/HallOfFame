@@ -1,10 +1,6 @@
 @use "../../vanilla-vars" as vanilla;
 @use "./shared" as shared;
 
-// The durations of the panel's own transition, which the backdrop fades in step with.
-$enter-duration: 250ms;
-$exit-duration: 150ms;
-
 $padding-horizontal: 30rem;
 $paragraph-gap: 12rem;
 
@@ -38,15 +34,6 @@ $scrollbar-track-width: 16rem;
 
 // The top padding of the vanilla panel's body.
 $panel-content-padding-top: 25rem;
-
-.backdrop {
-  animation: backdrop-enter $enter-duration ease-out;
-  transition: opacity $exit-duration;
-
-  &--exiting {
-    opacity: 0;
-  }
-}
 
 .window {
   // The game's windows take their body's opacity from the interface opacity setting, which leaves
@@ -750,15 +737,5 @@ $panel-content-padding-top: 25rem;
 
   &-action {
     margin-top: 16rem;
-  }
-}
-
-@keyframes backdrop-enter {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
   }
 }

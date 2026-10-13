@@ -20,6 +20,20 @@
   }
 }
 
+// A progress glyph's endless turn.
+@mixin spin($duration: 1s) {
+  animation: spin $duration linear infinite;
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
 @mixin fade-in-slide-in($x: 0, $y: 0, $duration: 0.5s, $timing-function: $default-timing-function) {
   animation: fade-in $duration $timing-function both;
 

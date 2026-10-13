@@ -173,6 +173,7 @@ public sealed class Mod : IMod {
       updateSystem.UpdateAt<CommonUISystem>(SystemUpdatePhase.UIUpdate);
       updateSystem.UpdateAt<SlideshowUISystem>(SystemUpdatePhase.UIUpdate);
       updateSystem.UpdateAt<CaptureUISystem>(SystemUpdatePhase.UIUpdate);
+      updateSystem.UpdateAt<DashboardUISystem>(SystemUpdatePhase.UIUpdate);
 
       Mod.Log.Verbose($"{nameof(Mod)}: {nameof(this.OnLoad)} complete.");
     }

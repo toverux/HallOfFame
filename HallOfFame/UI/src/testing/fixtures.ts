@@ -85,6 +85,7 @@ export function makeScreenshot(overrides: Partial<Screenshot> = {}): Screenshot 
     cityPopulation: 0,
     mapName: '',
     description: '',
+    imageUrlThumbnail: 'thumbnail.png',
     imageUrlFHD: 'fhd.png',
     imageUrl4K: '4k.png',
     viewerUrl: 'https://api.test/screenshots/id/viewer',
@@ -102,6 +103,9 @@ export function makeScreenshot(overrides: Partial<Screenshot> = {}): Screenshot 
     viewsCount: 0,
     uniqueViewsCount: 0,
     likingPercentage: 0,
+    viewerClicksCount: 0,
+    rank: null,
+    isReported: false,
     isLiked: false,
     creator: makeCreator(),
     ...overrides

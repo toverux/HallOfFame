@@ -27,6 +27,12 @@ internal interface IHallOfFameApi {
 
   Task<Screenshot> GetRandomScreenshotWeighted();
 
+  /// <summary>
+  /// Every screenshot the authenticated creator uploaded, reported ones included, in no particular
+  /// order, as the dashboard's slim record.
+  /// </summary>
+  Task<IReadOnlyList<DashboardScreenshot>> GetMyScreenshots();
+
   Task<View> LikeScreenshot(string screenshotId, bool liked);
 
   Task<View> MarkScreenshotViewed(string screenshotId);
