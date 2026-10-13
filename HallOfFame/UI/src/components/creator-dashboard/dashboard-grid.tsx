@@ -94,4 +94,4 @@ const ROW_OVERSCAN = 1;
  * What the first frames assume a row measures, before a rendered one is measured:
  * the row's height at the resolution where a `rem` is a pixel.
  */
-const ESTIMATED_ROW_HEIGHT_PX = 260;
+const ESTIMATED_ROW_HEIGHT_PX = 282;

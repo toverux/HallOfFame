@@ -4,12 +4,14 @@ import {
   type RefCallback,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState
 } from 'react';
 import {
   useUniformSizeProvider,
-  useVirtualList
+  useVirtualList,
+  type VirtualListSizeProvider
 } from '../vanilla-modules/game-ui/common/scrolling/virtual-list/virtual-list';
 import { getClassesModule, selector } from './vanilla-modules';
 
@@ -76,7 +78,22 @@ export function useUniformVirtualList({
 
   const rowHeight = useMeasuredRowHeight(scrollableRef, rowSelector, estimatedRowHeightPx);
 
-  const sizeProvider = useUniformSizeProvider(rowHeight, count, overscan);
+  const uniformSizeProvider = useUniformSizeProvider(rowHeight, count, overscan);
+
+  // The list reads its viewport off its container on the frames after it mounts, which cohtml may
+  // not have laid out yet: the zero it reads then would render a single row for a frame, so the
+  // window's height stands in, as it does before the list's first read.
+  const sizeProvider = useMemo<VirtualListSizeProvider>(
+    () => ({
+      getRenderedRange: (scrollPos, viewportSize) =>
+        uniformSizeProvider.getRenderedRange(
+          scrollPos,
+          viewportSize > 0 ? viewportSize : window.innerHeight
+        ),
+      getTotalSize: uniformSizeProvider.getTotalSize
+    }),
+    [uniformSizeProvider]
+  );
 
   const { list } = useVirtualList(scrollableRef, sizeProvider, 'vertical', className, renderRow);
 
