@@ -62,6 +62,7 @@ Check live what a component test cannot show (layout, tooltips, transitions, nat
 A fake lasts until the game updates that binding or the UI reloads.
 For a scenario that must survive reloads, load a real screenshot instead, in a Debug build, with the `unity` `eval` tool: `world.GetExistingSystemManaged<HallOfFame.Systems.SlideshowUISystem>().LoadScreenshotById("<id>")`.
 When no screenshot has the state you need, edit one into it: the local dev database (`mongodb://localhost/halloffame`, started by `mise dev:db:start` in `../HallOfFameServer`) is throwaway and free to edit.
+To see another creator's collection, log in as them: the server matches a login by Creator ID, name or slug, so move your own record's `creatorId`, `creatorName` and `creatorNameSlug` aside, then give theirs the Creator ID your mod settings send. The login renames their record to your name, so restore both records afterwards.
 
 ## Best-effort loading and harness repair
 
