@@ -5,6 +5,7 @@ symptoms:
   - 'Escape does not close a panel opened from the main-menu slideshow controls'
   - 'A vanilla dropdown in the slideshow controls stays open on Escape'
   - 'The shoulder buttons do not switch the tabs of a window opened from the slideshow controls'
+  - 'The slideshow hotkeys act behind a modal covering the slideshow controls'
 tags: [cs2-ui, cs2-input, input-action, focus, main-menu, escape, switch-tab]
 ---
 
@@ -39,3 +40,7 @@ const backActions = useMemo(() => ({ Back: onClose }), [onClose]);
 
 Anything the slideshow controls open binds its own dismissal, and its own tab switching, this way. `screenshot-details-window.test.tsx`
 covers it by sending `Back` and `Switch Tab` through an `EventInputProvider` with nothing focused.
+
+The slideshow's own hotkeys are the reverse case: they reach the UI as input phases C# binds
+(`useMenuControlsInputAction`), which no consumer, focus-bound or not, can swallow. A modal covering
+the controls gates them in that hook, as the Creator Dashboard's open state does.
