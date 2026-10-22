@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using HallOfFame.Domain;
 using HallOfFame.Http;
 using HallOfFame.Logging;
 using HallOfFame.Utils;

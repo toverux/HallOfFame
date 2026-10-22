@@ -11,9 +11,7 @@ internal partial class HttpQueries {
   /// decoded off the main thread as a collection runs to megabytes.
   /// </summary>
   public async Task<IReadOnlyList<DashboardScreenshot>> GetMyScreenshots() {
-    using var request = UnityWebRequest.Get(
-      HttpQueries.PrependApiUrl("/screenshots?creatorId=me")
-    );
+    using var request = UnityWebRequest.Get(HttpQueries.PrependApiUrl("/screenshots?creatorId=me"));
 
     return await HttpQueries.Send<List<DashboardScreenshot>>(
       request,

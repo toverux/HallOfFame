@@ -42,29 +42,42 @@ internal sealed class ShapeRecordingJsonWriter : IJsonWriter {
 
   public void PropertyName(string name) => this.openTypes.Peek().Properties.Add(name);
 
-  public void MapBegin(uint size) { }
+  public void MapBegin(uint size) {
+  }
 
-  public void MapEnd() { }
+  public void MapEnd() {
+  }
 
-  public void ArrayBegin(uint size) { }
+  public void ArrayBegin(uint size) {
+  }
 
-  public void ArrayEnd() { }
+  public void ArrayEnd() {
+  }
 
-  public void WriteNull() { }
+  public void WriteNull() {
+  }
 
-  public void Write(bool value) { }
+  public void Write(bool value) {
+  }
 
-  public void Write(int value) { }
+  public void Write(int value) {
+  }
 
-  public void Write(uint value) { }
+  public void Write(uint value) {
+  }
 
-  public void Write(long value) { }
+  public void Write(long value) {
+  }
 
-  public void Write(ulong value) { }
+  public void Write(ulong value) {
+  }
 
-  public void Write(float value) { }
+  public void Write(float value) {
+  }
 
-  public void Write(double value) { }
+  public void Write(double value) {
+  }
 
-  public void Write(string value) { }
+  public void Write(string value) {
+  }
 }

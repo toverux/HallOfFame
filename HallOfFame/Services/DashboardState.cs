@@ -38,14 +38,16 @@ internal sealed record DashboardState {
   internal static DashboardState Loaded(
     IReadOnlyList<DashboardScreenshot> screenshots,
     CreatorStats stats
-  ) => new(DashboardStatus.Loaded) {
-    Screenshots = screenshots,
-    Stats = stats
-  };
+  ) =>
+    new(DashboardStatus.Loaded) {
+      Screenshots = screenshots,
+      Stats = stats
+    };
 
-  internal static DashboardState Failed(LocalizedString error) => new(DashboardStatus.Error) {
-    Error = error
-  };
+  internal static DashboardState Failed(LocalizedString error) =>
+    new(DashboardStatus.Error) {
+      Error = error
+    };
 }
 
 internal enum DashboardStatus {

@@ -211,7 +211,12 @@ public sealed class DashboardServiceTests {
 
   [Fact]
   public async Task Close_WhileLoading_ThenOpen_ShowsOnlyTheNewAnswer() {
-    var gates = new Queue<TaskCompletionSource<IReadOnlyList<DashboardScreenshot>>>([new(), new()]);
+    var gates = new Queue<TaskCompletionSource<IReadOnlyList<DashboardScreenshot>>>(
+      [
+        new TaskCompletionSource<IReadOnlyList<DashboardScreenshot>>(),
+        new TaskCompletionSource<IReadOnlyList<DashboardScreenshot>>()
+      ]
+    );
     var pending = new List<TaskCompletionSource<IReadOnlyList<DashboardScreenshot>>>();
 
     var api = new FakeApi {
@@ -264,7 +269,8 @@ public sealed class DashboardServiceTests {
     };
   }
 
-  private static DashboardScreenshot MakeScreenshot(string id) => new() {
-    Id = id
-  };
+  private static DashboardScreenshot MakeScreenshot(string id) =>
+    new() {
+      Id = id
+    };
 }

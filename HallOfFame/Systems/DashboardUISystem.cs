@@ -67,6 +67,5 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
     }
   }
 
-  void IDashboardPresentationSink.Publish(DashboardState state) =>
-    this.stateBinding.Update(state);
+  void IDashboardPresentationSink.Publish(DashboardState state) => this.stateBinding.Update(state);
 }

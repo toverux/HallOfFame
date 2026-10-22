@@ -45,7 +45,7 @@ internal sealed class DashboardStateValueWriter : IWriter<DashboardState> {
       DashboardStateValueWriter.statsWriter.Write(writer, stats);
     }
 
-    if (error is { } message) {
+    if (error is {} message) {
       writer.PropertyName("error");
       message.Write(writer);
     }
