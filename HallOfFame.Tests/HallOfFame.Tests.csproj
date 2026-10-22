@@ -16,6 +16,9 @@
              scope. -->
         <ManagedPath>$([System.Environment]::GetEnvironmentVariable('CSII_MANAGEDPATH', 'EnvironmentVariableTarget.User'))</ManagedPath>
         <ManagedPath Condition="'$(ManagedPath)' == ''">$(CSII_MANAGEDPATH)</ManagedPath>
+
+        <!-- Mono runs the tests: pass -p:MonoPath=<path> when mono is not on PATH. -->
+        <MonoPath Condition="'$(MonoPath)' == ''">mono</MonoPath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -49,4 +52,13 @@
     <ItemGroup>
         <ProjectReference Include="..\HallOfFame\HallOfFame.csproj" />
     </ItemGroup>
+
+    <!-- `dotnet test` starts the test executable with $(RunCommand) $(RunArguments), which the
+         .NET 11 SDK leaves unset for a .NET Framework executable on Linux (NETSDK1243). -->
+    <Target Name="RunTestsUnderMono" BeforeTargets="ComputeRunArguments">
+        <PropertyGroup>
+            <RunCommand>$(MonoPath)</RunCommand>
+            <RunArguments>&quot;$(TargetPath)&quot;</RunArguments>
+        </PropertyGroup>
+    </Target>
 </Project>

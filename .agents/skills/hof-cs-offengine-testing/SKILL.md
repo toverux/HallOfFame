@@ -21,7 +21,10 @@ This runs `dotnet test` with `-p:SkipBuildUI=true -p:SkipModPostProcess=true`, s
 Prefer it over a bare `dotnet test`.
 On Linux, Mono hosts the `net48` test process and needs `mono-devel`: without its framework facades the test host crashes before any test runs.
 `dotnet test` runs through Microsoft.Testing.Platform, which the root `global.json` selects: VSTest no longer hosts .NET Framework tests under Mono.
-The suite does not run on Windows, which is not a target: the generated binding redirect sends every `netstandard` reference to the 2.1 the Unity modules ask for, which .NET Framework lacks, so the test host crashes. Removing that redirect (`SuggestedBindingRedirects` before `GenerateBindingRedirects`) lets it start, and only the Colossal.Json decode tests still fail, on default interface methods the .NET Framework CLR cannot load.
+The `RunTestsUnderMono` target in `HallOfFame.Tests.csproj` names Mono as the command that starts the tests (`-p:MonoPath=<path>` when `mono` is not on PATH): without it, the .NET 11 SDK picks no runner for a .NET Framework executable on Linux and fails with NETSDK1243.
+The suite does not run on Windows, which is not a target.
+The .NET Framework host starts only with an `App.config` redirecting `netstandard` (`0.0.0.0-2.1.0.0` to `2.0.0.0`), which Mono ignores; dropping the generated redirect instead lets it start, but each later netstandard 2.1 load throws `FileNotFoundException`.
+Even redirected, it cannot run default interface methods (`Colossal.Logging.ILog`, `NativeList`), netstandard 2.1 types (`System.HashCode`), or any Unity native call (`SecurityException`).
 
 ## Where testable logic goes
 
