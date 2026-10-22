@@ -816,7 +816,7 @@ function selectConditions(
  */
 function selectTime(
   recorded: Readonly<Record<string, RenderConditionValue>>,
-  settings: Readonly<Record<string, string>>
+  settings: Readonly<Record<string, number>>
 ): PhotoModeConditionsTime | undefined {
   const settingHour = settings[TIME_OF_DAY_CODE];
 
@@ -827,9 +827,7 @@ function selectTime(
     return { kind: 'dayNightVisualsOff' };
   }
 
-  const hour =
-    readCondition(recorded, 'time.hour', 'number') ??
-    (settingHour == undefined ? undefined : Number(settingHour));
+  const hour = readCondition(recorded, 'time.hour', 'number') ?? settingHour;
 
   if (hour == undefined) {
     return undefined;
@@ -862,10 +860,9 @@ interface ConditionType {
  * Lists the stored settings under their tab and section, in the catalog's order, a color's or a
  * vector's components reassembled into one setting, and the codes the catalog lacks in a last
  * group.
- * The values reach the UI as text, though uploaded as numbers.
  */
 function groupPhotoModeSettings(
-  renderSettings: Readonly<Record<string, string>>,
+  renderSettings: Readonly<Record<string, number>>,
   catalog: readonly PhotoModeProperty[]
 ): readonly PhotoModeGroup[] {
   // By setting code, each at the place of its first component in the catalog, which a later
@@ -873,9 +870,9 @@ function groupPhotoModeSettings(
   const listed = new Map<string, { property: PhotoModeProperty; value: PhotoModeValue }>();
 
   for (const property of catalog) {
-    const text = renderSettings[property.code];
+    const value = renderSettings[property.code];
 
-    if (text == undefined) {
+    if (value == undefined) {
       continue;
     }
 
@@ -883,7 +880,7 @@ function groupPhotoModeSettings(
 
     listed.set(code, {
       property,
-      value: readValue(property, component, Number(text), listed.get(code)?.value)
+      value: readValue(property, component, value, listed.get(code)?.value)
     });
   }
 
@@ -922,9 +919,9 @@ function groupPhotoModeSettings(
 
   const otherSettings = Object.entries(renderSettings)
     .filter(([code]) => !catalogCodes.has(code))
-    .map(([code, text]): UnnotedSetting => ({
+    .map(([code, value]): UnnotedSetting => ({
       code,
-      value: { kind: 'number', value: Number(text), fractionDigits: undefined }
+      value: { kind: 'number', value, fractionDigits: undefined }
     }));
 
   return otherSettings.length > 0

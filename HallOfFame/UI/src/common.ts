@@ -58,7 +58,7 @@ export interface Screenshot {
   // The server still sends a creator their own unshared playset's IDs.
   readonly shareParadoxModIds: boolean;
   readonly shareRenderSettings: boolean;
-  readonly renderSettings: Readonly<Record<string, string>>;
+  readonly renderSettings: Readonly<Record<string, number>>;
   // The scene and light the shot was taken in, by name, each value keeping its type. The mod adds
   // names over its releases: read one by name, ignoring the rest.
   readonly renderConditions: Readonly<Record<string, RenderConditionValue>>;

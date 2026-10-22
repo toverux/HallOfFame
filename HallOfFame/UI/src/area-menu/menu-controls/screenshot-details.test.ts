@@ -44,7 +44,7 @@ const preShareCapabilities: readonly ScreenshotCapability[] = ['paradoxModIds', 
 const playset: readonly number[] = [1];
 
 // Any photo mode setting off the game's defaults, its value irrelevant to the row.
-const photoModeSettings: Readonly<Record<string, string>> = { 'dof.focusDistance': '3' };
+const photoModeSettings: Readonly<Record<string, number>> = { 'dof.focusDistance': 3 };
 
 // The conditions of a shot in summer daylight, as the mod records them, with names the block does
 // not show.
@@ -391,7 +391,7 @@ describe('selectScreenshotDetails', () => {
         makeScreenshot({
           capabilities: preShareCapabilities,
           shareRenderSettings: true,
-          renderSettings: { 'Time of Day': '12' }
+          renderSettings: { 'Time of Day': 12 }
         })
       );
 
@@ -404,10 +404,10 @@ describe('selectScreenshotDetails', () => {
           capabilities: allCapabilities,
           shareRenderSettings: true,
           renderSettings: {
-            'Time of Day': '9.5',
-            'WhiteBalance.temperature': '-12.25',
-            'PhotoModeRenderSystem.focalLength': '50',
-            'PhotoModeRenderSystem.iso': '400'
+            'Time of Day': 9.5,
+            'WhiteBalance.temperature': -12.25,
+            'PhotoModeRenderSystem.focalLength': 50,
+            'PhotoModeRenderSystem.iso': 400
           }
         })
       );
@@ -478,25 +478,25 @@ describe('selectScreenshotDetails', () => {
 
     it(`names an enum's option, and keeps the number of an option the game lacks`, () => {
       expect(
-        settingValues({ 'PhotoModeRenderSystem.gateFitMode': '2' }).get(
+        settingValues({ 'PhotoModeRenderSystem.gateFitMode': 2 }).get(
           'PhotoModeRenderSystem.gateFitMode'
         )
       ).toEqual({ kind: 'enum', enumType: 'GateFitMode', option: 'Horizontal', value: 2 });
 
       expect(
-        settingValues({ 'PhotoModeRenderSystem.gateFitMode': '7' }).get(
+        settingValues({ 'PhotoModeRenderSystem.gateFitMode': 7 }).get(
           'PhotoModeRenderSystem.gateFitMode'
         )
       ).toEqual({ kind: 'enum', enumType: 'GateFitMode', option: undefined, value: 7 });
     });
 
     it(`reads a checkbox as on or off`, () => {
-      expect(settingValues({ 'Vignette.rounded': '1' }).get('Vignette.rounded')).toEqual({
+      expect(settingValues({ 'Vignette.rounded': 1 }).get('Vignette.rounded')).toEqual({
         kind: 'checkbox',
         isOn: true
       });
 
-      expect(settingValues({ 'Vignette.rounded': '0' }).get('Vignette.rounded')).toEqual({
+      expect(settingValues({ 'Vignette.rounded': 0 }).get('Vignette.rounded')).toEqual({
         kind: 'checkbox',
         isOn: false
       });
@@ -504,13 +504,13 @@ describe('selectScreenshotDetails', () => {
 
     it(`reassembles a color from its channels into one setting, alpha only where stored`, () => {
       const values = settingValues({
-        'Vignette.color/r': '1',
-        'Vignette.color/g': '0.5',
-        'Vignette.color/b': '0',
-        'Fog.albedo/r': '0.2',
-        'Fog.albedo/g': '0.4',
-        'Fog.albedo/b': '0.6',
-        'Fog.albedo/a': '0.8'
+        'Vignette.color/r': 1,
+        'Vignette.color/g': 0.5,
+        'Vignette.color/b': 0,
+        'Fog.albedo/r': 0.2,
+        'Fog.albedo/g': 0.4,
+        'Fog.albedo/b': 0.6,
+        'Fog.albedo/a': 0.8
       });
 
       expect([...values.keys()]).toEqual(['Vignette.color', 'Fog.albedo']);
@@ -534,8 +534,8 @@ describe('selectScreenshotDetails', () => {
 
     it(`lists a vector's components in one setting`, () => {
       const values = settingValues({
-        'PhotoModeRenderSystem.sensorSize/y': '18.669',
-        'PhotoModeRenderSystem.sensorSize/x': '24.892'
+        'PhotoModeRenderSystem.sensorSize/y': 18.669,
+        'PhotoModeRenderSystem.sensorSize/x': 24.892
       });
 
       expect(values.get('PhotoModeRenderSystem.sensorSize')).toEqual({
@@ -549,7 +549,7 @@ describe('selectScreenshotDetails', () => {
     });
 
     it(`wraps a Time of Day past midnight to the hour the sun was drawn at`, () => {
-      expect(settingValues({ 'Time of Day': '100.5' }).get('Time of Day')).toEqual({
+      expect(settingValues({ 'Time of Day': 100.5 }).get('Time of Day')).toEqual({
         kind: 'number',
         value: 4.5,
         fractionDigits: 3
@@ -558,10 +558,10 @@ describe('selectScreenshotDetails', () => {
 
     it(`notes a run of settings sharing a note once, under its last setting`, () => {
       const noteIds = listedSettings({
-        'ColorAdjustments.postExposure': '1',
-        'WhiteBalance.temperature': '10',
-        'WhiteBalance.tint': '5',
-        'Time of Day': '12'
+        'ColorAdjustments.postExposure': 1,
+        'WhiteBalance.temperature': 10,
+        'WhiteBalance.tint': 5,
+        'Time of Day': 12
       }).map(setting => [setting.code, setting.noteId]);
 
       expect(noteIds).toEqual([
@@ -586,7 +586,7 @@ describe('selectScreenshotDetails', () => {
         makeScreenshot({
           capabilities: allCapabilities,
           shareRenderSettings: true,
-          renderSettings: { 'Env.TimeOfDayEase': '0.25', 'Time of Day': '12' }
+          renderSettings: { 'Env.TimeOfDayEase': 0.25, 'Time of Day': 12 }
         })
       );
 
@@ -633,7 +633,7 @@ describe('selectScreenshotDetails', () => {
         makeScreenshot({
           capabilities: allCapabilities,
           shareRenderSettings: true,
-          renderSettings: { 'Time of Day': '12' }
+          renderSettings: { 'Time of Day': 12 }
         }),
         { ...viewer, photoModeCatalog: [] }
       );
@@ -678,7 +678,7 @@ describe('selectScreenshotDetails', () => {
     it(`leaves out the exposure and white balance the creator set, listed as settings`, () => {
       expect(
         conditionsOf(
-          { 'ColorAdjustments.postExposure': '1', 'WhiteBalance.temperature': '20' },
+          { 'ColorAdjustments.postExposure': 1, 'WhiteBalance.temperature': 20 },
           { ...recordedConditions, 'post.tint': 5 }
         )
       ).toMatchObject({ gameChosen: [gameChosen({ code: 'WhiteBalance.tint', value: 5 })] });
@@ -707,7 +707,7 @@ describe('selectScreenshotDetails', () => {
     it(`shows the hour and the latitude the creator set, Day/Night visuals off or not`, () => {
       expect(
         conditionsOf(
-          { 'Time of Day': '18' },
+          { 'Time of Day': 18 },
           {
             ...recordedConditions,
             'time.hour': 18,
@@ -729,7 +729,7 @@ describe('selectScreenshotDetails', () => {
         makeScreenshot({
           capabilities: allCapabilities.filter(capability => capability != 'renderConditions'),
           shareRenderSettings: true,
-          renderSettings: { 'Time of Day': '100.5' },
+          renderSettings: { 'Time of Day': 100.5 },
           // A stray map the capability does not vouch for.
           renderConditions: recordedConditions
         })
@@ -741,13 +741,13 @@ describe('selectScreenshotDetails', () => {
     });
 
     it(`shows only the stored hour when the conditions are missing`, () => {
-      expect(conditionsOf({ 'Time of Day': '9' }, {})).toEqual(
+      expect(conditionsOf({ 'Time of Day': 9 }, {})).toEqual(
         onlyTime({ kind: 'clock', hour: 9, latitude: undefined })
       );
     });
 
     it(`is absent when nothing of it is known`, () => {
-      expect(conditionsOf({ 'Vignette.rounded': '1' }, {})).toBeUndefined();
+      expect(conditionsOf({ 'Vignette.rounded': 1 }, {})).toBeUndefined();
     });
 
     it(`ignores the names it does not know, and values of another type`, () => {
@@ -934,7 +934,7 @@ describe('selectScreenshotDetails', () => {
  * The conditions block of a shared screenshot carrying every capability.
  */
 function conditionsOf(
-  renderSettings: Readonly<Record<string, string>>,
+  renderSettings: Readonly<Record<string, number>>,
   renderConditions: Readonly<Record<string, RenderConditionValue>>
 ): PhotoModeConditions | undefined {
   const { photoModeSettings: tab } = selectScreenshotDetails(
@@ -1001,7 +1001,7 @@ describe('toPhotoModeColorSliders', () => {
  * The listed settings of a shared screenshot holding {@link renderSettings}, by code, in order.
  */
 function settingValues(
-  renderSettings: Readonly<Record<string, string>>
+  renderSettings: Readonly<Record<string, number>>
 ): ReadonlyMap<string, PhotoModeValue> {
   return new Map(listedSettings(renderSettings).map(setting => [setting.code, setting.value]));
 }
@@ -1010,7 +1010,7 @@ function settingValues(
  * The listed settings of a shared screenshot holding {@link renderSettings}, in order.
  */
 function listedSettings(
-  renderSettings: Readonly<Record<string, string>>
+  renderSettings: Readonly<Record<string, number>>
 ): readonly PhotoModeSetting[] {
   const details = selectScreenshotDetails(
     makeScreenshot({ capabilities: allCapabilities, shareRenderSettings: true, renderSettings })

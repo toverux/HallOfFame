@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Threading;
 using Colossal.Json;
 using HallOfFame.Domain;
 using Xunit;
@@ -32,6 +34,27 @@ public sealed class ScreenshotTests {
 
     // The server accepts no other kind of value, so one is dropped rather than failing the decode.
     Assert.False(screenshot.RenderConditions.ContainsKey("nested"));
+  }
+
+  /// <summary>
+  /// The game runs in the player's culture, whose decimal separator must not reach the values.
+  /// </summary>
+  [Fact]
+  public void Decode_RenderSettings_ReadsNumbersWhateverTheCulture() {
+    var previousCulture = Thread.CurrentThread.CurrentCulture;
+
+    Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
+
+    try {
+      var screenshot = JSON.MakeInto<Screenshot>(
+        JSON.Load("""{ "renderSettings": { "Time of Day": 14.5 } }""")
+      );
+
+      Assert.Equal(14.5, screenshot.RenderSettings["Time of Day"]);
+    }
+    finally {
+      Thread.CurrentThread.CurrentCulture = previousCulture;
+    }
   }
 
   [Fact]

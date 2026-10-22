@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Colossal.UI.Binding;
 using HallOfFame.Domain;
 
@@ -89,7 +90,7 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
     writer.Write(value.ShareRenderSettings);
 
     writer.PropertyName("renderSettings");
-    writer.Write(value.RenderSettings);
+    ScreenshotValueWriter.WriteRenderSettings(writer, value.RenderSettings);
 
     writer.PropertyName("renderConditions");
     ScreenshotValueWriter.WriteRenderConditions(writer, value.RenderConditions);
@@ -144,8 +145,26 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
   }
 
   /// <summary>
-  /// Writes the conditions as a map, each value as its own type, unlike the settings, which reach
-  /// the UI as text: the UI tells a number from text and from a boolean.
+  /// Writes the settings as a map of numbers, which the binding writers offer no overload for.
+  /// A map, not a type, so its varying names leave the screenshot's cached shape alone.
+  /// </summary>
+  private static void WriteRenderSettings(
+    IJsonWriter writer,
+    IReadOnlyDictionary<string, double> settings
+  ) {
+    writer.MapBegin((uint) settings.Count);
+
+    foreach (var setting in settings) {
+      writer.Write(setting.Key);
+      writer.Write(setting.Value);
+    }
+
+    writer.MapEnd();
+  }
+
+  /// <summary>
+  /// Writes the conditions as a map, each value as its own type: the UI tells a number from text
+  /// and from a boolean.
   /// A map, not a type, so its varying names leave the screenshot's cached shape alone.
   /// </summary>
   private static void WriteRenderConditions(IJsonWriter writer, RenderConditions conditions) {

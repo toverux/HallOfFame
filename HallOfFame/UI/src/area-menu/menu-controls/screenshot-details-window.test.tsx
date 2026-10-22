@@ -395,7 +395,7 @@ describe('ScreenshotDetailsWindow', () => {
     it(`lists the settings under their tab and section, after the notice`, () => {
       renderTab({
         shareRenderSettings: true,
-        renderSettings: { 'PhotoModeRenderSystem.iso': '400', 'Time of Day': '9.5' }
+        renderSettings: { 'PhotoModeRenderSystem.iso': 400, 'Time of Day': 9.5 }
       });
 
       const texts = [
@@ -424,7 +424,7 @@ describe('ScreenshotDetailsWindow', () => {
     it(`shows the conditions between the notice and the settings`, () => {
       renderTab({
         shareRenderSettings: true,
-        renderSettings: { 'PhotoModeRenderSystem.iso': '400' },
+        renderSettings: { 'PhotoModeRenderSystem.iso': 400 },
         renderConditions
       });
 
@@ -456,7 +456,7 @@ describe('ScreenshotDetailsWindow', () => {
     it(`styles the section titles as the panel does, on their name`, () => {
       renderTab({
         shareRenderSettings: true,
-        renderSettings: { 'PhotoModeRenderSystem.iso': '400' },
+        renderSettings: { 'PhotoModeRenderSystem.iso': 400 },
         renderConditions
       });
 
@@ -483,7 +483,7 @@ describe('ScreenshotDetailsWindow', () => {
     it(`notes that the conditions were not recorded when it shows only the stored hour`, () => {
       const note = 'HallOfFame.UI.Menu.ScreenshotDetails.CONDITIONS[Not Recorded]';
 
-      renderTab({ shareRenderSettings: true, renderSettings: { 'Time of Day': '11.2' } });
+      renderTab({ shareRenderSettings: true, renderSettings: { 'Time of Day': 11.2 } });
 
       expect(screen.getByText(note)).toBeDefined();
 
@@ -526,13 +526,13 @@ describe('ScreenshotDetailsWindow', () => {
       renderTab({
         shareRenderSettings: true,
         renderSettings: {
-          'PhotoModeRenderSystem.gateFitMode': '2',
-          'Vignette.rounded': '1',
-          'Vignette.color/r': '1',
-          'Vignette.color/g': '0.5',
-          'Vignette.color/b': '0',
-          'PhotoModeRenderSystem.sensorSize/x': '24.892',
-          'PhotoModeRenderSystem.sensorSize/y': '18.669'
+          'PhotoModeRenderSystem.gateFitMode': 2,
+          'Vignette.rounded': 1,
+          'Vignette.color/r': 1,
+          'Vignette.color/g': 0.5,
+          'Vignette.color/b': 0,
+          'PhotoModeRenderSystem.sensorSize/x': 24.892,
+          'PhotoModeRenderSystem.sensorSize/y': 18.669
         }
       });
 
@@ -555,7 +555,7 @@ describe('ScreenshotDetailsWindow', () => {
     });
 
     it(`lists a code the game lacks under "Other", raw`, () => {
-      renderTab({ shareRenderSettings: true, renderSettings: { 'Env.TimeOfDayEase': '0.25' } });
+      renderTab({ shareRenderSettings: true, renderSettings: { 'Env.TimeOfDayEase': 0.25 } });
 
       expect(
         screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Other]')
@@ -568,9 +568,9 @@ describe('ScreenshotDetailsWindow', () => {
       renderTab({
         shareRenderSettings: true,
         renderSettings: {
-          'ColorAdjustments.postExposure': '0.5',
-          'WhiteBalance.temperature': '10',
-          'Time of Day': '9.5'
+          'ColorAdjustments.postExposure': 0.5,
+          'WhiteBalance.temperature': 10,
+          'Time of Day': 9.5
         }
       });
 
@@ -584,7 +584,7 @@ describe('ScreenshotDetailsWindow', () => {
     it(`notes no setting that is not listed`, () => {
       renderTab({
         shareRenderSettings: true,
-        renderSettings: { 'PhotoModeRenderSystem.iso': '400' }
+        renderSettings: { 'PhotoModeRenderSystem.iso': 400 }
       });
 
       expect(screen.queryByText(/Note\]$/u)).toBeNull();
@@ -601,7 +601,7 @@ describe('ScreenshotDetailsWindow', () => {
     });
 
     it(`says the creator did not share them, showing none of those that arrived`, () => {
-      renderTab({ shareRenderSettings: false, renderSettings: { 'Time of Day': '9.5' } });
+      renderTab({ shareRenderSettings: false, renderSettings: { 'Time of Day': 9.5 } });
 
       expect(
         screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Not Shared]')
@@ -613,7 +613,7 @@ describe('ScreenshotDetailsWindow', () => {
       renderTab(
         {
           shareRenderSettings: false,
-          renderSettings: { 'Time of Day': '9.5' },
+          renderSettings: { 'Time of Day': 9.5 },
           creator: makeCreator({ id: 'me' })
         },
         { publicCreatorId: 'me' }

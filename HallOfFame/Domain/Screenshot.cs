@@ -73,9 +73,13 @@ internal record Screenshot {
   [DecodeAlias("shareRenderSettings")]
   internal bool ShareRenderSettings { get; [UsedImplicitly] set; }
 
+  /// <summary>
+  /// Decoded as numbers: Colossal.Json writes a number into a string in the player's culture,
+  /// whose decimal separator may be a comma.
+  /// </summary>
   [DecodeAlias("renderSettings")]
   // ReSharper disable once CollectionNeverUpdated.Global
-  internal Dictionary<string, string> RenderSettings { get; [UsedImplicitly] set; } = new();
+  internal Dictionary<string, double> RenderSettings { get; [UsedImplicitly] set; } = new();
 
   /// <summary>
   /// Shared under <see cref="ShareRenderSettings"/>, empty for a screenshot whose upload recorded
