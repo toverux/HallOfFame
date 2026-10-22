@@ -9,8 +9,8 @@ namespace HallOfFame.Utils.Writers;
 /// Outbound C# to cohtml UI-binding writer for <see cref="Screenshot"/>.
 /// </summary>
 /// <remarks>
-/// These writers are unit-testable via a recording <c>IJsonWriter</c> fake if a regression ever
-/// justifies building one.
+/// These writers are unit-testable through a recording <c>IJsonWriter</c> fake: the test project's
+/// <c>ShapeRecordingJsonWriter</c> records the shape a writer produces, but not its values.
 /// </remarks>
 internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
   private static readonly CreatorValueWriter creatorWriter = new();
