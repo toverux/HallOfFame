@@ -59,6 +59,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `mise check:agents:oxlint`: Only lints the code, optimized output.
 - `mise fix`: Apply the auto-fixes in place (oxlint `--fix`, oxfmt, then the C# cleanup of `fix:cs`).
 - `mise fix:cs`: Format the C# code in place with jb (ReSharper) cleanupcode. There is no read-only C# check, cleanupcode has no dry-run mode.
+  Run it right before each commit that touches C#, and only then, as it is slow. Files it reformats outside your change go in their own `style` commit.
 - `mise dev`: Watch and rebuild the UI (bundle and CSS module types) on change.
 - `mise test`: Run the full test suite, C# and UI.
 - `mise test:cs`: Run only the C# unit tests.
