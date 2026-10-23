@@ -3,6 +3,7 @@
 [tools]
 bun = "1.4.3"
 dotnet = "10.0.401"
+oxipng = "10.2.1"
 
 # DEVELOPMENT TASKS
 # =================
@@ -162,6 +163,12 @@ description = "Builds the mod in Release and publishes it as a new version on Pa
 raw = true
 run = "dotnet publish HallOfFame/HallOfFame.csproj -p:PublishProfile=PublishNewVersion"
 
+[tasks."publish:page"]
+description = "Updates the Paradox Mods page from PublishConfiguration.xml (description, tags, thumbnail and screenshots) without shipping a version."
+depends = ["images:optimize"]
+raw = true
+run = "dotnet publish HallOfFame/HallOfFame.csproj -p:PublishProfile=UpdatePublishedConfiguration"
+
 # LOCALIZATION TASKS
 # ==================
 
@@ -198,6 +205,17 @@ run = '''
 svg=$(curl -sSf -H "Referer: https://fontawesome.com" "https://site-assets.fontawesome.com/releases/v7.3.1/svgs/${usage_style}/${usage_icon}.svg")
 printf '%s' "$svg" | sed 's/<!--[^>]*-->//' > "HallOfFame/UI/src/icons/fontawesome/${usage_icon}-${usage_style}.svg"
 '''
+
+# Every image PublishConfiguration.xml uploads to Paradox Mods sits in HallOfFame/Properties.
+# Paradox Mods serves the previews byte for byte, so pngquant cuts them to a 256-colour palette,
+# a third of the size and indistinguishable at full size. The thumbnail stays lossless: Paradox
+# re-encodes it to JPEG anyway. oxipng then recompresses every image without touching a pixel.
+[tasks."images:optimize"]
+description = "Shrinks the Paradox Mods images in HallOfFame/Properties: pngquant cuts the previews to 256 colours, oxipng losslessly recompresses them and the thumbnail."
+run = [
+  "bun x pngquant --speed 1 --strip --force --ext .png HallOfFame/Properties/Preview_*.png",
+  "oxipng -o max --strip safe HallOfFame/Properties/*.png"
+]
 
 # TEST TASKS
 # ==========
