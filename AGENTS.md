@@ -69,6 +69,9 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `mise l10n:pull`: Preview Crowdin's current translations of the source keys added or changed since `--base`, with author and date, where they differ from the locale files, or of every key with `--all`; `--write` puts them into the files. Run before translating a feature's keys, so a volunteer's pending work is kept rather than pushed over, and with `--all` before a release, since nothing else brings volunteers' work into the repo. Needs `CROWDIN_PERSONAL_TOKEN`.
 - `mise l10n:skyve`: Copy Skyve's stability labels, for every locale the mod ships, into `HallOfFame/Locales/Skyve` from Skyve's repository at the commit `.agents/scripts/import-skyve-labels.ts` pins. Move the pin to pick up Skyve's newer translations.
 - `mise icons:fontawesome <style> <icon>`: Download a Font Awesome 7.3.1 icon, Free or Pro (ex. `duotone-light aperture`), into `HallOfFame/UI/src/icons/fontawesome` as `<icon>-<style>.svg`, its license comment stripped. List a Pro icon in that folder's `NOTICE`.
+- `mise images:optimize`: Shrink the Paradox Mods images in `HallOfFame/Properties`, previews quantized by pngquant, everything recompressed by oxipng. Idempotent.
+- `mise publish:page`: Push `PublishConfiguration.xml` to the Paradox Mods page (description, tags, thumbnail, screenshots) without shipping a version; runs `images:optimize` first.
+- `mise publish`: Build in Release and publish a new version on Paradox Mods.
 
 Run `mise tasks` to see the full shortcut list; append arguments freely, mise passes them through (ex. `mise some:task --some-arg`).
 Do NOT use npx to run commands; prefer mise shortcuts, or bun/bunx when no shortcut exists.
@@ -109,6 +112,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 - The toolchain's `CSII_*` variables are Windows user-scope environment variables, a scope Linux lacks: read one from the user scope with a process-environment fallback, the shape `HallOfFame.csproj` and `HallOfFame.Tests.csproj` use.
 - When writing or running C# tests, debugging an engine-bound type that won't load off-engine, or deciding where to put logic so it stays testable, use the `hof-cs-offengine-testing` skill.
 - When writing or running UI tests, configuring bindings or asserting triggers in a test, or fixing the harness after a game update, use the `hof-ui-testing` skill.
+- When reviewing or editing the Paradox Mods preview images (`Previews.af`), read `docs/agents/paradox-mods-previews.md` first: palette, type scale, margins, and the deliberate design choices a review leaves alone.
 
 ## Boundaries
 
@@ -124,6 +128,7 @@ Ask first before:
 - Changing the HTTP wire format shared with the server, or the bindings wire format shared with the UI.
 - Performing destructive file or data operations.
 - Running `mise l10n:push --push`, in either mode. It writes to the shared Crowdin project: by default it approves translations, which stamps a proofreading verdict volunteer translators see and cannot easily undo, and `--no-approve` adds them unapproved, for volunteers to review. Preview first, and keep `--base` to the commits you wrote: a base reaching back across a pull commit pushes volunteers' translations as though they were yours.
+- Running `mise publish` or `mise publish:page`: both write to the live Paradox Mods page every player sees.
 
 ## Preferred agent behavior
 
