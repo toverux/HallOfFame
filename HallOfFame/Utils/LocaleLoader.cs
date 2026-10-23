@@ -25,9 +25,10 @@ internal static class LocaleLoader {
   private static readonly Regex InterpolationPattern =
     new(@"\{KEY=([^}]+)\}", RegexOptions.Compiled);
 
+  // [ \t] rather than \s, which under Multiline also eats the blank line above a comment.
   /// <seealso cref="PostprocessLocaleDictionary"/>
   private static readonly Regex CommentPattern =
-    new(@"^\s*//.*(?:\r?\n)?", RegexOptions.Compiled | RegexOptions.Multiline);
+    new(@"^[ \t]*//.*(?:\r?\n)?", RegexOptions.Compiled | RegexOptions.Multiline);
 
   internal static void Setup() {
     // The game fills the gaps of the active locale from its fallback locale, which holds the mod's
