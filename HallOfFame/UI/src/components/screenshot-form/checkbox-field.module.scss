@@ -1,0 +1,55 @@
+@use "sass:color";
+@use "../../vanilla-vars" as vanilla;
+@use "./shared" as shared;
+
+.field {
+  display: flex;
+  flex-direction: row;
+
+  @include shared.field;
+
+  > :nth-child(2) {
+    flex: 1 1 auto;
+    margin-left: 10rem;
+  }
+
+  // Stacks the label over the control the choice owns.
+  &-body {
+    display: flex;
+    flex-direction: column;
+
+    > :nth-child(1) {
+      margin-bottom: 10rem;
+    }
+  }
+}
+
+// Checkbox control. These classes are injected alongside the Vanilla checkbox classes.
+.checkbox {
+  &-toggle {
+    width: calc(26rem * #{vanilla.$font-scale});
+    height: calc(26rem * #{vanilla.$font-scale});
+    //noinspection CssReplaceWithShorthandSafely
+    border: shared.$control-border;
+    //noinspection CssReplaceWithShorthandSafely
+    border-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.7);
+    border-radius: shared.$control-border-radius;
+
+    // Impossible to also make &.checked work so we use the field's checked state below.
+    &:hover,
+    &:focus {
+      background-color: shared.$control-background-color-focused;
+    }
+  }
+
+  &-checkmark {
+    background-color: shared.$control-border-color; // sets mask image color
+  }
+}
+
+// The checkbox toggle reacts to the enclosing field's checked and hover states.
+.field--checked .checkbox-toggle,
+.field:hover .checkbox-toggle {
+  border-color: shared.$control-border-color;
+  background-color: shared.$control-background-color-focused;
+}

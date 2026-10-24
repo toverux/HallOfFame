@@ -1,0 +1,23 @@
+// Emitted classes shared across the screenshot form and the panels hosting it, mixed onto their
+// host elements via `classNames`. Not `composes`: the type generator parses a `composes` target as
+// plain CSS and chokes on its SCSS syntax.
+
+@use "sass:color";
+@use "../../vanilla-vars" as vanilla;
+
+// Applied on the form's scrollable container and on the dropdown popup scrollable, which is not
+// contained in the form, so this needs to be higher scope.
+.scrollable-track-customization {
+  [class^="track"] {
+    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
+
+    [class^="thumb"] {
+      transition: background-color 0.1s ease-in-out;
+      background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
+    }
+  }
+
+  &:hover [class^="track"] [class^="thumb"] {
+    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.6);
+  }
+}

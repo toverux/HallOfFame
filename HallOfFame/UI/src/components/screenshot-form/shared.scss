@@ -1,0 +1,33 @@
+// Variables and mixins shared across the screenshot form fields.
+// Keep this file rule-free (variables and mixins only) so `@use`-ing it never re-emits CSS.
+
+@use "sass:color";
+@use "../../vanilla-vars" as vanilla;
+
+// The look shared by the form's controls: its checkboxes, its textarea, and the asset dropdown.
+$control-border: 2rem solid transparent;
+$control-border-color: #61a0b9;
+$control-border-radius: 5rem; // vanilla is 3rem
+$control-background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
+$control-background-color-focused: rgba(255, 255, 255, 0.4);
+
+// Stated rather than left to Cohtml's `normal`, so that a control's height is computable from its
+// font size alone. The dropdown and the textarea rely on this to agree on a single-line height.
+$control-line-height: 1.5;
+
+// The hoverable box every field sits in, its label bold and its hint under it normal.
+// Include it after the field's own declarations: its nested rules must come last.
+@mixin field {
+  margin-bottom: 10rem;
+  border-radius: 4rem;
+  padding: 10rem;
+  font-weight: bold;
+
+  &:hover {
+    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
+  }
+
+  label small {
+    font-weight: normal;
+  }
+}

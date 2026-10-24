@@ -1,33 +1,16 @@
-import classNames from 'classnames';
-import { Button, type Element, Scrollable } from 'cs2/ui';
-import { memo, type ReactElement, useCallback, useEffect, useRef, useState } from 'react';
-import { Tooltip } from '../../components/tooltip';
-import { getClassesModule, useTranslate } from '../../utils';
+import { Scrollable } from 'cs2/ui';
+import { memo, type ReactElement, useCallback } from 'react';
+import {
+  DescriptionField,
+  SharePlaysetField,
+  ShareRenderSettingsField,
+  ShowcasedModField
+} from '../../components/screenshot-form';
+import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { useScrollController } from '../../vanilla-modules/game-ui/common/hooks/use-scroll-controller';
-import { TextInput } from '../../vanilla-modules/game-ui/common/input/text/text-input';
-import {
-  Checkbox,
-  type CheckboxTheme
-} from '../../vanilla-modules/game-ui/common/input/toggle/checkbox/checkbox';
-import { TooltipLayout } from '../../vanilla-modules/game-ui/common/tooltip/description-tooltip/description-tooltip';
-import { AssetModDropdown } from './asset-mod-dropdown';
 import type { ScreenshotInfoFormValue } from './form-state';
 import * as styles from './panel-info-form.module.scss';
-
-const coCheckboxTheme = getClassesModule(
-  'game-ui/common/input/toggle/checkbox/checkbox.module.scss',
-  ['toggle', 'checkmark']
-);
-
-const checkboxTheme: CheckboxTheme = {
-  ...coCheckboxTheme,
-  toggle: classNames(coCheckboxTheme.toggle, styles.checkboxToggle),
-  checkmark: classNames(coCheckboxTheme.checkmark, styles.checkboxCheckmark)
-};
-
-// The server refuses a longer description.
-const DESCRIPTION_MAX_LENGTH = 4000;
 
 export const ScreenshotUploadPanelContentScreenshotInfo = memo(
   ScreenshotUploadPanelContentScreenshotInfoBase
@@ -52,14 +35,6 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
 
   const scrollController = useScrollController?.();
 
-  const playHoverSound = useCallback(() => bindings.playSound('hover-item'), []);
-
-  const selectShowcasedMod = useCallback(
-    (selectedMod: bindings.JsonMod) =>
-      patchFormValue({ isShowcasingAsset: true, showcasedMod: selectedMod }),
-    [patchFormValue]
-  );
-
   const handleShareModIdsChange = useCallback(
     (checked: boolean) => patchFormValue({ shareModIds: checked }),
     [patchFormValue]
@@ -70,56 +45,10 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
     [patchFormValue]
   );
 
-  const handleShowcasingAssetChange = useCallback(
-    (checked: boolean) =>
-      patchFormValue({
-        isShowcasingAsset: checked,
-        showcasedMod: checked ? formValue.showcasedMod : undefined
-      }),
-    [patchFormValue, formValue.showcasedMod]
+  const handleDescriptionChange = useCallback(
+    (description: string) => patchFormValue({ description }),
+    [patchFormValue]
   );
-
-  const restoreSavedDescription = useCallback(
-    () => patchFormValue({ description: uploadFormMemory.description }),
-    [patchFormValue, uploadFormMemory.description]
-  );
-
-  const clearDescription = useCallback(() => patchFormValue({ description: '' }), [patchFormValue]);
-
-  // Also the headings of the virtual keyboard console and handheld players type on.
-  const descriptionLabel =
-    translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_LABEL') ?? '';
-
-  const descriptionHint =
-    translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_DESCRIPTION') ?? '';
-
-  const formattingHelpLabel = translate(
-    'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_FORMATTING'
-  );
-
-  // Plain paragraphs rather than the tooltip's `description`, which renders markdown and would
-  // turn the syntax it explains into the formatting it produces.
-  const formattingHelpLines = translate(
-    'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_FORMATTING_TOOLTIP'
-  )
-    ?.split('\n')
-    .map(line => <p key={line}>{line}</p>);
-
-  const textareaContainerRef = useRef<HTMLDivElement>(null);
-
-  const [textareaFocused, setTextareaFocused] = useState(false);
-
-  // When the textarea is focused, scroll it fully into view.
-  useEffect(() => {
-    if (!(textareaFocused && textareaContainerRef.current)) {
-      return;
-    }
-
-    // The textarea expands when focused; wait for the textarea row count to be set and rendered.
-    setTimeout(() => {
-      scrollController?.scrollIntoView(textareaContainerRef.current as unknown as Element);
-    }, 100 /* for some reason the textarea takes ages to resize */);
-  }, [textareaContainerRef, scrollController, textareaFocused]);
 
   // noinspection HtmlRequiredAltAttribute
   return (
@@ -139,178 +68,23 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
       )}
 
       <div className={styles.form} onMouseEnter={playHoverSound}>
-        <div
-          className={classNames(styles.formField, styles.formFieldInline, {
-            [styles.formFieldChecked]: formValue.shareModIds
-          })}
-          onMouseEnter={playHoverSound}
-          onClick={() => {
-            patchFormValue({ shareModIds: !formValue.shareModIds });
-            bindings.playSound('select-toggle');
-          }}>
-          <Checkbox
-            theme={checkboxTheme}
-            checked={formValue.shareModIds}
-            onChange={handleShareModIdsChange}
-          />
+        <SharePlaysetField checked={formValue.shareModIds} onChange={handleShareModIdsChange} />
 
-          <label>
-            {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PLAYSET_LABEL')}
-            <br />
-            <small>
-              {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PLAYSET_DESCRIPTION')}
-            </small>
-          </label>
-        </div>
-
-        <div
-          className={classNames(styles.formField, styles.formFieldInline, {
-            [styles.formFieldChecked]: formValue.shareRenderSettings
-          })}
-          onMouseEnter={playHoverSound}
-          onClick={() => {
-            patchFormValue({ shareRenderSettings: !formValue.shareRenderSettings });
-            bindings.playSound('select-toggle');
-          }}>
-          <Checkbox
-            theme={checkboxTheme}
-            checked={formValue.shareRenderSettings}
-            onChange={handleShareRenderSettingsChange}
-          />
-
-          <label>
-            {translate(
-              'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PHOTO_MODE_SETTINGS_LABEL'
-            )}
-            <br />
-            <small>
-              {translate(
-                'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHARE_PHOTO_MODE_SETTINGS_DESCRIPTION'
-              )}
-            </small>
-          </label>
-        </div>
+        <ShareRenderSettingsField
+          checked={formValue.shareRenderSettings}
+          onChange={handleShareRenderSettingsChange}
+        />
 
         {assetMods.length > 0 && (
-          <div
-            className={classNames(styles.formField, styles.formFieldInline, {
-              [styles.formFieldChecked]: formValue.isShowcasingAsset
-            })}
-            onMouseEnter={playHoverSound}
-            onClick={() => {
-              patchFormValue({
-                isShowcasingAsset: !formValue.isShowcasingAsset,
-                showcasedMod: formValue.isShowcasingAsset ? undefined : formValue.showcasedMod
-              });
-              bindings.playSound('select-toggle');
-            }}>
-            <Checkbox
-              theme={checkboxTheme}
-              checked={formValue.isShowcasingAsset}
-              onChange={handleShowcasingAssetChange}
-            />
-
-            <div className={styles.formFieldBlock}>
-              <label>
-                {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_LABEL')}
-                <br />
-                <small>
-                  {translate(
-                    'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_DESCRIPTION'
-                  )}
-                </small>
-              </label>
-
-              <AssetModDropdown
-                assetMods={assetMods}
-                showcasedMod={formValue.showcasedMod}
-                isInvalid={formValue.isShowcasingAsset && !formValue.showcasedMod}
-                onSelect={selectShowcasedMod}
-              />
-            </div>
-          </div>
+          <ShowcasedModField assetMods={assetMods} value={formValue} onChange={patchFormValue} />
         )}
 
-        <div
-          ref={textareaContainerRef}
-          className={classNames(styles.formField, styles.formFieldBlock)}
-          style={{ margin: 0 }}
-          onMouseEnter={playHoverSound}>
-          <label>
-            {descriptionLabel}
-            <br />
-            <small>
-              {/* Cohtml's inline layout, so the link flows on after the hint's last word.
-                  Spread because the attribute is not in React's typings. */}
-              <p {...{ cohinline: 'cohinline' }}>
-                {descriptionHint}{' '}
-                <Tooltip
-                  direction='down'
-                  tooltip={
-                    <TooltipLayout title={formattingHelpLabel} content={formattingHelpLines} />
-                  }>
-                  <span className={styles.formattingHelp}>
-                    {/* Inline SVG: the inline layout draws no mask, so a tinted `Icon` vanishes,
-                        and the game's `Media/Glyphs/Info.svg` as an `<img>` is black. */}
-                    <svg viewBox='0 0 32 32' className={styles.formattingHelpIcon}>
-                      <path d='m14.5 10h3v3h-3z' />
-                      <path d='m14.5 14.5h3v7.5h-3z' />
-                      <circle cx='16' cy='16' r='11.5' fill='none' strokeWidth='3' />
-                    </svg>
-                    {formattingHelpLabel}
-                  </span>
-                </Tooltip>
-              </p>
-            </small>
-          </label>
-
-          <div className={styles.textareaWrapper}>
-            <TextInput
-              // A defined `multiline` is what makes this a `<textarea>`, of that many rows.
-              // oxlint-disable-next-line no-magic-numbers - expanded vs collapsed textarea row count
-              multiline={textareaFocused || formValue.description.length > 0 ? 5 : 1}
-              maxLength={DESCRIPTION_MAX_LENGTH}
-              value={formValue.description}
-              // A description is edited rather than replaced, so the caret belongs at the end.
-              selectAllOnFocus={false}
-              vkTitle={descriptionLabel}
-              vkDescription={descriptionHint}
-              onFocus={() => setTextareaFocused(true)}
-              onBlur={() => setTextareaFocused(false)}
-              onChange={event => patchFormValue({ description: event.target.value })}
-            />
-
-            {(textareaFocused || formValue.description.length > 0) && (
-              <div className={styles.textareaControls}>
-                {formValue.description.length == 0 && uploadFormMemory.description && (
-                  <Button
-                    variant='default'
-                    className={styles.textareaControlsButton}
-                    onMouseDown={event => event.preventDefault()}
-                    onClick={restoreSavedDescription}>
-                    {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_DESCRIPTION_RESTORE')}
-                  </Button>
-                )}
-
-                <Button
-                  variant='default'
-                  className={styles.textareaControlsButton}
-                  // Use visibility to avoid a small layout shift when the button appears.
-                  style={{ visibility: formValue.description.length > 0 ? 'visible' : 'hidden' }}
-                  onClick={clearDescription}>
-                  {translate('Editor.CLEAR', 'Clear')}
-                </Button>
-
-                <div style={{ flex: 1 }} />
-
-                <span>
-                  {/* oxlint-disable-next-line react/jsx-no-literals - typographic symbol, not translatable */}
-                  {formValue.description.length}&thinsp;/&thinsp;{DESCRIPTION_MAX_LENGTH}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
+        <DescriptionField
+          value={formValue.description}
+          savedDescription={uploadFormMemory.description}
+          scrollController={scrollController}
+          onChange={handleDescriptionChange}
+        />
       </div>
 
       <div style={{ flex: 1 }} />
@@ -332,4 +106,8 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
       </div>
     </Scrollable>
   );
+}
+
+function playHoverSound(): void {
+  bindings.playSound('hover-item');
 }

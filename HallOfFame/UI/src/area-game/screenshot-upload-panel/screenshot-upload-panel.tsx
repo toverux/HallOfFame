@@ -11,6 +11,7 @@ import { ScreenshotUploadPanelHeader } from './panel-header';
 import { ScreenshotUploadPanelImage } from './panel-image';
 import { ScreenshotUploadPanelContentScreenshotInfo } from './panel-info-form';
 import { ScreenshotUploadProgress } from './upload-progress';
+import * as formShared from '../../components/screenshot-form/shared.module.scss';
 import * as styles from './screenshot-upload-panel.module.scss';
 import * as shared from './shared.module.scss';
 
@@ -77,7 +78,9 @@ export function ScreenshotUploadPanel({
 
   return (
     <div className={styles.panelContainer}>
-      <div ref={panelRef} className={classNames(styles.panel, shared.scrollableTrackCustomization)}>
+      <div
+        ref={panelRef}
+        className={classNames(styles.panel, formShared.scrollableTrackCustomization)}>
         <ScreenshotUploadPanelHeader
           screenshotSnapshot={screenshotSnapshot}
           draggable={draggable}

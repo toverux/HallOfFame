@@ -1,8 +1,7 @@
 // Emitted classes shared across the panel's sub-components, mixed onto their host elements via
-// `classNames` (`.panel-surface`, `.scrollable-track-customization`). Not `composes`: the type
-// generator parses a `composes` target as plain CSS and chokes on its SCSS syntax.
+// `classNames` (`.panel-surface`). Not `composes`: the type generator parses a `composes` target as
+// plain CSS and chokes on its SCSS syntax.
 
-@use "sass:color";
 @use "../../common";
 @use "../../vanilla-vars" as vanilla;
 @use "./shared" as shared;
@@ -15,22 +14,5 @@
   @include common.on-new-ui {
     background-color: shared.$game-panel-white;
     color: shared.$game-panel-gray;
-  }
-}
-
-// Applied on the panel's scrollable container and on the dropdown popup scrollable, which is not
-// contained in the panel, so this needs to be higher scope.
-.scrollable-track-customization {
-  [class^="track"] {
-    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
-
-    [class^="thumb"] {
-      transition: background-color 0.1s ease-in-out;
-      background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
-    }
-  }
-
-  &:hover [class^="track"] [class^="thumb"] {
-    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.6);
   }
 }
