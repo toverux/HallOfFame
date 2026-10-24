@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
 import { Button, Dropdown, DropdownItem, type DropdownTheme, DropdownToggle, Icon } from 'cs2/ui';
 import type { ReactElement, ReactNode } from 'react';
-import type { CreatorStats } from '../../common';
+import type { CreatorStats, DashboardScreenshot } from '../../common';
 import circleRegularSrc from '../../icons/fontawesome/circle-regular.svg';
 import grid2RegularSrc from '../../icons/fontawesome/grid-2-regular.svg';
 import logoSrc from '../../icons/stats-notification.svg';
@@ -18,6 +18,7 @@ import {
   type MedalTally
 } from './dashboard-collection';
 import { MedalImage, MedalTooltip } from './dashboard-medal';
+import { useCityName } from './use-city-name';
 import * as styles from './dashboard-header.module.scss';
 
 /**
@@ -125,6 +126,47 @@ export function DashboardHeaderControls({
 
       <div className={styles.headerRest}>{children}</div>
     </>
+  );
+}
+
+/**
+ * The band's middle over the detail view: the way back to the grid,
+ * then the screenshot's city and how long ago it was shared, the exact date under the cursor.
+ */
+export function DashboardHeaderDetail({
+  screenshot
+}: Readonly<{ screenshot: DashboardScreenshot }>): ReactElement {
+  const translate = useTranslate();
+
+  const cityName = useCityName(screenshot);
+
+  return (
+    <div className={styles.headerDetail}>
+      <div className={styles.headerRule} />
+
+      {/* A tab of the band's, which it leads back to. */}
+      <Button
+        theme={plainButtonTheme}
+        className={styles.headerTab}
+        onSelect={bindings.closeDashboardDetail}
+        data-dashboard-back={true}>
+        <div className={styles.headerTabFace}>
+          <Icon src={arrowLeftSrc} tinted={true} className={styles.headerBackGlyph} />
+
+          {translate('Menu.BACK', 'Back')}
+        </div>
+      </Button>
+
+      <div className={styles.headerRule} />
+
+      <div className={styles.headerDetailTitle}>
+        <div className={styles.headerDetailCity}>{cityName}</div>
+
+        <Tooltip direction='down' tooltip={screenshot.createdAtFormatted}>
+          <div className={styles.headerDetailDate}>{screenshot.createdAtFormattedDistance}</div>
+        </Tooltip>
+      </div>
+    </div>
   );
 }
 
@@ -292,6 +334,8 @@ function TabTooltip({
 // The vanilla button's own looks go: a tab and the close button are drawn by the band's
 // stylesheet alone.
 const plainButtonTheme = { button: '' };
+
+const arrowLeftSrc = 'Media/Glyphs/ThickStrokeArrowLeft.svg';
 
 const totals: ReadonlyArray<{ id: string; select: (stats: CreatorStats) => number }> = [
   { id: 'HallOfFame.UI.Dashboard.TOTAL[Views]', select: stats => stats.viewsCount },

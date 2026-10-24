@@ -52,6 +52,28 @@ export type MedalState =
   | { readonly kind: 'noMedal'; readonly minLikesCount: number };
 
 /**
+ * Each medal's name.
+ */
+export const medalNameIds: Readonly<Record<ScreenshotRank, string>> = {
+  bronze: 'HallOfFame.UI.Dashboard.MEDAL[Bronze]',
+  silver: 'HallOfFame.UI.Dashboard.MEDAL[Silver]',
+  gold: 'HallOfFame.UI.Dashboard.MEDAL[Gold]',
+  platinum: 'HallOfFame.UI.Dashboard.MEDAL[Platinum]',
+  diamond: 'HallOfFame.UI.Dashboard.MEDAL[Diamond]'
+};
+
+/**
+ * Where the medal stands among the ranked screenshots.
+ */
+export const medalBandIds: Readonly<Record<ScreenshotRank, string>> = {
+  bronze: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Bronze Band]',
+  silver: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Silver Band]',
+  gold: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Gold Band]',
+  platinum: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Platinum Band]',
+  diamond: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Diamond Band]'
+};
+
+/**
  * The collection in the order `sort` asks for, as a new array.
  * Ties fall back to newest first, so an order never shuffles between two openings.
  */
@@ -144,6 +166,29 @@ export function likeRate(screenshot: DashboardScreenshot): number {
   return screenshot.uniqueViewsCount > 0 ? screenshot.likesCount / screenshot.uniqueViewsCount : 0;
 }
 
+/**
+ * The like rate as the card and the detail show it, a whole percentage, so the two never disagree.
+ */
+export function likePercentage(screenshot: DashboardScreenshot): number {
+  return Math.round(likeRate(screenshot) * 100);
+}
+
+/**
+ * A screenshot's place among the creator's collection in the Best medal order, 1 for the first:
+ * its position in the grid sorted that way, so the places read in order down the grid.
+ */
+export function collectionPlace(
+  screenshot: DashboardScreenshot,
+  screenshots: readonly DashboardScreenshot[]
+): number {
+  return (
+    1 +
+    screenshots.filter(
+      other => (compareBestMedal(other, screenshot) || compareNewest(other, screenshot)) < 0
+    ).length
+  );
+}
+
 type Comparator = (a: DashboardScreenshot, b: DashboardScreenshot) => number;
 
 const comparators: Readonly<Record<DashboardSort, Comparator>> = {
@@ -152,8 +197,16 @@ const comparators: Readonly<Record<DashboardSort, Comparator>> = {
   mostLiked: (a, b) => b.likesCount - a.likesCount,
   leastLiked: (a, b) => a.likesCount - b.likesCount,
   mostViewed: (a, b) => b.uniqueViewsCount - a.uniqueViewsCount,
-  bestRank: (a, b) => rankOrder(b) - rankOrder(a) || likeRate(b) - likeRate(a)
+  bestRank: compareBestMedal
 };
+
+/**
+ * The higher medal first, then the higher like rate,
+ * then at the same rate the more likes, the rate resting on more viewers.
+ */
+function compareBestMedal(a: DashboardScreenshot, b: DashboardScreenshot): number {
+  return rankOrder(b) - rankOrder(a) || likeRate(b) - likeRate(a) || b.likesCount - a.likesCount;
+}
 
 /**
  * The ID breaks a tie of the same second, a server ID growing with its creation time.

@@ -260,12 +260,186 @@ public sealed class DashboardServiceTests {
     Assert.Empty(sink.Log);
   }
 
-  private static FakeApi CreateApi(string[] ids, CreatorStats stats) {
+  [Fact]
+  public async Task OpenDetail_PublishesLoading_ThenTheFullScreenshot() {
+    var full = new Screenshot {
+      Id = "b",
+      Description = "full"
+    };
+
+    var requested = new List<string>();
+
+    var api = DashboardServiceTests.CreateApi(
+      ["a", "b"],
+      new CreatorStats(),
+      id => {
+        requested.Add(id);
+
+        return Task.FromResult(full);
+      }
+    );
+
+    var sink = new FakeDashboardPresentationSink();
+    var service = new DashboardService(api, new FakeModLog(), sink);
+
+    await service.Open();
+    await service.OpenDetail("b");
+
+    Assert.Equal(["b"], requested);
+    Assert.Equal(["Loading", "Loaded:a,b", "Detail:Loading:b", "Detail:Loaded:b"], sink.Log);
+    Assert.Same(full, sink.LastDetail.Screenshot);
+  }
+
+  [Fact]
+  public async Task OpenDetail_Failure_PublishesTheError_AndOpeningItAgainRetries() {
+    var silent = new List<Exception>();
+    var fetchCount = 0;
+
+    var api = DashboardServiceTests.CreateApi(
+      ["a"],
+      new CreatorStats(),
+      id => {
+        fetchCount++;
+
+        return fetchCount == 1
+          ? Task.FromException<Screenshot>(new HttpNetworkException("1", "offline"))
+          : Task.FromResult(
+            new Screenshot {
+              Id = id
+            }
+          );
+      }
+    );
+
+    var log = new FakeModLog {
+      ErrorSilentImpl = silent.Add
+    };
+
+    var sink = new FakeDashboardPresentationSink();
+    var service = new DashboardService(api, log, sink);
+
+    await service.Open();
+
+    // Must not throw despite the failed fetch.
+    await service.OpenDetail("a");
+
+    Assert.Equal("Detail:Error:a", sink.Log.Last());
+    Assert.NotNull(sink.LastDetail.Error);
+    Assert.Single(silent);
+
+    await service.OpenDetail("a");
+
+    Assert.Equal("Detail:Loaded:a", sink.Log.Last());
+    Assert.Null(sink.LastDetail.Error);
+
+    // The grid's collection stays loaded throughout.
+    Assert.Equal(DashboardStatus.Loaded, sink.LastState.Status);
+  }
+
+  [Fact]
+  public async Task OpenDetail_WithoutACollection_DoesNothing() {
+    // Any fetch would throw on the unwired fake.
+    var sink = new FakeDashboardPresentationSink();
+    var service = new DashboardService(new FakeApi(), new FakeModLog(), sink);
+
+    await service.OpenDetail("a");
+
+    Assert.Empty(sink.Log);
+  }
+
+  [Fact]
+  public async Task CloseDetail_WhileLoading_DiscardsTheLateAnswer() {
+    var gate = new TaskCompletionSource<Screenshot>();
+
+    var api = DashboardServiceTests.CreateApi(["a"], new CreatorStats(), _ => gate.Task);
+    var sink = new FakeDashboardPresentationSink();
+    var service = new DashboardService(api, new FakeModLog(), sink);
+
+    await service.Open();
+
+    var detail = service.OpenDetail("a");
+
+    service.CloseDetail();
+
+    gate.SetResult(
+      new Screenshot {
+        Id = "a"
+      }
+    );
+    await detail;
+
+    Assert.Equal(["Loading", "Loaded:a", "Detail:Loading:a", "Detail:Closed"], sink.Log);
+  }
+
+  [Fact]
+  public async Task OpenDetail_AnotherWhileLoading_ShowsOnlyTheLatest() {
+    var gates = new Dictionary<string, TaskCompletionSource<Screenshot>> {
+      ["a"] = new(),
+      ["b"] = new()
+    };
+
+    var api = DashboardServiceTests.CreateApi(["a", "b"], new CreatorStats(), id => gates[id].Task);
+    var sink = new FakeDashboardPresentationSink();
+    var service = new DashboardService(api, new FakeModLog(), sink);
+
+    await service.Open();
+
+    var first = service.OpenDetail("a");
+    var second = service.OpenDetail("b");
+
+    gates["b"]
+      .SetResult(
+        new Screenshot {
+          Id = "b"
+        }
+      );
+    await second;
+
+    gates["a"]
+      .SetResult(
+        new Screenshot {
+          Id = "a"
+        }
+      );
+    await first;
+
+    Assert.Equal("Detail:Loaded:b", sink.Log.Last());
+    Assert.Equal("b", sink.LastDetail.Screenshot?.Id);
+  }
+
+  [Fact]
+  public async Task Close_ClosesTheDashboardThenItsDetail() {
+    var api = DashboardServiceTests.CreateApi(
+      ["a"],
+      new CreatorStats(),
+      id => Task.FromResult(
+        new Screenshot {
+          Id = id
+        }
+      )
+    );
+
+    var sink = new FakeDashboardPresentationSink();
+    var service = new DashboardService(api, new FakeModLog(), sink);
+
+    await service.Open();
+    await service.OpenDetail("a");
+    service.Close();
+
+    Assert.Equal(["Closed", "Detail:Closed"], sink.Log.Skip(4));
+  }
+
+  private static FakeApi CreateApi(
+    string[] ids,
+    CreatorStats stats,
+    Func<string, Task<Screenshot>>? getScreenshot = null
+  ) {
     DashboardScreenshot[] screenshots = [.. ids.Select(DashboardServiceTests.MakeScreenshot)];
 
     return new FakeApi {
       GetMyScreenshotsImpl = () => Task.FromResult<IReadOnlyList<DashboardScreenshot>>(screenshots),
-      GetCreatorStatsImpl = () => Task.FromResult(stats)
+      GetCreatorStatsImpl = () => Task.FromResult(stats),
+      GetScreenshotImpl = getScreenshot
     };
   }
 

@@ -18,12 +18,11 @@ internal interface IHallOfFameApi {
 
   Task<CreatorStats> GetCreatorStats();
 
-  #if DEBUG
   /// <summary>
-  /// Debug-only: load a specific <see cref="Screenshot"/> by its ID.
+  /// One screenshot by its ID, reported or not, with its showcased mod,
+  /// and whether the authenticated creator likes it.
   /// </summary>
   Task<Screenshot> GetScreenshot(string screenshotId);
-  #endif
 
   Task<Screenshot> GetRandomScreenshotWeighted();
 

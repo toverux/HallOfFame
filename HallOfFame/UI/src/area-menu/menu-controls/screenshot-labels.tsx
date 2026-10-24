@@ -8,7 +8,7 @@ import trophySrc from '../../icons/paradox/trophy.svg';
 import eyeOpenSrc from '../../icons/uil/eye-open.svg';
 import { useTranslate } from '../../utils';
 import type * as bindings from '../../utils/bindings';
-import { formatBigNumber } from './menu-controls-utils';
+import { formatBigNumber, isPristineWilderness } from './menu-controls-utils';
 import * as styles from './screenshot-labels.module.scss';
 
 export const MenuControlsScreenshotLabels = memo(
@@ -26,18 +26,11 @@ export const MenuControlsScreenshotLabels = memo(
   }>): ReactElement => {
     const translate = useTranslate();
 
-    // Do not show the pop/milestone labels if this is an empty map screenshot, which is likely when
-    // the pop is 0 and the milestone is 0 (Founding) or 20 (Megalopolis, i.e., creative mode).
-    const isPristineWilderness =
-      screenshot.cityPopulation == 0 &&
-      // oxlint-disable-next-line no-magic-numbers
-      (screenshot.cityMilestone == 0 || screenshot.cityMilestone == 20);
-
     // noinspection HtmlUnknownTarget,HtmlRequiredAltAttribute
     return (
       <div className={styles.labels}>
         {modSettings.showCityInfo &&
-          (isPristineWilderness ? (
+          (isPristineWilderness(screenshot) ? (
             <span className={styles.labelsLabel}>
               <img src={naturalResourcesSrc} className={styles.labelsIcon} />
               {translate(`HallOfFame.UI.Menu.MenuControls.LABEL[Pristine Wilderness]`)}

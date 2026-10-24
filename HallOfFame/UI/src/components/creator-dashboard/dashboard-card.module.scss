@@ -7,19 +7,18 @@ $medal-size: 44rem;
 
 // A framed print: the thumbnail flush in a rim, its caption below in the same frame.
 .card {
+  @include dashboard.frame;
+
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  // Longhands to the side: the engine drops any shorthand holding a custom property, and
-  // border-color is one.
-  border-width: 1rem;
-  border-style: solid;
-  border-top-color: vanilla.$menu-border-color-1;
-  border-right-color: vanilla.$menu-border-color-1;
-  border-bottom-color: vanilla.$menu-border-color-1;
-  border-left-color: vanilla.$menu-border-color-1;
-  border-radius: 6rem;
-  background-color: rgba(255, 255, 255, 0.06);
+  transition: background-color 0.1s ease-in-out;
+
+  // Under the cursor or the gamepad's focus, as the game's own list items light up.
+  &:hover,
+  &:focus {
+    background-color: vanilla.$menu-hover-color;
+  }
 
   // The server's thumbnails keep the screenshots' 16:9 frame.
   &-thumbnail {

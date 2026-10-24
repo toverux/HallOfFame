@@ -1,0 +1,290 @@
+@use "../../common";
+@use "../../vanilla-vars" as vanilla;
+@use "../../area-menu/menu-controls/shared" as menu;
+@use "./shared" as dashboard;
+
+// The form's column, beside the image's: wide enough for the upload form's fields.
+$side-width: 560rem;
+
+$medal-size: 48rem;
+
+// Over the grid, which stays mounted under it so going back finds it where it was scrolled to.
+.detail {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+
+  // The image and its figures, the room left by the form's column.
+  &-main {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &-mainContent {
+    padding: dashboard.$edge-padding;
+  }
+
+  &-side {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    width: $side-width;
+    // Longhands: the engine drops a shorthand holding a custom property.
+    border-left-width: 1rem;
+    border-left-style: solid;
+    border-left-color: vanilla.$menu-border-color-1;
+  }
+}
+
+// The card enlarged, the image over its caption in the card's own frame.
+.print {
+  @include dashboard.frame;
+
+  overflow: hidden;
+}
+
+// The screenshots' 16:9 frame, a letterboxed picture kept whole rather than cropped.
+.image {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  padding: 12rem;
+  // Inside the print's border, its corners one border width tighter.
+  border-radius: 5rem 5rem 0 0;
+  background-color: rgba(0, 0, 0, 0.25);
+
+  &-layer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  &-full {
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+
+    &--loaded {
+      opacity: 1;
+    }
+  }
+}
+
+// The badge's explanation under the image, in the band's colour like the badge.
+.notice {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 12rem;
+  padding: 12rem 16rem;
+  border-radius: 6rem;
+  background-color: dashboard.$band-color;
+
+  &-icon {
+    // The colour a vanilla tinted icon paints its glyph with, which it does not inherit.
+    --iconColor: #{vanilla.$warning-color};
+
+    flex-shrink: 0;
+    width: 20rem;
+    height: 20rem;
+    margin-right: 12rem;
+  }
+}
+
+// The card's caption, enlarged.
+.caption {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  // Taller than a medal, so the caption keeps its height while the facts load.
+  min-height: $medal-size + 2 * 12rem;
+  padding: 12rem 16rem;
+
+  &-facts {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  // Spaced by padding: Cohtml sizes a wrapping flex item with margins short of its content.
+  // Faded in, as they land a moment after the rest of the detail.
+  &-fact {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 4rem 24rem 4rem 0;
+
+    font-size: vanilla.$font-size-m;
+    white-space: nowrap;
+
+    // Last: the mixin nests its keyframes, which Sass wants after every declaration.
+    @include common.fade-in(0.2s);
+  }
+
+  // Opens a tab of the details window, so it lights up like the cards when hovered.
+  // The light overflows the fact's box rather than padding it, so the facts keep their spacing.
+  &-factButton {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    // Its own stacking context, so the light stays under its content but over the caption.
+    z-index: 0;
+
+    &::before {
+      position: absolute;
+      top: -4rem;
+      right: -8rem;
+      bottom: -4rem;
+      left: -8rem;
+      z-index: -1;
+      border-radius: 4rem;
+      content: "";
+    }
+
+    &:hover::before,
+    &:focus::before {
+      background-color: vanilla.$menu-hover-color;
+    }
+  }
+
+  &-icon {
+    width: 22rem;
+    height: 22rem;
+    margin-right: 8rem;
+
+    // A glyph fills its box where the coloured icons leave room inside theirs: drawn smaller, it
+    // reads as their size, centred in the same slot so the texts stay aligned.
+    &--glyph {
+      $size: 18rem;
+
+      width: $size;
+      height: $size;
+      margin: 0 (8rem + (22rem - $size) * 0.5) 0 (22rem - $size) * 0.5;
+    }
+  }
+
+  &-medal {
+    display: flex;
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    max-width: 420rem;
+    margin-left: 16rem;
+  }
+
+  // Wraps rather than pushing the medal out of the frame.
+  &-medalText {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-right: 14rem;
+
+    text-align: right;
+  }
+
+  &-medalDescription {
+    margin-top: 2rem;
+
+    color: menu.$dimmed-color;
+    font-size: vanilla.$font-size-s;
+  }
+}
+
+.medal {
+  &-image {
+    flex-shrink: 0;
+    width: $medal-size;
+    height: $medal-size;
+  }
+
+  // Muted and smaller than a medal's disc, as on the card and the tabs: no medal is no failure.
+  &-glyph {
+    --iconColor: #{menu.$dimmed-color};
+
+    flex-shrink: 0;
+    width: 32rem;
+    height: 32rem;
+    margin: 0 ($medal-size - 32rem) * 0.5;
+  }
+}
+
+// Two framed groups side by side.
+.figures {
+  display: flex;
+  flex-direction: row;
+  margin: 16rem -6rem 0;
+}
+
+// A group of figures, framed like the print, its title ruled off above them.
+.group {
+  @include dashboard.frame;
+
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0 6rem;
+  padding-bottom: 6rem;
+  overflow: hidden;
+
+  &-title {
+    margin-bottom: 4rem;
+    padding: 8rem 16rem;
+    border-bottom-width: 1rem;
+    border-bottom-style: solid;
+    border-bottom-color: vanilla.$menu-border-color-1;
+
+    color: menu.$dimmed-color;
+    font-size: vanilla.$font-size-s;
+  }
+}
+
+.figure {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 8rem 16rem 8rem 0;
+
+  // Right-aligned in a column of its own, wide enough for six digits and a separator, so the
+  // digits line up from row to row; a longer figure widens it rather than overflowing the frame
+  // that clips it.
+  &-value {
+    flex-shrink: 0;
+    min-width: 102rem;
+    margin-right: 16rem;
+
+    font-size: 28rem;
+    font-weight: bold;
+    line-height: 34rem;
+    text-align: right;
+  }
+
+  &-text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    padding-top: 2rem;
+  }
+
+  &-description {
+    margin-top: 2rem;
+
+    color: menu.$dimmed-color;
+    font-size: vanilla.$font-size-s;
+  }
+}

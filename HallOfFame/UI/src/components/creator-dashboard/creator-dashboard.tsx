@@ -1,4 +1,5 @@
-import { AutoNavigationScope } from 'cs2/input';
+import classNames from 'classnames';
+import { AutoNavigationScope, FocusDisabled } from 'cs2/input';
 import { memo, type ReactElement, useEffect, useMemo, useState } from 'react';
 import type { DashboardScreenshot } from '../../common';
 import * as bindings from '../../utils/bindings';
@@ -12,10 +13,12 @@ import {
   sortScreenshots,
   tallyMedals
 } from './dashboard-collection';
+import { DashboardDetail } from './dashboard-detail';
 import { DashboardGrid } from './dashboard-grid';
 import {
   DashboardHeader,
   DashboardHeaderControls,
+  DashboardHeaderDetail,
   DashboardHeaderSkeleton,
   DashboardSortDropdown
 } from './dashboard-header';
@@ -31,23 +34,27 @@ import * as styles from './creator-dashboard.module.scss';
 export const CreatorDashboard = memo((): ReactElement => {
   const state = bindings.useDashboardState();
 
+  const detail = bindings.useDashboardDetail();
+
   // Leaving the screen hosting the dashboard closes it, rather than leaving it to reopen on the
   // next visit.
   useEffect(() => bindings.closeDashboard, []);
 
   return (
     // A closing panel keeps the props it was last rendered with while its exit plays, so it holds
-    // its content although C# empties the collection on close.
+    // its content although C# empties the collection and closes the detail on close.
     <ModalHost>
-      {state.status != 'closed' && <DashboardModal key='dashboard' state={state} />}
+      {state.status != 'closed' && <DashboardModal key='dashboard' state={state} detail={detail} />}
     </ModalHost>
   );
 });
 
 function DashboardModal({
-  state
+  state,
+  detail
 }: Readonly<{
   state: Exclude<bindings.DashboardState, { status: 'closed' }>;
+  detail: bindings.DashboardDetailState;
 }>): ReactElement {
   // Held here rather than by the controls, and so reset on each opening: the transition group
   // mounts the modal afresh every time C# opens the panel.
@@ -67,8 +74,16 @@ function DashboardModal({
 
   const tally = useMemo(() => tallyMedals(screenshots), [screenshots]);
 
+  // The collection's own record of the screenshot the detail view is open on.
+  const detailScreenshot =
+    detail.status == 'closed'
+      ? undefined
+      : screenshots.find(screenshot => screenshot.id == detail.screenshotId);
+
   return (
-    <ModalBackdrop actions={backActions} onClose={bindings.closeDashboard}>
+    <ModalBackdrop
+      actions={detailScreenshot ? detailBackActions : backActions}
+      onClose={bindings.closeDashboard}>
       {/* No title bar: the band carries the title and the close button itself. */}
       <Panel
         className={styles.window}
@@ -79,7 +94,9 @@ function DashboardModal({
         <AutoNavigationScope>
           <div className={styles.body}>
             <DashboardHeader>
-              {state.status == 'loading' ? (
+              {detailScreenshot ? (
+                <DashboardHeaderDetail screenshot={detailScreenshot} />
+              ) : state.status == 'loading' ? (
                 <DashboardHeaderSkeleton />
               ) : state.status == 'loaded' ? (
                 <DashboardHeaderControls
@@ -94,23 +111,50 @@ function DashboardModal({
               ) : undefined}
             </DashboardHeader>
 
-            {state.status == 'loading' && <DashboardLoading />}
+            <div className={styles.bodyContent}>
+              {state.status == 'loading' && <DashboardLoading />}
 
-            {state.status == 'error' && <DashboardError error={state.error} />}
+              {state.status == 'error' && (
+                <DashboardError
+                  title='HallOfFame.UI.Dashboard.ERROR_TITLE'
+                  error={state.error}
+                  onRetry={bindings.refreshDashboard}
+                />
+              )}
 
-            {state.status == 'loaded' && screenshots.length == 0 && <DashboardEmpty />}
+              {state.status == 'loaded' && screenshots.length == 0 && <DashboardEmpty />}
 
-            {/* A tab matching nothing leaves the body empty, its zero count saying why, rather
-                than hold a grid that would wait for a row to measure on every frame. */}
-            {state.status == 'loaded' && visibleScreenshots.length > 0 && (
-              // Keyed on the selection, so a new one starts from the top rather than from wherever
-              // the previous one was scrolled to.
-              <DashboardGrid
-                key={`${filter}-${sort}`}
-                screenshots={visibleScreenshots}
-                stats={state.stats}
-              />
-            )}
+              {/* A tab matching nothing leaves the body empty, its zero count saying why, rather
+                  than hold a grid that would wait for a row to measure on every frame. */}
+              {state.status == 'loaded' && visibleScreenshots.length > 0 && (
+                // Hidden rather than unmounted under the detail view, so going back finds it
+                // scrolled where it was, and out of the gamepad's reach meanwhile.
+                <FocusDisabled disabled={detailScreenshot != null}>
+                  <div
+                    className={classNames(
+                      styles.bodyGrid,
+                      detailScreenshot && styles.bodyGridHidden
+                    )}>
+                    {/* Keyed on the selection, so a new one starts from the top rather than from
+                        wherever the previous one was scrolled to. */}
+                    <DashboardGrid
+                      key={`${filter}-${sort}`}
+                      screenshots={visibleScreenshots}
+                      stats={state.stats}
+                    />
+                  </div>
+                </FocusDisabled>
+              )}
+
+              {state.status == 'loaded' && detailScreenshot && detail.status != 'closed' && (
+                <DashboardDetail
+                  detail={detail}
+                  screenshot={detailScreenshot}
+                  screenshots={state.screenshots}
+                  stats={state.stats}
+                />
+              )}
+            </div>
           </div>
         </AutoNavigationScope>
       </Panel>
@@ -119,6 +163,9 @@ function DashboardModal({
 }
 
 const backActions = { Back: bindings.closeDashboard };
+
+// Back steps out of the detail view first, as the game's nested menus do.
+const detailBackActions = { Back: bindings.closeDashboardDetail };
 
 // One empty collection for every state holding none, so the memos over it hold too.
 const noScreenshots: readonly DashboardScreenshot[] = [];

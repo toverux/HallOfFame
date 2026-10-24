@@ -35,9 +35,7 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   internal Func<string, Task<IReadOnlyList<HallOfFame.Domain.Mod>>>? GetPlaysetImpl { get; init; }
 
-  #if DEBUG
   internal Func<string, Task<Screenshot>>? GetScreenshotImpl { get; init; }
-  #endif
 
   public Task<CreatorStats> GetCreatorStats() =>
     this.GetCreatorStatsImpl?.Invoke() ?? throw new NotImplementedException();
@@ -47,10 +45,8 @@ internal sealed class FakeApi : IHallOfFameApi {
   public Task<Creator> UpdateMe() =>
     this.UpdateMeImpl?.Invoke() ?? throw new NotImplementedException();
 
-  #if DEBUG
   public Task<Screenshot> GetScreenshot(string screenshotId) =>
     this.GetScreenshotImpl?.Invoke(screenshotId) ?? throw new NotImplementedException();
-  #endif
 
   public Task<Screenshot> GetRandomScreenshotWeighted() =>
     this.GetRandomScreenshotWeightedImpl?.Invoke() ?? throw new NotImplementedException();

@@ -1,4 +1,3 @@
-using System;
 using Colossal.UI.Binding;
 using HallOfFame.Domain;
 using HallOfFame.Services;
@@ -27,15 +26,7 @@ internal sealed class DashboardStateValueWriter : IWriter<DashboardState> {
     );
 
     writer.PropertyName("status");
-    writer.Write(
-      value.Status switch {
-        DashboardStatus.Closed => "closed",
-        DashboardStatus.Loading => "loading",
-        DashboardStatus.Loaded => "loaded",
-        DashboardStatus.Error => "error",
-        _ => throw new InvalidOperationException($"Unknown status {value.Status}.")
-      }
-    );
+    writer.Write(value.Status.ToWireName());
 
     if (stats is not null) {
       writer.PropertyName("screenshots");

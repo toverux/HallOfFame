@@ -7,6 +7,7 @@ import goldSrc from '../../icons/medals/gold.svg';
 import platinumSrc from '../../icons/medals/platinum.svg';
 import silverSrc from '../../icons/medals/silver.svg';
 import { useTranslate } from '../../utils';
+import { medalBandIds, medalNameIds } from './dashboard-collection';
 import * as styles from './dashboard-medal.module.scss';
 
 /**
@@ -66,23 +67,4 @@ const medalSrcs: Readonly<Record<ScreenshotRank, string>> = {
   gold: goldSrc,
   platinum: platinumSrc,
   diamond: diamondSrc
-};
-
-const medalNameIds: Readonly<Record<ScreenshotRank, string>> = {
-  bronze: 'HallOfFame.UI.Dashboard.MEDAL[Bronze]',
-  silver: 'HallOfFame.UI.Dashboard.MEDAL[Silver]',
-  gold: 'HallOfFame.UI.Dashboard.MEDAL[Gold]',
-  platinum: 'HallOfFame.UI.Dashboard.MEDAL[Platinum]',
-  diamond: 'HallOfFame.UI.Dashboard.MEDAL[Diamond]'
-};
-
-/**
- * Where the medal stands among the ranked screenshots.
- */
-const medalBandIds: Readonly<Record<ScreenshotRank, string>> = {
-  bronze: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Bronze Band]',
-  silver: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Silver Band]',
-  gold: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Gold Band]',
-  platinum: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Platinum Band]',
-  diamond: 'HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Diamond Band]'
 };

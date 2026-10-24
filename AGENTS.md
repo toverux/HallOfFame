@@ -41,7 +41,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `HallOfFame/Services`: Plain (non-ECS) classes holding logic extracted from systems.
 - `HallOfFame/Reflection`: Proxy/accessor classes reaching into private game internals via reflection (screen utilities, error dialogs, Paradox SDK platform).
 - `HallOfFame/Logging`: The mod-owned logging seam (`IModLog` + `ModLog`, reached through `Mod.Log`) wrapping the engine's `Colossal.Logging.ILog` so logging logic stays unit-testable off-engine.
-- `HallOfFame/Utils`: Small helpers and extensions (localization, input bindings, etc.), plus `Writers/`, the outbound C# to cohtml binding writers (`IWriter<T>` implementations).
+- `HallOfFame/Utils`: Small helpers and extensions (localization, input bindings, etc.), plus `Writers/`, the outbound C# to cohtml binding writers (`IWriter<T>` implementations and the helpers they share).
 - `HallOfFame/Locales`: Localization files, one JSON per language, keyed `HallOfFame.<Area>.<KEY>`, plus `Skyve/`, Skyve's own labels, keyed bare (see Guidelines).
 - `HallOfFame/Mod.cs` and `HallOfFame/Settings.cs`: Mod entry point and user-facing settings.
 - `HallOfFame.Tests`: C# unit tests (xUnit, `net48`, run off-engine).

@@ -1,21 +1,22 @@
 import classNames from 'classnames';
 import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
-import { Icon } from 'cs2/ui';
+import { Button, Icon } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
-import { selectLocalizedName } from '../../area-menu/menu-controls/select-localized-name';
 import type { CreatorStats, DashboardScreenshot } from '../../common';
 import hourglassHalfSolidSrc from '../../icons/fontawesome/hourglass-half-solid.svg';
 import { useImageLoaded, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { Tooltip } from '../tooltip';
-import { likeRate, type MedalState, selectMedalState } from './dashboard-collection';
+import { likePercentage, type MedalState, selectMedalState } from './dashboard-collection';
 import { MedalImage, MedalTooltip } from './dashboard-medal';
+import { useCityName } from './use-city-name';
 import * as styles from './dashboard-card.module.scss';
 
 /**
  * One screenshot of the collection: its thumbnail,
  * what tells it apart from the creator's other shots of the same city,
  * the attention it got, and its medal.
+ * Selecting it opens its detail view.
  */
 export const DashboardCard = memo(
   ({
@@ -25,24 +26,19 @@ export const DashboardCard = memo(
     screenshot: DashboardScreenshot;
     stats: CreatorStats;
   }>): ReactElement => {
-    const modSettings = bindings.useModSettings();
-
-    const gameLocale = bindings.useLocale();
-
-    // The same form of the name the slideshow shows, or the native one when that form is missing.
-    const city = selectLocalizedName(modSettings.namesTranslationMode, gameLocale, {
-      value: screenshot.cityName,
-      latinized: screenshot.cityNameLatinized,
-      translated: screenshot.cityNameTranslated,
-      locale: screenshot.cityNameLocale
-    });
+    const cityName = useCityName(screenshot);
 
     const medalState = selectMedalState(screenshot, stats);
 
     const isThumbnailLoaded = useImageLoaded(screenshot.imageUrlThumbnail);
 
     return (
-      <div className={styles.card} data-dashboard-card={screenshot.id}>
+      <Button
+        as='div'
+        theme={plainButtonTheme}
+        className={styles.card}
+        onSelect={() => bindings.openDashboardDetail(screenshot.id)}
+        data-dashboard-card={screenshot.id}>
         <div className={styles.cardThumbnail}>
           <div
             className={classNames(
@@ -57,7 +53,7 @@ export const DashboardCard = memo(
 
         <div className={styles.cardInfo}>
           <div className={styles.cardText}>
-            <div className={styles.cardCityName}>{city.name ?? screenshot.cityName}</div>
+            <div className={styles.cardCityName}>{cityName}</div>
 
             <Tooltip
               direction='down'
@@ -85,7 +81,7 @@ export const DashboardCard = memo(
 
           <CardMedal state={medalState} />
         </div>
-      </div>
+      </Button>
     );
   }
 );
@@ -93,8 +89,9 @@ export const DashboardCard = memo(
 /**
  * Reported screenshots stay in the collection,
  * hidden from the slideshow until a moderator clears them, which is all the badge has to explain.
+ * The detail view lays it over its image too.
  */
-function CardUnderReviewBadge(): ReactElement {
+export function CardUnderReviewBadge(): ReactElement {
   const translate = useTranslate();
 
   return (
@@ -114,7 +111,7 @@ function CardUnderReviewBadge(): ReactElement {
  * The like rate only shows on a ranked screenshot:
  * below the minimums it rests on too few viewers or likes to mean much,
  * and a raw percentage reads worse than it is.
- * The rate shown is {@link likeRate}, the ratio the medal ranks by.
+ * The rate shown is {@link likePercentage}, the ratio the medal ranks by, as a whole percentage.
  */
 function CardStatsTooltip({
   screenshot,
@@ -142,7 +139,7 @@ function CardStatsTooltip({
         <LocalizedString
           id='HallOfFame.UI.Dashboard.CARD_TOOLTIP[Like Rate]'
           args={{
-            LIKING_PERCENTAGE: <LocalizedNumber value={Math.round(likeRate(screenshot) * 100)} />
+            LIKING_PERCENTAGE: <LocalizedNumber value={likePercentage(screenshot)} />
           }}
         />
       )}
@@ -216,6 +213,9 @@ function CardMedal({ state }: Readonly<{ state: MedalState }>): ReactElement {
     }
   }
 }
+
+// The card paints its own face, the vanilla button's.
+const plainButtonTheme = { button: '' };
 
 const eyeOpenSrc = 'Media/Glyphs/EyeOpen.svg';
 

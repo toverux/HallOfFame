@@ -1,5 +1,4 @@
-﻿#if DEBUG
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using HallOfFame.Domain;
 using UnityEngine.Networking;
 
@@ -7,7 +6,7 @@ namespace HallOfFame.Http;
 
 internal partial class HttpQueries {
   /// <summary>
-  /// Get a specific <see cref="Screenshot"/> by ID from the server.
+  /// Get a specific <see cref="Screenshot"/> by ID from the server, with its showcased mod.
   /// </summary>
   public async Task<Screenshot> GetScreenshot(string screenshotId) {
     using var request = UnityWebRequest.Get(
@@ -17,4 +16,3 @@ internal partial class HttpQueries {
     return await HttpQueries.Send<Screenshot>(request);
   }
 }
-#endif

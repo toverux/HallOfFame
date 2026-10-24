@@ -1,5 +1,6 @@
 import { type Localization, LocalizedString, type LocElement, type LocElementType } from 'cs2/l10n';
 import type { ReactElement, ReactNode } from 'react';
+import type { Screenshot } from '../../common';
 
 export function locElementToReactNode(
   element: LocElement | null | undefined,
@@ -11,6 +12,21 @@ export function locElementToReactNode(
     <LocalizedString id={element.id} fallback={element.value} />
   ) : (
     <>{fallback}</>
+  );
+}
+
+/**
+ * Whether a screenshot shows an empty map rather than a city:
+ * likely when the population is 0,
+ * and the milestone is 0 (Founding) or 20 (Megalopolis, i.e., creative mode).
+ */
+export function isPristineWilderness(
+  screenshot: Pick<Screenshot, 'cityMilestone' | 'cityPopulation'>
+): boolean {
+  return (
+    screenshot.cityPopulation == 0 &&
+    // oxlint-disable-next-line no-magic-numbers
+    (screenshot.cityMilestone == 0 || screenshot.cityMilestone == 20)
   );
 }
 

@@ -3,7 +3,6 @@ import { Button, Icon } from 'cs2/ui';
 import type { ReactElement } from 'react';
 import { locElementToReactNode } from '../../area-menu/menu-controls/menu-controls-utils';
 import { useTranslate } from '../../utils';
-import * as bindings from '../../utils/bindings';
 import * as styles from './dashboard-status.module.scss';
 
 /**
@@ -21,7 +20,18 @@ export function DashboardLoading(): ReactElement {
   );
 }
 
-export function DashboardError({ error }: Readonly<{ error: LocalizedString }>): ReactElement {
+/**
+ * A failed fetch, what failed in `title`, why in `error`, and a retry.
+ */
+export function DashboardError({
+  title,
+  error,
+  onRetry
+}: Readonly<{
+  title: string;
+  error: LocalizedString;
+  onRetry: () => void;
+}>): ReactElement {
   const translate = useTranslate();
 
   return (
@@ -31,9 +41,7 @@ export function DashboardError({ error }: Readonly<{ error: LocalizedString }>):
         style={{ backgroundImage: 'url(Media/Game/Icons/AdvisorTrafficAccident.svg)' }}
       />
 
-      <strong className={styles.statusTitle}>
-        {translate('HallOfFame.UI.Dashboard.ERROR_TITLE')}
-      </strong>
+      <strong className={styles.statusTitle}>{translate(title)}</strong>
 
       <div className={styles.statusMessage}>
         <LocalizedString
@@ -45,10 +53,7 @@ export function DashboardError({ error }: Readonly<{ error: LocalizedString }>):
         />
       </div>
 
-      <Button
-        className={styles.statusButton}
-        variant='primary'
-        onSelect={bindings.refreshDashboard}>
+      <Button className={styles.statusButton} variant='primary' onSelect={onRetry}>
         {translate('HallOfFame.UI.Dashboard.ACTION[Retry]')}
       </Button>
     </div>

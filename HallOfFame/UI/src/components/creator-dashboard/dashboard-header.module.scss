@@ -18,8 +18,7 @@ $window-radius: 12rem;
 // The band's edge, the line setting it apart from the body.
 $band-border-width: 1rem;
 
-// The rules setting the band's parts apart, which stop short of its edges.
-$rule-color: rgba(255, 255, 255, 0.2);
+// The rules setting the band's parts apart stop short of its edges.
 $rule-inset: 20rem;
 
 $tab-medal-size: 28rem;
@@ -54,7 +53,7 @@ $line-height: 1.2;
   align-self: stretch;
   width: 1rem;
   margin: $rule-inset 0;
-  background-color: $rule-color;
+  background-color: shared.$rule-color;
 }
 
 // The window's one band, its title bar and the creator's standing in one: the body's chrome rather
@@ -207,6 +206,72 @@ $line-height: 1.2;
     align-items: center;
     justify-content: flex-end;
     padding-left: $group-gap;
+  }
+
+  // The band's middle over the detail view, the way back then the screenshot's title.
+  &-detail {
+    @include band-surface;
+
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: row;
+    align-items: stretch;
+    min-width: 0;
+
+    // The tab's own padding takes it the rest of the way to a group gap, on either side.
+    > .header-rule:first-child {
+      margin-right: $group-gap - $tab-padding;
+    }
+
+    > .header-tab + .header-rule {
+      margin-left: $group-gap - $tab-padding;
+    }
+
+    // The band around it paints the surface and its edge already, which the tab would double.
+    > .header-tab {
+      border-bottom-width: 0;
+      background-color: transparent;
+    }
+  }
+
+  // Lit with the tab's text, as the tabs' glyphs are.
+  &-backGlyph {
+    --iconColor: #{menu.$dimmed-color};
+
+    width: 18rem;
+    height: 18rem;
+    margin-right: 10rem;
+
+    .header-tab:hover & {
+      --iconColor: #{vanilla.$menu-active-color-bright};
+    }
+  }
+
+  // Cohtml ellipsizes only a text box laid out as a column.
+  &-detailTitle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  &-detailCity {
+    flex-direction: column;
+    overflow: hidden;
+
+    font-size: vanilla.$font-size-xl;
+    font-weight: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  // Hugs its text, so its tooltip opens under it rather than under the band's whole width.
+  &-detailDate {
+    align-self: flex-start;
+    margin-top: 2rem;
+
+    color: menu.$dimmed-color;
+    font-size: vanilla.$font-size-s;
   }
 
   // The band's end, the close button's.
@@ -372,7 +437,7 @@ $line-height: 1.2;
     flex-direction: row;
     align-items: center;
     padding: 7rem 10rem 7rem 12rem;
-    border: 1rem solid $rule-color;
+    border: 1rem solid shared.$rule-color;
     border-radius: 4rem;
     background-color: rgba(0, 0, 0, 0.3);
 
@@ -419,7 +484,7 @@ $line-height: 1.2;
   // The toggle's own dark, opaque so the cards scrolling under it never show through.
   &-menu {
     padding: 4rem;
-    border: 1rem solid $rule-color;
+    border: 1rem solid shared.$rule-color;
     border-radius: 4rem;
     background-color: color.change(vanilla.$panel-color-dark, $alpha: 0.98);
     box-shadow: 0 4rem 16rem rgba(0, 0, 0, 0.4);

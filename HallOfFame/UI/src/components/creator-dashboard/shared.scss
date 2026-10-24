@@ -1,6 +1,25 @@
+@use "../../vanilla-vars" as vanilla;
+
 // The window's one band, its title and the creator's standing: the game's dark panel colour,
 // lightened to the tone it takes over the window's blue body.
 $band-color: #202d42;
 
 // The distance from the window's sides the band's contents and the grid's rows both keep.
 $edge-padding: 24rem;
+
+// The rules setting the window's parts apart.
+$rule-color: rgba(255, 255, 255, 0.2);
+
+// The cards' frame, which the detail view's print and figure groups share.
+@mixin frame {
+  // Longhands to the side: the engine drops any shorthand holding a custom property, and
+  // border-color is one.
+  border-width: 1rem;
+  border-style: solid;
+  border-top-color: vanilla.$menu-border-color-1;
+  border-right-color: vanilla.$menu-border-color-1;
+  border-bottom-color: vanilla.$menu-border-color-1;
+  border-left-color: vanilla.$menu-border-color-1;
+  border-radius: 6rem;
+  background-color: rgba(255, 255, 255, 0.06);
+}

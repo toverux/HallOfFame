@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, mock } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EventInputProvider } from 'cs2/input';
 import type { CreatorStats, DashboardScreenshot } from '../../common';
-import { makeScreenshot } from '../../testing/fixtures';
+import { makeScreenshot, photoModeCatalog } from '../../testing/fixtures';
 import {
   emitEvent,
   getTriggers,
@@ -10,7 +10,7 @@ import {
   setBinding,
   setTranslations
 } from '../../testing/game-setup';
-import type { DashboardState } from '../../utils/bindings';
+import type { DashboardDetailState, DashboardState } from '../../utils/bindings';
 import { TransitionContext } from '../../vanilla-modules/game-ui/common/animations/transition-context';
 import { CreatorDashboard } from './creator-dashboard';
 
@@ -396,6 +396,303 @@ describe('CreatorDashboard', () => {
 
     expect(await screen.findByText(/MEDAL_TOOLTIP\[No Medal\]/u)).toBeDefined();
   });
+
+  it(`opens a card's detail view when the card is selected`, () => {
+    renderCard(makeScreenshot({ id: 'a' }));
+
+    fireEvent.click(card('a'));
+
+    expect(triggersOf('openDetail')).toEqual([['a']]);
+  });
+
+  it(`shows the detail over the grid, from the collection's figures while it loads`, () => {
+    setTranslations({
+      'HallOfFame.UI.Dashboard.DETAIL_STAT_VALUE[Like Rate]': '{LIKING_PERCENTAGE}%'
+    });
+
+    setLoaded([
+      makeScreenshot({
+        id: 'a',
+        cityName: 'Detail City',
+        uniqueViewsCount: 80,
+        viewsCount: 120,
+        likesCount: 20,
+        viewerClicksCount: 7,
+        rank: 'gold'
+      })
+    ]);
+
+    setDetail({ status: 'loading', screenshotId: 'a' });
+
+    render(<CreatorDashboard />);
+
+    const detail = query('[data-dashboard-detail="a"]');
+
+    // The band names the screenshot rather than the collection's standing.
+    expect(document.querySelector('[data-tally]')).toBeNull();
+    expect(query('[data-dashboard-back]').parentElement?.textContent).toContain('Detail City');
+
+    expect(statText('uniqueViews')).toContain('80');
+    expect(statText('views')).toContain('120');
+    expect(statText('likes')).toContain('20');
+    expect(statText('viewerClicks')).toContain('7');
+    // 20 likes over 80 unique viewers, as the card's tooltip rounds it.
+    expect(statText('likeRate')).toContain('25%');
+    expect(statText('likeRate')).toContain('DETAIL_STAT_DESCRIPTION[Like Rate]');
+
+    expect(detail.querySelector('[data-medal]')?.getAttribute('data-medal')).toBe('gold');
+    expect(detail.querySelector('[data-dashboard-state="loading"]')).not.toBeNull();
+    expect(detail.querySelector('[data-under-review-notice]')).toBeNull();
+
+    // The grid stays mounted under it, so going back finds it where it was scrolled to.
+    expect(cardIds()).toEqual(['a']);
+  });
+
+  it(`places the screenshot in the Best medal order, alone in its collection never`, () => {
+    setTranslations({
+      'HallOfFame.UI.Dashboard.DETAIL_STAT_VALUE[Collection Place]': '#{PLACE}',
+      'HallOfFame.UI.Dashboard.DETAIL_STAT_DESCRIPTION[Collection Place]':
+        'Among {SCREENSHOTS_COUNT}.'
+    });
+
+    setLoaded([
+      makeScreenshot({ id: 'a', rank: 'gold' }),
+      makeScreenshot({ id: 'b', rank: 'diamond' })
+    ]);
+    setDetail({ status: 'loading', screenshotId: 'a' });
+
+    const { unmount } = render(<CreatorDashboard />);
+
+    expect(statText('collectionPlace')).toContain('#2');
+    expect(statText('collectionPlace')).toContain('Among 2.');
+
+    unmount();
+
+    setLoaded([makeScreenshot({ id: 'a' })]);
+
+    render(<CreatorDashboard />);
+
+    expect(document.querySelector('[data-stat="collectionPlace"]')).toBeNull();
+  });
+
+  it(`leaves the like rate out of an unranked screenshot's detail`, () => {
+    setLoaded([makeScreenshot({ id: 'a', uniqueViewsCount: 40, likesCount: 1 })]);
+    setDetail({ status: 'loading', screenshotId: 'a' });
+
+    render(<CreatorDashboard />);
+
+    expect(document.querySelector('[data-stat="likeRate"]')).toBeNull();
+    expect(query('[data-dashboard-detail] [data-medal]').getAttribute('data-medal')).toBe('none');
+  });
+
+  it(`explains in plain view why a reported screenshot is under review`, () => {
+    setLoaded([makeScreenshot({ id: 'a', isReported: true })]);
+    setDetail({ status: 'loading', screenshotId: 'a' });
+
+    render(<CreatorDashboard />);
+
+    expect(query('[data-under-review-notice]').textContent).toContain(
+      'HallOfFame.UI.Dashboard.CARD_TOOLTIP[Under Review]'
+    );
+  });
+
+  it(`shows the full image once the full screenshot is loaded`, () => {
+    setLoaded([makeScreenshot({ id: 'a', imageUrlThumbnail: 'thumbnail.jpg' })]);
+    setDetail({
+      status: 'loaded',
+      screenshotId: 'a',
+      screenshot: makeScreenshot({ id: 'a', imageUrlFHD: 'full.jpg' })
+    });
+
+    render(<CreatorDashboard />);
+
+    const detail = query('[data-dashboard-detail="a"]');
+
+    expect(detail.innerHTML).toContain('full.jpg');
+    expect(detail.innerHTML).toContain('thumbnail.jpg');
+    expect(detail.querySelector('[data-dashboard-state]')).toBeNull();
+  });
+
+  it(`captions the image with the city's facts once the full screenshot is loaded`, () => {
+    setTranslations({
+      'HallOfFame.UI.Dashboard.DETAIL_FACT[Playset]': '{MODS_COUNT} mods',
+      'HallOfFame.UI.Dashboard.DETAIL_FACT[Photo Settings]': '{SETTINGS_COUNT} photo settings',
+      'Progression.MILESTONE_NAME:5': 'Small City'
+    });
+
+    setBinding('hallOfFame.slideshow', 'photoModeCatalog', photoModeCatalog);
+    setLoaded([makeScreenshot({ id: 'a' })]);
+    setDetail({ status: 'loading', screenshotId: 'a' });
+
+    render(<CreatorDashboard />);
+
+    expect(document.querySelector('[data-dashboard-detail] [data-fact]')).toBeNull();
+
+    act(() => {
+      setDetail({
+        status: 'loaded',
+        screenshotId: 'a',
+        screenshot: makeScreenshot({
+          id: 'a',
+          cityMilestone: 5,
+          cityPopulation: 1200,
+          mapName: 'Volchoria',
+          createdAtFormatted: '03/09/2026',
+          capabilities: ['paradoxModIds', 'renderSettings'],
+          paradoxModIds: [1, 2],
+          shareParadoxModIds: true,
+          shareRenderSettings: true,
+          renderSettings: { 'PhotoModeRenderSystem.iso': 400 }
+        })
+      });
+    });
+
+    const detail = query('[data-dashboard-detail="a"]');
+
+    expect(detail.textContent).toContain('Small City');
+    expect(detail.textContent).toContain('Volchoria');
+    expect(detail.textContent).toContain('03/09/2026');
+    expect(query('[data-fact="playset"]').textContent).toBe('2 mods');
+    expect(query('[data-fact="photoSettings"]').textContent).toBe('1 photo settings');
+  });
+
+  it(`leaves out the photo settings and the playset a screenshot does not carry`, () => {
+    setLoaded([makeScreenshot({ id: 'a' })]);
+    setDetail({
+      status: 'loaded',
+      screenshotId: 'a',
+      // Mod IDs from before the playset was recorded, which the details window does not list.
+      screenshot: makeScreenshot({
+        id: 'a',
+        mapName: 'Volchoria',
+        paradoxModIds: [1],
+        shareParadoxModIds: true
+      })
+    });
+
+    render(<CreatorDashboard />);
+
+    expect(query('[data-dashboard-detail="a"]').textContent).toContain('Volchoria');
+    expect(document.querySelector('[data-fact="playset"]')).toBeNull();
+    expect(document.querySelector('[data-fact="photoSettings"]')).toBeNull();
+  });
+
+  it(`leaves out the photo settings and the playset the creator did not share`, () => {
+    setBinding('hallOfFame.slideshow', 'photoModeCatalog', photoModeCatalog);
+    setLoaded([makeScreenshot({ id: 'a' })]);
+    setDetail({
+      status: 'loaded',
+      screenshotId: 'a',
+      // The server keeps both for their creator, but the details window lists neither.
+      screenshot: makeScreenshot({
+        id: 'a',
+        capabilities: ['paradoxModIds', 'renderSettings'],
+        paradoxModIds: [1, 2],
+        shareParadoxModIds: false,
+        shareRenderSettings: false,
+        renderSettings: { 'PhotoModeRenderSystem.iso': 400 }
+      })
+    });
+
+    render(<CreatorDashboard />);
+
+    expect(document.querySelector('[data-fact="playset"]')).toBeNull();
+    expect(document.querySelector('[data-fact="photoSettings"]')).toBeNull();
+  });
+
+  it(`opens the details window on the playset from its fact`, () => {
+    setLoadedWithDetails();
+
+    render(<CreatorDashboard />);
+
+    fireEvent.click(query('[data-fact="playset"] > *'));
+
+    // The playset tab asks the mod for the screenshot's playset as it opens.
+    expect(
+      getTriggers()
+        .filter(trigger => trigger.event == 'hallOfFame.slideshow.loadPlayset')
+        .map(trigger => trigger.args)
+    ).toEqual([['a']]);
+    expect(screen.queryByText(photoModeNotice)).toBeNull();
+  });
+
+  it(`opens the details window on the photo settings from their fact`, () => {
+    setLoadedWithDetails();
+
+    render(<CreatorDashboard />);
+
+    fireEvent.click(query('[data-fact="photoSettings"] > *'));
+
+    expect(screen.getByText(photoModeNotice)).toBeDefined();
+  });
+
+  it(`retries a failed detail fetch on the same screenshot`, () => {
+    setLoaded([makeScreenshot({ id: 'a' })]);
+    setDetail({
+      status: 'error',
+      screenshotId: 'a',
+      error: { id: 'SOME_ERROR', value: 'Some error', args: null }
+    });
+
+    render(<CreatorDashboard />);
+
+    expect(screen.getByText('HallOfFame.UI.Dashboard.DETAIL_ERROR_TITLE')).toBeDefined();
+
+    fireEvent.click(screen.getByText('HallOfFame.UI.Dashboard.ACTION[Retry]'));
+
+    expect(triggersOf('openDetail')).toEqual([['a']]);
+  });
+
+  it(`goes back to the grid from the band's Back button`, () => {
+    setLoaded([makeScreenshot({ id: 'a' })]);
+    setDetail({ status: 'loading', screenshotId: 'a' });
+
+    render(<CreatorDashboard />);
+
+    fireEvent.click(query('[data-dashboard-back]'));
+
+    expect(triggersOf('closeDetail')).toHaveLength(1);
+    expect(closeTriggers()).toBe(0);
+  });
+
+  it(`keeps the detail on screen while the panel closing from it plays its exit`, () => {
+    setLoaded([makeScreenshot({ id: 'a' })]);
+    setDetail({ status: 'loading', screenshotId: 'a' });
+
+    render(<CreatorDashboard />);
+
+    // C# closes the dashboard, then its detail.
+    act(() => {
+      setState({ status: 'closed' });
+    });
+
+    act(() => {
+      setDetail({ status: 'closed' });
+    });
+
+    expect(document.querySelector('[data-dashboard-detail="a"]')).not.toBeNull();
+    expect(document.querySelector('[data-tally]')).toBeNull();
+  });
+
+  it(`goes back to the grid on Back, rather than closing`, async () => {
+    setBinding('input', 'actionNames', ['Back']);
+    setLoaded([makeScreenshot({ id: 'a' })]);
+    setDetail({ status: 'loading', screenshotId: 'a' });
+
+    render(
+      <EventInputProvider>
+        <CreatorDashboard />
+      </EventInputProvider>
+    );
+
+    await waitFor(() => {
+      emitEvent('input.onActionPerformed.update', { action: 'Back', value: null });
+
+      expect(triggersOf('closeDetail').length).toBeGreaterThan(0);
+    });
+
+    expect(closeTriggers()).toBe(0);
+  });
 });
 
 // Their arguments render beside their ids.
@@ -413,11 +710,45 @@ function setState(state: DashboardState): void {
   setBinding(GROUP, 'state', state);
 }
 
+const photoModeNotice = 'HallOfFame.UI.Menu.ScreenshotDetails.PHOTO_MODE_SETTINGS[Notice]';
+
+// A loaded detail whose screenshot shares a playset and photo settings, both opening the window.
+function setLoadedWithDetails(): void {
+  setBinding('hallOfFame.slideshow', 'photoModeCatalog', photoModeCatalog);
+  setLoaded([makeScreenshot({ id: 'a' })]);
+  setDetail({
+    status: 'loaded',
+    screenshotId: 'a',
+    screenshot: makeScreenshot({
+      id: 'a',
+      capabilities: ['paradoxModIds', 'renderSettings'],
+      paradoxModIds: [1],
+      shareParadoxModIds: true,
+      shareRenderSettings: true,
+      renderSettings: { 'PhotoModeRenderSystem.iso': 400 }
+    })
+  });
+}
+
+function setDetail(detail: DashboardDetailState): void {
+  setBinding(GROUP, 'detail', detail);
+}
+
 function setLoaded(
   screenshots: readonly DashboardScreenshot[],
   loadedStats: CreatorStats = stats
 ): void {
   setState({ status: 'loaded', screenshots, stats: loadedStats });
+}
+
+function triggersOf(name: string): ReadonlyArray<readonly unknown[]> {
+  return getTriggers()
+    .filter(trigger => trigger.event == `${GROUP}.${name}`)
+    .map(trigger => trigger.args);
+}
+
+function statText(name: string): string | null {
+  return query(`[data-stat="${name}"]`).textContent;
 }
 
 function cardIds(): Array<string | null> {

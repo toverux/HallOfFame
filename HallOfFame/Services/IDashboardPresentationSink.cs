@@ -8,4 +8,6 @@ namespace HallOfFame.Services;
 /// </summary>
 internal interface IDashboardPresentationSink {
   void Publish(DashboardState state);
+
+  void PublishDetail(DashboardDetailState detail);
 }

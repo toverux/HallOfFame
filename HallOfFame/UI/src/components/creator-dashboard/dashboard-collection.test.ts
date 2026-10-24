@@ -3,6 +3,7 @@ import type { DashboardScreenshot } from '../../common';
 import { makeScreenshot } from '../../testing/fixtures';
 import {
   chunkRows,
+  collectionPlace,
   filterScreenshots,
   type DashboardSort,
   selectMedalState,
@@ -90,7 +91,7 @@ describe('sortScreenshots', () => {
     ]);
   });
 
-  it(`orders by medal, then by the exact like rate, then newest first, unranked last`, () => {
+  it(`orders by medal, then by the exact like rate, then by likes, then newest first, unranked last`, () => {
     const diamond = makeScreenshot({
       ...older,
       id: 'diamond',
@@ -130,6 +131,15 @@ describe('sortScreenshots', () => {
       uniqueViewsCount: 10
     });
 
+    // The tied pair's rate, from more likes: more viewers back it, so it comes first.
+    const goldMoreLikes = makeScreenshot({
+      ...older,
+      id: 'goldMoreLikes',
+      rank: 'gold',
+      likesCount: 6,
+      uniqueViewsCount: 20
+    });
+
     // A higher rate than any gold, but a lower medal.
     const bronze = makeScreenshot({
       ...older,
@@ -152,6 +162,7 @@ describe('sortScreenshots', () => {
       unrankedNewer,
       diamond,
       goldTiedNewer,
+      goldMoreLikes,
       goldHigh
     ];
 
@@ -159,11 +170,13 @@ describe('sortScreenshots', () => {
       'diamond',
       'goldHigh',
       'goldLow',
+      'goldMoreLikes',
       'a2',
       'a1',
       'bronze',
-      'unrankedNewer',
-      'unrankedOlder'
+      // Both at a rate of 0, the older holding the one like.
+      'unrankedOlder',
+      'unrankedNewer'
     ]);
   });
 
@@ -259,5 +272,27 @@ describe('chunkRows', () => {
 
   it(`makes no row of an empty collection`, () => {
     expect(chunkRows([], 2)).toEqual([]);
+  });
+});
+
+describe('collectionPlace', () => {
+  it(`places each screenshot where the grid's Best medal order puts it, ties included`, () => {
+    const newer = makeScreenshot({ id: 'newer', createdAt: '2026-06-01T10:00:00Z' });
+    const older = makeScreenshot({ id: 'older', createdAt: '2026-01-01T10:00:00Z' });
+
+    // The same medal, rate and likes: only their dates set them apart, as in the grid.
+    const collection = [
+      makeScreenshot({ ...older, rank: 'gold', likesCount: 2, uniqueViewsCount: 10 }),
+      makeScreenshot({ ...newer, rank: null, likesCount: 0 }),
+      makeScreenshot({ ...newer, rank: 'gold', likesCount: 2, uniqueViewsCount: 10 }),
+      makeScreenshot({ ...older, rank: 'diamond', likesCount: 1, uniqueViewsCount: 10 }),
+      makeScreenshot({ ...older, rank: null, likesCount: 0 })
+    ];
+
+    const places = sortScreenshots(collection, 'bestRank').map(screenshot =>
+      collectionPlace(screenshot, collection)
+    );
+
+    expect(places).toEqual(collection.map((_, index) => index + 1));
   });
 });

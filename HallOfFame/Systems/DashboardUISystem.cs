@@ -19,6 +19,8 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
 
   private ValueBinding<DashboardState> stateBinding = null!;
 
+  private ValueBinding<DashboardDetailState> detailBinding = null!;
+
   protected override void OnCreate() {
     base.OnCreate();
 
@@ -36,6 +38,15 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
       );
 
       this.AddBinding(this.stateBinding);
+
+      this.detailBinding = new ValueBinding<DashboardDetailState>(
+        DashboardUISystem.BindingGroup,
+        "detail",
+        DashboardDetailState.Closed,
+        new DashboardDetailStateValueWriter()
+      );
+
+      this.AddBinding(this.detailBinding);
 
       // Fire-and-forget edges: the service entry points are designed never to throw.
       this.AddBinding(
@@ -61,6 +72,22 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
           () => { _ = this.service.Refresh(); }
         )
       );
+
+      this.AddBinding(
+        new TriggerBinding<string>(
+          DashboardUISystem.BindingGroup,
+          "openDetail",
+          screenshotId => { _ = this.service.OpenDetail(screenshotId); }
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding(
+          DashboardUISystem.BindingGroup,
+          "closeDetail",
+          this.service.CloseDetail
+        )
+      );
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
@@ -68,4 +95,7 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
   }
 
   void IDashboardPresentationSink.Publish(DashboardState state) => this.stateBinding.Update(state);
+
+  void IDashboardPresentationSink.PublishDetail(DashboardDetailState detail) =>
+    this.detailBinding.Update(detail);
 }

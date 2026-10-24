@@ -11,11 +11,14 @@ namespace HallOfFame.Tests.Services;
 internal sealed class FakeDashboardPresentationSink : IDashboardPresentationSink {
   /// <summary>
   /// Every push in order, by its status's name,
-  /// a loaded one followed by its screenshots' IDs (ex. "Loaded:a,b").
+  /// a loaded one followed by its screenshots' IDs (ex. "Loaded:a,b"),
+  /// and a detail's prefixed and followed by its screenshot's ID (ex. "Detail:Loading:a").
   /// </summary>
   internal List<string> Log { get; } = [];
 
   internal DashboardState LastState { get; private set; } = DashboardState.Closed;
+
+  internal DashboardDetailState LastDetail { get; private set; } = DashboardDetailState.Closed;
 
   public void Publish(DashboardState state) {
     this.LastState = state;
@@ -28,5 +31,15 @@ internal sealed class FakeDashboardPresentationSink : IDashboardPresentationSink
     else {
       this.Log.Add(state.Status.ToString());
     }
+  }
+
+  public void PublishDetail(DashboardDetailState detail) {
+    this.LastDetail = detail;
+
+    this.Log.Add(
+      detail.ScreenshotId is null
+        ? $"Detail:{detail.Status}"
+        : $"Detail:{detail.Status}:{detail.ScreenshotId}"
+    );
   }
 }

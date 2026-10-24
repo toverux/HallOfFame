@@ -23,4 +23,25 @@
   flex-direction: column;
   // Lets the grid's scrollable shrink to the window rather than push it taller.
   min-height: 0;
+
+  // What the band sits over: the grid, or a status in its place, with the detail view over both.
+  &-content {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  // Passes the room on to the grid's scrollable, as the body does.
+  &-grid {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+
+    &--hidden {
+      visibility: hidden;
+    }
+  }
 }
