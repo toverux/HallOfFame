@@ -12,11 +12,13 @@
       <Path>README.md</Path>
       <Path>bunfig.toml</Path>
       <Path>crowdin.yml</Path>
+      <Path>docs</Path>
       <Path>lefthook.yml</Path>
       <Path>mise.toml</Path>
       <Path>oxfmt.config.ts</Path>
       <Path>oxlint.config.ts</Path>
       <Path>package.json</Path>
+      <Path>scripts</Path>
       <Path>tsconfig.json</Path>
     </explicitIncludes>
     <explicitExcludes />
