@@ -19,22 +19,7 @@
     flex-direction: column;
 
     textarea {
-      position: relative;
-      width: auto;
-      border: shared.$control-border;
-      border-radius: shared.$control-border-radius;
-      padding: 10rem;
-      background-color: shared.$control-background-color;
-
-      // Shared with the dropdown item so that both controls are the same height on a single line.
-      font-size: vanilla.$font-size-xl;
-      line-height: shared.$control-line-height;
-
-      &:hover,
-      &:focus {
-        border-color: shared.$control-border-color;
-        background-color: shared.$control-background-color-focused;
-      }
+      @include shared.text-control;
     }
   }
 
@@ -43,31 +28,30 @@
     display: flex; // Workaround cohtml breaking text nodes into two lines.
     align-items: center;
     font-size: vanilla.$font-size-s;
-    color: vanilla.$menu-text-1-disabled;
+    color: var(--hofTextDim);
   }
 
+  // A vanilla button inherits no text colour, so the control's is restated here.
   &-controlsButton {
-    border: shared.$control-border;
-    border-radius: shared.$control-border-radius;
+    @include shared.control;
     padding: 1rem 5rem;
-    background-color: shared.$control-background-color;
+    color: var(--hofControlText);
 
     &:hover {
-      border-color: shared.$control-border-color;
-      background-color: shared.$control-background-color-focused;
+      @include shared.control-active;
     }
   }
 }
 
 // Hover target of the description's formatting tooltip, a link flowing on after the hint.
 .formattingHelp {
-  color: vanilla.$accent-color-dark;
+  color: var(--hofLink);
   white-space: nowrap; // The icon wraps with its label, never apart.
 
   &:hover {
     // Cohtml defaults the decoration to black instead of following the text colour.
     text-decoration: underline;
-    text-decoration-color: vanilla.$accent-color-dark;
+    text-decoration-color: var(--hofLink);
   }
 
   &-icon {
@@ -75,7 +59,7 @@
     height: 1em;
     margin-right: 0.2em;
     vertical-align: middle;
-    fill: vanilla.$accent-color-dark;
-    stroke: vanilla.$accent-color-dark;
+    fill: var(--hofLink);
+    stroke: var(--hofLink);
   }
 }

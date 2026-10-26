@@ -23,3 +23,10 @@ export function useGameVersion(): string {
 export function playSound(sound: `${UISound}`, volume = 1): void {
   trigger(AUDIO_GROUP, 'playSound', sound, volume);
 }
+
+/**
+ * Plays the hover sound vanilla's controls play, for a mouse entering one of the mod's.
+ */
+export function playHoverSound(): void {
+  playSound('hover-item');
+}

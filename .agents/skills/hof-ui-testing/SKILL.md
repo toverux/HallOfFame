@@ -37,8 +37,7 @@ Drive the component through the mock engine exported by `../testing/game-setup`:
 
 - `setBinding(group, name, value)` BEFORE `render` configures what a `bindValue(group, name, default)` returns.
   An unconfigured binding keeps its `bindValue` default; a default-less binding throws, which is the intended "you forgot to configure this" signal.
-  The harness answers the game's tutorial bindings itself, since every vanilla tutorial target (a `Tab`, for one) reads them.
-  It leaves `input.useTextFieldInputBarrier` to the test: one rendering a vanilla `TextInput` sets it to `false`.
+  The harness answers the game's tutorial bindings and `input.useTextFieldInputBarrier` itself, since every vanilla tutorial target (a `Tab`, for one) reads the former and a vanilla `TextInput` the latter.
 - `setMapBinding(group, name, key, value)` configures one MapEntry binding (e.g. `cs2/ui` input hints); unconfigured entries resolve to `null`, which is enough for game widgets to render.
 - `getTriggers()` returns the outbound command triggers (`{ event, args }`) recorded since the last reset.
   Assert on these instead of mocking the binding layer.

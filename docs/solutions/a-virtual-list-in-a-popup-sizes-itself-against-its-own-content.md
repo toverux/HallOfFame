@@ -53,7 +53,7 @@ meanwhile:
 
 ```ts
 function measure(): void {
-  const row = scrollable.current?.querySelector(selector(dropdownTheme.dropdownItem));
+  const row = scrollable.current?.querySelector(selector(dropdownItemClassName));
 
   // Unrounded: `offsetHeight` rounds, and a fraction lost per row shows as a stray scrollbar.
   const height = row instanceof HTMLElement ? row.getBoundingClientRect().height : 0;

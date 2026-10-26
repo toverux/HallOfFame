@@ -37,8 +37,9 @@ internal record Screenshot {
   [DecodeAlias("mapName")]
   internal string MapName { get; [UsedImplicitly] set; } = string.Empty;
 
+  // Null when the creator gave none.
   [DecodeAlias("description")]
-  internal string Description { get; [UsedImplicitly] set; } = string.Empty;
+  internal string? Description { get; [UsedImplicitly] set; }
 
   [DecodeAlias("imageUrlThumbnail")]
   internal string ImageUrlThumbnail { get; [UsedImplicitly] set; } = string.Empty;

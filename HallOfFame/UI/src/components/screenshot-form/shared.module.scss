@@ -4,20 +4,75 @@
 
 @use "sass:color";
 @use "../../vanilla-vars" as vanilla;
+@use "../creator-dashboard/shared" as dashboard;
+
+// The palette the form's controls take on a surface, mixed onto the host's root, and onto the
+// dropdown's popup, which vanilla mounts outside the host.
+// Each tone states every property: Cohtml resolves no `var()` fallback.
+.tone {
+  // The upload panel's white pane: dark tints, lit by the game's blue control border.
+  &--light {
+    --hofControlText: black;
+    --hofTextDim: rgba(0, 0, 0, 0.5);
+    --hofControlFill: #{color.adjust(vanilla.$panel-color-dark, $alpha: -0.9)};
+    --hofControlFillActive: rgba(255, 255, 255, 0.4);
+    --hofControlBorderActive: #61a0b9;
+    --hofCheckboxBorder: #{color.adjust(vanilla.$panel-color-dark, $alpha: -0.7)};
+    --hofCheckboxBorderChecked: #61a0b9;
+    --hofCheckboxFillChecked: rgba(255, 255, 255, 0.4);
+    --hofCheckboxMark: #61a0b9;
+    --hofFieldHover: #{color.adjust(vanilla.$panel-color-dark, $alpha: -0.9)};
+    --hofMatch: rgba(97, 160, 185, 0.5);
+    --hofLink: #{vanilla.$accent-color-dark};
+    // Vanilla's own dropdown menu.
+    --hofMenuFill: white;
+    --hofMenuBorder: black;
+    --hofMenuItemHover: rgba(187, 187, 187, 0.5);
+    // Quieter than vanilla's scrollbar: the thumb shows on hover.
+    --hofScrollbarTrack: #{color.adjust(vanilla.$panel-color-dark, $alpha: -0.85)};
+    --hofScrollbarThumb: #{color.adjust(vanilla.$panel-color-dark, $alpha: -0.85)};
+    --hofScrollbarThumbHover: #{color.adjust(vanilla.$panel-color-dark, $alpha: -0.6)};
+  }
+
+  // The dashboard's navy window: the game's own dark controls, lit by its light accent.
+  &--dark {
+    --hofControlText: #eee;
+    --hofTextDim: rgba(255, 255, 255, 0.5);
+    --hofControlFill: rgba(0, 0, 0, 0.15);
+    --hofControlFillActive: rgba(255, 255, 255, 0.15);
+    --hofControlBorderActive: #{vanilla.$accent-color-light};
+    --hofCheckboxBorder: rgba(255, 255, 255, 0.3);
+    // A checked box fills rather than lights its border, which hover and focus own.
+    --hofCheckboxBorderChecked: rgba(255, 255, 255, 0.3);
+    --hofCheckboxFillChecked: #{vanilla.$accent-color-dark};
+    --hofCheckboxMark: white;
+    --hofFieldHover: rgba(255, 255, 255, 0.06);
+    --hofMatch: #{color.adjust(vanilla.$accent-color-light, $alpha: -0.65)};
+    --hofLink: #{vanilla.$highlight-bright-blue};
+    // The dashboard's band colour, ruled off like its parts.
+    --hofMenuFill: #{dashboard.$band-color};
+    --hofMenuBorder: rgba(255, 255, 255, 0.3);
+    --hofMenuItemHover: rgba(255, 255, 255, 0.1);
+    // Vanilla's own scrollbar, which the window's other scrollables show.
+    --hofScrollbarTrack: rgba(255, 255, 255, 0.15);
+    --hofScrollbarThumb: rgba(255, 255, 255, 0.6);
+    --hofScrollbarThumbHover: rgba(255, 255, 255, 0.8);
+  }
+}
 
 // Applied on the form's scrollable container and on the dropdown popup scrollable, which is not
 // contained in the form, so this needs to be higher scope.
 .scrollable-track-customization {
   [class^="track"] {
-    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
+    background-color: var(--hofScrollbarTrack);
 
     [class^="thumb"] {
       transition: background-color 0.1s ease-in-out;
-      background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.85);
+      background-color: var(--hofScrollbarThumb);
     }
   }
 
   &:hover [class^="track"] [class^="thumb"] {
-    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.6);
+    background-color: var(--hofScrollbarThumbHover);
   }
 }

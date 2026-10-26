@@ -409,15 +409,8 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
     this.isSavingBinding.Update(isSaving);
   }
 
-  void ISlideshowPresentationSink.ShowError(LocalizedString message) {
-    ErrorDialogManagerAccessor.Instance?.ShowError(
-      new ErrorDialog {
-        localizedTitle = "HallOfFame.Common.OOPS",
-        localizedMessage = message,
-        actions = ErrorDialog.ActionBits.Continue
-      }
-    );
-  }
+  void ISlideshowPresentationSink.ShowError(LocalizedString message) =>
+    ErrorDialogManagerAccessor.ShowError(message);
 
   Task<bool> ISlideshowPresentationSink.ConfirmReport(Screenshot screenshot) {
     var confirmation = new TaskCompletionSource<bool>();

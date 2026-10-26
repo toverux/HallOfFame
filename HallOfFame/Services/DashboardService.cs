@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using HallOfFame.Domain;
 using HallOfFame.Http;
 using HallOfFame.Logging;
 using HallOfFame.Utils;
@@ -120,6 +122,59 @@ internal sealed class DashboardService(
     this.PublishDetail(DashboardDetailState.Closed);
   }
 
+  /// <summary>
+  /// Saves an edit of the screenshot the detail view holds, then merges the answer into it and into
+  /// the collection, or fetches it again when the edit picked a new showcased mod.
+  /// A failed save leaves both as they were and shows the error, the form keeping its edits.
+  /// An edit while another is saving is ignored.
+  /// Designed never to throw, so the caller can fire-and-forget it.
+  /// </summary>
+  internal async Task Update(ScreenshotUpdate update) {
+    if (this.detail is not {
+        Status: DashboardStatus.Loaded, Screenshot: {} held, IsSaving: false
+      }) {
+      return;
+    }
+
+    var generation = this.detailGeneration;
+
+    this.PublishDetail(DashboardDetailState.Loaded(held, isSaving: true));
+
+    try {
+      var response = await api.UpdateScreenshot(held.Id, update);
+
+      // The answer leaves out the showcased mod, so a newly picked one is fetched in full.
+      var merged = update.ShowcasedModId is { Length: > 0 }
+        ? await api.GetScreenshot(held.Id)
+        : DashboardService.Merge(held, response, update);
+
+      // The collection takes the edit even after Back, the server holding it either way.
+      if (this.state.Status is DashboardStatus.Loaded && this.state.Stats is {} stats) {
+        var screenshots = this.state.Screenshots
+          .Select(item => item.Id == merged.Id ? DashboardService.MergeItem(item, merged) : item)
+          .ToArray();
+
+        this.Publish(DashboardState.Loaded(screenshots, stats));
+      }
+
+      if (generation == this.detailGeneration) {
+        this.PublishDetail(DashboardDetailState.Loaded(merged));
+      }
+    }
+    catch (Exception ex) {
+      this.LogFailure(ex);
+
+      // The form has no panel to show the message in, so the game's error dialog does.
+      if (ex is HttpException) {
+        sink.ShowError(ex.GetUserFriendlyMessage());
+      }
+
+      if (generation == this.detailGeneration) {
+        this.PublishDetail(DashboardDetailState.Loaded(held));
+      }
+    }
+  }
+
   private async Task Load() {
     var generation = ++this.loadGeneration;
 
@@ -150,6 +205,36 @@ internal sealed class DashboardService(
       this.Publish(DashboardState.Failed(ex.GetUserFriendlyMessage()));
     }
   }
+
+  /// <summary>
+  /// The held screenshot with the fields the server owns taken from its answer to an update,
+  /// which leaves out the creator, the liked state, and the showcased mod, kept from the held one
+  /// unless the update cleared it.
+  /// </summary>
+  private static Screenshot Merge(Screenshot held, Screenshot response, ScreenshotUpdate update) =>
+    held with {
+      CityName = response.CityName,
+      CityNameLocale = response.CityNameLocale,
+      CityNameLatinized = response.CityNameLatinized,
+      CityNameTranslated = response.CityNameTranslated,
+      Description = response.Description,
+      ShareParadoxModIds = response.ShareParadoxModIds,
+      ShareRenderSettings = response.ShareRenderSettings,
+      Rank = response.Rank,
+      ShowcasedMod = update.ShowcasedModId is "" ? null : held.ShowcasedMod
+    };
+
+  /// <summary>
+  /// A card's record with what an update can change on it taken from the merged screenshot.
+  /// </summary>
+  private static DashboardScreenshot MergeItem(DashboardScreenshot item, Screenshot merged) =>
+    item with {
+      CityName = merged.CityName,
+      CityNameLocale = merged.CityNameLocale,
+      CityNameLatinized = merged.CityNameLatinized,
+      CityNameTranslated = merged.CityNameTranslated,
+      Rank = merged.Rank
+    };
 
   /// <summary>
   /// Logs a failed request silently when the network or the server failed it,

@@ -34,6 +34,9 @@ internal sealed class DashboardDetailStateValueWriter : IWriter<DashboardDetailS
     if (screenshot is not null) {
       writer.PropertyName("screenshot");
       DashboardDetailStateValueWriter.screenshotWriter.Write(writer, screenshot);
+
+      writer.PropertyName("isSaving");
+      writer.Write(value.IsSaving);
     }
 
     if (error is {} message) {

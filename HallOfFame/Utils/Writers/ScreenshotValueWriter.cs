@@ -60,8 +60,9 @@ internal sealed class ScreenshotValueWriter : IWriter<Screenshot?> {
     writer.PropertyName("mapName");
     writer.Write(value.MapName);
 
+    // The record keeps the server's null description; the form edits it as the empty string.
     writer.PropertyName("description");
-    writer.Write(value.Description);
+    writer.Write(value.Description ?? string.Empty);
 
     writer.PropertyName("imageUrlThumbnail");
     writer.Write(value.ImageUrlThumbnail);

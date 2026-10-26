@@ -43,16 +43,35 @@ const coDropdownTheme = getClassesModule(
   ]
 );
 
-const dropdownTheme: DropdownTheme = {
-  ...coDropdownTheme,
-  dropdownToggle: classNames(coDropdownTheme.dropdownToggle, styles.dropdownToggle),
-  dropdownPopup: classNames(
-    coDropdownTheme.dropdownPopup,
-    styles.dropdownPopup,
-    shared.scrollableTrackCustomization
-  ),
-  dropdownItem: classNames(coDropdownTheme.dropdownItem, styles.dropdownItem)
+/**
+ * The surface the form sits on, which decides the palette of its controls: the tone class of
+ * `shared.module.scss` on the host's root, and the one the dropdown puts on its popup.
+ */
+export type FormTone = 'light' | 'dark';
+
+const dropdownItemClassName = classNames(coDropdownTheme.dropdownItem, styles.dropdownItem);
+
+// One theme per tone: vanilla mounts the popup outside the host, where it inherits no tone.
+const dropdownThemes: Record<FormTone, DropdownTheme> = {
+  light: createDropdownTheme(shared.toneLight),
+  dark: createDropdownTheme(shared.toneDark)
 };
+
+function createDropdownTheme(toneClassName: string): DropdownTheme {
+  return {
+    ...coDropdownTheme,
+    dropdownToggle: classNames(coDropdownTheme.dropdownToggle, styles.dropdownToggle),
+    indicator: classNames(coDropdownTheme.indicator, styles.dropdownIndicator),
+    dropdownPopup: classNames(
+      coDropdownTheme.dropdownPopup,
+      styles.dropdownPopup,
+      toneClassName,
+      shared.scrollableTrackCustomization
+    ),
+    dropdownMenu: classNames(coDropdownTheme.dropdownMenu, styles.dropdownMenu),
+    dropdownItem: dropdownItemClassName
+  };
+}
 
 // The toggle spans the whole control, so its hover sound would fire on the way to anything else.
 const toggleSounds = { ...defaultButtonSounds, hover: null };
@@ -67,11 +86,13 @@ function AssetModDropdownBase({
   assetMods,
   showcasedMod,
   isInvalid,
+  tone,
   onSelect
 }: Readonly<{
   assetMods: readonly bindings.JsonMod[];
   showcasedMod: bindings.JsonMod | undefined;
   isInvalid: boolean;
+  tone: FormTone;
   onSelect: (mod: bindings.JsonMod) => void;
 }>): ReactElement {
   const translate = useTranslate();
@@ -95,7 +116,7 @@ function AssetModDropdownBase({
     );
 
   return (
-    <Dropdown theme={dropdownTheme} content={content}>
+    <Dropdown theme={dropdownThemes[tone]} content={content}>
       <AssetModDropdownToggle
         showcasedMod={showcasedMod}
         isInvalid={isInvalid}
@@ -138,7 +159,7 @@ function AssetModMenu({
   const { anchorRef, scrollableRef, list } = useUniformVirtualList({
     count: matches.length,
     overscan: MENU_OVERSCAN,
-    rowSelector: selector(dropdownTheme.dropdownItem),
+    rowSelector: selector(dropdownItemClassName),
     estimatedRowHeightPx: ESTIMATED_ROW_HEIGHT_PX,
     renderRow: renderItem
   });
@@ -326,7 +347,7 @@ function AssetModDropdownToggle({
       })}
       sounds={toggleSounds}>
       <div
-        className={classNames(dropdownTheme.dropdownItem, styles.dropdownPreviewItem, {
+        className={classNames(dropdownItemClassName, styles.dropdownPreviewItem, {
           [styles.dropdownFilter]: visible
         })}>
         {showcasedMod && (

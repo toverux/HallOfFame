@@ -16,8 +16,8 @@ namespace HallOfFame.Systems.Capture;
 /// Reads city facts from the game's ECS world and the Paradox SDK, isolating all that engine
 /// reach-through out of <see cref="CaptureUISystem"/>.
 /// Engine-bound and therefore not unit-testable off-engine; it intentionally has no interface
-/// because the only consumer (the capture system) is itself an untestable ECS system, so a fake
-/// would never be used.
+/// because the only holder of an instance (the capture system) is itself an untestable ECS
+/// system, so a fake would never be used.
 /// </summary>
 internal sealed class CitySnapshotProvider {
   /// <summary>
@@ -102,15 +102,17 @@ internal sealed class CitySnapshotProvider {
       : 0;
 
   /// <summary>
-  /// Gets the mods from the current playset.
+  /// Gets the mods from the current playset, read once until <see cref="InvalidateModsCache"/>.
   /// It DOES NOT return HoF among the list.
   /// Null when the playset could not be read, which is not cached, so the next call tries again.
   /// </summary>
-  internal async Task<Colossal.PSI.Common.Mod[]?> GetActiveMods() {
-    if (this.activeModsCache is not null) {
-      return this.activeModsCache;
-    }
+  internal async Task<Colossal.PSI.Common.Mod[]?> GetActiveMods() =>
+    this.activeModsCache ??= await CitySnapshotProvider.ReadActiveMods();
 
+  /// <summary>
+  /// Reads the mods of the current playset afresh, <see cref="GetActiveMods"/> without its cache.
+  /// </summary>
+  internal static async Task<Colossal.PSI.Common.Mod[]?> ReadActiveMods() {
     try {
       var pdxSdk = PdxSdkPlatformProxy.PdxSdk;
 
@@ -124,7 +126,7 @@ internal sealed class CitySnapshotProvider {
         return null;
       }
 
-      return this.activeModsCache = mods
+      return mods
         // Ignore Hall of Fame's ID
         .Where(mod => mod.id != "90641")
         .ToArray();
@@ -135,6 +137,17 @@ internal sealed class CitySnapshotProvider {
       return null;
     }
   }
+
+  /// <summary>
+  /// The asset mods among a playset's mods, the ones a screenshot can showcase, by name.
+  /// </summary>
+  internal static Colossal.PSI.Common.Mod[] SelectAssetMods(
+    IEnumerable<Colossal.PSI.Common.Mod> mods
+  ) =>
+    mods
+      .Where(mod => mod.tags.Contains("Prefab") || mod.tags.Contains("Map"))
+      .OrderBy(mod => mod.displayName)
+      .ToArray();
 
   /// <summary>
   /// Invalidates the active mods cache so it is recomputed on the next call.

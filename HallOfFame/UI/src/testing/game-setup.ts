@@ -59,11 +59,13 @@ const recordedTriggers: RecordedTrigger[] = [];
 // Localization id -> string, consulted by `translate` before its echo-the-id default.
 const translations = new Map<string, string>();
 
-// Game state every tutorial target (a vanilla tab, for one) reads from a default-less binding,
-// answered unless a test configures it: null is no running tutorial.
+// Game state vanilla controls read from a default-less binding, answered unless a test configures
+// it: every tutorial target (a vanilla tab, for one) asks for the running tutorial, null being
+// none, and a text field asks whether an input barrier holds the keyboard.
 const gameBindingValues: ReadonlyMap<string, unknown> = new Map([
   ['tutorials.activeTutorial', null],
-  ['tutorials.activeTutorialPhase', null]
+  ['tutorials.activeTutorialPhase', null],
+  ['input.useTextFieldInputBarrier', false]
 ]);
 
 /**

@@ -1,7 +1,11 @@
 using System;
+using System.Threading.Tasks;
 using Colossal.UI.Binding;
 using Game.UI;
+using Game.UI.Localization;
+using HallOfFame.Reflection;
 using HallOfFame.Services;
+using HallOfFame.Systems.Capture;
 using HallOfFame.Utils.Writers;
 
 namespace HallOfFame.Systems;
@@ -9,6 +13,7 @@ namespace HallOfFame.Systems;
 /// <summary>
 /// The Creator Dashboard's thin binding shell over <see cref="DashboardService"/>:
 /// it registers the bindings, forwards the UI's triggers to the service,
+/// reads the playset for the edit form's picker,
 /// and implements <see cref="IDashboardPresentationSink"/>.
 /// C# owns whether the panel is open, so every entry point opens it the same way.
 /// </summary>
@@ -20,6 +25,8 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
   private ValueBinding<DashboardState> stateBinding = null!;
 
   private ValueBinding<DashboardDetailState> detailBinding = null!;
+
+  private ValueBinding<Colossal.PSI.Common.Mod[]> assetModsBinding = null!;
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -48,12 +55,24 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
 
       this.AddBinding(this.detailBinding);
 
+      this.assetModsBinding = new ValueBinding<Colossal.PSI.Common.Mod[]>(
+        DashboardUISystem.BindingGroup,
+        "assetMods",
+        [],
+        new ListWriter<Colossal.PSI.Common.Mod>(new AssetModValueWriter())
+      );
+
+      this.AddBinding(this.assetModsBinding);
+
       // Fire-and-forget edges: the service entry points are designed never to throw.
       this.AddBinding(
         new TriggerBinding(
           DashboardUISystem.BindingGroup,
           "open",
-          () => { _ = this.service.Open(); }
+          () => {
+            _ = this.service.Open();
+            _ = this.PublishAssetMods();
+          }
         )
       );
 
@@ -88,6 +107,14 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
           this.service.CloseDetail
         )
       );
+
+      this.AddBinding(
+        new TriggerBinding<ScreenshotUpdate>(
+          DashboardUISystem.BindingGroup,
+          "update",
+          update => { _ = this.service.Update(update); }
+        )
+      );
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
@@ -98,4 +125,32 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
 
   void IDashboardPresentationSink.PublishDetail(DashboardDetailState detail) =>
     this.detailBinding.Update(detail);
+
+  void IDashboardPresentationSink.ShowError(LocalizedString message) =>
+    ErrorDialogManagerAccessor.ShowError(message);
+
+  /// <summary>
+  /// Publishes the active playset's asset mods, the ones the edit form can showcase, in the
+  /// upload panel's shape.
+  /// They are read afresh on each open: the capture system's own list is read once per game
+  /// session, and the playset changes in between.
+  /// Empty when the playset cannot be read.
+  /// Designed never to throw, so the open trigger can fire-and-forget it.
+  /// </summary>
+  private async Task PublishAssetMods() {
+    Colossal.PSI.Common.Mod[] assetMods = [];
+
+    try {
+      var mods = await CitySnapshotProvider.ReadActiveMods();
+
+      if (mods is not null) {
+        assetMods = CitySnapshotProvider.SelectAssetMods(mods);
+      }
+    }
+    catch (Exception ex) {
+      Mod.Log.ErrorRecoverable(ex);
+    }
+
+    this.assetModsBinding.Update(assetMods);
+  }
 }

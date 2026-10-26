@@ -1,0 +1,21 @@
+@use "../../vanilla-vars" as vanilla;
+@use "../../area-menu/menu-controls/shared" as menu;
+@use "./shared" as dashboard;
+
+// A group of the detail's rows, framed like the print, its title ruled off above them.
+.group {
+  @include dashboard.frame;
+
+  overflow: hidden;
+
+  &-title {
+    margin-bottom: 4rem;
+    padding: 8rem 16rem;
+    border-bottom-width: 1rem;
+    border-bottom-style: solid;
+    border-bottom-color: vanilla.$menu-border-color-1;
+
+    color: menu.$dimmed-color;
+    font-size: vanilla.$font-size-s;
+  }
+}

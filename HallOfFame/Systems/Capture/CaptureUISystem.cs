@@ -113,12 +113,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.screenshotUploader = new ScreenshotUploader(
         Mod.Api,
         Mod.Log,
-        ex => ErrorDialogManagerAccessor.Instance?.ShowError(
-          new ErrorDialog {
-            localizedTitle = "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR",
-            localizedMessage = ex.GetUserFriendlyMessage(),
-            actions = ErrorDialog.ActionBits.Continue
-          }
+        ex => ErrorDialogManagerAccessor.ShowError(
+          ex.GetUserFriendlyMessage(),
+          "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR"
         )
       );
 
@@ -251,12 +248,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     // If the asset mods value binding is not set yet, initialize it, unless the playset could not
     // be read, so that the next capture tries again.
     if (mods is not null && this.assetModsBinding.value is null) {
-      var assetMods = mods
-        .Where(mod => mod.tags.Contains("Prefab") || mod.tags.Contains("Map"))
-        .OrderBy(mod => mod.displayName)
-        .ToArray();
-
-      this.assetModsBinding.Update(assetMods);
+      this.assetModsBinding.Update(CitySnapshotProvider.SelectAssetMods(mods));
     }
 
     var screenshotSnapshot = new ScreenshotSnapshot(

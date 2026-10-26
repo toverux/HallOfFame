@@ -1,6 +1,7 @@
 import { trigger, useValue } from 'cs2/api';
 import type { LocalizedString } from 'cs2/l10n';
 import type { CreatorStats, DashboardScreenshot, Screenshot } from '../../common';
+import type { JsonMod } from './capture';
 import { lazyBindValue } from './lazy-value-binding';
 
 const GROUP = 'hallOfFame.dashboard';
@@ -33,12 +34,31 @@ export type DashboardDetailState =
       readonly screenshotId: string;
       // The full screenshot, its showcased mod included.
       readonly screenshot: Screenshot;
+      // Whether an edit of it is on its way to the server.
+      readonly isSaving: boolean;
     }
   | { readonly status: 'error'; readonly screenshotId: string; readonly error: LocalizedString };
+
+/**
+ * Serialization of C# `HallOfFame.Services.ScreenshotUpdate`: the fields of a screenshot the edit
+ * form changed, each absent when unchanged.
+ */
+export interface ScreenshotUpdate {
+  readonly cityName?: string;
+  // Empty clears it.
+  readonly description?: string;
+  // A Paradox Mods ID, empty to clear it, as for the description.
+  readonly showcasedModId?: string;
+  readonly shareParadoxModIds?: boolean;
+  readonly shareRenderSettings?: boolean;
+}
 
 const state$ = lazyBindValue<DashboardState>(GROUP, 'state', { status: 'closed' });
 
 const detail$ = lazyBindValue<DashboardDetailState>(GROUP, 'detail', { status: 'closed' });
+
+// Empty until the dashboard opens, and when the playset cannot be read.
+const assetMods$ = lazyBindValue<readonly JsonMod[]>(GROUP, 'assetMods', []);
 
 /**
  * Subscribes to the dashboard's state, which C# owns,
@@ -86,4 +106,19 @@ export function openDashboardDetail(screenshotId: string): void {
  */
 export function closeDashboardDetail(): void {
   trigger(GROUP, 'closeDetail');
+}
+
+/**
+ * Subscribes to the active playset's asset mods, read on each open: the ones the edit form offers
+ * to showcase, in the shape the upload panel's picker takes.
+ */
+export function useDashboardAssetMods(): readonly JsonMod[] {
+  return useValue(assetMods$());
+}
+
+/**
+ * Saves an edit of the screenshot the detail view holds; ignored while another is saving.
+ */
+export function updateDashboardScreenshot(update: ScreenshotUpdate): void {
+  trigger(GROUP, 'update', update);
 }

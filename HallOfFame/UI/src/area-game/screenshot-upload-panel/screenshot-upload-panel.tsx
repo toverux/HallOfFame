@@ -80,7 +80,11 @@ export function ScreenshotUploadPanel({
     <div className={styles.panelContainer}>
       <div
         ref={panelRef}
-        className={classNames(styles.panel, formShared.scrollableTrackCustomization)}>
+        className={classNames(
+          styles.panel,
+          formShared.toneLight,
+          formShared.scrollableTrackCustomization
+        )}>
         <ScreenshotUploadPanelHeader
           screenshotSnapshot={screenshotSnapshot}
           draggable={draggable}

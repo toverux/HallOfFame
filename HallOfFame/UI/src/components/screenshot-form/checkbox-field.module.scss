@@ -1,4 +1,3 @@
-@use "sass:color";
 @use "../../vanilla-vars" as vanilla;
 @use "./shared" as shared;
 
@@ -29,27 +28,36 @@
   &-toggle {
     width: calc(26rem * #{vanilla.$font-scale});
     height: calc(26rem * #{vanilla.$font-scale});
-    //noinspection CssReplaceWithShorthandSafely
     border: shared.$control-border;
-    //noinspection CssReplaceWithShorthandSafely
-    border-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.7);
+    @include shared.border-color(var(--hofCheckboxBorder));
     border-radius: shared.$control-border-radius;
 
     // Impossible to also make &.checked work so we use the field's checked state below.
     &:hover,
     &:focus {
-      background-color: shared.$control-background-color-focused;
+      background-color: var(--hofControlFillActive);
     }
   }
 
   &-checkmark {
-    background-color: shared.$control-border-color; // sets mask image color
+    background-color: var(--hofCheckboxMark); // Sets the mask image's colour.
   }
 }
 
-// The checkbox toggle reacts to the enclosing field's checked and hover states.
-.field--checked .checkbox-toggle,
+// The checkbox toggle reacts to the enclosing field's hover and checked states: a checked box
+// keeps its fill under hover, and its border lights up instead.
 .field:hover .checkbox-toggle {
-  border-color: shared.$control-border-color;
-  background-color: shared.$control-background-color-focused;
+  @include shared.control-active;
+}
+
+.field--checked .checkbox-toggle {
+  @include shared.border-color(var(--hofCheckboxBorderChecked));
+  background-color: var(--hofCheckboxFillChecked);
+}
+
+.field--checked:hover .checkbox-toggle,
+.field--checked .checkbox-toggle:hover,
+.field--checked .checkbox-toggle:focus {
+  @include shared.border-color(var(--hofControlBorderActive));
+  background-color: var(--hofCheckboxFillChecked);
 }

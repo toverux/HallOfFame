@@ -19,9 +19,12 @@ export function DescriptionField({
   value,
   savedDescription,
   scrollController,
+  hint = true,
   onChange
 }: Readonly<{
   value: string;
+  // Whether the first-time explanation shows under the label; the formatting help link stays.
+  hint?: boolean;
   // What Restore brings back, no Restore button when absent or empty.
   savedDescription?: string | undefined;
   // The enclosing scrollable's controller, which brings the expanded textarea into view.
@@ -66,7 +69,7 @@ export function DescriptionField({
   }, [textareaContainerRef, scrollController, textareaFocused]);
 
   return (
-    <div ref={textareaContainerRef} className={styles.field} onMouseEnter={playHoverSound}>
+    <div ref={textareaContainerRef} className={styles.field} onMouseEnter={bindings.playHoverSound}>
       <label>
         {descriptionLabel}
         <br />
@@ -74,7 +77,7 @@ export function DescriptionField({
           {/* Cohtml's inline layout, so the link flows on after the hint's last word.
               Spread because the attribute is not in React's typings. */}
           <p {...{ cohinline: 'cohinline' }}>
-            {descriptionHint}{' '}
+            {hint && `${descriptionHint} `}
             <Tooltip
               direction='down'
               tooltip={<TooltipLayout title={formattingHelpLabel} content={formattingHelpLines} />}>
@@ -141,8 +144,4 @@ export function DescriptionField({
       </div>
     </div>
   );
-}
-
-function playHoverSound(): void {
-  bindings.playSound('hover-item');
 }

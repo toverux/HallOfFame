@@ -1,19 +1,41 @@
 // Variables and mixins shared across the screenshot form fields.
 // Keep this file rule-free (variables and mixins only) so `@use`-ing it never re-emits CSS.
 
-@use "sass:color";
 @use "../../vanilla-vars" as vanilla;
 
-// The look shared by the form's controls: its checkboxes, its textarea, and the asset dropdown.
+// The look shared by the form's controls: its checkboxes, its text controls, and the asset
+// dropdown. Their colours are the `--hof*` custom properties of a tone class in shared.module.scss,
+// mixed onto the host's root: the form sits on the upload panel's white pane and the dashboard's
+// navy window.
+// The border shows on hover and focus only: outlined at rest, the stacked fields read as a wall of
+// frames.
 $control-border: 2rem solid transparent;
-$control-border-color: #61a0b9;
 $control-border-radius: 5rem; // vanilla is 3rem
-$control-background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
-$control-background-color-focused: rgba(255, 255, 255, 0.4);
 
 // Stated rather than left to Cohtml's `normal`, so that a control's height is computable from its
 // font size alone. The dropdown and the textarea rely on this to agree on a single-line height.
 $control-line-height: 1.5;
+
+// The engine drops a `border-color` shorthand holding a custom property, so the four longhands.
+@mixin border-color($color) {
+  border-top-color: $color;
+  border-right-color: $color;
+  border-bottom-color: $color;
+  border-left-color: $color;
+}
+
+// A control's box at rest: the dropdown toggle, the text controls, the description's buttons.
+@mixin control {
+  border: $control-border;
+  border-radius: $control-border-radius;
+  background-color: var(--hofControlFill);
+}
+
+// The same box lit, hovered or focused.
+@mixin control-active {
+  @include border-color(var(--hofControlBorderActive));
+  background-color: var(--hofControlFillActive);
+}
 
 // The hoverable box every field sits in, its label bold and its hint under it normal.
 // Include it after the field's own declarations: its nested rules must come last.
@@ -24,10 +46,28 @@ $control-line-height: 1.5;
   font-weight: bold;
 
   &:hover {
-    background-color: color.adjust(vanilla.$panel-color-dark, $alpha: -0.9);
+    background-color: var(--hofFieldHover);
   }
 
   label small {
     font-weight: normal;
+  }
+}
+
+// A text control, the description's textarea or the city name's input.
+@mixin text-control {
+  position: relative;
+  width: auto;
+  @include control;
+  padding: 10rem;
+  color: var(--hofControlText);
+
+  // Shared with the dropdown item so that both controls are the same height on a single line.
+  font-size: vanilla.$font-size-xl;
+  line-height: $control-line-height;
+
+  &:hover,
+  &:focus {
+    @include control-active;
   }
 }

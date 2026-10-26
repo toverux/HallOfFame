@@ -1,7 +1,7 @@
 import { type ReactElement, useCallback } from 'react';
 import { useTranslate } from '../../utils';
 import type * as bindings from '../../utils/bindings';
-import { AssetModDropdown } from './asset-mod-dropdown';
+import { AssetModDropdown, type FormTone } from './asset-mod-dropdown';
 import { CheckboxField } from './checkbox-field';
 
 export interface ShowcasedModValue {
@@ -16,10 +16,14 @@ export interface ShowcasedModValue {
 export function ShowcasedModField({
   assetMods,
   value,
+  tone,
+  hint = true,
   onChange
 }: Readonly<{
   assetMods: readonly bindings.JsonMod[];
   value: ShowcasedModValue;
+  tone: FormTone;
+  hint?: boolean;
   onChange: (value: ShowcasedModValue) => void;
 }>): ReactElement {
   const translate = useTranslate();
@@ -35,9 +39,10 @@ export function ShowcasedModField({
     <CheckboxField
       checked={value.isShowcasingAsset}
       label={translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_LABEL')}
-      description={translate(
-        'HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_DESCRIPTION'
-      )}
+      description={
+        hint &&
+        translate('HallOfFame.UI.Game.ScreenshotUploadPanel.FORM_SHOWCASE_ASSET_DESCRIPTION')
+      }
       onChange={checked =>
         onChange({
           isShowcasingAsset: checked,
@@ -48,6 +53,7 @@ export function ShowcasedModField({
         assetMods={assetMods}
         showcasedMod={value.showcasedMod}
         isInvalid={value.isShowcasingAsset && !value.showcasedMod}
+        tone={tone}
         onSelect={selectShowcasedMod}
       />
     </CheckboxField>

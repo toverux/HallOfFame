@@ -229,27 +229,12 @@ $medal-size: 48rem;
   display: flex;
   flex-direction: row;
   margin: 16rem -6rem 0;
-}
 
-// A group of figures, framed like the print, its title ruled off above them.
-.group {
-  @include dashboard.frame;
-
-  flex: 1 1 0;
-  min-width: 0;
-  margin: 0 6rem;
-  padding-bottom: 6rem;
-  overflow: hidden;
-
-  &-title {
-    margin-bottom: 4rem;
-    padding: 8rem 16rem;
-    border-bottom-width: 1rem;
-    border-bottom-style: solid;
-    border-bottom-color: vanilla.$menu-border-color-1;
-
-    color: menu.$dimmed-color;
-    font-size: vanilla.$font-size-s;
+  &-group {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0 6rem;
+    padding-bottom: 6rem;
   }
 }
 

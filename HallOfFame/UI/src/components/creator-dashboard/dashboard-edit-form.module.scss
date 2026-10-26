@@ -1,0 +1,36 @@
+@use "./shared" as dashboard;
+
+// The detail's side column, filled: the fields scroll over the action row, which stays in view.
+.form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+
+  // The fields' groups, framed as the figures across are, at the print's distance from the edges,
+  // the last group's bottom margin making up the edge.
+  &-fields {
+    flex: 1 1 auto;
+    padding: dashboard.$edge-padding dashboard.$edge-padding (dashboard.$edge-padding - 16rem);
+  }
+
+  // The fields keep their own 10rem box, so this inset lines their text up with the title's.
+  &-group {
+    margin-bottom: 16rem;
+    padding: 0 6rem;
+  }
+
+  // The band's colour, so the row reads as the window's own, like the band over it.
+  &-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    padding: 14rem dashboard.$edge-padding;
+    border-top: 1rem solid dashboard.$rule-color;
+    background-color: dashboard.$band-color;
+  }
+
+  &-save {
+    padding: 10rem 32rem;
+  }
+}

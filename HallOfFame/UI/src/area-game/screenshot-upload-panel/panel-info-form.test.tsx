@@ -17,8 +17,6 @@ describe('ScreenshotUploadPanelContentScreenshotInfo', () => {
   it(`offers no asset to showcase while the playset could not be read`, () => {
     // The game leaves the asset mods unset until a capture reads the playset.
     setBinding('hallOfFame.capture', 'assetMods', null);
-    // Read by the vanilla text field the description is typed in.
-    setBinding('input', 'useTextFieldInputBarrier', false);
 
     render(
       <ScreenshotUploadPanelContentScreenshotInfo

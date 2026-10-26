@@ -67,7 +67,7 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
         </div>
       )}
 
-      <div className={styles.form} onMouseEnter={playHoverSound}>
+      <div className={styles.form} onMouseEnter={bindings.playHoverSound}>
         <SharePlaysetField checked={formValue.shareModIds} onChange={handleShareModIdsChange} />
 
         <ShareRenderSettingsField
@@ -76,7 +76,12 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
         />
 
         {assetMods.length > 0 && (
-          <ShowcasedModField assetMods={assetMods} value={formValue} onChange={patchFormValue} />
+          <ShowcasedModField
+            assetMods={assetMods}
+            value={formValue}
+            tone='light'
+            onChange={patchFormValue}
+          />
         )}
 
         <DescriptionField
@@ -106,8 +111,4 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
       </div>
     </Scrollable>
   );
-}
-
-function playHoverSound(): void {
-  bindings.playSound('hover-item');
 }

@@ -21,8 +21,8 @@ const checkboxTheme: CheckboxTheme = {
 
 /**
  * A labelled checkbox whose whole box toggles it,
- * with an optional control under its label that belongs to the choice,
- * like the showcased mod's dropdown.
+ * with an optional hint under its label, and an optional control under both that belongs to
+ * the choice, like the showcased mod's dropdown.
  */
 export function CheckboxField({
   checked,
@@ -33,22 +33,26 @@ export function CheckboxField({
 }: Readonly<{
   checked: boolean;
   label: ReactNode;
-  description: ReactNode;
+  description?: ReactNode | undefined;
   onChange: (checked: boolean) => void;
   children?: ReactNode;
 }>): ReactElement {
   const labelElement = (
     <label>
       {label}
-      <br />
-      <small>{description}</small>
+      {description && (
+        <>
+          <br />
+          <small>{description}</small>
+        </>
+      )}
     </label>
   );
 
   return (
     <div
       className={classNames(styles.field, { [styles.fieldChecked]: checked })}
-      onMouseEnter={playHoverSound}
+      onMouseEnter={bindings.playHoverSound}
       onClick={() => {
         onChange(!checked);
         bindings.playSound('select-toggle');
@@ -65,8 +69,4 @@ export function CheckboxField({
       )}
     </div>
   );
-}
-
-function playHoverSound(): void {
-  bindings.playSound('hover-item');
 }

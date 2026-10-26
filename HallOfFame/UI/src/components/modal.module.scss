@@ -3,6 +3,9 @@ $enter-duration: 250ms;
 $exit-duration: 150ms;
 
 .backdrop {
+  // Under the game's dialogs, which hold the vanilla backdrop's 1000 in the app's own tree:
+  // portaled after it, a modal at the same index would hide an error or a confirmation.
+  z-index: 999;
   animation: backdrop-enter $enter-duration ease-out;
   transition: opacity $exit-duration;
 

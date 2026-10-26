@@ -25,6 +25,11 @@ internal sealed record DashboardDetailState {
   internal Screenshot? Screenshot { get; private init; }
 
   /// <summary>
+  /// Whether an edit of the loaded screenshot is on its way to the server.
+  /// </summary>
+  internal bool IsSaving { get; private init; }
+
+  /// <summary>
   /// Why the fetch failed, <c>null</c> unless in error.
   /// </summary>
   internal LocalizedString? Error { get; private init; }
@@ -37,9 +42,10 @@ internal sealed record DashboardDetailState {
   internal static DashboardDetailState Loading(string screenshotId) =>
     new(DashboardStatus.Loading, screenshotId);
 
-  internal static DashboardDetailState Loaded(Screenshot screenshot) =>
+  internal static DashboardDetailState Loaded(Screenshot screenshot, bool isSaving = false) =>
     new(DashboardStatus.Loaded, screenshot.Id) {
-      Screenshot = screenshot
+      Screenshot = screenshot,
+      IsSaving = isSaving
     };
 
   internal static DashboardDetailState Failed(string screenshotId, LocalizedString error) =>

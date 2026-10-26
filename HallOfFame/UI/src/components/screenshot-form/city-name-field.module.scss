@@ -1,0 +1,19 @@
+@use "./shared" as shared;
+
+.field {
+  display: flex;
+  flex-direction: column;
+
+  @include shared.field;
+
+  > :nth-child(1) {
+    margin-bottom: 10rem;
+  }
+}
+
+// Text input control, styled as the description's textarea.
+.input {
+  &-wrapper input {
+    @include shared.text-control;
+  }
+}

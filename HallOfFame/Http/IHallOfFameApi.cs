@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using HallOfFame.Domain;
+using HallOfFame.Services;
 
 namespace HallOfFame.Http;
 
@@ -37,6 +38,12 @@ internal interface IHallOfFameApi {
   Task<View> MarkScreenshotViewed(string screenshotId);
 
   Task<Screenshot> ReportScreenshot(string screenshotId);
+
+  /// <summary>
+  /// Changes the fields of one of the authenticated creator's screenshots that the update holds,
+  /// answering with the screenshot without its creator, liked state, or showcased mod.
+  /// </summary>
+  Task<Screenshot> UpdateScreenshot(string screenshotId, ScreenshotUpdate update);
 
   /// <summary>
   /// The mods of a screenshot's shared playset, most subscribed first, those Paradox Mods no

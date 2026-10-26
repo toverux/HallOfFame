@@ -10,6 +10,7 @@
 // compare what changed when a game update breaks the UI.
 
 $accent-color-dark: #1e83aa;
+$accent-color-light: #9ee2fc; // var(--accentColorLight)
 $center-panel-width: var(--centerPanelWidth); // calc((1 + var(--fontScaleChange) / 3) * 1500rem)
 $font-scale: var(--fontScale); // depends on settings, 100% = 1.
 $font-size-l: var(--fontSizeL); // calc(14rem * var(--fontScale) + 4rem)

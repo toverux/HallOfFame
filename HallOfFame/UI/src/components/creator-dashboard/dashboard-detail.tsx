@@ -30,8 +30,10 @@ import {
   type MedalState,
   selectMedalState
 } from './dashboard-collection';
+import { DashboardEditForm } from './dashboard-edit-form';
 import { MedalImage } from './dashboard-medal';
 import { DashboardError, DashboardLoading } from './dashboard-status';
+import { DetailGroup } from './detail-group';
 import * as styles from './dashboard-detail.module.scss';
 
 /**
@@ -96,6 +98,14 @@ export function DashboardDetail({
 
       <div className={styles.detailSide}>
         {detail.status == 'loading' && <DashboardLoading />}
+
+        {detail.status == 'loaded' && (
+          <DashboardEditForm
+            key={detail.screenshotId}
+            screenshot={detail.screenshot}
+            isSaving={detail.isSaving}
+          />
+        )}
 
         {detail.status == 'error' && (
           <DashboardError
@@ -336,7 +346,9 @@ function DetailFigures({
 }>): ReactElement {
   return (
     <div className={styles.figures}>
-      <DetailFigureGroup titleId='HallOfFame.UI.Dashboard.DETAIL_GROUP[Audience]'>
+      <DetailGroup
+        titleId='HallOfFame.UI.Dashboard.DETAIL_GROUP[Audience]'
+        className={styles.figuresGroup}>
         <DetailFigure
           name='uniqueViews'
           value={<LocalizedNumber value={screenshot.uniqueViewsCount} />}
@@ -357,9 +369,11 @@ function DetailFigures({
           labelId='HallOfFame.UI.Dashboard.DETAIL_STAT[Viewer Clicks]'
           descriptionId='HallOfFame.UI.Dashboard.DETAIL_STAT_DESCRIPTION[Viewer Clicks]'
         />
-      </DetailFigureGroup>
+      </DetailGroup>
 
-      <DetailFigureGroup titleId='HallOfFame.UI.Dashboard.DETAIL_GROUP[Appreciation]'>
+      <DetailGroup
+        titleId='HallOfFame.UI.Dashboard.DETAIL_GROUP[Appreciation]'
+        className={styles.figuresGroup}>
         <DetailFigure
           name='likes'
           value={<LocalizedNumber value={screenshot.likesCount} />}
@@ -399,22 +413,7 @@ function DetailFigures({
             descriptionArgs={{ SCREENSHOTS_COUNT: <LocalizedNumber value={screenshots.length} /> }}
           />
         )}
-      </DetailFigureGroup>
-    </div>
-  );
-}
-
-function DetailFigureGroup({
-  titleId,
-  children
-}: Readonly<{ titleId: string; children: ReactNode }>): ReactElement {
-  const translate = useTranslate();
-
-  return (
-    <div className={styles.group}>
-      <div className={styles.groupTitle}>{translate(titleId)}</div>
-
-      {children}
+      </DetailGroup>
     </div>
   );
 }

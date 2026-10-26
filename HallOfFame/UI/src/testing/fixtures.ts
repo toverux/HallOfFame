@@ -1,5 +1,5 @@
 import type { Creator, Mod, PhotoModeProperty, Screenshot, SkyveVerdict } from '../common';
-import type { JsonScreenshotSnapshot, ModSettings } from '../utils/bindings';
+import type { JsonMod, JsonScreenshotSnapshot, ModSettings } from '../utils/bindings';
 
 /**
  * A deferred preload call recorded by {@link createFakePreloader}: the requested URL plus the
@@ -172,6 +172,18 @@ export function makeMod(overrides: Partial<Mod> & Pick<Mod, 'paradoxModId'>): Mo
     knownLastReleasedAtFormattedDistance: null,
     knownLastReleasedAt: null,
     skyve: null,
+    ...overrides
+  };
+}
+
+/**
+ * Builds a {@link JsonMod} as the asset mod bindings send one, its name derived from its ID.
+ */
+export function makeJsonMod(overrides: Partial<JsonMod> & Pick<JsonMod, 'id'>): JsonMod {
+  return {
+    displayName: `Mod ${overrides.id}`,
+    author: '',
+    thumbnailPath: '',
     ...overrides
   };
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using HallOfFame.Domain;
 using HallOfFame.Http;
+using HallOfFame.Services;
 
 namespace HallOfFame.Tests.Http;
 
@@ -37,6 +38,8 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   internal Func<string, Task<Screenshot>>? GetScreenshotImpl { get; init; }
 
+  internal Func<string, ScreenshotUpdate, Task<Screenshot>>? UpdateScreenshotImpl { get; init; }
+
   public Task<CreatorStats> GetCreatorStats() =>
     this.GetCreatorStatsImpl?.Invoke() ?? throw new NotImplementedException();
 
@@ -62,6 +65,9 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   public Task<Screenshot> ReportScreenshot(string screenshotId) =>
     this.ReportScreenshotImpl?.Invoke(screenshotId) ?? throw new NotImplementedException();
+
+  public Task<Screenshot> UpdateScreenshot(string screenshotId, ScreenshotUpdate update) =>
+    this.UpdateScreenshotImpl?.Invoke(screenshotId, update) ?? throw new NotImplementedException();
 
   public Task<Screenshot> UploadScreenshot(UploadScreenshotParams @params) =>
     this.UploadScreenshotImpl?.Invoke(@params) ?? throw new NotImplementedException();

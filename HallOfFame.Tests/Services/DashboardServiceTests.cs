@@ -429,18 +429,339 @@ public sealed class DashboardServiceTests {
     Assert.Equal(["Closed", "Detail:Closed"], sink.Log.Skip(4));
   }
 
+  [Fact]
+  public async Task Update_SendsTheEdit_ThenMergesTheAnswer_KeepingWhatItLeavesOut() {
+    var creator = new Creator {
+      Id = "me"
+    };
+
+    var showcasedMod = new HallOfFame.Domain.Mod {
+      Id = "12"
+    };
+
+    var held = new Screenshot {
+      Id = "a",
+      CityName = "Old Town",
+      CityNameTranslated = "Vieille Ville",
+      MapName = "Lakeside",
+      ParadoxModIds = [12, 34],
+      LikesCount = 7,
+      IsLiked = true,
+      Creator = creator,
+      ShowcasedMod = showcasedMod
+    };
+
+    // The answer as the server sends it: no creator, liked state, or showcased mod,
+    // the translation of the new name still to come.
+    var response = new Screenshot {
+      Id = "a",
+      CityName = "New Town",
+      Description = "Now described",
+      ShareParadoxModIds = true,
+      ShareRenderSettings = true,
+      Rank = "gold"
+    };
+
+    var sent = new List<(string Id, ScreenshotUpdate Update)>();
+
+    var update = new ScreenshotUpdate {
+      CityName = "New Town",
+      Description = "Now described"
+    };
+
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      held,
+      sink,
+      (id, sentUpdate) => {
+        sent.Add((id, sentUpdate));
+
+        return Task.FromResult(response);
+      }
+    );
+
+    var other = sink.LastState.Screenshots[1];
+
+    await service.Update(update);
+
+    Assert.Equal([("a", update)], sent);
+    Assert.Equal(["Detail:Saving:a", "Loaded:a,b", "Detail:Loaded:a"], sink.Log);
+
+    var merged = sink.LastDetail.Screenshot!;
+
+    Assert.Equal("New Town", merged.CityName);
+    Assert.Null(merged.CityNameTranslated);
+    Assert.Equal("Now described", merged.Description);
+    Assert.True(merged.ShareParadoxModIds);
+    Assert.True(merged.ShareRenderSettings);
+    Assert.Equal("gold", merged.Rank);
+    Assert.Same(creator, merged.Creator);
+    Assert.True(merged.IsLiked);
+    Assert.Same(showcasedMod, merged.ShowcasedMod);
+    Assert.Equal("Lakeside", merged.MapName);
+    Assert.Equal([12, 34], merged.ParadoxModIds);
+    Assert.Equal(7, merged.LikesCount);
+
+    var item = sink.LastState.Screenshots[0];
+
+    Assert.Equal("New Town", item.CityName);
+    Assert.Equal("gold", item.Rank);
+    Assert.Same(other, sink.LastState.Screenshots[1]);
+  }
+
+  [Fact]
+  public async Task Update_NewShowcasedMod_FetchesTheScreenshotAgain() {
+    var held = new Screenshot {
+      Id = "a"
+    };
+
+    // The answer to the update leaves the showcased mod out, the screenshot fetched again has it.
+    var refetched = new Screenshot {
+      Id = "a",
+      ShowcasedMod = new HallOfFame.Domain.Mod {
+        ParadoxModId = 34
+      }
+    };
+
+    var fetches = new Queue<Screenshot>([held, refetched]);
+
+    var api = DashboardServiceTests.CreateApi(
+      ["a"],
+      new CreatorStats(),
+      _ => Task.FromResult(fetches.Dequeue()),
+      (_, _) => Task.FromResult(
+        new Screenshot {
+          Id = "a"
+        }
+      )
+    );
+
+    var sink = new FakeDashboardPresentationSink();
+    var service = new DashboardService(api, new FakeModLog(), sink);
+
+    await service.Open();
+    await service.OpenDetail("a");
+
+    await service.Update(
+      new ScreenshotUpdate {
+        ShowcasedModId = "34"
+      }
+    );
+
+    Assert.Empty(fetches);
+    Assert.Same(refetched, sink.LastDetail.Screenshot);
+  }
+
+  [Fact]
+  public async Task Update_ClearedShowcasedMod_DropsIt() {
+    var held = new Screenshot {
+      Id = "a",
+      ShowcasedMod = new HallOfFame.Domain.Mod {
+        Id = "12"
+      }
+    };
+
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      held,
+      sink,
+      (_, _) => Task.FromResult(
+        new Screenshot {
+          Id = "a"
+        }
+      )
+    );
+
+    await service.Update(
+      new ScreenshotUpdate {
+        ShowcasedModId = ""
+      }
+    );
+
+    Assert.NotNull(sink.LastDetail.Screenshot);
+    Assert.Null(sink.LastDetail.Screenshot.ShowcasedMod);
+  }
+
+  [Fact]
+  public async Task Update_HttpFailure_KeepsTheCollectionAndTheDetail_AndShowsTheError() {
+    var silent = new List<Exception>();
+
+    var held = new Screenshot {
+      Id = "a",
+      CityName = "Old Town"
+    };
+
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      held,
+      sink,
+      (_, _) => throw new HttpServerException("42", new HttpQueries.JsonError()),
+      log: new FakeModLog {
+        ErrorSilentImpl = silent.Add
+      }
+    );
+
+    var collection = sink.LastState.Screenshots;
+
+    // Must not throw despite the failed save.
+    await service.Update(
+      new ScreenshotUpdate {
+        CityName = "New Town"
+      }
+    );
+
+    Assert.Equal(["Detail:Saving:a", "Detail:Loaded:a"], sink.Log);
+    Assert.Same(held, sink.LastDetail.Screenshot);
+    Assert.Same(collection, sink.LastState.Screenshots);
+    Assert.Single(silent);
+    Assert.Equal(
+      $"HallOfFame.Common.ERROR_MESSAGE[{typeof(HttpServerException).FullName}]",
+      Assert.Single(sink.Errors).id
+    );
+  }
+
+  [Fact]
+  public async Task Update_UnexpectedFailure_LogsRecoverably_WithoutASecondDialog() {
+    var recoverable = new List<Exception>();
+
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      (_, _) => throw new InvalidOperationException(),
+      log: new FakeModLog {
+        ErrorRecoverableImpl = recoverable.Add
+      }
+    );
+
+    await service.Update(
+      new ScreenshotUpdate {
+        CityName = "New Town"
+      }
+    );
+
+    Assert.Single(recoverable);
+    Assert.Empty(sink.Errors);
+    Assert.False(sink.LastDetail.IsSaving);
+  }
+
+  [Fact]
+  public async Task Update_AgainWhileSaving_SendsOnce() {
+    var gate = new TaskCompletionSource<Screenshot>();
+    var sendCount = 0;
+
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      (_, _) => {
+        sendCount++;
+
+        return gate.Task;
+      }
+    );
+
+    var update = new ScreenshotUpdate {
+      CityName = "New Town"
+    };
+
+    var first = service.Update(update);
+
+    await service.Update(update);
+
+    gate.SetResult(
+      new Screenshot {
+        Id = "a"
+      }
+    );
+    await first;
+
+    Assert.Equal(1, sendCount);
+  }
+
+  [Fact]
+  public async Task Update_AnsweredAfterBack_StillMergesIntoTheCollection() {
+    var gate = new TaskCompletionSource<Screenshot>();
+
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      (_, _) => gate.Task
+    );
+
+    var update = service.Update(
+      new ScreenshotUpdate {
+        CityName = "New Town"
+      }
+    );
+
+    service.CloseDetail();
+
+    gate.SetResult(
+      new Screenshot {
+        Id = "a",
+        CityName = "New Town"
+      }
+    );
+    await update;
+
+    Assert.Equal(["Detail:Saving:a", "Detail:Closed", "Loaded:a,b"], sink.Log);
+    Assert.Equal("New Town", sink.LastState.Screenshots[0].CityName);
+  }
+
   private static FakeApi CreateApi(
     string[] ids,
     CreatorStats stats,
-    Func<string, Task<Screenshot>>? getScreenshot = null
+    Func<string, Task<Screenshot>>? getScreenshot = null,
+    Func<string, ScreenshotUpdate, Task<Screenshot>>? updateScreenshot = null
   ) {
     DashboardScreenshot[] screenshots = [.. ids.Select(DashboardServiceTests.MakeScreenshot)];
 
     return new FakeApi {
       GetMyScreenshotsImpl = () => Task.FromResult<IReadOnlyList<DashboardScreenshot>>(screenshots),
       GetCreatorStatsImpl = () => Task.FromResult(stats),
-      GetScreenshotImpl = getScreenshot
+      GetScreenshotImpl = getScreenshot,
+      UpdateScreenshotImpl = updateScreenshot
     };
+  }
+
+  /// <summary>
+  /// A service showing the detail of "a", held in full, in a collection of "a" and "b".
+  /// </summary>
+  private static async Task<DashboardService> OpenDetailOfA(
+    Screenshot held,
+    FakeDashboardPresentationSink sink,
+    Func<string, ScreenshotUpdate, Task<Screenshot>> updateScreenshot,
+    FakeModLog? log = null
+  ) {
+    var api = DashboardServiceTests.CreateApi(
+      ["a", "b"],
+      new CreatorStats(),
+      _ => Task.FromResult(held),
+      updateScreenshot
+    );
+
+    var service = new DashboardService(api, log ?? new FakeModLog(), sink);
+
+    await service.Open();
+    await service.OpenDetail("a");
+
+    sink.Log.Clear();
+
+    return service;
   }
 
   private static DashboardScreenshot MakeScreenshot(string id) =>
