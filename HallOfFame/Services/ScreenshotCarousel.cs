@@ -193,21 +193,24 @@ internal sealed class ScreenshotCarousel(IHallOfFameApi api) {
     this.screenshots[this.CurrentIndex] = screenshot;
   }
 
-  #if DEBUG
   /// <summary>
-  /// Debug-only: loads a specific screenshot by its ID, appends it to the window, and advances the
-  /// cursor onto it so <see cref="Current"/> stays consistent, returning the resulting
-  /// <see cref="NavigationStep"/>.
+  /// Shows a screenshot the caller holds: appends it to the window and advances the cursor onto it,
+  /// so <see cref="Current"/> stays consistent.
+  /// Returns the resulting <see cref="NavigationStep"/>.
   /// It lands at the front of the window, so the step prefetches ahead like any other forward move.
   /// </summary>
-  internal async Task<NavigationStep> LoadById(string id) {
-    var screenshot = await api.GetScreenshot(id);
-
+  internal NavigationStep Show(Screenshot screenshot) {
     this.screenshots.Add(screenshot);
     this.CurrentIndex = this.Count - 1;
 
     return this.ForwardStep();
   }
+
+  #if DEBUG
+  /// <summary>
+  /// Debug-only: loads a specific screenshot by its ID and shows it.
+  /// </summary>
+  internal async Task<NavigationStep> LoadById(string id) => this.Show(await api.GetScreenshot(id));
   #endif
 
   /// <summary>

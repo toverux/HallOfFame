@@ -1,0 +1,93 @@
+@use "../../vanilla-vars" as vanilla;
+@use "../screenshot-form/shared" as form;
+@use "./shared" as dashboard;
+
+// Each class rides alongside the vanilla one it skins, so the popup keeps the positioning and the
+// structure the game gives it; the colours are the form's dark tone, on the popup as on the toggle.
+.menu {
+  padding: 5rem;
+  border-radius: 6rem;
+  background-color: var(--hofMenuFill);
+  @include form.border-color(var(--hofMenuBorder));
+
+  // A quiet action, at the row's height.
+  &-toggle {
+    height: dashboard.$action-height;
+    padding: 0 12rem 0 16rem;
+
+    @include dashboard.quiet-action;
+  }
+
+  // The chevron, turned over while the menu is open.
+  &-indicator {
+    width: 1em;
+    height: 1em;
+    margin-left: 8rem;
+    transition: transform 0.15s ease-out;
+
+    // The glyph is a mask the icon fills with its own background, painted the text's colour.
+    [class*="iconImg"] {
+      background-color: vanilla.$menu-text-1-normal;
+    }
+
+    .menu-toggle:hover &,
+    .menu-toggle:focus & {
+      [class*="iconImg"] {
+        background-color: vanilla.$menu-active-color-bright;
+      }
+    }
+
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
+
+  // Over the panel, which the popup shares a root with.
+  &-popup {
+    z-index: 1;
+  }
+
+  // The items are few and short, so the vanilla scroller only ever gets in the way here.
+  &-scrollable {
+    max-height: none;
+  }
+
+  // An item is a vanilla `Button`, which inherits nothing, so the text look is restated here.
+  &-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8rem 12rem;
+    border-radius: 5rem;
+    color: var(--hofControlText);
+    font-size: vanilla.$font-size-m;
+    white-space: nowrap;
+
+    // A tinted icon is a mask filled by its own background, kept in step with the label by hand.
+    [class*="iconImg"] {
+      background-color: var(--hofControlText);
+    }
+
+    &:hover,
+    &:focus {
+      background-color: var(--hofMenuItemHover);
+    }
+
+    &[disabled],
+    &[disabled]:hover {
+      background-color: transparent;
+      color: var(--hofTextDim);
+
+      [class*="iconImg"] {
+        background-color: var(--hofTextDim);
+      }
+    }
+  }
+
+  // Sized in `em` so the glyph tracks the label beside it.
+  &-itemIcon {
+    width: 1em;
+    height: 1em;
+    margin-right: 10rem;
+  }
+}

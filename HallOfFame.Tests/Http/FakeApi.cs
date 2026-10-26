@@ -40,6 +40,8 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   internal Func<string, ScreenshotUpdate, Task<Screenshot>>? UpdateScreenshotImpl { get; init; }
 
+  internal Func<string, Task>? DeleteScreenshotImpl { get; init; }
+
   public Task<CreatorStats> GetCreatorStats() =>
     this.GetCreatorStatsImpl?.Invoke() ?? throw new NotImplementedException();
 
@@ -68,6 +70,9 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   public Task<Screenshot> UpdateScreenshot(string screenshotId, ScreenshotUpdate update) =>
     this.UpdateScreenshotImpl?.Invoke(screenshotId, update) ?? throw new NotImplementedException();
+
+  public Task DeleteScreenshot(string screenshotId) =>
+    this.DeleteScreenshotImpl?.Invoke(screenshotId) ?? throw new NotImplementedException();
 
   public Task<Screenshot> UploadScreenshot(UploadScreenshotParams @params) =>
     this.UploadScreenshotImpl?.Invoke(@params) ?? throw new NotImplementedException();

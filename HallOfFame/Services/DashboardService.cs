@@ -126,12 +126,12 @@ internal sealed class DashboardService(
   /// Saves an edit of the screenshot the detail view holds, then merges the answer into it and into
   /// the collection, or fetches it again when the edit picked a new showcased mod.
   /// A failed save leaves both as they were and shows the error, the form keeping its edits.
-  /// An edit while another is saving is ignored.
+  /// An edit while another mutation is on its way is ignored.
   /// Designed never to throw, so the caller can fire-and-forget it.
   /// </summary>
   internal async Task Update(ScreenshotUpdate update) {
     if (this.detail is not {
-        Status: DashboardStatus.Loaded, Screenshot: {} held, IsSaving: false
+        Status: DashboardStatus.Loaded, Screenshot: {} held, IsSaving: false, IsDeleting: false
       }) {
       return;
     }
@@ -175,6 +175,84 @@ internal sealed class DashboardService(
     }
   }
 
+  /// <summary>
+  /// Deletes the screenshot the detail view holds once the player confirms it, then drops it from
+  /// the collection, returns to the grid, and refreshes the stats, which the deletion changed.
+  /// A screenshot the server no longer has is dropped the same way, being gone either way.
+  /// A failed deletion leaves the collection and the detail as they were and shows the error.
+  /// A deletion while another mutation is on its way is ignored.
+  /// Designed never to throw, so the caller can fire-and-forget it.
+  /// </summary>
+  internal async Task Delete() {
+    if (this.detail is not {
+        Status: DashboardStatus.Loaded, Screenshot: {} held, IsSaving: false, IsDeleting: false
+      }) {
+      return;
+    }
+
+    var generation = this.detailGeneration;
+
+    // The detail may have closed under the dialog: a late confirmation deletes nothing.
+    if (!await sink.ConfirmDelete(held) || generation != this.detailGeneration) {
+      return;
+    }
+
+    this.PublishDetail(DashboardDetailState.Loaded(held, isDeleting: true));
+
+    try {
+      try {
+        await api.DeleteScreenshot(held.Id);
+      }
+      // The client maps a 404 to this exception: here, the screenshot was already gone.
+      catch (HttpUserCompatibilityException) {
+      }
+
+      sink.PlayDeletedSound();
+
+      // The totals are the server's: fetched again, so a figure the deletion changed does not
+      // linger. A refused fetch keeps the ones held, the deletion having landed regardless.
+      var stats = await this.TryRefreshStats();
+
+      if (this.state.Status is DashboardStatus.Loaded && this.state.Stats is {} heldStats) {
+        var screenshots = this.state.Screenshots.Where(item => item.Id != held.Id).ToArray();
+
+        this.Publish(DashboardState.Loaded(screenshots, stats ?? heldStats));
+      }
+
+      if (generation == this.detailGeneration) {
+        this.CloseDetail();
+      }
+    }
+    catch (Exception ex) {
+      this.LogFailure(ex);
+
+      if (ex is HttpException) {
+        sink.ShowError(ex.GetUserFriendlyMessage());
+      }
+
+      if (generation == this.detailGeneration) {
+        this.PublishDetail(DashboardDetailState.Loaded(held));
+      }
+    }
+  }
+
+  /// <summary>
+  /// Hands the screenshot the detail view holds to the slideshow and closes the panel, so the
+  /// screenshot shows full screen where the panel was.
+  /// Ignored while a mutation is on its way: the slideshow would be handed a record the server is
+  /// about to change or drop.
+  /// </summary>
+  internal void ShowInSlideshow() {
+    if (this.detail is not {
+        Status: DashboardStatus.Loaded, Screenshot: {} held, IsSaving: false, IsDeleting: false
+      }) {
+      return;
+    }
+
+    sink.ShowInSlideshow(held);
+    this.Close();
+  }
+
   private async Task Load() {
     var generation = ++this.loadGeneration;
 
@@ -203,6 +281,20 @@ internal sealed class DashboardService(
       }
 
       this.Publish(DashboardState.Failed(ex.GetUserFriendlyMessage()));
+    }
+  }
+
+  /// <summary>
+  /// The creator's stats fetched again, or <c>null</c> when the fetch failed, logged.
+  /// </summary>
+  private async Task<CreatorStats?> TryRefreshStats() {
+    try {
+      return await api.GetCreatorStats();
+    }
+    catch (Exception ex) {
+      this.LogFailure(ex);
+
+      return null;
     }
   }
 

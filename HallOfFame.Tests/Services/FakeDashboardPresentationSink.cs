@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Game.UI.Localization;
+using HallOfFame.Domain;
 using HallOfFame.Services;
 
 namespace HallOfFame.Tests.Services;
@@ -14,7 +17,7 @@ internal sealed class FakeDashboardPresentationSink : IDashboardPresentationSink
   /// Every push of a state in order, by its status's name,
   /// a loaded one followed by its screenshots' IDs (ex. "Loaded:a,b"),
   /// and a detail's prefixed and followed by its screenshot's ID (ex. "Detail:Loading:a"),
-  /// "Saving" when it is saving (ex. "Detail:Saving:a").
+  /// "Saving" or "Deleting" while a mutation is on its way (ex. "Detail:Saving:a").
   /// </summary>
   internal List<string> Log { get; } = [];
 
@@ -23,6 +26,15 @@ internal sealed class FakeDashboardPresentationSink : IDashboardPresentationSink
   internal DashboardDetailState LastDetail { get; private set; } = DashboardDetailState.Closed;
 
   internal List<LocalizedString> Errors { get; } = [];
+
+  /// <summary>
+  /// Answers the delete confirmation, declining when unwired.
+  /// </summary>
+  internal Func<Screenshot, Task<bool>>? ConfirmDeleteImpl { get; init; }
+
+  internal List<Screenshot> ShownInSlideshow { get; } = [];
+
+  internal int DeletedSoundCount { get; private set; }
 
   public void Publish(DashboardState state) {
     this.LastState = state;
@@ -40,7 +52,11 @@ internal sealed class FakeDashboardPresentationSink : IDashboardPresentationSink
   public void PublishDetail(DashboardDetailState detail) {
     this.LastDetail = detail;
 
-    var status = detail.IsSaving ? "Saving" : detail.Status.ToString();
+    var status = detail switch {
+      { IsSaving: true } => "Saving",
+      { IsDeleting: true } => "Deleting",
+      _ => detail.Status.ToString()
+    };
 
     this.Log.Add(
       detail.ScreenshotId is null ? $"Detail:{status}" : $"Detail:{status}:{detail.ScreenshotId}"
@@ -48,4 +64,11 @@ internal sealed class FakeDashboardPresentationSink : IDashboardPresentationSink
   }
 
   public void ShowError(LocalizedString message) => this.Errors.Add(message);
+
+  public Task<bool> ConfirmDelete(Screenshot screenshot) =>
+    this.ConfirmDeleteImpl?.Invoke(screenshot) ?? Task.FromResult(false);
+
+  public void PlayDeletedSound() => this.DeletedSoundCount++;
+
+  public void ShowInSlideshow(Screenshot screenshot) => this.ShownInSlideshow.Add(screenshot);
 }

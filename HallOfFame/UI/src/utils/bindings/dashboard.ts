@@ -36,6 +36,8 @@ export type DashboardDetailState =
       readonly screenshot: Screenshot;
       // Whether an edit of it is on its way to the server.
       readonly isSaving: boolean;
+      // Whether its deletion is on its way to the server.
+      readonly isDeleting: boolean;
     }
   | { readonly status: 'error'; readonly screenshotId: string; readonly error: LocalizedString };
 
@@ -121,4 +123,19 @@ export function useDashboardAssetMods(): readonly JsonMod[] {
  */
 export function updateDashboardScreenshot(update: ScreenshotUpdate): void {
   trigger(GROUP, 'update', update);
+}
+
+/**
+ * Deletes the screenshot the detail view holds, once the player confirms it in the game's dialog;
+ * ignored while another mutation is on its way.
+ */
+export function deleteDashboardScreenshot(): void {
+  trigger(GROUP, 'delete');
+}
+
+/**
+ * Shows the screenshot the detail view holds in the slideshow, closing the dashboard over it.
+ */
+export function showDashboardScreenshotInSlideshow(): void {
+  trigger(GROUP, 'showInSlideshow');
 }

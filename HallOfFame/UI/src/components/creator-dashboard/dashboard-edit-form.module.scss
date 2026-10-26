@@ -1,3 +1,5 @@
+@use "sass:color";
+@use "../../vanilla-vars" as vanilla;
 @use "./shared" as dashboard;
 
 // The detail's side column, filled: the fields scroll over the action row, which stays in view.
@@ -21,16 +23,48 @@
   }
 
   // The band's colour, so the row reads as the window's own, like the band over it.
+  // Delete at its start, away from Save at its end with the More menu before it, all the row's
+  // one height.
   &-actions {
     display: flex;
     flex-direction: row;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     padding: 14rem dashboard.$edge-padding;
     border-top: 1rem solid dashboard.$rule-color;
     background-color: dashboard.$band-color;
   }
 
+  &-actionsEnd {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  // A quiet action; destructive, so it lights in the game's negative colour, text and box both,
+  // rather than the action's own when hovered or focused.
+  &-delete {
+    height: dashboard.$action-height;
+    padding: 0 16rem;
+
+    @include dashboard.quiet-action;
+
+    &:hover,
+    &:focus {
+      background-color: color.change(vanilla.$negative-color, $alpha: 0.12);
+      color: vanilla.$negative-color;
+    }
+  }
+
+  // The game's primary button, cut to the row's height and the quiet actions' text size: its
+  // uppercase carries weight enough beside them.
   &-save {
-    padding: 10rem 32rem;
+    display: flex;
+    align-items: center;
+    height: dashboard.$action-height;
+    margin-left: 24rem;
+    padding: 0 28rem;
+
+    font-size: vanilla.$font-size-m;
   }
 }

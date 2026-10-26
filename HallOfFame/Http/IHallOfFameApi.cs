@@ -46,6 +46,11 @@ internal interface IHallOfFameApi {
   Task<Screenshot> UpdateScreenshot(string screenshotId, ScreenshotUpdate update);
 
   /// <summary>
+  /// Deletes one of the authenticated creator's screenshots for good.
+  /// </summary>
+  Task DeleteScreenshot(string screenshotId);
+
+  /// <summary>
   /// The mods of a screenshot's shared playset, most subscribed first, those Paradox Mods no
   /// longer publishes listed last with their <see cref="Domain.Mod.State"/>.
   /// Mods Paradox Mods deleted or banned, or the server failed to fetch, are left out.

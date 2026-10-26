@@ -180,6 +180,14 @@ export interface KeepAliveScreenshotsState {
 }
 
 /**
+ * Subscribes to whether the game is on the main menu, where the slideshow shows, rather than in a
+ * city or its pause menu.
+ */
+export function useIsInMainMenu(): boolean {
+  return useValue(isInMainMenu$());
+}
+
+/**
  * Subscribes to the screenshot the slideshow will show next, which the conductor resolves while the
  * current one is still on screen.
  *

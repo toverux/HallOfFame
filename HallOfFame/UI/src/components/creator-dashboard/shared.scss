@@ -10,6 +10,34 @@ $edge-padding: 24rem;
 // The rules setting the window's parts apart.
 $rule-color: rgba(255, 255, 255, 0.2);
 
+// The height of the detail's action row's controls, so they line up.
+$action-height: 40rem;
+
+// A quiet action beside a primary button, as the upload panel's cancel: text alone at rest, lit
+// like the band's tabs when hovered or focused. A vanilla button inherits no text style, so the
+// label's is restated here. Included last: Sass wants the hover rule after every declaration.
+@mixin quiet-action {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 4rem;
+  // Stated: vanilla's dropdown toggle brings a fill and a border of its own.
+  border-width: 0;
+  background-color: transparent;
+
+  color: vanilla.$menu-text-1-normal;
+  font-size: vanilla.$font-size-m;
+  transition:
+    color 0.1s ease-in-out,
+    background-color 0.1s ease-in-out;
+
+  &:hover,
+  &:focus {
+    background-color: vanilla.$menu-hover-color;
+    color: vanilla.$menu-active-color-bright;
+  }
+}
+
 // The cards' frame, which the detail view's print and figure groups share.
 @mixin frame {
   // Longhands to the side: the engine drops any shorthand holding a custom property, and

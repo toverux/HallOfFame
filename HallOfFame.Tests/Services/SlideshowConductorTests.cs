@@ -655,6 +655,83 @@ public sealed class SlideshowConductorTests {
   // GAME MODE AND THE MOUNT HANDSHAKE
 
   [Fact]
+  public async Task Show_PublishesTheScreenshot_AndPrefetchesAhead() {
+    var api = SlideshowConductorTests.SequentialApi();
+    var sink = new FakeSlideshowPresentationSink();
+    var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
+
+    await conductor.OnSlideshowMounted();
+
+    await conductor.Show(SlideshowConductorTests.MakeScreenshot("mine"));
+
+    // Shown past the look-ahead the mount prefetched, which is left behind as its previous.
+    Assert.Equal("mine", sink.LastPublishedScreenshot!.Id);
+    Assert.Equal("s1", sink.LastPublishedPrevious!.Id);
+    Assert.Equal("s2", sink.LastPublishedNext!.Id);
+    Assert.True(sink.CanAdvanceLog[^1]);
+  }
+
+  [Fact]
+  public async Task Show_WhileTheLockIsHeld_ShowsOnceThePrefetchReleasesIt() {
+    var fetchGate = new TaskCompletionSource<Screenshot>();
+    var fetchCount = 0;
+
+    var api = new FakeApi {
+      GetRandomScreenshotWeightedImpl = () => {
+        fetchCount++;
+
+        return fetchCount == 1
+          ? Task.FromResult(SlideshowConductorTests.MakeScreenshot("s0"))
+          : fetchGate.Task;
+      },
+      MarkScreenshotViewedImpl = _ => Task.FromResult(new View())
+    };
+
+    var sink = new FakeSlideshowPresentationSink();
+    var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
+
+    // The first load's prefetch holds the lock until the gate opens.
+    var mount = conductor.OnSlideshowMounted();
+
+    await conductor.Show(SlideshowConductorTests.MakeScreenshot("mine"));
+
+    Assert.Equal("s0", sink.LastPublishedScreenshot!.Id);
+
+    fetchGate.SetResult(SlideshowConductorTests.MakeScreenshot("s1"));
+    await mount;
+
+    Assert.Equal("mine", sink.LastPublishedScreenshot!.Id);
+    Assert.Equal("s1", sink.LastPublishedPrevious!.Id);
+  }
+
+  [Fact]
+  public async Task Show_WhileALoadHoldsTheLock_ShowsOnceThatLoadFails() {
+    var fetchGate = new TaskCompletionSource<Screenshot>();
+
+    var api = new FakeApi {
+      GetRandomScreenshotWeightedImpl = () => fetchGate.Task,
+      MarkScreenshotViewedImpl = _ => Task.FromResult(new View())
+    };
+
+    var sink = new FakeSlideshowPresentationSink();
+    var conductor = SlideshowConductorTests.CreateConductor(api: api, sink: sink);
+
+    // The first load holds the lock until the gate fails it.
+    var mount = conductor.OnSlideshowMounted();
+
+    await conductor.Show(SlideshowConductorTests.MakeScreenshot("mine"));
+
+    Assert.Null(sink.LastPublishedScreenshot);
+
+    fetchGate.SetException(new HttpNetworkException("1", "boom"));
+    await mount;
+
+    // The failed load freed the lock, and the shown screenshot needs no fetch of its own.
+    Assert.Equal("mine", sink.LastPublishedScreenshot!.Id);
+    Assert.Null(sink.PublishedLoadErrors[^1]);
+  }
+
+  [Fact]
   public async Task OnSlideshowMounted_FirstMount_LoadsTheFirstScreenshot() {
     var sink = new FakeSlideshowPresentationSink();
 

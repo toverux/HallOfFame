@@ -104,6 +104,7 @@ export function DashboardDetail({
             key={detail.screenshotId}
             screenshot={detail.screenshot}
             isSaving={detail.isSaving}
+            isDeleting={detail.isDeleting}
           />
         )}
 

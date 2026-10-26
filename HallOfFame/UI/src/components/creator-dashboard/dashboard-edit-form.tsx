@@ -1,10 +1,11 @@
 import classNames from 'classnames';
-import { Button, Scrollable } from 'cs2/ui';
+import { Button, type ButtonSounds, Scrollable } from 'cs2/ui';
 import { type ReactElement, useCallback, useMemo, useState } from 'react';
 import type { Screenshot } from '../../common';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { useScrollController } from '../../vanilla-modules/game-ui/common/hooks/use-scroll-controller';
+import { defaultButtonSounds } from '../../vanilla-modules/game-ui/common/input/button/button';
 import {
   CityNameField,
   DescriptionField,
@@ -12,6 +13,7 @@ import {
   ShareRenderSettingsField,
   ShowcasedModField
 } from '../screenshot-form';
+import { DashboardActionsMenu } from './dashboard-actions-menu';
 import {
   buildScreenshotUpdate,
   canSaveEditForm,
@@ -25,21 +27,28 @@ import * as styles from './dashboard-edit-form.module.scss';
 
 /**
  * The fields of the screenshot the server lets its creator change, in the upload form's own
- * controls, over the action row. The fields sit in two groups framed like the figures across,
- * and show their labels alone, without the upload panel's first-time hints.
+ * controls, over the action row at its end: Delete at its start, away from Save at its end and
+ * the other actions' menu before it.
+ * The fields sit in two groups framed like the figures across, and show their labels alone,
+ * without the upload panel's first-time hints.
  * The form starts from the screenshot and compares against it, so once a save lands it holds
  * nothing to save, and a failed one keeps the edits.
  */
 export function DashboardEditForm({
   screenshot,
-  isSaving
+  isSaving,
+  isDeleting
 }: Readonly<{
   screenshot: Screenshot;
   isSaving: boolean;
+  isDeleting: boolean;
 }>): ReactElement {
   const translate = useTranslate();
 
   const assetMods = bindings.useDashboardAssetMods();
+
+  // One mutation at a time: the other waits for its answer.
+  const isMutating = isSaving || isDeleting;
 
   const scrollController = useScrollController?.();
 
@@ -106,19 +115,41 @@ export function DashboardEditForm({
 
       <div className={styles.formActions}>
         <Button
-          variant='primary'
-          className={styles.formSave}
-          disabled={isSaving || !canSaveEditForm(form, screenshot)}
-          onSelect={() =>
-            bindings.updateDashboardScreenshot(buildScreenshotUpdate(form, screenshot))
-          }>
+          theme={plainButtonTheme}
+          className={styles.formDelete}
+          disabled={isMutating}
+          sounds={deleteButtonSounds}
+          onSelect={bindings.deleteDashboardScreenshot}>
           {translate(
-            isSaving
-              ? 'HallOfFame.UI.Dashboard.EDIT_ACTION[Saving]'
-              : 'HallOfFame.UI.Dashboard.EDIT_ACTION[Save]'
+            isDeleting
+              ? 'HallOfFame.UI.Dashboard.EDIT_ACTION[Deleting]'
+              : 'HallOfFame.UI.Dashboard.EDIT_ACTION[Delete]'
           )}
         </Button>
+
+        <div className={styles.formActionsEnd}>
+          <DashboardActionsMenu screenshot={screenshot} isMutating={isMutating} />
+
+          <Button
+            variant='primary'
+            className={styles.formSave}
+            disabled={isMutating || !canSaveEditForm(form, screenshot)}
+            onSelect={() =>
+              bindings.updateDashboardScreenshot(buildScreenshotUpdate(form, screenshot))
+            }>
+            {translate(
+              isSaving
+                ? 'HallOfFame.UI.Dashboard.EDIT_ACTION[Saving]'
+                : 'HallOfFame.UI.Dashboard.EDIT_ACTION[Save]'
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
 }
+
+// The bulldozer, as the slideshow's report plays it: both take something down.
+const deleteButtonSounds: ButtonSounds = { ...defaultButtonSounds, select: 'bulldoze' };
+
+const plainButtonTheme = { button: '' };

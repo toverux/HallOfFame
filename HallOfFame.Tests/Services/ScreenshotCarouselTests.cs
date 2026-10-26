@@ -230,6 +230,22 @@ public sealed class ScreenshotCarouselTests {
     );
   }
 
+  [Fact]
+  public void Show_AppendsAndAdvances() {
+    var carousel = new ScreenshotCarousel(new FakeApi());
+
+    var step = carousel.Show(ScreenshotCarouselTests.MakeScreenshot("abc"));
+
+    // Showing lands at the front of the window, so its step behaves like any other forward move:
+    // it preloads ahead.
+    Assert.Equal("abc", step.Current.Id);
+    Assert.True(step.ShouldPreloadAhead);
+
+    Assert.Equal("abc", carousel.Current?.Id);
+    Assert.Equal(0, carousel.CurrentIndex);
+    Assert.Equal(1, carousel.Count);
+  }
+
   #if DEBUG
   [Fact]
   public async Task LoadById_FetchesAppendsAndAdvances() {

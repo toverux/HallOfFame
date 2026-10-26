@@ -722,6 +722,324 @@ public sealed class DashboardServiceTests {
     Assert.Equal("New Town", sink.LastState.Screenshots[0].CityName);
   }
 
+  [Fact]
+  public async Task Delete_Confirmed_DropsTheScreenshot_RefreshesTheStats_AndReturnsToTheGrid() {
+    var held = new Screenshot {
+      Id = "a",
+      CityName = "Old Town"
+    };
+
+    var deleted = new List<string>();
+    var confirmed = new List<Screenshot>();
+
+    var refreshed = new CreatorStats {
+      ScreenshotsCount = 1
+    };
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDeleteImpl = screenshot => {
+        confirmed.Add(screenshot);
+
+        return Task.FromResult(true);
+      }
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      held,
+      sink,
+      deleteScreenshot: id => {
+        deleted.Add(id);
+
+        return Task.CompletedTask;
+      },
+      stats: new Queue<CreatorStats>([new CreatorStats(), refreshed])
+    );
+
+    await service.Delete();
+
+    Assert.Same(held, Assert.Single(confirmed));
+    Assert.Equal(["a"], deleted);
+    Assert.Equal(["Detail:Deleting:a", "Loaded:b", "Detail:Closed"], sink.Log);
+    Assert.Same(refreshed, sink.LastState.Stats);
+    Assert.Equal(1, sink.DeletedSoundCount);
+  }
+
+  [Fact]
+  public async Task Delete_Declined_DoesNothing() {
+    // Any delete would throw on the unwired fake, and the fake sink declines unwired.
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink
+    );
+
+    await service.Delete();
+
+    Assert.Empty(sink.Log);
+    Assert.Equal(0, sink.DeletedSoundCount);
+  }
+
+  [Fact]
+  public async Task Delete_NotFound_DropsTheScreenshotAllTheSame() {
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDeleteImpl = _ => Task.FromResult(true)
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      deleteScreenshot: _ => throw new HttpUserCompatibilityException(
+        "42",
+        new HttpQueries.JsonError()
+      )
+    );
+
+    await service.Delete();
+
+    Assert.Equal(["Detail:Deleting:a", "Loaded:b", "Detail:Closed"], sink.Log);
+    Assert.Empty(sink.Errors);
+  }
+
+  [Fact]
+  public async Task Delete_HttpFailure_KeepsTheCollectionAndTheDetail_AndShowsTheError() {
+    var silent = new List<Exception>();
+
+    var held = new Screenshot {
+      Id = "a"
+    };
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDeleteImpl = _ => Task.FromResult(true)
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      held,
+      sink,
+      deleteScreenshot: _ => throw new HttpServerException("42", new HttpQueries.JsonError()),
+      log: new FakeModLog {
+        ErrorSilentImpl = silent.Add
+      }
+    );
+
+    var collection = sink.LastState.Screenshots;
+
+    // Must not throw despite the failed deletion.
+    await service.Delete();
+
+    Assert.Equal(["Detail:Deleting:a", "Detail:Loaded:a"], sink.Log);
+    Assert.Same(held, sink.LastDetail.Screenshot);
+    Assert.Same(collection, sink.LastState.Screenshots);
+    Assert.Single(silent);
+    Assert.Equal(
+      $"HallOfFame.Common.ERROR_MESSAGE[{typeof(HttpServerException).FullName}]",
+      Assert.Single(sink.Errors).id
+    );
+    Assert.Equal(0, sink.DeletedSoundCount);
+  }
+
+  [Fact]
+  public async Task Delete_StatsRefreshFailure_DropsTheScreenshot_AndKeepsTheStatsHeld() {
+    var silent = new List<Exception>();
+    var statsCount = 0;
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDeleteImpl = _ => Task.FromResult(true)
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      deleteScreenshot: _ => Task.CompletedTask,
+      log: new FakeModLog {
+        ErrorSilentImpl = silent.Add
+      },
+      getStats: () => ++statsCount == 1
+        ? Task.FromResult(new CreatorStats())
+        : throw new HttpNetworkException("1", "offline")
+    );
+
+    var stats = sink.LastState.Stats;
+
+    await service.Delete();
+
+    Assert.Equal(["Detail:Deleting:a", "Loaded:b", "Detail:Closed"], sink.Log);
+    Assert.Same(stats, sink.LastState.Stats);
+    Assert.Single(silent);
+    Assert.Empty(sink.Errors);
+  }
+
+  [Fact]
+  public async Task Delete_AgainWhileDeleting_DeletesOnce() {
+    var gate = new TaskCompletionSource<bool>();
+    var deleteCount = 0;
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDeleteImpl = _ => Task.FromResult(true)
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      deleteScreenshot: _ => {
+        deleteCount++;
+
+        return gate.Task;
+      }
+    );
+
+    var first = service.Delete();
+
+    await service.Delete();
+
+    gate.SetResult(true);
+    await first;
+
+    Assert.Equal(1, deleteCount);
+  }
+
+  [Fact]
+  public async Task Update_WhileDeleting_IsIgnored() {
+    var gate = new TaskCompletionSource<bool>();
+    var updateCount = 0;
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDeleteImpl = _ => Task.FromResult(true)
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      updateScreenshot: (_, _) => {
+        updateCount++;
+
+        return Task.FromResult(
+          new Screenshot {
+            Id = "a"
+          }
+        );
+      },
+      deleteScreenshot: _ => gate.Task
+    );
+
+    var deletion = service.Delete();
+
+    await service.Update(
+      new ScreenshotUpdate {
+        CityName = "New Town"
+      }
+    );
+
+    gate.SetResult(true);
+    await deletion;
+
+    Assert.Equal(0, updateCount);
+    Assert.DoesNotContain("Detail:Saving:a", sink.Log);
+  }
+
+  [Fact]
+  public async Task ShowInSlideshow_WhileDeleting_DoesNothing() {
+    var gate = new TaskCompletionSource<bool>();
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDeleteImpl = _ => Task.FromResult(true)
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      deleteScreenshot: _ => gate.Task
+    );
+
+    var deletion = service.Delete();
+
+    service.ShowInSlideshow();
+
+    gate.SetResult(true);
+    await deletion;
+
+    Assert.Empty(sink.ShownInSlideshow);
+  }
+
+  [Fact]
+  public async Task ShowInSlideshow_WhileSaving_DoesNothing() {
+    var gate = new TaskCompletionSource<Screenshot>();
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      updateScreenshot: (_, _) => gate.Task
+    );
+
+    var save = service.Update(
+      new ScreenshotUpdate {
+        CityName = "New Town"
+      }
+    );
+
+    service.ShowInSlideshow();
+
+    gate.SetResult(
+      new Screenshot {
+        Id = "a"
+      }
+    );
+    await save;
+
+    Assert.Empty(sink.ShownInSlideshow);
+  }
+
+  [Fact]
+  public async Task ShowInSlideshow_HandsTheHeldScreenshotOver_AndClosesThePanel() {
+    var held = new Screenshot {
+      Id = "a"
+    };
+
+    var sink = new FakeDashboardPresentationSink();
+    var service = await DashboardServiceTests.OpenDetailOfA(held, sink);
+
+    service.ShowInSlideshow();
+
+    Assert.Same(held, Assert.Single(sink.ShownInSlideshow));
+    Assert.Equal(["Closed", "Detail:Closed"], sink.Log);
+  }
+
+  [Fact]
+  public async Task ShowInSlideshow_WhileTheDetailLoads_DoesNothing() {
+    var api = DashboardServiceTests.CreateApi(
+      ["a"],
+      new CreatorStats(),
+      _ => new TaskCompletionSource<Screenshot>().Task
+    );
+
+    var sink = new FakeDashboardPresentationSink();
+    var service = new DashboardService(api, new FakeModLog(), sink);
+
+    await service.Open();
+
+    _ = service.OpenDetail("a");
+
+    service.ShowInSlideshow();
+
+    Assert.Empty(sink.ShownInSlideshow);
+    Assert.Equal(DashboardStatus.Loaded, sink.LastState.Status);
+  }
+
   private static FakeApi CreateApi(
     string[] ids,
     CreatorStats stats,
@@ -739,20 +1057,28 @@ public sealed class DashboardServiceTests {
   }
 
   /// <summary>
-  /// A service showing the detail of "a", held in full, in a collection of "a" and "b".
+  /// A service showing the detail of "a", held in full, in a collection of "a" and "b",
+  /// the mutations wired as given and the stats answered in turn from the queue, the first on open.
   /// </summary>
   private static async Task<DashboardService> OpenDetailOfA(
     Screenshot held,
     FakeDashboardPresentationSink sink,
-    Func<string, ScreenshotUpdate, Task<Screenshot>> updateScreenshot,
-    FakeModLog? log = null
+    Func<string, ScreenshotUpdate, Task<Screenshot>>? updateScreenshot = null,
+    FakeModLog? log = null,
+    Func<string, Task>? deleteScreenshot = null,
+    Queue<CreatorStats>? stats = null,
+    Func<Task<CreatorStats>>? getStats = null
   ) {
-    var api = DashboardServiceTests.CreateApi(
-      ["a", "b"],
-      new CreatorStats(),
-      _ => Task.FromResult(held),
-      updateScreenshot
-    );
+    var api = new FakeApi {
+      GetMyScreenshotsImpl = () => Task.FromResult<IReadOnlyList<DashboardScreenshot>>(
+        [DashboardServiceTests.MakeScreenshot("a"), DashboardServiceTests.MakeScreenshot("b")]
+      ),
+      GetCreatorStatsImpl =
+        getStats ?? (() => Task.FromResult(stats?.Dequeue() ?? new CreatorStats())),
+      GetScreenshotImpl = _ => Task.FromResult(held),
+      UpdateScreenshotImpl = updateScreenshot,
+      DeleteScreenshotImpl = deleteScreenshot
+    };
 
     var service = new DashboardService(api, log ?? new FakeModLog(), sink);
 

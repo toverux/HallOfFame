@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Game;
+using HallOfFame.Domain;
 using HallOfFame.Http;
 using HallOfFame.Logging;
 using HallOfFame.Utils;
@@ -76,6 +77,12 @@ internal sealed class SlideshowConductor {
   /// </summary>
   private bool isSlideshowMounted;
 
+  /// <summary>
+  /// A screenshot handed to <see cref="Show"/> while the navigation lock was held, shown once the
+  /// lock frees rather than dropped: the caller closed its own view over it.
+  /// </summary>
+  private Screenshot? pendingShow;
+
   /// <param name="api">Server API used by the leaves this conductor drives.</param>
   /// <param name="log">
   /// Mod logger; the conductor logs through it and never renders off-engine.
@@ -136,7 +143,7 @@ internal sealed class SlideshowConductor {
       step = await this.carousel.Next();
     }
     catch (Exception ex) {
-      this.AbortNavigation(ex);
+      await this.AbortNavigation(ex);
 
       return;
     }
@@ -174,7 +181,7 @@ internal sealed class SlideshowConductor {
       step = this.carousel.Previous();
     }
     catch (Exception ex) {
-      this.AbortNavigation(ex);
+      await this.AbortNavigation(ex);
 
       return;
     }
@@ -263,6 +270,26 @@ internal sealed class SlideshowConductor {
     }
   }
 
+  /// <summary>
+  /// Shows a screenshot the caller holds, the dashboard's, appending it to the carousel and
+  /// advancing onto it like any other load, so the slideshow goes on from it.
+  /// While a navigation holds the lock, it waits for the lock to free, then shows before any owed
+  /// load.
+  /// Designed never to throw, so the shell can fire-and-forget it.
+  /// </summary>
+  internal Task Show(Screenshot screenshot) {
+    if (!this.navigation.CanAdvance) {
+      this.pendingShow = screenshot;
+
+      return Task.CompletedTask;
+    }
+
+    this.navigation.Begin();
+    this.sink.SetCanAdvance(this.navigation.CanAdvance);
+
+    return this.ApplyStep(this.carousel.Show(screenshot));
+  }
+
   #if DEBUG
   /// <summary>
   /// Debug/development entry point to load a screenshot by its ID.
@@ -280,7 +307,7 @@ internal sealed class SlideshowConductor {
       step = await this.carousel.LoadById(screenshotId);
     }
     catch (Exception ex) {
-      this.AbortNavigation(ex);
+      await this.AbortNavigation(ex);
 
       return;
     }
@@ -309,6 +336,7 @@ internal sealed class SlideshowConductor {
 
     this.isSlideshowMounted = false;
     this.isRefreshPending = true;
+    this.pendingShow = null;
   }
 
   /// <summary>
@@ -334,13 +362,31 @@ internal sealed class SlideshowConductor {
   internal static bool IsNetworkError(Exception ex) => ex is HttpException;
 
   /// <summary>
-  /// Loads a screenshot when one is owed and the slideshow is mounted to show it, and does nothing
-  /// otherwise.
-  /// Gating on the mount here rather than at each call site is what keeps an owed load from being
-  /// spent on a request and a view count nobody sees: the flag outlives the menu session.
+  /// Shows a screenshot deferred while the lock was held, or else loads a screenshot when one is
+  /// owed and the slideshow is mounted to show it, and does nothing otherwise.
+  /// Gating the owed load on the mount here rather than at each call site is what keeps it from
+  /// being spent on a request and a view count nobody sees: the flag outlives the menu session.
   /// </summary>
-  private Task ServeRefresh() =>
-    this.isRefreshPending && this.isSlideshowMounted ? this.Next() : Task.CompletedTask;
+  private Task ServeRefresh() {
+    if (this.pendingShow is not null) {
+      return this.ServePendingShow();
+    }
+
+    return this.isRefreshPending && this.isSlideshowMounted ? this.Next() : Task.CompletedTask;
+  }
+
+  /// <summary>
+  /// Shows the screenshot a <see cref="Show"/> deferred while the lock was held, if any.
+  /// </summary>
+  private Task ServePendingShow() {
+    if (this.pendingShow is not {} screenshot) {
+      return Task.CompletedTask;
+    }
+
+    this.pendingShow = null;
+
+    return this.Show(screenshot);
+  }
 
   /// <summary>
   /// Mirrors a successful <see cref="NavigationStep"/> onto the UI and enacts the side effects
@@ -349,7 +395,7 @@ internal sealed class SlideshowConductor {
   /// the prefetch's lock turned away.
   /// The screenshot is published before the prefetch is awaited, so the display stays immediate
   /// while the lock is held throughout the prefetch.
-  /// This is the single apply path shared by next, previous, and (in debug) load-by-id.
+  /// This is the single apply path shared by next, previous, show, and (in debug) load-by-id.
   /// </summary>
   private async Task ApplyStep(NavigationStep step) {
     // The screenshot is now displayed, so clear any error left over from a prior failed load.
@@ -421,13 +467,18 @@ internal sealed class SlideshowConductor {
 
   /// <summary>
   /// Aborts an in-flight navigation after a failed load: applies the error policy and releases the
-  /// navigation lock, leaving the previously displayed screenshot in place.
+  /// navigation lock, leaving the previously displayed screenshot in place unless a show was
+  /// deferred meanwhile, which then replaces it, needing no fetch.
+  /// The owed load is left to the next mount or prefetch: retrying it here would loop on a dead
+  /// network.
   /// Callers return immediately afterward.
   /// </summary>
-  private void AbortNavigation(Exception ex) {
+  private Task AbortNavigation(Exception ex) {
     this.HandleDisplayLoadError(ex);
     this.navigation.Abort();
     this.sink.SetCanAdvance(this.navigation.CanAdvance);
+
+    return this.ServePendingShow();
   }
 
   /// <summary>

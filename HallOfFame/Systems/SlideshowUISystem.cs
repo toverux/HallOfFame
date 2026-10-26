@@ -384,6 +384,13 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
   }
   #endif
 
+  /// <summary>
+  /// Shows a screenshot another system holds, the dashboard's, forwarded to the conductor.
+  /// </summary>
+  internal void ShowScreenshot(Screenshot screenshot) {
+    _ = this.conductor.Show(screenshot);
+  }
+
   void ISlideshowPresentationSink.PublishScreenshot(Screenshot? screenshot) {
     this.screenshotBinding.Update(screenshot);
   }

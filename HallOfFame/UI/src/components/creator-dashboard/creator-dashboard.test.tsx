@@ -501,6 +501,7 @@ describe('CreatorDashboard', () => {
     setDetail({
       status: 'loaded',
       isSaving: false,
+      isDeleting: false,
       screenshotId: 'a',
       screenshot: makeScreenshot({ id: 'a', imageUrlFHD: 'full.jpg' })
     });
@@ -533,6 +534,7 @@ describe('CreatorDashboard', () => {
       setDetail({
         status: 'loaded',
         isSaving: false,
+        isDeleting: false,
         screenshotId: 'a',
         screenshot: makeScreenshot({
           id: 'a',
@@ -563,6 +565,7 @@ describe('CreatorDashboard', () => {
     setDetail({
       status: 'loaded',
       isSaving: false,
+      isDeleting: false,
       screenshotId: 'a',
       // Mod IDs from before the playset was recorded, which the details window does not list.
       screenshot: makeScreenshot({
@@ -586,6 +589,7 @@ describe('CreatorDashboard', () => {
     setDetail({
       status: 'loaded',
       isSaving: false,
+      isDeleting: false,
       screenshotId: 'a',
       // The server keeps both for their creator, but the details window lists neither.
       screenshot: makeScreenshot({
@@ -723,6 +727,7 @@ function setLoadedWithDetails(): void {
   setDetail({
     status: 'loaded',
     isSaving: false,
+    isDeleting: false,
     screenshotId: 'a',
     screenshot: makeScreenshot({
       id: 'a',

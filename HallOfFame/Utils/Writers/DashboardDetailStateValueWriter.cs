@@ -37,6 +37,9 @@ internal sealed class DashboardDetailStateValueWriter : IWriter<DashboardDetailS
 
       writer.PropertyName("isSaving");
       writer.Write(value.IsSaving);
+
+      writer.PropertyName("isDeleting");
+      writer.Write(value.IsDeleting);
     }
 
     if (error is {} message) {

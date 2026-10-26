@@ -1,4 +1,6 @@
+using System.Threading.Tasks;
 using Game.UI.Localization;
+using HallOfFame.Domain;
 
 namespace HallOfFame.Services;
 
@@ -14,7 +16,23 @@ internal interface IDashboardPresentationSink {
   void PublishDetail(DashboardDetailState detail);
 
   /// <summary>
-  /// Shows a failed edit's message in the mod's error dialog.
+  /// Shows a failed edit's or deletion's message in the mod's error dialog.
   /// </summary>
   void ShowError(LocalizedString message);
+
+  /// <summary>
+  /// Asks the player to confirm deleting the screenshot, for good, through the game's
+  /// confirmation dialog, resolving to <c>true</c> when they confirm.
+  /// </summary>
+  Task<bool> ConfirmDelete(Screenshot screenshot);
+
+  /// <summary>
+  /// Plays the sound of a deletion landing, the bulldozer's last.
+  /// </summary>
+  void PlayDeletedSound();
+
+  /// <summary>
+  /// Puts the screenshot on the slideshow, which the panel closes over.
+  /// </summary>
+  void ShowInSlideshow(Screenshot screenshot);
 }

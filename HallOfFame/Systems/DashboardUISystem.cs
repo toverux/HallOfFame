@@ -1,12 +1,17 @@
 using System;
 using System.Threading.Tasks;
 using Colossal.UI.Binding;
+using Game;
+using Game.SceneFlow;
 using Game.UI;
 using Game.UI.Localization;
+using HallOfFame.Domain;
 using HallOfFame.Reflection;
 using HallOfFame.Services;
 using HallOfFame.Systems.Capture;
+using HallOfFame.Utils;
 using HallOfFame.Utils.Writers;
+using UnityEngine;
 
 namespace HallOfFame.Systems;
 
@@ -14,13 +19,21 @@ namespace HallOfFame.Systems;
 /// The Creator Dashboard's thin binding shell over <see cref="DashboardService"/>:
 /// it registers the bindings, forwards the UI's triggers to the service,
 /// reads the playset for the edit form's picker,
-/// and implements <see cref="IDashboardPresentationSink"/>.
+/// and implements <see cref="IDashboardPresentationSink"/>, the delete confirmation and the
+/// handover to the slideshow included.
 /// C# owns whether the panel is open, so every entry point opens it the same way.
 /// </summary>
 internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresentationSink {
   private const string BindingGroup = "hallOfFame.dashboard";
 
   private DashboardService service = null!;
+
+  private SlideshowUISystem slideshowUISystem = null!;
+
+  /// <summary>
+  /// The game's UI sounds, the ones its audio binding plays for the UI, for the deletion's.
+  /// </summary>
+  private UISoundCollection? soundCollection;
 
   private ValueBinding<DashboardState> stateBinding = null!;
 
@@ -36,6 +49,10 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
       this.Enabled = false;
 
       this.service = new DashboardService(Mod.Api, Mod.Log, this);
+
+      this.slideshowUISystem = this.World.GetOrCreateSystemManaged<SlideshowUISystem>();
+
+      this.soundCollection = Resources.Load<UISoundCollection>("Audio/UI Sounds");
 
       this.stateBinding = new ValueBinding<DashboardState>(
         DashboardUISystem.BindingGroup,
@@ -115,6 +132,22 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
           update => { _ = this.service.Update(update); }
         )
       );
+
+      this.AddBinding(
+        new TriggerBinding(
+          DashboardUISystem.BindingGroup,
+          "delete",
+          () => { _ = this.service.Delete(); }
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding(
+          DashboardUISystem.BindingGroup,
+          "showInSlideshow",
+          this.service.ShowInSlideshow
+        )
+      );
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
@@ -128,6 +161,35 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
 
   void IDashboardPresentationSink.ShowError(LocalizedString message) =>
     ErrorDialogManagerAccessor.ShowError(message);
+
+  Task<bool> IDashboardPresentationSink.ConfirmDelete(Screenshot screenshot) {
+    var confirmation = new TaskCompletionSource<bool>();
+
+    var dialog = new ConfirmationDialog(
+      LocalizedString.IdWithArgs(
+        "HallOfFame.Systems.DashboardUI.CONFIRM_DELETE_DIALOG[Title]",
+        ("CITY_NAME", LocalizedString.Value(screenshot.CityName))
+      ),
+      LocalizedString.Id("HallOfFame.Systems.DashboardUI.CONFIRM_DELETE_DIALOG[Message]"),
+      LocalizedString.Id("HallOfFame.Systems.DashboardUI.CONFIRM_DELETE_DIALOG[ConfirmAction]"),
+      LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel")
+    );
+
+    GameManager.instance.userInterface.appBindings
+      .ShowConfirmationDialog(dialog, choice => confirmation.SetResult(choice is 0));
+
+    return confirmation.Task;
+  }
+
+  void IDashboardPresentationSink.PlayDeletedSound() {
+    // A plain comparison, not `?.`: a Unity object answers null through its own operator.
+    if (this.soundCollection != null) {
+      this.soundCollection.PlaySound("bulldoze-end");
+    }
+  }
+
+  void IDashboardPresentationSink.ShowInSlideshow(Screenshot screenshot) =>
+    this.slideshowUISystem.ShowScreenshot(screenshot);
 
   /// <summary>
   /// Publishes the active playset's asset mods, the ones the edit form can showcase, in the
