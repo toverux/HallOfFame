@@ -4,6 +4,23 @@ Planned work on the mod that no ticket holds yet.
 
 Every entry opens with a triage line: **Priority** (high, medium, low) and **Cost** as the code reads at triage (trivial, cheap, moderate, large), either one `unsure` when nobody has judged it yet.
 
+## The Greenfield template's improvements, ported wholesale
+
+**Priority:** high · **Cost:** moderate
+
+`../cs2-greenfield-mod-template` started from Hall of Fame's layout and tooling (its commits `4afa798` to `37e03ec`), then kept improving on them. Port all of it back: every file, from `lefthook.yml` and `mise.toml` to the mod code, translated to Hall of Fame's names (`Greenfield` to `HallOfFame`, `gfd-` to `hof-`) and places (`.agents/` for skills, rules and scripts). Only what exists to make or maintain the template stays out: `template/`, the `gfd-setup` wizard, its `LICENSE`, and the entity counter sample slice.
+
+What Hall of Fame lacks entirely, as of template commit `8ecc1ff`:
+
+- The shared C# build settings in `Directory.Build.props` and `Directory.Build.targets`, with the `.editorconfig` code style enforced on every build.
+- C# tests on xUnit v3 and .NET 10 rather than `net48`, with the Unity native-memory shim (`Shim/`) and the float64 pass (`Float64/`, `mise test:cs:float64`, `scripts/check-float64-output.ts`). This adds dependencies and rewrites the test setup the `hof-cs-offengine-testing` skill and `AGENTS.md` describe.
+- In-game scenarios run unattended (`Scenarios/`, `scripts/game.ts`, `scripts/test-game.ts`, the game and scenario log parsers, `mise test:game`, `mise game`), with the `gfd-game-testing` and `gfd-game-cycle` skills.
+- The `gfd-game-update` and `gfd-template-update` skills, the `PublishNewMod` profile, `NullStrings`, and tests Hall of Fame has no equivalent of (`ModLog`, `LocaleLoader`, `AlwaysFalseEqualityComparer`, the UI's `game-setup`).
+
+Most files the two repositories share also differ: `Settings.cs`, the csproj files, `CommonUISystem.cs`, `LocaleLoader.cs`, `Mod.cs`, `mise.toml`, `build.ts`, `AGENTS.md`, the translate, release and testing skills, `lefthook.yml`. Diff each one, take the template's side, and keep what is Hall of Fame's own, since some of those differences are features the template never had.
+
+Finish by writing a `.template.json` that points at the ported template commit, so `gfd-template-update` can bring later template commits over one by one.
+
 ## The upload panel's maximized image as a component
 
 **Priority:** unsure · **Cost:** cheap
