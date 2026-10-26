@@ -162,9 +162,7 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
   void IDashboardPresentationSink.ShowError(LocalizedString message) =>
     ErrorDialogManagerAccessor.ShowError(message);
 
-  Task<bool> IDashboardPresentationSink.ConfirmDelete(Screenshot screenshot) {
-    var confirmation = new TaskCompletionSource<bool>();
-
+  async Task<bool> IDashboardPresentationSink.ConfirmDelete(Screenshot screenshot) {
     var dialog = new ConfirmationDialog(
       LocalizedString.IdWithArgs(
         "HallOfFame.Systems.DashboardUI.CONFIRM_DELETE_DIALOG[Title]",
@@ -175,10 +173,10 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
       LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel")
     );
 
-    GameManager.instance.userInterface.appBindings
-      .ShowConfirmationDialog(dialog, choice => confirmation.SetResult(choice is 0));
+    var choice = await GameManager.instance.userInterface.appBindings
+      .ShowConfirmationDialogAndWait(dialog);
 
-    return confirmation.Task;
+    return choice is 0;
   }
 
   void IDashboardPresentationSink.PlayDeletedSound() {

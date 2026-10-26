@@ -419,9 +419,7 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
   void ISlideshowPresentationSink.ShowError(LocalizedString message) =>
     ErrorDialogManagerAccessor.ShowError(message);
 
-  Task<bool> ISlideshowPresentationSink.ConfirmReport(Screenshot screenshot) {
-    var confirmation = new TaskCompletionSource<bool>();
-
+  async Task<bool> ISlideshowPresentationSink.ConfirmReport(Screenshot screenshot) {
     var dialog = new ConfirmationDialog(
       LocalizedString.IdWithArgs(
         "HallOfFame.Systems.SlideshowUI.CONFIRM_REPORT_DIALOG[Title]",
@@ -433,10 +431,10 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
       LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel")
     );
 
-    GameManager.instance.userInterface.appBindings
-      .ShowConfirmationDialog(dialog, choice => confirmation.SetResult(choice is 0));
+    var choice = await GameManager.instance.userInterface.appBindings
+      .ShowConfirmationDialogAndWait(dialog);
 
-    return confirmation.Task;
+    return choice is 0;
   }
 
   void ISlideshowPresentationSink.ShowReportSuccess() {
