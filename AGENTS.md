@@ -138,3 +138,4 @@ Ask first before:
 - When uncertain, state the assumption and proceed conservatively.
 - Actively propose updates to `AGENTS.md`, comments, or other docs when you detect drift.
 - Where a spec contradicts a design iterated with the user in the running game, the design stands: annotate the spec with it, without asking.
+- Drive the running game yourself to verify a change, during a review or simplify pass as much as during the work itself.

@@ -45,6 +45,7 @@ So domain records (`Screenshot`, `CreatorStats`, ...) and pure managed structs l
 
 Loading the game assemblies cannot save you from code that makes Unity **native** calls or loads engine-only types.
 Never let a test touch these directly; depend on a mod-owned interface and inject a fake.
+A seam earns its place when an off-engine test pins behaviour behind it: data a system reads and binds unchanged, the dashboard's playset for one, stays in the system rather than relaying through the service.
 
 - **HTTP / `HttpQueries`.** Its static constructor calls `SystemInfo.deviceUniqueIdentifier` (native) and its methods take `UnityWebRequest`, so instantiating it off-engine fails.
   Depend on `IHallOfFameApi` and inject `FakeApi`; never `new HttpQueries`.

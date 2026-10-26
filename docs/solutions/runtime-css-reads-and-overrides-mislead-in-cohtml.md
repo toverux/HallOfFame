@@ -6,7 +6,7 @@ symptoms:
   - 'An A/B test toggling a CSS rule at runtime measures the same result both ways'
   - '`parseFloat(getComputedStyle(el).fontSize)` returns a number far too small to be pixels'
 tags: [cohtml, css, selectors, getcomputedstyle, measurement]
-updated: 2026-10-12
+updated: 2026-10-26
 ---
 
 # Runtime CSS reads and overrides mislead in cohtml
@@ -60,3 +60,8 @@ Prove a runtime style override actually applied before trusting a measurement ta
 change something visible, or assert the property on the element. An override that silently no-ops
 turns an experiment into a comparison of a configuration against itself, which reads as a real
 result.
+
+A rule of the mod's beats vanilla's at equal specificity: the game loads
+`coui://ui-mods/HallOfFame.css` after `assetdb://gameui/index.css` (read off the live
+`document.styleSheets`), so source order settles the tie. Vanilla's dropdown item takes its
+`focused` class under the gamepad input scheme only, so a style on it never shows for keyboard focus.
