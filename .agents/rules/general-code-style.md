@@ -33,7 +33,17 @@ Apply every rule to all code you write or edit.
 - Describe code as it is now. Never narrate deleted or changed code ("this used to…", "the old X is gone").
   Reference removed code only when present code cannot stand without it (wire- or API-compatibility constraint, non-obvious gotcha the removal left behind). Then state constraint, not chronology.
 - Active voice, period at end of every sentence, Oxford commas.
-- In docblocks, wrap lines at sentence or logical boundaries so each stays legible alone:
+- In comments and docblocks, a sentence fills each line to the 100-character limit and wraps only there, never early at a comma or a clause.
+  A new sentence may start on its own line where that reads better, rather than leave its first words at the end of the previous one:
+  Bad:
+  ```
+  The cow is white, (lf)
+  and the dog is brown.
+  ```
+  Good:
+  ```
+  The cow is white, and the dog is brown.
+  ```
   Bad:
   ```
   The cow is white. The (lf)

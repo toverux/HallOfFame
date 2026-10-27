@@ -12,12 +12,12 @@ Class names follow a BEM-derived convention written in SCSS and consumed as came
 - One block per concept. A module's root block is named for its role, not for the feature or panel it belongs to: per-file scoping removes the need for a global prefix (`footer`, `cityInfo`, `uploadProgress`, not `screenshotUploadPanelFooter`).
 - A segment that spans multiple words is camelCase: `cityInfo`, `itemImage`, `backgroundColor`.
 - Block to element uses a single hyphen: `footer-button`, `cityInfo-name`.
-- A modifier uses a double hyphen: `footer-button--cancel`, `form-field--checked`, `image--hidden`.
+- A modifier uses a double hyphen: `footer-button--secondary`, `form-field--checked`, `image--hidden`.
 - Elements are flat. There are no sub-elements (never `block-element-subElement`). A DOM-nested part that is not its own block gets a flat compound element name: `image-magnifyButton`, `dropdown-itemImage`.
 - Promote a nested structural unit to its own block rather than nesting elements: `checkbox`, `dropdown`, and `textarea` are blocks, not `form-...` elements.
 - In SCSS, build names with `&-` and `&--` concatenation, and keep the source nested for readability even though the generated names stay flat.
 
-Names convert to camelCase in TypeScript (postcss-modules `localsConvention: 'camelCaseOnly'` in `HallOfFame/UI/build.ts`), so `.footer-button--cancel` becomes `styles.footerButtonCancel`.
+Names convert to camelCase in TypeScript (postcss-modules `localsConvention: 'camelCaseOnly'` in `HallOfFame/UI/build.ts`), so `.footer-button--secondary` becomes `styles.footerButtonSecondary`.
 Always access them via `import * as styles from './x.module.scss'`.
 
 ## File layout
