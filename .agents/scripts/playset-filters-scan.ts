@@ -13,7 +13,7 @@ import {
   assetCategoryMatches,
   playsetKindMatches,
   type TagsMatch
-} from '../../HallOfFame/UI/src/area-menu/menu-controls/screenshot-details';
+} from '../../HallOfFame/UI/src/components/screenshot-details/screenshot-details';
 
 const databaseUrl = 'mongodb://localhost/halloffame';
 

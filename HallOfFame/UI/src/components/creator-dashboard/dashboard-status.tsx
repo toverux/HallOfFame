@@ -1,8 +1,7 @@
 import { LocalizedString } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import type { ReactElement } from 'react';
-import { locElementToReactNode } from '../../area-menu/menu-controls/menu-controls-utils';
-import { useTranslate } from '../../utils';
+import { locElementToReactNode, useTranslate } from '../../utils';
 import * as styles from './dashboard-status.module.scss';
 
 /**

@@ -42,12 +42,33 @@ internal sealed class DashboardService(
   private int detailGeneration;
 
   /// <summary>
+  /// Whether one of the sink's confirmation dialogs is open, so a request for another is declined
+  /// rather than stacked over it.
+  /// </summary>
+  private bool isConfirming;
+
+  /// <summary>
   /// Fetches and publishes the creator's collection and stats, through a loading state.
   /// A second open while loading is ignored, leaving the first fetch to answer.
   /// Designed never to throw, so the caller can fire-and-forget it.
   /// </summary>
   internal Task Open() =>
     this.state.Status is DashboardStatus.Loading ? Task.CompletedTask : this.Load();
+
+  /// <summary>
+  /// Opens the panel straight on a screenshot's detail view, once the collection holding it is
+  /// loaded: the upload panel's shortcut to the screenshot just shared.
+  /// Ignored while a load is in flight, as <see cref="Open"/> is.
+  /// Designed never to throw, so the caller can fire-and-forget it.
+  /// </summary>
+  internal async Task OpenOnScreenshot(string screenshotId) {
+    if (this.state.Status is DashboardStatus.Loading) {
+      return;
+    }
+
+    await this.Load();
+    await this.OpenDetail(screenshotId);
+  }
 
   /// <summary>
   /// Fetches the collection and stats again while the panel is open, the error view's retry.
@@ -110,6 +131,28 @@ internal sealed class DashboardService(
   }
 
   /// <summary>
+  /// <see cref="Close"/>, once the player confirms dropping the edits the form holds:
+  /// the UI calls it in place of <see cref="Close"/> while its form differs from the screenshot.
+  /// Designed never to throw, so the caller can fire-and-forget it.
+  /// </summary>
+  internal async Task ConfirmClose() {
+    if (await this.ConfirmDiscardEdits()) {
+      this.Close();
+    }
+  }
+
+  /// <summary>
+  /// <see cref="CloseDetail"/>, once the player confirms dropping the edits the form holds,
+  /// as <see cref="ConfirmClose"/> is.
+  /// Designed never to throw, so the caller can fire-and-forget it.
+  /// </summary>
+  internal async Task ConfirmCloseDetail() {
+    if (await this.ConfirmDiscardEdits()) {
+      this.CloseDetail();
+    }
+  }
+
+  /// <summary>
   /// Returns to the grid, discarding the answer of any detail fetch in flight.
   /// </summary>
   internal void CloseDetail() {
@@ -118,6 +161,10 @@ internal sealed class DashboardService(
     }
 
     this.detailGeneration++;
+
+    // A dialog another one replaced never answers and would hold back every later confirmation; its
+    // answer is dropped anyway once the detail closes, the generation having moved on.
+    this.isConfirming = false;
 
     this.PublishDetail(DashboardDetailState.Closed);
   }
@@ -193,7 +240,8 @@ internal sealed class DashboardService(
     var generation = this.detailGeneration;
 
     // The detail may have closed under the dialog: a late confirmation deletes nothing.
-    if (!await sink.ConfirmDelete(held) || generation != this.detailGeneration) {
+    if (!await this.Confirm(() => sink.ConfirmDelete(held)) ||
+      generation != this.detailGeneration) {
       return;
     }
 
@@ -281,6 +329,43 @@ internal sealed class DashboardService(
       }
 
       this.Publish(DashboardState.Failed(ex.GetUserFriendlyMessage()));
+    }
+  }
+
+  /// <summary>
+  /// Whether the player confirms dropping the edits of the screenshot the detail view holds,
+  /// <c>true</c> without asking when it holds none, so no form can hold edits either.
+  /// </summary>
+  private async Task<bool> ConfirmDiscardEdits() {
+    if (this.detail is not { Status: DashboardStatus.Loaded, Screenshot: {} held }) {
+      return true;
+    }
+
+    var generation = this.detailGeneration;
+
+    // The detail may have closed under the dialog: a late confirmation closes nothing more.
+    return await this.Confirm(() => sink.ConfirmDiscardEdits(held)) &&
+      generation == this.detailGeneration;
+  }
+
+  /// <summary>
+  /// Asks the player through one of the sink's confirmation dialogs, declining at once while
+  /// another is open.
+  /// The game's app bindings hold a single dialog callback, which a second dialog replaces, so the
+  /// first's answer would never arrive (read in the decompiled <c>AppBindings</c>).
+  /// </summary>
+  private async Task<bool> Confirm(Func<Task<bool>> ask) {
+    if (this.isConfirming) {
+      return false;
+    }
+
+    this.isConfirming = true;
+
+    try {
+      return await ask();
+    }
+    finally {
+      this.isConfirming = false;
     }
   }
 

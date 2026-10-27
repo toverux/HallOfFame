@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'bun:test';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getTriggers, resetBindings } from '../../testing/game-setup';
 import { MenuControlsMoreActionsMenu } from './more-actions-menu';
@@ -18,8 +18,36 @@ describe('MenuControlsMoreActionsMenu', () => {
     // The round toggle is the menu's only button while the popup is closed.
     await user.click(screen.getByRole('button'));
 
-    await user.click(screen.getByText('HallOfFame.UI.Menu.MenuControls.ACTION[Creator Dashboard]'));
+    const item = 'HallOfFame.UI.Menu.MenuControls.ACTION[Creator Dashboard]';
+
+    await user.click(screen.getByText(item));
 
     expect(getTriggers().map(trigger => trigger.event)).toContain('hallOfFame.dashboard.open');
+
+    // The popup's exit runs on timers, which would otherwise fire inside the next test.
+    await waitFor(() => expect(screen.queryByText(item)).toBeNull());
+  });
+
+  it(`reports each opening of the menu, for the menu tour`, async () => {
+    const user = userEvent.setup();
+
+    render(<MenuControlsMoreActionsMenu isSaving={false} saveDirectory='' />);
+
+    const toggle = screen.getByRole('button');
+
+    await user.click(toggle);
+
+    expect(getTriggers().map(trigger => trigger.event)).toContain(
+      'hallOfFame.menuTour.moreActionsOpened'
+    );
+
+    // Closed again, so the popup's exit timers fire here rather than inside the next test.
+    await user.click(toggle);
+
+    await waitFor(() =>
+      expect(
+        screen.queryByText('HallOfFame.UI.Menu.MenuControls.ACTION[Creator Dashboard]')
+      ).toBeNull()
+    );
   });
 });

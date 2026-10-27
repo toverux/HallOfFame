@@ -5,21 +5,22 @@ using System.Linq;
 using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
 using Colossal.UI.Binding;
+using Game;
 using Game.Input;
 using Game.Modding;
+using Game.SceneFlow;
 using Game.Settings;
 using Game.UI.Localization;
 using Game.UI.Widgets;
 using HallOfFame.Services;
+using HallOfFame.Systems;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
+using Unity.Entities;
 using UnityEngine;
 #if DEBUG
 using Colossal;
 using Colossal.Json;
-using Game.SceneFlow;
-using HallOfFame.Systems;
-using Unity.Entities;
 #endif
 
 namespace HallOfFame;
@@ -44,7 +45,8 @@ namespace HallOfFame;
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingToggleMenu), Usages.kMenuUsage)]
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingScreenshotDetails), Usages.kMenuUsage)]
 public sealed class
-  Settings : ModSetting, IJsonWritable, ICreatorIdentityStore, ISlideshowSettings {
+  Settings
+  : ModSetting, IJsonWritable, ICreatorIdentityStore, ISlideshowSettings, IMenuTourStore {
   private const string GroupYourProfile = "YourProfile";
 
   private const string GroupUIPreferences = "UIPreferences";
@@ -176,6 +178,22 @@ public sealed class
   // We could use a private setter to set the text but then the game won't interpret our property as
   // an Option entry, it has to be getter-only.
   public LocalizedString LoginStatus => this.loginStatusValue;
+
+  /// <summary>
+  /// Leaves the options for the Creator Dashboard, in the main menu as in game.
+  /// </summary>
+  [SettingsUISection(Settings.GroupYourProfile)]
+  [SettingsUIButton]
+  [SettingsUIButtonGroup("Profile")]
+  [SettingsUIHideByCondition(typeof(Settings), nameof(Settings.IsCreatorDashboardUnavailable))]
+  [UsedImplicitly]
+  public bool OpenCreatorDashboard {
+    // ReSharper disable once ValueParameterNotUsed
+    set =>
+      World.DefaultGameObjectInjectionWorld
+        .GetOrCreateSystemManaged<DashboardUISystem>()
+        .OpenFromOptions();
+  }
 
   /// <summary>
   /// Opens the web viewer on the Creator's profile page.
@@ -529,6 +547,10 @@ public sealed class
   [SettingsUIHidden]
   public bool HasSeenWebViewerDialog { get; set; }
 
+  /// <inheritdoc/>
+  [SettingsUIHidden]
+  public bool HasSeenMenuTour { get; set; }
+
   /// <summary>
   /// The latest value the user selected for the "Share playset" option in the upload panel.
   /// It is restored when it opens.
@@ -638,6 +660,7 @@ public sealed class
 
     this.ParadoxModsBrowsingPreference = "undefined";
     this.HasSeenWebViewerDialog = false;
+    this.HasSeenMenuTour = false;
     this.SavedShareModIdsPreference = true;
     this.SavedShareRenderSettingsPreference = true;
     this.SavedScreenshotDescription = string.Empty;
@@ -684,6 +707,12 @@ public sealed class
   }
 
   internal Settings Clone() => (Settings) this.MemberwiseClone();
+
+  /// <summary>
+  /// The dashboard renders in the main menu and in game only, not in the editor.
+  /// </summary>
+  internal static bool IsCreatorDashboardUnavailable() =>
+    GameManager.instance.gameMode is not (GameMode.MainMenu or GameMode.Game);
 
   internal static bool IsNvidiaGpu() =>
     SystemInfo.graphicsDeviceVendor.ToLower().Contains("nvidia");

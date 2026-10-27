@@ -13,7 +13,7 @@ namespace HallOfFame.Tests.Services;
 
 public sealed class ScreenshotUploaderTests {
   [Fact]
-  public async Task Upload_Success_LeavesCurrentProgressComplete() {
+  public async Task Upload_Success_LeavesCurrentProgressComplete_AndHoldsTheUploadedId() {
     var api = new FakeApi {
       UploadScreenshotImpl = _ => Task.FromResult(
         new Screenshot {
@@ -31,6 +31,7 @@ public sealed class ScreenshotUploaderTests {
     );
 
     Assert.True(uploader.CurrentProgress!.Value.IsComplete);
+    Assert.Equal("42", uploader.UploadedScreenshotId);
   }
 
   [Fact]
@@ -224,6 +225,118 @@ public sealed class ScreenshotUploaderTests {
     uploader.Reset();
 
     Assert.Null(uploader.CurrentProgress);
+  }
+
+  [Fact]
+  public async Task Upload_AbandonedOneLandingLast_LeavesTheNewerUploadedId() {
+    var abandoned = new TaskCompletionSource<Screenshot>();
+    var answers = new Queue<Task<Screenshot>>(
+      [
+        abandoned.Task,
+        Task.FromResult(
+          new Screenshot {
+            Id = "new"
+          }
+        )
+      ]
+    );
+
+    var api = new FakeApi {
+      UploadScreenshotImpl = _ => answers.Dequeue()
+    };
+
+    var uploader = ScreenshotUploaderTests.MakeUploader(api);
+
+    var first = uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    uploader.Reset();
+
+    await uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    abandoned.SetResult(
+      new Screenshot {
+        Id = "old"
+      }
+    );
+    await first;
+
+    Assert.Equal("new", uploader.UploadedScreenshotId);
+  }
+
+  [Fact]
+  public async Task Upload_AbandonedOneFailingDuringANewerOne_LeavesTheNewerOneAlone() {
+    var abandoned = new TaskCompletionSource<Screenshot>();
+    var answers = new Queue<Task<Screenshot>>(
+      [
+        abandoned.Task,
+        Task.FromResult(
+          new Screenshot {
+            Id = "new"
+          }
+        )
+      ]
+    );
+
+    var api = new FakeApi {
+      UploadScreenshotImpl = _ => answers.Dequeue()
+    };
+
+    var reported = new List<HttpException>();
+    var uploader = ScreenshotUploaderTests.MakeUploader(api, reportError: reported.Add);
+
+    var first = uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    uploader.Reset();
+
+    await uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    abandoned.SetException(new HttpNetworkException("1", "boom"));
+    await first;
+
+    Assert.Equal("new", uploader.UploadedScreenshotId);
+    Assert.NotNull(uploader.CurrentProgress);
+    Assert.Empty(reported);
+  }
+
+  [Fact]
+  public async Task Upload_FailingAfterAResetWithNoNewerUpload_StillReportsTheError() {
+    var pending = new TaskCompletionSource<Screenshot>();
+
+    var api = new FakeApi {
+      UploadScreenshotImpl = _ => pending.Task
+    };
+
+    var reported = new List<HttpException>();
+    var uploader = ScreenshotUploaderTests.MakeUploader(api, reportError: reported.Add);
+
+    var upload = uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    uploader.Reset();
+
+    pending.SetException(new HttpNetworkException("1", "boom"));
+    await upload;
+
+    Assert.IsType<HttpNetworkException>(Assert.Single(reported));
   }
 
   private static ScreenshotUploader MakeUploader(

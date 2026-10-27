@@ -1,6 +1,5 @@
 @use "../../common";
 @use "../../vanilla-vars" as vanilla;
-@use "../../area-menu/menu-controls/shared" as menu;
 @use "./shared" as dashboard;
 
 // The form's column, beside the image's: wide enough for the upload form's fields.
@@ -201,7 +200,7 @@ $medal-size: 48rem;
   &-medalDescription {
     margin-top: 2rem;
 
-    color: menu.$dimmed-color;
+    color: common.$dimmed-color;
     font-size: vanilla.$font-size-s;
   }
 }
@@ -215,7 +214,7 @@ $medal-size: 48rem;
 
   // Muted and smaller than a medal's disc, as on the card and the tabs: no medal is no failure.
   &-glyph {
-    --iconColor: #{menu.$dimmed-color};
+    --iconColor: #{common.$dimmed-color};
 
     flex-shrink: 0;
     width: 32rem;
@@ -269,7 +268,7 @@ $medal-size: 48rem;
   &-description {
     margin-top: 2rem;
 
-    color: menu.$dimmed-color;
+    color: common.$dimmed-color;
     font-size: vanilla.$font-size-s;
   }
 }

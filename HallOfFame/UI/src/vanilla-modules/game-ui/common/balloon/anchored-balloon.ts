@@ -16,6 +16,15 @@ export const vanillaTooltipTheme = getClassesModule('game-ui/common/tooltip/tool
 ]);
 
 /**
+ * The look of the game's tutorial balloons: white, rounded, and wider than a tooltip, for a hint
+ * the player reads rather than glances at.
+ */
+export const vanillaTutorialBalloonTheme = getClassesModule(
+  'game-ui/common/balloon/themes/tutorial-balloon.module.scss',
+  ['balloon', 'enter', 'enterActive', 'exitActive', 'container', 'arrow', 'content']
+);
+
+/**
  * Where the balloon sits against its anchor, and how it lines up along that edge.
  *
  * The name is the game's: this is the descriptor a tutorial hands its balloon, and it is the only

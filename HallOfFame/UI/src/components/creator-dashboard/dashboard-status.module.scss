@@ -1,6 +1,5 @@
 @use "../../common";
 @use "../../vanilla-vars" as vanilla;
-@use "../../area-menu/menu-controls/shared" as shared;
 
 // Centered in the room the grid would take.
 .status {
@@ -17,7 +16,7 @@
   // Sized to the room it stands in, the whole grid's, where a form's spinner would be lost, and
   // dimmed under the word that says what it is for.
   &-spinner {
-    --iconColor: #{shared.$dimmed-color};
+    --iconColor: #{common.$dimmed-color};
 
     width: 72rem;
     height: 72rem;
@@ -48,7 +47,7 @@
     max-width: 600rem;
     margin-top: 8rem;
 
-    color: shared.$dimmed-color;
+    color: common.$dimmed-color;
   }
 
   // Sized to the room it stands in, like the spinner: the game's button is cut for a form.

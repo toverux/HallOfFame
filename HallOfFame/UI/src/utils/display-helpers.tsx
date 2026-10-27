@@ -1,6 +1,6 @@
 import { type Localization, LocalizedString, type LocElement, type LocElementType } from 'cs2/l10n';
 import type { ReactElement, ReactNode } from 'react';
-import type { Screenshot } from '../../common';
+import type { Screenshot } from '../common';
 
 export function locElementToReactNode(
   element: LocElement | null | undefined,

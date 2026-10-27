@@ -1,10 +1,11 @@
+@use "../../common";
 @use "../../vanilla-vars" as vanilla;
 @use "./shared" as shared;
 
 $padding-horizontal: 30rem;
 $paragraph-gap: 12rem;
 
-$empty-color: shared.$dimmed-color;
+$empty-color: common.$dimmed-color;
 $empty-line-height: 1.4em;
 
 // A blank bar standing where a line of text will land once loaded.

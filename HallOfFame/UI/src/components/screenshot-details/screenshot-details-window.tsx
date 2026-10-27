@@ -23,6 +23,7 @@ import populationSrc from '../../icons/paradox/population.svg';
 import {
   deriveModThumbnailUri,
   getClassesModule,
+  selectLocalizedName,
   useTranslate,
   useUniformVirtualList
 } from '../../utils';
@@ -59,7 +60,6 @@ import {
   selectScreenshotDetails,
   toPhotoModeColorSliders
 } from './screenshot-details';
-import { selectLocalizedName } from './select-localized-name';
 import { SkyveLogo, SkyveVerdictBlock } from './skyve-verdict';
 import { useDetailsContext, useViewerModIds } from './use-details-context';
 import * as styles from './screenshot-details-window.module.scss';

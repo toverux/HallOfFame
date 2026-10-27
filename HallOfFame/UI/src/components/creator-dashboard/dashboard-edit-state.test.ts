@@ -5,6 +5,7 @@ import {
   buildScreenshotUpdate,
   canSaveEditForm,
   type EditFormValue,
+  hasEditFormChanges,
   initialEditForm,
   selectPickableMods
 } from './dashboard-edit-state';
@@ -112,6 +113,28 @@ describe('canSaveEditForm', () => {
         screenshot
       )
     ).toBe(false);
+  });
+});
+
+describe('hasEditFormChanges', () => {
+  it(`holds none while nothing changed`, () => {
+    expect(hasEditFormChanges(initialEditForm(screenshot), screenshot)).toBe(false);
+  });
+
+  it(`holds a change to a field`, () => {
+    expect(hasEditFormChanges(edit({ shareRenderSettings: true }), screenshot)).toBe(true);
+  });
+
+  it(`holds none once a change is undone, up to the server's trimming`, () => {
+    expect(hasEditFormChanges(edit({ cityName: ' Old Town ' }), screenshot)).toBe(false);
+  });
+
+  it(`holds a showcased asset checked without a pick, although Save refuses it`, () => {
+    const plain = makeScreenshot({ cityName: 'Old Town' });
+
+    expect(hasEditFormChanges({ ...initialEditForm(plain), isShowcasingAsset: true }, plain)).toBe(
+      true
+    );
   });
 });
 

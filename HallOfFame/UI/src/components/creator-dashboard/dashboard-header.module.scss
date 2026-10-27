@@ -1,7 +1,7 @@
 @use "sass:color";
 @use "sass:math";
+@use "../../common";
 @use "../../vanilla-vars" as vanilla;
-@use "../../area-menu/menu-controls/shared" as menu;
 @use "./shared" as shared;
 
 // Above and below the band's contents.
@@ -96,7 +96,7 @@ $line-height: 1.2;
 
   // The first line dimmed, the qualifier of the name under it.
   &-titleKicker {
-    color: menu.$dimmed-color;
+    color: common.$dimmed-color;
   }
 
   &-rule {
@@ -236,7 +236,7 @@ $line-height: 1.2;
 
   // Lit with the tab's text, as the tabs' glyphs are.
   &-backGlyph {
-    --iconColor: #{menu.$dimmed-color};
+    --iconColor: #{common.$dimmed-color};
 
     width: 18rem;
     height: 18rem;
@@ -270,7 +270,7 @@ $line-height: 1.2;
     align-self: flex-start;
     margin-top: 2rem;
 
-    color: menu.$dimmed-color;
+    color: common.$dimmed-color;
     font-size: vanilla.$font-size-s;
   }
 
@@ -324,7 +324,7 @@ $line-height: 1.2;
   // box by the disc's own ratio so the ring sits in it as a medal's disc sits in a medal's. Both
   // glyphs at one scale keep their family's stroke and balance.
   &-tabGlyph {
-    --iconColor: #{menu.$dimmed-color};
+    --iconColor: #{common.$dimmed-color};
 
     width: $tab-glyph-size;
     height: $tab-glyph-size;
@@ -361,7 +361,7 @@ $line-height: 1.2;
     &Label {
       margin-top: 2rem;
 
-      color: menu.$dimmed-color;
+      color: common.$dimmed-color;
       font-size: vanilla.$font-size-s;
       line-height: $line-height;
     }
@@ -426,7 +426,7 @@ $line-height: 1.2;
   &-label {
     margin-right: 10rem;
 
-    color: menu.$dimmed-color;
+    color: common.$dimmed-color;
     font-size: vanilla.$font-size-m;
   }
 
@@ -468,7 +468,7 @@ $line-height: 1.2;
     }
 
     &Indicator {
-      --iconColor: #{menu.$dimmed-color};
+      --iconColor: #{common.$dimmed-color};
 
       flex-shrink: 0;
       width: 1em;

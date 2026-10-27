@@ -36,7 +36,7 @@ export const ScreenshotUploadPanelFooter = memo(
           <>
             {!isUploading && (
               <Button
-                className={classNames(styles.footerButton, styles.footerButtonCancel)}
+                className={classNames(styles.footerButton, styles.footerButtonSecondary)}
                 variant='primary'
                 disabled={isUploading}
                 onSelect={bindings.clearScreenshot}
@@ -60,13 +60,22 @@ export const ScreenshotUploadPanelFooter = memo(
         )}
 
         {isDoneUploading && (
-          <Button
-            variant='primary'
-            className={styles.footerButton}
-            onSelect={bindings.clearScreenshot}
-            selectSound='close-menu'>
-            {translate('Common.CLOSE', 'Close')}
-          </Button>
+          <>
+            <Button
+              variant='primary'
+              className={classNames(styles.footerButton, styles.footerButtonSecondary)}
+              onSelect={bindings.openUploadedInDashboard}>
+              {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.OPEN_IN_DASHBOARD')}
+            </Button>
+
+            <Button
+              variant='primary'
+              className={styles.footerButton}
+              onSelect={bindings.clearScreenshot}
+              selectSound='close-menu'>
+              {translate('Common.CLOSE', 'Close')}
+            </Button>
+          </>
         )}
       </div>
     );

@@ -38,10 +38,12 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
 
       // The notifier owns the fetch/threshold/error lifecycle; this system keeps owning the
       // engine-bound notification it builds through the callback.
+      // Every fetch also feeds the menu tour, which needs the creator's screenshot count.
       this.statsNotifier = new StatsNotifier(
         Mod.Api,
         Mod.Log,
-        this.ShowStatsNotification
+        this.ShowStatsNotification,
+        this.World.GetOrCreateSystemManaged<MenuTourUISystem>().ReportCreatorStats
       );
 
       // If the mod loaded *after* the main menu has already loaded, show the notification.

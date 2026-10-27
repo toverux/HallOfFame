@@ -13,11 +13,15 @@ namespace HallOfFame.Services;
 /// The engine-bound presentation stays with the host system, reached through the injected
 /// <paramref name="showNotification"/> callback, so this service constructs and runs off-engine
 /// like <see cref="ScreenshotViewRecorder"/> and <see cref="ScreenshotLiker"/>.
+/// <paramref name="reportStats"/> receives the stats of every successful fetch, notable or not,
+/// for the readers that need the creator's figures on a main-menu visit, like
+/// <see cref="MenuTour"/>.
 /// </summary>
 internal sealed class StatsNotifier(
   IHallOfFameApi api,
   IModLog log,
-  Action<CreatorStats> showNotification
+  Action<CreatorStats> showNotification,
+  Action<CreatorStats> reportStats
 ) {
   /// <summary>
   /// Minimum number of likes for the stats to be deemed notable enough to notify the creator.
@@ -27,8 +31,8 @@ internal sealed class StatsNotifier(
   private State state = State.Idle;
 
   /// <summary>
-  /// Fetches the creator's stats and, when they are notable enough, hands them to the injected
-  /// notification callback.
+  /// Fetches the creator's stats, reports them, and, when they are notable enough, hands them to
+  /// the injected notification callback.
   /// <para>
   /// <see cref="State.Shown"/> is the only terminal state: once a notable result has been surfaced,
   /// further calls are no-ops for the rest of the session.
@@ -50,6 +54,8 @@ internal sealed class StatsNotifier(
 
     try {
       var stats = await api.GetCreatorStats();
+
+      reportStats(stats);
 
       if (stats.LikesCount >= StatsNotifier.MinLikesToNotify) {
         showNotification(stats);

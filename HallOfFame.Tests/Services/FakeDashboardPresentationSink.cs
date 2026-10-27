@@ -32,6 +32,11 @@ internal sealed class FakeDashboardPresentationSink : IDashboardPresentationSink
   /// </summary>
   internal Func<Screenshot, Task<bool>>? ConfirmDeleteImpl { get; init; }
 
+  /// <summary>
+  /// Answers the confirmation to drop the edit form's edits, declining when unwired.
+  /// </summary>
+  internal Func<Screenshot, Task<bool>>? ConfirmDiscardEditsImpl { get; init; }
+
   internal List<Screenshot> ShownInSlideshow { get; } = [];
 
   internal int DeletedSoundCount { get; private set; }
@@ -67,6 +72,9 @@ internal sealed class FakeDashboardPresentationSink : IDashboardPresentationSink
 
   public Task<bool> ConfirmDelete(Screenshot screenshot) =>
     this.ConfirmDeleteImpl?.Invoke(screenshot) ?? Task.FromResult(false);
+
+  public Task<bool> ConfirmDiscardEdits(Screenshot screenshot) =>
+    this.ConfirmDiscardEditsImpl?.Invoke(screenshot) ?? Task.FromResult(false);
 
   public void PlayDeletedSound() => this.DeletedSoundCount++;
 

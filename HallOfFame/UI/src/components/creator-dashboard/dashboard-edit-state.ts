@@ -65,8 +65,16 @@ export function buildScreenshotUpdate(
  * without a pick, which the picker flags, so the creator picks one or unchecks it.
  */
 export function canSaveEditForm(form: EditFormValue, screenshot: Screenshot): boolean {
+  return !(form.isShowcasingAsset && !form.showcasedMod) && hasEditFormChanges(form, screenshot);
+}
+
+/**
+ * Whether the form differs from the screenshot, a showcased asset checked without a pick
+ * included, so that leaving it would drop edits.
+ */
+export function hasEditFormChanges(form: EditFormValue, screenshot: Screenshot): boolean {
   return (
-    !(form.isShowcasingAsset && !form.showcasedMod) &&
+    form.isShowcasingAsset != (screenshot.showcasedMod != null) ||
     Object.keys(buildScreenshotUpdate(form, screenshot)).length > 0
   );
 }

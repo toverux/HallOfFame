@@ -204,6 +204,13 @@ export function makeSkyveVerdict(overrides: Partial<SkyveVerdict> = {}): SkyveVe
 }
 
 /**
+ * A callback a test passes where the component needs one, but the test does not look at its calls.
+ */
+export function noop(): void {
+  // Deliberately empty.
+}
+
+/**
  * Builds a {@link PhotoModeProperty}, a number with the game's default fraction digits unless
  * overridden.
  */

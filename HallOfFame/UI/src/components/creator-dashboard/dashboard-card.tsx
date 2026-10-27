@@ -7,7 +7,7 @@ import hourglassHalfSolidSrc from '../../icons/fontawesome/hourglass-half-solid.
 import { useImageLoaded, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { Tooltip } from '../tooltip';
-import { likePercentage, type MedalState, selectMedalState } from './dashboard-collection';
+import { type MedalState, selectMedalState, viewersPerLike } from './dashboard-collection';
 import { MedalImage, MedalTooltip } from './dashboard-medal';
 import { useCityName } from './use-city-name';
 import * as styles from './dashboard-card.module.scss';
@@ -111,7 +111,7 @@ export function CardUnderReviewBadge(): ReactElement {
  * The like rate only shows on a ranked screenshot:
  * below the minimums it rests on too few viewers or likes to mean much,
  * and a raw percentage reads worse than it is.
- * The rate shown is {@link likePercentage}, the ratio the medal ranks by, as a whole percentage.
+ * The rate shown is {@link viewersPerLike}, the ratio the medal ranks by, as "1 in N" viewers.
  */
 function CardStatsTooltip({
   screenshot,
@@ -139,7 +139,7 @@ function CardStatsTooltip({
         <LocalizedString
           id='HallOfFame.UI.Dashboard.CARD_TOOLTIP[Like Rate]'
           args={{
-            LIKING_PERCENTAGE: <LocalizedNumber value={likePercentage(screenshot)} />
+            VIEWERS_COUNT: <LocalizedNumber value={viewersPerLike(screenshot)} />
           }}
         />
       )}

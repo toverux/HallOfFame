@@ -3,14 +3,29 @@ import { LocalizedString } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { memo, type ReactElement, useCallback, useMemo, useState } from 'react';
 import type { Mod } from '../../common';
-import { CreatorDashboard } from '../../components/creator-dashboard/creator-dashboard';
 import { PreloadImages } from '../../components/preload-images';
+import {
+  selectModHints,
+  selectScreenshotDetails
+} from '../../components/screenshot-details/screenshot-details';
+import {
+  type DetailsTabId,
+  detailsTabsPreloadedIcons,
+  ScreenshotDetailsWindow
+} from '../../components/screenshot-details/screenshot-details-window';
+import {
+  SkyveHeading,
+  SkyveVerdictBlock,
+  skyveVerdictPreloadedIcons
+} from '../../components/screenshot-details/skyve-verdict';
+import { useDetailsContext } from '../../components/screenshot-details/use-details-context';
 import { Tooltip } from '../../components/tooltip';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { cityNamePreloadedIcons, MenuControlsCityName } from './city-name';
 import { detailsRowPreloadedIcons, MenuControlsDetailsRow } from './details-row';
 import { MenuControlsError } from './error';
+import { MenuTourAnchor } from './menu-tour';
 import { MenuControlsMoreActionsMenu, moreActionsPreloadedIcons } from './more-actions-menu';
 import {
   MenuControlsLikeButton,
@@ -19,16 +34,8 @@ import {
   MenuControlsToggleMenuVisibilityButton,
   navButtonsPreloadedIcons
 } from './nav-buttons';
-import { selectModHints, selectScreenshotDetails } from './screenshot-details';
-import {
-  type DetailsTabId,
-  detailsTabsPreloadedIcons,
-  ScreenshotDetailsWindow
-} from './screenshot-details-window';
 import { MenuControlsScreenshotLabels } from './screenshot-labels';
-import { SkyveHeading, SkyveVerdictBlock, skyveVerdictPreloadedIcons } from './skyve-verdict';
 import { MenuControlsSocialsPreloader } from './socials-preloader';
-import { useDetailsContext } from './use-details-context';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 import { viewerLinkPreloadedIcons } from './viewer-link';
 import * as styles from './menu-controls.module.scss';
@@ -63,9 +70,6 @@ export function MenuControls(): ReactElement {
       <PreloadImages srcs={preloadedIcons} />
 
       <MenuControlsSocialsPreloader />
-
-      {/* Outside the content, so the error view taking the controls' place leaves it open. */}
-      <CreatorDashboard />
 
       {/* Subcomponent just to avoid one stupid level of indentation! */}
       <MenuControlsContent />
@@ -177,17 +181,21 @@ export function MenuControlsContent(): ReactElement {
 
       <div className={styles.section}>
         <div className={styles.sectionButtons} style={{ alignSelf: 'flex-end' }}>
-          <MenuControlsNextButton isLoading={!menuState.isReadyForNextImage} />
+          <MenuTourAnchor step='navigation'>
+            <MenuControlsNextButton isLoading={!menuState.isReadyForNextImage} />
+          </MenuTourAnchor>
 
           <MenuControlsPreviousButton
             isLoading={!menuState.isReadyForNextImage}
             hasPreviousScreenshot={menuState.hasPreviousScreenshot}
           />
 
-          <MenuControlsToggleMenuVisibilityButton
-            isMenuVisible={menuState.isMenuVisible}
-            toggleMenuVisibility={toggleMenuVisibility}
-          />
+          <MenuTourAnchor step='menuVisibility'>
+            <MenuControlsToggleMenuVisibilityButton
+              isMenuVisible={menuState.isMenuVisible}
+              toggleMenuVisibility={toggleMenuVisibility}
+            />
+          </MenuTourAnchor>
         </div>
 
         <div className={styles.sectionContent} style={{ alignSelf: 'flex-start' }}>
@@ -203,7 +211,9 @@ export function MenuControlsContent(): ReactElement {
 
       <div className={styles.section}>
         <div className={styles.sectionButtons}>
-          <MenuControlsLikeButton screenshot={menuState.screenshot} />
+          <MenuTourAnchor step='like'>
+            <MenuControlsLikeButton screenshot={menuState.screenshot} />
+          </MenuTourAnchor>
         </div>
 
         <div className={styles.controlsLikesCount}>
@@ -225,10 +235,12 @@ export function MenuControlsContent(): ReactElement {
 
       <div className={styles.section}>
         <div className={styles.sectionButtons}>
-          <MenuControlsMoreActionsMenu
-            isSaving={menuState.isSaving}
-            saveDirectory={modSettings.creatorsScreenshotSaveDirectory}
-          />
+          <MenuTourAnchor step='dashboard'>
+            <MenuControlsMoreActionsMenu
+              isSaving={menuState.isSaving}
+              saveDirectory={modSettings.creatorsScreenshotSaveDirectory}
+            />
+          </MenuTourAnchor>
         </div>
       </div>
     </div>

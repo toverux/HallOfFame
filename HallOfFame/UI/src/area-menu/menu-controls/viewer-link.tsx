@@ -10,11 +10,11 @@ import {
 } from 'react';
 import externalLinkSrc from '../../icons/fontawesome/arrow-up-right-from-square-solid.svg';
 import linkSolidSrc from '../../icons/fontawesome/link-solid.svg';
-import { useTranslate } from '../../utils';
+import { iconTintFromStylesheet, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { DOMNodeContext } from '../../vanilla-modules/game-ui/common/dom-node/dom-node';
 import { DropdownContext } from '../../vanilla-modules/game-ui/common/input/dropdown/dropdown';
-import { dropdownMenuTheme, iconTintFromStylesheet } from './dropdown-menu';
+import { dropdownMenuTheme } from './dropdown-menu';
 import * as styles from './viewer-link.module.scss';
 
 /**

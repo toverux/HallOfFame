@@ -1,13 +1,13 @@
 import classNames from 'classnames';
 import { Button, Icon } from 'cs2/ui';
 import { memo, type ReactElement, type ReactNode } from 'react';
+import type { DetailsRow } from '../../components/screenshot-details/screenshot-details';
+import type { DetailsTabId } from '../../components/screenshot-details/screenshot-details-window';
 import apertureSharpSolidSrc from '../../icons/fontawesome/aperture-sharp-solid.svg';
 import paradoxModsSolidSrc from '../../icons/paradox/paradox-mods-solid.svg';
 import { useTranslate } from '../../utils';
 import type * as bindings from '../../utils/bindings';
 import { MenuControlsInputHintTooltip } from './input-hint-tooltip';
-import type { DetailsRow } from './screenshot-details';
-import type { DetailsTabId } from './screenshot-details-window';
 import * as styles from './details-row.module.scss';
 
 /**

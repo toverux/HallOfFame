@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'bun:test';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { makeJsonMod, makeMod, makeScreenshot } from '../../testing/fixtures';
+import { makeJsonMod, makeMod, makeScreenshot, noop } from '../../testing/fixtures';
 import { getTriggers, resetBindings, setBinding } from '../../testing/game-setup';
 import { DashboardEditForm } from './dashboard-edit-form';
 
@@ -21,6 +21,8 @@ const openViewerEvent = 'hallOfFame.common.openViewerLink';
 // `translate()` returns the id when no fallback is given, so a label is its id.
 const saveLabel = 'HallOfFame.UI.Dashboard.EDIT_ACTION[Save]';
 
+const savedLabel = 'HallOfFame.UI.Dashboard.EDIT_ACTION[Saved]';
+
 const deleteLabel = 'HallOfFame.UI.Dashboard.EDIT_ACTION[Delete]';
 
 const showLabel = 'HallOfFame.UI.Dashboard.EDIT_ACTION[Show in Slideshow]';
@@ -39,7 +41,13 @@ type FormProps = Parameters<typeof DashboardEditForm>[0];
 
 function renderForm(props: Partial<FormProps> = {}): ReturnType<typeof render> {
   return render(
-    <DashboardEditForm screenshot={screenshot} isSaving={false} isDeleting={false} {...props} />
+    <DashboardEditForm
+      screenshot={screenshot}
+      isSaving={false}
+      isDeleting={false}
+      onHasChangesChange={noop}
+      {...props}
+    />
   );
 }
 
@@ -114,11 +122,83 @@ describe('DashboardEditForm', () => {
         screenshot={{ ...screenshot, cityName: 'New Town' }}
         isSaving={false}
         isDeleting={false}
+        onHasChangesChange={noop}
       />
     );
 
     expect(cityNameInput().value).toBe(' New Town ');
     expect(saveButton().disabled).toBe(true);
+  });
+
+  it(`reports its edits as they come and go, and none once gone`, () => {
+    const reports: boolean[] = [];
+
+    const { unmount } = renderForm({
+      onHasChangesChange: hasChanges => {
+        reports.push(hasChanges);
+      }
+    });
+
+    fireEvent.change(cityNameInput(), { target: { value: 'New Town' } });
+    fireEvent.change(cityNameInput(), { target: { value: 'Old Town' } });
+    fireEvent.change(cityNameInput(), { target: { value: 'New Town' } });
+
+    unmount();
+
+    expect(reports).toEqual([false, true, false, true, false]);
+  });
+
+  it(`says Saved once a save lands`, () => {
+    const { rerender } = renderForm();
+
+    fireEvent.change(cityNameInput(), { target: { value: 'New Town' } });
+
+    const saved = { ...screenshot, cityName: 'New Town' };
+
+    rerender(
+      <DashboardEditForm
+        screenshot={screenshot}
+        isSaving={true}
+        isDeleting={false}
+        onHasChangesChange={noop}
+      />
+    );
+
+    rerender(
+      <DashboardEditForm
+        screenshot={saved}
+        isSaving={false}
+        isDeleting={false}
+        onHasChangesChange={noop}
+      />
+    );
+
+    expect(screen.getByRole<HTMLButtonElement>('button', { name: savedLabel }).disabled).toBe(true);
+
+    // The next edit is a new one to save.
+    fireEvent.change(cityNameInput(), { target: { value: 'Newer Town' } });
+
+    expect(saveButton().disabled).toBe(false);
+  });
+
+  it(`keeps the edits to save again once a save fails`, () => {
+    const { rerender } = renderForm();
+
+    fireEvent.change(cityNameInput(), { target: { value: 'New Town' } });
+
+    for (const isSaving of [true, false]) {
+      rerender(
+        <DashboardEditForm
+          screenshot={screenshot}
+          isSaving={isSaving}
+          isDeleting={false}
+          onHasChangesChange={noop}
+        />
+      );
+    }
+
+    expect(saveButton().disabled).toBe(false);
+    expect(screen.queryByRole('button', { name: savedLabel })).toBeNull();
   });
 
   it(`offers the showcased mod alone while the playset gives none`, () => {
@@ -193,6 +273,27 @@ describe('DashboardEditForm', () => {
 
     cleanup();
     setBinding('hallOfFame.slideshow', 'isInMainMenu', false);
+
+    renderForm();
+
+    await openActionsMenu();
+
+    expect(screen.queryByText(showLabel)).toBeNull();
+  });
+
+  it(`keeps its actions menu when the game leaves the main menu`, async () => {
+    renderForm();
+
+    act(() => setBinding('hallOfFame.slideshow', 'isInMainMenu', false));
+
+    await openActionsMenu();
+
+    expect(screen.queryByText(showLabel)).toBeNull();
+    expect(screen.getByText(openViewerLabel)).toBeDefined();
+  });
+
+  it(`offers no slideshow while the settings turn it off`, async () => {
+    setBinding('hallOfFame.slideshow', 'enableMainMenuSlideshow', false);
 
     renderForm();
 

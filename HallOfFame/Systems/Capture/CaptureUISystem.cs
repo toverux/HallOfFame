@@ -73,6 +73,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   private TriggerBinding<ScreenshotInfoFormValue> uploadScreenshotBinding = null!;
 
+  private TriggerBinding openUploadedInDashboardBinding = null!;
+
   /// <summary>
   /// Current screenshot snapshot.
   /// Null if no screenshot is being displayed/uploaded.
@@ -177,6 +179,12 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         this.UploadScreenshot
       );
 
+      this.openUploadedInDashboardBinding = new TriggerBinding(
+        CaptureUISystem.BindingGroup,
+        "openUploadedInDashboard",
+        this.OpenUploadedInDashboard
+      );
+
       this.AddBinding(this.assetModsBinding);
       this.AddUpdateBinding(this.cityNameBinding);
       this.AddUpdateBinding(this.screenshotSnapshotBinding);
@@ -185,6 +193,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.AddBinding(this.takeScreenshotBinding);
       this.AddBinding(this.clearScreenshotBinding);
       this.AddBinding(this.uploadScreenshotBinding);
+      this.AddBinding(this.openUploadedInDashboardBinding);
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
@@ -315,6 +324,25 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
     // The uploader never throws and drives its own progress/error reporting, so fire-and-forget.
     _ = this.screenshotUploader.Upload(this.CurrentScreenshot.Value, cityName, formValue);
+  }
+
+  /// <summary>
+  /// Closes the upload panel for the dashboard, open on the screenshot the upload just created.
+  /// </summary>
+  private void OpenUploadedInDashboard() {
+    var screenshotId = this.screenshotUploader.UploadedScreenshotId;
+
+    this.ClearScreenshot();
+
+    if (screenshotId is null) {
+      Mod.Log.Warn(
+        $"{nameof(CaptureUISystem)}: Call to {nameof(this.OpenUploadedInDashboard)} with no uploaded screenshot."
+      );
+
+      return;
+    }
+
+    this.World.GetOrCreateSystemManaged<DashboardUISystem>().OpenOnScreenshot(screenshotId);
   }
 
   /// <summary>

@@ -6,9 +6,8 @@ import naturalResourcesSrc from '../../icons/paradox/natural-resources.svg';
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
 import eyeOpenSrc from '../../icons/uil/eye-open.svg';
-import { useTranslate } from '../../utils';
+import { formatBigNumber, isPristineWilderness, useTranslate } from '../../utils';
 import type * as bindings from '../../utils/bindings';
-import { formatBigNumber, isPristineWilderness } from './menu-controls-utils';
 import * as styles from './screenshot-labels.module.scss';
 
 export const MenuControlsScreenshotLabels = memo(

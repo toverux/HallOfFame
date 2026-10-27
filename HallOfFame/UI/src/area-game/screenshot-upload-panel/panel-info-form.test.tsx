@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { cleanup, render, screen } from '@testing-library/react';
-import { makeScreenshotSnapshot } from '../../testing/fixtures';
+import { makeScreenshotSnapshot, noop } from '../../testing/fixtures';
 import { resetBindings, setBinding } from '../../testing/game-setup';
 import { ScreenshotUploadPanelContentScreenshotInfo } from './panel-info-form';
 
@@ -8,10 +8,6 @@ afterEach(() => {
   cleanup();
   resetBindings();
 });
-
-function noop(): void {
-  // Editing the form is not what these tests look at.
-}
 
 describe('ScreenshotUploadPanelContentScreenshotInfo', () => {
   it(`offers no asset to showcase while the playset could not be read`, () => {

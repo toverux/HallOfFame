@@ -108,3 +108,10 @@ export function clearScreenshot(): void {
 export function uploadScreenshot(payload: UploadPayload): void {
   trigger(GROUP, 'uploadScreenshot', payload);
 }
+
+/**
+ * Closes the upload panel for the Creator Dashboard, open on the screenshot just uploaded.
+ */
+export function openUploadedInDashboard(): void {
+  trigger(GROUP, 'openUploadedInDashboard');
+}

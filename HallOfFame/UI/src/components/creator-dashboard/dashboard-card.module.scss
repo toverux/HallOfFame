@@ -1,5 +1,5 @@
+@use "../../common";
 @use "../../vanilla-vars" as vanilla;
-@use "../../area-menu/menu-controls/shared" as shared;
 @use "./shared" as dashboard;
 
 $padding: 12rem;
@@ -123,7 +123,7 @@ $medal-size: 44rem;
     }
 
     &Icon {
-      --iconColor: #{shared.$dimmed-color};
+      --iconColor: #{common.$dimmed-color};
 
       width: 15rem;
       height: 15rem;
@@ -136,7 +136,7 @@ $medal-size: 44rem;
     align-self: flex-start;
     margin-top: 3rem;
 
-    color: shared.$dimmed-color;
+    color: common.$dimmed-color;
     font-size: vanilla.$font-size-s;
   }
 
@@ -161,7 +161,7 @@ $medal-size: 44rem;
 
     // Muted: a screenshot still waiting on viewers is no worse off than a medalled one.
     &Settling {
-      --iconColor: #{shared.$dimmed-color};
+      --iconColor: #{common.$dimmed-color};
 
       width: 20rem;
       height: 20rem;
@@ -170,7 +170,7 @@ $medal-size: 44rem;
     &Progress {
       margin-top: 4rem;
 
-      color: shared.$dimmed-color;
+      color: common.$dimmed-color;
       font-size: vanilla.$font-size-s;
       white-space: nowrap;
     }

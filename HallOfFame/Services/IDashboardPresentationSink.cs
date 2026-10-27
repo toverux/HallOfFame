@@ -27,6 +27,12 @@ internal interface IDashboardPresentationSink {
   Task<bool> ConfirmDelete(Screenshot screenshot);
 
   /// <summary>
+  /// Asks the player to confirm dropping the edits the form holds for the screenshot, through the
+  /// game's confirmation dialog, resolving to <c>true</c> when they confirm.
+  /// </summary>
+  Task<bool> ConfirmDiscardEdits(Screenshot screenshot);
+
+  /// <summary>
   /// Plays the sound of a deletion landing, the bulldozer's last.
   /// </summary>
   void PlayDeletedSound();

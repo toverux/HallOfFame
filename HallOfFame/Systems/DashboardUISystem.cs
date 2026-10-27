@@ -4,7 +4,9 @@ using Colossal.UI.Binding;
 using Game;
 using Game.SceneFlow;
 using Game.UI;
+using Game.UI.InGame;
 using Game.UI.Localization;
+using Game.UI.Menu;
 using HallOfFame.Domain;
 using HallOfFame.Reflection;
 using HallOfFame.Services;
@@ -21,7 +23,8 @@ namespace HallOfFame.Systems;
 /// reads the playset for the edit form's picker,
 /// and implements <see cref="IDashboardPresentationSink"/>, the delete confirmation and the
 /// handover to the slideshow included.
-/// C# owns whether the panel is open, so every entry point opens it the same way.
+/// C# owns whether the panel is open, so every entry point opens it the same way, the options
+/// page's button included.
 /// </summary>
 internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresentationSink {
   private const string BindingGroup = "hallOfFame.dashboard";
@@ -82,22 +85,21 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
       this.AddBinding(this.assetModsBinding);
 
       // Fire-and-forget edges: the service entry points are designed never to throw.
-      this.AddBinding(
-        new TriggerBinding(
-          DashboardUISystem.BindingGroup,
-          "open",
-          () => {
-            _ = this.service.Open();
-            _ = this.PublishAssetMods();
-          }
-        )
-      );
+      this.AddBinding(new TriggerBinding(DashboardUISystem.BindingGroup, "open", this.Open));
 
       this.AddBinding(
         new TriggerBinding(
           DashboardUISystem.BindingGroup,
           "close",
           this.service.Close
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding(
+          DashboardUISystem.BindingGroup,
+          "confirmClose",
+          () => { _ = this.service.ConfirmClose(); }
         )
       );
 
@@ -122,6 +124,14 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
           DashboardUISystem.BindingGroup,
           "closeDetail",
           this.service.CloseDetail
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding(
+          DashboardUISystem.BindingGroup,
+          "confirmCloseDetail",
+          () => { _ = this.service.ConfirmCloseDetail(); }
         )
       );
 
@@ -154,6 +164,38 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
     }
   }
 
+  /// <summary>
+  /// Opens the dashboard from the mod's options page, leaving the options for the screen the
+  /// dashboard renders on: the main menu's own, or the game's view, the pause menu closing too.
+  /// </summary>
+  internal void OpenFromOptions() {
+    switch (GameManager.instance.gameMode) {
+      case GameMode.MainMenu:
+        this.World.GetOrCreateSystemManaged<MenuUISystem>().activeScreen =
+          MenuUISystem.MenuScreen.Menu;
+
+        break;
+
+      case GameMode.Game:
+        this.World.GetOrCreateSystemManaged<GameScreenUISystem>()
+          .SetScreen(GameScreenUISystem.GameScreen.Main);
+
+        break;
+
+      default: return;
+    }
+
+    this.Open();
+  }
+
+  /// <summary>
+  /// Opens the dashboard on a screenshot's detail view, the upload panel's shortcut.
+  /// </summary>
+  internal void OpenOnScreenshot(string screenshotId) {
+    _ = this.service.OpenOnScreenshot(screenshotId);
+    _ = this.PublishAssetMods();
+  }
+
   void IDashboardPresentationSink.Publish(DashboardState state) => this.stateBinding.Update(state);
 
   void IDashboardPresentationSink.PublishDetail(DashboardDetailState detail) =>
@@ -173,10 +215,21 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
       LocalizedString.IdWithFallback("Common.ACTION[Cancel]", "Cancel")
     );
 
-    var choice = await GameManager.instance.userInterface.appBindings
-      .ShowConfirmationDialogAndWait(dialog);
+    return await DashboardUISystem.Confirm(dialog);
+  }
 
-    return choice is 0;
+  async Task<bool> IDashboardPresentationSink.ConfirmDiscardEdits(Screenshot screenshot) {
+    var dialog = new ConfirmationDialog(
+      LocalizedString.IdWithArgs(
+        "HallOfFame.Systems.DashboardUI.CONFIRM_DISCARD_DIALOG[Title]",
+        ("CITY_NAME", LocalizedString.Value(screenshot.CityName))
+      ),
+      LocalizedString.Id("HallOfFame.Systems.DashboardUI.CONFIRM_DISCARD_DIALOG[Message]"),
+      LocalizedString.Id("HallOfFame.Systems.DashboardUI.CONFIRM_DISCARD_DIALOG[ConfirmAction]"),
+      LocalizedString.Id("HallOfFame.Systems.DashboardUI.CONFIRM_DISCARD_DIALOG[CancelAction]")
+    );
+
+    return await DashboardUISystem.Confirm(dialog);
   }
 
   void IDashboardPresentationSink.PlayDeletedSound() {
@@ -188,6 +241,21 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
 
   void IDashboardPresentationSink.ShowInSlideshow(Screenshot screenshot) =>
     this.slideshowUISystem.ShowScreenshot(screenshot);
+
+  /// <summary>
+  /// Shows a confirmation dialog, resolving to whether the player chose its confirm action.
+  /// </summary>
+  private static async Task<bool> Confirm(ConfirmationDialog dialog) {
+    var choice = await GameManager.instance.userInterface.appBindings
+      .ShowConfirmationDialogAndWait(dialog);
+
+    return choice is 0;
+  }
+
+  private void Open() {
+    _ = this.service.Open();
+    _ = this.PublishAssetMods();
+  }
 
   /// <summary>
   /// Publishes the active playset's asset mods, the ones the edit form can showcase, in the

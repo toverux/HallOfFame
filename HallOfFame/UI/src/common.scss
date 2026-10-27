@@ -1,5 +1,9 @@
 ﻿$default-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
+// Dimmed text over the game's dark windows: lighter than the grey of the game's empty panels, which
+// reads poorly over a window's body.
+$dimmed-color: #b7bec8;
+
 // Applies the content passed in the mixin when the legacy UI is not enabled.
 @mixin on-new-ui {
   @at-root :global(.overwrite-legacy) & {

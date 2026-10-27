@@ -2,16 +2,6 @@ import classNames from 'classnames';
 import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
 import { Button, Icon, Scrollable } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useState } from 'react';
-import {
-  formatBigNumber,
-  isPristineWilderness
-} from '../../area-menu/menu-controls/menu-controls-utils';
-import { selectScreenshotDetails } from '../../area-menu/menu-controls/screenshot-details';
-import {
-  type DetailsTabId,
-  ScreenshotDetailsWindow
-} from '../../area-menu/menu-controls/screenshot-details-window';
-import { useDetailsContext } from '../../area-menu/menu-controls/use-details-context';
 import type { CreatorStats, DashboardScreenshot, Screenshot } from '../../common';
 import apertureSharpSolidSrc from '../../icons/fontawesome/aperture-sharp-solid.svg';
 import circleRegularSrc from '../../icons/fontawesome/circle-regular.svg';
@@ -19,12 +9,18 @@ import hourglassHalfSolidSrc from '../../icons/fontawesome/hourglass-half-solid.
 import naturalResourcesSrc from '../../icons/paradox/natural-resources.svg';
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
-import { useImageLoaded, useTranslate } from '../../utils';
+import { formatBigNumber, isPristineWilderness, useImageLoaded, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
+import { selectScreenshotDetails } from '../screenshot-details/screenshot-details';
+import {
+  type DetailsTabId,
+  ScreenshotDetailsWindow
+} from '../screenshot-details/screenshot-details-window';
+import { useDetailsContext } from '../screenshot-details/use-details-context';
 import { CardUnderReviewBadge } from './dashboard-card';
 import {
   collectionPlace,
-  likePercentage,
+  viewersPerLike,
   medalBandIds,
   medalNameIds,
   type MedalState,
@@ -48,13 +44,16 @@ export function DashboardDetail({
   detail,
   screenshot,
   screenshots,
-  stats
+  stats,
+  onHasChangesChange
 }: Readonly<{
   detail: Exclude<bindings.DashboardDetailState, { status: 'closed' }>;
   screenshot: DashboardScreenshot;
   // The whole collection, to place the screenshot among it.
   screenshots: readonly DashboardScreenshot[];
   stats: CreatorStats;
+  // Whether the edit form holds edits.
+  onHasChangesChange: (hasChanges: boolean) => void;
 }>): ReactElement {
   const medalState = selectMedalState(screenshot, stats);
 
@@ -105,6 +104,7 @@ export function DashboardDetail({
             screenshot={detail.screenshot}
             isSaving={detail.isSaving}
             isDeleting={detail.isDeleting}
+            onHasChangesChange={onHasChangesChange}
           />
         )}
 
@@ -389,7 +389,7 @@ function DetailFigures({
               <LocalizedString
                 id='HallOfFame.UI.Dashboard.DETAIL_STAT_VALUE[Like Rate]'
                 args={{
-                  LIKING_PERCENTAGE: <LocalizedNumber value={likePercentage(screenshot)} />
+                  VIEWERS_COUNT: <LocalizedNumber value={viewersPerLike(screenshot)} />
                 }}
               />
             }

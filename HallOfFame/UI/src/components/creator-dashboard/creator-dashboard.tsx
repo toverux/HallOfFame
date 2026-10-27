@@ -74,28 +74,43 @@ function DashboardModal({
 
   const tally = useMemo(() => tallyMedals(screenshots), [screenshots]);
 
+  // While the edit form holds edits, every exit asks before dropping them, in the game's dialog.
+  const [hasUnsavedEdits, setHasUnsavedEdits] = useState(false);
+
+  const close = hasUnsavedEdits ? bindings.confirmCloseDashboard : bindings.closeDashboard;
+
+  const closeDetail = hasUnsavedEdits
+    ? bindings.confirmCloseDashboardDetail
+    : bindings.closeDashboardDetail;
+
   // The collection's own record of the screenshot the detail view is open on.
   const detailScreenshot =
     detail.status == 'closed'
       ? undefined
       : screenshots.find(screenshot => screenshot.id == detail.screenshotId);
 
+  // Back steps out of the detail view first, as the game's nested menus do.
+  const isDetailOpen = detailScreenshot != null;
+
+  const backActions = useMemo(
+    () => ({ Back: isDetailOpen ? closeDetail : close }),
+    [isDetailOpen, close, closeDetail]
+  );
+
   return (
-    <ModalBackdrop
-      actions={detailScreenshot ? detailBackActions : backActions}
-      onClose={bindings.closeDashboard}>
+    <ModalBackdrop actions={backActions} onClose={close}>
       {/* No title bar: the band carries the title and the close button itself. */}
       <Panel
         className={styles.window}
         contentClassName={styles.windowContent}
         theme={iceflakePanelTheme}
-        onClose={bindings.closeDashboard}>
+        onClose={close}>
         {/* The panel's content hosts a single focusable child. */}
         <AutoNavigationScope>
           <div className={styles.body}>
-            <DashboardHeader>
+            <DashboardHeader onClose={close}>
               {detailScreenshot ? (
-                <DashboardHeaderDetail screenshot={detailScreenshot} />
+                <DashboardHeaderDetail screenshot={detailScreenshot} onBack={closeDetail} />
               ) : state.status == 'loading' ? (
                 <DashboardHeaderSkeleton />
               ) : state.status == 'loaded' ? (
@@ -152,6 +167,7 @@ function DashboardModal({
                   screenshot={detailScreenshot}
                   screenshots={state.screenshots}
                   stats={state.stats}
+                  onHasChangesChange={setHasUnsavedEdits}
                 />
               )}
             </div>
@@ -161,11 +177,6 @@ function DashboardModal({
     </ModalBackdrop>
   );
 }
-
-const backActions = { Back: bindings.closeDashboard };
-
-// Back steps out of the detail view first, as the game's nested menus do.
-const detailBackActions = { Back: bindings.closeDashboardDetail };
 
 // One empty collection for every state holding none, so the memos over it hold too.
 const noScreenshots: readonly DashboardScreenshot[] = [];

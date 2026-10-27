@@ -1,0 +1,54 @@
+@use "sass:color";
+@use "../../vanilla-vars" as vanilla;
+
+// The anchor wrapping a control without a box of its own.
+.anchor {
+  display: flex;
+}
+
+// One step up the vanilla type scale from a tutorial step's, a welcome tour having the room for
+// it. Nested under the root so these win over the vanilla tutorial classes they sit beside.
+.balloon {
+  &-title {
+    .balloon & {
+      font-size: vanilla.$font-size-xl;
+    }
+  }
+
+  &-description {
+    .balloon & {
+      font-size: vanilla.$font-size-m;
+      line-height: 1.3;
+    }
+  }
+
+  &-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8rem;
+    padding: 0 16rem 16rem;
+  }
+
+  &-button {
+    .balloon & {
+      padding: 4rem 16rem;
+      font-size: vanilla.$font-size-m;
+    }
+
+    // Close beside Next: the tutorial button's text without its fill, so Next reads as the way on.
+    &--secondary {
+      .balloon & {
+        background-color: transparent;
+        color: vanilla.$ifs-page-button-color;
+
+        &:hover {
+          background-color: color.change(vanilla.$ifs-page-button-color, $alpha: 0.12);
+        }
+
+        &:active {
+          background-color: color.change(vanilla.$ifs-page-button-color, $alpha: 0.2);
+        }
+      }
+    }
+  }
+}

@@ -32,6 +32,12 @@ internal sealed class ScreenshotUploader(
   internal UploadProgress? CurrentProgress => this.currentModel?.Current;
 
   /// <summary>
+  /// The ID of the screenshot the last upload created, <c>null</c> until one succeeds and from the
+  /// start of the next.
+  /// </summary>
+  internal string? UploadedScreenshotId { get; private set; }
+
+  /// <summary>
   /// Clears the current upload progress, so the UI stops showing it.
   /// Nulls only the field; an in-flight upload keeps driving its own captured model, see
   /// <see cref="currentModel"/>.
@@ -46,7 +52,7 @@ internal sealed class ScreenshotUploader(
   /// snapshot), and the user's <paramref name="form"/> input.
   /// Designed never to throw, so the caller can fire-and-forget it: an <see cref="HttpException"/>
   /// goes to <see cref="reportError"/>, any other error is logged as recoverable, and either way
-  /// the progress is reset.
+  /// the progress is reset, unless a newer upload replaced this one, whose failure is only logged.
   /// </summary>
   internal async Task Upload(
     ScreenshotSnapshot snapshot,
@@ -59,6 +65,8 @@ internal sealed class ScreenshotUploader(
     // (e.g., by clearing the screenshot), but the callback and the ramp must keep driving this same
     // instance, which the UI binding reads back through the field.
     var progressModel = this.currentModel = new UploadProgressModel();
+
+    this.UploadedScreenshotId = null;
 
     try {
       var screenshot = await api.UploadScreenshot(
@@ -89,9 +97,18 @@ internal sealed class ScreenshotUploader(
         }
       );
 
+      // An upload the panel abandoned, landing after a newer one, leaves the newer one's ID.
+      if (this.currentModel == progressModel) {
+        this.UploadedScreenshotId = screenshot.Id;
+      }
+
       progressModel.Complete();
 
       log.Info($"{nameof(ScreenshotUploader)}: Screenshot uploaded, ID #{screenshot.Id}.");
+    }
+    // An upload the panel abandoned, failing during a newer one, leaves the newer one's progress.
+    catch (Exception ex) when (this.currentModel is {} current && current != progressModel) {
+      log.Warn(ex, $"{nameof(ScreenshotUploader)}: An abandoned upload failed.");
     }
     catch (HttpException ex) {
       // Reset progress state.

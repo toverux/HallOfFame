@@ -1,4 +1,4 @@
-import type { ModSettings } from '../../utils/bindings';
+import type { ModSettings } from './bindings';
 
 /**
  * The raw, multi-form name of an entity (a city or a creator) as it comes from the server: the

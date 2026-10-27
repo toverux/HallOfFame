@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
 import { MenuButton } from 'cs2/ui';
-import { memo, type ReactElement, useContext } from 'react';
+import { memo, type ReactElement, useContext, useEffect } from 'react';
 import type { Screenshot } from '../../common';
 import ellipsisSolidSrc from '../../icons/fontawesome/ellipsis-solid.svg';
 import loveChirperSrc from '../../icons/love-chirper.png';
@@ -240,9 +240,18 @@ export const MenuControlsLikeButton = memo(
  *
  * The select sound is dropped because the vanilla `toggle` plays the dropdown's own, and the two
  * would otherwise land together.
+ *
+ * It reports each opening, which the menu tour's step pointing at the menu needs.
  */
 export const MenuControlsMoreActionsButton = memo((): ReactElement => {
   const { visible, toggle } = useContext(DropdownContext);
+
+  // Read off `visible` rather than the toggle, so every way of opening the menu counts.
+  useEffect(() => {
+    if (visible) {
+      bindings.reportMoreActionsOpened();
+    }
+  }, [visible]);
 
   return (
     <MenuButton

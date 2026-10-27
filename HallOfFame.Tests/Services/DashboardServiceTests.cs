@@ -291,6 +291,26 @@ public sealed class DashboardServiceTests {
   }
 
   [Fact]
+  public async Task OpenOnScreenshot_LoadsTheCollection_ThenOpensTheScreenshot() {
+    var api = DashboardServiceTests.CreateApi(
+      ["a", "b"],
+      new CreatorStats(),
+      id => Task.FromResult(
+        new Screenshot {
+          Id = id
+        }
+      )
+    );
+
+    var sink = new FakeDashboardPresentationSink();
+    var service = new DashboardService(api, new FakeModLog(), sink);
+
+    await service.OpenOnScreenshot("b");
+
+    Assert.Equal(["Loading", "Loaded:a,b", "Detail:Loading:b", "Detail:Loaded:b"], sink.Log);
+  }
+
+  [Fact]
   public async Task OpenDetail_Failure_PublishesTheError_AndOpeningItAgainRetries() {
     var silent = new List<Exception>();
     var fetchCount = 0;
@@ -427,6 +447,257 @@ public sealed class DashboardServiceTests {
     service.Close();
 
     Assert.Equal(["Closed", "Detail:Closed"], sink.Log.Skip(4));
+  }
+
+  [Fact]
+  public async Task ConfirmClose_Confirmed_ClosesTheDashboardThenItsDetail() {
+    var held = new Screenshot {
+      Id = "a"
+    };
+
+    var confirmed = new List<Screenshot>();
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDiscardEditsImpl = screenshot => {
+        confirmed.Add(screenshot);
+
+        return Task.FromResult(true);
+      }
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(held, sink);
+
+    await service.ConfirmClose();
+
+    Assert.Same(held, Assert.Single(confirmed));
+    Assert.Equal(["Closed", "Detail:Closed"], sink.Log);
+  }
+
+  [Fact]
+  public async Task ConfirmClose_Declined_KeepsTheDashboardOpen() {
+    // The fake sink declines unwired.
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink
+    );
+
+    await service.ConfirmClose();
+
+    Assert.Empty(sink.Log);
+  }
+
+  [Fact]
+  public async Task ConfirmCloseDetail_Confirmed_ReturnsToTheGrid() {
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDiscardEditsImpl = _ => Task.FromResult(true)
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink
+    );
+
+    await service.ConfirmCloseDetail();
+
+    Assert.Equal(["Detail:Closed"], sink.Log);
+  }
+
+  [Fact]
+  public async Task ConfirmCloseDetail_Declined_KeepsTheDetail() {
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink
+    );
+
+    await service.ConfirmCloseDetail();
+
+    Assert.Empty(sink.Log);
+  }
+
+  [Fact]
+  public async Task ConfirmClose_DetailClosedUnderTheDialog_ClosesNothingMore() {
+    DashboardService? service = null;
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDiscardEditsImpl = _ => {
+        service?.CloseDetail();
+
+        return Task.FromResult(true);
+      }
+    };
+
+    service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink
+    );
+
+    await service.ConfirmClose();
+
+    Assert.Equal(["Detail:Closed"], sink.Log);
+  }
+
+  [Fact]
+  public async Task ConfirmClose_OnTheGrid_ClosesWithoutAsking() {
+    var sink = new FakeDashboardPresentationSink();
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink
+    );
+
+    service.CloseDetail();
+    sink.Log.Clear();
+
+    await service.ConfirmClose();
+
+    Assert.Equal(["Closed"], sink.Log);
+  }
+
+  [Fact]
+  public async Task ConfirmClose_AgainWhileItsDialogIsOpen_AsksOnce() {
+    var gate = new TaskCompletionSource<bool>();
+    var askCount = 0;
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDiscardEditsImpl = _ => {
+        askCount++;
+
+        return gate.Task;
+      }
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink
+    );
+
+    var first = service.ConfirmClose();
+    var second = service.ConfirmCloseDetail();
+
+    gate.SetResult(true);
+    await Task.WhenAll(first, second);
+
+    Assert.Equal(1, askCount);
+    Assert.Equal(["Closed", "Detail:Closed"], sink.Log);
+  }
+
+  [Fact]
+  public async Task ConfirmClose_WhileTheDeleteDialogIsOpen_AsksNothing() {
+    var gate = new TaskCompletionSource<bool>();
+    var askedToDiscard = false;
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDeleteImpl = _ => gate.Task,
+      ConfirmDiscardEditsImpl = _ => {
+        askedToDiscard = true;
+
+        return Task.FromResult(true);
+      }
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink
+    );
+
+    var delete = service.Delete();
+    var close = service.ConfirmClose();
+
+    gate.SetResult(false);
+    await Task.WhenAll(delete, close);
+
+    Assert.False(askedToDiscard);
+    Assert.Empty(sink.Log);
+  }
+
+  [Fact]
+  public async Task ConfirmClose_WhileSaving_AsksAsAtAnyOtherTime() {
+    var gate = new TaskCompletionSource<Screenshot>();
+    var askedToDiscard = false;
+
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDiscardEditsImpl = _ => {
+        askedToDiscard = true;
+
+        return Task.FromResult(true);
+      }
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink,
+      (_, _) => gate.Task
+    );
+
+    var update = service.Update(
+      new ScreenshotUpdate {
+        CityName = "New Town"
+      }
+    );
+
+    sink.Log.Clear();
+
+    await service.ConfirmClose();
+
+    gate.SetResult(
+      new Screenshot {
+        Id = "a"
+      }
+    );
+    await update;
+
+    Assert.True(askedToDiscard);
+    Assert.Equal(["Closed", "Detail:Closed"], sink.Log.Take(2));
+  }
+
+  [Fact]
+  public async Task ConfirmCloseDetail_AfterTheDetailClosedOnAnUnansweredDialog_AsksAgain() {
+    var askCount = 0;
+
+    // A dialog another replaced never answers.
+    var sink = new FakeDashboardPresentationSink {
+      ConfirmDiscardEditsImpl = _ => {
+        askCount++;
+
+        return new TaskCompletionSource<bool>().Task;
+      }
+    };
+
+    var service = await DashboardServiceTests.OpenDetailOfA(
+      new Screenshot {
+        Id = "a"
+      },
+      sink
+    );
+
+    _ = service.ConfirmCloseDetail();
+
+    service.CloseDetail();
+    await service.OpenDetail("a");
+
+    _ = service.ConfirmCloseDetail();
+
+    Assert.Equal(2, askCount);
   }
 
   [Fact]

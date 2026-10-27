@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, mock } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EventInputProvider } from 'cs2/input';
 import type { CreatorStats, DashboardScreenshot } from '../../common';
-import { makeScreenshot, photoModeCatalog } from '../../testing/fixtures';
+import { makeScreenshot, noop, photoModeCatalog } from '../../testing/fixtures';
 import {
   emitEvent,
   getTriggers,
@@ -25,10 +25,6 @@ afterEach(() => {
 const GROUP = 'hallOfFame.dashboard';
 
 const title = 'HallOfFame.UI.Dashboard.TITLE[Dashboard]';
-
-function noop(): void {
-  // The spy below only looks at unmounts.
-}
 
 const stats: CreatorStats = {
   screenshotsCount: 3,
@@ -344,7 +340,7 @@ describe('CreatorDashboard', () => {
 
   it(`gives the like rate from the card's own likes and unique views`, async () => {
     setTranslations({
-      'HallOfFame.UI.Dashboard.CARD_TOOLTIP[Like Rate]': 'Rate {LIKING_PERCENTAGE}%'
+      'HallOfFame.UI.Dashboard.CARD_TOOLTIP[Like Rate]': 'Rate 1 in {VIEWERS_COUNT}'
     });
 
     renderCard(
@@ -359,7 +355,8 @@ describe('CreatorDashboard', () => {
     hover(card('card').querySelector('[data-card-stats]'));
 
     // The tooltip's strings are text nodes of one element, which no text matcher splits apart.
-    await waitFor(() => expect(document.body.textContent).toContain('Rate 11%'));
+    // 9 likes over 80 unique viewers: 1 in 8.9, rounded.
+    await waitFor(() => expect(document.body.textContent).toContain('Rate 1 in 9'));
   });
 
   it(`leaves the like rate out of an unranked card's figures`, async () => {
@@ -407,7 +404,7 @@ describe('CreatorDashboard', () => {
 
   it(`shows the detail over the grid, from the collection's figures while it loads`, () => {
     setTranslations({
-      'HallOfFame.UI.Dashboard.DETAIL_STAT_VALUE[Like Rate]': '{LIKING_PERCENTAGE}%'
+      'HallOfFame.UI.Dashboard.DETAIL_STAT_VALUE[Like Rate]': '1 in {VIEWERS_COUNT}'
     });
 
     setLoaded([
@@ -437,7 +434,7 @@ describe('CreatorDashboard', () => {
     expect(statText('likes')).toContain('20');
     expect(statText('viewerClicks')).toContain('7');
     // 20 likes over 80 unique viewers, as the card's tooltip rounds it.
-    expect(statText('likeRate')).toContain('25%');
+    expect(statText('likeRate')).toContain('1 in 4');
     expect(statText('likeRate')).toContain('DETAIL_STAT_DESCRIPTION[Like Rate]');
 
     expect(detail.querySelector('[data-medal]')?.getAttribute('data-medal')).toBe('gold');
@@ -700,6 +697,37 @@ describe('CreatorDashboard', () => {
     });
 
     expect(closeTriggers()).toBe(0);
+  });
+
+  it(`leaves through C#'s confirmation while the form holds edits, and only then`, () => {
+    const screenshot = makeScreenshot({ id: 'a', cityName: 'Old Town' });
+
+    setLoaded([screenshot]);
+    setDetail({
+      status: 'loaded',
+      isSaving: false,
+      isDeleting: false,
+      screenshotId: 'a',
+      screenshot
+    });
+
+    render(<CreatorDashboard />);
+
+    const cityName = query('[data-dashboard-edit-form] input');
+
+    fireEvent.change(cityName, { target: { value: 'New Town' } });
+
+    fireEvent.click(query('[data-dashboard-back]'));
+
+    expect(triggersOf('confirmCloseDetail')).toHaveLength(1);
+    expect(triggersOf('closeDetail')).toHaveLength(0);
+
+    fireEvent.change(cityName, { target: { value: 'Old Town' } });
+
+    fireEvent.click(query('[data-dashboard-back]'));
+
+    expect(triggersOf('confirmCloseDetail')).toHaveLength(1);
+    expect(triggersOf('closeDetail')).toHaveLength(1);
   });
 });
 

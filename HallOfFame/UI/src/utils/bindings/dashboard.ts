@@ -82,6 +82,14 @@ export function closeDashboard(): void {
 }
 
 /**
+ * Closes the dashboard once the player confirms dropping the edit form's edits, in the game's
+ * dialog: the exit in place of {@link closeDashboard} while the form holds some.
+ */
+export function confirmCloseDashboard(): void {
+  trigger(GROUP, 'confirmClose');
+}
+
+/**
  * Fetches the collection again while the dashboard is open, the error view's retry.
  */
 export function refreshDashboard(): void {
@@ -108,6 +116,14 @@ export function openDashboardDetail(screenshotId: string): void {
  */
 export function closeDashboardDetail(): void {
   trigger(GROUP, 'closeDetail');
+}
+
+/**
+ * Returns to the grid once the player confirms dropping the edit form's edits, as
+ * {@link confirmCloseDashboard} closes the dashboard.
+ */
+export function confirmCloseDashboardDetail(): void {
+  trigger(GROUP, 'confirmCloseDetail');
 }
 
 /**

@@ -5,10 +5,10 @@ import { memo, type ReactElement, useCallback } from 'react';
 import { Tooltip } from '../../components/tooltip';
 import flagSolidSrc from '../../icons/fontawesome/flag-solid.svg';
 import grid2SolidSrc from '../../icons/fontawesome/grid-2-solid.svg';
-import { useTranslate } from '../../utils';
+import { iconTintFromStylesheet, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { defaultButtonSounds } from '../../vanilla-modules/game-ui/common/input/button/button';
-import { columnDropdownMenuTheme, iconTintFromStylesheet } from './dropdown-menu';
+import { columnDropdownMenuTheme } from './dropdown-menu';
 import { MenuControlsMoreActionsButton } from './nav-buttons';
 import * as styles from './more-actions-menu.module.scss';
 

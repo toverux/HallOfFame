@@ -1,5 +1,5 @@
-import { selectLocalizedName } from '../../area-menu/menu-controls/select-localized-name';
 import type { DashboardScreenshot } from '../../common';
+import { selectLocalizedName } from '../../utils';
 import * as bindings from '../../utils/bindings';
 
 /**

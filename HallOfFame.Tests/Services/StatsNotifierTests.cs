@@ -17,35 +17,40 @@ public sealed class StatsNotifierTests {
       LikesCount = 2
     };
     var shown = new List<CreatorStats>();
+    var reported = new List<CreatorStats>();
 
     var api = new FakeApi {
       GetCreatorStatsImpl = () => Task.FromResult(stats)
     };
 
-    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add);
+    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add, reported.Add);
 
     await notifier.ShowIfNotable();
 
     Assert.Same(stats, Assert.Single(shown));
+    Assert.Same(stats, Assert.Single(reported));
   }
 
   [Fact]
-  public async Task ShowIfNotable_DoesNotEmit_WhenLikesBelowThreshold() {
+  public async Task ShowIfNotable_DoesNotEmitButReports_WhenLikesBelowThreshold() {
+    var stats = new CreatorStats {
+      LikesCount = 1
+    };
     var shown = new List<CreatorStats>();
+    var reported = new List<CreatorStats>();
 
     var api = new FakeApi {
-      GetCreatorStatsImpl = () => Task.FromResult(
-        new CreatorStats {
-          LikesCount = 1
-        }
-      )
+      GetCreatorStatsImpl = () => Task.FromResult(stats)
     };
 
-    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add);
+    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add, reported.Add);
 
     await notifier.ShowIfNotable();
 
     Assert.Empty(shown);
+
+    // The report precedes the threshold test, so a below-threshold result reaches it too.
+    Assert.Same(stats, Assert.Single(reported));
   }
 
   [Fact]
@@ -54,6 +59,7 @@ public sealed class StatsNotifierTests {
       LikesCount = 2
     };
     var shown = new List<CreatorStats>();
+    var reported = new List<CreatorStats>();
     var fetchCount = 0;
     var gate = new TaskCompletionSource<CreatorStats>();
 
@@ -65,7 +71,7 @@ public sealed class StatsNotifierTests {
       }
     };
 
-    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add);
+    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add, reported.Add);
 
     // The first call starts the fetch and parks on the gate.
     var first = notifier.ShowIfNotable();
@@ -82,6 +88,7 @@ public sealed class StatsNotifierTests {
 
     Assert.Equal(1, fetchCount);
     Assert.Same(stats, Assert.Single(shown));
+    Assert.Same(stats, Assert.Single(reported));
   }
 
   [Fact]
@@ -90,6 +97,7 @@ public sealed class StatsNotifierTests {
       LikesCount = 2
     };
     var shown = new List<CreatorStats>();
+    var reported = new List<CreatorStats>();
     var fetchCount = 0;
 
     var api = new FakeApi {
@@ -100,13 +108,14 @@ public sealed class StatsNotifierTests {
       }
     };
 
-    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add);
+    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add, reported.Add);
 
     await notifier.ShowIfNotable();
     await notifier.ShowIfNotable();
 
     Assert.Equal(1, fetchCount);
     Assert.Single(shown);
+    Assert.Single(reported);
   }
 
   [Fact]
@@ -115,6 +124,7 @@ public sealed class StatsNotifierTests {
       LikesCount = 2
     };
     var shown = new List<CreatorStats>();
+    var reported = new List<CreatorStats>();
     var fetchCount = 0;
 
     var api = new FakeApi {
@@ -132,7 +142,7 @@ public sealed class StatsNotifierTests {
       }
     };
 
-    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add);
+    var notifier = new StatsNotifier(api, new FakeModLog(), shown.Add, reported.Add);
 
     await notifier.ShowIfNotable();
     Assert.Empty(shown);
@@ -141,6 +151,7 @@ public sealed class StatsNotifierTests {
 
     Assert.Equal(2, fetchCount);
     Assert.Same(notable, Assert.Single(shown));
+    Assert.Equal(2, reported.Count);
   }
 
   [Fact]
@@ -149,6 +160,7 @@ public sealed class StatsNotifierTests {
       LikesCount = 2
     };
     var shown = new List<CreatorStats>();
+    var reported = new List<CreatorStats>();
     var silent = new List<Exception>();
     var recoverable = new List<Exception>();
     var fetchCount = 0;
@@ -168,7 +180,7 @@ public sealed class StatsNotifierTests {
       ErrorRecoverableImpl = recoverable.Add
     };
 
-    var notifier = new StatsNotifier(api, log, shown.Add);
+    var notifier = new StatsNotifier(api, log, shown.Add, reported.Add);
 
     // Must not throw despite the failed fetch.
     await notifier.ShowIfNotable();
@@ -176,12 +188,14 @@ public sealed class StatsNotifierTests {
     Assert.Single(silent);
     Assert.Empty(recoverable);
     Assert.Empty(shown);
+    Assert.Empty(reported);
 
     // The failure is retryable: a later call re-fetches and can emit.
     await notifier.ShowIfNotable();
 
     Assert.Equal(2, fetchCount);
     Assert.Same(notable, Assert.Single(shown));
+    Assert.Same(notable, Assert.Single(reported));
   }
 
   [Fact]
@@ -190,6 +204,7 @@ public sealed class StatsNotifierTests {
       LikesCount = 2
     };
     var shown = new List<CreatorStats>();
+    var reported = new List<CreatorStats>();
     var silent = new List<Exception>();
     var recoverable = new List<Exception>();
     var fetchCount = 0;
@@ -209,7 +224,7 @@ public sealed class StatsNotifierTests {
       ErrorRecoverableImpl = recoverable.Add
     };
 
-    var notifier = new StatsNotifier(api, log, shown.Add);
+    var notifier = new StatsNotifier(api, log, shown.Add, reported.Add);
 
     // Must not throw despite the failed fetch.
     await notifier.ShowIfNotable();
@@ -217,11 +232,13 @@ public sealed class StatsNotifierTests {
     Assert.Single(recoverable);
     Assert.Empty(silent);
     Assert.Empty(shown);
+    Assert.Empty(reported);
 
     // The failure is retryable: a later call re-fetches and can emit.
     await notifier.ShowIfNotable();
 
     Assert.Equal(2, fetchCount);
     Assert.Same(notable, Assert.Single(shown));
+    Assert.Same(notable, Assert.Single(reported));
   }
 }

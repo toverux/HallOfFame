@@ -7,7 +7,6 @@ import circleRegularSrc from '../../icons/fontawesome/circle-regular.svg';
 import grid2RegularSrc from '../../icons/fontawesome/grid-2-regular.svg';
 import logoSrc from '../../icons/stats-notification.svg';
 import { useTranslate } from '../../utils';
-import * as bindings from '../../utils/bindings';
 import { skinDropdownTheme } from '../../vanilla-modules/game-ui/common/input/dropdown/dropdown';
 import { Tooltip } from '../tooltip';
 import {
@@ -27,7 +26,10 @@ import * as styles from './dashboard-header.module.scss';
  * and between them whatever the collection's state has to show, which `children` carries.
  * Nothing there paints the band's rest, so the band reads whole when there is nothing to show.
  */
-export function DashboardHeader({ children }: Readonly<{ children?: ReactNode }>): ReactElement {
+export function DashboardHeader({
+  onClose,
+  children
+}: Readonly<{ onClose: () => void; children?: ReactNode }>): ReactElement {
   const translate = useTranslate();
 
   return (
@@ -51,7 +53,7 @@ export function DashboardHeader({ children }: Readonly<{ children?: ReactNode }>
         <Button
           theme={plainButtonTheme}
           className={styles.headerClose}
-          onSelect={bindings.closeDashboard}
+          onSelect={onClose}
           selectSound='close-menu'>
           <Icon src='Media/Glyphs/Close.svg' tinted={true} className={styles.headerCloseGlyph} />
         </Button>
@@ -134,8 +136,9 @@ export function DashboardHeaderControls({
  * then the screenshot's city and how long ago it was shared, the exact date under the cursor.
  */
 export function DashboardHeaderDetail({
-  screenshot
-}: Readonly<{ screenshot: DashboardScreenshot }>): ReactElement {
+  screenshot,
+  onBack
+}: Readonly<{ screenshot: DashboardScreenshot; onBack: () => void }>): ReactElement {
   const translate = useTranslate();
 
   const cityName = useCityName(screenshot);
@@ -148,7 +151,7 @@ export function DashboardHeaderDetail({
       <Button
         theme={plainButtonTheme}
         className={styles.headerTab}
-        onSelect={bindings.closeDashboardDetail}
+        onSelect={onBack}
         data-dashboard-back={true}>
         <div className={styles.headerTabFace}>
           <Icon src={arrowLeftSrc} tinted={true} className={styles.headerBackGlyph} />

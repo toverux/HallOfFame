@@ -167,10 +167,12 @@ export function likeRate(screenshot: DashboardScreenshot): number {
 }
 
 /**
- * The like rate as the card and the detail show it, a whole percentage, so the two never disagree.
+ * The like rate as the card and the detail show it, "1 in N" viewers, N rounded, so the two never
+ * disagree: a count of people reads kinder than the percentage it equals.
+ * Shown on a ranked screenshot only, which has likes, so N is never infinite.
  */
-export function likePercentage(screenshot: DashboardScreenshot): number {
-  return Math.round(likeRate(screenshot) * 100);
+export function viewersPerLike(screenshot: DashboardScreenshot): number {
+  return Math.max(1, Math.round(1 / likeRate(screenshot)));
 }
 
 /**

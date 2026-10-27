@@ -1,9 +1,8 @@
 import { LocalizedString } from 'cs2/l10n';
 import { MenuButton } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
-import { snappyOnSelect, useTranslate } from '../../utils';
+import { locElementToReactNode, snappyOnSelect, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
-import { locElementToReactNode } from './menu-controls-utils';
 import * as styles from './error.module.scss';
 
 export const MenuControlsError = memo(

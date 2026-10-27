@@ -3,6 +3,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getTriggers, resetBindings } from '../../testing/game-setup';
 import type { DraggableProps } from '../../utils';
+import type { JsonUploadProgress } from '../../utils/bindings';
 import type { ScreenshotInfoFormValue } from './form-state';
 import { ScreenshotUploadPanelFooter } from './panel-footer';
 
@@ -23,6 +24,13 @@ const validForm: ScreenshotInfoFormValue = {
   isShowcasingAsset: false,
   showcasedMod: undefined,
   description: '  Nice city  '
+};
+
+const completeUpload: JsonUploadProgress = {
+  isComplete: true,
+  globalProgress: 1,
+  uploadProgress: 1,
+  processingProgress: 1
 };
 
 const uploadEvent = 'hallOfFame.capture.uploadScreenshot';
@@ -72,5 +80,27 @@ describe('ScreenshotUploadPanelFooter', () => {
     const shareButton = screen.getByText(shareLabel).closest('button');
 
     expect(shareButton?.disabled).toBe(true);
+  });
+
+  it(`opens the dashboard on the uploaded screenshot from the success state`, async () => {
+    render(
+      <ScreenshotUploadPanelFooter
+        creatorNameIsEmpty={false}
+        uploadProgress={completeUpload}
+        draggable={draggable}
+        formValue={validForm}
+      />
+    );
+
+    await userEvent
+      .setup()
+      .click(screen.getByText('HallOfFame.UI.Game.ScreenshotUploadPanel.OPEN_IN_DASHBOARD'));
+
+    // The button's select sound is a trigger too, so only the mod's own count.
+    const modEvents = getTriggers()
+      .map(trigger => trigger.event)
+      .filter(event => event.startsWith('hallOfFame.'));
+
+    expect(modEvents).toEqual(['hallOfFame.capture.openUploadedInDashboard']);
   });
 });

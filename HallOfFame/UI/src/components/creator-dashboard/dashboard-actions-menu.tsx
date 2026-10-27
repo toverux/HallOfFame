@@ -1,11 +1,10 @@
 import classNames from 'classnames';
 import { Dropdown, DropdownItem, type DropdownTheme, DropdownToggle, Icon } from 'cs2/ui';
 import { type ReactElement, useContext } from 'react';
-import { iconTintFromStylesheet } from '../../area-menu/menu-controls/dropdown-menu';
 import type { Screenshot } from '../../common';
 import externalLinkSrc from '../../icons/fontawesome/arrow-up-right-from-square-solid.svg';
 import expandSolidSrc from '../../icons/fontawesome/expand-solid.svg';
-import { getClassesModule, useTranslate } from '../../utils';
+import { getClassesModule, iconTintFromStylesheet, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { defaultButtonSounds } from '../../vanilla-modules/game-ui/common/input/button/button';
 import { DropdownContext } from '../../vanilla-modules/game-ui/common/input/dropdown/dropdown';
@@ -64,6 +63,9 @@ export function DashboardActionsMenu({
 
   const isInMainMenu = bindings.useIsInMainMenu();
 
+  // The dashboard also opens in the main menu with the slideshow off, from the options page.
+  const isSlideshowEnabled = bindings.useIsSlideshowEnabled();
+
   return (
     <>
       <PreloadImages srcs={menuIcons} />
@@ -74,7 +76,7 @@ export function DashboardActionsMenu({
         alignment='right'
         content={
           <>
-            {isInMainMenu && (
+            {isInMainMenu && isSlideshowEnabled && (
               <DropdownItem<string>
                 value='slideshow'
                 disabled={isMutating}

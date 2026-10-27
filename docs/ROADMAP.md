@@ -33,7 +33,7 @@ The Creator Dashboard's detail view can then use the same component to show its 
 
 **Priority:** unsure · **Cost:** moderate
 
-The slideshow's details window (`area-menu/menu-controls/screenshot-details-window.tsx`) opens on a Description tab that shows the creator's text, or an empty state when there is none. Make it an Information tab that always has content: the description first when there is one, then what the screenshot payload already holds and the slideshow only half shows:
+The slideshow's details window (`components/screenshot-details/screenshot-details-window.tsx`) opens on a Description tab that shows the creator's text, or an empty state when there is none. Make it an Information tab that always has content: the description first when there is one, then what the screenshot payload already holds and the slideshow only half shows:
 
 - The medal with its band and the Popular note, as the Creator Dashboard's detail caption words them.
 - The city: milestone, population, map, and the exact upload date where the labels give how long ago.

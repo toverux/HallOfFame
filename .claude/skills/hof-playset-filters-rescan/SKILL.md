@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Playset filters rescan
 
-The playset tab narrows a screenshot's mods with toggles the mod maps from Paradox Mods tags, in `assetCategoryMatches` and `playsetKindMatches` of `HallOfFame/UI/src/area-menu/menu-controls/screenshot-details.ts`.
+The playset tab narrows a screenshot's mods with toggles the mod maps from Paradox Mods tags, in `assetCategoryMatches` and `playsetKindMatches` of `HallOfFame/UI/src/components/screenshot-details/screenshot-details.ts`.
 Tags drift as Paradox and creators tag new mods, so the mapping is rescanned from time to time against the local dev database, a copy of production the user refreshes by hand.
 Four steps: run the scan, read it against the standing decisions, revise the mapping, verify.
 

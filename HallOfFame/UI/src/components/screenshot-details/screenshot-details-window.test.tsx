@@ -8,6 +8,7 @@ import {
   makeScreenshot,
   makeSettings,
   makeSkyveVerdict,
+  noop,
   photoModeCatalog
 } from '../../testing/fixtures';
 import {
@@ -25,10 +26,6 @@ afterEach(() => {
   cleanup();
   resetBindings();
 });
-
-function noop(): void {
-  // Closing is not what these tests look at.
-}
 
 function nextFrame(): Promise<void> {
   // oxlint-disable-next-line promise/avoid-new - requestAnimationFrame only takes a callback
