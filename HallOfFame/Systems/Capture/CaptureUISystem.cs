@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Colossal.Core;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
@@ -86,9 +85,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
       this.screenshotUploader.Reset();
 
-      // Optimization: only enable live bindings when a screenshot is being displayed/uploaded.
-      // Run on the next frame to let the UI update one last time.
-      MainThreadDispatcher.RegisterUpdater(() => { this.Enabled = value is not null; });
+      // Optimization: live bindings poll only while a screenshot is displayed or uploading.
+      // Each change gets one update to publish it; OnUpdate disables the system once it is null.
+      this.Enabled = true;
     }
   }
 
@@ -197,6 +196,17 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
+    }
+  }
+
+  protected override void OnUpdate() {
+    base.OnUpdate();
+
+    // Disabling here lets this update publish the cleared screenshot first; a disable deferred
+    // through MainThreadDispatcher runs at the end of the frame (GameManager.Update), so a clear
+    // landing after this update would turn the system off unpublished, the panel staying on screen.
+    if (this.CurrentScreenshot is null) {
+      this.Enabled = false;
     }
   }
 
