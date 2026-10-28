@@ -380,7 +380,7 @@ public sealed class SlideshowConductorTests {
     var sink = new FakeSlideshowPresentationSink();
     var conductor = SlideshowConductorTests.CreateConductor(sink: sink);
 
-    await conductor.Save();
+    Assert.False(await conductor.Save());
 
     Assert.Empty(sink.SavingLog);
   }
@@ -414,7 +414,7 @@ public sealed class SlideshowConductorTests {
     Assert.Equal([true], sink.SavingLog);
 
     // Second save is ignored while the first is in flight: no second download.
-    await conductor.Save();
+    Assert.False(await conductor.Save());
 
     Assert.Equal(1, downloadCalls);
 
@@ -457,7 +457,8 @@ public sealed class SlideshowConductorTests {
       );
 
       await conductor.Next();
-      await conductor.Save();
+
+      Assert.True(await conductor.Save());
 
       Assert.Equal([true, false], sink.SavingLog);
       Assert.Empty(recoverable);
@@ -494,7 +495,8 @@ public sealed class SlideshowConductorTests {
     );
 
     await conductor.Next();
-    await conductor.Save();
+
+    Assert.False(await conductor.Save());
 
     // A foreseen failure: its message goes to the message dialog, the exception only to the log.
     Assert.Single(sink.ShownErrors);
@@ -526,7 +528,8 @@ public sealed class SlideshowConductorTests {
     );
 
     await conductor.Next();
-    await conductor.Save();
+
+    Assert.False(await conductor.Save());
 
     Assert.IsType<InvalidOperationException>(Assert.Single(recoverable));
     Assert.Equal([true, false], sink.SavingLog);

@@ -175,20 +175,25 @@ internal sealed class DashboardService(
   /// A failed save leaves both as they were and shows the error, the form keeping its edits.
   /// An edit while another mutation is on its way is ignored.
   /// Designed never to throw, so the caller can fire-and-forget it.
+  /// Resolves to whether the server took the edit.
   /// </summary>
-  internal async Task Update(ScreenshotUpdate update) {
+  internal async Task<bool> Update(ScreenshotUpdate update) {
     if (this.detail is not {
         Status: DashboardStatus.Loaded, Screenshot: {} held, IsSaving: false, IsDeleting: false
       }) {
-      return;
+      return false;
     }
 
     var generation = this.detailGeneration;
+
+    var isSaved = false;
 
     this.PublishDetail(DashboardDetailState.Loaded(held, isSaving: true));
 
     try {
       var response = await api.UpdateScreenshot(held.Id, update);
+
+      isSaved = true;
 
       // The answer leaves out the showcased mod, so a newly picked one is fetched in full.
       var merged = update.ShowcasedModId is { Length: > 0 }
@@ -220,6 +225,8 @@ internal sealed class DashboardService(
         this.PublishDetail(DashboardDetailState.Loaded(held));
       }
     }
+
+    return isSaved;
   }
 
   /// <summary>
@@ -229,12 +236,14 @@ internal sealed class DashboardService(
   /// A failed deletion leaves the collection and the detail as they were and shows the error.
   /// A deletion while another mutation is on its way is ignored.
   /// Designed never to throw, so the caller can fire-and-forget it.
+  /// Resolves to whether the screenshot is gone from the server, which a refused confirmation
+  /// leaves it on.
   /// </summary>
-  internal async Task Delete() {
+  internal async Task<bool> Delete() {
     if (this.detail is not {
         Status: DashboardStatus.Loaded, Screenshot: {} held, IsSaving: false, IsDeleting: false
       }) {
-      return;
+      return false;
     }
 
     var generation = this.detailGeneration;
@@ -242,8 +251,10 @@ internal sealed class DashboardService(
     // The detail may have closed under the dialog: a late confirmation deletes nothing.
     if (!await this.Confirm(() => sink.ConfirmDelete(held)) ||
       generation != this.detailGeneration) {
-      return;
+      return false;
     }
+
+    var isDeleted = false;
 
     this.PublishDetail(DashboardDetailState.Loaded(held, isDeleting: true));
 
@@ -254,6 +265,8 @@ internal sealed class DashboardService(
       // The client maps a 404 to this exception: here, the screenshot was already gone.
       catch (HttpUserCompatibilityException) {
       }
+
+      isDeleted = true;
 
       sink.PlayDeletedSound();
 
@@ -282,6 +295,8 @@ internal sealed class DashboardService(
         this.PublishDetail(DashboardDetailState.Loaded(held));
       }
     }
+
+    return isDeleted;
   }
 
   /// <summary>

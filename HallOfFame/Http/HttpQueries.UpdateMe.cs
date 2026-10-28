@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Colossal.Json;
+using Game;
 using Game.Input;
 using Game.SceneFlow;
 using Game.Settings;
@@ -18,6 +19,7 @@ internal partial class HttpQueries {
       ["metadata"] = new Dictionary<string, object> {
         // General info
         ["modVersion"] = typeof(HttpQueries).Assembly.GetName().Version.ToString(3),
+        ["gameVersion"] = Version.current.shortVersion,
         ["isNvidiaGpu"] = Settings.IsNvidiaGpu(),
         ["screenWidth"] = Screen.width,
         ["screenHeight"] = Screen.height,
@@ -43,7 +45,9 @@ internal partial class HttpQueries {
         ["screenshotResolution"] = Mod.Settings.ScreenshotResolution,
         ["createLocalScreenshot"] = Mod.Settings.CreateLocalScreenshot,
         ["disableGlobalIllumination"] = Mod.Settings.DisableGlobalIllumination,
-        ["paradoxModsBrowsingPreference"] = Mod.Settings.ParadoxModsBrowsingPreference
+        ["paradoxModsBrowsingPreference"] = Mod.Settings.ParadoxModsBrowsingPreference,
+        // Lets the server tell an opted-out creator from one whose events were lost.
+        ["sendUsageStatistics"] = Mod.Settings.SendUsageStatistics
       }
     };
 

@@ -205,19 +205,24 @@ internal sealed class SlideshowConductor {
   /// Saves the current screenshot's 4K image to disk, to the path specified in the mod settings.
   /// Owns the saving indicator, the reentrancy guard, and the network-vs.-recoverable error policy.
   /// Designed never to throw, so the shell can fire-and-forget it.
+  /// Resolves to whether the image reached the disk.
   /// </summary>
-  internal async Task Save() {
+  internal async Task<bool> Save() {
     var screenshot = this.carousel.Current;
 
     if (this.isSaving || screenshot is null) {
-      return;
+      return false;
     }
+
+    var isSaved = false;
 
     try {
       this.isSaving = true;
       this.sink.SetSaving(true);
 
       var filePath = await this.exporter.Export(screenshot, this.settings.SaveDirectory);
+
+      isSaved = true;
 
       this.log.Info($"{nameof(SlideshowConductor)}: Saved {screenshot} image to {filePath}.");
     }
@@ -232,6 +237,8 @@ internal sealed class SlideshowConductor {
       this.isSaving = false;
       this.sink.SetSaving(false);
     }
+
+    return isSaved;
   }
 
   /// <summary>

@@ -42,6 +42,8 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   internal Func<string, Task>? DeleteScreenshotImpl { get; init; }
 
+  internal Func<UsageBatch, Task>? PostUsageEventsImpl { get; init; }
+
   public Task<CreatorStats> GetCreatorStats() =>
     this.GetCreatorStatsImpl?.Invoke() ?? throw new NotImplementedException();
 
@@ -84,4 +86,7 @@ internal sealed class FakeApi : IHallOfFameApi {
     this.DownloadImageImpl?.Invoke(url) ?? throw new NotImplementedException();
 
   public Task<string> ResolveParadoxModsUsername(string url) => throw new NotImplementedException();
+
+  public Task PostUsageEvents(UsageBatch batch) =>
+    this.PostUsageEventsImpl?.Invoke(batch) ?? throw new NotImplementedException();
 }

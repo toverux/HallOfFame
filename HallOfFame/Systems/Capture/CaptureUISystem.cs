@@ -231,6 +231,10 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// and the method will not proceed.
   /// </summary>
   private async void TakeScreenshot() {
+    // Tracked before anything can stop it: the capture funnel starts at the press, which nothing
+    // else records, since the upload panel shows only once a capture succeeded.
+    Mod.UsageTracker.Track("capture_requested");
+
     // This bricks the current game session if this throws, so we will handle exceptions properly
     // here, as there is a non-zero chance of failure in this section (notably due to I/O).
     try {
@@ -285,6 +289,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     );
 
     this.CurrentScreenshot = screenshotSnapshot;
+
+    Mod.UsageTracker.Track("screenshot_captured");
   }
 
   private void ClearScreenshot() {
@@ -331,6 +337,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     // The city name is read live at upload time (the user can edit it after the screenshot is
     // taken), unlike the rest of the snapshot which is frozen at capture.
     var cityName = this.citySnapshotProvider.GetCityName();
+
+    Mod.UsageTracker.Track("upload_started");
 
     // The uploader never throws and drives its own progress/error reporting, so fire-and-forget.
     _ = this.screenshotUploader.Upload(this.CurrentScreenshot.Value, cityName, formValue);

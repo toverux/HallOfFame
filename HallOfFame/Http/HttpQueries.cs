@@ -142,6 +142,21 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   }
 
   /// <summary>
+  /// Sends a request expecting no body, a <c>204 No Content</c>.
+  /// A non-success result is status-mapped and thrown like <see cref="Send{T}"/> does.
+  /// </summary>
+  private static async Task SendForNoContent(UnityWebRequest request) {
+    await HttpQueries.SendRequest(request, HttpQueries.RequestTimeoutSeconds);
+
+    if (request.result is UnityWebRequest.Result.Success) {
+      return;
+    }
+
+    // Always throws on a failed request, the body of an error response being JSON.
+    await HttpQueries.ParseResponse<JsonError>(request, isDecodedOffMainThread: false);
+  }
+
+  /// <summary>
   /// Sends a request expecting a raw binary body (e.g., a CDN image) and returns the downloaded
   /// bytes.
   /// Unlike <see cref="Send{T}"/>, this applies no JSON status mapping: any non-success result is
@@ -226,6 +241,12 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
       "Authorization",
       Mod.CreatorIdentity.BuildAuthorizationHeader()
     );
+
+    // Lets the server tie the rows this request writes to the launch's usage events, and is left
+    // out with them when the player does not allow usage statistics.
+    if (Mod.UsageTracker.SessionHeader is {} sessionId) {
+      request.SetRequestHeader("X-Session-Id", sessionId);
+    }
 
     request.SetRequestHeader(
       "Accept-Language",

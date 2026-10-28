@@ -267,7 +267,7 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
       this.saveScreenshotBinding = new TriggerBinding(
         SlideshowUISystem.BindingGroup,
         "saveScreenshot",
-        () => { _ = this.conductor.Save(); }
+        this.SaveScreenshot
       );
 
       this.reportScreenshotBinding = new TriggerBinding(
@@ -354,6 +354,17 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
     catch (Exception ex) {
       // The details window then lists every setting under "Other", by its raw code.
       Mod.Log.ErrorRecoverable(ex);
+    }
+  }
+
+  /// <summary>
+  /// Saves the current screenshot to disk, tracked once the file is written, not on a failed
+  /// download.
+  /// The conductor never throws, so neither does this trigger handler.
+  /// </summary>
+  private async void SaveScreenshot() {
+    if (await this.conductor.Save()) {
+      Mod.UsageTracker.Track("screenshot_saved");
     }
   }
 

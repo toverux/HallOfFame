@@ -62,4 +62,10 @@ internal interface IHallOfFameApi {
   Task<byte[]> DownloadImage(string url);
 
   Task<string> ResolveParadoxModsUsername(string url);
+
+  /// <summary>
+  /// Stores a batch of usage events against the authenticated creator.
+  /// The server answers with no body.
+  /// </summary>
+  Task PostUsageEvents(UsageBatch batch);
 }

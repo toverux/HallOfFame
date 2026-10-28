@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Colossal.UI.Binding;
 using Game;
@@ -84,7 +85,14 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
       this.AddBinding(this.assetModsBinding);
 
       // Fire-and-forget edges: the service entry points are designed never to throw.
-      this.AddBinding(new TriggerBinding(DashboardUISystem.BindingGroup, "open", this.Open));
+      // The more-actions menu opens it in the main menu, the mod menu button everywhere else.
+      this.AddBinding(
+        new TriggerBinding(
+          DashboardUISystem.BindingGroup,
+          "open",
+          () => this.Open(GameManager.instance.gameMode is GameMode.MainMenu ? "menu" : "mod_menu")
+        )
+      );
 
       this.AddBinding(
         new TriggerBinding(
@@ -138,7 +146,7 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
         new TriggerBinding<ScreenshotUpdate>(
           DashboardUISystem.BindingGroup,
           "update",
-          update => { _ = this.service.Update(update); }
+          this.SaveEdit
         )
       );
 
@@ -146,7 +154,7 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
         new TriggerBinding(
           DashboardUISystem.BindingGroup,
           "delete",
-          () => { _ = this.service.Delete(); }
+          this.DeleteScreenshot
         )
       );
 
@@ -184,13 +192,15 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
       default: return;
     }
 
-    this.Open();
+    this.Open("options");
   }
 
   /// <summary>
   /// Opens the dashboard on a screenshot's detail view, the upload panel's shortcut.
   /// </summary>
   internal void OpenOnScreenshot(string screenshotId) {
+    DashboardUISystem.TrackOpened("upload_panel");
+
     _ = this.service.OpenOnScreenshot(screenshotId);
     _ = this.PublishAssetMods();
   }
@@ -251,9 +261,44 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
     return choice is 0;
   }
 
-  private void Open() {
+  /// <summary>
+  /// Tracks an opening of the dashboard with where it was opened from, the entry points being split
+  /// between the UI's trigger and the C# callers.
+  /// </summary>
+  private static void TrackOpened(string from) =>
+    Mod.UsageTracker.Track(
+      "dashboard_opened",
+      new Dictionary<string, object> {
+        ["from"] = from
+      }
+    );
+
+  private void Open(string from) {
+    DashboardUISystem.TrackOpened(from);
+
     _ = this.service.Open();
     _ = this.PublishAssetMods();
+  }
+
+  /// <summary>
+  /// Saves an edit, tracked once the server took it.
+  /// The service never throws, so neither does this trigger handler.
+  /// </summary>
+  private async void SaveEdit(ScreenshotUpdate update) {
+    if (await this.service.Update(update)) {
+      Mod.UsageTracker.Track("dashboard_screenshot_edited");
+    }
+  }
+
+  /// <summary>
+  /// Deletes the screenshot the detail view holds, tracked once it is gone, not on a refused
+  /// confirmation.
+  /// The service never throws, so neither does this trigger handler.
+  /// </summary>
+  private async void DeleteScreenshot() {
+    if (await this.service.Delete()) {
+      Mod.UsageTracker.Track("dashboard_screenshot_deleted");
+    }
   }
 
   /// <summary>

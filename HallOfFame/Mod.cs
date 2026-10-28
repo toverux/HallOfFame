@@ -15,6 +15,7 @@ using HallOfFame.Systems.Capture;
 using HallOfFame.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
+using Version = Game.Version;
 #if DEBUG
 using Game.SceneFlow;
 #endif
@@ -66,6 +67,17 @@ public sealed class Mod : IMod {
     Mod.creatorIdentityValue ??
     throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
+  /// <summary>
+  /// The usage tracker, queuing the usage events of this launch and holding its session, whose ID
+  /// the HTTP layer reads at call time for the session header.
+  /// Built in <see cref="OnLoad"/>; there is no setter, tests construct the tracker with fakes
+  /// instead.
+  /// </summary>
+  /// <exception cref="NullReferenceException">If the mod has not been loaded yet.</exception>
+  internal static UsageTracker UsageTracker =>
+    Mod.usageTrackerValue ??
+    throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
+
   internal static string GameScreenshotsPath { get; } =
     Path.Combine(EnvPath.kUserDataPath, "Screenshots");
 
@@ -86,6 +98,8 @@ public sealed class Mod : IMod {
   private static IHallOfFameApi? apiValue;
 
   private static CreatorIdentity? creatorIdentityValue;
+
+  private static UsageTracker? usageTrackerValue;
 
   private Settings? settingsValue;
 
@@ -138,6 +152,26 @@ public sealed class Mod : IMod {
         new Settings.DevDictionarySource()
       );
       #endif
+
+      // Built before the creator identity starts: its startup sync is the first request the session
+      // header goes on.
+      Mod.usageTrackerValue = new UsageTracker(
+        Mod.Api,
+        Mod.Log,
+        this.settingsValue,
+        new UsageSession(
+          // One session per launch, for the whole life of the process: the game is usually killed
+          // rather than closed, so a session ends with the last row that carries its ID.
+          Guid.NewGuid().ToString(),
+          typeof(Mod).Assembly.GetName().Version.ToString(3),
+          Version.current.shortVersion,
+          #if DEBUG
+          IsDebug: true
+          #else
+          IsDebug: false
+          #endif
+        )
+      );
 
       // Build the creator identity module and publish it as a singleton before starting it: its
       // startup sync issues the first authorized request, whose credential is assembled through

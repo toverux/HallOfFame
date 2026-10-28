@@ -754,7 +754,7 @@ public sealed class DashboardServiceTests {
 
     var other = sink.LastState.Screenshots[1];
 
-    await service.Update(update);
+    Assert.True(await service.Update(update));
 
     Assert.Equal([("a", update)], sent);
     Assert.Equal(["Detail:Saving:a", "Loaded:a,b", "Detail:Loaded:a"], sink.Log);
@@ -878,12 +878,13 @@ public sealed class DashboardServiceTests {
     var collection = sink.LastState.Screenshots;
 
     // Must not throw despite the failed save.
-    await service.Update(
+    var isSaved = await service.Update(
       new ScreenshotUpdate {
         CityName = "New Town"
       }
     );
 
+    Assert.False(isSaved);
     Assert.Equal(["Detail:Saving:a", "Detail:Loaded:a"], sink.Log);
     Assert.Same(held, sink.LastDetail.Screenshot);
     Assert.Same(collection, sink.LastState.Screenshots);
@@ -1026,7 +1027,7 @@ public sealed class DashboardServiceTests {
       stats: new Queue<CreatorStats>([new CreatorStats(), refreshed])
     );
 
-    await service.Delete();
+    Assert.True(await service.Delete());
 
     Assert.Same(held, Assert.Single(confirmed));
     Assert.Equal(["a"], deleted);
@@ -1047,7 +1048,7 @@ public sealed class DashboardServiceTests {
       sink
     );
 
-    await service.Delete();
+    Assert.False(await service.Delete());
 
     Assert.Empty(sink.Log);
     Assert.Equal(0, sink.DeletedSoundCount);
@@ -1100,7 +1101,7 @@ public sealed class DashboardServiceTests {
     var collection = sink.LastState.Screenshots;
 
     // Must not throw despite the failed deletion.
-    await service.Delete();
+    Assert.False(await service.Delete());
 
     Assert.Equal(["Detail:Deleting:a", "Detail:Loaded:a"], sink.Log);
     Assert.Same(held, sink.LastDetail.Screenshot);

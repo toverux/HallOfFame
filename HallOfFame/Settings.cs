@@ -46,7 +46,12 @@ namespace HallOfFame;
 [SettingsUIKeyboardAction(nameof(Settings.KeyBindingScreenshotDetails), Usages.kMenuUsage)]
 public sealed class
   Settings
-  : ModSetting, IJsonWritable, ICreatorIdentityStore, ISlideshowSettings, IMenuTourStore {
+  : ModSetting,
+    IJsonWritable,
+    ICreatorIdentityStore,
+    ISlideshowSettings,
+    IMenuTourStore,
+    IUsageSettings {
   private const string GroupYourProfile = "YourProfile";
 
   private const string GroupUIPreferences = "UIPreferences";
@@ -445,6 +450,10 @@ public sealed class
   [SettingsUIAdvanced]
   public bool DisableGlobalIllumination { get; set; }
 
+  /// <inheritdoc/>
+  [SettingsUISection(Settings.GroupAdvanced)]
+  public bool SendUsageStatistics { get; set; }
+
   /// <summary>
   /// Base URL of the Hall of Fame server.
   /// </summary>
@@ -656,6 +665,7 @@ public sealed class
 
     this.CreateLocalScreenshot = true;
     this.DisableGlobalIllumination = Settings.IsNvidiaGpu();
+    this.SendUsageStatistics = true;
     this.BaseUrl = "halloffame.cs2.mtq.io";
 
     this.ParadoxModsBrowsingPreference = "undefined";

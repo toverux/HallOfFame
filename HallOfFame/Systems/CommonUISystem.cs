@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Colossal.Localization;
+using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
+using Game;
 using Game.SceneFlow;
 using Game.Settings;
 using Game.UI;
@@ -18,9 +20,16 @@ namespace HallOfFame.Systems;
 
 /// <summary>
 /// UI System providing utilities used by various features of the mod.
+/// It also schedules the flushes of <see cref="Mod.UsageTracker"/>: on an interval, on each loading
+/// completion, and at quit.
 /// </summary>
 internal sealed partial class CommonUISystem : UISystemBase {
   private const string BindingGroup = "hallOfFame.common";
+
+  /// <summary>
+  /// The longest a usage event waits in memory, and so the most a killed game loses.
+  /// </summary>
+  private static readonly TimeSpan UsageFlushInterval = TimeSpan.FromSeconds(10);
 
   private readonly LocalizationManager localizationManager =
     GameManager.instance.localizationManager;
@@ -42,6 +51,13 @@ internal sealed partial class CommonUISystem : UISystemBase {
   private GetterValueBinding<string> localeBinding = null!;
 
   private GetterValueBinding<Settings> settingsBinding = null!;
+
+  /// <summary>
+  /// When the interval flush of the usage events is next due, in UTC.
+  /// Not read from Unity's clock: a reference to <c>Time</c> in a system makes the Entities source
+  /// generator emit a partial of it outside its namespace, which hides the system from its callers.
+  /// </summary>
+  private DateTime nextUsageFlushTime;
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -125,11 +141,39 @@ internal sealed partial class CommonUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Shows the message dialogs held until the UI listens, as the Paradox warning raised at boot.
+  /// Shows the message dialogs held until the UI listens, as the Paradox warning raised at boot,
+  /// and flushes the usage events when their interval is due.
   /// Leaves out the base update: the bindings update by hand when their value changes.
   /// </summary>
-  protected override void OnUpdate() =>
+  protected override void OnUpdate() {
     ErrorMessageDialog.ShowHeld(GameManager.instance.userInterface.appBindings);
+
+    var now = DateTime.UtcNow;
+
+    if (now < this.nextUsageFlushTime) {
+      return;
+    }
+
+    this.nextUsageFlushTime = now + CommonUISystem.UsageFlushInterval;
+
+    _ = Mod.UsageTracker.Flush();
+  }
+
+  /// <summary>
+  /// Tracks the context the player entered, the main menu, a city, or the editor, told apart by the
+  /// mode, and a new game from a loaded one by the purpose, then flushes the queue.
+  /// </summary>
+  protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode) {
+    Mod.UsageTracker.Track(
+      "context_entered",
+      new Dictionary<string, object> {
+        ["mode"] = mode.ToString(),
+        ["purpose"] = purpose.ToString()
+      }
+    );
+
+    _ = Mod.UsageTracker.Flush();
+  }
 
   protected override void OnDestroy() {
     base.OnDestroy();
@@ -139,6 +183,11 @@ internal sealed partial class CommonUISystem : UISystemBase {
     Mod.Settings.onSettingsApplied -= this.OnSettingsApplied;
 
     Mod.Settings.PublicCreatorIDChanged -= this.OnPublicCreatorIDChanged;
+
+    // The world lives until the game quits, and is destroyed before Application.quitting fires
+    // (GameManager.TerminateGame, decompile), so the quit flush goes here.
+    // Best effort: a request started while the game quits may never leave.
+    _ = Mod.UsageTracker.Flush();
   }
 
   private void OnActiveDictionaryChanged() {
@@ -147,6 +196,9 @@ internal sealed partial class CommonUISystem : UISystemBase {
 
   private void OnSettingsApplied(Setting setting) {
     this.settingsBinding.Update();
+
+    // Discards the queued usage events at once when the player just turned them off.
+    _ = Mod.UsageTracker.Flush();
   }
 
   private void OnPublicCreatorIDChanged() {
