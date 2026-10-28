@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Colossal.Localization;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
+using Game.Input;
 using Game.SceneFlow;
 using Game.Settings;
 using Game.UI;
@@ -20,11 +22,13 @@ namespace HallOfFame.Systems;
 
 /// <summary>
 /// UI System providing utilities used by various features of the mod.
-/// It also schedules the flushes of <see cref="Mod.UsageTracker"/>: on an interval, on each loading
-/// completion, and at quit.
+/// It also receives the UI's usage events into <see cref="Mod.UsageTracker"/>, and schedules its
+/// flushes: on an interval, on each loading completion, and at quit.
 /// </summary>
 internal sealed partial class CommonUISystem : UISystemBase {
   private const string BindingGroup = "hallOfFame.common";
+
+  private const string UsageBindingGroup = "hallOfFame.usage";
 
   /// <summary>
   /// The longest a usage event waits in memory, and so the most a killed game loses.
@@ -47,6 +51,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
   private TriggerBinding<string> copyViewerLinkBinding = null!;
 
   private TriggerBinding<bool, string> logJavaScriptErrorBinding = null!;
+
+  private TriggerBinding<string, Dictionary<string, string>> trackUsageBinding = null!;
 
   private GetterValueBinding<string> localeBinding = null!;
 
@@ -118,6 +124,15 @@ internal sealed partial class CommonUISystem : UISystemBase {
         this.LogJavaScriptError
       );
 
+      this.trackUsageBinding = new TriggerBinding<string, Dictionary<string, string>>(
+        CommonUISystem.UsageBindingGroup,
+        "trackUsage",
+        CommonUISystem.TrackUsage,
+        // Passed explicitly: the reader the binding would create for a dictionary has no
+        // parameterless constructor to be created with, which throws.
+        reader2: new DictionaryReader<string, string>()
+      );
+
       this.AddBinding(this.localeBinding);
       this.AddBinding(this.settingsBinding);
       this.AddBinding(this.openModSettingsBinding);
@@ -127,6 +142,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
       this.AddBinding(this.openViewerLinkBinding);
       this.AddBinding(this.copyViewerLinkBinding);
       this.AddBinding(this.logJavaScriptErrorBinding);
+      this.AddBinding(this.trackUsageBinding);
 
       this.localizationManager.onActiveDictionaryChanged +=
         this.OnActiveDictionaryChanged;
@@ -383,6 +399,25 @@ internal sealed partial class CommonUISystem : UISystemBase {
     );
 
     Mod.Log.ErrorSilent(error);
+  }
+
+  /// <summary>
+  /// Tracks a usage event of the moments only the UI sees.
+  /// A slideshow navigation is stamped with the device the game reads input from at this moment, as
+  /// the UI's <c>via</c> alone does not tell it.
+  /// </summary>
+  private static void TrackUsage(string name, Dictionary<string, string> properties) {
+    var eventProperties = properties.ToDictionary(
+      static pair => pair.Key,
+      static pair => (object) pair.Value
+    );
+
+    if (name is "slideshow_navigated") {
+      eventProperties["device"] =
+        InputManager.instance.isGamepadControlSchemeActive ? "gamepad" : "keyboard_mouse";
+    }
+
+    Mod.UsageTracker.Track(name, eventProperties);
   }
 
   private class FakeSettingComparer : EqualityComparer<Settings> {

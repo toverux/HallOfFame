@@ -14,6 +14,7 @@ import {
 import {
   emitEvent,
   getTriggers,
+  getUsageEvents,
   resetBindings,
   setBinding,
   setTranslations
@@ -45,6 +46,7 @@ describe('ScreenshotDetailsWindow', () => {
           capabilities: ['description']
         })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -71,6 +73,7 @@ describe('ScreenshotDetailsWindow', () => {
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -89,6 +92,7 @@ describe('ScreenshotDetailsWindow', () => {
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -118,6 +122,7 @@ describe('ScreenshotDetailsWindow', () => {
         <ScreenshotDetailsWindow
           screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
           openTab='description'
+          from='menu'
           onClose={noop}
         />
       </EventInputProvider>
@@ -146,6 +151,59 @@ describe('ScreenshotDetailsWindow', () => {
     emitEvent('input.onActionPerformed.update', { action: 'Switch Tab', value: -1 });
 
     expect(await screen.findByText(playset)).toBeDefined();
+
+    expect(getUsageEvents()).toEqual([
+      ['screenshot_details_opened', { from: 'menu' }],
+      ['screenshot_details_tab_changed', { tab: 'photoModeSettings' }],
+      ['screenshot_details_tab_changed', { tab: 'playset' }],
+      ['screenshot_details_tab_changed', { tab: 'description' }],
+      ['screenshot_details_tab_changed', { tab: 'playset' }]
+    ]);
+  });
+
+  it(`tracks each opening once, with where it opened from, and the tab changes apart`, async () => {
+    const user = userEvent.setup();
+
+    const screenshot = makeScreenshot({ description: 'A city.', capabilities: ['description'] });
+
+    const { rerender } = render(
+      <ScreenshotDetailsWindow
+        screenshot={screenshot}
+        openTab='description'
+        from='dashboard'
+        onClose={noop}
+      />
+    );
+
+    await user.click(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]'));
+
+    // Selecting the tab already open changes nothing.
+    await user.click(screen.getByText('HallOfFame.UI.Menu.ScreenshotDetails.TAB[Playset]'));
+
+    rerender(
+      <ScreenshotDetailsWindow
+        screenshot={screenshot}
+        openTab={undefined}
+        from='dashboard'
+        onClose={noop}
+      />
+    );
+
+    // Reopened on another tab than the first, which is its opening rather than a change.
+    rerender(
+      <ScreenshotDetailsWindow
+        screenshot={screenshot}
+        openTab='photoModeSettings'
+        from='dashboard'
+        onClose={noop}
+      />
+    );
+
+    expect(getUsageEvents()).toEqual([
+      ['screenshot_details_opened', { from: 'dashboard' }],
+      ['screenshot_details_tab_changed', { tab: 'playset' }],
+      ['screenshot_details_opened', { from: 'dashboard' }]
+    ]);
   });
 
   it(`leaves unsupported markdown as literal text`, () => {
@@ -156,6 +214,7 @@ describe('ScreenshotDetailsWindow', () => {
           capabilities: ['description']
         })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -168,6 +227,7 @@ describe('ScreenshotDetailsWindow', () => {
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: '', capabilities: ['description'] })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -182,6 +242,7 @@ describe('ScreenshotDetailsWindow', () => {
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: '', capabilities: [] })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -207,6 +268,7 @@ describe('ScreenshotDetailsWindow', () => {
           cityNameLocale: 'fr-FR'
         })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -227,6 +289,7 @@ describe('ScreenshotDetailsWindow', () => {
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ cityName: 'Ville-Lumière', cityNameLocale: 'fr-FR' })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -239,6 +302,7 @@ describe('ScreenshotDetailsWindow', () => {
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
         openTab={undefined}
+        from='menu'
         onClose={noop}
       />
     );
@@ -253,6 +317,7 @@ describe('ScreenshotDetailsWindow', () => {
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ id: 'a', description: 'First.', capabilities })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -261,6 +326,7 @@ describe('ScreenshotDetailsWindow', () => {
       <ScreenshotDetailsWindow
         screenshot={makeScreenshot({ id: 'b', description: 'Second.', capabilities })}
         openTab='description'
+        from='menu'
         onClose={noop}
       />
     );
@@ -279,14 +345,24 @@ describe('ScreenshotDetailsWindow', () => {
     const { rerender, unmount } = render(
       // oxlint-disable-next-line react/jsx-no-constructed-context-values - one fixture, reused below
       <TransitionContext.Provider value={groupContext}>
-        <ScreenshotDetailsWindow screenshot={screenshot} openTab='description' onClose={noop} />
+        <ScreenshotDetailsWindow
+          screenshot={screenshot}
+          openTab='description'
+          from='menu'
+          onClose={noop}
+        />
       </TransitionContext.Provider>
     );
 
     rerender(
       // oxlint-disable-next-line react/jsx-no-constructed-context-values - the fixture from above
       <TransitionContext.Provider value={groupContext}>
-        <ScreenshotDetailsWindow screenshot={screenshot} openTab={undefined} onClose={noop} />
+        <ScreenshotDetailsWindow
+          screenshot={screenshot}
+          openTab={undefined}
+          from='menu'
+          onClose={noop}
+        />
       </TransitionContext.Provider>
     );
 
@@ -312,6 +388,7 @@ describe('ScreenshotDetailsWindow', () => {
           capabilities: ['description']
         })}
         openTab='description'
+        from='menu'
         onClose={onClose}
       />
     );
@@ -339,6 +416,7 @@ describe('ScreenshotDetailsWindow', () => {
         <ScreenshotDetailsWindow
           screenshot={makeScreenshot({ description: 'A city.', capabilities: ['description'] })}
           openTab='description'
+          from='menu'
           onClose={onClose}
         />
       </EventInputProvider>
@@ -384,6 +462,7 @@ describe('ScreenshotDetailsWindow', () => {
         <ScreenshotDetailsWindow
           screenshot={makeScreenshot({ capabilities, ...screenshot })}
           openTab='photoModeSettings'
+          from='menu'
           onClose={noop}
         />
       );
@@ -671,6 +750,7 @@ describe('ScreenshotDetailsWindow', () => {
         <ScreenshotDetailsWindow
           screenshot={makeScreenshot(screenshot)}
           openTab='playset'
+          from='menu'
           onClose={noop}
         />
       );
@@ -882,6 +962,7 @@ describe('ScreenshotDetailsWindow', () => {
         event: 'hallOfFame.common.openModPage',
         args: [traffic.paradoxModId]
       });
+      expect(getUsageEvents()).toContainEqual(['asset_mod_page_opened', { from: 'details' }]);
     });
 
     const KIND = 'HallOfFame.UI.Menu.ScreenshotDetails.PLAYSET_KIND';
@@ -1032,6 +1113,7 @@ describe('ScreenshotDetailsWindow', () => {
             capabilities: [...shared.capabilities, 'description']
           })}
           openTab='description'
+          from='menu'
           onClose={noop}
         />
       );

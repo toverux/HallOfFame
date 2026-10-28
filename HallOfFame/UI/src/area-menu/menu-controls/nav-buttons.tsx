@@ -65,7 +65,7 @@ export const MenuControlsNextButton = memo(
       phase,
       // SetTimeout is used to give time to the key press .*active class to show briefly before
       // [disabled] is set.
-      () => !disabled && (setTimeout(bindings.nextScreenshot, 0), true),
+      () => !disabled && (setTimeout(() => navigate('next', 'action'), 0), true),
       'select-item'
     );
 
@@ -81,7 +81,7 @@ export const MenuControlsNextButton = memo(
           src={doubleArrowRightTriangleSrc}
           tinted={true}
           disabled={isLoading}
-          {...snappyOnSelect(bindings.nextScreenshot)}
+          {...snappyOnSelect(() => navigate('next', 'button'))}
         />
       </MenuControlsInputHintTooltip>
     );
@@ -109,7 +109,7 @@ export const MenuControlsPreviousButton = memo(
       phase,
       // SetTimeout is used to give time to the key press .*active class to show briefly before
       // [disabled] is set.
-      () => !disabled && (setTimeout(bindings.previousScreenshot, 0), true),
+      () => !disabled && (setTimeout(() => navigate('previous', 'action'), 0), true),
       'select-item'
     );
 
@@ -125,7 +125,7 @@ export const MenuControlsPreviousButton = memo(
           src={doubleArrowRightTriangleSrc}
           tinted={true}
           disabled={disabled}
-          {...snappyOnSelect(bindings.previousScreenshot)}
+          {...snappyOnSelect(() => navigate('previous', 'button'))}
         />
       </MenuControlsInputHintTooltip>
     );
@@ -241,7 +241,7 @@ export const MenuControlsLikeButton = memo(
  * The select sound is dropped because the vanilla `toggle` plays the dropdown's own, and the two
  * would otherwise land together.
  *
- * It reports each opening, which the menu tour's step pointing at the menu needs.
+ * It reports each opening, which the menu tour's step pointing at the menu needs, and tracks it.
  */
 export const MenuControlsMoreActionsButton = memo((): ReactElement => {
   const { visible, toggle } = useContext(DropdownContext);
@@ -250,6 +250,7 @@ export const MenuControlsMoreActionsButton = memo((): ReactElement => {
   useEffect(() => {
     if (visible) {
       bindings.reportMoreActionsOpened();
+      bindings.trackUsage('more_actions_opened', {});
     }
   }, [visible]);
 
@@ -263,3 +264,18 @@ export const MenuControlsMoreActionsButton = memo((): ReactElement => {
     />
   );
 });
+
+/**
+ * Moves the slideshow, tracking how the player asked for it: an on-screen button or an input
+ * action. A gamepad presses neither button, as a live walk of the focus tree showed: the vanilla
+ * `Button` answers a select only while focused, and the main menu never moves its focus onto them.
+ */
+function navigate(direction: 'previous' | 'next', via: 'button' | 'action'): void {
+  bindings.trackUsage('slideshow_navigated', { direction, via });
+
+  if (direction == 'next') {
+    bindings.nextScreenshot();
+  } else {
+    bindings.previousScreenshot();
+  }
+}

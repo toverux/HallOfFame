@@ -90,7 +90,7 @@ export function DashboardActionsMenu({
               value='viewer'
               icon={externalLinkSrc}
               iconTint={iconTintFromStylesheet}
-              onChange={() => bindings.openViewerLink(screenshot.viewerUrl)}>
+              onChange={() => bindings.openViewerLink(screenshot.viewerUrl, 'dashboard')}>
               {translate('HallOfFame.UI.Dashboard.EDIT_ACTION[Open in Web Viewer]')}
             </DropdownItem>
           </>

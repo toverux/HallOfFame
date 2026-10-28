@@ -1,6 +1,7 @@
 import { trigger, useValue } from 'cs2/api';
 import type { CreatorSocialLink, Mod } from '../../common';
 import { lazyBindValue } from './lazy-value-binding';
+import { trackUsage } from './usage';
 
 const GROUP = 'hallOfFame.common';
 
@@ -74,32 +75,47 @@ export function openModSettings(tab: string): void {
   trigger(GROUP, 'openModSettings', tab);
 }
 
-export function openModPage(mod: Mod): void {
+/**
+ * Opens a mod's Paradox Mods page, tracked with the place it was opened {@link from}.
+ */
+export function openModPage(mod: Mod, from: 'controls' | 'details'): void {
   trigger(GROUP, 'openModPage', mod.paradoxModId);
+
+  trackUsage('asset_mod_page_opened', { from });
 }
 
+/**
+ * Opens a creator's social link, on Paradox Mods or in the player's default browser, and tracks it.
+ */
 export function openSocialLink({ platform, link }: CreatorSocialLink): void {
   if (platform == 'paradoxmods') {
     trigger(GROUP, 'openCreatorPage', link);
   } else {
     trigger(GROUP, 'openWebPage', link);
   }
+
+  trackUsage('social_link_opened', {});
 }
 
 /**
  * Opens a web viewer link in the player's default browser, {@link url} being the server's tracked
- * redirect so that the visit is counted.
+ * redirect so that the visit is counted, and tracks the place it was opened {@link from}.
  */
-export function openViewerLink(url: string): void {
+export function openViewerLink(url: string, from: 'menu' | 'dashboard'): void {
   trigger(GROUP, 'openViewerLink', url);
+
+  trackUsage('viewer_opened', { from });
 }
 
 /**
  * Puts a web viewer link on the system clipboard, {@link url} being the plain viewer page rather
- * than the tracked redirect, which is what belongs in a shared link.
+ * than the tracked redirect, which is what belongs in a shared link, and tracks the place it was
+ * copied {@link from}.
  */
-export function copyViewerLink(url: string): void {
+export function copyViewerLink(url: string, from: 'menu'): void {
   trigger(GROUP, 'copyViewerLink', url);
+
+  trackUsage('viewer_link_copied', { from });
 }
 
 /**

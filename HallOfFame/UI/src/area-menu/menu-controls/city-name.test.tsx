@@ -2,7 +2,13 @@ import { afterEach, describe, expect, it } from 'bun:test';
 import { cleanup, render, type RenderResult, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { makeCreator, makeScreenshot, makeSettings } from '../../testing/fixtures';
-import { getTriggers, resetBindings, setBinding, setTranslations } from '../../testing/game-setup';
+import {
+  getTriggers,
+  getUsageEvents,
+  resetBindings,
+  setBinding,
+  setTranslations
+} from '../../testing/game-setup';
 import { MenuControlsCityName } from './city-name';
 
 afterEach(() => {
@@ -104,6 +110,7 @@ describe('MenuControlsCityName', () => {
     expect(getTriggers().filter(({ event }) => event == openEvent)).toEqual([
       { event: openEvent, args: ['https://api.test/screenshots/screenshot-1/viewer'] }
     ]);
+    expect(getUsageEvents()).toEqual([['viewer_opened', { from: 'menu' }]]);
   });
 
   it(`opens the tracked viewer URL of the creator from the creator menu`, async () => {
@@ -130,6 +137,7 @@ describe('MenuControlsCityName', () => {
     expect(getTriggers().filter(({ event }) => event == copyEvent)).toEqual([
       { event: copyEvent, args: ['https://viewer.test/city/screenshot-1'] }
     ]);
+    expect(getUsageEvents()).toEqual([['viewer_link_copied', { from: 'menu' }]]);
   });
 
   it(`copies the clean viewer URL of the creator, not the tracked one`, async () => {
@@ -176,6 +184,25 @@ describe('MenuControlsCityName', () => {
 
     expect(screen.getByText('Shelbyville')).toBeDefined();
     expect(screen.queryByText(openLabel)).toBeNull();
+  });
+
+  it(`opens a creator's social link, and tracks it`, async () => {
+    renderCityName({
+      creator: makeCreator({
+        id: 'creator-1',
+        creatorName: 'Alice',
+        socials: [{ platform: 'youtube', link: 'https://youtube.test/alice' }]
+      })
+    });
+
+    // The social buttons are the only buttons while no menu is open.
+    await userEvent.setup().click(screen.getByRole('button'));
+
+    expect(getTriggers()).toContainEqual({
+      event: 'hallOfFame.common.openWebPage',
+      args: ['https://youtube.test/alice']
+    });
+    expect(getUsageEvents()).toEqual([['social_link_opened', {}]]);
   });
 
   it(`still opens the menu for an anonymous creator`, async () => {

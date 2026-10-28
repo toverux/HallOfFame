@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { makeJsonMod, makeMod, makeScreenshot, noop } from '../../testing/fixtures';
-import { getTriggers, resetBindings, setBinding } from '../../testing/game-setup';
+import { getTriggers, getUsageEvents, resetBindings, setBinding } from '../../testing/game-setup';
 import { DashboardEditForm } from './dashboard-edit-form';
 
 afterEach(() => {
@@ -226,6 +226,7 @@ describe('DashboardEditForm', () => {
     await userEvent.setup().click(screen.getByText(openViewerLabel));
 
     expect(triggered(openViewerEvent)).toEqual([[screenshot.viewerUrl]]);
+    expect(getUsageEvents()).toEqual([['viewer_opened', { from: 'dashboard' }]]);
   });
 
   it(`shows the screenshot in the slideshow, from the main menu alone`, async () => {

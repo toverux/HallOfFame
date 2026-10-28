@@ -123,6 +123,16 @@ export function getTriggers(): readonly RecordedTrigger[] {
 }
 
 /**
+ * Returns the usage events `trackUsage` fired since the last {@link resetBindings} call, each as
+ * its name and properties.
+ */
+export function getUsageEvents(): ReadonlyArray<readonly unknown[]> {
+  return recordedTriggers
+    .filter(({ event }) => event == 'hallOfFame.usage.trackUsage')
+    .map(({ args }) => args);
+}
+
+/**
  * Clears all configured bindings, translations and recorded triggers.
  * Call in an `afterEach` with `cleanup`.
  */

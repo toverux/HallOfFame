@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { getTriggers, resetBindings } from '../../testing/game-setup';
+import { getTriggers, getUsageEvents, resetBindings } from '../../testing/game-setup';
 import { MenuControlsMoreActionsMenu } from './more-actions-menu';
 
 afterEach(() => {
@@ -28,7 +28,7 @@ describe('MenuControlsMoreActionsMenu', () => {
     await waitFor(() => expect(screen.queryByText(item)).toBeNull());
   });
 
-  it(`reports each opening of the menu, for the menu tour`, async () => {
+  it(`reports each opening of the menu, for the menu tour and as a usage event`, async () => {
     const user = userEvent.setup();
 
     render(<MenuControlsMoreActionsMenu isSaving={false} saveDirectory='' />);
@@ -40,6 +40,7 @@ describe('MenuControlsMoreActionsMenu', () => {
     expect(getTriggers().map(trigger => trigger.event)).toContain(
       'hallOfFame.menuTour.moreActionsOpened'
     );
+    expect(getUsageEvents()).toEqual([['more_actions_opened', {}]]);
 
     // Closed again, so the popup's exit timers fire here rather than inside the next test.
     await user.click(toggle);

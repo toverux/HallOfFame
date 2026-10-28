@@ -90,6 +90,7 @@ export function DashboardDetail({
         <ScreenshotDetailsWindow
           screenshot={full}
           openTab={detailsTab}
+          from='dashboard'
           onClose={() => setDetailsTab(undefined)}
         />
       )}

@@ -172,6 +172,7 @@ export function MenuControlsContent(): ReactElement {
       <ScreenshotDetailsWindow
         screenshot={menuState.screenshot}
         openTab={detailsTab}
+        from='menu'
         onClose={closeDetails}
       />
 
@@ -263,7 +264,7 @@ const MenuControlsShowcasedMod = memo(({ mod }: Readonly<{ mod: Mod }>): ReactEl
     <Button
       variant='menu'
       className={styles.assetButton}
-      onSelect={() => bindings.openModPage(mod)}>
+      onSelect={() => bindings.openModPage(mod, 'controls')}>
       <div
         className={styles.assetButtonThumbnail}
         style={{ backgroundImage: `url(${mod.thumbnailUrl})` }}

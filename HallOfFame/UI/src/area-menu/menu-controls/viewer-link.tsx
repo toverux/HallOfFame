@@ -67,7 +67,7 @@ export function MenuControlsViewerLink({
   }
 
   function handleCopy(): void {
-    bindings.copyViewerLink(shareUrl);
+    bindings.copyViewerLink(shareUrl, 'menu');
 
     setIsCopied(true);
   }
@@ -86,7 +86,7 @@ export function MenuControlsViewerLink({
               value='open'
               icon={externalLinkSrc}
               iconTint={iconTintFromStylesheet}
-              onChange={() => bindings.openViewerLink(trackedUrl)}>
+              onChange={() => bindings.openViewerLink(trackedUrl, 'menu')}>
               {translate('HallOfFame.UI.Menu.MenuControls.LINK_ACTION[Open]')}
             </DropdownItem>
 

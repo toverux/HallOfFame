@@ -9,7 +9,15 @@ import {
   MarkdownRenderer,
   Scrollable
 } from 'cs2/ui';
-import { memo, type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react';
+import {
+  memo,
+  type ReactElement,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import type { Mod, Screenshot } from '../../common';
 import { ModalBackdrop, ModalHost } from '../../components/modal';
 import { PreloadImages } from '../../components/preload-images';
@@ -91,6 +99,7 @@ export const ScreenshotDetailsWindow = memo(
   ({
     screenshot,
     openTab,
+    from,
     onClose
   }: Readonly<{
     screenshot: Screenshot;
@@ -98,19 +107,35 @@ export const ScreenshotDetailsWindow = memo(
      * The tab the window opens on, `undefined` while it is closed.
      */
     openTab: DetailsTabId | undefined;
+    /**
+     * Where the window is opened from, which its usage events report.
+     */
+    from: 'menu' | 'dashboard';
     onClose: () => void;
-  }>): ReactElement => (
-    <ModalHost>
-      {openTab != undefined && (
-        <DetailsModal
-          key='details'
-          screenshot={screenshot}
-          initialTab={openTab}
-          onClose={onClose}
-        />
-      )}
-    </ModalHost>
-  )
+  }>): ReactElement => {
+    const isOpen = openTab != undefined;
+
+    // On the closed-to-open transition, rather than on the modal's mount: a window reopened while
+    // its exit plays keeps the modal it had.
+    useEffect(() => {
+      if (isOpen) {
+        bindings.trackUsage('screenshot_details_opened', { from });
+      }
+    }, [isOpen, from]);
+
+    return (
+      <ModalHost>
+        {openTab != undefined && (
+          <DetailsModal
+            key='details'
+            screenshot={screenshot}
+            initialTab={openTab}
+            onClose={onClose}
+          />
+        )}
+      </ModalHost>
+    );
+  }
 );
 
 function DetailsModal({
@@ -171,6 +196,17 @@ function DetailsModal({
 
   // Not kept across openings: the window reopens on the tab it is opened on.
   const [selectedTab, setSelectedTab] = useState(initialTab);
+
+  // The tab last tracked, so that the tab the window opens on is not tracked as a change.
+  const trackedTabRef = useRef(initialTab);
+
+  useEffect(() => {
+    if (selectedTab != trackedTabRef.current) {
+      trackedTabRef.current = selectedTab;
+
+      bindings.trackUsage('screenshot_details_tab_changed', { tab: selectedTab });
+    }
+  }, [selectedTab]);
 
   // Switch Tab is handled here rather than by the vanilla tab bar, which waits for the focus the
   // way Back would. It wraps around at either end.
@@ -1192,7 +1228,7 @@ function PlaysetModRow({
           theme={playsetRowButtonTheme}
           // Compared by value, so a row keeps its focus across the list's re-renders.
           focusKey={`mod-${mod.id}`}
-          onSelect={() => bindings.openModPage(mod)}>
+          onSelect={() => bindings.openModPage(mod, 'details')}>
           <div
             className={styles.playsetRowThumbnail}
             style={{ backgroundImage: `url(${deriveModThumbnailUri(mod.thumbnailUrl)})` }}

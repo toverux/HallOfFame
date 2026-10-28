@@ -6,6 +6,7 @@ import { makeScreenshot, noop, photoModeCatalog } from '../../testing/fixtures';
 import {
   emitEvent,
   getTriggers,
+  getUsageEvents,
   resetBindings,
   setBinding,
   setTranslations
@@ -619,6 +620,7 @@ describe('CreatorDashboard', () => {
         .map(trigger => trigger.args)
     ).toEqual([['a']]);
     expect(screen.queryByText(photoModeNotice)).toBeNull();
+    expect(getUsageEvents()).toEqual([['screenshot_details_opened', { from: 'dashboard' }]]);
   });
 
   it(`opens the details window on the photo settings from their fact`, () => {

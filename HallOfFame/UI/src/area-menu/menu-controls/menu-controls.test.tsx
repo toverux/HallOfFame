@@ -1,7 +1,13 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { makeMod, makeScreenshot, makeSettings, makeSkyveVerdict } from '../../testing/fixtures';
-import { resetBindings, setBinding, setTranslations } from '../../testing/game-setup';
+import {
+  getTriggers,
+  getUsageEvents,
+  resetBindings,
+  setBinding,
+  setTranslations
+} from '../../testing/game-setup';
 import { MenuControlsContent } from './menu-controls';
 
 afterEach(() => {
@@ -62,6 +68,36 @@ describe('MenuControlsContent', () => {
 
     // The row's preview alone.
     expect(screen.getAllByText('A town.')).toHaveLength(1);
+  });
+
+  it(`tracks the details window opening from the menu, from the row as from the key`, () => {
+    setBinding(
+      'hallOfFame.slideshow',
+      'screenshot',
+      makeScreenshot({ description: 'A city.', capabilities: ['description'] })
+    );
+
+    render(<MenuControlsContent />);
+
+    fireEvent.click(screen.getByText('A city.'));
+
+    // The key closes the window, then opens it again.
+    act(() => {
+      setBinding('hallOfFame.slideshow', 'screenshotDetailsInputAction.phase', 'Performed');
+    });
+
+    act(() => {
+      setBinding('hallOfFame.slideshow', 'screenshotDetailsInputAction.phase', 'Canceled');
+    });
+
+    act(() => {
+      setBinding('hallOfFame.slideshow', 'screenshotDetailsInputAction.phase', 'Performed');
+    });
+
+    expect(getUsageEvents()).toEqual([
+      ['screenshot_details_opened', { from: 'menu' }],
+      ['screenshot_details_opened', { from: 'menu' }]
+    ]);
   });
 
   it(`hides the details row by setting while the key still opens the window`, () => {
@@ -137,6 +173,18 @@ describe('MenuControlsContent', () => {
 
       expect(skyveLine()?.textContent).toBe('Skyve: Caution when using it');
       expect(skyveLine()?.getAttribute('data-tone')).toBe('warning');
+    });
+
+    it(`opens the showcased mod's page, and tracks it as opened from the controls`, () => {
+      showcase();
+
+      fireEvent.click(screen.getByText('Traffic'));
+
+      expect(getTriggers()).toContainEqual({
+        event: 'hallOfFame.common.openModPage',
+        args: [1]
+      });
+      expect(getUsageEvents()).toEqual([['asset_mod_page_opened', { from: 'controls' }]]);
     });
 
     it(`shows no Skyve line without a verdict`, () => {
