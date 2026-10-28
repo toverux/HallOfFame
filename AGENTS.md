@@ -71,6 +71,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `mise icons:fontawesome <style> <icon>`: Download a Font Awesome 7.3.1 icon, Free or Pro (ex. `duotone-light aperture`), into `HallOfFame/UI/src/icons/fontawesome` as `<icon>-<style>.svg`, its license comment stripped. List a Pro icon in that folder's `NOTICE`.
 - `mise images:optimize`: Shrink the Paradox Mods images in `HallOfFame/Properties`, previews quantized by pngquant, everything recompressed by oxipng. Idempotent.
 - `mise publish:page`: Push `PublishConfiguration.xml` to the Paradox Mods page (description, tags, thumbnail, screenshots) without shipping a version; runs `images:optimize` first.
+  The build writes the page's description and changelog into the XML from `HallOfFame/LongDescription.md` and `HallOfFame/ChangeLog.md`, for this and `mise publish` alike: edit them there.
 - `mise publish`: Build in Release and publish a new version on Paradox Mods.
 
 Run `mise tasks` to see the full shortcut list; append arguments freely, mise passes them through (ex. `mise some:task --some-arg`).
