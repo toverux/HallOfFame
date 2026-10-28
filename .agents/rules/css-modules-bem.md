@@ -25,7 +25,7 @@ Always access them via `import * as styles from './x.module.scss'`.
 - One `*.module.scss` per component file, colocated next to its `*.tsx`.
   When a component is split into sub-components, split its stylesheet to match.
 - Cross-subcomponent SCSS variables and mixins live in a colocated `shared.scss` partial.
-  It must contain only variables and mixins (no top-level rules), so `@use` never re-emits CSS per importer.
+  It must contain only variables, functions and mixins (no top-level rules), so `@use` never re-emits CSS per importer.
 - Cross-subcomponent emitted classes and shared trait blocks live in a colocated `shared.module.scss`, mixed in via `classNames`.
   Do not `composes` from these SCSS modules: the type generator parses a `composes` target as plain CSS and chokes on its SCSS syntax.
 - Component-local tokens stay in the component module, not in the shared files.

@@ -39,7 +39,7 @@ A Cities: Skylines II mod has two halves talking over cohtml bindings: the C# lo
 - `HallOfFame/Systems`: ECS-style UI systems driving the mod's runtime behavior.
   `Capture/` holds `CaptureUISystem` plus its engine-bound collaborators (`ScreenshotCapturer`, `CitySnapshotProvider`).
 - `HallOfFame/Services`: Plain (non-ECS) classes holding logic extracted from systems.
-- `HallOfFame/Reflection`: Proxy/accessor classes reaching into private game internals via reflection (screen utilities, error dialogs, Paradox SDK platform).
+- `HallOfFame/Reflection`: Proxy/accessor classes reaching into private game internals via reflection (screen utilities, the error dialog manager and the dialog answer callback, Paradox SDK platform).
 - `HallOfFame/Logging`: The mod-owned logging seam (`IModLog` + `ModLog`, reached through `Mod.Log`) wrapping the engine's `Colossal.Logging.ILog` so logging logic stays unit-testable off-engine.
 - `HallOfFame/Utils`: Small helpers and extensions (localization, input bindings, etc.), plus `Writers/`, the outbound C# to cohtml binding writers (`IWriter<T>` implementations and the helpers they share).
 - `HallOfFame/Locales`: Localization files, one JSON per language, keyed `HallOfFame.<Area>.<KEY>`, plus `Skyve/`, Skyve's own labels, keyed bare (see Guidelines).
@@ -94,6 +94,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 - One `*.module.scss` per component file, colocated with its `*.tsx`, class names following the BEM-derived convention in `.agents/rules/css-modules-bem.md`.
 - Every layout length is in `rem` or `em`, which scale with the viewport: `px` is only correct at 1920 wide, where `1rem` happens to equal `1px`, and drifts both ways at every other resolution.
 - SCSS reaches a vanilla color only through its `vanilla.$…` variable in `HallOfFame/UI/src/vanilla-vars.scss`, never a raw `var(--…)` nor its value copied as a literal (a tint is `color.change(vanilla.$…, $alpha: …)`): add a missing one there with its latest known value in a trailing comment, so a game update that moves a color shows in one file.
+- An error reaches the player by what the mod knew of it: a failed fetch shows in its panel with Retry; a foreseen failure, an `HttpException` through `GetUserFriendlyMessage`, in `ErrorMessageDialog`, the game's message dialog with a single Close; an unforeseen exception, through `Mod.Log.ErrorRecoverable` or `ErrorFatal`, in the game's error dialog, Quit Game included, as the JavaScript error report does for its stack; background work logs through `ErrorSilent` alone.
 - Tooltips come from `HallOfFame/UI/src/components/tooltip.tsx`, never from `cs2/ui`: the vanilla one silently drops `direction` and `alignment`, so every tooltip placed through it opens upwards.
 - Focus keys are compared by value, so a plain string like `` `mod-${mod.id}` `` keeps a list row attached across re-renders, where a `FocusSymbol` memoized per row costs more for the same result.
 - A `vanilla-modules` stub may declare more of the vanilla API than the mod calls today: its unused members are kept on purpose, for the next consumer.
