@@ -1,6 +1,6 @@
 import classNames from 'classnames';
-import { Button, type ButtonSounds, Scrollable } from 'cs2/ui';
-import { type ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, type ButtonSounds, Icon, Scrollable } from 'cs2/ui';
+import { type ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import type { Screenshot } from '../../common';
 import { useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
@@ -78,8 +78,6 @@ export function DashboardEditForm({
     [onHasChangesChange]
   );
 
-  const hasJustSaved = useHasJustSaved(isSaving, hasChanges);
-
   const pickableMods = useMemo(
     () => selectPickableMods(assetMods, screenshot.showcasedMod),
     [assetMods, screenshot.showcasedMod]
@@ -140,11 +138,7 @@ export function DashboardEditForm({
           disabled={isMutating}
           sounds={deleteButtonSounds}
           onSelect={bindings.deleteDashboardScreenshot}>
-          {translate(
-            isDeleting
-              ? 'HallOfFame.UI.Dashboard.EDIT_ACTION[Deleting]'
-              : 'HallOfFame.UI.Dashboard.EDIT_ACTION[Delete]'
-          )}
+          {translate('HallOfFame.UI.Dashboard.EDIT_ACTION[Delete]')}
         </Button>
 
         <div className={styles.formActionsEnd}>
@@ -157,12 +151,15 @@ export function DashboardEditForm({
             onSelect={() =>
               bindings.updateDashboardScreenshot(buildScreenshotUpdate(form, screenshot))
             }>
-            {translate(
-              isSaving
-                ? 'HallOfFame.UI.Dashboard.EDIT_ACTION[Saving]'
-                : hasJustSaved
-                  ? 'HallOfFame.UI.Dashboard.EDIT_ACTION[Saved]'
-                  : 'HallOfFame.UI.Dashboard.EDIT_ACTION[Save]'
+            {/* Hidden rather than removed under the spinner, so the button keeps its width. */}
+            <span className={classNames(isSaving && styles.formSaveLabelHidden)}>
+              {translate('HallOfFame.UI.Dashboard.EDIT_ACTION[Save]')}
+            </span>
+
+            {isSaving && (
+              <div className={styles.formSaveSpinner} data-dashboard-saving={true}>
+                <Icon src={progressSrc} tinted={true} className={styles.formSaveSpinnerIcon} />
+              </div>
             )}
           </Button>
         </div>
@@ -171,39 +168,7 @@ export function DashboardEditForm({
   );
 }
 
-/**
- * Whether a save landed a moment ago:
- * the save ending on a form holding nothing to save, where a failed one leaves its edits.
- * A new edit ends the moment early.
- */
-function useHasJustSaved(isSaving: boolean, hasChanges: boolean): boolean {
-  const [hasJustSaved, setHasJustSaved] = useState(false);
-
-  const wasSaving = useRef(isSaving);
-
-  useEffect(() => {
-    const hasLanded = wasSaving.current && !isSaving && !hasChanges;
-
-    wasSaving.current = isSaving;
-
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-
-    if (hasLanded) {
-      setHasJustSaved(true);
-
-      timeout = setTimeout(() => setHasJustSaved(false), JUST_SAVED_MS);
-    }
-
-    return () => {
-      clearTimeout(timeout);
-      setHasJustSaved(false);
-    };
-  }, [isSaving, hasChanges]);
-
-  return hasJustSaved;
-}
-
-const JUST_SAVED_MS = 2000;
+const progressSrc = 'Media/Glyphs/Progress.svg';
 
 // The bulldozer, as the slideshow's report plays it: both take something down.
 const deleteButtonSounds: ButtonSounds = { ...defaultButtonSounds, select: 'bulldoze' };

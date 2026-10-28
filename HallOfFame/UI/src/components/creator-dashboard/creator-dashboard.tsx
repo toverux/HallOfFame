@@ -119,9 +119,7 @@ function DashboardModal({
                   tally={tally}
                   filter={filter}
                   onFilterChange={setFilter}>
-                  {screenshots.length > 0 && (
-                    <DashboardSortDropdown sort={sort} onChange={setSort} />
-                  )}
+                  <DashboardSortDropdown sort={sort} onChange={setSort} />
                 </DashboardHeaderControls>
               ) : undefined}
             </DashboardHeader>

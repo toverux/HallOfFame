@@ -21,8 +21,6 @@ const openViewerEvent = 'hallOfFame.common.openViewerLink';
 // `translate()` returns the id when no fallback is given, so a label is its id.
 const saveLabel = 'HallOfFame.UI.Dashboard.EDIT_ACTION[Save]';
 
-const savedLabel = 'HallOfFame.UI.Dashboard.EDIT_ACTION[Saved]';
-
 const deleteLabel = 'HallOfFame.UI.Dashboard.EDIT_ACTION[Delete]';
 
 const showLabel = 'HallOfFame.UI.Dashboard.EDIT_ACTION[Show in Slideshow]';
@@ -100,16 +98,13 @@ describe('DashboardEditForm', () => {
     expect(triggered(updateEvent)).toEqual([[{ cityName: 'New Town' }]]);
   });
 
-  it(`holds the save while one is on its way`, () => {
+  it(`holds the save while one is on its way, a spinner inside it`, () => {
     renderForm({ isSaving: true });
 
     fireEvent.change(cityNameInput(), { target: { value: 'New Town' } });
 
-    const saving = screen.getByRole<HTMLButtonElement>('button', {
-      name: 'HallOfFame.UI.Dashboard.EDIT_ACTION[Saving]'
-    });
-
-    expect(saving.disabled).toBe(true);
+    expect(saveButton().disabled).toBe(true);
+    expect(document.querySelector('[data-dashboard-saving]')).not.toBeNull();
   });
 
   it(`has nothing left to save once the saved screenshot comes back`, () => {
@@ -128,6 +123,11 @@ describe('DashboardEditForm', () => {
 
     expect(cityNameInput().value).toBe(' New Town ');
     expect(saveButton().disabled).toBe(true);
+
+    // The next edit is a new one to save.
+    fireEvent.change(cityNameInput(), { target: { value: 'Newer Town' } });
+
+    expect(saveButton().disabled).toBe(false);
   });
 
   it(`reports its edits as they come and go, and none once gone`, () => {
@@ -148,39 +148,6 @@ describe('DashboardEditForm', () => {
     expect(reports).toEqual([false, true, false, true, false]);
   });
 
-  it(`says Saved once a save lands`, () => {
-    const { rerender } = renderForm();
-
-    fireEvent.change(cityNameInput(), { target: { value: 'New Town' } });
-
-    const saved = { ...screenshot, cityName: 'New Town' };
-
-    rerender(
-      <DashboardEditForm
-        screenshot={screenshot}
-        isSaving={true}
-        isDeleting={false}
-        onHasChangesChange={noop}
-      />
-    );
-
-    rerender(
-      <DashboardEditForm
-        screenshot={saved}
-        isSaving={false}
-        isDeleting={false}
-        onHasChangesChange={noop}
-      />
-    );
-
-    expect(screen.getByRole<HTMLButtonElement>('button', { name: savedLabel }).disabled).toBe(true);
-
-    // The next edit is a new one to save.
-    fireEvent.change(cityNameInput(), { target: { value: 'Newer Town' } });
-
-    expect(saveButton().disabled).toBe(false);
-  });
-
   it(`keeps the edits to save again once a save fails`, () => {
     const { rerender } = renderForm();
 
@@ -198,7 +165,7 @@ describe('DashboardEditForm', () => {
     }
 
     expect(saveButton().disabled).toBe(false);
-    expect(screen.queryByRole('button', { name: savedLabel })).toBeNull();
+    expect(document.querySelector('[data-dashboard-saving]')).toBeNull();
   });
 
   it(`offers the showcased mod alone while the playset gives none`, () => {
@@ -245,9 +212,7 @@ describe('DashboardEditForm', () => {
     expect(saveButton().disabled).toBe(true);
 
     await openActionsMenu();
-    await userEvent
-      .setup()
-      .click(screen.getByText('HallOfFame.UI.Dashboard.EDIT_ACTION[Deleting]'));
+    await userEvent.setup().click(screen.getByText(deleteLabel));
     await userEvent.setup().click(screen.getByText(showLabel));
 
     expect(triggered(deleteEvent)).toEqual([]);

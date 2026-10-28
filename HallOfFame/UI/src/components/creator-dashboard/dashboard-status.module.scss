@@ -25,29 +25,29 @@
     @include common.spin;
   }
 
-  // Larger than any vanilla size: the one word on a body otherwise empty.
-  &-loading {
+  // Larger than any vanilla size: the one line on a body otherwise empty.
+  &-loading,
+  &-title {
     font-size: 28rem;
   }
 
   &-image {
-    width: 120rem;
-    height: 120rem;
+    width: 160rem;
+    height: 160rem;
     margin-bottom: 16rem;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
   }
 
-  &-title {
-    font-size: vanilla.$font-size-xl;
-  }
-
+  // Keeps the string's own line breaks. Cohtml has no `pre-line`.
   &-message {
-    max-width: 600rem;
-    margin-top: 8rem;
+    max-width: 760rem;
+    margin-top: 10rem;
 
     color: common.$dimmed-color;
+    font-size: vanilla.$font-size-xl;
+    white-space: pre-wrap;
   }
 
   // Sized to the room it stands in, like the spinner: the game's button is cut for a form.

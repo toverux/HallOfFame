@@ -3,12 +3,14 @@ import { LocalizedNumber, LocalizedString } from 'cs2/l10n';
 import { Button, Icon } from 'cs2/ui';
 import { memo, type ReactElement } from 'react';
 import type { CreatorStats, DashboardScreenshot } from '../../common';
-import hourglassHalfSolidSrc from '../../icons/fontawesome/hourglass-half-solid.svg';
+import eyeSolidSrc from '../../icons/fontawesome/eye-solid.svg';
+import heartSolidSrc from '../../icons/fontawesome/heart-solid.svg';
+import hourglassLightSrc from '../../icons/fontawesome/hourglass-light.svg';
 import { useImageLoaded, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { Tooltip } from '../tooltip';
 import { type MedalState, selectMedalState, viewersPerLike } from './dashboard-collection';
-import { MedalImage, MedalTooltip } from './dashboard-medal';
+import { MedalImage, MedalTooltip, UnrankedTooltip } from './dashboard-medal';
 import { useCityName } from './use-city-name';
 import * as styles from './dashboard-card.module.scss';
 
@@ -62,12 +64,12 @@ export const DashboardCard = memo(
               }>
               <div className={styles.cardStats} data-card-stats={true}>
                 <span className={styles.cardStat}>
-                  <Icon src={eyeOpenSrc} tinted={true} className={styles.cardStatIcon} />
+                  <Icon src={eyeSolidSrc} tinted={true} className={styles.cardStatIcon} />
                   <LocalizedNumber value={screenshot.uniqueViewsCount} />
                 </span>
 
                 <span className={styles.cardStat}>
-                  <Icon src={heartFilledSrc} tinted={true} className={styles.cardStatIcon} />
+                  <Icon src={heartSolidSrc} tinted={true} className={styles.cardStatIcon} />
                   <LocalizedNumber value={screenshot.likesCount} />
                 </span>
               </div>
@@ -148,11 +150,12 @@ function CardStatsTooltip({
 }
 
 /**
- * The medal, or what stands in its slot while the screenshot has none:
- * Settling's progress towards its first ranking,
- * or nothing at all for No medal, which is no failure to point at.
+ * The medal, or what stands in its slot while the screenshot has none: Settling's progress towards
+ * its first ranking, or a muted ring for No medal.
  */
 function CardMedal({ state }: Readonly<{ state: MedalState }>): ReactElement {
+  const translate = useTranslate();
+
   switch (state.kind) {
     case 'ranked': {
       return (
@@ -168,16 +171,18 @@ function CardMedal({ state }: Readonly<{ state: MedalState }>): ReactElement {
         <Tooltip
           direction='down'
           tooltip={
-            <LocalizedString
-              id='HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Settling]'
-              args={{
-                MIN_UNIQUE_VIEWS_COUNT: <LocalizedNumber value={state.minUniqueViewsCount} />
-              }}
-            />
+            <UnrankedTooltip title={translate('HallOfFame.UI.Dashboard.DETAIL_MEDAL[Settling]')}>
+              <LocalizedString
+                id='HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Settling]'
+                args={{
+                  MIN_UNIQUE_VIEWS_COUNT: <LocalizedNumber value={state.minUniqueViewsCount} />
+                }}
+              />
+            </UnrankedTooltip>
           }>
-          <div className={styles.cardMedal} data-medal='settling'>
-            <Icon src={hourglassHalfSolidSrc} tinted={true} className={styles.cardMedalSettling} />
-
+          <div
+            className={classNames(styles.cardMedal, styles.cardMedalSettling)}
+            data-medal='settling'>
             <div className={styles.cardMedalProgress}>
               <LocalizedString
                 id='HallOfFame.UI.Dashboard.CARD[Settling Progress]'
@@ -187,23 +192,28 @@ function CardMedal({ state }: Readonly<{ state: MedalState }>): ReactElement {
                 }}
               />
             </div>
+
+            <Icon src={hourglassLightSrc} tinted={true} className={styles.cardMedalHourglass} />
           </div>
         </Tooltip>
       );
     }
     case 'noMedal': {
-      // The slot stays empty, but still answers a hover: a creator wondering why a screenshot has
-      // no medal looks right there.
+      // A muted ring: an empty slot would answer a hover with nothing to point at.
       return (
         <Tooltip
           direction='down'
           tooltip={
-            <LocalizedString
-              id='HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[No Medal]'
-              args={{ MIN_LIKES_COUNT: <LocalizedNumber value={state.minLikesCount} /> }}
-            />
+            <UnrankedTooltip title={translate('HallOfFame.UI.Dashboard.DETAIL_MEDAL[No Medal]')}>
+              <LocalizedString
+                id='HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[No Medal]'
+                args={{ MIN_LIKES_COUNT: <LocalizedNumber value={state.minLikesCount} /> }}
+              />
+            </UnrankedTooltip>
           }>
-          <div className={styles.cardMedal} data-medal='none' />
+          <div className={styles.cardMedal} data-medal='none'>
+            <div className={styles.cardMedalNone} />
+          </div>
         </Tooltip>
       );
     }
@@ -216,9 +226,5 @@ function CardMedal({ state }: Readonly<{ state: MedalState }>): ReactElement {
 
 // The card paints its own face, the vanilla button's.
 const plainButtonTheme = { button: '' };
-
-const eyeOpenSrc = 'Media/Glyphs/EyeOpen.svg';
-
-const heartFilledSrc = 'Media/Glyphs/HeartFilled.svg';
 
 const warningSrc = 'Media/Glyphs/Warning.svg';

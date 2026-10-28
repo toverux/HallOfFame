@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import { Button, Icon } from 'cs2/ui';
 import { memo, type ReactElement, useCallback } from 'react';
+import arrowUpRightFromSquareSolidSrc from '../../icons/fontawesome/arrow-up-right-from-square-solid.svg';
 import cloudArrowUpSolidSrc from '../../icons/fontawesome/cloud-arrow-up-solid.svg';
 import { type DraggableProps, useTranslate } from '../../utils';
 import * as bindings from '../../utils/bindings';
@@ -65,6 +66,12 @@ export const ScreenshotUploadPanelFooter = memo(
               variant='primary'
               className={classNames(styles.footerButton, styles.footerButtonSecondary)}
               onSelect={bindings.openUploadedInDashboard}>
+              <Icon
+                src={arrowUpRightFromSquareSolidSrc}
+                tinted={true}
+                className={styles.footerButtonIcon}
+              />
+
               {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.OPEN_IN_DASHBOARD')}
             </Button>
 

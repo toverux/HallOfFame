@@ -4,8 +4,7 @@ import { Button, Icon, Scrollable } from 'cs2/ui';
 import { type ReactElement, type ReactNode, useState } from 'react';
 import type { CreatorStats, DashboardScreenshot, Screenshot } from '../../common';
 import apertureSharpSolidSrc from '../../icons/fontawesome/aperture-sharp-solid.svg';
-import circleRegularSrc from '../../icons/fontawesome/circle-regular.svg';
-import hourglassHalfSolidSrc from '../../icons/fontawesome/hourglass-half-solid.svg';
+import hourglassLightSrc from '../../icons/fontawesome/hourglass-light.svg';
 import naturalResourcesSrc from '../../icons/paradox/natural-resources.svg';
 import populationSrc from '../../icons/paradox/population.svg';
 import trophySrc from '../../icons/paradox/trophy.svg';
@@ -486,7 +485,7 @@ function useMedalSummary(state: MedalState): MedalSummary {
     case 'settling': {
       return {
         name: 'settling',
-        icon: <Icon src={hourglassHalfSolidSrc} tinted={true} className={styles.medalGlyph} />,
+        icon: <Icon src={hourglassLightSrc} tinted={true} className={styles.medalGlyph} />,
         title: translate('HallOfFame.UI.Dashboard.DETAIL_MEDAL[Settling]'),
         description: (
           <LocalizedString
@@ -499,7 +498,7 @@ function useMedalSummary(state: MedalState): MedalSummary {
     case 'noMedal': {
       return {
         name: 'none',
-        icon: <Icon src={circleRegularSrc} tinted={true} className={styles.medalGlyph} />,
+        icon: <div className={styles.medalRing} />,
         title: translate('HallOfFame.UI.Dashboard.DETAIL_MEDAL[No Medal]'),
         description: (
           <LocalizedString

@@ -72,7 +72,6 @@ export function DashboardActionsMenu({
 
       <Dropdown
         theme={menuTheme}
-        // The popup's edge on the toggle's, near the row's end.
         alignment='right'
         content={
           <>

@@ -1,3 +1,5 @@
+@use "sass:math";
+@use "../../common";
 @use "../../vanilla-vars" as vanilla;
 
 // The window's one band, its title and the creator's standing: the game's dark panel colour,
@@ -50,4 +52,22 @@ $action-height: 40rem;
   border-left-color: vanilla.$menu-border-color-1;
   border-radius: 6rem;
   background-color: rgba(255, 255, 255, 0.06);
+}
+
+// A medal's bright face spans 23 of its image's 32 units, centred, its dark rim lost on the window:
+// what stands in for a missing medal is cut to that face, inset by the rim.
+@function medal-face-size($medal-size) {
+  @return math.div($medal-size * 23, 32);
+}
+
+@function medal-rim-width($medal-size) {
+  @return math.div($medal-size - medal-face-size($medal-size), 2);
+}
+
+// The outline of that face, for a screenshot with no medal: muted, as no medal is no failure.
+@mixin medal-ring($medal-size) {
+  width: medal-face-size($medal-size);
+  height: medal-face-size($medal-size);
+  border: 2rem solid common.$dimmed-color;
+  border-radius: 50%;
 }

@@ -35,10 +35,7 @@ export function DashboardError({
 
   return (
     <div className={styles.status} data-dashboard-state='error'>
-      <div
-        className={styles.statusImage}
-        style={{ backgroundImage: 'url(Media/Game/Icons/AdvisorTrafficAccident.svg)' }}
-      />
+      <div className={styles.statusImage} style={{ backgroundImage: `url(${accidentSrc})` }} />
 
       <strong className={styles.statusTitle}>{translate(title)}</strong>
 
@@ -68,9 +65,22 @@ export function DashboardEmpty(): ReactElement {
 
   return (
     <div className={styles.status} data-dashboard-state='empty'>
-      <div className={styles.statusMessage}>{translate('HallOfFame.UI.Dashboard.EMPTY')}</div>
+      <div className={styles.statusImage} style={{ backgroundImage: `url(${photoModeSrc})` }} />
+
+      <strong className={styles.statusTitle}>
+        {translate('HallOfFame.UI.Dashboard.EMPTY[Title]')}
+      </strong>
+
+      <div className={styles.statusMessage}>
+        {translate('HallOfFame.UI.Dashboard.EMPTY[Message]')}
+      </div>
     </div>
   );
 }
 
 const progressSrc = 'Media/Glyphs/Progress.svg';
+
+const accidentSrc = 'Media/Game/Icons/AdvisorTrafficAccident.svg';
+
+// The photo mode's own icon, where the screenshots this shows are taken.
+const photoModeSrc = 'Media/Game/Icons/PhotoMode.svg';

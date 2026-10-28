@@ -63,10 +63,9 @@ export function DashboardHeader({
 }
 
 /**
- * The band's controls over a loaded collection:
- * the creator's totals, then the tabs narrowing the grid to one medal, with a count of each,
- * and at the end the sort control,
- * which `children` carries so an empty collection can go without it.
+ * The band's controls over a loaded collection: the creator's totals, then the tabs narrowing the
+ * grid to one medal, with a count of each, and at the end the controls `children` carries.
+ * An empty collection goes without the tabs and those controls, which would act on nothing.
  */
 export function DashboardHeaderControls({
   stats,
@@ -103,30 +102,35 @@ export function DashboardHeaderControls({
         <div className={styles.headerRule} />
       </div>
 
-      <div className={styles.headerTabs}>
-        {dashboardFilters.map(option => (
-          <Tooltip
-            key={option}
-            direction='down'
-            tooltip={<TabTooltip filter={option} stats={stats} />}>
-            <Button
-              theme={plainButtonTheme}
-              className={classNames(styles.headerTab, option == filter && styles.headerTabSelected)}
-              selected={option == filter}
-              onSelect={() => onFilterChange(option)}
-              data-tally={option}
-              data-selected={option == filter}>
-              <div className={styles.headerTabFace}>
-                <TabIcon filter={option} />
+      {tally.all > 0 && (
+        <div className={styles.headerTabs}>
+          {dashboardFilters.map(option => (
+            <Tooltip
+              key={option}
+              direction='down'
+              tooltip={<TabTooltip filter={option} stats={stats} />}>
+              <Button
+                theme={plainButtonTheme}
+                className={classNames(
+                  styles.headerTab,
+                  option == filter && styles.headerTabSelected
+                )}
+                selected={option == filter}
+                onSelect={() => onFilterChange(option)}
+                data-tally={option}
+                data-selected={option == filter}>
+                <div className={styles.headerTabFace}>
+                  <TabIcon filter={option} />
 
-                <LocalizedNumber value={tally[option]} />
-              </div>
-            </Button>
-          </Tooltip>
-        ))}
-      </div>
+                  <LocalizedNumber value={tally[option]} />
+                </div>
+              </Button>
+            </Tooltip>
+          ))}
+        </div>
+      )}
 
-      <div className={styles.headerRest}>{children}</div>
+      <div className={styles.headerRest}>{tally.all > 0 && children}</div>
     </>
   );
 }

@@ -140,9 +140,8 @@ $medal-size: 44rem;
     font-size: vanilla.$font-size-s;
   }
 
-  // Sized alike in every state, so the text beside it lines up from card to card. Its contents
-  // sit at the card's edge: a medal fills the slot, and Settling's hourglass ends where its
-  // progress line does.
+  // At least a medal's size, which Settling's row grows past. Its contents sit at the card's edge:
+  // a medal fills the slot, and Settling's hourglass ends it, its progress beside it.
   &-medal {
     display: flex;
     flex-direction: column;
@@ -150,7 +149,6 @@ $medal-size: 44rem;
     align-items: flex-end;
     justify-content: center;
     min-width: $medal-size;
-    // An empty slot keeps the size of a medal, which its tooltip needs to be hovered at all.
     min-height: $medal-size;
     margin-left: $padding;
 
@@ -159,20 +157,35 @@ $medal-size: 44rem;
       height: $medal-size;
     }
 
-    // Muted: a screenshot still waiting on viewers is no worse off than a medalled one.
-    &Settling {
-      --iconColor: #{common.$dimmed-color};
-
-      width: 20rem;
-      height: 20rem;
+    &--settling {
+      flex-direction: row;
+      align-items: center;
     }
 
+    // Muted: a screenshot still waiting on viewers is no worse off than a medalled one.
+    &Hourglass {
+      --iconColor: #{common.$dimmed-color};
+
+      flex-shrink: 0;
+      width: dashboard.medal-face-size($medal-size);
+      height: dashboard.medal-face-size($medal-size);
+    }
+
+    &None {
+      @include dashboard.medal-ring($medal-size);
+
+      margin: dashboard.medal-rim-width($medal-size);
+    }
+
+    // The count over its unit, on the string's own line break. Cohtml has no `pre-line`.
     &Progress {
-      margin-top: 4rem;
+      margin-right: 8rem;
 
       color: common.$dimmed-color;
       font-size: vanilla.$font-size-s;
-      white-space: nowrap;
+      line-height: 1.15;
+      text-align: right;
+      white-space: pre-wrap;
     }
   }
 }

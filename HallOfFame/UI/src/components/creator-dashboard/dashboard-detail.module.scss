@@ -5,7 +5,7 @@
 // The form's column, beside the image's: wide enough for the upload form's fields.
 $side-width: 560rem;
 
-$medal-size: 48rem;
+$medal-size: 56rem;
 
 // Over the grid, which stays mounted under it so going back finds it where it was scrolled to.
 .detail {
@@ -212,14 +212,22 @@ $medal-size: 48rem;
     height: $medal-size;
   }
 
-  // Muted and smaller than a medal's disc, as on the card and the tabs: no medal is no failure.
+  // Settling's hourglass, muted and cut to a medal's face as on the card: a screenshot still
+  // waiting on viewers is no worse off than a medalled one.
   &-glyph {
     --iconColor: #{common.$dimmed-color};
 
     flex-shrink: 0;
-    width: 32rem;
-    height: 32rem;
-    margin: 0 ($medal-size - 32rem) * 0.5;
+    width: dashboard.medal-face-size($medal-size);
+    height: dashboard.medal-face-size($medal-size);
+    margin: 0 dashboard.medal-rim-width($medal-size);
+  }
+
+  &-ring {
+    @include dashboard.medal-ring($medal-size);
+
+    flex-shrink: 0;
+    margin: 0 dashboard.medal-rim-width($medal-size);
   }
 }
 

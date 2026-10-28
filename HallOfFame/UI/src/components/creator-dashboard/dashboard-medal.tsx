@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import type { CSSProperties, ReactElement } from 'react';
+import type { CSSProperties, PropsWithChildren, ReactElement, ReactNode } from 'react';
 import type { ScreenshotRank } from '../../common';
 import bronzeSrc from '../../icons/medals/bronze.svg';
 import diamondSrc from '../../icons/medals/diamond.svg';
@@ -54,6 +54,22 @@ export function MedalTooltip({ rank }: Readonly<{ rank: ScreenshotRank }>): Reac
       <div className={styles.medalTooltipPopular}>
         {translate('HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Popular]')}
       </div>
+    </div>
+  );
+}
+
+/**
+ * What a card without a medal stands for, under a title as a medal's tooltip has one.
+ */
+export function UnrankedTooltip({
+  title,
+  children
+}: Readonly<PropsWithChildren<{ title: ReactNode }>>): ReactElement {
+  return (
+    <div className={styles.medalTooltip}>
+      <strong>{title}</strong>
+
+      <div>{children}</div>
     </div>
   );
 }

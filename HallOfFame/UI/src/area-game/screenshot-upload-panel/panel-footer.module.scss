@@ -43,7 +43,10 @@
       }
     }
 
+    // Its icon takes the label's colour, which the hover inverts.
     &--secondary {
+      --iconColor: #{vanilla.$text-color};
+
       color: vanilla.$text-color;
       border-color: transparent;
       background-image: none;
@@ -62,6 +65,8 @@
           );
           background-color: transparent !important;
           color: vanilla.$menu-text-1-inverted;
+
+          --iconColor: #{vanilla.$menu-text-1-inverted};
         }
       }
     }

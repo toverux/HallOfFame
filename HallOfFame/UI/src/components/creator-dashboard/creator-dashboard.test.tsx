@@ -178,7 +178,7 @@ describe('CreatorDashboard', () => {
     expect(settling?.textContent).toContain('HallOfFame.UI.Dashboard.CARD[Settling Progress]');
 
     expect(unranked?.querySelector('[data-medal]')?.getAttribute('data-medal')).toBe('none');
-    expect(unranked?.querySelector('[data-medal]')?.childElementCount).toBe(0);
+    expect(unranked?.querySelector('[data-medal] img')).toBeNull();
   });
 
   it(`heads the grid with the creator's totals and a count of each medal`, () => {
