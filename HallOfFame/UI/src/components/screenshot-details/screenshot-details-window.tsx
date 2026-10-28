@@ -37,6 +37,7 @@ import {
   useUniformVirtualList
 } from '../../utils';
 import * as bindings from '../../utils/bindings';
+import { defaultButtonSounds } from '../../vanilla-modules/game-ui/common/input/button/button';
 import {
   Checkbox,
   type CheckboxTheme
@@ -1231,6 +1232,7 @@ function PlaysetModRow({
         data-is-owned={isOwned}>
         <Button
           theme={playsetRowButtonTheme}
+          sounds={playsetRowButtonSounds}
           // Compared by value, so a row keeps its focus across the list's re-renders.
           focusKey={`mod-${mod.id}`}
           onSelect={() => bindings.openModPage(mod, 'details')}>
@@ -1361,6 +1363,10 @@ function playsetRowClassName(index: number): string {
 
 // Replaces the vanilla button look, which a row does not wear.
 const playsetRowButtonTheme = { button: styles.playsetRowButton };
+
+// The rows stack edge to edge, so a hover sound would fire on every row the cursor or a scroll
+// passes.
+const playsetRowButtonSounds = { ...defaultButtonSounds, hover: null };
 
 /**
  * A row's shape while the playset loads, one per mod the screenshot lists.
