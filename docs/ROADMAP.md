@@ -89,3 +89,11 @@ What is already known from the decompile, not yet measured in a running game:
 **Priority:** unsure · **Cost:** unsure
 
 A button on the details window's Playset tab that saves the screenshot's mod IDs as a text file, one ID per line, for Skyve to import as a playset. Skyve's import format and where the file should land are still to check against Skyve's own documentation and source.
+
+## A JSON mapper of our own
+
+**Priority:** low · **Cost:** moderate
+
+Colossal.Json's `Make` resolves every JSON key by reflection it never caches, scanning each member's attributes for a `[DecodeAlias]`, so it decodes about one object per millisecond. Decoding off the main thread keeps the frame rate, but a big playset still takes seconds to appear: with 2,256 mods, `Make` took about 2.5 s off-engine and the Playset tab showed its rows 7.7 s after the click in game. Mapping the same response by hand took 13 ms.
+
+Replace `variant.Make<T>()` in `HttpQueries.DecodeJson` with a generic mapper that reads a type's `[DecodeAlias]` properties once and caches, per JSON key, a setter and a decoder for its value. It needs no code per domain class, only a case per kind of value: `string`, `int`, `bool`, `DateTime`, arrays, `List<T>`, `Dictionary<string, T>`, nested records, and types carrying `[JsonConverter]` (`RenderConditions`). Its cache must be thread-safe, since decoding runs on a worker thread. Off-engine tests decode each `Domain` type through both `Make` and the mapper and compare the results; `DateTime` parsing and a `null` on a non-nullable member are the parity cases nobody has checked yet.
