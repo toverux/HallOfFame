@@ -7,12 +7,13 @@ namespace HallOfFame.Http;
 internal partial class HttpQueries {
   /// <summary>
   /// Get the mods of a screenshot's playset, which the server refuses when it is not shared.
+  /// It is decoded off the main thread, as a playset of thousands of mods runs to megabytes.
   /// </summary>
   public async Task<IReadOnlyList<Domain.Mod>> GetPlayset(string screenshotId) {
     using var request = UnityWebRequest.Get(
       HttpQueries.PrependApiUrl($"/screenshots/{screenshotId}/playset")
     );
 
-    return await HttpQueries.Send<List<Domain.Mod>>(request);
+    return await HttpQueries.Send<List<Domain.Mod>>(request, isDecodedOffMainThread: true);
   }
 }
