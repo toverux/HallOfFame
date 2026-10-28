@@ -322,6 +322,8 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreateLocalScreenshot]": "將 Hall of Fame 拍攝的螢幕截圖另存一份副本至遊戲的螢幕截圖資料夾。\n與遊戲本身的螢幕截圖不同，這些副本為 4K+ 解析度。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DisableGlobalIllumination]": "關閉「{KEY=Options.OPTION[SSGIQualitySettings]}」",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DisableGlobalIllumination]": "<{KEY=Options.OPTION[SSGIQualitySettings]}> 是一項畫質設定，已知在《城市：天際線 II》搭配 Nvidia 顯示卡時問題頗多，會讓圖片產生大量顆粒雜訊與瑕疵。\n勾選此項後，只會在拍攝螢幕截圖的期間關閉該設定，若原本為啟用狀態，拍攝後會立即重新啟用。\n如果你*確定* <{KEY=Options.OPTION[SSGIQualitySettings]}> 在你的電腦上運作正常，可以取消勾選此選項，以獲得最佳畫質的螢幕截圖。",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.SendUsageStatistics]": "傳送使用統計資料",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SendUsageStatistics]": "將基本的使用統計資料傳送給我們，以協助改善此模組。這些紀錄不含任何個人資料，並會保留一年。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fame 伺服器",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fame 伺服器的位址。除非你正在開發此模組或使用替代伺服器，否則不應變更。\n你可以使用「test.halloffame.cs2.mtq.io」在沙盒資料庫上測試此模組。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "重置設定",

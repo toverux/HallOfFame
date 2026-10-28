@@ -322,6 +322,8 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreateLocalScreenshot]": "Hall of Fame으로 촬영한 스크린샷의 복사본을 게임의 스크린샷 폴더에 저장합니다.\n게임 스크린샷과 달리 이 사진들은 4K+ 해상도로 저장됩니다.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DisableGlobalIllumination]": "“{KEY=Options.OPTION[SSGIQualitySettings]}” 비활성화",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DisableGlobalIllumination]": "<{KEY=Options.OPTION[SSGIQualitySettings]}>는, NVIDIA 그래픽 카드로 시티즈: 스카이라인 II를 플레이할 때 아주 많은 자글거림과 그래픽 깨짐을 유발하는, 버그가 꽤 많은 그래픽 설정입니다.\n이것을 체크하면 스크린샷을 찍는 동안에만 <{KEY=Options.OPTION[SSGIQualitySettings]}>가 비활성화됩니다.\n<{KEY=Options.OPTION[SSGIQualitySettings]}> 옵션이 사용자님의 게임에서 확실히 정상적으로 작동한다면, 최고 품질의 스크린샷을 얻기 위해 이 옵션을 끄셔도 됩니다.",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.SendUsageStatistics]": "사용 통계 보내기",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SendUsageStatistics]": "모드 개선을 위해 기본적인 사용 통계를 저희에게 보냅니다. 이 기록에는 개인 정보가 포함되지 않으며, 1년 동안 보관됩니다.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fame 서버",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fame의 서버 주소입니다. 모드를 개발중이시거나 다른 서버를 쓰시고 계신 게 아니라면 이 값을 바꾸지 마십시오.\n샌드박스 데이터베이스에서 이 모드를 시험하시려면 test.halloffame.cs2.mtq.io 를 입력하시면 됩니다.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "설정 초기화",

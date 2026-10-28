@@ -322,6 +322,8 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.CreateLocalScreenshot]": "Hall of Fameで撮影したスクリーンショットのコピーを、ゲームのスクリーンショットフォルダに保存します。\nゲーム標準のスクリーンショットとは異なり、4K以上の解像度で保存されます。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DisableGlobalIllumination]": "「{KEY=Options.OPTION[SSGIQualitySettings]}」を無効化",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DisableGlobalIllumination]": "<{KEY=Options.OPTION[SSGIQualitySettings]}>は、C:S 2ではNVIDIA製のグラフィックカードで不具合が多いことで知られるグラフィック設定で、ノイズやアーティファクトの多い画像になってしまいます。\nこれをチェックすると、スクリーンショットの撮影中だけ無効になり、元々有効だった場合は撮影後すぐに再び有効になります。\n<{KEY=Options.OPTION[SSGIQualitySettings]}>が問題なく動作すると*確信*している場合は、このオプションのチェックを外すと最高品質のスクリーンショットを撮影できます。",
+  "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.SendUsageStatistics]": "利用統計を送信",
+  "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.SendUsageStatistics]": "MODの改善に役立てるため、基本的な利用統計をHall of Fameサーバーに送信します。記録に個人情報は含まれず、1年間保存されます。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fameサーバー",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fameサーバーのアドレスです。MODを開発している場合や代替サーバーを使用する場合を除き、変更しないでください。\n「test.halloffame.cs2.mtq.io」を使用すると、サンドボックスのデータベースでMODをテストできます。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "設定をリセット",
