@@ -71,6 +71,16 @@ permanently prohibited from using the service, without warning.
 A report button is available in the main menu to report inappropriate content.
 It will be immediately unlisted and reviewed by a human.
 
+## Privacy
+
+Hall of Fame is by nature an online service, and as such, it needs to send some data to the server.
+For moderation purposes only, the mod sends the Hall of Fame server an abstract hardware ID and your
+IP address, and these are not stored permanently.
+Other metadata are sent, like your screen size or graphics card model, which have helped in the past
+to identify issues in the screenshot tool.
+While “Send usage statistics” is on in the mod settings, the mod also sends which of its features
+you use, allowing us to improve the mod, and the server keeps those records for one year.
+
 ## Participate in the project
 
 ### Get support, report bugs, discuss
