@@ -32,6 +32,7 @@ import {
   deriveModThumbnailUri,
   getClassesModule,
   selectLocalizedName,
+  useImageLoaded,
   useTranslate,
   useUniformVirtualList
 } from '../../utils';
@@ -1196,6 +1197,10 @@ function PlaysetModRow({
 
   const hasContent = hasPreviews || hasHints;
 
+  const thumbnailUri = deriveModThumbnailUri(mod.thumbnailUrl);
+
+  const isThumbnailLoaded = useImageLoaded(thumbnailUri);
+
   return (
     <Tooltip
       direction='right'
@@ -1229,10 +1234,15 @@ function PlaysetModRow({
           // Compared by value, so a row keeps its focus across the list's re-renders.
           focusKey={`mod-${mod.id}`}
           onSelect={() => bindings.openModPage(mod, 'details')}>
-          <div
-            className={styles.playsetRowThumbnail}
-            style={{ backgroundImage: `url(${deriveModThumbnailUri(mod.thumbnailUrl)})` }}
-          />
+          <div className={styles.playsetRowThumbnail}>
+            <div
+              className={classNames(
+                styles.playsetRowThumbnailImage,
+                isThumbnailLoaded && styles.playsetRowThumbnailImageLoaded
+              )}
+              style={{ backgroundImage: `url(${thumbnailUri})` }}
+            />
+          </div>
 
           <div className={styles.playsetRowText}>
             <div className={styles.playsetRowNameLine}>

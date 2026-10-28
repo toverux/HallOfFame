@@ -377,17 +377,34 @@ $panel-content-padding-top: 25rem;
   }
 
   &-rowThumbnail {
+    position: relative;
     flex-shrink: 0;
     width: $playset-thumbnail-size;
     height: $playset-thumbnail-size;
     margin-right: 12rem;
     border-radius: 3rem;
     background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  // The picture itself, faded in over the grey box once it has loaded.
+  &-rowThumbnailImage {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: 3rem;
 
     // The CDN's thumbnail variant squashes every cover into 16:9, which painting it to this square
     // box undoes for the square covers most mods have.
     background-size: 100% 100%;
     background-repeat: no-repeat;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+
+    &--loaded {
+      opacity: 1;
+    }
   }
 
   &-rowText {
