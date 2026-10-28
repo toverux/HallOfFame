@@ -109,7 +109,7 @@ internal sealed class SlideshowConductor {
     this.navigation = new NavigationState();
 
     // The Liker reports back through two narrow callbacks; the conductor adapts them to the sink,
-    // translating the HTTP failure into a user-friendly message on the way to the error dialog.
+    // translating the HTTP failure into a user-friendly message on the way to the message dialog.
     this.liker = new ScreenshotLiker(
       this.carousel,
       api,
@@ -222,7 +222,8 @@ internal sealed class SlideshowConductor {
       this.log.Info($"{nameof(SlideshowConductor)}: Saved {screenshot} image to {filePath}.");
     }
     catch (Exception ex) when (SlideshowConductor.IsNetworkError(ex)) {
-      this.log.Error(ex.GetUserFriendlyMessage());
+      this.log.ErrorSilent(ex);
+      this.sink.ShowError(ex.GetUserFriendlyMessage());
     }
     catch (Exception ex) {
       this.log.ErrorRecoverable(ex);

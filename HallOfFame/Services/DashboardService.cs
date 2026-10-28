@@ -211,7 +211,7 @@ internal sealed class DashboardService(
     catch (Exception ex) {
       this.LogFailure(ex);
 
-      // The form has no panel to show the message in, so the game's error dialog does.
+      // The form has no panel to show the message in, so the game's message dialog does.
       if (ex is HttpException) {
         sink.ShowError(ex.GetUserFriendlyMessage());
       }

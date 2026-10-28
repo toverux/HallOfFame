@@ -114,7 +114,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.screenshotUploader = new ScreenshotUploader(
         Mod.Api,
         Mod.Log,
-        ex => ErrorDialogManagerAccessor.ShowError(
+        ex => ErrorMessageDialog.Show(
           ex.GetUserFriendlyMessage(),
           "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR"
         )

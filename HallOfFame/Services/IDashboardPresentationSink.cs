@@ -16,7 +16,7 @@ internal interface IDashboardPresentationSink {
   void PublishDetail(DashboardDetailState detail);
 
   /// <summary>
-  /// Shows a failed edit's or deletion's message in the mod's error dialog.
+  /// Shows a failed edit's or deletion's message in the game's message dialog.
   /// </summary>
   void ShowError(LocalizedString message);
 

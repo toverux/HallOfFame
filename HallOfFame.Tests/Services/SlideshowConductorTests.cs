@@ -470,7 +470,7 @@ public sealed class SlideshowConductorTests {
   }
 
   [Fact]
-  public async Task Save_NetworkError_LogsTheUserFriendlyMessage() {
+  public async Task Save_NetworkError_ShowsTheUserFriendlyMessage() {
     var n = 0;
 
     var api = new FakeApi {
@@ -481,12 +481,14 @@ public sealed class SlideshowConductorTests {
     };
 
     var localizedErrors = new List<LocalizedString>();
+    var silentErrors = new List<Exception>();
     var sink = new FakeSlideshowPresentationSink();
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
       log: new FakeModLog {
-        ErrorLocalizedImpl = localizedErrors.Add
+        ErrorLocalizedImpl = localizedErrors.Add,
+        ErrorSilentImpl = silentErrors.Add
       },
       sink: sink
     );
@@ -494,10 +496,10 @@ public sealed class SlideshowConductorTests {
     await conductor.Next();
     await conductor.Save();
 
-    // The network save error is logged (and surfaced in-game by the real logger), not shown through
-    // the like/report dialog.
-    Assert.Single(localizedErrors);
-    Assert.Empty(sink.ShownErrors);
+    // A foreseen failure: its message goes to the message dialog, the exception only to the log.
+    Assert.Single(sink.ShownErrors);
+    Assert.Single(silentErrors);
+    Assert.Empty(localizedErrors);
     Assert.Equal([true, false], sink.SavingLog);
   }
 

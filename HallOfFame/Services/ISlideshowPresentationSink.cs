@@ -54,7 +54,7 @@ internal interface ISlideshowPresentationSink {
   void SetSaving(bool isSaving);
 
   /// <summary>
-  /// Surfaces a like or report failure to the user through the engine "OOPS" error dialog.
+  /// Surfaces a like, report or 4K save failure through the game's "OOPS" message dialog.
   /// Distinct from <see cref="PublishLoadError"/>, which is the inline display-load error channel.
   /// </summary>
   void ShowError(LocalizedString message);

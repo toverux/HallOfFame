@@ -92,6 +92,7 @@ public sealed class Mod : IMod {
   public void OnLoad(UpdateSystem updateSystem) {
     #if DEBUG
     // In debug mode, eagerly check reflection hacks are working.
+    DialogCallbackAccessor.Init();
     ErrorDialogManagerAccessor.Init();
     PdxSdkPlatformProxy.Init();
     ScreenUtilityProxy.Init();

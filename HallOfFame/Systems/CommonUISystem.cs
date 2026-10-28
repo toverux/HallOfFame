@@ -47,10 +47,6 @@ internal sealed partial class CommonUISystem : UISystemBase {
     base.OnCreate();
 
     try {
-      // No need to OnUpdate as there are no bindings that require it, they are manually updated
-      // when needed.
-      this.Enabled = false;
-
       this.localeBinding = new GetterValueBinding<string>(
         CommonUISystem.BindingGroup,
         "locale",
@@ -128,6 +124,13 @@ internal sealed partial class CommonUISystem : UISystemBase {
     }
   }
 
+  /// <summary>
+  /// Shows the message dialogs held until the UI listens, as the Paradox warning raised at boot.
+  /// Leaves out the base update: the bindings update by hand when their value changes.
+  /// </summary>
+  protected override void OnUpdate() =>
+    ErrorMessageDialog.ShowHeld(GameManager.instance.userInterface.appBindings);
+
   protected override void OnDestroy() {
     base.OnDestroy();
 
@@ -203,6 +206,11 @@ internal sealed partial class CommonUISystem : UISystemBase {
           var username = await Mod.Api.ResolveParadoxModsUsername(url);
 
           PdxSdkPlatformProxy.ShowModsUI(view => view.Show(ModsUIScreen.Creator, username));
+        }
+        catch (HttpException ex) {
+          Mod.Log.ErrorSilent(ex);
+
+          ErrorMessageDialog.Show(ex.GetUserFriendlyMessage());
         }
         catch (Exception ex) {
           Mod.Log.ErrorRecoverable(ex);
@@ -313,6 +321,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
       ? "HallOfFame.Common.FATAL_ERROR".Translate()
       : "HallOfFame.Common.RECOVERABLE_ERROR".Translate();
 
+    // The game's error dialog, as for the mod's own unforeseen errors: it shows the stack as plain
+    // text, where the message dialog's details would read it as markup.
     ErrorDialogManagerAccessor.Instance?.ShowError(
       new ErrorDialog {
         localizedMessage = $"{@base} \n{gravity}",

@@ -8,7 +8,6 @@ using Game.UI.InGame;
 using Game.UI.Localization;
 using Game.UI.Menu;
 using HallOfFame.Domain;
-using HallOfFame.Reflection;
 using HallOfFame.Services;
 using HallOfFame.Systems.Capture;
 using HallOfFame.Utils;
@@ -202,7 +201,7 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
     this.detailBinding.Update(detail);
 
   void IDashboardPresentationSink.ShowError(LocalizedString message) =>
-    ErrorDialogManagerAccessor.ShowError(message);
+    ErrorMessageDialog.Show(message);
 
   async Task<bool> IDashboardPresentationSink.ConfirmDelete(Screenshot screenshot) {
     var dialog = new ConfirmationDialog(

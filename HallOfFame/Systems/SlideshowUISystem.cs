@@ -417,7 +417,7 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
   }
 
   void ISlideshowPresentationSink.ShowError(LocalizedString message) =>
-    ErrorDialogManagerAccessor.ShowError(message);
+    ErrorMessageDialog.Show(message);
 
   async Task<bool> ISlideshowPresentationSink.ConfirmReport(Screenshot screenshot) {
     var dialog = new ConfirmationDialog(
