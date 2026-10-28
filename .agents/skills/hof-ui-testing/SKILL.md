@@ -17,7 +17,7 @@ mise test:ui
 ```
 
 This runs `bun test HallOfFame/UI`.
-For a focused run during TDD, call `bun test <path>` directly; the `bunfig.toml` preload still applies.
+For a focused run during TDD, call `bun test <path>` directly from the repo root, where the `bunfig.toml` preload applies.
 Run `mise check` after, like any UI change.
 
 ## The two tiers, and where logic goes
@@ -41,6 +41,7 @@ Drive the component through the mock engine exported by `../testing/game-setup`:
 - `setMapBinding(group, name, key, value)` configures one MapEntry binding (e.g. `cs2/ui` input hints); unconfigured entries resolve to `null`, which is enough for game widgets to render.
 - `getTriggers()` returns the outbound command triggers (`{ event, args }`) recorded since the last reset.
   Assert on these instead of mocking the binding layer.
+- `getUsageEvents()` returns the `[name, properties]` of each `trackUsage` call since the last reset, for asserting usage events.
 - `emitEvent(name, ...args)` sends the UI an event the game would, calling every handler the bundle registered for it.
   An event binding listens on its name suffixed with `.update`: an input action is `emitEvent('input.onActionPerformed.update', { action: 'Back', value: null })`, delivered only to consumers inside an `EventInputProvider` from `cs2/input`, which reads the `input.actionNames` binding (see `screenshot-details-window.test.tsx`).
 - `resetBindings()` clears configured bindings and recorded triggers; call it in `afterEach` alongside `@testing-library/react`'s `cleanup()`.

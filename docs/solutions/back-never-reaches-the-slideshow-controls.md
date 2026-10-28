@@ -6,7 +6,9 @@ symptoms:
   - 'A vanilla dropdown in the slideshow controls stays open on Escape'
   - 'The shoulder buttons do not switch the tabs of a window opened from the slideshow controls'
   - 'The slideshow hotkeys act behind a modal covering the slideshow controls'
-tags: [cs2-ui, cs2-input, input-action, focus, main-menu, escape, switch-tab]
+  - "A gamepad's select does not press a slideshow button, even with an `onSelect` passed"
+tags: [cs2-ui, cs2-input, input-action, focus, main-menu, escape, switch-tab, gamepad]
+updated: 2026-10-28
 ---
 
 # Back never reaches the slideshow controls
@@ -22,7 +24,8 @@ In the main menu Escape arrives as the `Back` input action, and a plain input co
 `ActiveOnFocus` (`index.js:32942-32943`): it hears an action only while the focus sits on its
 branch. The slideshow controls are mounted outside the focus path the main menu drives, so nothing
 in them ever holds the focus, and every focus-bound consumer there stays deaf, the vanilla
-`Panel`'s own close handling and the vanilla `TabNav`'s `Switch Tab` included.
+`Panel`'s own close handling, the vanilla `TabNav`'s `Switch Tab` and the vanilla `Button`'s
+`Select`, which runs its `onSelect` for a gamepad, included.
 
 ## Fix
 
@@ -44,3 +47,6 @@ covers it by sending `Back` and `Switch Tab` through an `EventInputProvider` wit
 The slideshow's own hotkeys are the reverse case: they reach the UI as input phases C# binds
 (`useMenuControlsInputAction`), which no consumer, focus-bound or not, can swallow. A modal covering
 the controls gates them in that hook, as the Creator Dashboard's open state does.
+
+The slideshow's round buttons stay mouse-only: a gamepad presses them only once the controls sit
+in a navigation scope the main menu moves its focus into.
