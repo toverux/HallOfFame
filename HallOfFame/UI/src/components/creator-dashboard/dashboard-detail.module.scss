@@ -110,6 +110,7 @@ $medal-size: 56rem;
   min-height: $medal-size + 2 * 12rem;
   padding: 12rem 16rem;
 
+  // The room the medal leaves, the facts wrapping into more rows as it narrows.
   &-facts {
     display: flex;
     flex: 1 1 auto;
@@ -176,20 +177,17 @@ $medal-size: 56rem;
     }
   }
 
+  // As wide as its text, which the longest translation leaves the facts room beside.
   &-medal {
     display: flex;
     flex-shrink: 0;
     flex-direction: row;
     align-items: center;
-    max-width: 420rem;
     margin-left: 16rem;
   }
 
-  // Wraps rather than pushing the medal out of the frame.
   &-medalText {
     display: flex;
-    flex: 1 1 auto;
-    min-width: 0;
     flex-direction: column;
     align-items: flex-end;
     margin-right: 14rem;
@@ -202,6 +200,9 @@ $medal-size: 56rem;
 
     color: common.$dimmed-color;
     font-size: vanilla.$font-size-s;
+    // One line: Cohtml sizes the medal a fraction of a pixel short of its text, which would wrap
+    // the last word.
+    white-space: nowrap;
   }
 }
 

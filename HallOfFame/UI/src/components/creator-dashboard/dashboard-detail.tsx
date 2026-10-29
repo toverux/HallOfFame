@@ -465,8 +465,8 @@ interface MedalSummary {
 }
 
 /**
- * The medal, or what stands for it while the screenshot has none,
- * with what the card's medal tooltip says of it.
+ * The medal, or what stands for it while the screenshot has none, with what the card's medal
+ * tooltip says of it cut to its first sentence, a line beside the medal.
  */
 function useMedalSummary(state: MedalState): MedalSummary {
   const translate = useTranslate();
@@ -477,10 +477,7 @@ function useMedalSummary(state: MedalState): MedalSummary {
         name: state.rank,
         icon: <MedalImage rank={state.rank} className={styles.medalImage} hasShimmer={true} />,
         title: translate(medalNameIds[state.rank]),
-        // One text node: cohtml lays sibling text nodes out as separate lines.
-        description: `${translate(medalBandIds[state.rank]) ?? ''} ${
-          translate('HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Popular]') ?? ''
-        }`
+        description: captionSentence(translate(medalBandIds[state.rank]))
       };
     }
     case 'settling': {
@@ -490,7 +487,8 @@ function useMedalSummary(state: MedalState): MedalSummary {
         title: translate('HallOfFame.UI.Dashboard.DETAIL_MEDAL[Settling]'),
         description: (
           <LocalizedString
-            id='HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Settling]'
+            id={null}
+            fallback={captionSentence(translate('HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[Settling]'))}
             args={{ MIN_UNIQUE_VIEWS_COUNT: <LocalizedNumber value={state.minUniqueViewsCount} /> }}
           />
         )
@@ -503,7 +501,8 @@ function useMedalSummary(state: MedalState): MedalSummary {
         title: translate('HallOfFame.UI.Dashboard.DETAIL_MEDAL[No Medal]'),
         description: (
           <LocalizedString
-            id='HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[No Medal]'
+            id={null}
+            fallback={captionSentence(translate('HallOfFame.UI.Dashboard.MEDAL_TOOLTIP[No Medal]'))}
             args={{ MIN_LIKES_COUNT: <LocalizedNumber value={state.minLikesCount} /> }}
           />
         )
@@ -514,6 +513,14 @@ function useMedalSummary(state: MedalState): MedalSummary {
       throw state satisfies never;
     }
   }
+}
+
+/**
+ * A translation's first sentence without its full stop, read as a label: a sentence ends at a stop
+ * followed by a space, or at a full-width stop, which CJK locales follow with none.
+ */
+function captionSentence(text: string | null): string | null {
+  return text?.split(/(?<=[.!?])\s+|(?<=[。！？])/u)[0]?.replace(/[.。]$/u, '') ?? null;
 }
 
 const plainButtonTheme = { button: '' };
