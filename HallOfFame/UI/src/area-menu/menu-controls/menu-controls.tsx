@@ -40,11 +40,6 @@ import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 import { viewerLinkPreloadedIcons } from './viewer-link';
 import * as styles from './menu-controls.module.scss';
 
-const screenshotDetailsInputAction = bindings.bindInputAction(
-  'hallOfFame.slideshow',
-  'screenshotDetailsInputAction'
-);
-
 // The icons the controls only show on demand, gathered from the components that own them.
 //
 // They are preloaded from here rather than from those components because this is the one node that
@@ -96,7 +91,7 @@ export function MenuControlsContent(): ReactElement {
 
   const closeDetails = useCallback(() => setDetailsTab(undefined), []);
 
-  const detailsInputBinding = screenshotDetailsInputAction.useInputBinding();
+  const detailsInputBinding = bindings.screenshotDetailsInputAction.useInputBinding();
 
   // `undefined` while the error view or the empty state below take the controls' place.
   const shownScreenshotId = menuState.loadError ? undefined : menuState.screenshot?.id;
@@ -104,7 +99,7 @@ export function MenuControlsContent(): ReactElement {
   // The key opens the window whether or not the details row shows, so it does the same thing on
   // every screenshot, and closes it again.
   useMenuControlsInputAction(
-    screenshotDetailsInputAction.useInputPhase(),
+    bindings.screenshotDetailsInputAction.useInputPhase(),
     () => {
       if (shownScreenshotId == undefined) {
         return false;

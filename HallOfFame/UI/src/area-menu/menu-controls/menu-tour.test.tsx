@@ -53,6 +53,48 @@ describe('MenuTourAnchor', () => {
     expect(screen.getByText(closeLabel)).toBeDefined();
   });
 
+  it(`lists its step's keys with what they do`, () => {
+    setBinding('hallOfFame.menuTour', 'step', 'navigation');
+
+    renderAnchor();
+
+    expect(screen.getByText('HallOfFame.UI.Menu.MenuTour.INPUT_HINT[Navigation]')).toBeDefined();
+  });
+
+  it(`moves the tour on when the player presses its control`, () => {
+    setBinding('hallOfFame.menuTour', 'step', 'navigation');
+
+    renderAnchor();
+
+    fireEvent.mouseDown(screen.getByTestId('control'));
+
+    expect(getTriggers().map(trigger => trigger.event)).toEqual(['hallOfFame.menuTour.next']);
+  });
+
+  it(`moves the tour on when the player presses one of its step's keys`, () => {
+    setBinding('hallOfFame.menuTour', 'step', 'navigation');
+
+    renderAnchor();
+
+    act(() =>
+      setBinding('hallOfFame.slideshow', 'previousScreenshotInputAction.phase', 'Performed')
+    );
+
+    expect(getTriggers().map(trigger => trigger.event)).toEqual(['hallOfFame.menuTour.next']);
+  });
+
+  it(`leaves the tour alone when its control or keys are used on another step`, () => {
+    setBinding('hallOfFame.menuTour', 'step', 'like');
+
+    renderAnchor();
+
+    fireEvent.mouseDown(screen.getByTestId('control'));
+
+    act(() => setBinding('hallOfFame.slideshow', 'nextScreenshotInputAction.phase', 'Performed'));
+
+    expect(getTriggers()).toEqual([]);
+  });
+
   it(`hides its balloon while the dashboard covers the controls`, () => {
     setBinding('hallOfFame.menuTour', 'step', 'navigation');
     setBinding('hallOfFame.dashboard', 'state', { status: 'loading' });
@@ -66,7 +108,7 @@ describe('MenuTourAnchor', () => {
 function renderAnchor(): void {
   render(
     <MenuTourAnchor step='navigation'>
-      <span />
+      <span data-testid='control' />
     </MenuTourAnchor>
   );
 }

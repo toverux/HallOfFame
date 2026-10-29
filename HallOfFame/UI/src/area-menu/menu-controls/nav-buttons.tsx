@@ -15,26 +15,6 @@ import { MenuControlsInputHintTooltip } from './input-hint-tooltip';
 import { useMenuControlsInputAction } from './use-menu-controls-input-action';
 import * as styles from './nav-buttons.module.scss';
 
-const previousScreenshotInputAction = bindings.bindInputAction(
-  'hallOfFame.slideshow',
-  'previousScreenshotInputAction'
-);
-
-const nextScreenshotInputAction = bindings.bindInputAction(
-  'hallOfFame.slideshow',
-  'nextScreenshotInputAction'
-);
-
-const likeScreenshotInputAction = bindings.bindInputAction(
-  'hallOfFame.slideshow',
-  'likeScreenshotInputAction'
-);
-
-const toggleMenuInputAction = bindings.bindInputAction(
-  'hallOfFame.slideshow',
-  'toggleMenuInputAction'
-);
-
 /**
  * The buttons' icons that are not on screen when the controls mount, for the preloading the
  * controls do on their behalf.
@@ -56,7 +36,7 @@ export const MenuControlsNextButton = memo(
 
     const translate = useTranslate();
 
-    const { useInputBinding, useInputPhase } = nextScreenshotInputAction;
+    const { useInputBinding, useInputPhase } = bindings.nextScreenshotInputAction;
 
     const binding = useInputBinding();
     const phase = useInputPhase();
@@ -100,7 +80,7 @@ export const MenuControlsPreviousButton = memo(
 
     const translate = useTranslate();
 
-    const { useInputBinding, useInputPhase } = previousScreenshotInputAction;
+    const { useInputBinding, useInputPhase } = bindings.previousScreenshotInputAction;
 
     const binding = useInputBinding();
     const phase = useInputPhase();
@@ -147,7 +127,7 @@ function MenuControlsToggleMenuVisibilityButtonBase({
 
   const translate = useTranslate();
 
-  const { useInputBinding, useInputPhase } = toggleMenuInputAction;
+  const { useInputBinding, useInputPhase } = bindings.toggleMenuInputAction;
 
   const binding = useInputBinding();
   const phase = useInputPhase();
@@ -179,7 +159,7 @@ export const MenuControlsLikeButton = memo(
   }>): ReactElement => {
     const selectSound = screenshot.isLiked ? 'chirp-event' : 'xp-event';
 
-    const { useInputBinding, useInputPhase } = likeScreenshotInputAction;
+    const { useInputBinding, useInputPhase } = bindings.likeScreenshotInputAction;
 
     const binding = useInputBinding();
     const phase = useInputPhase();

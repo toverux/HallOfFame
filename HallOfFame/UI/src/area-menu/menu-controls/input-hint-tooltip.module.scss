@@ -3,18 +3,33 @@
   flex-direction: column;
 
   &-binding {
+    margin-top: 5rem;
+  }
+}
+
+// Keys and label wrap as whole lines when a long binding outgrows the width, gaps rather than
+// margins keeping a wrapped line flush left.
+// Cohtml spreads wrapped lines past their container's measured height unless they pack at its
+// start.
+.inputHint {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  align-items: center;
+  gap: 4rem 8rem;
+
+  &-keys {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
     align-items: center;
-    margin-top: 5rem;
+    gap: 4rem;
   }
 
   // The key's own glyph, smaller than the text around it.
-  &-bindingIcons {
+  &-key {
     font-size: 0.8em;
-  }
-
-  &-bindingLabel {
-    margin-left: 8rem;
   }
 }

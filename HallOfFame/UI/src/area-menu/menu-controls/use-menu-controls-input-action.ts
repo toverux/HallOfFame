@@ -10,7 +10,7 @@ import * as bindings from '../../utils/bindings';
  * Returning void (`undefined`) is equivalent to returning `true`.
  *
  * This is a very specific implementation whose sole role is to provide a good UX for the behavior
- * of the main menu control buttons.
+ * of the main menu control buttons and the tour's key listeners.
  * The keys rest while the Creator Dashboard is open: it covers the controls, and their actions
  * reach the UI as C# input phases that its backdrop cannot consume.
  *

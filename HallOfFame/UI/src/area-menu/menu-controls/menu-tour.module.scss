@@ -22,6 +22,44 @@
     }
   }
 
+  // The step's keys, between its description and its buttons.
+  &-inputHints {
+    display: flex;
+    flex-direction: column;
+    gap: 6rem;
+    margin-top: 12rem;
+    font-size: vanilla.$font-size-m;
+
+    // The vanilla key is white on translucent white, drawn for dark tooltips: on the balloon's
+    // light fill it becomes an outlined keycap, its text in the balloon's ink and its outline a
+    // lighter tint of it, its deeper bottom edge the key's depth.
+    // Nested under the root to outrank the vanilla tooltip's own key rule.
+    // The vanilla strokes are whole pixels at every resolution, where a rem width rounds to a
+    // different side on each key; set side by side, as Cohtml drops a `border-width` shorthand
+    // holding a `var()`.
+    .balloon & [class^="button-text"] {
+      min-width: 28rem;
+      padding: 2rem 7rem 1rem;
+      border-style: solid;
+      border-top-width: vanilla.$stroke-1;
+      border-right-width: vanilla.$stroke-1;
+      border-bottom-width: vanilla.$stroke-3;
+      border-left-width: vanilla.$stroke-1;
+      border-color: color.change(vanilla.$menu-text-1-inverted, $alpha: 0.5);
+      border-radius: 5rem;
+      background-color: transparent;
+      color: vanilla.$menu-text-1-inverted;
+      font-size: 1.1em;
+      font-weight: bold;
+      text-align: center;
+    }
+  }
+
+  // The vanilla divider between alternative keys, which the keys of a hint are not.
+  &-inputHints [class^="hint"] + [class^="hint"]::before {
+    display: none;
+  }
+
   &-footer {
     display: flex;
     justify-content: flex-end;

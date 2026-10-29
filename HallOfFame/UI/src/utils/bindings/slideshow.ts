@@ -4,6 +4,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { Mod, PhotoModeProperty, Screenshot } from '../../common';
 import { createSingletonHook } from '../singleton-hook';
 import { type ModSettings, useModSettings } from './common';
+import { bindInputAction } from './input-action';
 import { lazyBindValue } from './lazy-value-binding';
 
 const GROUP = 'hallOfFame.slideshow';
@@ -86,6 +87,19 @@ const photoModeCatalog$ = lazyBindValue<readonly PhotoModeProperty[]>(
 const playset$ = lazyBindValue<PlaysetState | null>(GROUP, 'playset', null);
 
 const viewerPlayset$ = lazyBindValue<readonly number[] | null>(GROUP, 'viewerPlayset', null);
+
+export const previousScreenshotInputAction = bindInputAction(
+  GROUP,
+  'previousScreenshotInputAction'
+);
+
+export const nextScreenshotInputAction = bindInputAction(GROUP, 'nextScreenshotInputAction');
+
+export const likeScreenshotInputAction = bindInputAction(GROUP, 'likeScreenshotInputAction');
+
+export const toggleMenuInputAction = bindInputAction(GROUP, 'toggleMenuInputAction');
+
+export const screenshotDetailsInputAction = bindInputAction(GROUP, 'screenshotDetailsInputAction');
 
 const useSingletonMenuState = createSingletonHook<SettableMenuState>({
   isMenuVisible: true,
