@@ -145,22 +145,12 @@ Donations are very welcome and will help keep the service running.
   <Screenshot Value="Properties/Preview_6.png" />
   <Tag Value="Code Mod" />
   <ForumLink Value="https://forum.paradoxplaza.com/forum/threads/hall-of-fame.1704820/" />
-  <ModVersion Value="2026.6.0" />
+  <ModVersion Value="2026.6.1" />
   <GameVersion Value="1.6.*" />
-  <ChangeLog>**The Creator Dashboard update!**
-
-You can _finally_ view and manage your own screenshots! The Creator Dashboard lists every screenshot you shared with its views, likes and medal (new), and lets you edit or delete it.
-It is also the editor promised back in 2026.0.0, so your older screenshots can get a description and a showcased asset too!
-
-- **Open it** from the main menu's more-actions menu, from the Hall of Fame button in the game's mod menu (behind the Paradox Mods icon of the HUD), from the mod settings, or from the upload panel right after you share a screenshot.
-- **Browse your collection** with your total views, unique views and likes.
-- **Medals, from Bronze to Diamond.** A screenshot is ranked once about 30 people have seen it, by the share of its viewers who liked it. The Popular slideshow favors higher medals. Hover a medal to see what it means.
-- **Open a screenshot** to see it in full with its figures: views, unique views, likes, like rate, Web Viewer clicks and its place in your collection.
-- **Edit it**: city name, description, showcased asset or map, and whether its photo mode settings and playset are shared.
-- **Delete it**, show it in the slideshow (from the main menu), or open it in the Web Viewer.
-- **A short tour** of the slideshow controls the first time you see them.
-
-And many other smaller improvements!</ChangeLog>
+  <ChangeLog>- The welcome tour now shows the keyboard shortcuts of the slideshow controls it presents: press one to try it, and the tour moves on to the next step.
+- Fixed the welcome tour coming back at the next launch after you loaded a city while it showed, or after the game crashed.
+- Fixed the Photo mode settings tab of the screenshot details window staying empty when the game loaded your mods after the main menu, as it does after a slow Paradox login or mod sync.
+- The medal caption in the Creator Dashboard now fits on one line beside the medal instead of wrapping in a narrow column.</ChangeLog>
   <ExternalLink Type="discord" Url="https://discord.gg/HTav7ARPs2" />
   <ExternalLink Type="github" Url="https://github.com/toverux/HallOfFame" />
   <ExternalLink Type="crowdin" Url="https://crowdin.com/project/halloffame-cs2" />
