@@ -90,6 +90,16 @@ What is already known from the decompile, not yet measured in a running game:
 
 A button on the details window's Playset tab that saves the screenshot's mod IDs as a text file, one ID per line, for Skyve to import as a playset. Skyve's import format and where the file should land are still to check against Skyve's own documentation and source.
 
+## A screenshot as the desktop wallpaper
+
+**Priority:** unsure · **Cost:** cheap
+
+A slideshow action next to Save that makes the current screenshot the Windows desktop wallpaper. `SlideshowUISystem.SaveScreenshot` already downloads the 4K image through `ScreenshotExporter`: write it to one fixed file under `ModsData/HallOfFame` instead, so each new wallpaper replaces the last, then apply it with `user32`'s `SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE)`. It needs new locale keys and a success notice.
+
+Under Proton the call reaches Wine's desktop rather than the player's, so on Linux it likely does nothing visible; nobody has checked yet.
+
+The Wallpaper Engine wallpaper in `../HallOfFameServer/docs/ROADMAP.md` is the live, rotating counterpart.
+
 ## A JSON mapper of our own
 
 **Priority:** low · **Cost:** moderate
