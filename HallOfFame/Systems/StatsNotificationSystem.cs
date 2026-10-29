@@ -46,9 +46,9 @@ internal sealed partial class StatsNotificationSystem : GameSystemBase {
         this.World.GetOrCreateSystemManaged<MenuTourUISystem>().ReportCreatorStats
       );
 
-      // If the mod loaded *after* the main menu has already loaded, show the notification.
-      if (GameManager.instance.gameMode is GameMode.MainMenu) {
-        _ = this.statsNotifier.ShowIfNotable();
+      // Replays the main menu's loading completion this system missed when the mod loaded late.
+      if (GameManager.instance.IsMainMenuLoaded) {
+        this.OnGameLoadingComplete(Purpose.Cleanup, GameMode.MainMenu);
       }
     }
     catch (Exception ex) {

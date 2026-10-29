@@ -118,6 +118,22 @@ public sealed class MenuTourTests {
   }
 
   [Fact]
+  public void Close_SavesTheSeenTour_OnceAndAtOnce() {
+    var store = new FakeMenuTourStore();
+
+    var tour = new MenuTour(store, (_, _) => {});
+
+    tour.Next();
+
+    Assert.Empty(store.Saves);
+
+    tour.Close();
+    tour.Close();
+
+    Assert.Equal([true], store.Saves);
+  }
+
+  [Fact]
   public void OnMoreActionsOpened_EndsTheTour_OnlyOnTheDashboardStep() {
     var store = new FakeMenuTourStore();
 

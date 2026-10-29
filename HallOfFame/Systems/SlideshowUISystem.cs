@@ -312,6 +312,11 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
         this.OnForceEnableMainMenuSlideshowInteraction;
 
       this.EnableOrDisableEnableMainMenuSlideshowAction();
+
+      // Replays the main menu's loading completion this system missed when the mod loaded late.
+      if (GameManager.instance.IsMainMenuLoaded) {
+        this.OnGameLoadingComplete(Purpose.Cleanup, GameMode.MainMenu);
+      }
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);

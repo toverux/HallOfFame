@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using HallOfFame.Services;
 
 namespace HallOfFame.Tests.Services;
@@ -8,4 +9,11 @@ namespace HallOfFame.Tests.Services;
 /// </summary>
 internal sealed class FakeMenuTourStore : IMenuTourStore {
   public bool HasSeenMenuTour { get; set; }
+
+  /// <summary>
+  /// The value of <see cref="HasSeenMenuTour"/> at each <see cref="Save"/>, in call order.
+  /// </summary>
+  public List<bool> Saves { get; } = [];
+
+  public void Save() => this.Saves.Add(this.HasSeenMenuTour);
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Colossal.IO.AssetDatabase;
 using Colossal.PSI.Common;
 using Colossal.UI.Binding;
@@ -605,6 +606,12 @@ public sealed class
   void ICreatorIdentityStore.Save() => this.ApplyAndSave();
 
   /// <summary>
+  /// Writes the settings on behalf of <see cref="MenuTour"/> through the
+  /// <see cref="IMenuTourStore"/> seam, without applying them.
+  /// </summary>
+  void IMenuTourStore.Save() => _ = Settings.SaveAll();
+
+  /// <summary>
   /// Exposes the save directory to <see cref="SlideshowConductor"/> through the
   /// <see cref="ISlideshowSettings"/> seam.
   /// <see cref="ISlideshowSettings.ScreenshotResolution"/> is satisfied directly by the public
@@ -614,6 +621,16 @@ public sealed class
 
   public Settings(IMod mod) : base(mod) {
     this.SetDefaults();
+  }
+
+  /// <summary>
+  /// Applies the settings, then writes them through <see cref="SaveAll"/>.
+  /// The game's options page calls it on each change the player makes.
+  /// </summary>
+  public override void ApplyAndSave() {
+    this.Apply();
+
+    _ = Settings.SaveAll();
   }
 
   /// <summary>
@@ -768,6 +785,22 @@ public sealed class
     writer.Write(this.PublicCreatorID);
 
     writer.TypeEnd();
+  }
+
+  /// <summary>
+  /// Writes the settings file at once, with every other mod's, as the game does on a clean quit,
+  /// the only time it writes them on its own.
+  /// Not through the base <see cref="Setting.ApplyAndSave"/>, which finds the file to write from
+  /// the short class name: another mod's <c>Settings</c> class can share it, and the save then
+  /// writes that mod's file instead.
+  /// </summary>
+  private static async Task SaveAll() {
+    try {
+      await AssetDatabase.global.SaveAllSettings();
+    }
+    catch (Exception ex) {
+      Mod.Log.ErrorSilent(ex);
+    }
   }
 
   #if DEBUG

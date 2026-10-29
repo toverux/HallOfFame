@@ -150,6 +150,11 @@ internal sealed partial class CommonUISystem : UISystemBase {
       Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
 
       Mod.Settings.PublicCreatorIDChanged += this.OnPublicCreatorIDChanged;
+
+      // Replays the main menu's loading completion this system missed when the mod loaded late.
+      if (GameManager.instance.IsMainMenuLoaded) {
+        this.OnGameLoadingComplete(Purpose.Cleanup, GameMode.MainMenu);
+      }
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);

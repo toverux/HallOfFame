@@ -7,7 +7,8 @@ namespace HallOfFame.Services;
 /// Steps the main menu's one-time tour of the slideshow's controls, one balloon on each in turn:
 /// the navigation buttons, the menu visibility toggle, the like button, then the more-actions menu
 /// holding the Creator Dashboard, a step only a creator with a screenshot gets.
-/// Closing it on any step, or opening the more-actions menu on the dashboard's, ends it for good.
+/// Closing it on any step, leaving the main menu while it shows, or opening the more-actions menu
+/// on the dashboard's step ends it for good, saved at once.
 /// <para>
 /// The screenshot count comes from <see cref="StatsNotifier"/>'s fetch on each main-menu visit:
 /// until one succeeds, the tour ends on the like step.
@@ -66,6 +67,7 @@ internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> 
     }
 
     store.HasSeenMenuTour = true;
+    store.Save();
 
     this.Step = MenuTourStep.None;
 

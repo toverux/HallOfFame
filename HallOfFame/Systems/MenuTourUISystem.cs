@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
+using Game.SceneFlow;
 using Game.UI;
 using HallOfFame.Domain;
 using HallOfFame.Services;
+using HallOfFame.Utils;
 using HallOfFame.Utils.Writers;
 
 namespace HallOfFame.Systems;
@@ -26,8 +28,8 @@ internal sealed partial class MenuTourUISystem : UISystemBase {
   private ValueBinding<bool> isLastStepBinding = null!;
 
   /// <summary>
-  /// Whether this session tracked the tour's start, as the tour shows again on each launch until it
-  /// is closed, and on each main-menu visit of that launch.
+  /// Whether this session tracked the tour's start, and so showed the tour, which shows again on
+  /// each launch until it ends.
   /// </summary>
   private bool isStartTracked;
 
@@ -82,6 +84,11 @@ internal sealed partial class MenuTourUISystem : UISystemBase {
           () => this.TrackingFinish(this.tour.OnMoreActionsOpened, isCompleted: true)
         )
       );
+
+      // Replays the main menu's loading completion this system missed when the mod loaded late.
+      if (GameManager.instance.IsMainMenuLoaded) {
+        this.OnGameLoadingComplete(Purpose.Cleanup, GameMode.MainMenu);
+      }
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
@@ -107,6 +114,18 @@ internal sealed partial class MenuTourUISystem : UISystemBase {
   }
 
   /// <summary>
+  /// Ends the tour when the player leaves the main menu while it shows, which unmounts its balloons
+  /// without a trigger: the tour counts as seen rather than coming back at the next launch.
+  /// </summary>
+  protected override void OnGamePreload(Purpose purpose, GameMode mode) {
+    if (mode is GameMode.MainMenu || !this.isStartTracked) {
+      return;
+    }
+
+    this.TrackingFinish(this.tour.Close, isCompleted: false, hasLeftMenu: true);
+  }
+
+  /// <summary>
   /// Takes the creator's stats each time the main menu fetches them, for the tour's last step.
   /// </summary>
   internal void ReportCreatorStats(CreatorStats stats) => this.tour.ReportStats(stats);
@@ -118,7 +137,10 @@ internal sealed partial class MenuTourUISystem : UISystemBase {
   /// <param name="isCompleted">
   /// Whether the tour counts as completed when this trigger ends it.
   /// </param>
-  private void TrackingFinish(Action trigger, bool isCompleted) {
+  /// <param name="hasLeftMenu">
+  /// Whether the player ended it by leaving the main menu rather than through its balloons.
+  /// </param>
+  private void TrackingFinish(Action trigger, bool isCompleted, bool hasLeftMenu = false) {
     var wasShown = this.tour.Step is not MenuTourStep.None;
 
     trigger();
@@ -127,7 +149,8 @@ internal sealed partial class MenuTourUISystem : UISystemBase {
       Mod.UsageTracker.Track(
         "tour_finished",
         new Dictionary<string, object> {
-          ["completed"] = isCompleted
+          ["completed"] = isCompleted,
+          ["leftMenu"] = hasLeftMenu
         }
       );
     }

@@ -7,8 +7,13 @@ namespace HallOfFame.Services;
 internal interface IMenuTourStore {
   /// <summary>
   /// Whether the player closed the main menu's tour, which then never shows again.
-  /// The tour assigns it without saving: the game writes the settings file on close, and a save
-  /// re-enters the creator identity sync.
   /// </summary>
   bool HasSeenMenuTour { get; set; }
+
+  /// <summary>
+  /// Writes the settings to disk at once, as the game writes them only on a clean quit and a crash
+  /// would show the tour again.
+  /// Without applying them, which would re-enter the creator identity sync.
+  /// </summary>
+  void Save();
 }
