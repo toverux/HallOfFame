@@ -100,6 +100,14 @@ Under Proton the call reaches Wine's desktop rather than the player's, so on Lin
 
 The Wallpaper Engine wallpaper in `../HallOfFameServer/docs/ROADMAP.md` is the live, rotating counterpart.
 
+## The menu tour seen once it starts
+
+**Priority:** high · **Cost:** trivial
+
+`MenuTour` saves `HasSeenMenuTour` only when the tour ends (`Close`), so a game that crashes or quits while the tour shows brings it back next launch. Usage events from 2026.6.1's first 12 hours put that at 6 of 99 tours: each session stops right after `tour_started`, with no `tour_finished`, and 5 of those 6 creators saw the tour again 9 to 68 minutes later.
+
+Set and save the flag when the tour first publishes a step instead, and keep `Close` ending the tour in memory, so `tour_finished` still reports how it ended. A player whose game stops mid-tour then never sees its remaining steps. `MenuTourTests` asserts the save on close (`Close_SavesTheSeenTour_OnceAndAtOnce`) and needs to follow.
+
 ## A JSON mapper of our own
 
 **Priority:** low · **Cost:** moderate
