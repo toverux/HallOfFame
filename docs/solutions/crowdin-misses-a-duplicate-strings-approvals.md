@@ -4,6 +4,7 @@ area: l10n/crowdin
 symptoms:
   - '`GET /approvals?stringId=` returns nothing for a key whose translation shows approved'
   - '`mise l10n:push` previews `approve existing` again for a translation it already approved'
+  - '`mise l10n:push` previews `add unapproved` for an edit over an approved duplicate key'
 tags: [crowdin, approvals, duplicate-strings, l10n-push]
 ---
 
@@ -23,10 +24,10 @@ itself is approved.
 
 ## Fix
 
-Ask by translation, `GET /approvals?translationId=<id>`, where the question is whether one
-translation is approved: `approvedTranslationId` in `.agents/scripts/crowdin-push-translations.ts`.
-By string id the lookup holds only for a string that is not a duplicate; `search_strings` with the
-`isDuplicate` and `masterStringId` fields tells which keys are.
+Ask by translation where the question is whether one translation is approved, and by the master's
+string id where it is whether a string has an approval: `languageApprovals` in
+`scripts/crowdin-push-translations.ts` keys the language's approvals both ways, and a source string's
+`masterStringId` names its master.
 
 ## Prevention
 

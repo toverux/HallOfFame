@@ -13,7 +13,7 @@ Four steps: run the scan, read it against the standing decisions, revise the map
 ## 1. Run the scan
 
 ```
-bun .agents/scripts/playset-filters-scan.ts
+bun scripts/playset-filters-scan.ts
 ```
 
 It runs the matchers the game ships over every published mod and prints one `section.key: <json>` line per measure: each toggle's count, every pair of toggles with mods in common (their count, their most frequent tags, their most subscribed samples), the mods no toggle holds, and every tag on twenty assets or more with how its carriers split across the categories.

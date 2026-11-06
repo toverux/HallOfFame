@@ -1,4 +1,5 @@
-﻿using Colossal.UI.Binding;
+using cohtml.Net;
+using Colossal.UI.Binding;
 using Game.Input;
 using UnityEngine.InputSystem;
 
@@ -19,7 +20,7 @@ namespace HallOfFame.Utils;
 /// suffix, appended to the name passed in the constructor.
 /// </para>
 /// </summary>
-internal class InputActionBinding : CompositeBinding {
+internal sealed class InputActionBinding : CompositeBinding {
   internal InputActionBinding(
     string group,
     string name,
@@ -42,8 +43,9 @@ internal class InputActionBinding : CompositeBinding {
   /// This binding takes the initial binding instance and tracks the changes to update the current
   /// binding instance.
   /// </summary>
-  internal class BindingValueBinding : ValueBinding<ProxyBinding> {
-    private readonly ProxyBinding.Watcher watcher;
+  internal sealed class BindingValueBinding : ValueBinding<ProxyBinding> {
+    // Rebuilt on each attachment, see Attach.
+    private ProxyBinding.Watcher? watcher;
 
     internal BindingValueBinding(
       string group,
@@ -56,11 +58,21 @@ internal class InputActionBinding : CompositeBinding {
         binding,
         comparer: new AlwaysFalseEqualityComparer<ProxyBinding>()
       ) {
-      this.watcher = new ProxyBinding.Watcher(binding, this.Update);
     }
 
-    ~BindingValueBinding() {
-      this.watcher.Dispose();
+    // Built per attachment, as the game detaches and re-attaches bindings on UI navigation
+    // (decompile, UserInterface.OnNavigateTo), and a disposed watcher cannot be reused.
+    public override void Attach(View view) {
+      base.Attach(view);
+
+      this.watcher = new ProxyBinding.Watcher(this.value, this.Update);
+    }
+
+    public override void Detach() {
+      base.Detach();
+
+      this.watcher?.Dispose();
+      this.watcher = null;
     }
   }
 
@@ -70,7 +82,7 @@ internal class InputActionBinding : CompositeBinding {
   /// the binding is being subscribed or not.
   /// It reflects the current action's phase as its value.
   /// </summary>
-  internal class ActionPhaseValueBinding : ValueBinding<InputActionPhase> {
+  internal sealed class ActionPhaseValueBinding : ValueBinding<InputActionPhase> {
     private readonly ProxyAction action;
 
     internal ActionPhaseValueBinding(
@@ -84,11 +96,24 @@ internal class InputActionBinding : CompositeBinding {
       new EnumNameWriter<InputActionPhase>()
     ) {
       this.action = action;
+    }
+
+    // Subscribed per attachment, as the game detaches and re-attaches bindings on UI navigation.
+    public override void Attach(View view) {
+      base.Attach(view);
+
       this.action.onInteraction += this.OnActionInteraction;
     }
 
-    ~ActionPhaseValueBinding() {
+    public override void Detach() {
+      base.Detach();
+
       this.action.onInteraction -= this.OnActionInteraction;
+      this.action.shouldBeEnabled = false;
+
+      // A phase change while detached is never received, so the value re-attaches as idle rather
+      // than replaying a stale Performed (decompile, ValueBinding.OnSubscribe re-sends it).
+      this.Update(InputActionPhase.Waiting);
     }
 
     protected override void OnSubscribe() {
@@ -103,14 +128,6 @@ internal class InputActionBinding : CompositeBinding {
       this.action.shouldBeEnabled = this.active;
     }
 
-    public override void Detach() {
-      base.Detach();
-
-      this.action.shouldBeEnabled = false;
-    }
-
-    private void OnActionInteraction(ProxyAction _, InputActionPhase phase) {
-      this.Update(phase);
-    }
+    private void OnActionInteraction(ProxyAction _, InputActionPhase phase) => this.Update(phase);
   }
 }

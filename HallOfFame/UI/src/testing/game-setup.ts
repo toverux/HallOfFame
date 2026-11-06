@@ -12,8 +12,8 @@
 //
 // How it works (reverse-engineered from the bundle):
 //   - The bundle is a minified webpack IIFE. bun cannot `import()` it (its hot-reload setters
-//     reassign `const` bindings, which bun's transpiler rejects), so it is loaded with indirect
-//     `eval` (raw JS handed to JavaScriptCore).
+//     reassign `const` bindings, which bun's transpiler rejects), so its source is run with `eval`
+//     (raw JS handed to JavaScriptCore).
 //   - Injection: the bundle's two thin React wrapper modules are patched, so the bundle's own
 //     components use this repo's React dependency (allowing using a debug React build).
 //     That yields a single React instance shared by mod components, game components, and
@@ -36,7 +36,7 @@ type Dict = Record<string, unknown>;
 type Handler = (...args: readonly unknown[]) => void;
 
 /**
- * A command trigger recorded by the mock engine, e.g. `hallOfFame.capture.uploadScreenshot`.
+ * A command trigger recorded by the mock engine, e.g. `hallOfFame.common.openWebPage`.
  */
 export interface RecordedTrigger {
   readonly event: string;
@@ -99,6 +99,7 @@ export function setMapBinding(group: string, name: string, key: unknown, value: 
 
   if (!entries) {
     entries = new Map();
+
     mapBindings.set(base, entries);
   }
 
@@ -110,9 +111,9 @@ export function setMapBinding(group: string, name: string, key: unknown, value: 
 /**
  * Configures what `translate` returns for the given ids, overriding its echo-the-id default.
  *
- * Needed whenever a rendered string carries `{PLACEHOLDER}` arguments: `LocalizedString`
- * substitutes its `args` into the *translated* string, so with only the id to work with it drops
- * them, and an argument passed as an element never reaches the tree at all.
+ * Needed whenever a rendered string carries `{PLACEHOLDER}` arguments:
+ * `LocalizedString` substitutes its `args` into the *translated* string, so with only the id to
+ * work with it drops them, and an argument passed as an element never reaches the tree at all.
  */
 export function setTranslations(entries: Readonly<Record<string, string>>): void {
   for (const [id, value] of Object.entries(entries)) {
@@ -128,17 +129,7 @@ export function getTriggers(): readonly RecordedTrigger[] {
 }
 
 /**
- * Returns the usage events `trackUsage` fired since the last {@link resetBindings} call, each as
- * its name and properties.
- */
-export function getUsageEvents(): ReadonlyArray<readonly unknown[]> {
-  return recordedTriggers
-    .filter(({ event }) => event == 'hallOfFame.usage.trackUsage')
-    .map(({ args }) => args);
-}
-
-/**
- * Clears all configured bindings, translations and recorded triggers.
+ * Clears all configured bindings, translations, and recorded triggers.
  * Call in an `afterEach` with `cleanup`.
  */
 export function resetBindings(): void {
@@ -157,8 +148,8 @@ export function emitEvent(name: string, ...args: readonly unknown[]): void {
   const set = handlers.get(name);
 
   if (set) {
-    for (const fn of Array.from(set)) {
-      fn(...args);
+    for (const handler of Array.from(set)) {
+      handler(...args);
     }
   }
 }
@@ -178,11 +169,11 @@ function bootstrap(): void {
   globals.CanvasRenderingContext2D = class CanvasRenderingContext2D {};
 
   // The cohtml engine the bundle binds to. Defining it before load flips the bundle to its
-  // "attached" mode; a no-op `BindingsReady` keeps the app from auto-booting (its `whenReady`
-  // never fires), so only our test trees render.
+  // "attached" mode; a no-op `BindingsReady` keeps the app from auto-booting (its `whenReady` never
+  // fires), so only our test trees render.
   globals.engine = {
-    AddOrRemoveOnHandler: (name: string, fn: Handler): void => addHandler(name, fn),
-    RemoveOnHandler: (name: string, fn: Handler): void => removeHandler(name, fn),
+    AddOrRemoveOnHandler: (name: string, handler: Handler): void => addHandler(name, handler),
+    RemoveOnHandler: (name: string, handler: Handler): void => removeHandler(name, handler),
     ReleaseOnHandler: (): void => {
       // No-op: this harness never needs to release native handlers.
     },
@@ -198,7 +189,7 @@ function bootstrap(): void {
     // Pure-logic tests do not need the bundle, so do not fail the whole run; only component tests
     // that import `cs2/*` at runtime will fail, and with a clearer downstream error.
     console.warn(
-      `[HoF test harness] Game bundle not loaded; component tests will fail. Reason: ${
+      `[UI test harness] Game bundle not loaded; component tests will fail. Reason: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -213,7 +204,7 @@ function loadGameBundle(): void {
   const installPath = process.env.CSII_INSTALLATIONPATH;
 
   if (!installPath) {
-    throw new Error('CSII_INSTALLATIONPATH is not set');
+    throw new Error(`CSII_INSTALLATIONPATH is not set`);
   }
 
   const bundlePath = path.join(installPath, 'Cities2_Data', 'Content', 'Game', 'UI', 'index.js');
@@ -274,10 +265,12 @@ function aliasGameModules(): void {
 }
 
 /**
- * Overrides the `LocalizationContext` no-provider default so `useLocalization().translate(id,
- * fallback)` returns whatever {@link setTranslations} configured, else the fallback, else the id,
- * instead of `null`, without the real, binding-driven localization provider. `unitSettings` is
- * reused from the original default, so `LocalizedNumber` and friends keep working.
+ * Overrides the `LocalizationContext` no-provider default so
+ * `useLocalization().translate(id, fallback)` returns whatever {@link setTranslations} configured,
+ * else the fallback, else the id, instead of `null`, without the real, binding-driven localization
+ * provider.
+ * `unitSettings` is reused from the original default, so `LocalizedNumber` and friends keep
+ * working.
  */
 function overrideLocalization(): void {
   const { getModule } = globals['cs2/modding'] as {
@@ -302,32 +295,34 @@ function overrideLocalization(): void {
   context._currentValue2 = value;
 }
 
-function addHandler(name: string, fn: Handler): void {
+function addHandler(name: string, handler: Handler): void {
   let set = handlers.get(name);
 
   if (!set) {
     set = new Set();
+
     handlers.set(name, set);
   }
 
-  set.add(fn);
+  set.add(handler);
 }
 
-function removeHandler(name: string, fn: Handler): void {
-  handlers.get(name)?.delete(fn);
+function removeHandler(name: string, handler: Handler): void {
+  handlers.get(name)?.delete(handler);
 }
 
 /**
- * Receives every `engine.trigger(...)` from the bundle. Answers binding subscribe requests with
- * configured (or default) values and records everything else as a command trigger.
+ * Receives every `engine.trigger(...)` from the bundle.
+ * Answers binding subscribe requests with configured (or default) values, and records everything
+ * else as a command trigger.
  */
 function triggerEvent(name: string, ...args: readonly unknown[]): void {
   if (name.endsWith('.subscribe')) {
     const base = name.slice(0, -'.subscribe'.length);
 
     // When unconfigured, a game binding answers with its fixed value and any other keeps its
-    // `bindValue` default. Only a default-less binding throws, which is the intended "you forgot
-    // to configure this" signal.
+    // `bindValue` default. Only a default-less binding throws, which is the intended "you forgot to
+    // configure this" signal.
     if (valueBindings.has(base)) {
       emitEvent(`${base}.update`, valueBindings.get(base));
     } else if (gameBindingValues.has(base)) {

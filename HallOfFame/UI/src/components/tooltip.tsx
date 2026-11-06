@@ -30,15 +30,16 @@ export interface TooltipProps {
 }
 
 /**
- * A tooltip that opens on the side it is asked to, which the vanilla `Tooltip` no longer does: it
+ * A tooltip that opens on the side it is asked to, which the vanilla `Tooltip` does not do: it
  * hands the balloon `direction` and `alignment` as flat props, and the balloon reads them off its
  * `balloonUiTarget` instead, so every tooltip in the game opens `up` whatever it asked for.
  * This drives the same balloon through the channel it actually reads, so it keeps working either
  * way should the game reconnect the props.
  *
  * It is the mod's only tooltip, placement or not, so that there is one to reason about rather than
- * two whose props differ in ways nothing warns about. What it gives up in exchange is showing on
- * gamepad focus, which the vanilla one drives off an input observable the bundle does not export.
+ * two whose props differ in ways nothing warns about.
+ * What it gives up in exchange is showing on gamepad focus, which the vanilla one drives off an
+ * input observable the bundle does not export.
  *
  * The children are wrapped exactly as a vanilla `Tooltip` wraps them, in a single
  * {@link DOMNodeModifier}, so a mod component standing in for a vanilla leaf claims one handle here
@@ -96,17 +97,18 @@ export function Tooltip({
         return;
       }
 
-      anchorElRef.current?.removeEventListener('mouseover', show);
-      anchorElRef.current?.removeEventListener('mouseleave', hide);
-      anchorElRef.current?.removeEventListener('mousedown', hide);
-      anchorElRef.current?.removeEventListener('wheel', holdClosed);
-      anchorElRef.current?.removeEventListener('mousemove', release);
+      const listeners = [
+        ['mouseover', show],
+        ['mouseleave', hide],
+        ['mousedown', hide],
+        ['wheel', holdClosed],
+        ['mousemove', release]
+      ] as const;
 
-      element?.addEventListener('mouseover', show);
-      element?.addEventListener('mouseleave', hide);
-      element?.addEventListener('mousedown', hide);
-      element?.addEventListener('wheel', holdClosed);
-      element?.addEventListener('mousemove', release);
+      for (const [type, listener] of listeners) {
+        anchorElRef.current?.removeEventListener(type, listener);
+        element?.addEventListener(type, listener);
+      }
 
       anchorElRef.current = element;
     },

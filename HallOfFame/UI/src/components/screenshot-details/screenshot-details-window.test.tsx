@@ -14,11 +14,11 @@ import {
 import {
   emitEvent,
   getTriggers,
-  getUsageEvents,
   resetBindings,
   setBinding,
   setTranslations
 } from '../../testing/game-setup';
+import { getUsageEvents } from '../../testing/usage-events';
 import { TransitionContext } from '../../vanilla-modules/game-ui/common/animations/transition-context';
 import { photoModeContainerClasses } from '../../vanilla-modules/game-ui/game/components/photo-mode/widgets/photo-mode-container';
 import { ScreenshotDetailsWindow } from './screenshot-details-window';

@@ -1,3 +1,11 @@
+[install]
+# Holds back any package version published less than 3 days ago: most hijacked npm releases are
+# caught and pulled within that window. The shared lint and format configuration lands at once.
+minimumReleaseAge = "3d"
+minimumReleaseAgeExcludes = ["@toverux/blanc-hopital"]
+# Links each package to the dependencies it declares only, so an import of an undeclared one fails.
+linker = "isolated"
+
 # Preload that loads the real game UI bundle so component tests can render mod components against
 # the real cs2/* modules. Pure-logic tests do not depend on it: the bundle is loaded best-effort,
 # and only component tests fail if it cannot be loaded (game not installed, or anchors drifted).

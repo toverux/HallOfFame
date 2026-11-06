@@ -1,9 +1,22 @@
-# https://mise.jdx.dev -- One tool to manage languages, env vars, and tasks per project, reproducibly.
+# https://mise.jdx.dev -- Manages the languages, env vars, and tasks per project, reproducibly.
+
+# Every task body is a single command or a bun script, with no POSIX shell syntax (line
+# continuations, pipes, variables): mise runs inline tasks through `cmd /c` on Windows.
+
+# hard: the oldest mise that reads this file, the first with task `lock`. soft: the one the template
+# last passed on.
+min_version = { hard = "2026.11.0", soft = "2026.11.1" }
 
 [tools]
-bun = "1.4.3"
-dotnet = "10.0.401"
+bun = "1.4.4"
+dotnet = "10.0.403"
 oxipng = "10.2.1"
+
+[env]
+# The Crowdin project `mise l10n:pull` and `mise l10n:push` work on, by its numeric ID. The token
+# they also need, CROWDIN_PERSONAL_TOKEN, is a secret: export it, or set it in mise.local.toml,
+# which git ignores.
+CROWDIN_PROJECT_ID = "705701"
 
 # DEVELOPMENT TASKS
 # =================
@@ -15,8 +28,10 @@ run = [
   "mise up --interactive --bump",
   # using `mise exec bun` makes sure bun is found if a bun upgrade was just made
   "mise exec bun -- bun update --interactive",
-  # make sure transitive dependencies are updated & deduplicated
-  "mise exec bun -- bun update"
+  # refreshes every transitive dependency within its range, which the interactive pick leaves locked
+  "mise exec bun -- bun update",
+  # folds the transitive versions the updates left side by side onto one where the ranges allow
+  "mise exec bun -- bun dedupe"
 ]
 
 [tasks."dev"]
@@ -43,22 +58,22 @@ run = 'bun --bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --expor
 # The in-place auto-fixers live under fix:* (see FIX TASKS).
 # Run `mise fix` locally to apply, `mise check` to verify.
 # The `build:css-types` dependency is the one exception, and not a source write: it regenerates the
-# gitignored *.module.scss.d.ts that tsc and oxlint need to resolve the `styles.*` imports.
+# gitignored *.module.scss.d.ts that `bun check` and oxlint need to resolve the `styles.*` imports.
 
 [tasks."check"]
 description = "Verify read-only: typescript, oxlint, and oxfmt. Writes nothing, run `mise fix` to auto-fix."
 run = ["mise check:tsc", "mise check:oxlint", "mise check:oxfmt"]
 
 [tasks."check:tsc"]
-description = "Type-checks the UI with tsc (read-only)."
+description = "Type-checks the UI with `bun check`, Bun's port of tsc (read-only)."
 depends = "build:css-types"
 raw = true
-run = "bun --bun tsc --noEmit"
+run = "bun check"
 
 [tasks."check:oxfmt"]
-description = "Verifies formatting with oxfmt (read-only, `mise fix:oxfmt` writes)."
+description = "Verifies formatting with `bun fmt`, on the oxfmt configuration (read-only, `mise fix:oxfmt` writes)."
 raw = true
-run = "bun --bun oxfmt --check"
+run = "bun fmt --check"
 
 [tasks."check:oxlint"]
 description = "Lints with oxlint, warnings denied (read-only, `mise fix:oxlint` auto-fixes)."
@@ -69,6 +84,8 @@ run = "bun --bun oxlint --deny-warnings"
 # No check:cs: jb cleanupcode (the C# formatter, see fix:cs) has no read-only/dry-run mode, so there
 # is no read-only C# verify. Run `mise fix:cs` and commit; Rider formats live with the same engine,
 # the same HallOfFame.slnx.DotSettings profile, and the same root .editorconfig.
+# The build itself gates the :warning IDE rules (EnforceCodeStyleInBuild, see
+# Directory.Build.props).
 
 # CHECK TASKS (AGENTS)
 # ====================
@@ -78,10 +95,10 @@ description = "Verify read-only (typescript, oxlint, oxfmt), output optimized fo
 run = ["mise check:agents:tsc", "mise check:agents:oxlint", "mise check:oxfmt"]
 
 [tasks."check:agents:tsc"]
-description = "Type-checks the UI with tsc, output optimized for AI agents."
+description = "Type-checks the UI with `bun check`, output optimized for AI agents."
 depends = "build:css-types"
 raw = true
-run = "bun --bun tsc --noEmit --pretty false"
+run = "bun check --no-pretty"
 
 [tasks."check:agents:oxlint"]
 description = "Lints with oxlint (read-only, warnings denied), output optimized for AI agents."
@@ -105,9 +122,9 @@ raw = true
 run = "bun --bun oxlint --fix"
 
 [tasks."fix:oxfmt"]
-description = "Formats code in place with oxfmt (writes, `mise check:oxfmt` only verifies)."
+description = "Formats code in place with `bun fmt`, on the oxfmt configuration (writes, `mise check:oxfmt` only verifies)."
 raw = true
-run = "bun --bun oxfmt"
+run = "bun fmt"
 
 [tasks."fix:cs"]
 description = "Formats the C# code in place with jb (ReSharper) cleanupcode."
@@ -115,17 +132,17 @@ raw = true
 # jb cleanupcode (same engine as Rider) with the custom "AutoCleanup" profile: applies the
 # resharper_* wrapping dotnet format cannot, and the minor code-style fixes that keep the :warning
 # IDE rules satisfied.
-# Skips the UI build and the mod post-processor like `test:cs` does (cleanup needs the C# semantics,
-# not the deployed mod), and excludes the generated build output.
+# Skips the UI build and the mod post-processor (cleanup needs the C# semantics, not the deployed
+# mod), and turns the build's style gate off: jb refuses to run on a project whose design-time build
+# fails, and the violations are what it fixes.
+# Excludes the generated build output, and the toolchain's Mod.props/Mod.targets the csproj links,
+# which jb would otherwise rewrite in the toolchain folder.
 # `jb` is a local tool pinned in .config/dotnet-tools.json, so the restore has to precede it: it is
 # idempotent and a no-op once the tool is installed.
-run = ["dotnet tool restore", """
-dotnet jb cleanupcode HallOfFame.slnx \
-  --profile="AutoCleanup" \
-  --settings="HallOfFame.slnx.DotSettings" \
-  --properties:SkipBuildUI=true --properties:SkipModPostProcess=true \
-  --exclude="**/obj/**;**/bin/**"
-"""]
+run = [
+  "dotnet tool restore",
+  'dotnet jb cleanupcode HallOfFame.slnx --profile="AutoCleanup" --settings="HallOfFame.slnx.DotSettings" --properties:SkipBuildUI=true --properties:SkipModPostProcess=true --properties:EnforceCodeStyleInBuild=false --exclude="**/obj/**;**/bin/**;**/Mod.props;**/Mod.targets"'
+]
 
 # SETUP TASKS
 # ===========
@@ -138,9 +155,15 @@ run = "bash scripts/setup-linux-toolchain.sh"
 # BUILD TASKS
 # ===========
 
+# The tasks writing to the mod's Mods folder take the `HallOfFame:deploy` lock, so runs from other
+# terminals, agents or worktrees queue instead of overwriting each other's output.
+# A nested `mise run` inherits it.
+# The `dev:bundle` watcher stays out, as it would hold the lock forever.
+
 [tasks."build"]
 description = "Builds and deploys the whole mod: the C# assembly, the post-processor, and the UI (the csproj calls `build:ui` itself). Requires the game to be closed, which holds the deployed assembly open."
 raw = true
+lock = "HallOfFame:deploy"
 run = "dotnet build HallOfFame.slnx"
 
 [tasks."build:ui"]
@@ -149,11 +172,35 @@ depends = ["build:css-types", "build:bundle"]
 
 [tasks."build:bundle"]
 description = "Builds the UI bundle with Bun (`HallOfFame/UI/build.ts`). Does not type-check: `mise check` does."
+lock = "HallOfFame:deploy"
 run = "bun HallOfFame/UI/build.ts"
 
 [tasks."build:css-types"]
-description = "Generates the gitignored *.module.scss.d.ts so tsc catches stale styles.* references."
+description = "Generates the gitignored *.module.scss.d.ts so `bun check` catches stale styles.* references."
 run = 'bun --bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --exportType named --nameFormat camel'
+
+# TEST TASKS
+# ==========
+
+[tasks."test"]
+description = "Runs the full test suite: the off-engine C# tests, the UI tests, and the scripts' tests."
+depends = ["test:cs", "test:ui", "test:scripts"]
+
+[tasks."test:cs"]
+description = "Runs the off-engine C# tests on .NET 10 with xUnit. Skips the UI build, the mod post-processor, and the deploy step (none are needed by the tests)."
+raw = true
+run = "dotnet test --project HallOfFame.Tests -p:SkipBuildUI=true -p:SkipModPostProcess=true"
+
+[tasks."test:ui"]
+description = "Runs the UI tests with Bun, against the real game UI bundle (see bunfig.toml)."
+raw = true
+run = "bun test HallOfFame/UI"
+
+[tasks."test:scripts"]
+description = "Runs the tests of the agent and tooling scripts (scripts/) with Bun."
+# A mod may hold no script test, its init having pruned every part that had one.
+raw = true
+run = "bun test scripts --pass-with-no-tests"
 
 # PUBLISH TASKS
 # =============
@@ -161,75 +208,51 @@ run = 'bun --bun typed-scss-modules "HallOfFame/UI/src/**/*.module.scss" --expor
 [tasks."publish"]
 description = "Builds the mod in Release and publishes it as a new version on Paradox Mods."
 raw = true
+lock = "HallOfFame:deploy"
 run = "dotnet publish HallOfFame/HallOfFame.csproj -p:PublishProfile=PublishNewVersion"
 
 [tasks."publish:page"]
 description = "Updates the Paradox Mods page from PublishConfiguration.xml (description, tags, thumbnail and screenshots) without shipping a version."
 depends = ["images:optimize"]
 raw = true
+lock = "HallOfFame:deploy"
 run = "dotnet publish HallOfFame/HallOfFame.csproj -p:PublishProfile=UpdatePublishedConfiguration"
 
 # LOCALIZATION TASKS
 # ==================
 
 [tasks."l10n:pull"]
-description = "Pulls Crowdin's current translations of the source keys added or changed since `--base` into the locale files, so a volunteer's pending work is seen before the repo gets translations of its own. Previews by default; pass `--write` to apply. Needs CROWDIN_PERSONAL_TOKEN."
+description = "Pulls Crowdin's current translations of the source keys added or changed since `--base` into the locale files, so a volunteer's pending work is seen before the repo gets translations of its own. Previews by default; pass `--write` to apply. Needs CROWDIN_PROJECT_ID and CROWDIN_PERSONAL_TOKEN."
 raw = true
-run = "bun .agents/scripts/crowdin-pull-translations.ts"
+run = "bun scripts/crowdin-pull-translations.ts"
 
 [tasks."l10n:push"]
-description = "Pushes the locale-file edits to Crowdin and approves only the strings that changed, so a repo edit survives the next pull; `--no-approve` pushes them unapproved, left for proofreaders. Previews by default; pass `--push` to apply. Needs CROWDIN_PERSONAL_TOKEN."
+description = "Pushes the locale-file edits to Crowdin as unapproved translations flagged AI-translated, for proofreaders to review, and approves an edit that replaces an approved translation, so the edit survives the next pull. Previews by default; pass `--push` to apply. Needs CROWDIN_PROJECT_ID and CROWDIN_PERSONAL_TOKEN."
 raw = true
-run = "bun .agents/scripts/crowdin-push-translations.ts"
+run = "bun scripts/crowdin-push-translations.ts"
 
 [tasks."l10n:skyve"]
 description = "Copies Skyve's stability labels, in every locale the mod ships, from Skyve's repository at the commit the script pins into HallOfFame/Locales/Skyve. They stay out of Crowdin."
 raw = true
-run = "bun .agents/scripts/import-skyve-labels.ts"
+run = "bun scripts/import-skyve-labels.ts"
 
 # ASSET TASKS
 # ===========
 
-# Font Awesome serves every style, Pro ones included, from its own site's asset host, which only
-# checks the Referer. The version is the one the folder's NOTICE declares, and the license comment
-# each SVG carries is stripped, the NOTICE covering it.
-# The response is held in a variable rather than piped, so a failed download stops the task
-# (errexit) instead of leaving an empty file.
 [tasks."icons:fontawesome"]
-description = "Downloads a Font Awesome 7.3.1 icon, Free or Pro, into HallOfFame/UI/src/icons/fontawesome as <icon>-<style>.svg. List a Pro icon in that folder's NOTICE."
-usage = '''
-arg "<style>" help="Style folder, e.g. solid, regular, light, duotone-light, sharp-solid"
-arg "<icon>" help="Icon name, e.g. pen-line"
-'''
-run = '''
-svg=$(curl -sSf -H "Referer: https://fontawesome.com" "https://site-assets.fontawesome.com/releases/v7.3.1/svgs/${usage_style}/${usage_icon}.svg")
-printf '%s' "$svg" | sed 's/<!--[^>]*-->//' > "HallOfFame/UI/src/icons/fontawesome/${usage_icon}-${usage_style}.svg"
-'''
+description = "Downloads a Font Awesome icon, Free or Pro, into HallOfFame/UI/src/icons/fontawesome as <icon>-<style>.svg. List a Pro icon in that folder's NOTICE."
+raw = true
+run = "bun scripts/fontawesome-icon.ts"
 
 # Every image PublishConfiguration.xml uploads to Paradox Mods sits in HallOfFame/Properties.
 # Paradox Mods serves the previews byte for byte, so pngquant cuts them to a 256-colour palette,
-# a third of the size and indistinguishable at full size. The thumbnail stays lossless: Paradox
-# re-encodes it to JPEG anyway. oxipng then recompresses every image without touching a pixel.
+# indistinguishable at full size. The thumbnail stays lossless: Paradox re-encodes it to JPEG
+# anyway. oxipng then recompresses every image without touching a pixel. Rerunning changes no pixel.
+# On Windows, cmd passes the globs through unexpanded: both tools expand them themselves (oxipng's
+# source, pngquant-bin's Rust build run under Wine).
 [tasks."images:optimize"]
 description = "Shrinks the Paradox Mods images in HallOfFame/Properties: pngquant cuts the previews to 256 colours, oxipng losslessly recompresses them and the thumbnail."
 run = [
   "bun x pngquant --speed 1 --strip --force --ext .png HallOfFame/Properties/Preview_*.png",
   "oxipng -o max --strip safe HallOfFame/Properties/*.png"
 ]
-
-# TEST TASKS
-# ==========
-
-[tasks."test"]
-description = "Runs the full test suite: C# unit tests and TypeScript/UI tests."
-depends = ["test:cs", "test:ui"]
-
-[tasks."test:cs"]
-description = "Runs the C# unit tests with xUnit. Skips the TypeScript UI build, the mod post-processor, and the deploy step (none are needed by the tests)."
-raw = true
-run = "dotnet test HallOfFame.Tests/HallOfFame.Tests.csproj -p:SkipBuildUI=true -p:SkipModPostProcess=true"
-
-[tasks."test:ui"]
-description = "Runs the TypeScript/React UI tests with Bun."
-raw = true
-run = "bun test HallOfFame/UI"

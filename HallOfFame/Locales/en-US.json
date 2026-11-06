@@ -331,6 +331,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Address of the Hall of Fame server. You should not change it unless you’re developing on the mod or using an alternative server.\nYou can use “test.halloffame.cs2.mtq.io” to test the mod on a sandbox database.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Reset Settings",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Reset all mod settings to their default values (except the Creator ID which will be kept untouched).",
+  "Options.WARNING[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Reset all mod settings to their default values?",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Chat & Support on Discord",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "This is an invite link to join the Cities: Skylines Modding Discord server, for support requests and chatting.\nThe preferred channel is pdxm-mods-published › Hall of Fame.\nOpens <discord.gg/HTav7ARPs2>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "Donate <3 on PayPal or Ko-fi",

@@ -1,39 +1,39 @@
-﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<!--
 	  https://github.com/toverux/scrolls/blob/main/templates/csharp.sln.DotSettings
 	  Version: 1.0.0
 	  Team-shared ReSharper/jb settings.
 	  It reformats to the root .editorconfig and auto-applies the minor code-style fixes, but
-	  deliberately does not expression-body members, reorder members, rewrite patterns, or touch
-	  file headers (those stay Rider suggestions). Rider uses this same profile.
+	  deliberately does not expression-body members, reorder members, rewrite patterns, or touch file
+	  headers (those stay Rider suggestions). Rider uses this same profile.
 	-->
-    <s:String x:Key="/Default/CodeStyle/CodeCleanup/Profiles/=AutoCleanup/@EntryIndexedValue">&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;Profile name="AutoCleanup"&gt;&lt;CSReformatCode&gt;True&lt;/CSReformatCode&gt;&lt;CSCodeStyleAttributes ArrangeTypeAccessModifier="True" ArrangeTypeMemberModifiers="True" SortModifiers="True" RemoveRedundantParentheses="True" AddMissingParentheses="True" ArrangeBraces="True" ArrangeAttributes="True" ArrangeArgumentsStyle="False" ArrangeCodeBodyStyle="False" ArrangeVarStyle="True" ArrangeTrailingCommas="True" ArrangeObjectCreation="True" ArrangeDefaultValue="True" ArrangeNamespaces="True" ArrangeNullCheckingPattern="True" /&gt;&lt;CSArrangeQualifiers&gt;True&lt;/CSArrangeQualifiers&gt;&lt;CSUseVar&gt;&lt;BehavourStyle&gt;CAN_CHANGE_TO_EXPLICIT&lt;/BehavourStyle&gt;&lt;LocalVariableStyle&gt;ALWAYS_IMPLICIT&lt;/LocalVariableStyle&gt;&lt;ForeachVariableStyle&gt;ALWAYS_IMPLICIT&lt;/ForeachVariableStyle&gt;&lt;/CSUseVar&gt;&lt;CSOptimizeUsings&gt;&lt;OptimizeUsings&gt;True&lt;/OptimizeUsings&gt;&lt;EmbraceInRegion&gt;False&lt;/EmbraceInRegion&gt;&lt;RegionName&gt;&lt;/RegionName&gt;&lt;/CSOptimizeUsings&gt;&lt;CSShortenReferences&gt;True&lt;/CSShortenReferences&gt;&lt;CSMakeFieldReadonly&gt;True&lt;/CSMakeFieldReadonly&gt;&lt;CSUseAutoProperty&gt;True&lt;/CSUseAutoProperty&gt;&lt;RemoveCodeRedundancies&gt;True&lt;/RemoveCodeRedundancies&gt;&lt;CSUpdateFileHeader&gt;False&lt;/CSUpdateFileHeader&gt;&lt;CSReorderTypeMembers&gt;False&lt;/CSReorderTypeMembers&gt;&lt;/Profile&gt;</s:String>
-    <s:String x:Key="/Default/CodeStyle/CodeCleanup/SilentCleanupProfile/@EntryValue">AutoCleanup</s:String>
+	<s:String x:Key="/Default/CodeStyle/CodeCleanup/Profiles/=AutoCleanup/@EntryIndexedValue">&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;Profile name="AutoCleanup"&gt;&lt;CSReformatCode&gt;True&lt;/CSReformatCode&gt;&lt;CSCodeStyleAttributes ArrangeTypeAccessModifier="True" ArrangeTypeMemberModifiers="True" SortModifiers="True" RemoveRedundantParentheses="True" AddMissingParentheses="True" ArrangeBraces="True" ArrangeAttributes="True" ArrangeArgumentsStyle="False" ArrangeCodeBodyStyle="False" ArrangeVarStyle="True" ArrangeTrailingCommas="True" ArrangeObjectCreation="True" ArrangeDefaultValue="True" ArrangeNamespaces="True" ArrangeNullCheckingPattern="True" /&gt;&lt;CSArrangeQualifiers&gt;True&lt;/CSArrangeQualifiers&gt;&lt;CSUseVar&gt;&lt;BehavourStyle&gt;CAN_CHANGE_TO_EXPLICIT&lt;/BehavourStyle&gt;&lt;LocalVariableStyle&gt;ALWAYS_IMPLICIT&lt;/LocalVariableStyle&gt;&lt;ForeachVariableStyle&gt;ALWAYS_IMPLICIT&lt;/ForeachVariableStyle&gt;&lt;/CSUseVar&gt;&lt;CSOptimizeUsings&gt;&lt;OptimizeUsings&gt;True&lt;/OptimizeUsings&gt;&lt;EmbraceInRegion&gt;False&lt;/EmbraceInRegion&gt;&lt;RegionName&gt;&lt;/RegionName&gt;&lt;/CSOptimizeUsings&gt;&lt;CSShortenReferences&gt;True&lt;/CSShortenReferences&gt;&lt;CSMakeFieldReadonly&gt;True&lt;/CSMakeFieldReadonly&gt;&lt;CSUseAutoProperty&gt;True&lt;/CSUseAutoProperty&gt;&lt;RemoveCodeRedundancies&gt;True&lt;/RemoveCodeRedundancies&gt;&lt;CSUpdateFileHeader&gt;False&lt;/CSUpdateFileHeader&gt;&lt;CSReorderTypeMembers&gt;False&lt;/CSReorderTypeMembers&gt;&lt;/Profile&gt;</s:String>
+	<s:String x:Key="/Default/CodeStyle/CodeCleanup/SilentCleanupProfile/@EntryValue">AutoCleanup</s:String>
 
-    <!-- Shared dictionary -->
+	<!-- Shared dictionary -->
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=algernon/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=chirper/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=chunkmjs/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=cohtml_0027s/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=colossal_0027s/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=csii/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=debounces/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=factorio/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=fonticons/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=colossal_0027s/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=csii/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=debounces/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=factorio/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=fonticons/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=foxxy/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=gameface/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=hwid/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=lefthook/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=lumina/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=modders/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=paradoxmods/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=pdxm/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=playset/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=playsets/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=savegame/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=ssgi/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=steamapps/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=supersampling/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=toverux/@EntryIndexedValue">True</s:Boolean>
-    <s:Boolean x:Key="/Default/UserDictionary/Words/=userdatapath/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=gameface/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=hwid/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=lefthook/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=lumina/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=modders/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=paradoxmods/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=pdxm/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=playset/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=playsets/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=savegame/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=ssgi/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=steamapps/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=supersampling/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=toverux/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=userdatapath/@EntryIndexedValue">True</s:Boolean>
 </wpf:ResourceDictionary>

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -11,15 +12,12 @@ namespace HallOfFame.Utils;
 /// <summary>
 /// Provides functionality for managing and loading locale dictionaries matching the current in-game
 /// locale set by the user.
+/// The dictionaries are the flat JSON files of <c>Locales/</c>, embedded in the assembly.
 /// </summary>
 internal static class LocaleLoader {
-  private const string ResourcePrefix = "HallOfFame.Locales.";
+  internal const string ResourcePrefix = $"{nameof(HallOfFame)}.Locales.";
 
-  private const string SkyveResourcePrefix = "HallOfFame.Locales.Skyve.";
-
-  private const string SkyveKeyPrefix = "HallOfFame.Skyve.";
-
-  private static readonly List<string> LoadedLocales = [];
+  private static readonly HashSet<string> LoadedLocales = [];
 
   /// <seealso cref="PostprocessLocaleDictionary"/>
   private static readonly Regex InterpolationPattern =
@@ -44,31 +42,90 @@ internal static class LocaleLoader {
       LocaleLoader.RefreshLocale;
   }
 
+  /// <summary>
+  /// Loads the JSON resource of the given locale bundled in the assembly and parses it into a
+  /// localization dictionary, null when the mod does not ship that locale.
+  /// </summary>
+  internal static Dictionary<string, string>? ReadDictionary(string localeId) {
+    var resourceName = $"{LocaleLoader.ResourcePrefix}{localeId}.json";
+
+    var resourceStream = typeof(LocaleLoader).Assembly.GetManifestResourceStream(resourceName);
+
+    if (resourceStream is null) {
+      return null;
+    }
+
+    using var reader = new StreamReader(resourceStream, Encoding.UTF8);
+
+    return JSON.MakeInto<Dictionary<string, string>>(JSON.Load(reader.ReadToEnd())) ??
+      throw new FormatException($"{resourceName} is not a flat JSON object of strings.");
+  }
+
+  /// <summary>
+  /// Processes a given locale dictionary by removing comment lines and interpolating references to
+  /// other keys within it: <c>{KEY=...}</c> is replaced with the value of that key in the
+  /// dictionary, else the string <paramref name="lookupGameString"/> returns for it, else the key.
+  /// Does not modify the source dictionary.
+  /// </summary>
+  internal static Dictionary<string, string> PostprocessLocaleDictionary(
+    Dictionary<string, string> dictionary,
+    Func<string, string?> lookupGameString
+  ) {
+    var interpolatedDictionary = new Dictionary<string, string>(dictionary);
+
+    foreach (var entry in dictionary) {
+      // Remove lines starting with //.
+      var value = LocaleLoader.CommentPattern.Replace(entry.Value, string.Empty);
+
+      // Replace {KEY=...} with the value of the key in either the current or game dictionary.
+      value = LocaleLoader.InterpolationPattern.Replace(
+        value,
+        match => {
+          var key = match.Groups[1].Value;
+
+          return interpolatedDictionary.TryGetValue(key, out var replacement)
+            ? replacement
+            : lookupGameString(key) ?? key;
+        }
+      );
+
+      interpolatedDictionary[entry.Key] = value;
+    }
+
+    return interpolatedDictionary;
+  }
+
   private static void RefreshLocale() =>
     LocaleLoader.LoadLocale(GameManager.instance.localizationManager.activeLocaleId);
 
   /// <summary>
   /// Loads the mod's dictionary for a locale, processes its interpolations, and registers it into
-  /// the localization manager, along with Skyve's labels.
+  /// the localization manager.
   /// </summary>
   private static void LoadLocale(string localeId) {
-    // Check locale wasn't loaded yet.
-    if (LocaleLoader.LoadedLocales.Contains(localeId)) {
+    // Marked as loaded before it is, so a locale that fails is not tried again.
+    if (!LocaleLoader.LoadedLocales.Add(localeId)) {
       return;
     }
 
-    // Mark as loaded right now, so it is not tried again even if it fails.
-    LocaleLoader.LoadedLocales.Add(localeId);
+    Dictionary<string, string>? localeDictionary;
+    Dictionary<string, string>? skyveDictionary;
 
-    // Load locale dictionary.
-    var localeDictionary =
-      LocaleLoader.ReadDictionary($"{LocaleLoader.ResourcePrefix}{localeId}.json");
+    try {
+      localeDictionary = LocaleLoader.ReadDictionary(localeId);
+
+      // Skyve's labels, as Skyve words them, in their own files of the same locale names.
+      skyveDictionary = LocaleLoader.ReadDictionary($"Skyve.{localeId}");
+    }
+    catch (Exception ex) {
+      Mod.Log.ErrorSilent(ex, $"{nameof(LocaleLoader)}: Failed to read locale {localeId}.");
+
+      return;
+    }
 
     // Oops, we do not support this one.
     if (localeDictionary is null) {
-      Mod.Log.Info(
-        $"{nameof(LocaleLoader)}: Skipping locale {localeId}, it is not supported by HoF."
-      );
+      Mod.Log.Info($"{nameof(LocaleLoader)}: Skipping locale {localeId}, it is not supported.");
 
       return;
     }
@@ -84,88 +141,25 @@ internal static class LocaleLoader {
       string.Empty
     );
 
-    // Remove comments and process interpolations in the dictionary.
-    var processedLocaleDictionary = LocaleLoader.PostprocessLocaleDictionary(localeDictionary);
+    var gameDictionary = GameManager.instance.localizationManager.activeDictionary;
 
-    // Skyve's labels, as Skyve words them, under keys of their own.
-    var skyveDictionary = LocaleLoader.ReadDictionary(
-      $"{LocaleLoader.SkyveResourcePrefix}{localeId}.json"
+    // Remove comments and process interpolations in the dictionary.
+    var processedLocaleDictionary = LocaleLoader.PostprocessLocaleDictionary(
+      localeDictionary,
+      key => gameDictionary.TryGetValue(key, out var value) ? value : null
     );
 
+    // Skyve's labels go under keys of their own, with no interpolation.
     foreach (var entry in skyveDictionary ?? []) {
-      processedLocaleDictionary[$"{LocaleLoader.SkyveKeyPrefix}{entry.Key}"] = entry.Value;
+      processedLocaleDictionary[$"{nameof(HallOfFame)}.Skyve.{entry.Key}"] = entry.Value;
     }
 
     // Register the locale dictionary.
-    var source = new MemorySource(processedLocaleDictionary);
-
-    GameManager.instance.localizationManager.AddSource(localeId, source);
+    GameManager.instance.localizationManager.AddSource(
+      localeId,
+      new MemorySource(processedLocaleDictionary)
+    );
 
     Mod.Log.Verbose($"{nameof(LocaleLoader)}: Loaded locale {localeId}.");
-  }
-
-  /// <summary>
-  /// Loads the JSON resource of the given name bundled in the assembly and parses it into a
-  /// localization dictionary, null when there is no such resource.
-  /// The name is matched exactly, so the mod's own strings and Skyve's labels, which share their
-  /// file names, never stand in for one another.
-  /// </summary>
-  private static Dictionary<string, string>? ReadDictionary(string resourceName) {
-    var assembly = typeof(LocaleLoader).Assembly;
-
-    var resourceStream = assembly.GetManifestResourceStream(resourceName);
-
-    if (resourceStream is null) {
-      return null;
-    }
-
-    using var reader = new StreamReader(resourceStream, Encoding.UTF8);
-
-    var localeDictionary =
-      JSON.MakeInto<Dictionary<string, string>>(JSON.Load(reader.ReadToEnd()));
-
-    if (localeDictionary is not null) {
-      return localeDictionary;
-    }
-
-    Mod.Log.ErrorSilent($"LocaleLoader: Failed to parse resource file {resourceName}.");
-
-    return new Dictionary<string, string>();
-  }
-
-  /// <summary>
-  /// Processes a given locale dictionary by interpolating references to other dictionary keys
-  /// within it and removing comment lines.
-  /// Does not modify the source dictionary.
-  /// </summary>
-  private static Dictionary<string, string> PostprocessLocaleDictionary(
-    Dictionary<string, string> dictionary
-  ) {
-    var gameDictionary = GameManager.instance.localizationManager.activeDictionary;
-
-    var interpolatedDictionary = new Dictionary<string, string>(dictionary);
-
-    foreach (var entry in dictionary) {
-      // Remove lines starting with //.
-      var value = LocaleLoader.CommentPattern.Replace(entry.Value, string.Empty);
-
-      // Replace {KEY=...} with the value of the key in either the current or game dictionary.
-      value = LocaleLoader.InterpolationPattern.Replace(
-        value,
-        match => {
-          var key = match.Groups[1].Value;
-
-          return interpolatedDictionary.TryGetValue(key, out var replacement)
-            ? replacement
-            : gameDictionary.TryGetValue(key, out var gameReplacement)
-              ? gameReplacement
-              : key;
-        }
-      );
-
-      interpolatedDictionary[entry.Key] = value;
-    }
-
-    return interpolatedDictionary;
   }
 }

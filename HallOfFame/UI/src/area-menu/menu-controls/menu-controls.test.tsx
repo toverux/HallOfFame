@@ -1,13 +1,8 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { makeMod, makeScreenshot, makeSettings, makeSkyveVerdict } from '../../testing/fixtures';
-import {
-  getTriggers,
-  getUsageEvents,
-  resetBindings,
-  setBinding,
-  setTranslations
-} from '../../testing/game-setup';
+import { getTriggers, resetBindings, setBinding, setTranslations } from '../../testing/game-setup';
+import { getUsageEvents } from '../../testing/usage-events';
 import { MenuControlsContent } from './menu-controls';
 
 afterEach(() => {

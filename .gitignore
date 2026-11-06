@@ -11,7 +11,8 @@
 *.module.scss.d.ts
 
 # Build artifacts
-Library/
+# The Unity project folder the toolchain creates beside the csproj, and no deeper Library folder.
+/*/Library/
 bin/
 obj/
 

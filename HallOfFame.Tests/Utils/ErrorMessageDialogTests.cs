@@ -1,6 +1,6 @@
 using System;
 using System.Reflection;
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Colossal.UI.Binding;
 using Game.UI;
@@ -75,11 +75,11 @@ public sealed class ErrorMessageDialogTests {
   }
 
   private static AppBindings CreateAppBindings(bool isListening) {
-    var appBindings = (AppBindings) FormatterServices.GetUninitializedObject(typeof(AppBindings));
+    var appBindings = (AppBindings) RuntimeHelpers.GetUninitializedObject(typeof(AppBindings));
 
     // Built bare, as its constructor reaches the engine's logging, with a writer left detached.
     var binding =
-      FormatterServices.GetUninitializedObject(typeof(EventBinding<ConfirmationDialogBase>));
+      RuntimeHelpers.GetUninitializedObject(typeof(EventBinding<ConfirmationDialogBase>));
 
     ErrorMessageDialogTests.Field(typeof(RawEventBindingBase), "<jsonWriter>k__BackingField")
       .SetValue(binding, new JsonWriter("app.confirmationDialog"));

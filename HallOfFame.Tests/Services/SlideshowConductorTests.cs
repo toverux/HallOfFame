@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Game;
-using Game.UI.Localization;
 using HallOfFame.Domain;
 using HallOfFame.Http;
 using HallOfFame.Logging;
@@ -441,7 +440,6 @@ public sealed class SlideshowConductorTests {
 
     try {
       var recoverable = new List<Exception>();
-      var localizedErrors = new List<LocalizedString>();
       var sink = new FakeSlideshowPresentationSink();
 
       var conductor = SlideshowConductorTests.CreateConductor(
@@ -450,8 +448,7 @@ public sealed class SlideshowConductorTests {
           SaveDirectory = directory
         },
         log: new FakeModLog {
-          ErrorRecoverableImpl = recoverable.Add,
-          ErrorLocalizedImpl = localizedErrors.Add
+          ErrorRecoverableImpl = recoverable.Add
         },
         sink: sink
       );
@@ -462,7 +459,6 @@ public sealed class SlideshowConductorTests {
 
       Assert.Equal([true, false], sink.SavingLog);
       Assert.Empty(recoverable);
-      Assert.Empty(localizedErrors);
       Assert.NotEmpty(Directory.GetFiles(directory));
     }
     finally {
@@ -481,14 +477,12 @@ public sealed class SlideshowConductorTests {
       DownloadImageImpl = _ => Task.FromException<byte[]>(new HttpNetworkException("1", "boom"))
     };
 
-    var localizedErrors = new List<LocalizedString>();
     var silentErrors = new List<Exception>();
     var sink = new FakeSlideshowPresentationSink();
 
     var conductor = SlideshowConductorTests.CreateConductor(
       api: api,
       log: new FakeModLog {
-        ErrorLocalizedImpl = localizedErrors.Add,
         ErrorSilentImpl = silentErrors.Add
       },
       sink: sink
@@ -501,7 +495,6 @@ public sealed class SlideshowConductorTests {
     // A foreseen failure: its message goes to the message dialog, the exception only to the log.
     Assert.Single(sink.ShownErrors);
     Assert.Single(silentErrors);
-    Assert.Empty(localizedErrors);
     Assert.Equal([true, false], sink.SavingLog);
   }
 

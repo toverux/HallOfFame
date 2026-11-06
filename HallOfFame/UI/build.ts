@@ -12,22 +12,37 @@ import assert from 'node:assert/strict';
 import { mkdir, rm, watch } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+// On the major typed-scss-modules depends on (4), so exports match the .d.ts names: change-case 5
+// drops camelCaseTransformMerge and splits around digits differently.
+import { camelCase, camelCaseTransformMerge } from 'change-case';
 import postcss from 'postcss';
 import postcssModules from 'postcss-modules';
 import { compile as compileSass } from 'sass';
 import mod from './mod.json' with { type: 'json' };
 
-const userDataPath = process.env.CSII_USERDATAPATH;
+const localModsPath = process.env.CSII_LOCALMODSPATH;
 
-if (!userDataPath) {
+if (!localModsPath) {
   throw new Error(
-    `CSII_USERDATAPATH environment variable is not set, ensure the CSII Modding Toolchain is installed correctly.`
+    `CSII_LOCALMODSPATH environment variable is not set, ` +
+      `ensure the CSII Modding Toolchain is installed correctly.`
   );
 }
 
-const outputDirectory = path.join(userDataPath, 'Mods', mod.id);
+// The toolchain deploys the DLL to the same folder, its DeployDir.
+const outputDirectory = path.join(localModsPath, mod.id);
 
 const sourceDirectory = path.join(import.meta.dir, 'src');
+
+// The csproj `Version` is the mod's single version source. The game parses the banner's version as
+// a `System.Version`.
+const csprojPath = path.join(import.meta.dir, '..', `${mod.id}.csproj`);
+const version = /<Version>(?<version>[^<]+)<\/Version>/u.exec(await Bun.file(csprojPath).text())
+  ?.groups?.version;
+
+if (!version) {
+  throw new Error(`No <Version> found in ${csprojPath}.`);
+}
 
 // The modules the game exposes as properties of `window`, by import specifier.
 const windowExternals: ReadonlyMap<string, string> = new Map([
@@ -46,12 +61,22 @@ const windowExternals: ReadonlyMap<string, string> = new Map([
 // Debounces the burst of events one save raises into a single rebuild.
 const REBUILD_DELAY_MS = 150;
 
+// The class names a CSS module cannot export: the words typed-scss-modules leaves out of the .d.ts,
+// where tsc would only report a missing property, and `eval` and `arguments`, which a module cannot
+// bind with `export const`.
+const reservedWords: ReadonlySet<string> = new Set(
+  `arguments await break case catch class const continue debugger default delete do else enum eval
+  export extends false finally for function if implements import in instanceof interface let new
+  null package private protected public return static super switch this throw true try typeof var
+  void while with yield`.split(/\s+/u)
+);
+
 const banner = `/*
  * Cities: Skylines II UI Module
  *
  * Id: ${mod.id}
  * Author: ${mod.author}
- * Version: ${mod.version}
+ * Version: ${version}
  * Dependencies: ${mod.dependencies.join(',')}
  */`;
 
@@ -64,7 +89,12 @@ if (process.argv.includes('--watch')) {
     building = rebuild(building);
   };
 
-  for await (const _ of watch(sourceDirectory, { recursive: true })) {
+  for await (const { filename } of watch(sourceDirectory, { recursive: true })) {
+    // The generated `.module.scss.d.ts` sit beside their stylesheets but never reach the bundle.
+    if (filename?.endsWith('.d.ts')) {
+      continue;
+    }
+
     clearTimeout(rebuildTimer);
 
     rebuildTimer = setTimeout(queueRebuild, REBUILD_DELAY_MS);
@@ -95,6 +125,7 @@ async function bundle(): Promise<boolean> {
     target: 'browser',
     format: 'esm',
     minify: true,
+    banner,
     // Selects the production JSX runtime (jsx, not jsxDEV), as the game ships production React.
     define: { 'process.env.NODE_ENV': '"production"' },
     publicPath: 'coui://ui-mods/',
@@ -116,28 +147,40 @@ async function bundle(): Promise<boolean> {
   const js = result.outputs.find(output => output.kind == 'entry-point');
   const images = result.outputs.filter(output => output.kind == 'asset');
 
-  assert.ok(result.metafile);
-
-  // Concatenated in the order the modules evaluate, so of two rules of equal specificity, the one
-  // from the module imported later wins.
-  const css = evaluationOrder(result.metafile, entryPoint)
-    .flatMap(modulePath => stylesheets.get(modulePath) ?? [])
-    .join('\n');
-
-  // The entry point declares `hasCSS = true`, and a missing stylesheet hangs the game's module
-  // loader for every mod, so a build without CSS output fails.
-  if (!js || !css) {
-    console.error(`Bun.build produced no JS entry point or no CSS output.`);
+  if (!js) {
+    console.error(`Bun.build produced no JS entry point.`);
 
     return false;
   }
+
+  assert.ok(result.metafile);
+
+  const order = evaluationOrder(result.metafile, entryPoint);
+
+  // A compiled module the evaluation order misses would ship without its styles.
+  const unplaced = [...stylesheets.keys()].filter(modulePath => !order.includes(modulePath));
+
+  if (unplaced.length > 0) {
+    console.error(
+      `build.ts bug: evaluationOrder() missed these compiled stylesheets, their CSS would not ` +
+        `ship: ${unplaced.join(', ')}.`
+    );
+
+    return false;
+  }
+
+  // Concatenated in the order the modules evaluate, so of two rules of equal specificity, the one
+  // from the module imported later wins. Empty for a mod with no styles.
+  const css = order.flatMap(modulePath => stylesheets.get(modulePath) ?? []).join('\n');
 
   // The C# build deploys to the same folder: clear only what this build owns.
   await rm(path.join(outputDirectory, 'images'), { recursive: true, force: true });
   await mkdir(outputDirectory, { recursive: true });
 
   await Promise.all([
-    Bun.write(path.join(outputDirectory, `${mod.id}.mjs`), `${banner}\n${await js.text()}`),
+    Bun.write(path.join(outputDirectory, `${mod.id}.mjs`), js),
+    // Written even when empty: the entry point declares `hasCSS = true`, and a missing stylesheet
+    // hangs the game's module loader for every mod.
     Bun.write(path.join(outputDirectory, `${mod.id}.css`), css),
     // The minifier keeps the `/*!` notices but drops React's `@license` one, shipped here instead.
     Bun.write(
@@ -198,16 +241,35 @@ function evaluationOrder(metafile: Bun.BuildMetafile, entryPoint: string): strin
   }
 }
 
+// Every reference to another stylesheet (`composes` or `@value` from a file, `:import`) loads it
+// here. postcss-modules would read that file raw, and its SCSS would ship as is.
+class CrossFileImportLoader {
+  public fetch(file: string, relativeTo: string): never {
+    throw new Error(
+      `${relativeTo}: ${file} is imported from CSS, which would ship it uncompiled. ` +
+        `Import both modules from TSX and set both classes instead.`
+    );
+  }
+}
+
 // Compiles each `.module.scss` with Sass and scopes its classes with postcss-modules, keeping the
 // CSS out of Bun's own CSS bundler: it rewrites declarations into shorthands Gameface ignores, such
 // as `inset` and `flex-flow`.
 // The module exports each class under its camelCase name only, the names the generated
 // `.module.scss.d.ts` declare, and leaves its CSS in `stylesheets` for `bundle()` to concatenate.
+// What this CSS path cannot ship fails the build, naming the cause.
 function sassModulesPlugin(stylesheets: Map<string, string>): Bun.BunPlugin {
   return {
     name: 'sass-modules',
     setup(build) {
-      build.onLoad({ filter: /\.module\.scss$/u }, async args => {
+      build.onLoad({ filter: /\.(?:s[ac]ss|css)$/u }, async args => {
+        // Bun would otherwise copy it to images/ as a file asset, its styles applied nowhere.
+        if (!args.path.endsWith('.module.scss')) {
+          throw new Error(
+            `${args.path}: only CSS modules are bundled, rename it to *.module.scss.`
+          );
+        }
+
         let classes: Record<string, string> = {};
 
         const { css } = await postcss([
@@ -215,12 +277,36 @@ function sassModulesPlugin(stylesheets: Map<string, string>): Bun.BunPlugin {
             // The `hof-` prefix keeps the `[class^="…"]` selectors aimed at vanilla internals off
             // the mod's own classes.
             generateScopedName: 'hof-[local]_[hash:base64:3]',
-            localsConvention: 'camelCaseOnly',
+            // The names the generated .d.ts declare: postcss-modules' own camelCaseOnly splits
+            // after a digit (`icon2x` exports as `icon2X`), leaving the import undefined.
+            localsConvention: className =>
+              camelCase(className, { transform: camelCaseTransformMerge }),
             getJSON: (_, json) => {
               classes = json;
-            }
+            },
+            Loader: CrossFileImportLoader
           })
         ]).process(compileSass(args.path, { style: 'compressed' }).css, { from: args.path });
+
+        // The generated .d.ts omit most of these, so fail here with the cause.
+        const reservedNames = Object.keys(classes).filter(name => reservedWords.has(name));
+
+        if (reservedNames.length > 0) {
+          throw new Error(
+            `${args.path}: rename the classes exported as reserved words: ` +
+              `${reservedNames.join(', ')}.`
+          );
+        }
+
+        // Bun never sees this CSS, so a relative `url()` would ship as is, pointing at no file.
+        const relativeUrl = /url\(\s*(?!['"]?(?:[a-z][\w+.-]*:|#))[^)]*\)/iu.exec(css)?.[0];
+
+        if (relativeUrl) {
+          throw new Error(
+            `${args.path}: ${relativeUrl} is not deployed. Import the asset from TSX and set it ` +
+              `in a style instead: the build deploys imported assets under coui://ui-mods/images/.`
+          );
+        }
 
         stylesheets.set(args.path, css);
 

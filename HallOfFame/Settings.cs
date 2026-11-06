@@ -465,12 +465,16 @@ public sealed class
   public string BaseUrl { get; set; } = null!;
 
   [SettingsUIButton]
+  [SettingsUIConfirmation]
   [SettingsUISection(Settings.GroupAdvanced)]
   [UsedImplicitly]
   public bool ResetSettings {
     // ReSharper disable once ValueParameterNotUsed
     set {
       this.SetDefaults();
+      // SetDefaults leaves key bindings alone: only this restores them to their attribute defaults
+      // (decompile, ModSetting.ResetKeyBindings).
+      this.ResetKeyBindings();
       this.ApplyAndSave();
     }
   }
@@ -589,7 +593,10 @@ public sealed class
       : $"https://{this.BaseUrl}";
 
   /// <seealso cref="LoginStatus"/>
+  // Not an auto property: LoginStatus must stay getter-only for the game to list it as an option.
+  #pragma warning disable IDE0032
   private LocalizedString loginStatusValue = string.Empty;
+  #pragma warning restore IDE0032
 
   /// <summary>
   /// Writes the live login status surfaced by the getter-only <see cref="LoginStatus"/>.
@@ -694,44 +701,11 @@ public sealed class
   }
 
   /// <summary>
-  /// <para>
   /// Restores the default of every string setting that came back null from the settings file.
   /// Call it right after loading, passing an instance that has only been through
-  /// <see cref="SetDefaults"/>.
-  /// </para>
-  /// <para>
-  /// The game loads a <c>.coc</c> file with <c>JSON.WriteInto</c>, which applies every key present
-  /// in the file over the values the constructor just defaulted, an explicit JSON <c>null</c>
-  /// included.
-  /// A null that reaches the file therefore outlives every restart: <see cref="SetDefaults"/> runs,
-  /// the file overwrites it with null again, and the next save writes that null right back.
-  /// </para>
-  /// <para>
-  /// The vanilla options UI renders a <c>[SettingsUIDropdown]</c> string as
-  /// <c>DropdownField&lt;string&gt;</c>, which writes the value through the non-nullable
-  /// <c>StringWriter</c>, so such a null throws in <c>OptionsUISystem.OnUpdate</c> and the whole
-  /// options page stops rendering, ours and every other mod's alike, leaving the user no way to fix
-  /// the setting from the UI.
-  /// </para>
-  /// <para>
-  /// Only strings are repaired.
-  /// A value type sitting at <c>default(T)</c> is indistinguishable from a deliberate choice, so a
-  /// disabled slideshow or a zeroed weight cannot be told apart from corruption and is left alone.
-  /// </para>
-  /// <para>
-  /// Keep this list in step with the strings <see cref="SetDefaults"/> assigns: a new one missing
-  /// here is a new way to lock the user out of the options page.
-  /// </para>
+  /// <see cref="SetDefaults"/>; <see cref="NullStrings.Restore{T}"/> tells why.
   /// </summary>
-  internal void RestoreNullStrings(Settings defaults) {
-    this.CreatorName ??= defaults.CreatorName;
-    this.NamesTranslationMode ??= defaults.NamesTranslationMode;
-    this.ScreenshotResolution ??= defaults.ScreenshotResolution;
-    this.CreatorsScreenshotSaveDirectory ??= defaults.CreatorsScreenshotSaveDirectory;
-    this.BaseUrl ??= defaults.BaseUrl;
-    this.ParadoxModsBrowsingPreference ??= defaults.ParadoxModsBrowsingPreference;
-    this.SavedScreenshotDescription ??= defaults.SavedScreenshotDescription;
-  }
+  internal void RestoreNullStrings(Settings defaults) => NullStrings.Restore(this, defaults);
 
   internal Settings Clone() => (Settings) this.MemberwiseClone();
 

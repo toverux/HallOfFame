@@ -1,201 +1,197 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <!-- The mod's single version source: the build script writes it into the UI bundle banner. -->
+    <Version>2026.6.1</Version>
+
+    <Configurations>Debug;Release</Configurations>
+
+    <!-- The mod's publishing information for Paradox Mods. -->
+    <PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
+  </PropertyGroup>
+
+  <!-- The toolchain writes CSII_* as Windows user environment variables and reads them back from
+       the registry. Linux has no user scope, so fall back to the process environment there. -->
+  <PropertyGroup>
+    <CSIIToolPath>$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))</CSIIToolPath>
+    <CSIIToolPath Condition="'$(CSIIToolPath)' == ''">$(CSII_TOOLPATH)</CSIIToolPath>
+  </PropertyGroup>
+
+  <!--Imports must be after PropertyGroup block-->
+  <Import Project="$(CSIIToolPath)\Mod.props" />
+  <Import Project="$(CSIIToolPath)\Mod.targets" />
+
+  <ItemGroup>
+    <Reference Include="Game">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.Core">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.Logging">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.IO.AssetDatabase">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.UI">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.UI.Binding">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="cohtml.Net">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.Localization">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.InputSystem">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.Burst">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.Collections">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.Entities">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.Mathematics">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.AssetPipeline">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.Collections">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.Mathematics">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.PSI.Common">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Colossal.PSI.PdxSdk">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="PDX.ModsUI">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="PDX.SDK">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.Core.Runtime">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ScreenCaptureModule">
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Update="System">
+      <Private>false</Private>
+    </Reference>
+    <Reference Update="System.Core">
+      <Private>false</Private>
+    </Reference>
+    <Reference Update="System.Data">
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="HallOfFame.Tests" />
+  </ItemGroup>
+
+  <!-- Loaded by Utils/LocaleLoader.cs, by resource name: HallOfFame.Locales.<locale>.json. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Locales\*.json" />
+    <EmbeddedResource Include="Locales\Skyve\*.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(ModPropsFile)" Link="Properties\Mod.props" />
+    <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
+  </ItemGroup>
+
+  <!-- Without a net48 targeting pack, the reference pack's mscorlib wins over the game's: swap it
+       back (no-op on Windows). The game's System goes with it: the game's mscorlib defines types
+       the reference pack's System defines too (Queue<T>), where the game's System forwards them. -->
+  <Target Name="UseGameMscorlibOnUnix" AfterTargets="ResolveAssemblyReferences"
+          Condition="'$(OS)' != 'Windows_NT' AND '$(MSCORLIBPath)' != ''">
+    <ItemGroup>
+      <ReferencePath Remove="@(ReferencePath)"
+                     Condition="'%(Filename)' == 'mscorlib' Or '%(Filename)' == 'System'" />
+      <ReferencePath Include="$(MSCORLIBPath);$([System.IO.Path]::GetDirectoryName('$(MSCORLIBPath)'))/System.dll">
+        <Private>false</Private>
+      </ReferencePath>
+    </ItemGroup>
+  </Target>
+
+  <!-- The csproj Version, ChangeLog.md and LongDescription.md are the sources of the publish
+       configuration's version, changelog and description, poked into it on every build, so
+       Paradox Mods and the GitHub release render the same text. XmlPoke parses the value it writes
+       into an element as XML, hence the escapes: a changelog line may hold a `&` or a `<`. -->
+  <Target Name="PokePublishConfiguration" BeforeTargets="BeforeBuild">
     <PropertyGroup>
-        <Version>2026.6.1</Version>
-        <FileVersion>2026.6.1</FileVersion>
-
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-
-        <IsPackable>false</IsPackable>
-
-        <Configurations>Debug;Release</Configurations>
-
-        <!--The file where mod information which is required for publishing mod on PDX mods are stored-->
-        <PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
+      <_ChangeLog>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)\ChangeLog.md'))</_ChangeLog>
+      <_ChangeLog>$(_ChangeLog.Replace('&amp;', '&amp;amp;').Replace('&lt;', '&amp;lt;'))</_ChangeLog>
+      <_LongDescription>$([System.IO.File]::ReadAllText('$(MSBuildProjectDirectory)\LongDescription.md'))</_LongDescription>
+      <_LongDescription>$(_LongDescription.Replace('&amp;', '&amp;amp;').Replace('&lt;', '&amp;lt;'))</_LongDescription>
     </PropertyGroup>
+    <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Query="//ModVersion/@Value" Value="$(Version)" />
+    <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Query="//ChangeLog" Value="$(_ChangeLog)" />
+    <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Query="//LongDescription" Value="$(_LongDescription)" />
+  </Target>
 
-    <!-- The toolchain writes CSII_* as Windows user environment variables and reads them back from
-         the registry. Linux has no user scope, so fall back to the process environment there. -->
+  <!-- AfterTargets runs a target even when the one it follows was skipped, hence the NeedBuild
+       guard: the UI deploy is skipped with the C# one, in a configuration-only publish too. -->
+  <Target Name="BuildUI" AfterTargets="DeployWIP"
+          Condition="'$(SkipBuildUI)' != 'true' And '$(NeedBuild)' == 'true'">
+    <!-- Not $(SolutionDir): MSBuild only defines it when the build enters through the
+         solution, and sets it to the literal "*Undefined*" otherwise, which fails the Exec.
+         `dotnet publish` runs on the project, not the solution. -->
+    <Exec Command="mise build:ui" WorkingDirectory="$(MSBuildProjectDirectory)\.." />
+  </Target>
+
+  <!-- For Debug builds, compile Burst for Windows only, which shortens every iteration: the game
+       runs the Windows build on Linux too, under Proton. Release and publish keep every platform
+       (this override is Debug-gated), so the shipped mod is unchanged. This uses the toolchain's
+       documented CustomModPostProcessorConfig hook and only strips the unwanted "-p" platform
+       flags from the default args. -->
+  <Target Name="CustomModPostProcessorConfig" AfterTargets="ModPostProcessorConfig"
+          Condition="'$(Configuration)' == 'Debug'">
     <PropertyGroup>
-        <CSIIToolPath>$([System.Environment]::GetEnvironmentVariable('CSII_TOOLPATH', 'EnvironmentVariableTarget.User'))</CSIIToolPath>
-        <CSIIToolPath Condition="'$(CSIIToolPath)' == ''">$(CSII_TOOLPATH)</CSIIToolPath>
+      <ModPostProcessorArgs>$(ModPostProcessorArgs.Replace(' -p macOS', '').Replace(' -p Linux', ''))</ModPostProcessorArgs>
     </PropertyGroup>
+  </Target>
 
-    <!--Imports must be after PropertyGroup block-->
-    <Import Project="$(CSIIToolPath)\Mod.props" />
-    <Import Project="$(CSIIToolPath)\Mod.targets" />
-
-    <!-- Override LangVersion set by Mod.props -->
+  <!-- Let test runs skip post processing and deployment entirely (-p:SkipModPostProcess=true):
+       off-engine tests need neither the Entities/Burst codegen nor the deploy to the game's Mods
+       folder. The toolchain runs its output cleanup and post-build targets only while NeedBuild is
+       true; switched off after BeforeBuild, it still runs the path checks that name a wrong CSII_*
+       variable. -->
+  <Target Name="SkipModPostProcessing" AfterTargets="BeforeBuild"
+          Condition="'$(SkipModPostProcess)' == 'true'">
     <PropertyGroup>
-        <!-- According to @Wayz and @tdw_village on Discord, C# 9 is the highest version supported by Burst. -->
-        <!-- With a version higher than that it fails silently. -->
-        <!-- As I do not need Burst in Hall of Fame (no hot path), using C# 14 is fine. -->
-        <LangVersion>14</LangVersion>
+      <NeedBuild>false</NeedBuild>
     </PropertyGroup>
-
-    <ItemGroup>
-        <EmbeddedResource Include="Locales\*.json" />
-        <EmbeddedResource Include="Locales\Skyve\*.json" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Include="cohtml.Net">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Game">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.AssetPipeline">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.Collections">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.Core">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.Logging">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.Mathematics">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.IO.AssetDatabase">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.PSI.Common">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.PSI.PdxSdk">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.UI">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.UI.Binding">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Colossal.Localization">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="PDX.ModsUI">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="PDX.SDK">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.Burst">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.Collections">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.Entities">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.InputSystem">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.Mathematics">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.RenderPipelines.Core.Runtime">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.RenderPipelines.HighDefinition.Runtime">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.IMGUIModule">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.ImageConversionModule">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.CoreModule">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.ScreenCaptureModule">
-            <Private>false</Private>
-        </Reference>
-        <Reference Include="UnityEngine.UnityWebRequestModule">
-            <Private>false</Private>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Reference Update="System">
-            <Private>false</Private>
-        </Reference>
-        <Reference Update="System.Core">
-            <Private>false</Private>
-        </Reference>
-        <Reference Update="System.Data">
-            <Private>false</Private>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="PolySharp" Version="1.16.0">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <InternalsVisibleTo Include="HallOfFame.Tests" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="$(ModPropsFile)" Link="Properties\Mod.props" />
-        <None Include="$(ModTargetsFile)" Link="Properties\Mod.targets" />
-    </ItemGroup>
-
-    <Target Name="SetupAttributes" BeforeTargets="BeforeBuild">
-        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/LongDescription.md))" Query="//LongDescription" />
-        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$([System.IO.File]::ReadAllText($(ProjectDir)/ChangeLog.md))" Query="//ChangeLog" />
-        <XmlPoke XmlInputPath="$(PublishConfigurationPath)" Value="$(Version)" Query="//ModVersion/@Value" />
-    </Target>
-
-    <Target Name="BuildUI" AfterTargets="DeployWIP" Condition="'$(SkipBuildUI)' != 'true'">
-        <!-- Not $(SolutionDir): MSBuild only defines it when the build enters through the
-             solution, and sets it to the literal "*Undefined*" otherwise, which fails the Exec.
-             `dotnet publish` runs on the project, not the solution. -->
-        <Exec Command="mise build:ui" WorkingDirectory="$(MSBuildProjectDirectory)\.." />
-    </Target>
-
-    <!-- The mod contains no Burst jobs, so the per-platform native Burst compile the toolchain runs
-         is wasted time. The targets below trim that work and are only safe because of that. -->
-
-    <!-- For Debug builds, compile Burst for Windows only (the local dev platform). Release and
-         publish keep every platform (this override is Debug-gated), so the shipped mod is
-         unchanged. This uses the toolchain's documented CustomModPostProcessorConfig hook and only
-         strips the unwanted "-p" platform flags from the default args. -->
-    <Target Name="CustomModPostProcessorConfig" AfterTargets="ModPostProcessorConfig"
-            Condition="'$(Configuration)' == 'Debug'">
-        <PropertyGroup>
-            <ModPostProcessorArgs>$(ModPostProcessorArgs.Replace(' -p macOS', '').Replace(' -p Linux', ''))</ModPostProcessorArgs>
-        </PropertyGroup>
-    </Target>
-
-    <!-- Let test runs skip post processing and deployment entirely (the test:cs task sets
-         -p:SkipModPostProcess=true): the unit tests reference only managed domain/service types, so
-         they need neither the Entities/Burst codegen nor the deploy to the game's Mods folder.
-         These two targets override their Mod.targets counterparts to add the SkipModPostProcess
-         guard; keep their bodies in sync with the toolchain if it changes. -->
-    <Target Name="RunModPostProcessor" AfterTargets="AfterBuild"
-            Condition="'$(NeedBuild)' == 'true' And '$(SkipModPostProcess)' != 'true'">
-        <Error Condition="!Exists('$(ModPostProcessorFullPath)')" Text="Post processor not found, please check the path: $(ModPostProcessorFullPath)" />
-        <Message Text="Run post processor: $(ModPostProcessorArgs)" Importance="high" />
-        <Exec Command="$(ModPostProcessorArgs)" LogStandardErrorAsError="true" />
-    </Target>
-
-    <Target Name="DeployWIP" AfterTargets="AfterBuild"
-            Condition="'$(NeedBuild)' == 'true' And '$(SkipModPostProcess)' != 'true'">
-        <ItemGroup>
-            <FilesToDeploy Include="$(OutDir)\**\*.*" />
-        </ItemGroup>
-        <Message Text="Copy output to deploy directory $(DeployDir)" Importance="high" />
-        <RemoveDir Directories="$(DeployDir)" />
-        <Copy SourceFiles="@(FilesToDeploy)" DestinationFiles="@(FilesToDeploy->'$(DeployDir)\%(RecursiveDir)%(Filename)%(Extension)')" />
-    </Target>
+  </Target>
 </Project>

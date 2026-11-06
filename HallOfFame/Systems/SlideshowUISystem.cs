@@ -437,7 +437,7 @@ internal sealed partial class SlideshowUISystem : UISystemBase, ISlideshowPresen
 
   async Task<bool> ISlideshowPresentationSink.ConfirmReport(Screenshot screenshot) {
     var dialog = new ConfirmationDialog(
-      LocalizedString.IdWithArgs(
+      LocalizedString.Id(
         "HallOfFame.Systems.SlideshowUI.CONFIRM_REPORT_DIALOG[Title]",
         ("CITY_NAME", LocalizedString.Value(screenshot.CityName)),
         ("AUTHOR_NAME", LocalizedString.Value(screenshot.Creator?.CreatorName))

@@ -6,11 +6,11 @@ import { makeScreenshot, noop, photoModeCatalog } from '../../testing/fixtures';
 import {
   emitEvent,
   getTriggers,
-  getUsageEvents,
   resetBindings,
   setBinding,
   setTranslations
 } from '../../testing/game-setup';
+import { getUsageEvents } from '../../testing/usage-events';
 import type { DashboardDetailState, DashboardState } from '../../utils/bindings';
 import { TransitionContext } from '../../vanilla-modules/game-ui/common/animations/transition-context';
 import { CreatorDashboard } from './creator-dashboard';

@@ -6,7 +6,7 @@ import { trackUsage } from './usage';
 const GROUP = 'hallOfFame.common';
 
 /**
- * See C# `HallOfFame.Settings` class for documentation.
+ * The settings the UI reads, see C# `HallOfFame.Settings` for documentation.
  */
 export interface ModSettings {
   readonly creatorName: string;
@@ -64,15 +64,24 @@ export function subscribeToModSettings(listener: (settings: ModSettings) => void
 const locale$ = lazyBindValue<string>(GROUP, 'locale', 'en-US');
 
 /**
- * Subscribes to the game's current locale (e.g. `en-US`), used to decide whether city and creator
- * names need translating.
+ * Subscribes to the game's current locale (e.g. `en-US`).
  */
 export function useLocale(): string {
   return useValue(locale$());
 }
 
+/**
+ * Opens the mod's settings page at the given tab, e.g. `General`.
+ */
 export function openModSettings(tab: string): void {
   trigger(GROUP, 'openModSettings', tab);
+}
+
+/**
+ * Opens a web page in the player's default browser.
+ */
+export function openWebPage(url: string): void {
+  trigger(GROUP, 'openWebPage', url);
 }
 
 /**
@@ -91,7 +100,7 @@ export function openSocialLink({ platform, link }: CreatorSocialLink): void {
   if (platform == 'paradoxmods') {
     trigger(GROUP, 'openCreatorPage', link);
   } else {
-    trigger(GROUP, 'openWebPage', link);
+    openWebPage(link);
   }
 
   trackUsage('social_link_opened', {});

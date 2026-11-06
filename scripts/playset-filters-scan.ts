@@ -5,7 +5,7 @@
 // database, for the `hof-playset-filters-rescan` skill: how many mods each toggle holds, which
 // toggles overlap and on what, and which tags no toggle covers.
 //
-// Run it from the repo root: `bun .agents/scripts/playset-filters-scan.ts`.
+// Run it from the repo root: `bun scripts/playset-filters-scan.ts`.
 // It reads the matchers the game ships, so a change to them shows in the next run, and it only
 // reads the database: mongosh hands the published mods' tags over as JSON.
 
@@ -13,7 +13,7 @@ import {
   assetCategoryMatches,
   playsetKindMatches,
   type TagsMatch
-} from '../../HallOfFame/UI/src/components/screenshot-details/screenshot-details';
+} from '../HallOfFame/UI/src/components/screenshot-details/screenshot-details';
 
 const databaseUrl = 'mongodb://localhost/halloffame';
 

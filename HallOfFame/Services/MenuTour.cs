@@ -15,7 +15,10 @@ namespace HallOfFame.Services;
 /// </para>
 /// </summary>
 internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> publish) {
+  // No property to fold it into: IsLastStep reads it together with Step.
+  #pragma warning disable IDE0032
   private bool hasScreenshots;
+  #pragma warning restore IDE0032
 
   /// <summary>
   /// The step shown, <see cref="MenuTourStep.None"/> once the tour is over.

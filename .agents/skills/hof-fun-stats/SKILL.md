@@ -12,7 +12,7 @@ Four steps, all read-only on the database: run the known stats, hunt for new one
 ## 1. Run the known stats
 
 ```
-bun .agents/scripts/fun-stats.ts
+bun scripts/fun-stats.ts
 ```
 
 It prints one `section.key: <json>` line per stat.
@@ -20,7 +20,7 @@ The database is the local dev MongoDB, a copy of production the user refreshes b
 Where mongosh cannot connect, start it with `mise dev:db:start` in `../HallOfFameServer`.
 
 Where `.scratch/fun-stats.md` already exists, it is the previous run: read it before it is overwritten, and note every fact whose winner or ranking changed.
-To tell a real change from a definition drift, `bun .agents/scripts/fun-stats.ts --cap <the previous run's last upload, the full timestamp its report gives>` reproduces the previous numbers, counters and mod records aside.
+To tell a real change from a definition drift, `bun scripts/fun-stats.ts --cap <the previous run's last upload, the full timestamp its report gives>` reproduces the previous numbers, counters and mod records aside.
 
 ## 2. Discovery
 
@@ -37,7 +37,7 @@ mongosh "mongodb://localhost/halloffame" --quiet --json=relaxed --eval 'db.scree
 Seeds, where nothing better comes to mind: outliers and extreme values, what changed since the previous run, a setting or a field recorded only recently, habits by locale or by hour, the screenshots a showcased mod appears on, anything odd or funny.
 
 A fact is kept when it would make a creator smile or surprise the owner.
-Each kept fact gets its stat added to `.agents/scripts/fun-stats.ts`, so the next run prints it: discovery is done when every kept fact comes out of `fun-stats.ts`.
+Each kept fact gets its stat added to `scripts/fun-stats.ts`, so the next run prints it: discovery is done when every kept fact comes out of `fun-stats.ts`.
 
 ### What the data hides
 

@@ -36,7 +36,7 @@ A long frame in the running game may come from C# (an HTTP decode, a binding wri
   and no UI. Run a cheap eval first as a control, since attaching costs a frame of its own.
 - Isolate the UI by replaying a captured value with `engine.trigger('<group>.<name>.update', value)`.
 - Time a decode off-engine with a throwaway `HallOfFame.Tests` test on a saved response, writing to
-  a file under `/tmp` (xUnit output does not reach the console); off-engine Mono runs faster than
+  a file under `/tmp` (xUnit output does not reach the console); off-engine .NET runs faster than
   the game, so compare ratios rather than times. Save the response with `curl`, the authorization
   header written to a file by the unity `eval` and deleted after reading, never printed.
 

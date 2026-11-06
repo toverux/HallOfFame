@@ -7,7 +7,7 @@ import {
   type ReactElement,
   type RefAttributes
 } from 'react';
-import { getModuleExport } from '../../../../utils';
+import { getModuleExport, isRenderable } from '../../../../utils';
 
 /**
  * Inferred from `game-ui/common/dom-node/dom-node.tsx`.
@@ -19,13 +19,7 @@ export interface DOMNodeContextValue {
 }
 
 /**
- * How a vanilla component hands a parent the handle on its root DOM element.
- *
- * The parent renders a `DOMNode` around the subtree and publishes this context; the leaf that
- * actually renders an element is expected to apply the `ref` (and the class and style) to it.
- * Vanilla leaves do that for themselves, so a mod component standing in for one has to as well: a
- * leaf that ignores the context leaves the parent measuring nothing, which is how an anchored popup
- * ends up positionless and hidden.
+ * The context a component claims to hand a {@link DOMNodeModifier} its root DOM element.
  */
 export const DOMNodeContext = getModuleExport<Context<DOMNodeContextValue | undefined>>(
   'game-ui/common/dom-node/dom-node.tsx',
@@ -36,18 +30,19 @@ export const DOMNodeContext = getModuleExport<Context<DOMNodeContextValue | unde
 );
 
 /**
- * The other side of {@link DOMNodeContext}: the wrapper that publishes the handle, so that a parent
- * gets the child subtree's root element without needing a ref the child would have to forward.
+ * How a vanilla component hands a parent the handle on its root DOM element: the wrapper publishes
+ * it, so that a parent gets the child subtree's root element without a ref the child would have to
+ * forward.
  *
- * A host element as its child is served automatically; a component has to claim the context itself.
+ * A host element as its child is served automatically. A component has to claim the game's
+ * {@link DOMNodeContext} itself and apply its `ref`, class and style to the element it renders: one
+ * that ignores it leaves the parent measuring nothing, which is how an anchored popup ends up
+ * positionless and hidden.
  */
 export const DOMNodeModifier = getModuleExport<DOMNodeModifierComponent>(
   'game-ui/common/dom-node/dom-node.tsx',
   'DOMNodeModifier',
-  // A memoized component is an object, not a function, so the guard can only check that this is
-  // something React could render.
-  (value): value is DOMNodeModifierComponent =>
-    typeof value == 'function' || (value != null && typeof value == 'object'),
+  (value): value is DOMNodeModifierComponent => isRenderable(value),
   // The fallback drops the ref, since with the vanilla module gone there is no handle to hand back.
   forwardRef(({ children }: DOMNodeModifierProps, _ref) => children)
 );

@@ -1,0 +1,23 @@
+<Project>
+  <!-- Settings shared by the mod and its test project, so they never drift.
+       LangVersion lives in Directory.Build.targets: the toolchain's Mod.props, imported by the mod
+       csproj after this file, sets it to 9.0. -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <!-- Every build gates the :warning IDE rules of .editorconfig. The SDK sets AnalysisLevel
+         only for .NETCoreApp, and without it a net48 build ignores the :warning severity of
+         most IDE rules. -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="PolySharp" Version="1.16.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>

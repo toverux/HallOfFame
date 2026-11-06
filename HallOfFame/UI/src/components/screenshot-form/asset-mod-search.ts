@@ -51,6 +51,8 @@ const fuzzy = new uFuzzy({
 
   // Tolerate one typo per term, in the order the flags below sit: one missing, one wrong, two
   // transposed, or one extra character.
+  // `IntraMode.SingleError`, an ambient const enum `isolatedModules` cannot read.
+  // oxlint-disable-next-line typescript/no-unsafe-enum-assignment - see above.
   intraMode: 1,
   intraIns: 1,
   intraSub: 1,

@@ -1,64 +1,62 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>net48</TargetFramework>
-        <!-- xUnit v3 builds the tests as their own executable. On Linux, `dotnet test` runs it under
-             Mono through Microsoft.Testing.Platform, which the root global.json opts into: VSTest
-             dropped its Mono host for .NET Framework tests in 18.10 (microsoft/vstest#16158). -->
-        <OutputType>Exe</OutputType>
-        <LangVersion>14</LangVersion>
-        <Nullable>enable</Nullable>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <IsPackable>false</IsPackable>
-        <IsPublishable>false</IsPublishable>
+  <PropertyGroup>
+    <!-- The off-engine tests run on CoreCLR, alike on Linux and Windows: xUnit v3 builds them as
+         their own executable, which `dotnet test` starts through Microsoft.Testing.Platform (the
+         root global.json opts into it) and an IDE or a shell can launch directly. -->
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>false</IsPackable>
+    <IsPublishable>false</IsPublishable>
 
-        <!-- Resolve the game's managed assemblies the same way the mod does, from the User-scoped
-             CSII_MANAGEDPATH environment variable, or the process one on Linux, which has no user
-             scope. -->
-        <ManagedPath>$([System.Environment]::GetEnvironmentVariable('CSII_MANAGEDPATH', 'EnvironmentVariableTarget.User'))</ManagedPath>
-        <ManagedPath Condition="'$(ManagedPath)' == ''">$(CSII_MANAGEDPATH)</ManagedPath>
+    <!-- Resolve the game's managed assemblies the same way the mod does, from the User-scoped
+         CSII_MANAGEDPATH environment variable, or the process one on Linux, which has no user
+         scope. -->
+    <ManagedPath>$([System.Environment]::GetEnvironmentVariable('CSII_MANAGEDPATH', 'EnvironmentVariableTarget.User'))</ManagedPath>
+    <ManagedPath Condition="'$(ManagedPath)' == ''">$(CSII_MANAGEDPATH)</ManagedPath>
 
-        <!-- Mono runs the tests: pass -p:MonoPath=<path> when mono is not on PATH. -->
-        <MonoPath Condition="'$(MonoPath)' == ''">mono</MonoPath>
-    </PropertyGroup>
+    <!-- The mod targets net48 on purpose: CoreCLR runs it through its mscorlib facade. -->
+    <NoWarn>$(NoWarn);NU1702</NoWarn>
+  </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
+    <PackageReference Include="Mono.Cecil" Version="0.11.6" />
+  </ItemGroup>
+
+  <!-- The game assemblies the mod compiles against, copied next to the tests with the dependencies
+       MSBuild finds for them in the same folder, so the test process loads them like its own. -->
+  <ItemGroup>
+    <Reference Include="Game" HintPath="$(ManagedPath)\Game.dll" />
+    <Reference Include="Colossal.Core" HintPath="$(ManagedPath)\Colossal.Core.dll" />
+    <Reference Include="Colossal.Logging" HintPath="$(ManagedPath)\Colossal.Logging.dll" />
+    <Reference Include="Colossal.IO.AssetDatabase" HintPath="$(ManagedPath)\Colossal.IO.AssetDatabase.dll" />
+    <Reference Include="Colossal.UI" HintPath="$(ManagedPath)\Colossal.UI.dll" />
+    <Reference Include="Colossal.UI.Binding" HintPath="$(ManagedPath)\Colossal.UI.Binding.dll" />
+    <Reference Include="Colossal.Localization" HintPath="$(ManagedPath)\Colossal.Localization.dll" />
+    <Reference Include="Unity.InputSystem" HintPath="$(ManagedPath)\Unity.InputSystem.dll" />
+    <Reference Include="UnityEngine.CoreModule" HintPath="$(ManagedPath)\UnityEngine.CoreModule.dll" />
+    <Reference Include="Unity.Burst" HintPath="$(ManagedPath)\Unity.Burst.dll" />
+    <Reference Include="Unity.Collections" HintPath="$(ManagedPath)\Unity.Collections.dll" />
+    <Reference Include="Unity.Entities" HintPath="$(ManagedPath)\Unity.Entities.dll" />
+    <Reference Include="Unity.Mathematics" HintPath="$(ManagedPath)\Unity.Mathematics.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\HallOfFame\HallOfFame.csproj" />
+  </ItemGroup>
+
+  <!-- The native-call shim (Shim/UnityNativeCalls.cs) supplies UnityEngine.CoreModule itself: left
+       off the app's dependencies, the default load context asks the shim's resolving handler for
+       it. The original is copied next to the tests under another name, for the shim to rewrite. -->
+  <Target Name="HoldBackUnityCoreModule" AfterTargets="ResolveAssemblyReferences">
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
-        <PackageReference Include="xunit.v3" Version="4.0.2" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="PolySharp" Version="1.16.0">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)"
+                               Condition="'%(Filename)%(Extension)' == 'UnityEngine.CoreModule.dll'" />
+      <ReferencePath Update="@(ReferencePath)" Condition="'%(Filename)' == 'UnityEngine.CoreModule'"
+                     Private="false" />
+      <None Include="$(ManagedPath)\UnityEngine.CoreModule.dll" Link="UnityEngine.CoreModule.original"
+            CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
-
-    <!-- Game assemblies pulled in by the mod's domain types, copied next to the tests along with the
-         non-framework dependencies MSBuild finds for them, so the test process loads them like its
-         own. -->
-    <ItemGroup>
-        <Reference Include="Colossal.Core">
-            <HintPath>$(ManagedPath)\Colossal.Core.dll</HintPath>
-        </Reference>
-        <Reference Include="Colossal.UI.Binding">
-            <HintPath>$(ManagedPath)\Colossal.UI.Binding.dll</HintPath>
-        </Reference>
-        <Reference Include="Game">
-            <HintPath>$(ManagedPath)\Game.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\HallOfFame\HallOfFame.csproj" />
-    </ItemGroup>
-
-    <!-- `dotnet test` starts the test executable with $(RunCommand) $(RunArguments), which the
-         .NET 11 SDK leaves unset for a .NET Framework executable on Linux (NETSDK1243). -->
-    <Target Name="RunTestsUnderMono" BeforeTargets="ComputeRunArguments">
-        <PropertyGroup>
-            <RunCommand>$(MonoPath)</RunCommand>
-            <RunArguments>&quot;$(TargetPath)&quot;</RunArguments>
-        </PropertyGroup>
-    </Target>
+  </Target>
 </Project>

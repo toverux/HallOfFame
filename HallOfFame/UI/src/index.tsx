@@ -10,20 +10,37 @@ import { logError } from './utils';
 import './icons/stats-notification.svg';
 import './icons/cs2-lightbulb.svg';
 
-const register: ModRegistrar = moduleRegistry => {
-  try {
-    registerOnMenu(moduleRegistry);
-    registerOnGame(moduleRegistry);
-    registerOnOverlay(moduleRegistry);
+/**
+ * The features registering on the game's UI, each on its own: one that throws is reported and
+ * skipped, and the others still register.
+ */
+const registrars: readonly ModRegistrar[] = [
+  registerOnMenu,
+  registerOnGame,
+  registerOnOverlay,
+  // App-wide, not an area: the keep-alive nodes live on document.body outside the module registry,
+  // so they persist across menu, sub-screen, and gameplay states.
+  installKeepAliveImages
+];
 
-    // App-wide, not an area: the keep-alive nodes live on document.body outside the module
-    // registry, so they persist across menu, sub-screen, and gameplay states.
-    installKeepAliveImages();
-  } catch (error) {
-    return logError(error, true);
+const register: ModRegistrar = moduleRegistry => {
+  // The game calls every mod's registrar in one loop with no try/catch, so a throw here would also
+  // keep every mod after this one from registering.
+  let failed = false;
+
+  for (const registrar of registrars) {
+    try {
+      registrar(moduleRegistry);
+    } catch (error) {
+      failed = true;
+
+      logError(error, true);
+    }
   }
 
-  iconsole.info(`HoF: Successfully registered all modules.`);
+  if (!failed) {
+    iconsole.info(`HallOfFame: Registered all modules.`);
+  }
 };
 
 // noinspection JSUnusedGlobalSymbols

@@ -1,17 +1,22 @@
 using System;
 using Colossal.Logging;
-using Game.UI.Localization;
-using HallOfFame.Utils;
 
 namespace HallOfFame.Logging;
 
 /// <summary>
 /// Production <see cref="IModLog"/> that forwards to the game's <see cref="ILog"/>.
-/// It owns the small amount of behavior that used to live in logging extension methods: the
-/// "silent" toggle of <see cref="ILog.showsErrorsInUI"/>, and building the user-facing
-/// recoverable/fatal error messages from the localization dictionary.
+/// It owns the "silent" toggle of <see cref="ILog.showsErrorsInUI"/>, and builds the user-facing
+/// recoverable/fatal error messages from the localization dictionary through
+/// <paramref name="translate"/>, the active dictionary's lookup in production.
 /// </summary>
-internal sealed class ModLog(ILog log) : IModLog {
+internal sealed class ModLog(ILog log, Func<string, string> translate) : IModLog {
+  internal const string BaseErrorKey = $"{nameof(HallOfFame)}.Common.BASE_ERROR";
+
+  internal const string RecoverableErrorKey =
+    $"{nameof(HallOfFame)}.Common.RECOVERABLE_ERROR";
+
+  internal const string FatalErrorKey = $"{nameof(HallOfFame)}.Common.FATAL_ERROR";
+
   public void Verbose(string message) => log.Verbose(message);
 
   public void Info(string message) => log.Info(message);
@@ -22,8 +27,6 @@ internal sealed class ModLog(ILog log) : IModLog {
 
   public void Error(string message) => log.Error(message);
 
-  public void Error(LocalizedString message) => log.Error(message.Render());
-
   public void ErrorSilent(string message) => this.Silently(() => log.Error(message));
 
   public void ErrorSilent(Exception exception) => this.Silently(() => log.Error(exception));
@@ -31,18 +34,19 @@ internal sealed class ModLog(ILog log) : IModLog {
   public void ErrorSilent(Exception exception, string message) =>
     this.Silently(() => log.Error(exception, message));
 
-  public void ErrorRecoverable(Exception exception) {
-    var @base = "HallOfFame.Common.BASE_ERROR".Translate();
-    var gravity = "HallOfFame.Common.RECOVERABLE_ERROR".Translate();
+  public void ErrorRecoverable(Exception exception) =>
+    log.Error(exception, ModLog.PlayerMessage(isFatal: false, translate));
 
-    log.Error(exception, $"{@base} \n{gravity}");
-  }
+  public void ErrorFatal(Exception exception) =>
+    log.Error(exception, ModLog.PlayerMessage(isFatal: true, translate));
 
-  public void ErrorFatal(Exception exception) {
-    var @base = "HallOfFame.Common.BASE_ERROR".Translate();
-    var gravity = "HallOfFame.Common.FATAL_ERROR".Translate();
+  /// <summary>
+  /// The message shown to the player over an error: what happened, then how bad it is.
+  /// </summary>
+  internal static string PlayerMessage(bool isFatal, Func<string, string> translate) {
+    var gravityKey = isFatal ? ModLog.FatalErrorKey : ModLog.RecoverableErrorKey;
 
-    log.Error(exception, $"{@base} \n{gravity}");
+    return $"{translate(ModLog.BaseErrorKey)} \n{translate(gravityKey)}";
   }
 
   /// <summary>
@@ -53,8 +57,11 @@ internal sealed class ModLog(ILog log) : IModLog {
     var previousShowsErrorsInUI = log.showsErrorsInUI;
     log.showsErrorsInUI = false;
 
-    logError();
-
-    log.showsErrorsInUI = previousShowsErrorsInUI;
+    try {
+      logError();
+    }
+    finally {
+      log.showsErrorsInUI = previousShowsErrorsInUI;
+    }
   }
 }

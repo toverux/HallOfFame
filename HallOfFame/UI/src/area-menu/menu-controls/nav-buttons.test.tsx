@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { getTriggers, getUsageEvents, resetBindings, setBinding } from '../../testing/game-setup';
+import { getTriggers, resetBindings, setBinding } from '../../testing/game-setup';
+import { getUsageEvents } from '../../testing/usage-events';
 import { MenuControlsNextButton, MenuControlsPreviousButton } from './nav-buttons';
 
 afterEach(() => {

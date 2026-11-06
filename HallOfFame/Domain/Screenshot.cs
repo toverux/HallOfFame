@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Colossal.Json;
@@ -80,7 +80,7 @@ internal record Screenshot {
   /// </summary>
   [DecodeAlias("renderSettings")]
   // ReSharper disable once CollectionNeverUpdated.Global
-  internal Dictionary<string, double> RenderSettings { get; [UsedImplicitly] set; } = new();
+  internal Dictionary<string, double> RenderSettings { get; [UsedImplicitly] set; } = [];
 
   /// <summary>
   /// Shared under <see cref="ShareRenderSettings"/>, empty for a screenshot whose upload recorded
@@ -88,7 +88,7 @@ internal record Screenshot {
   /// </summary>
   [DecodeAlias("renderConditions")]
   // ReSharper disable once CollectionNeverUpdated.Global
-  internal RenderConditions RenderConditions { get; [UsedImplicitly] set; } = new();
+  internal RenderConditions RenderConditions { get; [UsedImplicitly] set; } = [];
 
   /// <summary>
   /// The server fields holding what the uploading mod captured, e.g. "description".

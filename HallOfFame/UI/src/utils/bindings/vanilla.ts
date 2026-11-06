@@ -2,8 +2,8 @@ import { trigger, useValue } from 'cs2/api';
 import type { UISound } from 'cs2/ui';
 import { lazyBindValue } from './lazy-value-binding';
 
-// The game's own groups, not Hall of Fame ones, which is why they live in their own module rather
-// than in `common`.
+// The game's own groups, not the mod's, which is why they live in their own module rather than in
+// `common`.
 const AUDIO_GROUP = 'audio';
 
 const MENU_GROUP = 'menu';

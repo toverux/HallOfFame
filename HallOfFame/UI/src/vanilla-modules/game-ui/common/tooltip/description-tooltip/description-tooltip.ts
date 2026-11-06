@@ -1,5 +1,5 @@
 import type { FC, ReactNode } from 'react';
-import { getModuleExport } from '../../../../../utils';
+import { getModuleExport, isRenderable } from '../../../../../utils';
 
 export interface TooltipLayoutProps {
   /**
@@ -24,7 +24,7 @@ export interface TooltipLayoutProps {
 export const TooltipLayout = getModuleExport<FC<TooltipLayoutProps>>(
   'game-ui/common/tooltip/description-tooltip/description-tooltip.tsx',
   'TooltipLayout',
-  (value): value is FC<TooltipLayoutProps> => typeof value == 'function',
+  (value): value is FC<TooltipLayoutProps> => isRenderable(value),
   // No-op fallback: only reached when the vanilla module is gone and already reported.
   () => null
 );

@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it } from 'bun:test';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { makeJsonMod, makeMod, makeScreenshot, noop } from '../../testing/fixtures';
-import { getTriggers, getUsageEvents, resetBindings, setBinding } from '../../testing/game-setup';
+import { getTriggers, resetBindings, setBinding } from '../../testing/game-setup';
+import { getUsageEvents } from '../../testing/usage-events';
 import { DashboardEditForm } from './dashboard-edit-form';
 
 afterEach(() => {

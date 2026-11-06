@@ -15,25 +15,25 @@ export default defineConfig({
     // override on .test.* files.
     'jest/require-hook': 'off',
 
-    // A11y rule that is useless in HoF.
+    // A11y rule that is useless in a game UI.
     'jsx-a11y/alt-text': 'off',
-    // A11y rule that is useless in HoF: the game UI is driven by the engine's gamepad/focus system,
+    // A11y rule that is useless in a game UI: it is driven by the engine's gamepad/focus system,
     // not by DOM keyboard events, and clickable elements wrap game controls that are already
     // keyboard-accessible. This is the inseparable sibling of `no-static-element-interactions`.
     'jsx-a11y/click-events-have-key-events': 'off',
-    // A11y rule that is useless in HoF.
+    // A11y rule that is useless in a game UI.
     'jsx-a11y/no-static-element-interactions': 'off',
 
-    // Useless in HoF as we can't use React DevTools.
+    // Useless in a mod as we can't use React DevTools.
     'react/display-name': 'off',
     // The rule enforces the React Compiler's Rules of Hooks, which want every hook call to resolve
     // statically to an import. The mod's input actions come from a `bindInputAction` factory, so
     // its hooks reach components through an object and never can. The game pins React 18 and runs
     // no compiler, so the analysis buys nothing here.
     'react/hooks': 'off',
-    // In HoF we routinely pass typed binding command functions (e.g. `bindings.clearScreenshot`)
-    // directly as `onSelect`/`onChange` handlers; those command names cannot follow the rule's
-    // `handle*` convention, so enforcing it here only fights the binding pattern.
+    // Mods routinely pass typed binding command functions (e.g. `bindings.openSettings`) directly
+    // as `onSelect`/`onChange` handlers; those command names cannot follow the rule's `handle*`
+    // convention, so enforcing it here only fights the binding pattern.
     'react/jsx-handler-names': 'off',
     // In this project we often split big components into smaller ones but keep them in one file.
     // But that is only for components that are very tied to their parent; generic components must

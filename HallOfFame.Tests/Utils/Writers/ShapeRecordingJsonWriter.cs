@@ -10,7 +10,7 @@ namespace HallOfFame.Tests.Utils.Writers;
 /// One writer may serve several writes, so a test can compare the shapes they produced.
 /// </summary>
 internal sealed class ShapeRecordingJsonWriter : IJsonWriter {
-  private readonly Stack<(string TypeName, List<string> Properties)> openTypes = new();
+  private readonly Stack<(string TypeName, List<string> Properties)> openTypes = [];
 
   public string debugName => nameof(ShapeRecordingJsonWriter);
 
@@ -23,7 +23,7 @@ internal sealed class ShapeRecordingJsonWriter : IJsonWriter {
   /// The type names written with more than one property list, which cohtml cannot bind.
   /// </summary>
   internal IEnumerable<string> ConflictingTypeNames =>
-    this.Shapes.Where(shape => shape.Value.Count > 1).Select(shape => shape.Key);
+    this.Shapes.Where(static shape => shape.Value.Count > 1).Select(static shape => shape.Key);
 
   public void TypeBegin(string name) => this.openTypes.Push((name, []));
 

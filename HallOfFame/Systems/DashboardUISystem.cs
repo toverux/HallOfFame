@@ -215,7 +215,7 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
 
   async Task<bool> IDashboardPresentationSink.ConfirmDelete(Screenshot screenshot) {
     var dialog = new ConfirmationDialog(
-      LocalizedString.IdWithArgs(
+      LocalizedString.Id(
         "HallOfFame.Systems.DashboardUI.CONFIRM_DELETE_DIALOG[Title]",
         ("CITY_NAME", LocalizedString.Value(screenshot.CityName))
       ),
@@ -229,7 +229,7 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
 
   async Task<bool> IDashboardPresentationSink.ConfirmDiscardEdits(Screenshot screenshot) {
     var dialog = new ConfirmationDialog(
-      LocalizedString.IdWithArgs(
+      LocalizedString.Id(
         "HallOfFame.Systems.DashboardUI.CONFIRM_DISCARD_DIALOG[Title]",
         ("CITY_NAME", LocalizedString.Value(screenshot.CityName))
       ),
@@ -243,9 +243,11 @@ internal sealed partial class DashboardUISystem : UISystemBase, IDashboardPresen
 
   void IDashboardPresentationSink.PlayDeletedSound() {
     // A plain comparison, not `?.`: a Unity object answers null through its own operator.
+    #pragma warning disable IDE0031
     if (this.soundCollection != null) {
       this.soundCollection.PlaySound("bulldoze-end");
     }
+    #pragma warning restore IDE0031
   }
 
   void IDashboardPresentationSink.ShowInSlideshow(Screenshot screenshot) =>

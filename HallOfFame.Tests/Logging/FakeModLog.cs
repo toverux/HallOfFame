@@ -1,5 +1,4 @@
 using System;
-using Game.UI.Localization;
 using HallOfFame.Logging;
 
 namespace HallOfFame.Tests.Logging;
@@ -16,8 +15,6 @@ internal sealed class FakeModLog : IModLog {
 
   internal Action<Exception>? ErrorRecoverableImpl { get; init; }
 
-  internal Action<LocalizedString>? ErrorLocalizedImpl { get; init; }
-
   public void Verbose(string message) {
   }
 
@@ -31,10 +28,6 @@ internal sealed class FakeModLog : IModLog {
   }
 
   public void Error(string message) {
-  }
-
-  public void Error(LocalizedString message) {
-    this.ErrorLocalizedImpl?.Invoke(message);
   }
 
   public void ErrorSilent(string message) {

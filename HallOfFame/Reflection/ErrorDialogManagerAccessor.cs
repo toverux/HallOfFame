@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using Game.SceneFlow;
 using Game.UI;
@@ -6,12 +6,6 @@ using Game.UI;
 namespace HallOfFame.Reflection;
 
 internal static class ErrorDialogManagerAccessor {
-  /// <summary>
-  /// Instance of the error dialog manager, will be null if there was an error retrieving its
-  /// instance through reflection.
-  /// </summary>
-  internal static ErrorDialogManager? Instance { get; }
-
   static ErrorDialogManagerAccessor() {
     var appBindings = GameManager.instance.userInterface.appBindings;
 
@@ -33,6 +27,12 @@ internal static class ErrorDialogManagerAccessor {
       );
     }
   }
+
+  /// <summary>
+  /// Instance of the error dialog manager, will be null if there was an error retrieving its
+  /// instance through reflection.
+  /// </summary>
+  internal static ErrorDialogManager? Instance { get; }
 
   public static void Init() {
     // Just a method to force-initialize the static constructor.

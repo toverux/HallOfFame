@@ -1,0 +1,6 @@
+<Project>
+  <!-- Imported after the project body, so it overrides the 9.0 the toolchain's Mod.props sets. -->
+  <PropertyGroup>
+    <LangVersion>14</LangVersion>
+  </PropertyGroup>
+</Project>

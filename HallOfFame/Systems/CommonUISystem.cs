@@ -12,6 +12,7 @@ using Game.UI;
 using Game.UI.Localization;
 using Game.UI.Menu;
 using HallOfFame.Http;
+using HallOfFame.Logging;
 using HallOfFame.Reflection;
 using HallOfFame.Utils;
 using PDX.ModsUI;
@@ -21,7 +22,9 @@ using UnityEngine.Networking;
 namespace HallOfFame.Systems;
 
 /// <summary>
-/// UI System providing utilities used by various features of the mod.
+/// UI System providing utilities used by various features of the mod: the active locale and the
+/// settings as value bindings, opening the mod's settings or a web page, and showing JavaScript
+/// errors in the game's error dialog.
 /// It also receives the UI's usage events into <see cref="Mod.UsageTracker"/>, and schedules its
 /// flushes: on an interval, on each loading completion, and at quit.
 /// </summary>
@@ -38,22 +41,8 @@ internal sealed partial class CommonUISystem : UISystemBase {
   private readonly LocalizationManager localizationManager =
     GameManager.instance.localizationManager;
 
-  private TriggerBinding<string> openModSettingsBinding = null!;
-
-  private TriggerBinding<string> openWebPageBinding = null!;
-
-  private TriggerBinding<int> openModPageBinding = null!;
-
-  private TriggerBinding<string> openCreatorPageBinding = null!;
-
-  private TriggerBinding<string> openViewerLinkBinding = null!;
-
-  private TriggerBinding<string> copyViewerLinkBinding = null!;
-
-  private TriggerBinding<bool, string> logJavaScriptErrorBinding = null!;
-
-  private TriggerBinding<string, Dictionary<string, string>> trackUsageBinding = null!;
-
+  // Both bindings are created in OnCreate, which the game runs before any other member: hence
+  // mutable, and null! until then.
   private GetterValueBinding<string> localeBinding = null!;
 
   private GetterValueBinding<Settings> settingsBinding = null!;
@@ -75,77 +64,86 @@ internal sealed partial class CommonUISystem : UISystemBase {
         () => this.localizationManager.activeLocaleId
       );
 
+      // The settings object is updated in place, so the default comparer would see it unchanged and
+      // skip every update.
       this.settingsBinding = new GetterValueBinding<Settings>(
         CommonUISystem.BindingGroup,
         "settings",
-        () => Mod.Settings,
-        comparer: new FakeSettingComparer()
-      );
-
-      this.openModSettingsBinding = new TriggerBinding<string>(
-        CommonUISystem.BindingGroup,
-        "openModSettings",
-        this.OpenModSettings
-      );
-
-      this.openWebPageBinding = new TriggerBinding<string>(
-        CommonUISystem.BindingGroup,
-        "openWebPage",
-        Application.OpenURL
-      );
-
-      this.openModPageBinding = new TriggerBinding<int>(
-        CommonUISystem.BindingGroup,
-        "openModPage",
-        this.OpenModPage
-      );
-
-      this.openCreatorPageBinding = new TriggerBinding<string>(
-        CommonUISystem.BindingGroup,
-        "openCreatorPage",
-        this.OpenCreatorPage
-      );
-
-      this.openViewerLinkBinding = new TriggerBinding<string>(
-        CommonUISystem.BindingGroup,
-        "openViewerLink",
-        url => CommonUISystem.RunWebViewerAction(() => Application.OpenURL(url))
-      );
-
-      this.copyViewerLinkBinding = new TriggerBinding<string>(
-        CommonUISystem.BindingGroup,
-        "copyViewerLink",
-        url => CommonUISystem.RunWebViewerAction(() => GUIUtility.systemCopyBuffer = url)
-      );
-
-      this.logJavaScriptErrorBinding = new TriggerBinding<bool, string>(
-        CommonUISystem.BindingGroup,
-        "logJavaScriptError",
-        this.LogJavaScriptError
-      );
-
-      this.trackUsageBinding = new TriggerBinding<string, Dictionary<string, string>>(
-        CommonUISystem.UsageBindingGroup,
-        "trackUsage",
-        CommonUISystem.TrackUsage,
-        // Passed explicitly: the reader the binding would create for a dictionary has no
-        // parameterless constructor to be created with, which throws.
-        reader2: new DictionaryReader<string, string>()
+        static () => Mod.Settings,
+        comparer: new AlwaysFalseEqualityComparer<Settings>()
       );
 
       this.AddBinding(this.localeBinding);
       this.AddBinding(this.settingsBinding);
-      this.AddBinding(this.openModSettingsBinding);
-      this.AddBinding(this.openWebPageBinding);
-      this.AddBinding(this.openModPageBinding);
-      this.AddBinding(this.openCreatorPageBinding);
-      this.AddBinding(this.openViewerLinkBinding);
-      this.AddBinding(this.copyViewerLinkBinding);
-      this.AddBinding(this.logJavaScriptErrorBinding);
-      this.AddBinding(this.trackUsageBinding);
 
-      this.localizationManager.onActiveDictionaryChanged +=
-        this.OnActiveDictionaryChanged;
+      this.AddBinding(
+        new TriggerBinding<string>(
+          CommonUISystem.BindingGroup,
+          "openModSettings",
+          this.OpenModSettings
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding<string>(
+          CommonUISystem.BindingGroup,
+          "openWebPage",
+          Application.OpenURL
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding<int>(
+          CommonUISystem.BindingGroup,
+          "openModPage",
+          this.OpenModPage
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding<string>(
+          CommonUISystem.BindingGroup,
+          "openCreatorPage",
+          this.OpenCreatorPage
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding<string>(
+          CommonUISystem.BindingGroup,
+          "openViewerLink",
+          url => CommonUISystem.RunWebViewerAction(() => Application.OpenURL(url))
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding<string>(
+          CommonUISystem.BindingGroup,
+          "copyViewerLink",
+          url => CommonUISystem.RunWebViewerAction(() => GUIUtility.systemCopyBuffer = url)
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding<bool, string>(
+          CommonUISystem.BindingGroup,
+          "logJavaScriptError",
+          CommonUISystem.LogJavaScriptError
+        )
+      );
+
+      this.AddBinding(
+        new TriggerBinding<string, Dictionary<string, string>>(
+          CommonUISystem.UsageBindingGroup,
+          "trackUsage",
+          CommonUISystem.TrackUsage,
+          // Passed explicitly: the reader the binding would create for a dictionary has no
+          // parameterless constructor to be created with, which throws.
+          reader2: new DictionaryReader<string, string>()
+        )
+      );
+
+      this.localizationManager.onActiveDictionaryChanged += this.OnActiveDictionaryChanged;
 
       Mod.Settings.onSettingsApplied += this.OnSettingsApplied;
 
@@ -211,9 +209,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
     _ = Mod.UsageTracker.Flush();
   }
 
-  private void OnActiveDictionaryChanged() {
-    this.localeBinding.Update();
-  }
+  private void OnActiveDictionaryChanged() => this.localeBinding.Update();
 
   private void OnSettingsApplied(Setting setting) {
     this.settingsBinding.Update();
@@ -227,17 +223,15 @@ internal sealed partial class CommonUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Opens the mod settings page at the specified section.
+  /// Opens the mod settings page at the specified tab, e.g. <c>General</c>, the tab of a
+  /// one-argument <see cref="SettingsUISectionAttribute"/>.
   /// </summary>
-  private void OpenModSettings(string section) {
-    var optionsUISystem =
-      this.World.GetOrCreateSystemManaged<OptionsUISystem>();
+  private void OpenModSettings(string tab) {
+    var optionsUISystem = this.World.GetOrCreateSystemManaged<OptionsUISystem>();
 
-    optionsUISystem.OpenPage(
-      "HallOfFame.HallOfFame.Mod",
-      $"HallOfFame.HallOfFame.Mod.{section}",
-      false
-    );
+    // OpenPage matches tab ids, not groups: an unknown id falls back to the first tab (decompile,
+    // OptionsUISystem.SelectSection).
+    optionsUISystem.OpenPage(Mod.Settings.id, $"{Mod.Settings.id}.{tab}", false);
   }
 
   /// <summary>
@@ -385,20 +379,14 @@ internal sealed partial class CommonUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Shows an error sent from JavaScript.
+  /// Shows an error sent from JavaScript in the game's error dialog, and logs it.
   /// </summary>
-  private void LogJavaScriptError(bool isFatal, string error) {
-    var @base = "HallOfFame.Common.BASE_ERROR".Translate();
-
-    var gravity = isFatal
-      ? "HallOfFame.Common.FATAL_ERROR".Translate()
-      : "HallOfFame.Common.RECOVERABLE_ERROR".Translate();
-
+  private static void LogJavaScriptError(bool isFatal, string error) {
     // The game's error dialog, as for the mod's own unforeseen errors: it shows the stack as plain
     // text, where the message dialog's details would read it as markup.
     ErrorDialogManagerAccessor.Instance?.ShowError(
       new ErrorDialog {
-        localizedMessage = $"{@base} \n{gravity}",
+        localizedMessage = ModLog.PlayerMessage(isFatal, static key => key.Translate()),
         errorDetails = error
       }
     );
@@ -423,11 +411,5 @@ internal sealed partial class CommonUISystem : UISystemBase {
     }
 
     Mod.UsageTracker.Track(name, eventProperties);
-  }
-
-  private class FakeSettingComparer : EqualityComparer<Settings> {
-    public override bool Equals(Settings x, Settings y) => false;
-
-    public override int GetHashCode(Settings settings) => settings.GetHashCode();
   }
 }

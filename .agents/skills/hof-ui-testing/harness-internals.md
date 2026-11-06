@@ -1,13 +1,13 @@
 # Game UI test harness internals
 
-`HallOfFame/UI/src/testing/game-setup.ts` is a `bun test` preload (wired in `bunfig.toml`) that loads the real Cities: Skylines II UI bundle so component tests render against the real `cs2/*` modules.
+[`game-setup.ts`](../../../HallOfFame/UI/src/testing/game-setup.ts) is a `bun test` preload (wired in `bunfig.toml`) that loads the real Cities: Skylines II UI bundle so component tests render against the real `cs2/*` modules.
 Read this when a game update breaks it, or when changing what the harness mocks.
 The file's own comments are the authority; this is the map.
 
 ## How it loads the bundle
 
 1. It reads the minified webpack bundle from `$CSII_INSTALLATIONPATH/Cities2_Data/Content/Game/UI/index.js`.
-2. `cs2/*` are ambient TYPE-only declarations in this repo (`HallOfFame/UI/cs2-types`); the real runtime implementations live only in that bundle.
+2. `cs2/*` are ambient TYPE-only declarations in this repo ([`cs2-types`](../../../HallOfFame/UI/cs2-types)); the real runtime implementations live only in that bundle.
 3. bun cannot `import()` the bundle (its hot-reload setters reassign `const` bindings, which bun's transpiler rejects), so the source is handed to JavaScriptCore via indirect `eval`.
 4. The bundle exposes each game module on `window` (e.g. `window['cs2/api']`); each bare specifier is aliased to its window export with `mock.module`.
    react and react-dom are intentionally NOT aliased this way (see below).
@@ -33,4 +33,4 @@ Defining it first flips the bundle to its "attached" mode, and a no-op `Bindings
 
 The engine answers `*.subscribe` / `*.subscribeMapEntry` requests synchronously from the values configured via `setBinding` / `setMapBinding` (an unconfigured value binding is left at its `bindValue` default; an unconfigured map entry resolves to `null`), and records every other `trigger` as a command for `getTriggers()`.
 `emitEvent(name, ...args)` goes the other way, calling the handlers the bundle registered for an event the game sends; the value bindings' updates go through it too.
-`overrideLocalization()` repoints the `LocalizationContext` no-provider default so `translate(id, fallback)` returns the fallback or the id without the real, binding-driven localization provider.
+`overrideLocalization()` repoints the `LocalizationContext` no-provider default so `translate(id, fallback)` returns the text `setTranslations` gave the id, else the fallback or the id, without the real, binding-driven localization provider.

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Sets up the Cities: Skylines II modding toolchain on Linux, where the in-game installer cannot run.
+# Sets up the Cities: Skylines II modding toolchain on Linux, where the in-game installer
+# cannot run.
 #
 # Builds run on native .NET. Only the Windows-only post-processor and publisher run under the
 # game's own Proton, reached through wrapper scripts. The Unity mod project is opened once by a
@@ -9,13 +10,31 @@
 #
 # Idempotent: rerun it after a game update changes the toolchain.
 # Needs the game installed through Steam and launched once, and the game closed.
-# Environment: STEAM_ROOT (default ~/.local/share/Steam).
+# Environment: STEAM_ROOT (default ~/.local/share/Steam), whose libraryfolders.vdf lists the other
+# Steam libraries, which may hold the game and Proton.
 
 set -euo pipefail
 
 steam=${STEAM_ROOT:-$HOME/.local/share/Steam}
-game="$steam/steamapps/common/Cities Skylines II"
-compat="$steam/steamapps/compatdata/949230"
+
+# Every Steam library: the root one, then the others libraryfolders.vdf lists.
+libraries=("$steam")
+vdf="$steam/steamapps/libraryfolders.vdf"
+while IFS= read -r library; do
+  [[ $library == "$steam" ]] || libraries+=("$library")
+done < <(sed -n 's/^[[:space:]]*"path"[[:space:]]*"\(.*\)"$/\1/p' "$vdf" 2>/dev/null)
+
+# The game's files and its Proton prefix both live in the library that installed it.
+game_library=$steam
+for library in "${libraries[@]}"; do
+  if [[ -f $library/steamapps/appmanifest_949230.acf ]]; then
+    game_library=$library
+    break
+  fi
+done
+
+game="$game_library/steamapps/common/Cities Skylines II"
+compat="$game_library/steamapps/compatdata/949230"
 pfx="$compat/pfx"
 user_data="$pfx/drive_c/users/steamuser/AppData/LocalLow/Colossal Order/Cities Skylines II"
 game_tooling="$game/Cities2_Data/Content/Game/.ModdingToolchain"
@@ -61,7 +80,11 @@ win_path() {
 # Use the Proton that owns the prefix, so nothing here upgrades it behind the game's back.
 prefix_version=$(<"$compat/version")
 proton=
-for candidate in "$steam"/steamapps/common/Proton* "$steam"/compatibilitytools.d/*; do
+candidates=()
+for library in "${libraries[@]}"; do
+  candidates+=("$library"/steamapps/common/Proton*)
+done
+for candidate in "${candidates[@]}" "$steam"/compatibilitytools.d/*; do
   if grep -qs "^CURRENT_PREFIX_VERSION=\"$prefix_version\"" "$candidate/proton"; then
     proton=$candidate
     break
@@ -186,9 +209,11 @@ else
 
   log="$downloads/UnityModsProject.log"
   mkdir -p "$downloads"
+  rm -f "$log"
   if ! "${unity[@]}" -batchmode -nographics -quit -projectPath "$ump" -logFile "$log" ||
     [[ ! -f $ump/Library/ScriptAssemblies/Unity.Entities.CodeGen.dll ]]; then
-    tail -n 30 "$log" >&2
+    # Unity can fail before it writes the log at all.
+    tail -n 30 "$log" >&2 || true
     die "Unity failed to open the mod project, full log in $log"
   fi
 

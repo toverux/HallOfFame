@@ -17,7 +17,7 @@ internal sealed class PlaysetLoader(
   IModLog log,
   Action<PlaysetState> publish
 ) {
-  private readonly Dictionary<string, IReadOnlyList<Domain.Mod>> loadedPlaysets = new();
+  private readonly Dictionary<string, IReadOnlyList<Domain.Mod>> loadedPlaysets = [];
 
   // The screenshots whose request is in flight, which a second load leaves to that request.
   private readonly HashSet<string> loadingScreenshotIds = [];

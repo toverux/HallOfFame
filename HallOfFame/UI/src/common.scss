@@ -1,4 +1,4 @@
-﻿$default-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+$default-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 // Dimmed text over the game's dark windows: lighter than the grey of the game's empty panels, which
 // reads poorly over a window's body.
@@ -39,9 +39,9 @@ $dimmed-color: #b7bec8;
 }
 
 @mixin fade-in-slide-in($x: 0, $y: 0, $duration: 0.5s, $timing-function: $default-timing-function) {
-  animation: fade-in $duration $timing-function both;
+  animation: fade-in-slide-in $duration $timing-function both;
 
-  @keyframes fade-in {
+  @keyframes fade-in-slide-in {
     0% {
       opacity: 0;
       transform: translate($x, $y);
@@ -95,4 +95,11 @@ $dimmed-color: #b7bec8;
       opacity: 1;
     }
   }
+}
+
+// Keeps a class that has no style of its own, such as the stable selector of an element vanilla
+// styles: Sass drops a rule with no declarations, and its class with it, but it keeps a `/*!`
+// comment.
+@mixin stable-class {
+  /*! stable class */
 }

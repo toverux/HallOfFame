@@ -1,11 +1,10 @@
-﻿root = true
+root = true
 
 [*]
 charset = utf-8
 end_of_line = lf
 indent_style = space
-# default to 4 for compat with other tools but override with 2 for most file types
-indent_size = 4
+indent_size = 2
 trim_trailing_whitespace = true
 insert_final_newline = true
 max_line_length = 100
@@ -14,20 +13,23 @@ max_line_length = 100
 insert_final_newline = false
 max_line_length = 999999999
 
-[*.{md,toml,yml,js,json,jsonc,ts,tsx,scss}]
-indent_size = 2
-
-[*.cs]
-indent_size = 2
+# Rider writes the settings layer with tabs, whatever it read.
+[*.DotSettings]
+indent_style = tab
 
 # https://github.com/toverux/scrolls/blob/main/templates/csharp.editorconfig
-# Version: 1.2.0
+# Version: 1.2.1
 # C# style. Compatible with various formatters, but made in particular for `jb cleanupcode`
 # (ReSharper CLI, same engine as Rider), run with the profile in `csharp.sln.DotSettings` for
 # enabling more smart diagnostics and auto-fixes for mechanical changes.
-# Minor auto-applied rules are :warning (they should gate the build via `EnforceCodeStyleInBuild`
-# and `TreatWarningsAsErrors`); shape-changing rules stay :suggestion (hints only).
+# Minor auto-applied rules are :warning; shape-changing rules stay :suggestion (hints only).
+# The :warning rules gate the build only when the project sets `TreatWarningsAsErrors` and
+# `<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>`, plus, on a target that is not
+# .NETCoreApp (ex. net48), `<AnalysisLevel>latest</AnalysisLevel>`: the SDK sets AnalysisLevel
+# only for .NETCoreApp, and without it the build ignores the :warning severity of most IDE rules.
 # Usage: $ dotnet jb cleanupcode csharp.slnx --profile="AutoCleanup" --settings="csharp.sln.DotSettings"
+
+[*.cs]
 
 # --- Brace & newline placement --------------------------------------------------
 csharp_new_line_before_open_brace = none
@@ -511,8 +513,7 @@ dotnet_naming_rule.type_members_rule.symbols = type_members
 dotnet_naming_rule.type_members_rule.style = pascal_case
 dotnet_naming_rule.type_members_rule.severity = suggestion
 
-# Generated build output is not our code: exempt obj/ from analysis. (The vendored
-# Mono.Debugger.Soft tree is instead handled by not enforcing style on the sdb project.)
+# Generated build output is not our code: exempt obj/ from analysis.
 [**/obj/**]
 generated_code = true
 dotnet_analyzer_diagnostic.severity = none

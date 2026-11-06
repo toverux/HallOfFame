@@ -58,7 +58,7 @@ describe('Tooltip', () => {
     await expectHidden(TIP_A);
   });
 
-  it(`holds every tooltip closed after a notch until the mouse moves, the scrolled-under one too`, async () => {
+  it(`holds both tooltips closed after a notch until the mouse moves`, async () => {
     render(<TwoTooltips />);
 
     fireEvent.mouseOver(anchor(ANCHOR_A));

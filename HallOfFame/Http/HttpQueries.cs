@@ -44,7 +44,7 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   /// `++<see cref="lastRequestId"/>`.
   /// </summary>
   private static readonly ConditionalWeakTable<UnityWebRequest, string>
-    RequestIdsMap = new();
+    RequestIdsMap = [];
 
   internal static string PrependApiUrl(string path) =>
     $"{Mod.Settings.BaseUrlWithScheme}{HttpQueries.BaseApiPath}{path}";
@@ -179,7 +179,7 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
       $"HTTP: Downloading {request.url} failed ({request.responseCode}): " +
       (string.IsNullOrEmpty(body)
         ? request.error
-        : body.Substring(0, Math.Min(body.Length, 500)))
+        : body[..Math.Min(body.Length, 500)])
     );
 
     throw new HttpNetworkException(HttpQueries.GetRequestId(request), request.error);
@@ -348,15 +348,11 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
 
       // This may throw if the JSON is invalid, but there is a wide range of exceptions that can be
       // thrown here, so we will catch them all and interpret them as a parsing error.
-      var variant = JSON.Load(json);
-
-      // Colossal's JSON library does always throw an exception when parsing invalid JSON, so we
+      // Colossal's JSON library does not always throw an exception when parsing invalid JSON, so we
       // need to check for null here.
       // It's kinda inconsistent, for example, parsing `foo` (not valid JSON) yields null, but
       // parsing `{foo: "bar"}` would throw a `JSONFormatUnexpectedEndException`.
-      if (variant is null) {
-        throw new Exception("Response is not valid JSON.");
-      }
+      var variant = JSON.Load(json) ?? throw new Exception("Response is not valid JSON.");
 
       // This may throw various exception, like with `JSON.Load()` we will handle any Exception as a
       // parsing error.

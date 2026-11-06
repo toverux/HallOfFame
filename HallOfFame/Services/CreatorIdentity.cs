@@ -331,7 +331,7 @@ internal sealed class CreatorIdentity(
         ? "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAnonymously]"
         : "Options.OPTION_VALUE[HallOfFame.HallOfFame.Mod.Settings.LoginStatus.LoggedInAs]";
 
-      return LocalizedString.IdWithArgs(
+      return LocalizedString.Id(
         statusId,
         ("CREATOR_NAME", LocalizedString.Value(creator.CreatorName))
       );

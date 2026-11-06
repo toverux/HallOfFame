@@ -331,6 +331,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Адрес сервера Hall of Fame. Его не следует изменять, если вы не занимаетесь разработкой мода или не используете альтернативный сервер.\nВы можете использовать «test.halloffame.cs2.mtq.io» для тестирования мода на базе данных sandbox.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Сброс настроек",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Сбросить все настройки мода к их значениям по умолчанию (кроме ID автора, он останется нетронутым).",
+  "Options.WARNING[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "Сбросить все настройки мода к значениям по умолчанию?",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Чат и поддержка в Discord",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Это ссылка-приглашение на Discord сервер Cities: Skylines Modding, для обращений в службу поддержки и общения.\nПредпочтительный канал: pdxm-mods-published › Hall of Fame.\nОткрывает <discord.gg/HTav7ARPs2>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "Пожертвование <3 на PayPal или Ko-fi",

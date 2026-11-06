@@ -331,6 +331,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fame 伺服器的位址。除非你正在開發此模組或使用替代伺服器，否則不應變更。\n你可以使用「test.halloffame.cs2.mtq.io」在沙盒資料庫上測試此模組。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "重置設定",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "將所有模組設定重置為預設值（創作者 ID 除外，會保持不變）。",
+  "Options.WARNING[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "要將所有模組設定重置為預設值嗎？",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "在 Discord 上聊天與尋求支援",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "這是加入 Cities: Skylines Modding Discord 伺服器的邀請連結，可用於尋求支援與聊天。\n建議使用的頻道是 pdxm-mods-published › Hall of Fame。\n開啟 <discord.gg/HTav7ARPs2>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "透過 PayPal 或 Ko-fi 贊助 <3",

@@ -1,6 +1,5 @@
-// Version: 1.0.0
-
 // oxlint-disable no-console -- a CLI talks on stdout.
+// oxlint-disable import/no-nodejs-modules -- a CLI script runs on Bun, not in the game.
 // oxlint-disable no-await-in-loop -- one request per language, in file order, is what this wants.
 
 // Pulls Crowdin's current translations of the source keys added or changed since `--base` into the
@@ -14,24 +13,34 @@
 // key order. A key not on Crowdin yet has nothing to pull until a push uploads it.
 //
 // Run it by hand, from the repo root, through `mise l10n:pull`. `CROWDIN_PERSONAL_TOKEN` needs
-// project read scope.
+// project read scope, from the project's owner, a manager, or a developer.
 
+import { parseArgs } from 'node:util';
 import {
-  api,
-  baseRef,
   fetchProject,
   languageIdsByFileName,
-  localesDirectory,
+  list,
+  LOCALES_DIRECTORY,
   projectId,
   readAtRef,
   readLocale,
   resolveCommit,
-  sourceFileName,
+  SOURCE_FILE_NAME,
   stringIdsByKey
 } from './crowdin';
 
-const isWriting = Bun.argv.includes('--write');
-const isAll = Bun.argv.includes('--all');
+// Strict, so a mistyped flag throws instead of running another mode.
+const { values: flags } = parseArgs({
+  args: Bun.argv.slice(2),
+  options: {
+    base: { type: 'string', default: 'HEAD' },
+    write: { type: 'boolean', default: false },
+    all: { type: 'boolean', default: false }
+  }
+});
+
+const isWriting = flags.write;
+const isAll = flags.all;
 
 interface LanguageTranslation {
   readonly stringId: number;
@@ -43,9 +52,9 @@ interface LanguageTranslation {
 await run();
 
 async function run(): Promise<void> {
-  const base = await resolveCommit(baseRef());
-  const source = await readLocale(sourceFileName);
-  const before = await readAtRef(base, sourceFileName);
+  const base = await resolveCommit(flags.base);
+  const source = await readLocale(SOURCE_FILE_NAME);
+  const before = await readAtRef(base, SOURCE_FILE_NAME);
   const keys = Object.keys(source).filter(key => isAll || source[key] != before[key]);
 
   console.info(
@@ -58,7 +67,7 @@ async function run(): Promise<void> {
   }
 
   const stringIds = await stringIdsByKey();
-  const ids = keys.map(key => stringIds.get(key)).filter(id => id != undefined);
+  const ids = keys.map(key => stringIds.get(key)).filter(id => id != null);
 
   if (ids.length < keys.length) {
     console.info(
@@ -71,20 +80,36 @@ async function run(): Promise<void> {
   }
 
   const keysById = new Map([...stringIds].map(([key, id]) => [id, key]));
+  const project = await fetchProject();
   let pulled = 0;
 
-  for (const [fileName, languageId] of languageIdsByFileName(await fetchProject())) {
-    const path = `${localesDirectory}/${fileName}`;
+  for (const [fileName, languageId] of languageIdsByFileName(project)) {
+    const path = `${LOCALES_DIRECTORY}/${fileName}`;
 
-    if (fileName == sourceFileName || !(await Bun.file(path).exists())) {
+    if (fileName == SOURCE_FILE_NAME) {
+      continue;
+    }
+
+    if (!(await Bun.file(path).exists())) {
+      console.warn(
+        `[${fileName}] a Crowdin language exports under this name: no such file, skipped.`
+      );
+
       continue;
     }
 
     const locale = await readLocale(fileName);
     const changed = new Map<string, string>();
+    const translations = await languageTranslations(languageId, ids, project.exportApprovedOnly);
 
-    for (const translation of await languageTranslations(languageId, ids)) {
-      const key = keysById.get(translation.stringId) ?? '';
+    for (const translation of translations) {
+      const key = keysById.get(translation.stringId);
+
+      if (key == null) {
+        throw new Error(
+          `Crowdin returned string ${translation.stringId}, which no source key holds.`
+        );
+      }
 
       // An emptied text is how Crowdin represents an untranslated string.
       if (translation.text == '' || translation.text == locale[key]) {
@@ -107,19 +132,21 @@ async function run(): Promise<void> {
     }
   }
 
-  console.info(isWriting ? `Done: ${pulled} translation(s) written.` : 'Done.');
+  console.info(isWriting ? `Done: ${pulled} translation(s) written.` : `Done.`);
 }
 
-// One translation per string: the one Crowdin would export.
-async function languageTranslations(
+// One translation per string: the one Crowdin would export, an approved one only where the project
+// exports nothing else.
+function languageTranslations(
   languageId: string,
-  stringIds: readonly number[]
+  stringIds: readonly number[],
+  isApprovedOnly: boolean
 ): Promise<LanguageTranslation[]> {
-  const query = `stringIds=${stringIds.join(',')}&limit=500`;
-  const path = `/projects/${projectId}/languages/${languageId}/translations?${query}`;
-  const result = (await api('GET', path)) as { data: Array<{ data: LanguageTranslation }> };
+  const query = `stringIds=${stringIds.join(',')}${isApprovedOnly ? '&approvedOnly=1' : ''}`;
 
-  return result.data.map(item => item.data);
+  return list<LanguageTranslation>(
+    `/projects/${projectId}/languages/${languageId}/translations?${query}`
+  );
 }
 
 // Source key order, so a key new to the locale lands where the source has it; a key the source
@@ -134,7 +161,7 @@ function serialize(
   for (const key of Object.keys(source)) {
     const text = changed.get(key) ?? locale[key];
 
-    if (text != undefined) {
+    if (text != null) {
       merged[key] = text;
     }
   }

@@ -21,21 +21,24 @@ Give every moderator the model that answered, or no `-m` at all, the account's d
 codex exec -m <model> -c 'model_reasoning_effort="high"' -s read-only -C <repo> -o <dir>/r1.md - < <dir>/r1-prompt.md > <dir>/r1.log 2>&1
 ```
 
-- `-s read-only` lets Codex read the repo itself: name the two files and the key range, paste the context and the rules, and ask for findings as key, current text, proposed text, reason, severity (error: meaning, grammar, placeholder, game term; improvement; nit), plus the count of strings accepted as they are.
+- `-s read-only` lets Codex read the repo itself: name the two files and the key range, paste the context and the rules, and ask for findings as key, current text, proposed text, reason, severity (error: meaning, grammar, placeholder, game term, typography; improvement; nit), plus the count of strings accepted as they are.
 - The log's header carries `session id: <uuid>`; the `-o` file holds the final message.
 - The next round resumes the session with the moderator's reply, which lists what was applied, what is disputed and why, and asks Codex to concede or counter each point and to flag anything new in the applied wording:
 
 ```
-codex exec resume <uuid> - < <dir>/r2-prompt.md -o <dir>/r2.md > <dir>/r2.log 2>&1
+codex exec resume <uuid> -m <model> -c 'model_reasoning_effort="high"' - < <dir>/r2-prompt.md -o <dir>/r2.md > <dir>/r2.log 2>&1
 ```
 
+- `resume` drops the first round's `-C`: run it from the repo, or it fails with "Not inside a trusted directory".
+
 - Five rounds at most; a point still open after that stays as the moderator judges and is reported.
-- Each moderator gets its own `<dir>`: siblings sharing one overwrote each other's helper scripts.
+- Each moderator gets its own `<dir>`: siblings sharing one overwrite each other's helper scripts.
 
 ## Codex's known turns
 
 - It may refuse the review because `AGENTS.md` tells an agent to stop when the game plugins are missing: resume with a line saying the review reads two JSON files and edits nothing.
 - It proposes dashes, and it rewrites "broken from the latest patch" as the patch marking the mod, which Skyve's reviewers do: both are declined.
-- It reaches for keys outside the range (the tab labels): declined, out of scope.
+- It reaches for keys outside the range: declined, out of scope.
 - `{WHEN}` is "3 days ago": a preposition before it ("on {WHEN}") is a bug it catches and the moderator confirms.
-- Its findings on the longer notes are usually right; its label rewrites are usually longer than the room, which is the moderator's call.
+- Its findings on the longer strings are usually right; its label rewrites are usually longer than the room, which is the moderator's call.
+- A round 1 with no finding and no quoted comparison is a skim, not a verdict: resume with a few candidate points of your own and ask it to compare each pair.

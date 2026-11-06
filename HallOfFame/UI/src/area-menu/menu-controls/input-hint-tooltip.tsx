@@ -7,6 +7,7 @@ import * as styles from './input-hint-tooltip.module.scss';
 
 // `ShortInputPathOption.FallbackToLong`: the enum is declared in `cs2/input` but missing from the
 // module at runtime.
+// oxlint-disable-next-line typescript/no-unsafe-enum-assignment - no enum to read at runtime.
 const shortNameFallbackToLong: ShortInputPathOption = 1;
 
 // Solid arrows for the arrow keys, whose short names in the game are outlined arrows: they weigh

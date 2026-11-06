@@ -1,34 +1,47 @@
 post-checkout:
-  commands:
-    configure-git:
+  jobs:
+    - name: configure-git
       run: git config blame.ignoreRevsFile .git-blame-ignore-revs
 
 pre-commit:
-  parallel: true
-  commands:
-    tsc:
-      # One root tsconfig covers both HallOfFame/UI/src and .agents/hooks, so a staged file anywhere
-      # runs the task that knows the whole project rather than one tsc over the staged files.
-      # `check:tsc` depends on `build:css-types`, which regenerates the *.module.scss.d.ts first, so
-      # an scss-only change still type-checks the `styles.*` references to its classes.
-      glob: "*.{ts,tsx,js,json,scss}"
-      run: mise check:tsc
-    oxlint:
-      glob: "*.{ts,tsx,js,jsx,mjs,cjs}"
-      run: mise exec bun -- bun --bun oxlint --deny-warnings --no-error-on-unmatched-pattern {staged_files}
-    oxfmt:
-      # Wider than oxlint's glob: oxfmt rewrites JSON, Markdown, TOML and YAML too, which puts
-      # mise.toml and this very file in its scope.
-      glob: "*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc,md,toml,yml,yaml}"
-      run: mise exec bun -- bun --bun oxfmt --check --no-error-on-unmatched-pattern {staged_files}
+  # Stops at a failed step, so the checks never run against stale or missing typings.
+  piped: true
+  jobs:
+    # Regenerates the *.module.scss.d.ts once, ahead of the checks: `bun check` and the type-aware
+    # oxlint both resolve `styles.*` through them, and a regeneration racing their reads fails a
+    # commit on a fresh clone.
+    # An scss-only change still type-checks the `styles.*` references this way.
+    # No glob: it takes well under a second, and running always keeps it ahead of every check.
+    - name: css-types
+      run: mise build:css-types
+    - group:
+        parallel: true
+        jobs:
+          # One root tsconfig covers the whole UI and its tooling, so a staged file anywhere runs
+          # the task that knows the whole project rather than one type check over the staged files.
+          - name: tsc
+            glob: "*.{ts,tsx,js,json,scss}"
+            run: mise run --skip-deps check:tsc
+          - name: oxlint
+            glob: "*.{ts,tsx,js,jsx,mjs,cjs}"
+            run: mise exec bun -- bun --bun oxlint --deny-warnings --no-error-on-unmatched-pattern {staged_files}
+          # Wider than oxlint's glob: `bun fmt` rewrites JSON, Markdown, TOML and YAML too, which
+          # puts mise.toml and this very file in its scope.
+          - name: oxfmt
+            glob: "*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc,md,toml,yml,yaml}"
+            run: mise exec bun -- bun fmt --check --no-error-on-unmatched-pattern {staged_files}
 
 # Tests run on push, not commit, to keep commits fast.
 pre-push:
   parallel: true
-  commands:
-    test:ui:
-      glob: "*.{ts,tsx}"
+  jobs:
+    - name: test:ui
+      glob: "*.{ts,tsx,scss}"
       run: mise test:ui
-    test:cs:
-      glob: "*.cs"
+    - name: test:scripts
+      glob: "scripts/**"
+      run: mise test:scripts
+    # The project files and the embedded locale JSON change what the C# tests see too.
+    - name: test:cs
+      glob: "*.{cs,csproj,props,targets,json}"
       run: mise test:cs

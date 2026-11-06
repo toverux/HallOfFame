@@ -4,23 +4,6 @@ Planned work on the mod that no ticket holds yet.
 
 Every entry opens with a triage line: **Priority** (high, medium, low) and **Cost** as the code reads at triage (trivial, cheap, moderate, large), either one `unsure` when nobody has judged it yet.
 
-## The Greenfield template's improvements, ported wholesale
-
-**Priority:** high · **Cost:** moderate
-
-`../cs2-greenfield-mod-template` started from Hall of Fame's layout and tooling (its commits `4afa798` to `37e03ec`), then kept improving on them. Port all of it back: every file, from `lefthook.yml` and `mise.toml` to the mod code, translated to Hall of Fame's names (`Greenfield` to `HallOfFame`, `gfd-` to `hof-`) and places (`.agents/` for skills, rules and scripts). Only what exists to make or maintain the template stays out: `template/`, the `gfd-setup` wizard, its `LICENSE`, and the entity counter sample slice.
-
-What Hall of Fame lacks entirely, as of template commit `8ecc1ff`:
-
-- The shared C# build settings in `Directory.Build.props` and `Directory.Build.targets`, with the `.editorconfig` code style enforced on every build.
-- C# tests on xUnit v3 and .NET 10 rather than `net48`, with the Unity native-memory shim (`Shim/`) and the float64 pass (`Float64/`, `mise test:cs:float64`, `scripts/check-float64-output.ts`). This adds dependencies and rewrites the test setup the `hof-cs-offengine-testing` skill and `AGENTS.md` describe.
-- In-game scenarios run unattended (`Scenarios/`, `scripts/game.ts`, `scripts/test-game.ts`, the game and scenario log parsers, `mise test:game`, `mise game`), with the `gfd-game-testing` and `gfd-game-cycle` skills.
-- The `gfd-game-update` and `gfd-template-update` skills, the `PublishNewMod` profile, `NullStrings`, and tests Hall of Fame has no equivalent of (`ModLog`, `LocaleLoader`, `AlwaysFalseEqualityComparer`, the UI's `game-setup`).
-
-Most files the two repositories share also differ: `Settings.cs`, the csproj files, `CommonUISystem.cs`, `LocaleLoader.cs`, `Mod.cs`, `mise.toml`, `build.ts`, `AGENTS.md`, the translate, release and testing skills, `lefthook.yml`. Diff each one, take the template's side, and keep what is Hall of Fame's own, since some of those differences are features the template never had.
-
-Finish by writing a `.template.json` that points at the ported template commit, so `gfd-template-update` can bring later template commits over one by one.
-
 ## The upload panel's maximized image as a component
 
 **Priority:** unsure · **Cost:** cheap
@@ -115,3 +98,9 @@ Set and save the flag when the tour first publishes a step instead, and keep `Cl
 Colossal.Json's `Make` resolves every JSON key by reflection it never caches, scanning each member's attributes for a `[DecodeAlias]`, so it decodes about one object per millisecond. Decoding off the main thread keeps the frame rate, but a big playset still takes seconds to appear: with 2,256 mods, `Make` took about 2.5 s off-engine and the Playset tab showed its rows 7.7 s after the click in game. Mapping the same response by hand took 13 ms.
 
 Replace `variant.Make<T>()` in `HttpQueries.DecodeJson` with a generic mapper that reads a type's `[DecodeAlias]` properties once and caches, per JSON key, a setter and a decoder for its value. It needs no code per domain class, only a case per kind of value: `string`, `int`, `bool`, `DateTime`, arrays, `List<T>`, `Dictionary<string, T>`, nested records, and types carrying `[JsonConverter]` (`RenderConditions`). Its cache must be thread-safe, since decoding runs on a worker thread. Off-engine tests decode each `Domain` type through both `Make` and the mapper and compare the results; `DateTime` parsing and a `null` on a non-nullable member are the parity cases nobody has checked yet.
+
+## In-game test scenarios
+
+**Priority:** unsure · **Cost:** unsure
+
+Investigate where the game's own test framework, run through the `cs2-dev` MCP server's `test` tool, would test what off-engine tests cannot: the capture systems (`Systems/Capture`) and photo mode over a loaded city, the screenshot pipeline end to end. The Greenfield template ships the setup as its `game-tests` part (`Scenarios/`, the `game-testing` skill, the `Colossal.TestFramework` reference); this mod pruned it, so adopting it means taking that part back from the template.

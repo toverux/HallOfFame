@@ -331,6 +331,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fameサーバーのアドレスです。MODを開発している場合や代替サーバーを使用する場合を除き、変更しないでください。\n「test.halloffame.cs2.mtq.io」を使用すると、サンドボックスのデータベースでMODをテストできます。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "設定をリセット",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "すべてのMOD設定を初期値に戻します（クリエイターIDは変更されずにそのまま残ります）。",
+  "Options.WARNING[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "すべてのMOD設定を初期値に戻しますか？",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Discordでチャット＆サポート",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Cities: Skylines ModdingのDiscordサーバーへの招待リンクです。サポートの依頼や雑談にご利用ください。\nおすすめのチャンネルは pdxm-mods-published › Hall of Fame です。\n<discord.gg/HTav7ARPs2>を開きます",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "PayPalまたはKo-fiで寄付 <3",

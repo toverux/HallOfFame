@@ -331,6 +331,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "这是“城市画廊”模组服务器的地址。除非您正在开发此模组或使用其他服务器，否则不应更改地址。\n您可以使用“test.halloffame.cs2.mtq.io”在沙盒数据库上测试此模组。",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "重置设置",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "重置此模组的所有设置（创建者 ID 将保持不变）。",
+  "Options.WARNING[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "要将此模组的所有设置重置为默认值吗？",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "在 Discord 上聊天和寻求帮助",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "这是加入 Cities: Skylines Modding 的 Discord 服务器的邀请链接，用于寻求帮助和聊天。\n首选频道是 pdxm-mods-published › Hall of Fame。\n链接：<discord.gg/HTav7ARPs2>",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "在 PayPal 或 Ko-fi 上捐款 <3",

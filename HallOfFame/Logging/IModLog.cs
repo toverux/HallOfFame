@@ -1,14 +1,13 @@
 using System;
-using Game.UI.Localization;
 
 namespace HallOfFame.Logging;
 
 /// <summary>
 /// Mod-owned logging seam over the game's <c>Colossal.Logging.ILog</c>.
-/// It exposes only the operations the mod actually uses, typed in mod terms (plain strings and
-/// exceptions), so logging-dependent logic can be unit-tested off-engine against a fake instead of
-/// the engine-bound <c>ILog</c>, which cannot load on the net48 test runtime.
-/// The production implementation is <see cref="ModLog"/>; tests inject a fake.
+/// It exposes only the operations the mod uses, typed in mod terms (plain strings and exceptions),
+/// so logging-dependent logic can be unit-tested off-engine against a fake: the game's
+/// <c>LogManager.GetLogger</c> needs the engine.
+/// The production implementation is <see cref="ModLog"/>.
 /// </summary>
 internal interface IModLog {
   /// <summary>
@@ -35,14 +34,6 @@ internal interface IModLog {
   /// Logs an error message also surfaced to the user in the game UI.
   /// </summary>
   void Error(string message);
-
-  /// <summary>
-  /// Same as <see cref="Error(string)"/> but takes a <see cref="LocalizedString"/> that the
-  /// implementation renders to display text.
-  /// This keeps the (engine-bound) rendering inside the production logger, so a caller that owns a
-  /// user-friendly <see cref="LocalizedString"/> can log it without rendering off-engine itself.
-  /// </summary>
-  void Error(LocalizedString message);
 
   /// <summary>
   /// Logs an error message without surfacing it to the user, regardless of the underlying logger's

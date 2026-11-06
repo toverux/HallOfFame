@@ -4,6 +4,7 @@ import { lazyBindValue } from './lazy-value-binding';
 
 export interface ProxyBinding {
   readonly binding: ControlPath;
+  // Mutable, as the game's `ControlIcons` takes it.
   readonly modifiers: ControlPath[];
 }
 

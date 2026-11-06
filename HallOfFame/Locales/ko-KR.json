@@ -331,6 +331,7 @@
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.BaseUrl]": "Hall of Fame의 서버 주소입니다. 모드를 개발중이시거나 다른 서버를 쓰시고 계신 게 아니라면 이 값을 바꾸지 마십시오.\n샌드박스 데이터베이스에서 이 모드를 시험하시려면 test.halloffame.cs2.mtq.io 를 입력하시면 됩니다.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "설정 초기화",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "사용자 ID를 제외한 모든 설정을 초기화합니다.",
+  "Options.WARNING[HallOfFame.HallOfFame.Mod.Settings.ResetSettings]": "모든 모드 설정을 기본값으로 초기화하시겠습니까?",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "디스코드에서 떠들기 & 지원하기",
   "Options.OPTION_DESCRIPTION[HallOfFame.HallOfFame.Mod.Settings.DiscordLink]": "Cities: Skylines Modding Discord server 서버 초대 링크입니다. 와서 떠드시거나 지원 요청을 하시면 됩니다.\npdxm-mods-published › Hall of Fame 채널로 오시면 됩니다.\n<discord.gg/HTav7ARPs2> 링크를 엽니다.",
   "Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DonateLink]": "PayPal 또는 Ko-fi에 기부하기",

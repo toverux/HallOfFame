@@ -2,13 +2,8 @@ import { afterEach, describe, expect, it } from 'bun:test';
 import { cleanup, render, type RenderResult, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { makeCreator, makeScreenshot, makeSettings } from '../../testing/fixtures';
-import {
-  getTriggers,
-  getUsageEvents,
-  resetBindings,
-  setBinding,
-  setTranslations
-} from '../../testing/game-setup';
+import { getTriggers, resetBindings, setBinding, setTranslations } from '../../testing/game-setup';
+import { getUsageEvents } from '../../testing/usage-events';
 import { MenuControlsCityName } from './city-name';
 
 afterEach(() => {

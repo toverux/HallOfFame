@@ -4,7 +4,7 @@
 // Prints fun statistics over the local dev database, one `section.key: <json>` line per stat, for
 // the `hof-fun-stats` skill.
 //
-// Run it from the repo root: `bun .agents/scripts/fun-stats.ts`. `--cap <date>` ignores the
+// Run it from the repo root: `bun scripts/fun-stats.ts`. `--cap <date>` ignores the
 // screenshots, creators, likes, and views created after that date, to compare with an earlier run.
 // A date without a time is its midnight. Counters such as likes and views, and the mod records,
 // stay the current ones.

@@ -102,121 +102,25 @@ Special thanks to:
 
 ## Development
 
-### Installation
+This mod started from [Greenfield Mod Template](https://github.com/CitiesSkylinesModding/greenfield-mod-template), whose README explains its tooling and the reasons behind it.
 
-1. Standard CS2 modding toolchain (on Linux, see [below](#linux) instead);
-2. (Recommended) Install [mise-en-place](https://mise.jdx.dev) for per-project .NET SDK and Bun
-   version management. Without mise, just match the required versions specified in `mise.toml`.
-3. `bun i` to install UI mod dependencies.
-4. Recommended: enable `--developerMode --uiDeveloperMode` as game launch options.
+### Setup
 
-On Steam those go in Properties → General → Launch Options, where `%command%` stands for the game
-executable:
+- [mise](https://mise.jdx.dev), then `mise install` for the pinned bun and .NET SDK.
+- The game's modding toolchain, installed from the game's Modding options. On Linux, where that installer cannot run, `mise setup:linux` installs it.
+- `bun install`, then `bunx lefthook install` for the git hooks.
 
-```sh
-%command% --developerMode --uiDeveloperMode
-```
+### Commands
 
-Point that at `Cities2.exe` under your install to also skip the launcher. The modding toolchain
-exports the install path as `CSII_INSTALLATIONPATH`.
+- `mise build`: Builds the mod and deploys it to the game, which must be closed.
+- `mise build:ui`: Builds and deploys the UI alone, with the game open.
+- `mise dev`: Rebuilds the UI on every change.
+- `mise check`: Type-checks the UI, lints it, and checks its formatting.
+- `mise fix`: Applies the lint fixes, then formats the TypeScript and the C#.
+- `mise test`: Runs the off-engine C# tests, the UI tests, and the scripts' tests.
+- `mise l10n:pull`, `mise l10n:push`: Pull translations from Crowdin and push the repo's edits to it.
+- `mise publish`: Publishes a new version on Paradox Mods.
 
-### Linux
+Run `mise tasks` for the full list.
 
-The in-game toolchain installer is Windows-only, so `mise setup:linux` stands in for it. It needs:
-
-- the game installed through Steam, launched once under Proton, and closed while the setup runs;
-- Unity Hub (the Flatpak works) signed in with a Personal license, since a licensed editor has to
-  open the toolchain's Unity project once;
-- mise, for the pinned .NET SDK.
-
-The mod then builds on native .NET; only the Windows-only post-processor and publisher run under
-the game's own Proton. The setup installs the Unity version the game pins twice, about 8 GB of
-downloads: a Linux editor to open the Unity project, and the Windows editor into the Proton prefix
-for the IL post-processor runner. It writes the `CSII_*` variables to
-`~/.config/environment.d/60-cs2-modding.conf`, so log out and back in once it is done. Rerun it
-after a game update.
-
-The C# tests target `net48`, which takes Mono on Linux: `sudo apt install mono-devel`, whose
-framework facades the test host needs.
-
-### Coding agents
-
-If you develop with Claude Code or Codex CLI, the
-[CS Modding agent plugins](https://github.com/CitiesSkylinesModding/agents-plugins) are recommended:
-they give an agent a live line into the running game's UI and its C#/ECS internals, plus knowledge
-of how the game is built.
-
-```sh
-claude plugin marketplace add CitiesSkylinesModding/agents-plugins
-claude plugin install cs2-modding@csmodding
-claude plugin install coherent-gameface@csmodding
-claude plugin install unity-devtools@csmodding
-```
-
-Then run `/cs2-modding-setup`, which provisions the local ground truth for this game: a decompile of
-your installed game, the launch options above, the debug patch that lets a debugger attach, a corpus
-of community mods to read, and a readable copy of the game's UI bundle. It records what it
-provisioned in `~/.cs2-modding/setup.md`, which is where this repo's own agent skills read those
-paths from, so nothing machine-specific is hardcoded here.
-
-Codex CLI uses the same arguments with `codex plugin marketplace add` / `codex plugin add`.
-
-### Development workflow
-
-The UI mod will be built automatically with the C# solution.
-
-However, if you are actively working on the UI, you may recompile it on change with `mise dev`.
-
-You can enable the game's UI live reload on change with `--uiDeveloperMode`.
-
-Debugging C# code can be done following these steps: https://cs2.paradoxwikis.com/Debugging.
-
-Debugging JS code can be done with the browser's dev tools by opening http://localhost:9444 (sadly
-not working well on Firefox, Chrome is recommended).
-
-Logs are situated in either:
-
-- `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Player.log`
-- `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Logs\UI.log`
-- `%appdata%\LocalLow\Colossal Order\Cities Skylines II\Logs\HallOfFame.log`
-
-### Publishing a new version
-
-- Update `Version` and `FileVersion` in `HallOfFame/HallOfFame.csproj`;
-- Update `ModVersion` in `HallOfFame/Properties/PublishConfiguration.xml`;
-- Update `version` in `HallOfFame/UI/mod.json`;
-- Update `HallOfFame/ChangeLog.md` _with only what's changed since the last version_;
-- Update `HallOfFame/LongDescription.md` if needed;
-- Run the `PublishNewVersion` publish configuration from the IDE or `mise publish`;
-- Tag version in git with `vX.Y.Z`.
-
-## Code style
-
-### TypeScript
-
-TypeScript code is formatted and linted by the [Oxc toolchain](https://oxc.rs) (oxfmt and oxlint).
-
-Run `mise check` to verify types, lint rules and formatting without writing anything, and `mise fix`
-to apply the auto-fixes it reports (run `mise tasks` to see more options).
-
-The formatter and linter should run as a pre-commit hook if you have it installed,
-which should be done automatically when running `bun i` (otherwise run `bun lefthook install`).
-
-I'd suggest using an Oxc plugin for your editor to ease development. Make sure that your plugin is
-set to type-aware mode if it does not inherit this configuration from the project.
-
-If a rule seems out of place for this project, you can either disable/reconfigure it in the
-`oxlint.config.ts` file or disable it with an annotation comment, but these should be justified and
-concerted.
-
-### C#
-
-For C#, prefer using Rider, as code style and linting settings are saved in the project.
-Reformat your code before committing (CTRL+ALT+L with Rider).
-
-At the very least, please ensure your IDE has `.editorconfig` support enabled.
-
-### Commit messages
-
-Commits must follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0)
-specification and more specifically, the Angular one.
+An agent restarts the game with the `cs2-modding` plugin's `cs2-dev` tools.

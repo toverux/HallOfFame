@@ -15,14 +15,11 @@ internal partial class HttpQueries {
     // We should have been redirected to the Paradox Mods URL.
     var pdxUrl = await HttpQueries.SendForRedirect(request);
 
-    var username = CreatorUsernameResolver.Resolve(pdxUrl);
-
-    if (username is null) {
+    var username = CreatorUsernameResolver.Resolve(pdxUrl) ??
       throw new HttpNetworkException(
         HttpQueries.GetRequestId(request),
         $"Error resolving link to creator page: Could not extract username from {pdxUrl}."
       );
-    }
 
     return username;
   }

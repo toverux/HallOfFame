@@ -1,0 +1,21 @@
+{
+  "template": "https://github.com/CitiesSkylinesModding/greenfield-mod-template",
+  "templateCommit": "e0582b31bb7733d6e0fa2b5661f4532be6d05c49",
+  "initialCommit": "23c38a0a8c7f71968b325ba93f67e7ec4fdbb0c6",
+  "parts": {
+    "sample-slice": false,
+    "ui-tests": true,
+    "game-tests": false,
+    "crowdin": true,
+    "linux-setup": true,
+    "float64": false,
+    "jb": true
+  },
+  "names": {
+    "Greenfield": "HallOfFame",
+    "greenfield": "hallOfFame",
+    "gfd": "hof"
+  },
+  "skills": ".agents/skills",
+  "rules": ".agents/rules"
+}

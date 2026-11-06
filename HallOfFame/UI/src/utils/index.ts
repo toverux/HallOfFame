@@ -1,5 +1,6 @@
 export * from './display-helpers';
 export * from './draggable-hook';
+export * from './icon-tint';
 export * from './mod-thumbnail';
 export * from './preload-image';
 export * from './select-localized-name';

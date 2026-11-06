@@ -3,15 +3,19 @@
   <component name="UserContentModel">
     <attachedFolders />
     <explicitIncludes>
+      <Path>.claude</Path>
       <Path>.agents</Path>
+      <Path>.config</Path>
+      <Path>.editorconfig</Path>
       <Path>.gitattributes</Path>
       <Path>.gitignore</Path>
-      <Path>.lefthook.yml</Path>
       <Path>AGENTS.md</Path>
-      <Path>HallOfFame.sln.DotSettings</Path>
+      <Path>Directory.Build.props</Path>
+      <Path>Directory.Build.targets</Path>
+      <Path>LICENSE</Path>
       <Path>README.md</Path>
+      <Path>HallOfFame.slnx.DotSettings</Path>
       <Path>bunfig.toml</Path>
-      <Path>crowdin.yml</Path>
       <Path>docs</Path>
       <Path>lefthook.yml</Path>
       <Path>mise.toml</Path>

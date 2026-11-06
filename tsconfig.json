@@ -2,10 +2,9 @@
   "include": [
     "oxfmt.config.ts",
     "oxlint.config.ts",
+    "scripts/**/*",
     "HallOfFame/UI/build.ts",
     "HallOfFame/UI/src/**/*",
-    ".agents/hooks/**/*",
-    ".agents/scripts/**/*",
     "HallOfFame/UI/cs2-types"
   ],
   "compilerOptions": {

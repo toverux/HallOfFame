@@ -24,9 +24,24 @@ namespace HallOfFame;
 
 [UsedImplicitly]
 public sealed class Mod : IMod {
+  // Backing fields rather than `field`: jb cleanupcode rewrites `field` in a static property into
+  // `Mod.field`, which does not compile.
+  #pragma warning disable IDE0032
+  private static IHallOfFameApi? apiValue;
+
+  private static CreatorIdentity? creatorIdentityValue;
+
+  private static UsageTracker? usageTrackerValue;
+  #pragma warning restore IDE0032
+
+  // Mutable, as OnLoad sets both, not a constructor.
+  private static Mod? instanceValue;
+
+  private Settings? settingsValue;
+
   /// <summary>
   /// A little more than a singleton, it is set only when the mod has successfully finished its
-  /// <see cref="OnLoad"/> and reset when disposed.
+  /// <see cref="OnLoad"/>.
   /// </summary>
   /// <exception cref="NullReferenceException">
   /// If the mod has not been loaded yet.
@@ -90,28 +105,11 @@ public sealed class Mod : IMod {
   internal static IModLog Log { get; } = new ModLog(
     LogManager.GetLogger(nameof(HallOfFame))
       .SetShowsErrorsInUI(true)
-      .SetEffectiveness(Level.All)
+      .SetEffectiveness(Level.All),
+    static key => key.Translate()
   );
 
-  private static Mod? instanceValue;
-
-  private static IHallOfFameApi? apiValue;
-
-  private static CreatorIdentity? creatorIdentityValue;
-
-  private static UsageTracker? usageTrackerValue;
-
-  private Settings? settingsValue;
-
   public void OnLoad(UpdateSystem updateSystem) {
-    #if DEBUG
-    // In debug mode, eagerly check reflection hacks are working.
-    DialogCallbackAccessor.Init();
-    ErrorDialogManagerAccessor.Init();
-    PdxSdkPlatformProxy.Init();
-    ScreenUtilityProxy.Init();
-    #endif
-
     try {
       // Build the API seam consumed by the framework layer; it must exist before any system or the
       // settings login can use it.
@@ -122,6 +120,15 @@ public sealed class Mod : IMod {
 
       // Set up locales.
       LocaleLoader.Setup();
+
+      #if DEBUG
+      // In debug mode, eagerly check reflection hacks are working, once locales are loaded so a
+      // failure reports translated text.
+      DialogCallbackAccessor.Init();
+      ErrorDialogManagerAccessor.Init();
+      PdxSdkPlatformProxy.Init();
+      ScreenUtilityProxy.Init();
+      #endif
 
       // Migration from previous versions.
       // Does not error if the file does not exist.
@@ -134,7 +141,11 @@ public sealed class Mod : IMod {
       this.settingsValue.RegisterInOptionsUI();
       this.settingsValue.RegisterKeyBindings();
 
-      AssetDatabase.global.LoadSettings(nameof(HallOfFame), this.settingsValue, defaultSettings);
+      AssetDatabase.global.LoadSettings(
+        nameof(HallOfFame),
+        this.settingsValue,
+        defaultSettings
+      );
 
       // The settings file can hold an explicit null over a string the defaults always set, and the
       // game's loader applies it verbatim, which breaks the whole options page.
@@ -220,9 +231,9 @@ public sealed class Mod : IMod {
 
   public void OnDispose() {
     // Nothing particular to do here.
-    // There is no need to clean up things like localization, the host location, event listeners,
-    // etc., as you can't just unload and reload a mod, disposing only happens when quitting the
-    // game, so here we only need to clean up things that are observable after the process exited.
+    // There is no need to clean up things like localization, event listeners, etc., as you can't
+    // just unload and reload a mod, disposing only happens when quitting the game, so here we only
+    // need to clean up things that are observable after the process exited.
   }
 
   private static void CreateDirectories() {
