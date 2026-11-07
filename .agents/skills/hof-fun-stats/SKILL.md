@@ -67,6 +67,6 @@ Each kept fact gets its stat added to `scripts/fun-stats.ts`, so the next run pr
 - Discord renders `##` headings and `- ` lists, and no tables: a table becomes an inline list of its top entries.
 - First person, in the owner's voice: they post it themselves, and are the creator `toverux` wherever that name ranks.
 - The first post opens with the screenshot count and date range, and says more posts follow.
-- Run the prose through the `humanizer:humanizer` skill.
+- Run the prose through the `humanizer` skill.
 
 Close by reporting both file paths, the five facts you found most fun, and what changed since the previous run.

@@ -61,7 +61,7 @@ One agent per locale, default model, in parallel, the briefing in the prompt:
 - The placeholders and `<…>` spans, verbatim, and what fills or shows them.
 - The file's voice and terms: the agent reads the whole file first.
 - The game's terms from step 3, and three parts of [`languages.md`](languages.md) pasted whole: Every locale, the locale's section, and the locale's section under This mod's locale files.
-- Idiomatic prose, not word-for-word English; the `humanizer:humanizer` skill over the longer strings.
+- Idiomatic prose, not word-for-word English; the `humanizer` skill over the longer strings.
 - Insert in source key order, after the key that precedes in en-US; edit nothing else.
 - Report: parse and key count, and the choices worth a second look.
 
