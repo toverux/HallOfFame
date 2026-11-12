@@ -74,6 +74,7 @@ TypeScript, one root `tsconfig.json` covering `HallOfFame/UI` and `scripts`:
 - `mise images:optimize`: Shrink the Paradox Mods images in `HallOfFame/Properties`, previews quantized by pngquant, everything recompressed by oxipng. Rerunning changes no pixel.
 - `mise publish:page`: Push `PublishConfiguration.xml` to the Paradox Mods page (description, tags, thumbnail, screenshots) without shipping a version; runs `images:optimize` first.
 - `mise publish`: Build in Release and publish a new version on Paradox Mods.
+- `dotnet build HallOfFame/HallOfFame.csproj -c Release -p:SkipBuildUI=true -p:SkipModPostProcess=true`: Release build check, after adding `#if DEBUG` code (`mise build` is Debug).
 - `mise dev:deps-upgrade`: Upgrade the tools and packages interactively; record a package left behind in `docs/agents/dependency-updates.md`.
 
 Run `mise tasks` to see the full shortcut list; append arguments freely, mise passes them through (ex. `mise some:task --some-arg`).
