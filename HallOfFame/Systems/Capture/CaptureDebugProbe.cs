@@ -21,11 +21,21 @@ internal static class CaptureDebugProbe {
 
   private static Vector2Int rtHandleSizeBefore;
 
+  private static int beginFrame;
+
+  private static int restoredFrame;
+
+  private static int readbacksDoneFrame;
+
   private static double rendersStartMs;
 
   private static double rendersEndMs;
 
+  private static double readbacksRequestedMs;
+
   private static double restoredMs;
+
+  private static double readbacksDoneMs;
 
   private static string renderStateBefore = "";
 
@@ -49,6 +59,8 @@ internal static class CaptureDebugProbe {
   internal static void Begin(Camera camera) {
     CaptureDebugProbe.Clock.Restart();
 
+    CaptureDebugProbe.beginFrame = Time.frameCount;
+
     CaptureDebugProbe.renderStateBefore = CaptureDebugProbe.ReadRenderState(camera);
 
     CaptureDebugProbe.graphicsDriverBytesBefore = Profiler.GetAllocatedMemoryForGraphicsDriver();
@@ -56,20 +68,35 @@ internal static class CaptureDebugProbe {
   }
 
   [Conditional("DEBUG")]
-  internal static void MarkRendersStart(Camera camera) {
+  internal static void MarkRendersStart() {
     CaptureDebugProbe.rendersStartMs = CaptureDebugProbe.Clock.Elapsed.TotalMilliseconds;
+  }
+
+  /// <summary>
+  /// Marks the end of the renders, and reads the state of the camera's last one.
+  /// </summary>
+  [Conditional("DEBUG")]
+  internal static void MarkRendersEnd(Camera camera) {
+    CaptureDebugProbe.rendersEndMs = CaptureDebugProbe.Clock.Elapsed.TotalMilliseconds;
 
     CaptureDebugProbe.renderStateDuring = CaptureDebugProbe.ReadRenderState(camera);
   }
 
   [Conditional("DEBUG")]
-  internal static void MarkRendersEnd() {
-    CaptureDebugProbe.rendersEndMs = CaptureDebugProbe.Clock.Elapsed.TotalMilliseconds;
+  internal static void MarkReadbacksRequested() {
+    CaptureDebugProbe.readbacksRequestedMs = CaptureDebugProbe.Clock.Elapsed.TotalMilliseconds;
   }
 
   [Conditional("DEBUG")]
   internal static void MarkRestored() {
     CaptureDebugProbe.restoredMs = CaptureDebugProbe.Clock.Elapsed.TotalMilliseconds;
+    CaptureDebugProbe.restoredFrame = Time.frameCount;
+  }
+
+  [Conditional("DEBUG")]
+  internal static void MarkReadbacksDone() {
+    CaptureDebugProbe.readbacksDoneMs = CaptureDebugProbe.Clock.Elapsed.TotalMilliseconds;
+    CaptureDebugProbe.readbacksDoneFrame = Time.frameCount;
   }
 
   [Conditional("DEBUG")]
@@ -81,8 +108,13 @@ internal static class CaptureDebugProbe {
       PlannedRenderSize = plannedRenderSize,
       SetupMs = CaptureDebugProbe.rendersStartMs,
       RendersMs = CaptureDebugProbe.rendersEndMs - CaptureDebugProbe.rendersStartMs,
-      RestoreMs = CaptureDebugProbe.restoredMs - CaptureDebugProbe.rendersEndMs,
-      EncodeMs = endMs - CaptureDebugProbe.restoredMs,
+      PreviewMs = CaptureDebugProbe.readbacksRequestedMs - CaptureDebugProbe.rendersEndMs,
+      RestoreMs = CaptureDebugProbe.restoredMs - CaptureDebugProbe.readbacksRequestedMs,
+      CaptureFrameMs = CaptureDebugProbe.restoredMs,
+      CaptureFrames = CaptureDebugProbe.restoredFrame - CaptureDebugProbe.beginFrame + 1,
+      ReadbackMs = CaptureDebugProbe.readbacksDoneMs - CaptureDebugProbe.restoredMs,
+      ReadbackFrames = CaptureDebugProbe.readbacksDoneFrame - CaptureDebugProbe.restoredFrame,
+      EncodeMs = endMs - CaptureDebugProbe.readbacksDoneMs,
       TotalMs = endMs,
       GraphicsDriverMiBBefore = CaptureDebugProbe.graphicsDriverBytesBefore / (1024 * 1024),
       GraphicsDriverMiBAfter = Profiler.GetAllocatedMemoryForGraphicsDriver() / (1024 * 1024),
@@ -98,14 +130,21 @@ internal static class CaptureDebugProbe {
   }
 
   /// <summary>
-  /// The upscaler that runs on the camera, and its anti-aliasing mode and SMAA quality.
+  /// The upscaler that runs on the camera, its anti-aliasing mode and SMAA quality, and of its last
+  /// render: the size it rendered at, and whether SSGI was on.
   /// </summary>
   private static string ReadRenderState(Camera camera) {
     var upscaler = ScreenshotCapturer.ReadRunningUpscaler(camera.GetComponent<TNDUpscaler>());
 
     var cameraData = camera.GetComponent<HDAdditionalCameraData>();
 
-    return $"{upscaler}, {cameraData.antialiasing} {cameraData.SMAAQuality}";
+    var hdCamera = HDCamera.GetOrCreate(camera);
+
+    var isSsgiOn = hdCamera.volumeStack.GetComponent<GlobalIllumination>().enable.value;
+
+    return
+      $"{upscaler}, {cameraData.antialiasing} {cameraData.SMAAQuality}, " +
+      $"{hdCamera.actualWidth}x{hdCamera.actualHeight}, SSGI {isSsgiOn}";
   }
 
   /// <summary>
@@ -134,9 +173,14 @@ internal static class CaptureDebugProbe {
     public required double SetupMs { get; init; }
 
     /// <summary>
-    /// The renders and the read of the image back from the GPU.
+    /// The capture's renders.
     /// </summary>
     public required double RendersMs { get; init; }
+
+    /// <summary>
+    /// The preview downscaled and both readbacks requested.
+    /// </summary>
+    public required double PreviewMs { get; init; }
 
     /// <summary>
     /// The render conditions read and the graphics settings restored.
@@ -144,7 +188,26 @@ internal static class CaptureDebugProbe {
     public required double RestoreMs { get; init; }
 
     /// <summary>
-    /// The full image and its preview encoded.
+    /// The time the capture holds the main thread in the frame of the press, from its start to the
+    /// graphics settings restored.
+    /// </summary>
+    public required double CaptureFrameMs { get; init; }
+
+    /// <summary>
+    /// The frames the capture spans up to the restore, 1 when it all ran in the frame of the press.
+    /// </summary>
+    public required int CaptureFrames { get; init; }
+
+    /// <summary>
+    /// From the restore to both readbacks done, the main thread free meanwhile.
+    /// </summary>
+    public required double ReadbackMs { get; init; }
+
+    /// <inheritdoc cref="ReadbackMs"/>
+    public required int ReadbackFrames { get; init; }
+
+    /// <summary>
+    /// From both readbacks done to the full image and its preview encoded on the thread pool.
     /// </summary>
     public required double EncodeMs { get; init; }
 
@@ -155,7 +218,11 @@ internal static class CaptureDebugProbe {
     /// </summary>
     public required long GraphicsDriverMiBBefore { get; init; }
 
-    /// <inheritdoc cref="GraphicsDriverMiBBefore"/>
+    /// <summary>
+    /// As <see cref="GraphicsDriverMiBBefore"/>, still counting the capture's textures: the counter
+    /// drops some time after a destroy, so reading it after theirs changes nothing, and the memory
+    /// a capture holds is read again seconds later.
+    /// </summary>
     public required long GraphicsDriverMiBAfter { get; init; }
 
     public required Vector2Int RTHandleSizeBefore { get; init; }
@@ -163,8 +230,8 @@ internal static class CaptureDebugProbe {
     public required Vector2Int RTHandleSizeAfter { get; init; }
 
     /// <summary>
-    /// The upscaler and the anti-aliasing the camera ran with before the capture, during its
-    /// renders, and once it ended.
+    /// The state the camera ran with before the capture, during its renders, and once it ended, see
+    /// <see cref="ReadRenderState"/>.
     /// </summary>
     public required string RenderStateBefore { get; init; }
 

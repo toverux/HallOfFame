@@ -77,6 +77,12 @@ internal sealed partial class CaptureUISystem : UISystemBase {
 
   private TriggerBinding openUploadedInDashboardBinding = null!;
 
+  /// <summary>
+  /// Whether a capture runs, from the press to its files written, during which
+  /// <see cref="TakeScreenshot"/> ignores a press.
+  /// </summary>
+  private bool isCaptureInFlight;
+
   #if DEBUG
   /// <summary>
   /// Set by <see cref="DebugCapture()"/>, cleared by the update that takes the screenshot.
@@ -284,9 +290,17 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// and the method will not proceed.
   /// </summary>
   private async void TakeScreenshot() {
+    // One press, one screenshot: a press while a capture is in flight starts nothing, so it is not
+    // tracked either.
+    if (this.isCaptureInFlight) {
+      return;
+    }
+
     // Tracked before anything can stop it: the capture funnel starts at the press, which nothing
     // else records, since the upload panel shows only once a capture succeeded.
     Mod.UsageTracker.Track("capture_requested");
+
+    this.isCaptureInFlight = true;
 
     // This bricks the current game session if this throws, so we will handle exceptions properly
     // here, as there is a non-zero chance of failure in this section (notably due to I/O).
@@ -302,6 +316,9 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       Mod.Log.ErrorRecoverable(ex);
 
       this.CurrentScreenshot = null;
+    }
+    finally {
+      this.isCaptureInFlight = false;
     }
   }
 

@@ -7,6 +7,9 @@
 
     <!-- The mod's publishing information for Paradox Mods. -->
     <PublishConfigurationPath>Properties\PublishConfiguration.xml</PublishConfigurationPath>
+
+    <!-- The capture's image conversion hands native buffers to Unity's native copy routines. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <!-- The toolchain writes CSII_* as Windows user environment variables and reads them back from
