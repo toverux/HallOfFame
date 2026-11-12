@@ -22,6 +22,7 @@ C#, same in `HallOfFame` and `HallOfFame.Tests` (`Directory.Build.props` and `Di
 
 - `LangVersion` 14, overriding the toolchain's 9.0. The mod targets `net48`, PolySharp polyfilling what it lacks; the tests target `net10.0`.
 - `Nullable` and `TreatWarningsAsErrors` enabled: fix a warning or suppress it inline with a justification.
+  The game's assemblies carry no nullable annotations: before using a game API new to the code, check in the decompile whether each reference it returns can be null.
 - `ImplicitUsings` off: write every `using` explicitly.
 - Every build fails on a `:warning` IDE rule of `.editorconfig` (`EnforceCodeStyleInBuild`).
 - Never `ConfigureAwait(false)`: continuations touch ECS and cohtml bindings, so awaits resume on Unity's main thread.
