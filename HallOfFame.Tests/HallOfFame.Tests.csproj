@@ -34,6 +34,7 @@
     <Reference Include="Colossal.UI" HintPath="$(ManagedPath)\Colossal.UI.dll" />
     <Reference Include="Colossal.UI.Binding" HintPath="$(ManagedPath)\Colossal.UI.Binding.dll" />
     <Reference Include="Colossal.Localization" HintPath="$(ManagedPath)\Colossal.Localization.dll" />
+    <Reference Include="Colossal.PSI.Common" HintPath="$(ManagedPath)\Colossal.PSI.Common.dll" />
     <Reference Include="Unity.InputSystem" HintPath="$(ManagedPath)\Unity.InputSystem.dll" />
     <Reference Include="UnityEngine.CoreModule" HintPath="$(ManagedPath)\UnityEngine.CoreModule.dll" />
     <Reference Include="Unity.Burst" HintPath="$(ManagedPath)\Unity.Burst.dll" />

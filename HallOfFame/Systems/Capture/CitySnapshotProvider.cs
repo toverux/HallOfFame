@@ -15,9 +15,9 @@ namespace HallOfFame.Systems.Capture;
 /// <summary>
 /// Reads city facts from the game's ECS world and the Paradox SDK, isolating all that engine
 /// reach-through out of <see cref="CaptureUISystem"/>.
-/// Engine-bound and therefore not unit-testable off-engine; it intentionally has no interface
-/// because the only holder of an instance (the capture system) is itself an untestable ECS
-/// system, so a fake would never be used.
+/// Engine-bound, so only <see cref="SelectAssetMods"/> is unit-testable off-engine; it
+/// intentionally has no interface because the only holder of an instance (the capture system) is
+/// itself an untestable ECS system, so a fake would never be used.
 /// </summary>
 internal sealed class CitySnapshotProvider {
   /// <summary>
@@ -140,12 +140,16 @@ internal sealed class CitySnapshotProvider {
 
   /// <summary>
   /// The asset mods among a playset's mods, the ones a screenshot can showcase, by name.
+  /// A mod's tags can be null, as in a game not signed in to a Paradox account: such a mod is left
+  /// out.
   /// </summary>
   internal static Colossal.PSI.Common.Mod[] SelectAssetMods(
     IEnumerable<Colossal.PSI.Common.Mod> mods
   ) =>
     mods
-      .Where(mod => mod.tags.Contains("Prefab") || mod.tags.Contains("Map"))
+      .Where(mod =>
+        mod.tags is not null && (mod.tags.Contains("Prefab") || mod.tags.Contains("Map"))
+      )
       .OrderBy(mod => mod.displayName)
       .ToArray();
 
