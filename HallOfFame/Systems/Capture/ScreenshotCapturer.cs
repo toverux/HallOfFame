@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Game.SceneFlow;
 using Game.Settings;
+using TND.Upscaling.Framework;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
 using Object = UnityEngine.Object;
@@ -29,25 +30,32 @@ internal static class ScreenshotCapturer {
     // Read everything needed up front before changing any state. If any of this fails, there is
     // nothing to restore and the UI was not hidden yet, so it is intentionally outside the
     // try/finally below.
-    //
-    // Take a supersize screenshot that is *at least* 2160 pixels (4K).
-    // Height is better than width because of widescreen monitors.
-    // The server will decide the final resolution, i.e., rescale to 2160p if the resulting image is
-    // bigger.
-    var scaleFactor = (int) Math.Ceiling(2160d / Screen.height);
-
     var camera = Camera.main!;
+
+    CaptureDebugProbe.Begin(camera);
 
     var cameraData = camera.GetComponent<HDAdditionalCameraData>();
 
-    var dynResSettings = SharedSettings.instance.graphics
-      .GetQualitySetting<DynamicResolutionScaleSettings>();
+    var graphics = SharedSettings.instance.graphics;
 
-    var ssgiSettings = SharedSettings.instance.graphics
-      .GetQualitySetting<SSGIQualitySettings>();
+    var antiAliasingSettings = graphics.GetQualitySetting<AntiAliasingQualitySettings>();
+
+    var dynResSettings = graphics.GetQualitySetting<DynamicResolutionScaleSettings>();
+
+    var ssgiSettings = graphics.GetQualitySetting<SSGIQualitySettings>();
+
+    var upscalerComponent = camera.GetComponent<TNDUpscaler>();
+
+    var runningUpscaler = ScreenshotCapturer.ReadRunningUpscaler(upscalerComponent);
+
+    // The component to switch off for the capture and back on after it, null when it is off.
+    // Keyed on the component, not on its active upscaler: an enabled component renders at its
+    // reduced scale whether or not an upscaler is active.
+    var forcedOffUpscaler = upscalerComponent is { enabled: true } ? upscalerComponent : null;
 
     // Previous values captured so the finally block can restore them.
-    var previousDlssValue = cameraData.allowDeepLearningSuperSampling;
+    var previousUpscaler = graphics.upscaler;
+    var previousUpscalerQuality = forcedOffUpscaler?.GetQuality() ?? UpscalerQuality.Off;
     var previousDynResLevel = dynResSettings.GetLevel();
     var previousSsgiQualityLevel = ssgiSettings.GetLevel();
 
@@ -55,8 +63,21 @@ internal static class ScreenshotCapturer {
       Mod.Settings.DisableGlobalIllumination &&
       previousSsgiQualityLevel != QualitySetting.Level.Disabled;
 
-    var width = Screen.width * scaleFactor;
-    var height = Screen.height * scaleFactor;
+    // No step of the capture reads the Wine check, so it is not run.
+    var plan = ScreenshotCapturer.Plan(
+      new Vector2Int(Screen.width, Screen.height),
+      runningUpscaler,
+      isWine: false
+    );
+
+    var renderSize = plan.RenderSize;
+
+    #if DEBUG
+    renderSize = CaptureDebugProbe.RenderSizeOverride ?? renderSize;
+    #endif
+
+    var (width, height) = (renderSize.x, renderSize.y);
+
     var renderTexture = new RenderTexture(width, height, 24);
     var screenshotTexture = new Texture2D(width, height, TextureFormat.RGB24, false);
 
@@ -69,9 +90,20 @@ internal static class ScreenshotCapturer {
     // matching restore so that a mid-render exception still restores the graphics quality and
     // re-enables the UI, never leaving the game in an altered state.
     try {
-      // Disable DLSS, causes grainy pictures or artifacts with some setups -- also, we already do
-      // actual supersampling.
-      cameraData.allowDeepLearningSuperSampling = false;
+      // Disable the upscaler (DLSS, FSR, or XeSS): it renders below the target size, which we
+      // already supersample, and causes grainy pictures or artifacts with some setups.
+      if (forcedOffUpscaler is not null) {
+        SetUpscaler(forcedOffUpscaler, GraphicsSettings.Upscaler.None, UpscalerQuality.Off);
+      }
+
+      // Force the game's best anti-aliasing, high-quality SMAA, whatever the player's setting: it
+      // can be off or FXAA, and the game hides it while an upscaler runs.
+      // TAA would erase thin geometry such as cables and wires, and an upscaler at native
+      // resolution does no better than SMAA at the size we render.
+      cameraData.antialiasing =
+        HDAdditionalCameraData.AntialiasingMode.SubpixelMorphologicalAntiAliasing;
+
+      cameraData.SMAAQuality = HDAdditionalCameraData.SMAAQualityLevel.High;
 
       // Disable Unity dynamic resolution upscaling, it's a low-quality profile.
       if (previousDynResLevel != QualitySetting.Level.High) {
@@ -97,10 +129,12 @@ internal static class ScreenshotCapturer {
 
       camera.targetTexture = renderTexture;
 
+      CaptureDebugProbe.MarkRendersStart(camera);
+
       // Proceed with the rendering.
       // Calling Render() multiple times is useful to let the GPU accumulate data for a cleaner and
-      // sharper image: this helps load more accurate geometry and lets the antialiasing do its job
-      // over multiple frames too.
+      // sharper image: this helps load more accurate geometry, and lets the effects that build up
+      // over frames, such as the volumetric clouds, settle.
       // You can test it on mountain ranges in the distance, for example, it's quite effective.
       // Typical values are 1, 2, 4 or 8 cycles.
       // Eight cycles is probably almost overkill, four would do the job well, but I've seen some
@@ -115,20 +149,26 @@ internal static class ScreenshotCapturer {
       screenshotTexture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
       screenshotTexture.Apply();
 
+      CaptureDebugProbe.MarkRendersEnd();
+
       renderConditions = conditionsReader.Read(
         camera,
         new RenderConditionsReader.CaptureOverrides(
-          // The camera allows DLSS by default, which only renders with it when the player turned
-          // it on.
-          IsDlssForcedOff: previousDlssValue && SharedSettings.instance.graphics.isDlssActive,
+          IsUpscalerForcedOff: forcedOffUpscaler is not null,
           IsDynamicResolutionForcedOff: previousDynResLevel != QualitySetting.Level.High,
           IsGlobalIlluminationForcedOff: wasGlobalIlluminationDisabled
         )
       );
     }
     finally {
-      // Reset DLSS.
-      cameraData.allowDeepLearningSuperSampling = previousDlssValue;
+      // Reset the upscaler first, as the game's own GraphicsSettings.Apply() does: the quality
+      // settings restored below configure the camera by whether an upscaler is active.
+      if (forcedOffUpscaler is not null) {
+        SetUpscaler(forcedOffUpscaler, previousUpscaler, previousUpscalerQuality);
+      }
+
+      // Reset anti-aliasing to the player's setting, or to none while an upscaler runs.
+      antiAliasingSettings.Apply();
 
       // Reset dynamic resolution.
       if (dynResSettings.GetLevel() != previousDynResLevel) {
@@ -149,6 +189,8 @@ internal static class ScreenshotCapturer {
       // Re-enable the UI.
       GameManager.instance.userInterface.view.enabled = true;
     }
+
+    CaptureDebugProbe.MarkRestored();
 
     await Task.Yield();
 
@@ -171,26 +213,75 @@ internal static class ScreenshotCapturer {
     Object.DestroyImmediate(screenshotTexture);
     Object.DestroyImmediate(previewTexture);
 
+    CaptureDebugProbe.End(camera, renderSize, plan.RenderSize);
+
     return new CapturedScreenshot {
       PngBytes = pngScreenshotBytes,
       JpgPreviewBytes = jpgPreviewBytes,
-      Size = new Vector2Int(width, height),
+      Size = renderSize,
       WasGlobalIlluminationDisabled = wasGlobalIlluminationDisabled,
       AreSettingsTopQuality = ScreenshotCapturer.AreSettingsTopQuality(),
       RenderConditions = renderConditions
     };
+
+    // Switches the upscaler without saving the change, and without UpscalerManager.Apply(): the
+    // MSAA it restores is a render pipeline setting, whose every change rebuilds the pipeline.
+    // The setting changes too, as the game's quality settings read it to know whether an upscaler
+    // runs, anti-aliasing among them.
+    void SetUpscaler(
+      TNDUpscaler component,
+      GraphicsSettings.Upscaler setting,
+      UpscalerQuality quality
+    ) {
+      graphics.upscaler = setting;
+
+      // Off also disables the component, which brings the render scale back to full size.
+      component.SetQuality(quality);
+    }
+  }
+
+  /// <summary>
+  /// The upscaler (DLSS, FSR, or XeSS) that runs on the camera, None when none does, read from its
+  /// component: the setting can name one that does not run, for example one the GPU does not
+  /// support.
+  /// </summary>
+  internal static UpscalerName ReadRunningUpscaler(TNDUpscaler? component) {
+    return component is { enabled: true } ? component.GetActiveUpscaler() : UpscalerName.None;
+  }
+
+  /// <summary>
+  /// Decides a capture's parameters from the screen size, the upscaler that runs on the camera
+  /// (None when none does), and whether the game runs under Wine.
+  /// </summary>
+  internal static CapturePlan Plan(
+    Vector2Int screenSize,
+    UpscalerName runningUpscaler,
+    bool isWine
+  ) {
+    // Take a supersize screenshot that is *at least* 2160 pixels (4K).
+    // Height is better than width because of widescreen monitors.
+    // The server will decide the final resolution, i.e., rescale to 2160p if the resulting image is
+    // bigger.
+    var scaleFactor = (int) Math.Ceiling(2160d / screenSize.y);
+
+    return new CapturePlan(
+      screenSize * scaleFactor,
+      IsXessPrecautionNeeded: runningUpscaler is UpscalerName.XeSS3 && isWine
+    );
   }
 
   /// <summary>
   /// Verifies that all graphics settings are set to the highest possible quality.
-  /// Ignores Global Illumination and Dynamic Resolution Scale settings as they are overridden
-  /// during the screenshot process because they cause issues.
+  /// Ignores the Anti-Aliasing, Global Illumination, and Dynamic Resolution Scale settings, as the
+  /// screenshot process overrides them.
   /// </summary>
   private static bool AreSettingsTopQuality() {
     return SharedSettings.instance.graphics
       .qualitySettings
       .Where(settings => settings
-        is not SSGIQualitySettings and not DynamicResolutionScaleSettings
+        is not AntiAliasingQualitySettings and
+        not SSGIQualitySettings and
+        not DynamicResolutionScaleSettings
       )
       .All(settings => {
           var highestLevel = settings
@@ -221,4 +312,14 @@ internal static class ScreenshotCapturer {
 
     return result;
   }
+
+  /// <summary>
+  /// Parameters of one capture, see <see cref="Plan"/>.
+  /// </summary>
+  /// <param name="RenderSize">Pixel size the screenshot renders at.</param>
+  /// <param name="IsXessPrecautionNeeded">
+  /// Whether the capture must take the Linux XeSS precaution: XeSS has frozen the game after a
+  /// capture under Wine, whatever the GPU, as DXVK can present one vendor's card as another's.
+  /// </param>
+  internal readonly record struct CapturePlan(Vector2Int RenderSize, bool IsXessPrecautionNeeded);
 }

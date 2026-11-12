@@ -41,6 +41,7 @@
     <Reference Include="Unity.Collections" HintPath="$(ManagedPath)\Unity.Collections.dll" />
     <Reference Include="Unity.Entities" HintPath="$(ManagedPath)\Unity.Entities.dll" />
     <Reference Include="Unity.Mathematics" HintPath="$(ManagedPath)\Unity.Mathematics.dll" />
+    <Reference Include="TND.Upscaling.Framework.Runtime.Core" HintPath="$(ManagedPath)\TND.Upscaling.Framework.Runtime.Core.dll" />
   </ItemGroup>
 
   <ItemGroup>

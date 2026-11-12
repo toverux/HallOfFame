@@ -58,7 +58,7 @@ internal sealed class RenderConditionsReader(World world) {
       RenderConditionsReader.ReadOptions(conditions);
       this.ReadCamera(conditions, camera);
 
-      conditions["capture.isDlssForcedOff"] = overrides.IsDlssForcedOff;
+      conditions["capture.isUpscalerForcedOff"] = overrides.IsUpscalerForcedOff;
       conditions["capture.isDynamicResolutionForcedOff"] = overrides.IsDynamicResolutionForcedOff;
       conditions["capture.isGlobalIlluminationForcedOff"] = overrides.IsGlobalIlluminationForcedOff;
 
@@ -224,7 +224,7 @@ internal sealed class RenderConditionsReader(World world) {
   /// them from the player's own.
   /// </summary>
   internal readonly record struct CaptureOverrides(
-    bool IsDlssForcedOff,
+    bool IsUpscalerForcedOff,
     bool IsDynamicResolutionForcedOff,
     bool IsGlobalIlluminationForcedOff
   );

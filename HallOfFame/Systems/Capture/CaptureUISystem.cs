@@ -16,6 +16,9 @@ using HallOfFame.Services;
 using HallOfFame.Utils;
 using HallOfFame.Utils.Writers;
 using Unity.Entities;
+#if DEBUG
+using UnityEngine;
+#endif
 
 namespace HallOfFame.Systems.Capture;
 
@@ -73,6 +76,13 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   private TriggerBinding<ScreenshotInfoFormValue> uploadScreenshotBinding = null!;
 
   private TriggerBinding openUploadedInDashboardBinding = null!;
+
+  #if DEBUG
+  /// <summary>
+  /// Set by <see cref="DebugCapture()"/>, cleared by the update that takes the screenshot.
+  /// </summary>
+  private bool isDebugCaptureScheduled;
+  #endif
 
   /// <summary>
   /// Current screenshot snapshot.
@@ -202,6 +212,18 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   protected override void OnUpdate() {
     base.OnUpdate();
 
+    #if DEBUG
+    if (this.isDebugCaptureScheduled) {
+      this.isDebugCaptureScheduled = false;
+
+      this.TakeScreenshot();
+
+      // The capture has read the override by now, as it runs synchronously up to that read, and a
+      // capture that stopped before it, at the creator name check, must not pass it on to the next.
+      CaptureDebugProbe.RenderSizeOverride = null;
+    }
+    #endif
+
     // Disabling here lets this update publish the cleared screenshot first; a disable deferred
     // through MainThreadDispatcher runs at the end of the frame (GameManager.Update), so a clear
     // landing after this update would turn the system off unpublished, the panel staying on screen.
@@ -224,6 +246,37 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.ClearScreenshot();
     }
   }
+
+  #if DEBUG
+  /// <summary>
+  /// Debug entry point: takes a screenshot as the Hall of Fame button does, and returns at once.
+  /// The capture runs from this system's next update, a safe point in the frame: the eval can land
+  /// inside the render pipeline's own render, where a render of ours crashes the game.
+  /// Read <c>CaptureDebugProbe.LastReport.ToString()</c> once the report is no longer null: the
+  /// eval shows a record by its type alone.
+  /// </summary>
+  internal static void DebugCapture() {
+    CaptureUISystem.ScheduleDebugCapture(null);
+  }
+
+  /// <summary>
+  /// Debug entry point: as <see cref="DebugCapture()"/>, rendering at the given size instead of the
+  /// planned one.
+  /// </summary>
+  internal static void DebugCapture(int width, int height) {
+    CaptureUISystem.ScheduleDebugCapture(new Vector2Int(width, height));
+  }
+
+  private static void ScheduleDebugCapture(Vector2Int? renderSize) {
+    var system = World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<CaptureUISystem>();
+
+    CaptureDebugProbe.RenderSizeOverride = renderSize;
+    CaptureDebugProbe.LastReport = null;
+
+    system.isDebugCaptureScheduled = true;
+    system.Enabled = true;
+  }
+  #endif
 
   /// <summary>
   /// Take a screenshot and prepare it for upload.
