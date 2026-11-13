@@ -1,6 +1,14 @@
 import classNames from 'classnames';
 import { Button } from 'cs2/ui';
-import { type CSSProperties, memo, type ReactElement, useCallback, useMemo } from 'react';
+import {
+  type CSSProperties,
+  memo,
+  type ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef
+} from 'react';
 import { Tooltip } from '../../components/tooltip';
 import expandSolidSrc from '../../icons/fontawesome/expand-solid.svg';
 import { getClassesModule, useTranslate } from '../../utils';
@@ -47,7 +55,10 @@ export const ScreenshotUploadPanelImage = memo(
         {/* This div sets the size of its parent and therefore the size of the image. */}
         <div className={coFixedRatioImageStyles.ratio} />
 
-        <img className={coFixedRatioImageStyles.image} src={screenshotSnapshot.previewImageUri} />
+        <PreviewImage
+          key={screenshotSnapshot.previewImageUri}
+          uri={screenshotSnapshot.previewImageUri}
+        />
 
         {ratioPreviewInfo.type != 'equal' && (
           <Tooltip
@@ -78,6 +89,8 @@ export const ScreenshotUploadPanelImage = memo(
             variant='round'
             src={expandSolidSrc}
             tinted={true}
+            // The full image still encodes when the panel opens on the preview.
+            disabled={!screenshotSnapshot.isImageReady}
             selectSound='open-panel'
             onSelect={showImageFullscreen}
             className={classNames(styles.imageMagnifyButton, {
@@ -101,4 +114,26 @@ function showFullscreenImage(src: string): void {
   div.addEventListener('click', () => {
     document.body.removeChild(div);
   });
+}
+
+/**
+ * The capture's preview, a live texture the mod destroys only once the UI lets go of it: an `<img>`
+ * holds it until garbage collection, minutes away while the UI idles, so it clears its source on
+ * unmount.
+ */
+function PreviewImage({ uri }: Readonly<{ uri: string }>): ReactElement {
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const image = imageRef.current;
+
+    return () => {
+      if (image) {
+        image.src = '';
+      }
+    };
+  }, []);
+
+  // noinspection HtmlRequiredAltAttribute
+  return <img ref={imageRef} className={coFixedRatioImageStyles.image} src={uri} />;
 }

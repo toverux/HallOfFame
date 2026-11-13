@@ -182,6 +182,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]": "正在处理截图……",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]": "上传完毕！",
   "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "在“城市画廊”中分享您的城市！此模组会拍摄一张照片，但您可在上传前对其进行检查。",
+  "HallOfFame.UI.Game.TakeHofPictureButton.TAKING_SCREENSHOT": "正在生成高分辨率截图……",
   "HallOfFame.UI.Game.UniversalModMenuButton.BUTTON_TOOLTIP": "打开创作者面板，查看您的截图获得的浏览、点赞和奖牌，并编辑或删除它们。",
   "HallOfFame.UI.Dashboard.TITLE[Creator]": "创作者",
   "HallOfFame.UI.Dashboard.TITLE[Dashboard]": "面板",

@@ -182,6 +182,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]": "Bild wird verarbeitet…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]": "Hochladen abgeschlossen!",
   "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "Bring deine Stadt in die Hall of Fame! Ein Bild wird aufgenommen, aber du kannst es vor dem Hochladen überprüfen.",
+  "HallOfFame.UI.Game.TakeHofPictureButton.TAKING_SCREENSHOT": "Hochauflösendes Bild wird aufgenommen…",
   "HallOfFame.UI.Game.UniversalModMenuButton.BUTTON_TOOLTIP": "Öffne das Creator-Dashboard, um die Aufrufe, Likes und Medaillen deiner Screenshots zu sehen und sie zu bearbeiten oder zu löschen.",
   "HallOfFame.UI.Dashboard.TITLE[Creator]": "Creator",
   "HallOfFame.UI.Dashboard.TITLE[Dashboard]": "Dashboard",

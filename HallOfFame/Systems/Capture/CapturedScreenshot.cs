@@ -1,22 +1,24 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace HallOfFame.Systems.Capture;
 
 /// <summary>
-/// Result of a screenshot capture: the encoded images, their size, the graphics-state facts the
-/// capturer observed while rendering, and the conditions of the shot.
+/// Result of a screenshot capture: the preview texture, the full-size image on its way, its size,
+/// the graphics-state facts the capturer observed while rendering, and the conditions of the shot.
 /// </summary>
 internal readonly struct CapturedScreenshot {
   /// <summary>
-  /// Full-size screenshot encoded as PNG.
+  /// Completes with the full-size screenshot encoded as PNG, on the thread pool after the capture
+  /// returned, faulting when its readback or its encode failed.
   /// </summary>
-  internal required byte[] PngBytes { get; init; }
+  internal required Task<byte[]> PngBytes { get; init; }
 
   /// <summary>
-  /// Downscaled preview encoded as JPG.
+  /// Downscaled preview, which the GPU may still be rendering, the caller's to destroy.
   /// </summary>
-  internal required byte[] JpgPreviewBytes { get; init; }
+  internal required RenderTexture PreviewTexture { get; init; }
 
   /// <summary>
   /// Pixel size of the full-size screenshot.

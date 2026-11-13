@@ -182,6 +182,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]": "Обработка изображения…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]": "Загрузка завершена!",
   "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "Добавьте свой город в Hall of Fame! Будет сделан снимок, но вы сможете проверить его перед публикацией.",
+  "HallOfFame.UI.Game.TakeHofPictureButton.TAKING_SCREENSHOT": "Создание изображения в высоком разрешении…",
   "HallOfFame.UI.Game.UniversalModMenuButton.BUTTON_TOOLTIP": "Откройте Кабинет автора, чтобы увидеть просмотры, лайки и медали ваших скриншотов, отредактировать или удалить их.",
   "HallOfFame.UI.Dashboard.TITLE[Creator]": "Кабинет",
   "HallOfFame.UI.Dashboard.TITLE[Dashboard]": "автора",

@@ -124,7 +124,7 @@ public sealed class ScreenshotUploaderTests {
       achievedMilestone: 7,
       population: 12345,
       mapName: "Map A",
-      imageBytes: imageBytes,
+      imageBytes: Task.FromResult(imageBytes),
       renderSettings: renderSettings,
       renderConditions: renderConditions,
       modIds: modIds
@@ -339,6 +339,92 @@ public sealed class ScreenshotUploaderTests {
     Assert.IsType<HttpNetworkException>(Assert.Single(reported));
   }
 
+  /// <summary>
+  /// The upload panel opens on the preview while the full image still encodes, so an upload can
+  /// start before the image bytes exist.
+  /// </summary>
+  [Fact]
+  public async Task Upload_PendingImage_CallsTheApiOnceTheImageIsEncoded() {
+    var encoded = new TaskCompletionSource<byte[]>();
+    var imageBytes = new byte[] { 1, 2, 3 };
+
+    byte[]? sentBytes = null;
+
+    var api = new FakeApi {
+      UploadScreenshotImpl = @params => {
+        sentBytes = @params.ScreenshotData;
+
+        return Task.FromResult(
+          new Screenshot {
+            Id = "1"
+          }
+        );
+      }
+    };
+
+    var uploader = ScreenshotUploaderTests.MakeUploader(api);
+
+    var upload = uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(imageBytes: encoded.Task),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    Assert.Null(sentBytes);
+    Assert.False(uploader.CurrentProgress!.Value.IsComplete);
+
+    encoded.SetResult(imageBytes);
+    await upload;
+
+    Assert.Same(imageBytes, sentBytes);
+    Assert.True(uploader.CurrentProgress!.Value.IsComplete);
+  }
+
+  /// <summary>
+  /// The capture reports a failed encode and closes the panel, so the upload stops without an error
+  /// of its own, which would show a second dialog.
+  /// </summary>
+  [Fact]
+  public async Task Upload_FailedEncode_NeverCallsTheApi_AndReportsNothing() {
+    var isApiCalled = false;
+
+    var api = new FakeApi {
+      UploadScreenshotImpl = _ => {
+        isApiCalled = true;
+
+        return Task.FromResult(
+          new Screenshot {
+            Id = "1"
+          }
+        );
+      }
+    };
+
+    var recoverable = new List<Exception>();
+    var reported = new List<HttpException>();
+
+    var uploader = new ScreenshotUploader(
+      api,
+      new FakeModLog {
+        ErrorRecoverableImpl = recoverable.Add
+      },
+      reported.Add
+    );
+
+    await uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(
+        imageBytes: Task.FromException<byte[]>(new InvalidOperationException("boom"))
+      ),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    Assert.False(isApiCalled);
+    Assert.Empty(recoverable);
+    Assert.Empty(reported);
+    Assert.Null(uploader.CurrentProgress);
+  }
+
   private static ScreenshotUploader MakeUploader(
     IHallOfFameApi api,
     Action<HttpException>? reportError = null,
@@ -350,7 +436,7 @@ public sealed class ScreenshotUploaderTests {
     int achievedMilestone = 0,
     int population = 0,
     string? mapName = null,
-    byte[]? imageBytes = null,
+    Task<byte[]>? imageBytes = null,
     IDictionary<string, float>? renderSettings = null,
     IReadOnlyDictionary<string, object>? renderConditions = null,
     string[]? modIds = null
@@ -359,7 +445,7 @@ public sealed class ScreenshotUploaderTests {
       achievedMilestone,
       population,
       mapName,
-      imageBytes ?? [],
+      imageBytes ?? Task.FromResult<byte[]>([]),
       0,
       0,
       false,

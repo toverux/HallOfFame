@@ -142,6 +142,7 @@ export function makeScreenshotSnapshot(
     population: 0,
     previewImageUri: '',
     imageUri: '',
+    isImageReady: true,
     imageFileSize: 0,
     imageWidth: 0,
     imageHeight: 0,

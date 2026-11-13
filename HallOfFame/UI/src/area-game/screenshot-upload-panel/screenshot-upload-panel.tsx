@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { type ReactElement, useEffect, useRef } from 'react';
 import { useSetState } from 'react-use';
-import { preloadImage as defaultPreloadImage, useDraggable } from '../../utils';
+import { useDraggable } from '../../utils';
 import * as bindings from '../../utils/bindings';
 import { useCaptureRevealGate } from './capture-reveal-gate';
 import type { ScreenshotInfoFormValue } from './form-state';
@@ -15,26 +15,12 @@ import * as formShared from '../../components/screenshot-form/shared.module.scss
 import * as styles from './screenshot-upload-panel.module.scss';
 import * as shared from './shared.module.scss';
 
-interface ScreenshotUploadPanelProps {
-  /**
-   * Preview-image preloader seam.
-   * Injectable so tests can drive the reveal deterministically; defaults to the real Cohtml-backed
-   * {@link defaultPreloadImage}.
-   */
-  readonly preloadImage?: (url: string) => Promise<void>;
-}
-
 /**
  * Component that shows up when the user takes a HoF screenshot.
  *
- * Its reveal is gated behind preloading the preview image: the panel plays an entrance animation,
- * and decoding a large preview mid-animation stutters, so it stays unmounted until the preview is
- * decoded, then reveals (animation runs against an already-decoded image) and plays the shutter
- * sound.
+ * Its reveal waits for the veil of the press to be gone, see {@link useCaptureRevealGate}.
  */
-export function ScreenshotUploadPanel({
-  preloadImage = defaultPreloadImage
-}: ScreenshotUploadPanelProps): ReactElement {
+export function ScreenshotUploadPanel(): ReactElement {
   const settings = bindings.useModSettings();
   const uploadFormMemory = bindings.useUploadFormMemory();
 
@@ -46,7 +32,7 @@ export function ScreenshotUploadPanel({
 
   const previewImageUri = screenshotSnapshot ? screenshotSnapshot.previewImageUri : null;
 
-  const isRevealed = useCaptureRevealGate(previewImageUri, preloadImage);
+  const isRevealed = useCaptureRevealGate(previewImageUri);
 
   const originalFormState: ScreenshotInfoFormValue = {
     shareModIds: uploadFormMemory.shareModIds,
@@ -59,15 +45,16 @@ export function ScreenshotUploadPanel({
 
   const [formValue, patchFormValue] = useSetState<ScreenshotInfoFormValue>(originalFormState);
 
-  // Reset the form whenever a new screenshot is captured.
+  // Reset the form whenever a new screenshot is captured, keyed on its preview, unique per capture:
+  // the snapshot itself is published again when its full image turns ready.
   useEffect(() => {
-    if (screenshotSnapshot) {
+    if (previewImageUri) {
       patchFormValue(originalFormState);
     }
     // Deps are intentionally narrow: originalFormState is recreated each render, so depending on it
     // (or patchFormValue) would reset the form on every render instead of only on a new capture.
     // oxlint-disable-next-line react-hooks/exhaustive-deps - reset only on a new capture.
-  }, [screenshotSnapshot]);
+  }, [previewImageUri]);
 
   // Show the panel only once there is a screenshot and its preview image has been decoded.
   if (!(screenshotSnapshot && isRevealed)) {

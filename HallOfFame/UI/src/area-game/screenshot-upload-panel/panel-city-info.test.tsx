@@ -17,6 +17,7 @@ const snapshot: JsonScreenshotSnapshot = {
   population: 12_345,
   previewImageUri: '',
   imageUri: '',
+  isImageReady: true,
   imageFileSize: 0,
   imageWidth: 1920,
   imageHeight: 1080,

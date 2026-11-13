@@ -16,6 +16,7 @@ using HallOfFame.Services;
 using HallOfFame.Utils;
 using HallOfFame.Utils.Writers;
 using Unity.Entities;
+using Object = UnityEngine.Object;
 #if DEBUG
 using UnityEngine;
 #endif
@@ -35,12 +36,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   private static readonly string ScreenshotFilePath =
     Path.Combine(Mod.ModDataPath, ScreenshotSnapshot.ScreenshotFileName);
 
-  /// <summary>
-  /// File path for the preview of the latest screenshot taken.
-  /// For file-serving purposes only.
-  /// </summary>
-  private static readonly string ScreenshotPreviewFilePath =
-    Path.Combine(Mod.ModDataPath, ScreenshotSnapshot.ScreenshotPreviewFileName);
+  private CapturePreviewTextures previewTextures = null!;
 
   private CitySnapshotProvider citySnapshotProvider = null!;
 
@@ -78,8 +74,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   private TriggerBinding openUploadedInDashboardBinding = null!;
 
   /// <summary>
-  /// Whether a capture runs, from the press to its files written, during which
-  /// <see cref="TakeScreenshot"/> ignores a press.
+  /// Whether a capture runs, from the press to its full image written, or to its encode finished
+  /// once its snapshot is cleared, during which <see cref="TakeScreenshot"/> ignores a press.
   /// </summary>
   private bool isCaptureInFlight;
 
@@ -97,9 +93,14 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   private ScreenshotSnapshot? CurrentScreenshot {
     get;
     set {
+      // A capture whose full image becomes ready keeps its upload: one may already wait for it.
+      var isSameCapture = value is {} next && field is {} previous && next.IsSameCapture(previous);
+
       field = value;
 
-      this.screenshotUploader.Reset();
+      if (!isSameCapture) {
+        this.screenshotUploader.Reset();
+      }
 
       // Optimization: live bindings poll only while a screenshot is displayed or uploading.
       // Each change gets one update to publish it; OnUpdate disables the system once it is null.
@@ -120,6 +121,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.citySnapshotProvider = new CitySnapshotProvider(this.World, milestoneLevelQuery);
 
       this.renderConditionsReader = new RenderConditionsReader(this.World);
+
+      this.previewTextures = new CapturePreviewTextures();
 
       // Kept alive by its subscription to the game's panel event.
       _ = new ClimateVolumeUnfreezer(this.World);
@@ -213,6 +216,12 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
     }
+  }
+
+  protected override void OnDestroy() {
+    this.previewTextures.Dispose();
+
+    base.OnDestroy();
   }
 
   protected override void OnUpdate() {
@@ -315,25 +324,54 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     catch (Exception ex) {
       Mod.Log.ErrorRecoverable(ex);
 
-      this.CurrentScreenshot = null;
+      // Clears the panel, open on the preview when the full image failed to encode.
+      if (this.CurrentScreenshot is not null) {
+        this.ClearScreenshot();
+      }
     }
     finally {
       this.isCaptureInFlight = false;
     }
   }
 
+  /// <summary>
+  /// Captures, opens the upload panel on the preview, then writes the full image once encoded,
+  /// returning only then.
+  /// </summary>
   private async Task DoTakeScreenshot() {
     var captured = await ScreenshotCapturer.Capture(this.renderConditionsReader);
 
-    // Prepare full size and preview images in a background thread.
-    await Task.Run(() => {
-        File.WriteAllBytes(CaptureUISystem.ScreenshotPreviewFilePath, captured.JpgPreviewBytes);
-        File.WriteAllBytes(CaptureUISystem.ScreenshotFilePath, captured.PngBytes);
+    // A capture taken while the panel shows an earlier one replaces it, and its files with it: the
+    // earlier full image would otherwise outlive this capture if this one is cleared before its own
+    // is written.
+    if (this.CurrentScreenshot is not null) {
+      this.ClearScreenshot();
+    }
 
-        CaptureUISystem.WriteLocalScreenshot(captured.PngBytes);
-      }
-    );
+    ScreenshotSnapshot screenshotSnapshot;
 
+    try {
+      screenshotSnapshot = await this.CreateSnapshot(captured);
+    }
+    catch {
+      Object.DestroyImmediate(captured.PreviewTexture);
+
+      throw;
+    }
+
+    this.previewTextures.Serve(captured.PreviewTexture, screenshotSnapshot.PreviewTextureName);
+
+    this.CurrentScreenshot = screenshotSnapshot;
+
+    Mod.UsageTracker.Track("screenshot_captured");
+
+    await this.WriteFullImage(screenshotSnapshot);
+  }
+
+  /// <summary>
+  /// Describes <paramref name="captured"/> and the city it shows, the playset included.
+  /// </summary>
+  private async Task<ScreenshotSnapshot> CreateSnapshot(CapturedScreenshot captured) {
     // Collect playset.
     var mods = await this.citySnapshotProvider.GetActiveMods();
     var modIds = mods?.Select(mod => mod.id).ToArray();
@@ -344,7 +382,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       this.assetModsBinding.Update(CitySnapshotProvider.SelectAssetMods(mods));
     }
 
-    var screenshotSnapshot = new ScreenshotSnapshot(
+    return new ScreenshotSnapshot(
       this.citySnapshotProvider.GetAchievedMilestone(),
       this.citySnapshotProvider.GetPopulation(),
       this.citySnapshotProvider.GetMapName(),
@@ -357,11 +395,60 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       captured.RenderConditions,
       modIds
     );
-
-    this.CurrentScreenshot = screenshotSnapshot;
-
-    Mod.UsageTracker.Track("screenshot_captured");
   }
+
+  /// <summary>
+  /// Writes the full image of <paramref name="snapshot"/> once encoded, and marks it ready.
+  /// A capture discarded meanwhile (closed panel, game load) writes nothing, and deletes what it
+  /// wrote if discarded during the write: the file names are shared by every capture.
+  /// A failed encode throws, unless the capture is discarded by then, which only logs it.
+  /// </summary>
+  private async Task WriteFullImage(ScreenshotSnapshot snapshot) {
+    byte[] pngBytes;
+
+    try {
+      pngBytes = await snapshot.ImageBytes;
+    }
+    catch (Exception ex) when (!this.IsCaptureKept(snapshot)) {
+      Mod.Log.ErrorSilent(ex, $"{nameof(CaptureUISystem)}: A discarded capture failed to encode.");
+
+      return;
+    }
+
+    if (!this.IsCaptureKept(snapshot)) {
+      return;
+    }
+
+    var localScreenshotPath = await Task.Run(() => {
+        File.WriteAllBytes(CaptureUISystem.ScreenshotFilePath, pngBytes);
+
+        return CaptureUISystem.WriteLocalScreenshot(pngBytes);
+      }
+    );
+
+    if (!this.IsCaptureKept(snapshot)) {
+      File.Delete(CaptureUISystem.ScreenshotFilePath);
+
+      if (localScreenshotPath is not null) {
+        File.Delete(localScreenshotPath);
+      }
+
+      return;
+    }
+
+    this.CurrentScreenshot = snapshot with {
+      ImageFileSize = pngBytes.Length
+    };
+  }
+
+  /// <summary>
+  /// Whether <paramref name="snapshot"/>'s capture is still on screen, and no game load started
+  /// since: the snapshot is cleared only once a load completes, and the encode can end before.
+  /// </summary>
+  private bool IsCaptureKept(ScreenshotSnapshot snapshot) =>
+    this.CurrentScreenshot is {} current &&
+    current.IsSameCapture(snapshot) &&
+    !GameManager.instance.isGameLoading;
 
   private void ClearScreenshot() {
     if (this.CurrentScreenshot is null) {
@@ -372,9 +459,14 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       return;
     }
 
+    this.previewTextures.Retire(this.CurrentScreenshot.Value.PreviewTextureName);
+
     try {
-      File.Delete(CaptureUISystem.ScreenshotFilePath);
-      File.Delete(CaptureUISystem.ScreenshotPreviewFilePath);
+      // Before its full image is ready, the capture deletes the file itself if it is being written,
+      // see WriteFullImage: a delete here could collide with the write.
+      if (this.CurrentScreenshot.Value.ImageFileSize is not null) {
+        File.Delete(CaptureUISystem.ScreenshotFilePath);
+      }
     }
     catch (Exception ex) {
       Mod.Log.ErrorRecoverable(ex);
@@ -477,9 +569,10 @@ internal sealed partial class CaptureUISystem : UISystemBase {
   /// Write the screenshot to the local screenshot directory, if enabled.
   /// It mimics the vanilla screenshot naming scheme.
   /// </summary>
-  private static void WriteLocalScreenshot(byte[] pngScreenshotBytes) {
+  /// <returns>The path of the file written, null when disabled.</returns>
+  private static string? WriteLocalScreenshot(byte[] pngScreenshotBytes) {
     if (!Mod.Settings.CreateLocalScreenshot) {
-      return;
+      return null;
     }
 
     // We will mimic the vanilla screenshot naming scheme.
@@ -491,5 +584,7 @@ internal sealed partial class CaptureUISystem : UISystemBase {
     );
 
     File.WriteAllBytes(fileName, pngScreenshotBytes);
+
+    return fileName;
   }
 }

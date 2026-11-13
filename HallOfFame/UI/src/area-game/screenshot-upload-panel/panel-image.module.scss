@@ -39,6 +39,15 @@
     &:hover [class*="icon"] {
       opacity: 1;
     }
+
+    // The vanilla round button has no disabled look, so the glyph dims, and no hover lights it.
+    &[disabled] {
+      pointer-events: none;
+
+      [class*="icon"] {
+        opacity: 0.3;
+      }
+    }
   }
 
   &-ratioPreview {

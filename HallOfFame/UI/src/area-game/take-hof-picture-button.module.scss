@@ -1,4 +1,7 @@
-﻿.button {
+@use "sass:color";
+@use "../vanilla-vars" as vanilla;
+
+.button {
   position: relative;
   display: block;
   // Override vanilla margin to make room for the 90° rotated HoF side label.
@@ -12,5 +15,45 @@
     height: 32rem;
     left: 1.6em;
     transform: rotate(90deg);
+  }
+
+  // The button's tooltip balloon while the veil is up: hidden at once, as its own fade-out would
+  // run into the frames the capture freezes.
+  &-tooltip--hidden {
+    display: none;
+  }
+}
+
+// Covers the screen while the capture freezes the game, so the freeze reads as a camera flash.
+.veil {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  // Over the game's dialogs and the mod's own modals.
+  z-index: 10000;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background-color: rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+
+  &-label {
+    // A long translation wraps instead of spanning the screen.
+    max-width: 60%;
+    padding: 12rem 24rem;
+    text-align: center;
+    border-radius: 4rem;
+
+    // A fixed opacity rather than the player's panel transparency, which can wash the label out
+    // over the veil.
+    background-color: color.change(vanilla.$panel-color-normal-opaque, $alpha: 0.7);
+    backdrop-filter: vanilla.$panel-blur;
+
+    color: vanilla.$text-color;
+    font-size: vanilla.$font-size-l;
   }
 }

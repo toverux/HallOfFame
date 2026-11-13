@@ -182,6 +182,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]": "画像を処理中…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]": "アップロードが完了しました！",
   "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "あなたの都市をHall of Fameへ！ 撮影した画像は、アップロードする前に確認できます。",
+  "HallOfFame.UI.Game.TakeHofPictureButton.TAKING_SCREENSHOT": "高解像度の画像を撮影中…",
   "HallOfFame.UI.Game.UniversalModMenuButton.BUTTON_TOOLTIP": "クリエイターダッシュボードを開いて、あなたのスクリーンショットの閲覧数、いいね、メダルを確認したり、編集や削除をしたりできます。",
   "HallOfFame.UI.Dashboard.TITLE[Creator]": "クリエイター",
   "HallOfFame.UI.Dashboard.TITLE[Dashboard]": "ダッシュボード",

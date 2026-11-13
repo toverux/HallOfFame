@@ -182,6 +182,7 @@
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Processing]": "A processar a imagem…",
   "HallOfFame.UI.Game.ScreenshotUploadPanel.UPLOAD_PROGRESS[Complete]": "Carregamento completo!",
   "HallOfFame.UI.Game.TakeHofPictureButton.BUTTON_TOOLTIP": "Leva a tua cidade ao Hall of Fame! Será tirada uma foto, mas poderás revê-la antes de a carregar.",
+  "HallOfFame.UI.Game.TakeHofPictureButton.TAKING_SCREENSHOT": "A capturar a imagem em alta resolução…",
   "HallOfFame.UI.Game.UniversalModMenuButton.BUTTON_TOOLTIP": "Abre o Painel do Criador para veres as visualizações, os gostos e as medalhas das tuas capturas de ecrã, e para as editares ou eliminares.",
   "HallOfFame.UI.Dashboard.TITLE[Creator]": "Painel do",
   "HallOfFame.UI.Dashboard.TITLE[Dashboard]": "Criador",

@@ -24,9 +24,10 @@ namespace HallOfFame.Systems.Capture;
 /// </summary>
 internal static class ScreenshotCapturer {
   /// <summary>
-  /// Renders the screenshot and its preview in the frame of the call, then reads them back from the
-  /// GPU and encodes them on the thread pool, returning the encoded images, the graphics-state
-  /// facts observed during the capture, and the conditions of the shot.
+  /// Renders the screenshot and its preview in the frame of the call, and returns in that frame
+  /// with the preview texture, the full image still to read back from the GPU and encode on the
+  /// thread pool, the graphics-state facts observed during the capture, and the conditions of the
+  /// shot.
   /// The conditions are read once the shot has rendered and before the forced graphics options are
   /// restored, as a read after the capture would see the restored options and a scene that may have
   /// moved on.
@@ -91,9 +92,11 @@ internal static class ScreenshotCapturer {
     var screenSizeTexture = new RenderTexture(Screen.width, Screen.height, 0);
     var previewTexture = new RenderTexture(Screen.width / 2, Screen.height / 2, 0);
 
-    // Null until their readbacks are requested.
+    // Null until its readback is requested.
     PendingImage? pendingImage = null;
-    PendingImage? pendingPreview = null;
+
+    // Once returned, the preview texture is the caller's to destroy.
+    var isPreviewHandedOver = false;
 
     try {
       Dictionary<string, object> renderConditions;
@@ -166,11 +169,6 @@ internal static class ScreenshotCapturer {
           ScreenshotCapturer.EncodePng
         );
 
-        pendingPreview = ScreenshotCapturer.ReadBackAndEncode(
-          previewTexture,
-          ScreenshotCapturer.EncodeJpg
-        );
-
         CaptureDebugProbe.MarkReadbacksRequested();
 
         renderConditions = conditionsReader.Read(
@@ -211,31 +209,34 @@ internal static class ScreenshotCapturer {
 
       var areSettingsTopQuality = ScreenshotCapturer.AreSettingsTopQuality();
 
-      await Task.WhenAll(pendingImage.Value.Read, pendingPreview.Value.Read);
+      CaptureDebugProbe.EndOnceEncoded(pendingImage.Value, camera, renderSize, plan.RenderSize);
 
-      CaptureDebugProbe.MarkReadbacksDone();
-
-      var pngBytes = await pendingImage.Value.Encoded;
-      var jpgPreviewBytes = await pendingPreview.Value.Encoded;
-
-      CaptureDebugProbe.End(camera, renderSize, plan.RenderSize);
+      isPreviewHandedOver = true;
 
       return new CapturedScreenshot {
-        PngBytes = pngBytes,
-        JpgPreviewBytes = jpgPreviewBytes,
+        PngBytes = pendingImage.Value.Encoded,
+        PreviewTexture = previewTexture,
         Size = renderSize,
         WasGlobalIlluminationDisabled = wasGlobalIlluminationDisabled,
         AreSettingsTopQuality = areSettingsTopQuality,
         RenderConditions = renderConditions
       };
     }
-    finally {
-      // The GPU reads a texture until its readback completes, so it is destroyed only then.
-      await Task.WhenAll(new[] { pendingImage?.Read, pendingPreview?.Read }.OfType<Task>());
+    catch when (pendingImage is not null) {
+      // A native encode cannot be cancelled, so a failed capture waits for its full image's, which
+      // the next capture's would otherwise run beside; WhenAny never throws.
+      await Task.WhenAny(pendingImage.Value.Encoded);
 
-      Object.DestroyImmediate(renderTexture);
-      Object.DestroyImmediate(screenSizeTexture);
-      Object.DestroyImmediate(previewTexture);
+      throw;
+    }
+    finally {
+      // Not awaited, as the full image's readback ends long after the capture returns.
+      _ = ScreenshotCapturer.DestroyOnceRead(
+        pendingImage?.Read,
+        isPreviewHandedOver
+          ? [renderTexture, screenSizeTexture]
+          : [renderTexture, screenSizeTexture, previewTexture]
+      );
     }
 
     // Switches the upscaler without saving the change, and without UpscalerManager.Apply(): the
@@ -396,14 +397,19 @@ internal static class ScreenshotCapturer {
     );
   }
 
-  private static NativeArray<byte> EncodeJpg(NativeArray<byte> rgba, Vector2Int size) {
-    return ImageConversion.EncodeNativeArrayToJPG(
-      rgba,
-      GraphicsFormat.R8G8B8A8_SRGB,
-      (uint) size.x,
-      (uint) size.y,
-      quality: 80
-    );
+  /// <summary>
+  /// Destroys the capture's textures once <paramref name="read"/>, the full image's readback, has
+  /// completed, or at once when it was never requested: the GPU reads them until then.
+  /// </summary>
+  private static async Task DestroyOnceRead(Task? read, IEnumerable<Texture> textures) {
+    if (read is not null) {
+      // WhenAny never throws, so the textures are destroyed whatever the readback's outcome.
+      await Task.WhenAny(read);
+    }
+
+    foreach (var texture in textures) {
+      Object.DestroyImmediate(texture);
+    }
   }
 
   /// <summary>
@@ -426,5 +432,5 @@ internal static class ScreenshotCapturer {
   /// <param name="Encoded">
   /// Completes with the encoded image, faulting when the readback or the encode failed.
   /// </param>
-  private readonly record struct PendingImage(Task Read, Task<byte[]> Encoded);
+  internal readonly record struct PendingImage(Task Read, Task<byte[]> Encoded);
 }

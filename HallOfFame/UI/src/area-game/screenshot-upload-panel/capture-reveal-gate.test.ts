@@ -1,70 +1,91 @@
-/* oxlint-disable require-await, typescript/require-await - async act() callbacks flush React effects, no direct await */
-
-import { afterEach, describe, expect, it, spyOn } from 'bun:test';
+import { afterEach, describe, expect, it } from 'bun:test';
 import { act, cleanup, renderHook } from '@testing-library/react';
-import { iconsole } from '../../iconsole';
-import { createFakePreloader } from '../../testing/fixtures';
 import { getTriggers, resetBindings } from '../../testing/game-setup';
+import { useCaptureVeilPhase } from '../capture-veil-phase';
 import { useCaptureRevealGate } from './capture-reveal-gate';
 
 afterEach(() => {
+  setVeilPhase('hidden');
   cleanup();
   resetBindings();
 });
 
 describe('useCaptureRevealGate', () => {
-  it(`stays gated until the preview loads, then reveals and plays the shutter sound`, async () => {
-    const fake = createFakePreloader();
+  it(`reveals a capture at once when no veil is up, and plays the reveal sound once`, () => {
+    const { result } = renderHook(() => useCaptureRevealGate('preview-1'));
 
-    const { result } = renderHook(() => useCaptureRevealGate('preview?v=1', fake.preload));
-
-    // Gated shut while the preview decodes; the preload was requested, but the sound has not fired.
-    expect(result.current).toBe(false);
-    expect(fake.calls).toHaveLength(1);
-    expect(shutterSoundCount()).toBe(0);
-
-    await act(async () => fake.resolveLast('preview?v=1'));
-
-    // Revealed once decoded, and the shutter sound fired exactly once on reveal.
     expect(result.current).toBe(true);
-    expect(shutterSoundCount()).toBe(1);
+    expect(revealSoundCount()).toBe(1);
   });
 
-  it(`reveals anyway and still plays the sound when the preview preload fails`, async () => {
-    const errorSpy = spyOn(iconsole, 'error').mockImplementation(() => {
-      /* Intentional no-op: swallow the expected error log during the test. */
-    });
+  it(`waits for the capture veil to be gone before revealing`, () => {
+    setVeilPhase('fading');
 
-    const fake = createFakePreloader();
+    const { result } = renderHook(() => useCaptureRevealGate('preview-1'));
 
-    const { result } = renderHook(() => useCaptureRevealGate('preview?v=1', fake.preload));
+    expect(result.current).toBe(false);
+    expect(revealSoundCount()).toBe(0);
 
-    await act(async () => fake.rejectLast('preview?v=1'));
+    setVeilPhase('hidden');
 
-    // The failed preload does not trap the panel closed: it reveals, still plays the shutter sound,
-    // and logs the failure once.
     expect(result.current).toBe(true);
-    expect(shutterSoundCount()).toBe(1);
-    expect(errorSpy).toHaveBeenCalledTimes(1);
+    expect(revealSoundCount()).toBe(1);
+  });
 
-    errorSpy.mockRestore();
+  it(`stays revealed under the veil of a later press`, () => {
+    const { result } = renderHook(() => useCaptureRevealGate('preview-1'));
+
+    setVeilPhase('shown');
+
+    expect(result.current).toBe(true);
+
+    setVeilPhase('hidden');
+
+    expect(result.current).toBe(true);
+    expect(revealSoundCount()).toBe(1);
+  });
+
+  it(`gates a new capture behind its own veil`, () => {
+    let uri = 'preview-1';
+
+    const { result, rerender } = renderHook(() => useCaptureRevealGate(uri));
+
+    setVeilPhase('shown');
+
+    uri = 'preview-2';
+    rerender();
+
+    expect(result.current).toBe(false);
+
+    setVeilPhase('hidden');
+
+    expect(result.current).toBe(true);
+    expect(revealSoundCount()).toBe(2);
   });
 
   it(`stays gated when there is no active capture`, () => {
-    const fake = createFakePreloader();
-
-    const { result } = renderHook(() => useCaptureRevealGate(null, fake.preload));
+    const { result } = renderHook(() => useCaptureRevealGate(null));
 
     expect(result.current).toBe(false);
-    expect(fake.calls).toHaveLength(0);
+    expect(revealSoundCount()).toBe(0);
   });
 });
 
 /**
- * Count of shutter-sound plays. Filters to `take-photo` specifically among the audio triggers.
+ * Sets the capture veil's shared phase, as the take-picture button does.
  */
-function shutterSoundCount(): number {
+function setVeilPhase(phase: 'hidden' | 'shown' | 'fading'): void {
+  const { result, unmount } = renderHook(() => useCaptureVeilPhase());
+
+  act(() => result.current[1](phase));
+  unmount();
+}
+
+/**
+ * Count of reveal-sound plays. Filters to `open-panel` specifically among the audio triggers.
+ */
+function revealSoundCount(): number {
   return getTriggers().filter(
-    trigger => trigger.event == 'audio.playSound' && trigger.args[0] == 'take-photo'
+    trigger => trigger.event == 'audio.playSound' && trigger.args[0] == 'open-panel'
   ).length;
 }

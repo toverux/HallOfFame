@@ -21,6 +21,14 @@ export interface JsonScreenshotSnapshot {
   readonly population: number;
   readonly previewImageUri: string;
   readonly imageUri: string;
+  /**
+   * Whether the full image behind {@link imageUri} is written: the upload panel opens on the
+   * preview while it still encodes.
+   */
+  readonly isImageReady: boolean;
+  /**
+   * 0 until the full image is ready.
+   */
   readonly imageFileSize: number;
   readonly imageWidth: number;
   readonly imageHeight: number;

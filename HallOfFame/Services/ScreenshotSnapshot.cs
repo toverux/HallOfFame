@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Colossal.UI.Binding;
 
 namespace HallOfFame.Services;
@@ -10,12 +11,14 @@ namespace HallOfFame.Services;
 /// Other info like city name and username have their own separated binding as we want to allow the
 /// user to change them on the fly after the screenshot is taken.
 /// Serializable to JSON for displaying in the UI.
+/// The full image encodes after the snapshot is published: a copy made with
+/// <see cref="ImageFileSize"/> set marks it ready, keeping the capture's version.
 /// </summary>
 internal readonly struct ScreenshotSnapshot(
   int achievedMilestone,
   int population,
   string? mapName,
-  byte[] imageBytes,
+  Task<byte[]> imageBytes,
   int imageWidth,
   int imageHeight,
   bool wasGlobalIlluminationDisabled,
@@ -32,12 +35,6 @@ internal readonly struct ScreenshotSnapshot(
   internal const string ScreenshotFileName = "screenshot.jpg";
 
   /// <summary>
-  /// File name of the screenshot preview.
-  /// See <see cref="ScreenshotFileName"/>.
-  /// </summary>
-  internal const string ScreenshotPreviewFileName = "preview.jpg";
-
-  /// <summary>
   /// As we use the same file name for each new screenshot, this is a refresh counter appended to
   /// the URL of the image as a query parameter for cache busting.
   /// </summary>
@@ -51,7 +48,16 @@ internal readonly struct ScreenshotSnapshot(
 
   internal string? MapName { get; } = mapName;
 
-  internal byte[] ImageBytes { get; } = imageBytes;
+  /// <summary>
+  /// Completes with the full image encoded as PNG, faulting when its encode failed.
+  /// </summary>
+  internal Task<byte[]> ImageBytes { get; } = imageBytes;
+
+  /// <summary>
+  /// Size in bytes of the full image once its file is written, which the UI then serves, null until
+  /// then.
+  /// </summary>
+  internal int? ImageFileSize { get; init; }
 
   internal IDictionary<string, float> RenderSettings { get; } =
     renderSettings;
@@ -63,9 +69,20 @@ internal readonly struct ScreenshotSnapshot(
   /// </summary>
   internal string[]? ModIds { get; } = modIds;
 
-  internal string PreviewImageUri =>
-    $"coui://halloffame/{ScreenshotSnapshot.ScreenshotPreviewFileName}" +
-    $"?v={this.currentVersion}";
+  /// <summary>
+  /// Name of the preview texture, unique to the capture, which the UI loads as the path of
+  /// <see cref="PreviewImageUri"/>.
+  /// </summary>
+  internal string PreviewTextureName => $"/capture-preview-{this.currentVersion}";
+
+  private string PreviewImageUri => $"live://halloffame{this.PreviewTextureName}";
+
+  /// <summary>
+  /// Whether this snapshot and <paramref name="other"/> describe the same capture, its full image
+  /// ready or not.
+  /// </summary>
+  internal bool IsSameCapture(ScreenshotSnapshot other) =>
+    this.currentVersion == other.currentVersion;
 
   private string ImageUri =>
     $"coui://halloffame/{ScreenshotSnapshot.ScreenshotFileName}" +
@@ -95,8 +112,12 @@ internal readonly struct ScreenshotSnapshot(
     writer.PropertyName("imageHeight");
     writer.Write(imageHeight);
 
+    // Written in every state, as cohtml binds one shape per type name.
+    writer.PropertyName("isImageReady");
+    writer.Write(this.ImageFileSize is not null);
+
     writer.PropertyName("imageFileSize");
-    writer.Write(this.ImageBytes.Length);
+    writer.Write(this.ImageFileSize ?? 0);
 
     writer.PropertyName("wasGlobalIlluminationDisabled");
     writer.Write(wasGlobalIlluminationDisabled);

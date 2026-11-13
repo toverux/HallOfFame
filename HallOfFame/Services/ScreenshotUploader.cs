@@ -68,6 +68,23 @@ internal sealed class ScreenshotUploader(
 
     this.UploadedScreenshotId = null;
 
+    byte[] imageBytes;
+
+    // The upload panel opens while the full image still encodes, so an upload can start before it.
+    try {
+      imageBytes = await snapshot.ImageBytes;
+    }
+    catch (Exception ex) {
+      // The capture reports a failed encode and closes the panel, so the upload only stops.
+      if (this.currentModel == progressModel) {
+        this.currentModel = null;
+      }
+
+      log.Warn(ex, $"{nameof(ScreenshotUploader)}: The screenshot to upload failed to encode.");
+
+      return;
+    }
+
     try {
       var screenshot = await api.UploadScreenshot(
         new UploadScreenshotParams {
@@ -82,7 +99,7 @@ internal sealed class ScreenshotUploader(
           ShareRenderSettings = form.ShareRenderSettings,
           RenderSettings = snapshot.RenderSettings,
           RenderConditions = snapshot.RenderConditions,
-          ScreenshotData = snapshot.ImageBytes,
+          ScreenshotData = imageBytes,
           UploadProgressHandler = (upload, download) => {
             progressModel.ReportUploadProgress(upload);
 

@@ -11,6 +11,7 @@ function snapshotWithSize(imageWidth: number, imageHeight: number): JsonScreensh
     population: 0,
     previewImageUri: '',
     imageUri: '',
+    isImageReady: true,
     imageFileSize: 0,
     imageWidth,
     imageHeight,

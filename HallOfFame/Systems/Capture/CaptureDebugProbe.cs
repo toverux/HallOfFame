@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Threading.Tasks;
 using TND.Upscaling.Framework;
 using UnityEngine;
 using UnityEngine.Profiling;
@@ -93,14 +94,31 @@ internal static class CaptureDebugProbe {
     CaptureDebugProbe.restoredFrame = Time.frameCount;
   }
 
+  /// <summary>
+  /// Records the report once the full image is encoded, after the capture returned, and records
+  /// nothing when its encode fails or the camera is gone by then.
+  /// Async void as it is fire-and-forget, and the capture never waits for it; it cannot throw
+  /// before the camera check, as WhenAny never does.
+  /// </summary>
   [Conditional("DEBUG")]
-  internal static void MarkReadbacksDone() {
+  internal static async void EndOnceEncoded(
+    ScreenshotCapturer.PendingImage image,
+    Camera camera,
+    Vector2Int renderSize,
+    Vector2Int plannedRenderSize
+  ) {
+    await Task.WhenAny(image.Read);
+
     CaptureDebugProbe.readbacksDoneMs = CaptureDebugProbe.Clock.Elapsed.TotalMilliseconds;
     CaptureDebugProbe.readbacksDoneFrame = Time.frameCount;
-  }
 
-  [Conditional("DEBUG")]
-  internal static void End(Camera camera, Vector2Int renderSize, Vector2Int plannedRenderSize) {
+    await Task.WhenAny(image.Encoded);
+
+    // Unity's equality: a camera destroyed by a game load compares equal to null.
+    if (image.Encoded.Status is not TaskStatus.RanToCompletion || camera == null) {
+      return;
+    }
+
     var endMs = CaptureDebugProbe.Clock.Elapsed.TotalMilliseconds;
 
     CaptureDebugProbe.LastReport = new Report {
@@ -178,7 +196,7 @@ internal static class CaptureDebugProbe {
     public required double RendersMs { get; init; }
 
     /// <summary>
-    /// The preview downscaled and both readbacks requested.
+    /// The preview downscaled and the full image's readback requested.
     /// </summary>
     public required double PreviewMs { get; init; }
 
@@ -199,7 +217,7 @@ internal static class CaptureDebugProbe {
     public required int CaptureFrames { get; init; }
 
     /// <summary>
-    /// From the restore to both readbacks done, the main thread free meanwhile.
+    /// From the restore to the full image's readback done, the main thread free meanwhile.
     /// </summary>
     public required double ReadbackMs { get; init; }
 
@@ -207,7 +225,8 @@ internal static class CaptureDebugProbe {
     public required int ReadbackFrames { get; init; }
 
     /// <summary>
-    /// From both readbacks done to the full image and its preview encoded on the thread pool.
+    /// From the readback done to the full image encoded on the thread pool, which runs on after the
+    /// capture returned.
     /// </summary>
     public required double EncodeMs { get; init; }
 
