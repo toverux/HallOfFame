@@ -120,7 +120,8 @@ internal static class ScreenshotCapturer {
         new RenderConditionsReader.CaptureOverrides(
           // The camera allows DLSS by default, which only renders with it when the player turned
           // it on.
-          IsDlssForcedOff: previousDlssValue && SharedSettings.instance.graphics.isDlssActive,
+          IsDlssForcedOff: previousDlssValue &&
+          SharedSettings.instance.graphics.upscaler == GraphicsSettings.Upscaler.DLSS4,
           IsDynamicResolutionForcedOff: previousDynResLevel != QualitySetting.Level.High,
           IsGlobalIlluminationForcedOff: wasGlobalIlluminationDisabled
         )
