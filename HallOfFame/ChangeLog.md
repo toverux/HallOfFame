@@ -1,4 +1,1 @@
-- The welcome tour now shows the keyboard shortcuts of the slideshow controls it presents: press one to try it, and the tour moves on to the next step.
-- Fixed the welcome tour coming back at the next launch after you loaded a city while it showed, or after the game crashed.
-- Fixed the Photo mode settings tab of the screenshot details window staying empty when the game loaded your mods after the main menu, as it does after a slow Paradox login or mod sync.
-- The medal caption in the Creator Dashboard now fits on one line beside the medal instead of wrapping in a narrow column.
+- Fixed taking a screenshot, broken since game update 1.6.4f1.
