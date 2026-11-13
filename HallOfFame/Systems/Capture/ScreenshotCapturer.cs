@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Colossal;
+using Game.Rendering;
 using Game.SceneFlow;
 using Game.Settings;
 using TND.Upscaling.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Entities;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -23,6 +26,9 @@ namespace HallOfFame.Systems.Capture;
 /// would never be used.
 /// </summary>
 internal static class ScreenshotCapturer {
+  // The custom pass drawing the outlines of the selected and hovered objects.
+  private const string OutlinesPassName = "Outlines Pass";
+
   /// <summary>
   /// Renders the screenshot and its preview in the frame of the call, and returns in that frame
   /// with the preview texture, the full image still to read back from the GPU and encode on the
@@ -42,6 +48,9 @@ internal static class ScreenshotCapturer {
     var cameraData = camera.GetComponent<HDAdditionalCameraData>();
 
     var uiView = GameManager.instance.userInterface.view;
+
+    var renderingSystem =
+      World.DefaultGameObjectInjectionWorld.GetExistingSystemManaged<RenderingSystem>();
 
     var graphics = SharedSettings.instance.graphics;
 
@@ -66,6 +75,14 @@ internal static class ScreenshotCapturer {
     var previousDynResLevel = dynResSettings.GetLevel();
     var previousAllowDynamicResolution = cameraData.allowDynamicResolution;
     var previousSsgiQualityLevel = ssgiSettings.GetLevel();
+
+    // Photo mode keeps the overlays hidden while it is open, so they are put back as they were, not
+    // shown. IsPassEnabled ignores its second argument.
+    var wasOverlayHidden = renderingSystem.hideOverlay;
+    var wasOutlinesPassEnabled = CustomPassCache.IsPassEnabled(
+      ScreenshotCapturer.OutlinesPassName,
+      enabled: true
+    );
 
     var wasGlobalIlluminationDisabled =
       Mod.Settings.DisableGlobalIllumination &&
@@ -142,6 +159,12 @@ internal static class ScreenshotCapturer {
         // on before the frame's own render, so it never leaves the screen.
         uiView.enabled = false;
 
+        // Hide the overlays (notification icons, area and district borders, routes) and the
+        // selection outlines from the renders too, as the game's own save previews do: photo mode
+        // hides the overlays, but a capture taken outside it would show them.
+        renderingSystem.hideOverlay = true;
+        CustomPassCache.SetPassEnabled(ScreenshotCapturer.OutlinesPassName, enabled: false);
+
         try {
           // Calling Render() multiple times is useful to let the GPU accumulate data for a cleaner
           // and sharper image: this helps load more accurate geometry, and lets the effects that
@@ -157,6 +180,11 @@ internal static class ScreenshotCapturer {
         }
         finally {
           uiView.enabled = true;
+          renderingSystem.hideOverlay = wasOverlayHidden;
+          CustomPassCache.SetPassEnabled(
+            ScreenshotCapturer.OutlinesPassName,
+            wasOutlinesPassEnabled
+          );
         }
 
         CaptureDebugProbe.MarkRendersEnd(camera);
