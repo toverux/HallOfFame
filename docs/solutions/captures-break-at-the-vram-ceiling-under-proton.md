@@ -40,6 +40,8 @@ hung instead, after 15 captures with its window covered and 78 with it on top.
 
 The crawl is separate: DXVK moves resources to system memory (GPU at 100 %, the PCIe link busy). It
 happens with defrag on or off, and worse with it off. Whether it happens on Windows is unmeasured.
+With XeSS running, a first capture stops the game for good at the same ceiling:
+[XeSS hangs a capture under Proton](xess-hangs-a-capture-under-proton.md).
 
 ## Fix
 
