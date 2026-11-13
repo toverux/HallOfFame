@@ -4,13 +4,11 @@ Planned work on the mod that no ticket holds yet.
 
 Every entry opens with a triage line: **Priority** (high, medium, low) and **Cost** as the code reads at triage (trivial, cheap, moderate, large), either one `unsure` when nobody has judged it yet.
 
-## The upload panel's maximized image as a component
+## The Creator Dashboard's image full screen
 
 **Priority:** unsure · **Cost:** cheap
 
-The upload panel's maximize button shows the capture full screen through `showFullscreenImage` (`area-game/screenshot-upload-panel/panel-image.tsx`): a `div` appended to `document.body` outside React, which a click anywhere removes. The image covers every piece of UI and shows no way out, so it is easy to take for a crashed UI. Make it a React component with a big X close button, closing on Back as well.
-
-The Creator Dashboard's detail view can then use the same component to show its image full screen.
+The Creator Dashboard's detail view (`components/creator-dashboard/dashboard-detail.tsx`, `DetailImage`) shows its image at FHD inside the panel, with no way to enlarge it. Give it an enlarge action that shows `imageUrl4K` through the full-screen image component planned for the upload panel, once that component exists.
 
 ## The details window's Description tab as an Information tab
 
@@ -83,14 +81,6 @@ Under Proton the call reaches Wine's desktop rather than the player's, so on Lin
 
 The Wallpaper Engine wallpaper in `../HallOfFameServer/docs/ROADMAP.md` is the live, rotating counterpart.
 
-## The menu tour seen once it starts
-
-**Priority:** high · **Cost:** trivial
-
-`MenuTour` saves `HasSeenMenuTour` only when the tour ends (`Close`), so a game that crashes or quits while the tour shows brings it back next launch. Usage events from 2026.6.1's first 12 hours put that at 6 of 99 tours: each session stops right after `tour_started`, with no `tour_finished`, and 5 of those 6 creators saw the tour again 9 to 68 minutes later.
-
-Set and save the flag when the tour first publishes a step instead, and keep `Close` ending the tour in memory, so `tour_finished` still reports how it ended. A player whose game stops mid-tour then never sees its remaining steps. `MenuTourTests` asserts the save on close (`Close_SavesTheSeenTour_OnceAndAtOnce`) and needs to follow.
-
 ## A JSON mapper of our own
 
 **Priority:** low · **Cost:** moderate
@@ -104,3 +94,37 @@ Replace `variant.Make<T>()` in `HttpQueries.DecodeJson` with a generic mapper th
 **Priority:** unsure · **Cost:** unsure
 
 Investigate where the game's own test framework, run through the `cs2-dev` MCP server's `test` tool, would test what off-engine tests cannot: the capture systems (`Systems/Capture`) and photo mode over a loaded city, the screenshot pipeline end to end. The Greenfield template ships the setup as its `game-tests` part (`Scenarios/`, the `game-testing` skill, the `Colossal.TestFramework` reference); this mod pruned it, so adopting it means taking that part back from the template.
+
+## Downloading your own pictures from the Creator Dashboard
+
+**Priority:** unsure · **Cost:** unsure
+
+A creator can edit and delete their screenshots from the Creator Dashboard's detail view (`components/creator-dashboard/dashboard-detail.tsx`), but cannot get the pictures back, for example after reinstalling the game or on another machine. Add a download action there that saves the screenshot's largest image, `imageUrl4K`, into the game's screenshots folder (`Mod.GameScreenshotsPath`), where a capture's local copy already goes (`CaptureUISystem.WriteLocalScreenshot`).
+
+## A refused upload's reason in its usage event
+
+**Priority:** unsure · **Cost:** unsure
+
+The `upload_finished` event planned for the next release names a refused upload `rejected`, with no reason: `HttpQueries.JsonError` carries only the message, and the server answers nearly every refusal with a 400. Telling a moderation refusal, a ban and a limit apart needs the server to send a machine-readable kind first, which is a wire format change. The Feature usage dashboard's capture funnel in `../HallOfFameServer` can then split the missing screenshots by outcome and reason.
+
+## Info views in a capture
+
+**Priority:** unsure · **Cost:** unsure
+
+Let a creator take a picture with an info view on, such as electricity or traffic flow, to show how their city works. Today a capture shows none: photo mode sets `RenderingSystem.hideOverlay` while it is open (`PhotoModeUISystem`), and the capture sets it too and turns off the "Outlines Pass" around its renders (`ScreenshotCapturer`).
+
+To find out first:
+
+- Which parts of an info view survive `hideOverlay`: the world tint, and the overlays some views draw (flow arrows, icons). Then which of them reach an offscreen 4K render.
+- Whether a view chosen through `ToolSystem.infoview` stays active and visible in photo mode, or the capture has to switch it on around its own renders and back off after.
+- Where the creator picks the view (a control in photo mode or on the capture button), and whether the server and the viewers should know a screenshot has one.
+
+## The UI's errors in Sentry, caught and readable
+
+**Priority:** unsure · **Cost:** moderate
+
+The error reporting planned for the next release sends the UI errors `logError` receives (`utils/ui-helpers.ts`), with minified stacks, and misses the rest: an uncaught error, a rejected promise, a render that throws.
+
+- Catch them with a `window` error handler and an error boundary, keeping only the errors whose stack names the mod's bundle: the game's UI and every mod share the page.
+- Make the stacks readable: the build writes a source map per published version, kept out of the shipped mod, and the release uploads it to Sentry with `sentry-cli`.
+- Two blind spots stay to look at: a UI module that throws while loading, which the game's loader swallows (`docs/solutions/mod-ui-vanishes-when-its-module-throws-on-load.md`), and an error raised before the settings load, when the player's consent is not known yet.
