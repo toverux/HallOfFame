@@ -152,7 +152,7 @@ internal static class CaptureDebugProbe {
   /// render: the size it rendered at, and whether SSGI was on.
   /// </summary>
   private static string ReadRenderState(Camera camera) {
-    var upscaler = ScreenshotCapturer.ReadRunningUpscaler(camera.GetComponent<TNDUpscaler>());
+    var upscaler = CaptureDebugProbe.ReadRunningUpscaler(camera.GetComponent<TNDUpscaler>());
 
     var cameraData = camera.GetComponent<HDAdditionalCameraData>();
 
@@ -163,6 +163,15 @@ internal static class CaptureDebugProbe {
     return
       $"{upscaler}, {cameraData.antialiasing} {cameraData.SMAAQuality}, " +
       $"{hdCamera.actualWidth}x{hdCamera.actualHeight}, SSGI {isSsgiOn}";
+  }
+
+  /// <summary>
+  /// The upscaler (DLSS, FSR, or XeSS) that runs on the camera, None when none does, read from its
+  /// component: the setting can name one that does not run, for example one the GPU does not
+  /// support.
+  /// </summary>
+  private static UpscalerName ReadRunningUpscaler(TNDUpscaler? component) {
+    return component is { enabled: true } ? component.GetActiveUpscaler() : UpscalerName.None;
   }
 
   /// <summary>
@@ -180,8 +189,8 @@ internal static class CaptureDebugProbe {
     public required Vector2Int RenderSize { get; init; }
 
     /// <summary>
-    /// The size the capture plan chose, which a Debug override replaces in
-    /// <see cref="RenderSize"/>.
+    /// The size <see cref="ScreenshotCapturer.PlanRenderSize"/> chose, which a Debug override
+    /// replaces in <see cref="RenderSize"/>.
     /// </summary>
     public required Vector2Int PlannedRenderSize { get; init; }
 

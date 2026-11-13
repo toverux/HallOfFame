@@ -62,8 +62,6 @@ internal static class ScreenshotCapturer {
 
     var upscalerComponent = camera.GetComponent<TNDUpscaler>();
 
-    var runningUpscaler = ScreenshotCapturer.ReadRunningUpscaler(upscalerComponent);
-
     // The component to switch off for the capture and back on after it, null when it is off.
     // Keyed on the component, not on its active upscaler: an enabled component renders at its
     // reduced scale whether or not an upscaler is active.
@@ -88,14 +86,11 @@ internal static class ScreenshotCapturer {
       Mod.Settings.DisableGlobalIllumination &&
       previousSsgiQualityLevel != QualitySetting.Level.Disabled;
 
-    // No step of the capture reads the Wine check, so it is not run.
-    var plan = ScreenshotCapturer.Plan(
-      new Vector2Int(Screen.width, Screen.height),
-      runningUpscaler,
-      isWine: false
+    var plannedRenderSize = ScreenshotCapturer.PlanRenderSize(
+      new Vector2Int(Screen.width, Screen.height)
     );
 
-    var renderSize = plan.RenderSize;
+    var renderSize = plannedRenderSize;
 
     #if DEBUG
     renderSize = CaptureDebugProbe.RenderSizeOverride ?? renderSize;
@@ -237,7 +232,7 @@ internal static class ScreenshotCapturer {
 
       var areSettingsTopQuality = ScreenshotCapturer.AreSettingsTopQuality();
 
-      CaptureDebugProbe.EndOnceEncoded(pendingImage.Value, camera, renderSize, plan.RenderSize);
+      CaptureDebugProbe.EndOnceEncoded(pendingImage.Value, camera, renderSize, plannedRenderSize);
 
       isPreviewHandedOver = true;
 
@@ -284,33 +279,16 @@ internal static class ScreenshotCapturer {
   }
 
   /// <summary>
-  /// The upscaler (DLSS, FSR, or XeSS) that runs on the camera, None when none does, read from its
-  /// component: the setting can name one that does not run, for example one the GPU does not
-  /// support.
+  /// The pixel size a capture renders at, from the screen size.
   /// </summary>
-  internal static UpscalerName ReadRunningUpscaler(TNDUpscaler? component) {
-    return component is { enabled: true } ? component.GetActiveUpscaler() : UpscalerName.None;
-  }
-
-  /// <summary>
-  /// Decides a capture's parameters from the screen size, the upscaler that runs on the camera
-  /// (None when none does), and whether the game runs under Wine.
-  /// </summary>
-  internal static CapturePlan Plan(
-    Vector2Int screenSize,
-    UpscalerName runningUpscaler,
-    bool isWine
-  ) {
+  internal static Vector2Int PlanRenderSize(Vector2Int screenSize) {
     // Take a supersize screenshot that is *at least* 2160 pixels (4K).
     // Height is better than width because of widescreen monitors.
     // The server will decide the final resolution, i.e., rescale to 2160p if the resulting image is
     // bigger.
     var scaleFactor = (int) Math.Ceiling(2160d / screenSize.y);
 
-    return new CapturePlan(
-      screenSize * scaleFactor,
-      IsXessPrecautionNeeded: runningUpscaler is UpscalerName.XeSS3 && isWine
-    );
+    return screenSize * scaleFactor;
   }
 
   /// <summary>
@@ -439,16 +417,6 @@ internal static class ScreenshotCapturer {
       Object.DestroyImmediate(texture);
     }
   }
-
-  /// <summary>
-  /// Parameters of one capture, see <see cref="Plan"/>.
-  /// </summary>
-  /// <param name="RenderSize">Pixel size the screenshot renders at.</param>
-  /// <param name="IsXessPrecautionNeeded">
-  /// Whether the capture must take the Linux XeSS precaution: XeSS has frozen the game after a
-  /// capture under Wine, whatever the GPU, as DXVK can present one vendor's card as another's.
-  /// </param>
-  internal readonly record struct CapturePlan(Vector2Int RenderSize, bool IsXessPrecautionNeeded);
 
   /// <summary>
   /// An image on its way from the GPU to its encoded bytes, see <see cref="ReadBackAndEncode"/>.
