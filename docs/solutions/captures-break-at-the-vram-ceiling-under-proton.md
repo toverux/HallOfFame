@@ -6,7 +6,7 @@ symptoms:
   - 'The live game left with no shadows anywhere and blank icons at 2 fps until a restart'
   - 'The game crawls or stops advancing frames after many captures in a row, GPU at 100 %'
 tags: [capture, vram, dxvk, proton, linux, defrag, relocation, dlss, rthandles, hang, corruption]
-retire_when: 'a Proton release ships a DXVK with doitsujin/dxvk PR #6042'
+retire_when: 'a Proton release ships a DXVK with doitsujin/dxvk PR #6043'
 ---
 
 # Captures break at the VRAM ceiling under Proton
@@ -30,10 +30,11 @@ restart, and after enough captures the game crawls to a hang.
 
 ## Root cause
 
-Two DXVK bugs in moving resources corrupt them at the ceiling, triggered by its defrag and eviction
-(`dxvk.enableMemoryDefrag`, on by default): a relocation batch can copy one resource several times
-with no barrier between the copies, and the eviction scan can evict a resource in use.
-doitsujin/dxvk PR #6042 fixes both. Matched runs of 260 captures, on a build that switched the
+A DXVK bug in moving resources corrupts them at the ceiling, triggered by its defrag and eviction
+(`dxvk.enableMemoryDefrag`, on by default): both can queue one resource for relocation several
+times, and a batch then copies it several times with no barrier between the copies.
+doitsujin/dxvk PR #6043 fixes it, the maintainer's replacement for PR #6042, which came out of this
+investigation. Matched runs of 260 captures, on a build that switched the
 upscaler off and on and reset the render targets per capture: 22 broken with defrag on, 0 with it
 off. Earlier runs at a fixed interval, defrag on, broke about 1 in 60 (4 of 259), with the reset or
 with the targets held at 4K. The corruption only showed in builds that switch the upscaler per
@@ -49,9 +50,10 @@ With XeSS running, a first capture stops the game for good at the same ceiling:
 
 None in the mod yet: releasing the 4K render targets when photo mode closes is the option left,
 and a capture would still peak at the ceiling.
-A DXVK built from PR #6042, its `d3d11.dll` and `dxgi.dll` in the game folder, stops the
-corruption alone, which tells it from a mod bug. `dxvk.enableMemoryDefrag = False` stops it too, but
-slows captures and worsens the crawl.
+A DXVK built with the fix, its `d3d11.dll` and `dxgi.dll` in the game folder, stops the corruption
+alone, which tells it from a mod bug: measured in the game with PR #6042, and on a standalone repro
+with PR #6043. `dxvk.enableMemoryDefrag = False` stops it too, but slows captures and worsens the
+crawl.
 
 ## Prevention
 
