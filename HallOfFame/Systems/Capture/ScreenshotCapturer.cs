@@ -279,16 +279,28 @@ internal static class ScreenshotCapturer {
   }
 
   /// <summary>
-  /// The pixel size a capture renders at, from the screen size.
+  /// The pixel size a capture renders at, from the screen size: the smallest size at the screen's
+  /// aspect ratio that covers 3840x2160, which the server keeps as it is, resizing any larger image
+  /// down to that cover and never enlarging a smaller one.
+  /// A larger render buys a supersampling gain the server mostly scales away, with graphics memory
+  /// that a card near its limit cannot spare: past it, the game crawls or hangs.
   /// </summary>
   internal static Vector2Int PlanRenderSize(Vector2Int screenSize) {
-    // Take a supersize screenshot that is *at least* 2160 pixels (4K).
-    // Height is better than width because of widescreen monitors.
-    // The server will decide the final resolution, i.e., rescale to 2160p if the resulting image is
-    // bigger.
-    var scaleFactor = (int) Math.Ceiling(2160d / screenSize.y);
+    const int minWidth = 3840;
+    const int minHeight = 2160;
 
-    return screenSize * scaleFactor;
+    // Compares the two scale factors, minWidth / width and minHeight / height, without division,
+    // and derives the other side by integer ceiling division, so no rounding error adds a pixel.
+    long width = screenSize.x;
+    long height = screenSize.y;
+
+    return minWidth * height >= minHeight * width
+      ? new Vector2Int(minWidth, (int) ScreenshotCapturer.CeilDiv(height * minWidth, width))
+      : new Vector2Int((int) ScreenshotCapturer.CeilDiv(width * minHeight, height), minHeight);
+  }
+
+  private static long CeilDiv(long dividend, long divisor) {
+    return (dividend + divisor - 1) / divisor;
   }
 
   /// <summary>
