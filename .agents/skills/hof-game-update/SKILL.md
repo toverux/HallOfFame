@@ -18,7 +18,7 @@ The game must be closed for the build steps.
 ## 2. What the mod copies
 
 - **cs2-types.** Copy the `.d.ts` files of `$CSII_INSTALLATIONPATH/Cities2_Data/Content/Game/.ModdingToolchain/npx-create-csii-ui-mod/template/types` over [`UI/cs2-types`](../../../HallOfFame/UI/cs2-types), as they are (git turns their CRLF into LF); `validateTypes.ts` stays out. Never edit them by hand: `mise check` then shows what the new types break.
-- **Game version.** Set `GameVersion` in [`PublishConfiguration.xml`](../../../HallOfFame/Properties/PublishConfiguration.xml) to the new `<major>.<minor>.*` (the game's version is in `Player.log`, `Game version: …`), when the minor moved.
+- **Game version.** Set `GameVersion` in [`PublishConfiguration.xml`](../../../HallOfFame/Properties/PublishConfiguration.xml) to the new `<major>.<minor>.*` (the game's version is the `Game version` key of `~/.cs2-modding/setup.md`), when the minor moved.
 - **Vanilla CSS variables.** Each value [`vanilla-vars.scss`](../../../HallOfFame/UI/src/vanilla-vars.scss) copies, rather than referencing its `var()`, is checked against the new bundle's stylesheet, and its trailing comment updated.
 
 ## 3. What the mod anchors into
