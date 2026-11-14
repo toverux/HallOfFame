@@ -5,8 +5,8 @@ symptoms:
   - 'A capture with the water gone (sand), no shadows, a frame blown out to white, or water shaded pale or black'
   - 'The live game left with no shadows anywhere and blank icons at 2 fps until a restart'
   - 'The game crawls or stops advancing frames after many captures in a row, GPU at 100 %'
-tags: [capture, vram, dxvk, proton, linux, defrag, dlss, rthandles, hang, corruption]
-retire_when: 'a DXVK release fixes resources corrupted by enableMemoryDefrag near the VRAM limit; check the DXVK issues and release notes for enableMemoryDefrag'
+tags: [capture, vram, dxvk, proton, linux, defrag, relocation, dlss, rthandles, hang, corruption]
+retire_when: 'a Proton release ships a DXVK with doitsujin/dxvk PR #6042'
 ---
 
 # Captures break at the VRAM ceiling under Proton
@@ -30,13 +30,15 @@ restart, and after enough captures the game crawls to a hang.
 
 ## Root cause
 
-DXVK's memory defragmentation (`dxvk.enableMemoryDefrag`, on by default) corrupts GPU resources at
-the ceiling. Matched runs of 260 captures, on a build that switched the upscaler off and on and
-reset the render targets per capture: 22 broken with defrag on, 0 with it off. Earlier runs at a
-fixed interval, defrag on, broke about 1 in 60 (4 of 259), with the reset or with the targets held
-at 4K. The corruption only showed in builds that switch the upscaler per capture: with no switch,
-none of 261 captures broke, 113 of them on the released 2026.6.2 (DLSS kept on, no reset), which
-hung instead, after 15 captures with its window covered and 78 with it on top.
+Two DXVK bugs in moving resources corrupt them at the ceiling, triggered by its defrag and eviction
+(`dxvk.enableMemoryDefrag`, on by default): a relocation batch can copy one resource several times
+with no barrier between the copies, and the eviction scan can evict a resource in use.
+doitsujin/dxvk PR #6042 fixes both. Matched runs of 260 captures, on a build that switched the
+upscaler off and on and reset the render targets per capture: 22 broken with defrag on, 0 with it
+off. Earlier runs at a fixed interval, defrag on, broke about 1 in 60 (4 of 259), with the reset or
+with the targets held at 4K. The corruption only showed in builds that switch the upscaler per
+capture: with no switch, none of 261 captures broke, 113 of them on the released 2026.6.2 (DLSS kept
+on, no reset), which hung instead, after 15 captures with its window covered and 78 with it on top.
 
 The crawl is separate: DXVK moves resources to system memory (GPU at 100 %, the PCIe link busy). It
 happens with defrag on or off, and worse with it off. Whether it happens on Windows is unmeasured.
@@ -47,9 +49,9 @@ With XeSS running, a first capture stops the game for good at the same ceiling:
 
 None in the mod yet: releasing the 4K render targets when photo mode closes is the option left,
 and a capture would still peak at the ceiling.
-`dxvk.enableMemoryDefrag = False` in `dxvk.conf` beside `Cities2.exe` stops the corruption, but
-captures run slower and the crawl gets worse, so it serves only to tell this corruption from a mod
-bug.
+A DXVK built from PR #6042, its `d3d11.dll` and `dxgi.dll` in the game folder, stops the
+corruption alone, which tells it from a mod bug. `dxvk.enableMemoryDefrag = False` stops it too, but
+slows captures and worsens the crawl.
 
 ## Prevention
 
