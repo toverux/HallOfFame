@@ -6,13 +6,13 @@ Every entry opens with a triage line: **Priority** (high, medium, low) and **Cos
 
 ## The Creator Dashboard's image full screen
 
-**Priority:** unsure · **Cost:** cheap
+**Priority:** high · **Cost:** cheap
 
 The Creator Dashboard's detail view (`components/creator-dashboard/dashboard-detail.tsx`, `DetailImage`) shows its image at FHD inside the panel, with no way to enlarge it. Give it an enlarge action that shows `imageUrl4K` through the full-screen image component planned for the upload panel, once that component exists.
 
 ## The details window's Description tab as an Information tab
 
-**Priority:** unsure · **Cost:** moderate
+**Priority:** medium · **Cost:** moderate
 
 The slideshow's details window (`components/screenshot-details/screenshot-details-window.tsx`) opens on a Description tab that shows the creator's text, or an empty state when there is none. Make it an Information tab that always has content: the description first when there is one, then what the screenshot payload already holds and the slideshow only half shows:
 
@@ -26,7 +26,7 @@ Build it from the dashboard detail's pieces (`components/creator-dashboard/dashb
 
 ## Controller support in the main menu
 
-**Priority:** unsure · **Cost:** unsure
+**Priority:** low · **Cost:** unsure
 
 On hold until the gamepad telemetry shows whether enough players use a controller to justify it. `UpdateMe` sends `isGamepadConnected` in the creator's `metadata`: whether a gamepad was connected at the last sync, a rough proxy for controller use, since a connected pad may sit idle and one connected after the sync goes unseen.
 
@@ -51,7 +51,7 @@ To read the game's live binding table, run `Game.Input.InputManager.instance.Get
 
 ## Saved photo mode settings
 
-**Priority:** unsure · **Cost:** unsure
+**Priority:** low · **Cost:** unsure
 
 The details window's photo mode settings tab is read-only. The follow-up is letting a player keep a screenshot's settings and apply them in their own photo mode:
 
@@ -67,13 +67,13 @@ What is already known from the decompile, not yet measured in a running game:
 
 ## Skyve playset download
 
-**Priority:** unsure · **Cost:** unsure
+**Priority:** low · **Cost:** unsure
 
 A button on the details window's Playset tab that saves the screenshot's mod IDs as a text file, one ID per line, for Skyve to import as a playset. Skyve's import format and where the file should land are still to check against Skyve's own documentation and source.
 
 ## A screenshot as the desktop wallpaper
 
-**Priority:** unsure · **Cost:** cheap
+**Priority:** medium · **Cost:** cheap
 
 A slideshow action next to Save that makes the current screenshot the Windows desktop wallpaper. `SlideshowUISystem.SaveScreenshot` already downloads the 4K image through `ScreenshotExporter`: write it to one fixed file under `ModsData/HallOfFame` instead, so each new wallpaper replaces the last, then apply it with `user32`'s `SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path, SPIF_UPDATEINIFILE | SPIF_SENDCHANGE)`. It needs new locale keys and a success notice.
 
@@ -91,25 +91,25 @@ Replace `variant.Make<T>()` in `HttpQueries.DecodeJson` with a generic mapper th
 
 ## In-game test scenarios
 
-**Priority:** unsure · **Cost:** unsure
+**Priority:** medium · **Cost:** unsure
 
 Investigate where the game's own test framework, run through the `cs2-dev` MCP server's `test` tool, would test what off-engine tests cannot: the capture systems (`Systems/Capture`) and photo mode over a loaded city, the screenshot pipeline end to end. The Greenfield template ships the setup as its `game-tests` part (`Scenarios/`, the `game-testing` skill, the `Colossal.TestFramework` reference); this mod pruned it, so adopting it means taking that part back from the template.
 
 ## Downloading your own pictures from the Creator Dashboard
 
-**Priority:** unsure · **Cost:** unsure
+**Priority:** medium · **Cost:** unsure
 
 A creator can edit and delete their screenshots from the Creator Dashboard's detail view (`components/creator-dashboard/dashboard-detail.tsx`), but cannot get the pictures back, for example after reinstalling the game or on another machine. Add a download action there that saves the screenshot's largest image, `imageUrl4K`, into the game's screenshots folder (`Mod.GameScreenshotsPath`), where a capture's local copy already goes (`CaptureUISystem.WriteLocalScreenshot`).
 
 ## A refused upload's reason in its usage event
 
-**Priority:** unsure · **Cost:** unsure
+**Priority:** medium · **Cost:** unsure
 
 The `upload_finished` event planned for the next release names a refused upload `rejected`, with no reason: `HttpQueries.JsonError` carries only the message, and the server answers nearly every refusal with a 400. Telling a moderation refusal, a ban and a limit apart needs the server to send a machine-readable kind first, which is a wire format change. The Feature usage dashboard's capture funnel in `../HallOfFameServer` can then split the missing screenshots by outcome and reason.
 
 ## Info views in a capture
 
-**Priority:** unsure · **Cost:** unsure
+**Priority:** medium · **Cost:** unsure
 
 Let a creator take a picture with an info view on, such as electricity or traffic flow, to show how their city works. Today a capture shows none: photo mode sets `RenderingSystem.hideOverlay` while it is open (`PhotoModeUISystem`), and the capture sets it too and turns off the "Outlines Pass" around its renders (`ScreenshotCapturer`).
 
@@ -121,7 +121,7 @@ To find out first:
 
 ## The UI's errors in Sentry, caught and readable
 
-**Priority:** unsure · **Cost:** moderate
+**Priority:** high · **Cost:** moderate
 
 The error reporting planned for the next release sends the UI errors `logError` receives (`utils/ui-helpers.ts`), with minified stacks, and misses the rest: an uncaught error, a rejected promise, a render that throws.
 
