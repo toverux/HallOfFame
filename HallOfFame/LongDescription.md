@@ -118,7 +118,6 @@ Donations are very welcome and will help keep the service running.
   TheBusStop, ThemisC2, Tigon Ologdring**, valuable community members who, in one way or the other,
   provided a lot of help, feedback, support and enthusiasm.
 - **Translators:**
-  baka-gourd (Chinese Simplified),
   elGendo87 (Spanish),
   Fuchs23 (German),
   GeraspteGatenKaas (Dutch),
