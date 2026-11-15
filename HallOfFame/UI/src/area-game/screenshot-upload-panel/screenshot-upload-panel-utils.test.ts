@@ -15,7 +15,6 @@ function snapshotWithSize(imageWidth: number, imageHeight: number): JsonScreensh
     imageFileSize: 0,
     imageWidth,
     imageHeight,
-    wasGlobalIlluminationDisabled: false,
     areSettingsTopQuality: true
   };
 }

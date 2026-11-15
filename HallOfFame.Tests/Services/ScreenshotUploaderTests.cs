@@ -449,7 +449,6 @@ public sealed class ScreenshotUploaderTests {
       0,
       0,
       false,
-      false,
       renderSettings ?? new Dictionary<string, float>(),
       renderConditions ?? new Dictionary<string, object>(),
       modIds ?? []

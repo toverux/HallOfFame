@@ -54,6 +54,11 @@ internal static class CaptureDebugProbe {
   /// <c>CaptureUISystem.DebugCapture</c>.
   /// </summary>
   internal static Vector2Int? RenderSizeOverride { get; set; }
+
+  /// <summary>
+  /// Renders each capture runs instead of the planned count while set, from the unity eval.
+  /// </summary>
+  internal static int? RenderCountOverride { get; set; }
   #endif
 
   [Conditional("DEBUG")]

@@ -32,7 +32,6 @@ export interface JsonScreenshotSnapshot {
   readonly imageFileSize: number;
   readonly imageWidth: number;
   readonly imageHeight: number;
-  readonly wasGlobalIlluminationDisabled: boolean;
   readonly areSettingsTopQuality: boolean;
 }
 

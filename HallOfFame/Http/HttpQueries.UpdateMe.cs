@@ -44,7 +44,6 @@ internal partial class HttpQueries {
         ["viewMaxAge"] = Mod.Settings.ViewMaxAge,
         ["screenshotResolution"] = Mod.Settings.ScreenshotResolution,
         ["createLocalScreenshot"] = Mod.Settings.CreateLocalScreenshot,
-        ["disableGlobalIllumination"] = Mod.Settings.DisableGlobalIllumination,
         ["paradoxModsBrowsingPreference"] = Mod.Settings.ParadoxModsBrowsingPreference,
         // Lets the server tell an opted-out creator from one whose events were lost.
         ["sendUsageStatistics"] = Mod.Settings.SendUsageStatistics

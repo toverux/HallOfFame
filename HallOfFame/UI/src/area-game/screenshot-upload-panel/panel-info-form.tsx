@@ -95,11 +95,6 @@ function ScreenshotUploadPanelContentScreenshotInfoBase({
       <div style={{ flex: 1 }} />
 
       <div className={styles.notes}>
-        {screenshotSnapshot.wasGlobalIlluminationDisabled && (
-          <p>
-            {translate('HallOfFame.UI.Game.ScreenshotUploadPanel.GLOBAL_ILLUMINATION_DISABLED')}
-          </p>
-        )}
         <p>
           {translate(
             'HallOfFame.UI.Game.ScreenshotUploadPanel.UPDATE_CITY_CREATOR_NAME_ON_THE_FLY'

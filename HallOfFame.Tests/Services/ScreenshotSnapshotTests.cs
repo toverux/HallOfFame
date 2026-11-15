@@ -51,7 +51,6 @@ public sealed class ScreenshotSnapshotTests {
       0,
       0,
       false,
-      false,
       new Dictionary<string, float>(),
       new Dictionary<string, object>(),
       null

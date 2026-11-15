@@ -146,7 +146,6 @@ export function makeScreenshotSnapshot(
     imageFileSize: 0,
     imageWidth: 0,
     imageHeight: 0,
-    wasGlobalIlluminationDisabled: false,
     areSettingsTopQuality: true,
     ...overrides
   };

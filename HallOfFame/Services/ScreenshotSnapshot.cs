@@ -21,7 +21,6 @@ internal readonly struct ScreenshotSnapshot(
   Task<byte[]> imageBytes,
   int imageWidth,
   int imageHeight,
-  bool wasGlobalIlluminationDisabled,
   bool areSettingsTopQuality,
   IDictionary<string, float> renderSettings,
   IReadOnlyDictionary<string, object> renderConditions,
@@ -118,9 +117,6 @@ internal readonly struct ScreenshotSnapshot(
 
     writer.PropertyName("imageFileSize");
     writer.Write(this.ImageFileSize ?? 0);
-
-    writer.PropertyName("wasGlobalIlluminationDisabled");
-    writer.Write(wasGlobalIlluminationDisabled);
 
     writer.PropertyName("areSettingsTopQuality");
     writer.Write(areSettingsTopQuality);

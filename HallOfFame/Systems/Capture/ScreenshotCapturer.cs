@@ -82,9 +82,11 @@ internal static class ScreenshotCapturer {
       enabled: true
     );
 
-    var wasGlobalIlluminationDisabled =
-      Mod.Settings.DisableGlobalIllumination &&
-      previousSsgiQualityLevel != QualitySetting.Level.Disabled;
+    var isGlobalIlluminationForcedOff = previousSsgiQualityLevel != QualitySetting.Level.Disabled;
+
+    #if DEBUG
+    isGlobalIlluminationForcedOff &= !Mod.Settings.CaptureWithGlobalIllumination;
+    #endif
 
     var plannedRenderSize = ScreenshotCapturer.PlanRenderSize(
       new Vector2Int(Screen.width, Screen.height)
@@ -137,11 +139,11 @@ internal static class ScreenshotCapturer {
         // scale only at the next frame's update.
         cameraData.allowDynamicResolution = false;
 
-        // Disable global illumination as it causes a LOT of grain in CS2's implementation of SSGI,
-        // on most NVIDIA GPUs.
-        if (Mod.Settings.DisableGlobalIllumination) {
-          // We pass "apply: false" because it performs ApplyAndSave() while we want just Apply() to
-          // restore the previous value just after the screenshot is taken.
+        // Disable global illumination (SSGI) on every GPU: the capture's few renders cannot
+        // converge its temporal filter, which leaves blotchy grain all over the image
+        // (docs/adr/0004-no-ssgi-in-captures.md).
+        // "apply: false" skips the save, so the player's setting stays saved and comes back below.
+        if (isGlobalIlluminationForcedOff) {
           ssgiSettings.SetLevel(QualitySetting.Level.Disabled, apply: false);
           ssgiSettings.Apply();
         }
@@ -169,7 +171,13 @@ internal static class ScreenshotCapturer {
           // Eight cycles is probably almost overkill, four would do the job well, but I've seen
           // some minor improvements after 4 cycles (it has diminishing returns).
           // Eight is at the limit of what's acceptable in terms of performance too.
-          for (var i = 0; i < 8; i++) {
+          var renderCount = 8;
+
+          #if DEBUG
+          renderCount = CaptureDebugProbe.RenderCountOverride ?? renderCount;
+          #endif
+
+          for (var i = 0; i < renderCount; i++) {
             camera.Render();
           }
         }
@@ -199,7 +207,7 @@ internal static class ScreenshotCapturer {
           new RenderConditionsReader.CaptureOverrides(
             IsUpscalerForcedOff: forcedOffUpscaler is not null,
             IsDynamicResolutionForcedOff: previousDynResLevel != QualitySetting.Level.High,
-            IsGlobalIlluminationForcedOff: wasGlobalIlluminationDisabled
+            IsGlobalIlluminationForcedOff: isGlobalIlluminationForcedOff
           )
         );
       }
@@ -240,7 +248,6 @@ internal static class ScreenshotCapturer {
         PngBytes = pendingImage.Value.Encoded,
         PreviewTexture = previewTexture,
         Size = renderSize,
-        WasGlobalIlluminationDisabled = wasGlobalIlluminationDisabled,
         AreSettingsTopQuality = areSettingsTopQuality,
         RenderConditions = renderConditions
       };

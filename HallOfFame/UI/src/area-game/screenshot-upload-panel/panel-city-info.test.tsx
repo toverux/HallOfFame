@@ -21,7 +21,6 @@ const snapshot: JsonScreenshotSnapshot = {
   imageFileSize: 0,
   imageWidth: 1920,
   imageHeight: 1080,
-  wasGlobalIlluminationDisabled: false,
   areSettingsTopQuality: true
 };
 

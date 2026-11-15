@@ -438,19 +438,6 @@ public sealed class
   [SettingsUISection(Settings.GroupAdvanced)]
   public bool CreateLocalScreenshot { get; set; }
 
-  /// <summary>
-  /// Whether to disable global illumination (while the screenshot is taken) due to the grainy
-  /// picture bug that happens on most (?) setups and is hideous, especially with supersampling.
-  /// </summary>
-  [SettingsUISection(Settings.GroupAdvanced)]
-  [SettingsUIHideByCondition(
-    typeof(Settings),
-    nameof(Settings.IsNvidiaGpu),
-    true
-  )]
-  [SettingsUIAdvanced]
-  public bool DisableGlobalIllumination { get; set; }
-
   /// <inheritdoc/>
   [SettingsUISection(Settings.GroupAdvanced)]
   public bool SendUsageStatistics { get; set; }
@@ -525,6 +512,14 @@ public sealed class
   }
 
   #if DEBUG
+  /// <summary>
+  /// Keeps the player's global illumination (SSGI) in captures, which the capturer otherwise turns
+  /// off, to see its grain again; see <c>docs/adr/0004-no-ssgi-in-captures.md</c>.
+  /// </summary>
+  [SettingsUISection(Settings.GroupDevelopment)]
+  [UsedImplicitly]
+  public bool CaptureWithGlobalIllumination { get; set; }
+
   [SettingsUISection(Settings.GroupDevelopment)]
   [SettingsUITextInput]
   [UsedImplicitly]
@@ -688,7 +683,6 @@ public sealed class
     );
 
     this.CreateLocalScreenshot = true;
-    this.DisableGlobalIllumination = Settings.IsNvidiaGpu();
     this.SendUsageStatistics = true;
     this.BaseUrl = "halloffame.cs2.mtq.io";
 
@@ -824,6 +818,8 @@ public sealed class
     ) =>
       new Dictionary<string, string> {
         ["Options.GROUP[HallOfFame.HallOfFame.Mod.Development]"] = "{ Development }",
+        ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CaptureWithGlobalIllumination]"] =
+          "Capture with Global Illumination",
         ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]"] = "Screenshot ID",
         ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]"] = "Load Screenshot",
         ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]"] =

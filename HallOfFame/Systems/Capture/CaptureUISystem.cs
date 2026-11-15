@@ -391,7 +391,6 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       captured.PngBytes,
       captured.Size.x,
       captured.Size.y,
-      captured.WasGlobalIlluminationDisabled,
       captured.AreSettingsTopQuality,
       this.citySnapshotProvider.GetPhotoModePropertiesSnapshot(),
       captured.RenderConditions,
