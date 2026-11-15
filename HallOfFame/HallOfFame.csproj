@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <!-- The mod's single version source: the build script writes it into the UI bundle banner. -->
-    <Version>2026.6.1</Version>
+    <Version>2026.7.0</Version>
 
     <Configurations>Debug;Release</Configurations>
 
