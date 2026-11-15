@@ -52,13 +52,20 @@ never resume.
 - Never seen on Windows with the same GPU, the mod's own capture included (memory at 6.3-7.4 GB,
   the ceiling not reached), on an RX 6950 XT under Windows, nor on an Intel Iris Xe under Proton
   (two captures). Untested on Linux AMD.
-- Whether DXVK's memory defrag plays a part is unknown: no run had `dxvk.enableMemoryDefrag = False`.
+- DXVK's relocation bugs, which break captures at the same ceiling, are not the cause: with their
+  fix (DXVK PR #6043 on Proton's DXVK base) a fresh first capture still hung, as one on stock DXVK
+  did in the same session pair, each after the capture's peak at 7.8 GB (capped). DXVK's memory
+  defrag itself was never switched off (`dxvk.enableMemoryDefrag = False`).
 
 ## Fix
 
-None in the mod. Two leads held, each once and under the conditions above: XeSS switched back on
-by hand more than 20 s after the game was back at its normal pace ran (capped), and one render at
-screen size with XeSS toggled off around it did not hang (by hand, at a breakpoint).
+None in the mod, and none planned: `docs/adr/0005-no-xess-workaround-under-proton.md` records why.
+The 3840x2160 capture size and the render target reset that keep other upscalers off the ceiling
+do not help: a first capture at that size still peaks at 7.8 GB, and the reset only acts once
+photo mode closes, after it. Two leads held, each once and under the conditions above: XeSS
+switched back on by hand more than 20 s after the game was back at its normal pace ran (capped),
+and one render at screen size with XeSS toggled off around it did not hang (by hand, at a
+breakpoint).
 With the upscaler off, DLSS4 or FSR3, captures on the same laptop did not hang this way (capped
 runs); the failures of
 [Captures break at the VRAM ceiling](captures-break-at-the-vram-ceiling-under-proton.md) still
