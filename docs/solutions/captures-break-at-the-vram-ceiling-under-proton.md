@@ -48,8 +48,9 @@ With XeSS running, a first capture stops the game for good at the same ceiling:
 
 ## Fix
 
-None in the mod yet: releasing the 4K render targets when photo mode closes is the option left,
-and a capture would still peak at the ceiling.
+The mod shrinks the render targets back to the screen size when photo mode closes
+(`RenderTargetShrinker`), which takes the game off the ceiling between photo sessions; a capture
+still peaks at it.
 A DXVK built with the fix, its `d3d11.dll` and `dxgi.dll` in the game folder, stops the corruption
 alone, which tells it from a mod bug: measured in the game with PR #6042, and on a standalone repro
 with PR #6043. `dxvk.enableMemoryDefrag = False` stops it too, but slows captures and worsens the

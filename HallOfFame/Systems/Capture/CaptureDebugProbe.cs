@@ -175,7 +175,8 @@ internal static class CaptureDebugProbe {
   }
 
   /// <summary>
-  /// Size of HDRP's shared render targets, which grow to the largest camera rendered and stay so.
+  /// Size of HDRP's shared render targets, which grow to the largest camera rendered and keep that
+  /// size until photo mode closes (`RenderTargetShrinker`).
   /// </summary>
   private static Vector2Int ReadRTHandleSize() {
     return new Vector2Int(RTHandles.maxWidth, RTHandles.maxHeight);

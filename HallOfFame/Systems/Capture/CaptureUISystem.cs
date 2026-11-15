@@ -127,6 +127,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
       // Kept alive by its subscription to the game's panel event.
       _ = new ClimateVolumeUnfreezer(this.World);
 
+      RenderTargetShrinker.Subscribe(this.World);
+
       // The uploader owns the capture -> assemble -> upload -> progress workflow, reporting back
       // through callbacks so this system keeps owning the UI binding and the (engine-bound) error
       // dialog.
