@@ -128,6 +128,7 @@ public sealed class Mod : IMod {
       ErrorDialogManagerAccessor.Init();
       PdxSdkPlatformProxy.Init();
       ScreenUtilityProxy.Init();
+      VolumetricFogBuffersAccessor.Init();
       #endif
 
       // Migration from previous versions.

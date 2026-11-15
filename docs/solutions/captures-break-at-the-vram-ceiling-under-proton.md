@@ -48,9 +48,9 @@ With XeSS running, a first capture stops the game for good at the same ceiling:
 
 ## Fix
 
-The mod shrinks the render targets back to the screen size when photo mode closes
-(`RenderTargetShrinker`), which takes the game off the ceiling between photo sessions; a capture
-still peaks at it.
+The mod shrinks the render targets and the volumetric fog buffers back to the screen size when
+photo mode closes (`RenderTargetShrinker`), which takes the game off the ceiling between photo
+sessions; a capture still peaks at it.
 A DXVK built with the fix, its `d3d11.dll` and `dxgi.dll` in the game folder, stops the corruption
 alone, which tells it from a mod bug: measured in the game with PR #6042, and on a standalone repro
 with PR #6043. `dxvk.enableMemoryDefrag = False` stops it too, but slows captures and worsens the
@@ -69,3 +69,8 @@ launch with the same save, camera and pinned time of day, the window kept on top
   shadow (under 1 % means no shadows).
 - Then the RMSE at 480 px wide against the run's first capture: a good capture sits under 0.01,
   a broken one above 0.02, often near 0.15. It also catches wrong water shading and exposure.
+
+To find what a capture leaves held, read the `ProfilerRecorder` counters `Render Textures Bytes`
+and `Texture Memory` from the unity eval before the capture, after it and after the shrink, then
+list `Resources.FindObjectsOfTypeAll<RenderTexture>()` by `Profiler.GetRuntimeMemorySizeLong`, in
+one eval: render-graph textures are freed between two eval calls.

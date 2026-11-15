@@ -20,6 +20,10 @@ RX 6950 XT whose GPU was not saturated.
 plus about 0.6 s at a session's first reset, most of it in
 `HDCamera.ResetAllHistoryRTHandleSystems`, whether a capture came before it or not.
 
+HDRP's volumetric fog buffers only grow too, and that reset leaves them alone: after a 4K capture
+they hold about 1.8 GiB, sized from the private `HDRenderPipeline.s_CurrentVolumetricBufferSize`
+and each camera's `HDCamera.volumetricHistoryBuffers`.
+
 Alternatives that were live:
 
 - A reset after every capture: each capture's renders took 1.2-2.9 s instead of 70-145 ms, and every
@@ -34,7 +38,9 @@ Alternatives that were live:
 `RenderTargetShrinker` resets the render targets to the screen size when the photo mode panel
 closes, on every platform, whenever they are larger than the screen: captures in a row stay fast,
 the game leaves the ceiling between photo sessions, and oversized targets cost the same GPU time
-whoever grew them. The warm-up reset was left out by Morgan's choice: the first reset's 0.6 s is
+whoever grew them. In the same step it shrinks the fog buffers by reflection on HDRP's private
+fields (`VolumetricFogBuffersAccessor`), best effort: where a game update renames a field, that
+part does nothing. The warm-up reset was left out by Morgan's choice: the first reset's 0.6 s is
 paid once per session, at a photo mode close.
 
 ## Consequences

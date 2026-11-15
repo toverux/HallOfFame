@@ -1,5 +1,6 @@
 using System;
 using Game.UI.InGame;
+using HallOfFame.Reflection;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -8,10 +9,11 @@ using UnityEngine.Rendering.HighDefinition;
 namespace HallOfFame.Systems.Capture;
 
 /// <summary>
-/// Shrinks HDRP's shared render targets back to the screen size when the photo mode panel closes.
-/// HDRP sizes the render targets every camera shares to the largest render it has seen and never
-/// shrinks them, so a capture leaves screen-size cameras drawing into a corner of capture-size
-/// targets for the rest of the session.
+/// Shrinks HDRP's shared render targets and its volumetric fog buffers back to the screen size when
+/// the photo mode panel closes.
+/// HDRP sizes the render targets every camera shares, and the fog's buffers, to the largest render
+/// it has seen and never shrinks them, so a capture leaves screen-size cameras drawing into a
+/// corner of capture-size buffers for the rest of the session.
 /// Every frame then costs more GPU time on every platform, and on a card short of memory under
 /// Proton, the game sits at DXVK's memory budget, where it crawls and its rendering can break.
 /// Shrinking at each capture would make every capture pay the regrowth; shrinking when photo mode
@@ -50,6 +52,13 @@ internal static class RenderTargetShrinker {
       );
 
       pipeline.ResetRTHandleReferenceSize(width, height);
+
+      // The volumetric fog grew with the same capture, through the camera it rendered with.
+      var camera = Camera.main;
+
+      if (camera != null) {
+        VolumetricFogBuffersAccessor.Shrink(camera);
+      }
     }
     catch (Exception ex) {
       // Silently, as an optimization: a game update breaking it would otherwise raise an error
