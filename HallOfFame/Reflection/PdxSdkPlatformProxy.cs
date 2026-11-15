@@ -113,15 +113,25 @@ internal static class PdxSdkPlatformProxy {
       : null;
 
   /// <summary>
-  /// Calls the private <c>ShowModsUI(Action&lt;ModsUIView&gt;)</c> method.
+  /// Whether <see cref="ShowModsUI"/> can open the in-game Paradox Mods UI, false where the SDK or
+  /// the private method was not found.
   /// </summary>
-  /// <exception cref="NullReferenceException">If the method was not found.</exception>
+  internal static bool CanShowModsUI =>
+    PdxSdkPlatformProxy.PdxSdk is not null && PdxSdkPlatformProxy.ShowModsUIMethod is not null;
+
+  /// <summary>
+  /// Calls the private <c>ShowModsUI(Action&lt;ModsUIView&gt;)</c> method.
+  /// Does nothing where <see cref="CanShowModsUI"/> is false.
+  /// </summary>
   internal static void ShowModsUI(Action<ModsUIView> showAction) {
-    if (PdxSdkPlatformProxy.ShowModsUIMethod is null) {
-      throw new NullReferenceException(nameof(PdxSdkPlatformProxy.ShowModsUIMethod));
+    if (
+      PdxSdkPlatformProxy.PdxSdk is not {} pdxSdk ||
+      PdxSdkPlatformProxy.ShowModsUIMethod is not {} showModsUIMethod
+    ) {
+      return;
     }
 
-    PdxSdkPlatformProxy.ShowModsUIMethod.Invoke(PdxSdkPlatformProxy.PdxSdk, [showAction]);
+    showModsUIMethod.Invoke(pdxSdk, [showAction]);
   }
 
   /// <summary>

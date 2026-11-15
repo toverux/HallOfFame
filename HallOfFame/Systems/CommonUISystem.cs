@@ -326,7 +326,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
     }
 
     void OpenInGame() {
-      if (PdxSdkPlatformProxy.PdxSdk is null) {
+      if (!PdxSdkPlatformProxy.CanShowModsUI) {
         Application.OpenURL(url);
 
         return;
