@@ -7,8 +7,11 @@ import {
   useCallback,
   useEffect,
   useMemo,
-  useRef
+  useRef,
+  useState
 } from 'react';
+import { FullscreenImage } from '../../components/fullscreen-image';
+import { PreloadImages } from '../../components/preload-images';
 import { Tooltip } from '../../components/tooltip';
 import expandSolidSrc from '../../icons/fontawesome/expand-solid.svg';
 import { getClassesModule, useTranslate } from '../../utils';
@@ -37,10 +40,15 @@ export const ScreenshotUploadPanelImage = memo(
       [screenshotSnapshot]
     );
 
-    const showImageFullscreen = useCallback(
-      () => showFullscreenImage(screenshotSnapshot.imageUri),
-      [screenshotSnapshot.imageUri]
-    );
+    const [isMaximized, setIsMaximized] = useState(false);
+
+    const maximize = useCallback(() => {
+      setIsMaximized(true);
+    }, []);
+
+    const unmaximize = useCallback(() => {
+      setIsMaximized(false);
+    }, []);
 
     // noinspection HtmlRequiredAltAttribute
     return (
@@ -58,6 +66,9 @@ export const ScreenshotUploadPanelImage = memo(
         <PreviewImage
           key={screenshotSnapshot.previewImageUri}
           uri={screenshotSnapshot.previewImageUri}
+          // On the preview, not on this whole block: React bubbles a click through the portal along
+          // the component tree, so the click closing the maximized image would reopen it here.
+          {...(screenshotSnapshot.isImageReady && { onClick: maximize })}
         />
 
         {ratioPreviewInfo.type != 'equal' && (
@@ -92,36 +103,39 @@ export const ScreenshotUploadPanelImage = memo(
             // The full image still encodes when the panel opens on the preview.
             disabled={!screenshotSnapshot.isImageReady}
             selectSound='open-panel'
-            onSelect={showImageFullscreen}
+            onSelect={maximize}
             className={classNames(styles.imageMagnifyButton, {
               [styles.imageHidden]: uploadProgress != null
             })}
           />
         </Tooltip>
+
+        {/* Loaded while the creator reads the panel, so a maximize shows it whole at once. */}
+        <PreloadImages
+          srcs={screenshotSnapshot.isImageReady ? [screenshotSnapshot.imageUri] : []}
+        />
+
+        {isMaximized && (
+          <FullscreenImage
+            src={screenshotSnapshot.imageUri}
+            placeholderSrc={screenshotSnapshot.previewImageUri}
+            onClose={unmaximize}
+          />
+        )}
       </div>
     );
   }
 );
-
-function showFullscreenImage(src: string): void {
-  const div = document.createElement('div');
-
-  div.classList.add(styles.fullscreenImage);
-  div.style.backgroundImage = `url(${src})`;
-
-  document.body.appendChild(div);
-
-  div.addEventListener('click', () => {
-    document.body.removeChild(div);
-  });
-}
 
 /**
  * The capture's preview, a live texture the mod destroys only once the UI lets go of it: an `<img>`
  * holds it until garbage collection, minutes away while the UI idles, so it clears its source on
  * unmount.
  */
-function PreviewImage({ uri }: Readonly<{ uri: string }>): ReactElement {
+function PreviewImage({
+  uri,
+  onClick
+}: Readonly<{ uri: string; onClick?: () => void }>): ReactElement {
   const imageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
@@ -135,5 +149,13 @@ function PreviewImage({ uri }: Readonly<{ uri: string }>): ReactElement {
   }, []);
 
   // noinspection HtmlRequiredAltAttribute
-  return <img ref={imageRef} className={coFixedRatioImageStyles.image} src={uri} />;
+  return (
+    // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions - a mouse shortcut to the maximize button, which keyboard and gamepad reach
+    <img
+      ref={imageRef}
+      className={classNames(styles.imagePreview, coFixedRatioImageStyles.image)}
+      src={uri}
+      onClick={onClick}
+    />
+  );
 }

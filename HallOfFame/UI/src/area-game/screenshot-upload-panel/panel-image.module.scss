@@ -13,6 +13,10 @@
     opacity: 0;
   }
 
+  &-preview {
+    @include common.stable-class;
+  }
+
   &-magnifyButton {
     position: absolute;
     // The round button is a good deal wider than the glyph it centres, so it carries its own
@@ -70,16 +74,4 @@
       opacity: 0.8;
     }
   }
-}
-
-.fullscreen-image {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  z-index: 10000;
 }
