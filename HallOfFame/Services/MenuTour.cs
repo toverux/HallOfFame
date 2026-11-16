@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using HallOfFame.Domain;
+using HallOfFame.Utils.Writers;
 
 namespace HallOfFame.Services;
 
@@ -14,8 +16,15 @@ namespace HallOfFame.Services;
 /// The screenshot count comes from <see cref="StatsNotifier"/>'s fetch on each main-menu visit:
 /// until one succeeds, the tour ends on the like step.
 /// </para>
+/// <para>
+/// It tracks its start, at its first balloon shown, and its end as usage events.
+/// </para>
 /// </summary>
-internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> publish) {
+internal sealed class MenuTour(
+  IMenuTourStore store,
+  Action<MenuTourStep, bool> publish,
+  Action<string, Dictionary<string, object>?> track
+) {
   // No property to fold it into: IsLastStep reads it together with Step.
   #pragma warning disable IDE0032
   private bool hasScreenshots;
@@ -51,17 +60,17 @@ internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> 
   /// <summary>
   /// Records that a balloon of the tour is on screen, which makes the tour a seen one, saved at
   /// once so that a crash or a quit never brings it back.
-  /// The tour goes on showing for the rest of the session.
+  /// The tour goes on showing for the rest of the session, and only the first report tracks its
+  /// start.
   /// </summary>
-  /// <returns>Whether this report started the tour, true only on the first one.</returns>
-  internal bool ReportShown() {
+  internal void ReportShown() {
     if (this.Step is MenuTourStep.None || store.HasSeenMenuTour) {
-      return false;
+      return;
     }
 
     this.MarkSeen();
 
-    return true;
+    track("tour_started", null);
   }
 
   /// <summary>
@@ -69,7 +78,7 @@ internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> 
   /// </summary>
   internal void Next() {
     if (this.IsLastStep) {
-      this.Close();
+      this.End(isCompleted: true);
     }
     else if (this.Step is not MenuTourStep.None) {
       this.Step++;
@@ -80,20 +89,9 @@ internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> 
 
   /// <summary>
   /// Ends the tour for good, whichever step it is on.
+  /// The last step shows no Next button, so closing it is the tour reaching its end.
   /// </summary>
-  internal void Close() {
-    if (this.Step is MenuTourStep.None) {
-      return;
-    }
-
-    if (!store.HasSeenMenuTour) {
-      this.MarkSeen();
-    }
-
-    this.Step = MenuTourStep.None;
-
-    this.Publish();
-  }
+  internal void Close() => this.End(isCompleted: this.IsLastStep);
 
   private void MarkSeen() {
     store.HasSeenMenuTour = true;
@@ -106,7 +104,7 @@ internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> 
   /// </summary>
   internal void OnMainMenuLeft() {
     if (store.HasSeenMenuTour) {
-      this.Close();
+      this.End(isCompleted: false, hasLeftMenu: true);
     }
   }
 
@@ -116,8 +114,38 @@ internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> 
   /// </summary>
   internal void OnMoreActionsOpened() {
     if (this.Step is MenuTourStep.Dashboard) {
-      this.Close();
+      this.End(isCompleted: true);
     }
+  }
+
+  /// <summary>
+  /// Ends the tour for good and tracks how, with the step it ended on.
+  /// </summary>
+  /// <param name="isCompleted">Whether the tour counts as completed.</param>
+  /// <param name="hasLeftMenu">
+  /// Whether the player ended it by leaving the main menu rather than through its balloons.
+  /// </param>
+  private void End(bool isCompleted, bool hasLeftMenu = false) {
+    if (this.Step is MenuTourStep.None) {
+      return;
+    }
+
+    if (!store.HasSeenMenuTour) {
+      this.MarkSeen();
+    }
+
+    track(
+      "tour_finished",
+      new Dictionary<string, object> {
+        ["completed"] = isCompleted,
+        ["leftMenu"] = hasLeftMenu,
+        ["step"] = this.Step.ToWireName()
+      }
+    );
+
+    this.Step = MenuTourStep.None;
+
+    this.Publish();
   }
 
   private void Publish() => publish(this.Step, this.IsLastStep);
