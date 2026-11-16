@@ -44,6 +44,8 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   internal Func<UsageBatch, Task>? PostUsageEventsImpl { get; init; }
 
+  internal Func<ErrorReport, Task>? PostErrorReportImpl { get; init; }
+
   public Task<CreatorStats> GetCreatorStats() =>
     this.GetCreatorStatsImpl?.Invoke() ?? throw new NotImplementedException();
 
@@ -89,4 +91,7 @@ internal sealed class FakeApi : IHallOfFameApi {
 
   public Task PostUsageEvents(UsageBatch batch) =>
     this.PostUsageEventsImpl?.Invoke(batch) ?? throw new NotImplementedException();
+
+  public Task PostErrorReport(ErrorReport report) =>
+    this.PostErrorReportImpl?.Invoke(report) ?? throw new NotImplementedException();
 }

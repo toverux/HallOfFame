@@ -8,8 +8,14 @@ namespace HallOfFame.Logging;
 /// It owns the "silent" toggle of <see cref="ILog.showsErrorsInUI"/>, and builds the user-facing
 /// recoverable/fatal error messages from the localization dictionary through
 /// <paramref name="translate"/>, the active dictionary's lookup in production.
+/// Each error call that carries an exception also hands it to <paramref name="report"/>, the error
+/// reporter in production, which decides whether it leaves the machine.
 /// </summary>
-internal sealed class ModLog(ILog log, Func<string, string> translate) : IModLog {
+internal sealed class ModLog(
+  ILog log,
+  Func<string, string> translate,
+  Action<Exception, ErrorSeverity> report
+) : IModLog {
   internal const string BaseErrorKey = $"{nameof(HallOfFame)}.Common.BASE_ERROR";
 
   internal const string RecoverableErrorKey =
@@ -29,16 +35,29 @@ internal sealed class ModLog(ILog log, Func<string, string> translate) : IModLog
 
   public void ErrorSilent(string message) => this.Silently(() => log.Error(message));
 
-  public void ErrorSilent(Exception exception) => this.Silently(() => log.Error(exception));
+  public void ErrorSilent(Exception exception) {
+    this.Silently(() => log.Error(exception));
 
-  public void ErrorSilent(Exception exception, string message) =>
+    report(exception, ErrorSeverity.Silent);
+  }
+
+  public void ErrorSilent(Exception exception, string message) {
     this.Silently(() => log.Error(exception, message));
 
-  public void ErrorRecoverable(Exception exception) =>
+    report(exception, ErrorSeverity.Silent);
+  }
+
+  public void ErrorRecoverable(Exception exception) {
     log.Error(exception, ModLog.PlayerMessage(isFatal: false, translate));
 
-  public void ErrorFatal(Exception exception) =>
+    report(exception, ErrorSeverity.Recoverable);
+  }
+
+  public void ErrorFatal(Exception exception) {
     log.Error(exception, ModLog.PlayerMessage(isFatal: true, translate));
+
+    report(exception, ErrorSeverity.Fatal);
+  }
 
   /// <summary>
   /// The message shown to the player over an error: what happened, then how bad it is.

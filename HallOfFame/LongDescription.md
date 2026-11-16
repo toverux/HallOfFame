@@ -74,8 +74,14 @@ For moderation purposes only, the mod sends the Hall of Fame server an abstract 
 IP address, and these are not stored permanently.
 Other metadata are sent, like your screen size or graphics card model, which have helped in the past
 to identify issues in the screenshot tool.
-While “Send usage statistics” is on in the mod settings, the mod also sends which of its features
-you use, allowing us to improve the mod, and the server keeps those records for one year.
+While “Send usage statistics and error reports” is on in the mod settings, the mod also sends which
+of its features you use, so we can improve it, and the server keeps those records for one year.
+When the mod runs into an unexpected error, the same option has it send a report: the error and
+where it happened in the mod's code, the mod and game versions, your operating system and whether
+the game runs under Wine or Proton, your screen size, graphics card and driver version, your game
+language, a random ID for the game session, and your public creator ID.
+Your Windows user name is removed from file paths before the report leaves your computer.
+The server passes reports to Sentry, an error tracking service, which keeps them for 30 days.
 
 ## Participate in the project
 

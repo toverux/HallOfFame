@@ -128,8 +128,9 @@ export function copyViewerLink(url: string, from: 'menu'): void {
 }
 
 /**
- * Logs a JavaScript error to the mod's C# logs (not only the UI console), and shows an error dialog
- * when {@link fatal} is set.
+ * Logs a JavaScript error to the mod's C# logs (not only the UI console), shows it in the game's
+ * error dialog, and reports it while the player allows usage statistics.
+ * {@link fatal} picks the dialog's message and the report's severity: the dialog shows either way.
  */
 export function logJavaScriptError(fatal: boolean, errorString: string | undefined): void {
   trigger(GROUP, 'logJavaScriptError', fatal, errorString);

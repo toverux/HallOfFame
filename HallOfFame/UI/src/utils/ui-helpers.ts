@@ -26,7 +26,8 @@ export function snappyOnSelect(
 }
 
 /**
- * Shows an error dialog and logs the error in the mod's logs instead of just in UI logs.
+ * Shows an error dialog, logs the error in the mod's C# logs instead of just in UI logs, and
+ * reports it while the player allows usage statistics.
  */
 export function logError(error: unknown, fatal = false): void {
   iconsole.error(error);

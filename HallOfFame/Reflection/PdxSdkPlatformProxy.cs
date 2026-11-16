@@ -90,9 +90,9 @@ internal static class PdxSdkPlatformProxy {
       BindingFlags.NonPublic | BindingFlags.Instance
     );
 
-    // Logged only: the public playset reader stands in for it.
+    // Silent to the player: the public playset reader stands in for it.
     if (PdxSdkPlatformProxy.SdkContextField is null) {
-      Mod.Log.ErrorSilent("Failed to find field m_SDKContext in PdxSdkPlatform.");
+      Mod.Log.ErrorSilent(new Exception("Failed to find field m_SDKContext in PdxSdkPlatform."));
     }
     else {
       Mod.Log.Verbose($"{nameof(PdxSdkPlatformProxy)}: Acquired PdxSdkPlatform.m_SDKContext");

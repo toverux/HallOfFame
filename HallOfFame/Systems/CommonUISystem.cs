@@ -379,7 +379,7 @@ internal sealed partial class CommonUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Shows an error sent from JavaScript in the game's error dialog, and logs it.
+  /// Shows an error sent from JavaScript in the game's error dialog, logs it, and reports it.
   /// </summary>
   private static void LogJavaScriptError(bool isFatal, string error) {
     // The game's error dialog, as for the mod's own unforeseen errors: it shows the stack as plain
@@ -391,7 +391,10 @@ internal sealed partial class CommonUISystem : UISystemBase {
       }
     );
 
+    // A message-only call, which the log does not report: the UI error has its own entry point.
     Mod.Log.ErrorSilent(error);
+
+    Mod.ErrorReporter.ReportUIError(isFatal, error);
   }
 
   /// <summary>

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Colossal.Core;
 using Colossal.IO.AssetDatabase;
 using Colossal.Logging;
 using Colossal.PSI.Environment;
@@ -30,6 +31,8 @@ public sealed class Mod : IMod {
   private static IHallOfFameApi? apiValue;
 
   private static CreatorIdentity? creatorIdentityValue;
+
+  private static ErrorReporter? errorReporterValue;
 
   private static UsageTracker? usageTrackerValue;
   #pragma warning restore IDE0032
@@ -93,6 +96,18 @@ public sealed class Mod : IMod {
     Mod.usageTrackerValue ??
     throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
 
+  /// <summary>
+  /// The error reporter, which the log's error calls, the game's log, and the UI hand their errors
+  /// to.
+  /// Built in <see cref="OnLoad"/> once the settings are loaded and the creator identity exists: an
+  /// error raised before cannot know the player's consent nor authenticate its request, and is not
+  /// reported.
+  /// </summary>
+  /// <exception cref="NullReferenceException">If the mod has not been loaded yet.</exception>
+  internal static ErrorReporter ErrorReporter =>
+    Mod.errorReporterValue ??
+    throw new NullReferenceException($"Mod {nameof(Mod.OnLoad)}() was not called yet.");
+
   internal static string GameScreenshotsPath { get; } =
     Path.Combine(EnvPath.kUserDataPath, "Screenshots");
 
@@ -106,7 +121,8 @@ public sealed class Mod : IMod {
     LogManager.GetLogger(nameof(HallOfFame))
       .SetShowsErrorsInUI(true)
       .SetEffectiveness(Level.All),
-    static key => key.Translate()
+    static key => key.Translate(),
+    static (exception, severity) => Mod.errorReporterValue?.ReportException(exception, severity)
   );
 
   public void OnLoad(UpdateSystem updateSystem) {
@@ -165,25 +181,22 @@ public sealed class Mod : IMod {
       );
       #endif
 
+      var session = new UsageSession(
+        // One session per launch, for the whole life of the process: the game is usually killed
+        // rather than closed, so a session ends with the last row that carries its ID.
+        Guid.NewGuid().ToString(),
+        typeof(Mod).Assembly.GetName().Version.ToString(3),
+        Version.current.shortVersion,
+        #if DEBUG
+        IsDebug: true
+        #else
+        IsDebug: false
+        #endif
+      );
+
       // Built before the creator identity starts: its startup sync is the first request the session
       // header goes on.
-      Mod.usageTrackerValue = new UsageTracker(
-        Mod.Api,
-        Mod.Log,
-        this.settingsValue,
-        new UsageSession(
-          // One session per launch, for the whole life of the process: the game is usually killed
-          // rather than closed, so a session ends with the last row that carries its ID.
-          Guid.NewGuid().ToString(),
-          typeof(Mod).Assembly.GetName().Version.ToString(3),
-          Version.current.shortVersion,
-          #if DEBUG
-          IsDebug: true
-          #else
-          IsDebug: false
-          #endif
-        )
-      );
+      Mod.usageTrackerValue = new UsageTracker(Mod.Api, Mod.Log, this.settingsValue, session);
 
       // Build the creator identity module and publish it as a singleton before starting it: its
       // startup sync issues the first authorized request, whose credential is assembled through
@@ -197,6 +210,9 @@ public sealed class Mod : IMod {
       );
 
       Mod.creatorIdentityValue = identity;
+
+      // Before the identity starts, so that a failure of its startup sync is reported.
+      Mod.StartErrorReporter(session, this.settingsValue);
 
       identity.Start();
 
@@ -235,6 +251,52 @@ public sealed class Mod : IMod {
     // There is no need to clean up things like localization, event listeners, etc., as you can't
     // just unload and reload a mod, disposing only happens when quitting the game, so here we only
     // need to clean up things that are observable after the process exited.
+  }
+
+  #if DEBUG
+  /// <summary>
+  /// Debug entry point: turns the error reporter on for the rest of the session, as Debug builds
+  /// send nothing by default, and reports a test exception through the log, the path every error
+  /// call takes.
+  /// Its stack is the same at each call, so a session sends it once.
+  /// </summary>
+  internal static void SendTestErrorReport() {
+    Mod.ErrorReporter.IsEnabled = true;
+
+    try {
+      throw new InvalidOperationException(
+        "Test error report, sent from the Debug entry point; delete it."
+      );
+    }
+    catch (Exception ex) {
+      Mod.Log.ErrorSilent(ex);
+    }
+  }
+  #endif
+
+  /// <summary>
+  /// Builds the error reporter, and hands it what the game's log sees: an exception a system's
+  /// update or a trigger throws reaches <see cref="UnityLogger.OnErrorOrHigher"/>, one an
+  /// <c>async void</c> method throws reaches <see cref="UnityLogger.OnException"/>.
+  /// </summary>
+  private static void StartErrorReporter(UsageSession session, Settings settings) {
+    var reporter = new ErrorReporter(
+      Mod.Api,
+      settings,
+      ErrorContextReader.Read(session),
+      // Run by the game manager's update, which no mod system can keep from running.
+      static action => MainThreadDispatcher.RegisterUpdater(action)
+    ) {
+      ProfilePath = ErrorContextReader.ReadProfilePath(),
+      IsEnabled = !session.IsDebug
+    };
+
+    Mod.errorReporterValue = reporter;
+
+    UnityLogger.OnErrorOrHigher += (log, _, _, exception, _) =>
+      reporter.ReportEscaped(log?.name, exception);
+
+    UnityLogger.OnException += (exception, _) => reporter.ReportEscaped(null, exception);
   }
 
   private static void CreateDirectories() {

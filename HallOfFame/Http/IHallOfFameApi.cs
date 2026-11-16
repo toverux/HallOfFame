@@ -68,4 +68,11 @@ internal interface IHallOfFameApi {
   /// The server answers with no body.
   /// </summary>
   Task PostUsageEvents(UsageBatch batch);
+
+  /// <summary>
+  /// Reports an unforeseen error of the mod, which the server passes to Sentry against the
+  /// authenticated creator's public ID.
+  /// The server answers with no body, and drops a report over its hourly ceiling without failing.
+  /// </summary>
+  Task PostErrorReport(ErrorReport report);
 }
