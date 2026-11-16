@@ -85,7 +85,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 ## Glossary
 
 - **Vanilla**: the unmodded game's own code and UI (`vanilla-modules`, `vanilla-vars.scss`).
-- **Debug entry point**: a Debug-only static member an agent calls from the unity eval to run a C# action or read its state.
+- **Debug entry point**: a Debug-only member an agent calls from the unity eval to run a C# action or read its state.
 - **Slideshow**: the main-menu screenshot rotation (`SlideshowUISystem`, `SlideshowConductor`, `area-menu`). It was once called the "presenter"; it is the slideshow everywhere now.
 - **Creator**: the player account that uploaded a screenshot. The mod calls players creators, not users or authors.
 - **Creator ID**: `Settings.CreatorID` is the mod's API credential, never a public identifier and never in a URL. The creator's public identifier is `Domain/Creator.Id`, persisted as `Settings.PublicCreatorID`.
@@ -95,7 +95,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 
 One agent builds a feature and verifies it in the running game, so every feature exposes what that takes:
 
-- Every C# action has a Debug entry point, `#if DEBUG` and static, callable from the unity eval, and the state it changes is readable from there too.
+- Every C# action has a Debug entry point, `#if DEBUG`, callable from the unity eval, and the state it changes is readable from there too.
 - Every interactive UI element carries a stable class from its stylesheet, which an agent or a test selects by its prefixed BEM name with the hash left out: `[class*="hof-<block>-<element>_"]`. No test ids.
 - Every UI↔C# path is a named binding, declared in a `utils/bindings` module on the TS side and in a UI system on the C# side.
 - A feature is done when an agent has driven it in the running game (the unity eval for C#, the gameface `game_*` tools for the UI, the `cs2-dev` tools around both) and pinned what is stable as a UI test.
