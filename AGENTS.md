@@ -96,7 +96,7 @@ Always run the appropriate check/test commands after changes, at the end of the 
 One agent builds a feature and verifies it in the running game, so every feature exposes what that takes:
 
 - Every C# action has a Debug entry point, `#if DEBUG`, callable from the unity eval, and the state it changes is readable from there too.
-- Every interactive UI element carries a stable class from its stylesheet, which an agent or a test selects by its prefixed BEM name with the hash left out: `[class*="hof-<block>-<element>_"]`. No test ids.
+- Every interactive UI element carries a stable class from its stylesheet, which an agent selects in the running game by its prefixed BEM name with the hash left out: `[class*="hof-<block>-<element>_"]`. A UI test cannot, as the harness leaves the mod's classes undefined. No test ids.
 - Every UI↔C# path is a named binding, declared in a `utils/bindings` module on the TS side and in a UI system on the C# side.
 - A feature is done when an agent has driven it in the running game (the unity eval for C#, the gameface `game_*` tools for the UI, the `cs2-dev` tools around both) and pinned what is stable as a UI test.
 
