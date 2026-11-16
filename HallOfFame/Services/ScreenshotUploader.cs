@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using HallOfFame.Http;
@@ -10,12 +11,13 @@ namespace HallOfFame.Services;
 /// Owns the screenshot upload workflow: it merges the frozen <see cref="ScreenshotSnapshot"/>, the
 /// live city name, and the user's <see cref="ScreenshotInfoFormValue"/> into a single upload
 /// request, drives the two-phase progress (network upload, then a time-based processing guess), and
-/// reports the outcome.
+/// reports the outcome, to the player and as an <c>upload_finished</c> usage event.
 /// </summary>
 internal sealed class ScreenshotUploader(
   IHallOfFameApi api,
   IModLog log,
-  Action<HttpException> reportError
+  Action<HttpException> reportError,
+  Action<string, Dictionary<string, object>?> track
 ) {
   /// <summary>
   /// Progress model for the current upload, or <c>null</c> when no upload is in progress.
@@ -53,6 +55,7 @@ internal sealed class ScreenshotUploader(
   /// Designed never to throw, so the caller can fire-and-forget it: an <see cref="HttpException"/>
   /// goes to <see cref="reportError"/>, any other error is logged as recoverable, and either way
   /// the progress is reset, unless a newer upload replaced this one, whose failure is only logged.
+  /// Every exit tracks one <c>upload_finished</c> with its outcome, an abandoned upload's included.
   /// </summary>
   internal async Task Upload(
     ScreenshotSnapshot snapshot,
@@ -81,6 +84,8 @@ internal sealed class ScreenshotUploader(
       }
 
       log.Warn(ex, $"{nameof(ScreenshotUploader)}: The screenshot to upload failed to encode.");
+
+      this.TrackFinished("encode_failed");
 
       return;
     }
@@ -121,21 +126,29 @@ internal sealed class ScreenshotUploader(
 
       progressModel.Complete();
 
+      this.TrackFinished("stored");
+
       log.Info($"{nameof(ScreenshotUploader)}: Screenshot uploaded, ID #{screenshot.Id}.");
     }
     // An upload the panel abandoned, failing during a newer one, leaves the newer one's progress.
     catch (Exception ex) when (this.currentModel is {} current && current != progressModel) {
+      this.TrackFailed(ex);
+
       log.Warn(ex, $"{nameof(ScreenshotUploader)}: An abandoned upload failed.");
     }
     catch (HttpException ex) {
       // Reset progress state.
       this.currentModel = null;
 
+      this.TrackFailed(ex);
+
       reportError(ex);
     }
     catch (Exception ex) {
       // Reset progress state.
       this.currentModel = null;
+
+      this.TrackFailed(ex);
 
       log.ErrorRecoverable(ex);
     }
@@ -162,5 +175,31 @@ internal sealed class ScreenshotUploader(
         await Task.Yield();
       }
     }
+  }
+
+  /// <summary>
+  /// The <c>upload_finished</c> outcome of an upload that failed with <paramref name="ex"/>.
+  /// </summary>
+  private static string GetFailureOutcome(Exception ex) =>
+    ex switch {
+      HttpNetworkException { IsUndecodable: true } => "bad_response",
+      HttpNetworkException => "network",
+      HttpUserCompatibilityException => "incompatible",
+      HttpUserException => "rejected",
+      HttpServerException => "server_error",
+      _ => "failed"
+    };
+
+  private void TrackFailed(Exception ex) {
+    this.TrackFinished(ScreenshotUploader.GetFailureOutcome(ex));
+  }
+
+  private void TrackFinished(string outcome) {
+    track(
+      "upload_finished",
+      new Dictionary<string, object> {
+        ["outcome"] = outcome
+      }
+    );
   }
 }

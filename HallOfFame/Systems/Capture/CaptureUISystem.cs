@@ -138,7 +138,8 @@ internal sealed partial class CaptureUISystem : UISystemBase {
         ex => ErrorMessageDialog.Show(
           ex.GetUserFriendlyMessage(),
           "HallOfFame.Systems.CaptureUI.UPLOAD_ERROR"
-        )
+        ),
+        Mod.UsageTracker.Track
       );
 
       this.assetModsBinding = new ValueBinding<Colossal.PSI.Common.Mod[]?>(

@@ -18,13 +18,20 @@ internal abstract class HttpException(
 }
 
 /// <summary>
-/// Class for an HTTP *network* error ("code 0").
+/// Class for an HTTP *network* error ("code 0"), or for a response whose body could not be decoded.
 /// </summary>
 internal sealed class HttpNetworkException(
   string requestId,
   string message,
   Exception? inner = null
-) : HttpException(requestId, message, inner);
+) : HttpException(requestId, message, inner) {
+  /// <summary>
+  /// Whether the server answered with a body the mod could not parse or map, an empty one included.
+  /// It is a wire format mismatch rather than a connection failure, but stays this type, as the
+  /// message the player reads is keyed on the exception's type name.
+  /// </summary>
+  internal bool IsUndecodable { get; init; }
+}
 
 /// <summary>
 /// Class for an internal server error (HTTP status code 500+).

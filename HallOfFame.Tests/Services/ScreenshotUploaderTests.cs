@@ -66,12 +66,12 @@ public sealed class ScreenshotUploaderTests {
     var logged = new List<Exception>();
     var reported = new List<HttpException>();
 
-    var uploader = new ScreenshotUploader(
+    var uploader = ScreenshotUploaderTests.MakeUploader(
       api,
+      reported.Add,
       new FakeModLog {
         ErrorRecoverableImpl = logged.Add
-      },
-      reported.Add
+      }
     );
 
     await uploader.Upload(
@@ -245,7 +245,8 @@ public sealed class ScreenshotUploaderTests {
       UploadScreenshotImpl = _ => answers.Dequeue()
     };
 
-    var uploader = ScreenshotUploaderTests.MakeUploader(api);
+    var tracked = new List<string>();
+    var uploader = ScreenshotUploaderTests.MakeUploader(api, tracked: tracked);
 
     var first = uploader.Upload(
       ScreenshotUploaderTests.MakeSnapshot(),
@@ -269,6 +270,9 @@ public sealed class ScreenshotUploaderTests {
     await first;
 
     Assert.Equal("new", uploader.UploadedScreenshotId);
+
+    // Each upload reports its own outcome, the newer one landing first.
+    Assert.Equal(["stored", "stored"], tracked);
   }
 
   [Fact]
@@ -290,7 +294,13 @@ public sealed class ScreenshotUploaderTests {
     };
 
     var reported = new List<HttpException>();
-    var uploader = ScreenshotUploaderTests.MakeUploader(api, reportError: reported.Add);
+    var tracked = new List<string>();
+
+    var uploader = ScreenshotUploaderTests.MakeUploader(
+      api,
+      reportError: reported.Add,
+      tracked: tracked
+    );
 
     var first = uploader.Upload(
       ScreenshotUploaderTests.MakeSnapshot(),
@@ -312,6 +322,9 @@ public sealed class ScreenshotUploaderTests {
     Assert.Equal("new", uploader.UploadedScreenshotId);
     Assert.NotNull(uploader.CurrentProgress);
     Assert.Empty(reported);
+
+    // The abandoned upload reports its failure through usage alone, never to the player.
+    Assert.Equal(["stored", "network"], tracked);
   }
 
   [Fact]
@@ -403,12 +416,12 @@ public sealed class ScreenshotUploaderTests {
     var recoverable = new List<Exception>();
     var reported = new List<HttpException>();
 
-    var uploader = new ScreenshotUploader(
+    var uploader = ScreenshotUploaderTests.MakeUploader(
       api,
+      reported.Add,
       new FakeModLog {
         ErrorRecoverableImpl = recoverable.Add
-      },
-      reported.Add
+      }
     );
 
     await uploader.Upload(
@@ -425,12 +438,112 @@ public sealed class ScreenshotUploaderTests {
     Assert.Null(uploader.CurrentProgress);
   }
 
+  [Fact]
+  public async Task Upload_Success_TracksStored() {
+    var api = new FakeApi {
+      UploadScreenshotImpl = _ => Task.FromResult(
+        new Screenshot {
+          Id = "1"
+        }
+      )
+    };
+
+    var tracked = new List<string>();
+    var uploader = ScreenshotUploaderTests.MakeUploader(api, tracked: tracked);
+
+    await uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    Assert.Equal(["stored"], tracked);
+  }
+
+  [Theory]
+  [InlineData("network")]
+  [InlineData("bad_response")]
+  [InlineData("rejected")]
+  [InlineData("incompatible")]
+  [InlineData("server_error")]
+  [InlineData("failed")]
+  public async Task Upload_Failure_TracksItsOutcome(string outcome) {
+    var api = new FakeApi {
+      UploadScreenshotImpl = _ =>
+        Task.FromException<Screenshot>(ScreenshotUploaderTests.MakeFailure(outcome))
+    };
+
+    var tracked = new List<string>();
+    var uploader = ScreenshotUploaderTests.MakeUploader(api, tracked: tracked);
+
+    await uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    Assert.Equal([outcome], tracked);
+  }
+
+  [Fact]
+  public async Task Upload_FailedEncode_TracksEncodeFailed() {
+    var tracked = new List<string>();
+    var uploader = ScreenshotUploaderTests.MakeUploader(new FakeApi(), tracked: tracked);
+
+    await uploader.Upload(
+      ScreenshotUploaderTests.MakeSnapshot(
+        imageBytes: Task.FromException<byte[]>(new InvalidOperationException("boom"))
+      ),
+      "City",
+      ScreenshotUploaderTests.MakeForm()
+    );
+
+    Assert.Equal(["encode_failed"], tracked);
+  }
+
+  /// <summary>
+  /// The exception an upload ending on <paramref name="outcome"/> fails with, as the HTTP layer
+  /// raises it.
+  /// </summary>
+  private static Exception MakeFailure(string outcome) =>
+    outcome switch {
+      "network" => new HttpNetworkException("1", "boom"),
+      "bad_response" => new HttpNetworkException("1", "boom") {
+        IsUndecodable = true
+      },
+      "rejected" => new HttpUserException("1", new HttpQueries.JsonError()),
+      "incompatible" => new HttpUserCompatibilityException("1", new HttpQueries.JsonError()),
+      "server_error" => new HttpServerException("1", new HttpQueries.JsonError()),
+      _ => new InvalidOperationException("boom")
+    };
+
   private static ScreenshotUploader MakeUploader(
     IHallOfFameApi api,
     Action<HttpException>? reportError = null,
-    IModLog? log = null
+    IModLog? log = null,
+    List<string>? tracked = null
   ) =>
-    new(api, log ?? new FakeModLog(), reportError ?? (_ => {}));
+    new(
+      api,
+      log ?? new FakeModLog(),
+      reportError ?? (_ => {}),
+      (name, properties) => ScreenshotUploaderTests.RecordOutcome(tracked, name, properties)
+    );
+
+  /// <summary>
+  /// Records the outcome of each <c>upload_finished</c>, failing on any other event, so a test
+  /// asserts the exits of an upload as a list of outcomes.
+  /// </summary>
+  private static void RecordOutcome(
+    List<string>? tracked,
+    string name,
+    Dictionary<string, object>? properties
+  ) {
+    Assert.Equal("upload_finished", name);
+    Assert.NotNull(properties);
+
+    tracked?.Add((string) Assert.Single(properties!, p => p.Key == "outcome").Value);
+  }
 
   private static ScreenshotSnapshot MakeSnapshot(
     int achievedMilestone = 0,

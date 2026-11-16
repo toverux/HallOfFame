@@ -285,19 +285,11 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
       // Unity's client is high-level and interprets non-2xx status codes as "protocol errors".
       // ReSharper disable once InvertIf
       if (request.result is UnityWebRequest.Result.ProtocolError) {
-        var error = HttpQueries.DecodeJson<JsonError>(requestId, request.downloadHandler.text);
-
-        throw request.responseCode switch {
-          >= 500 =>
-            new HttpServerException(requestId, error),
-          >= 400 and not 404 =>
-            new HttpUserException(requestId, error),
-          404 =>
-            new HttpUserCompatibilityException(requestId, error),
-
-          // This should not happen.
-          _ => new HttpNetworkException(requestId, error.Message)
-        };
+        throw HttpQueries.GetProtocolException(
+          requestId,
+          request.responseCode,
+          request.downloadHandler.text
+        );
       }
 
       // So far so good, we can parse the JSON response.
@@ -336,10 +328,43 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
   }
 
   /// <summary>
+  /// The exception for a response with a non-2xx status, picked by that status.
+  /// A body that is not the server's JSON, such as a proxy's HTML error page, leaves the default
+  /// message, as the status already says how the request failed.
+  /// </summary>
+  internal static HttpException GetProtocolException(
+    string requestId,
+    long responseCode,
+    string body
+  ) {
+    JsonError error;
+
+    try {
+      error = HttpQueries.DecodeJson<JsonError>(requestId, body);
+    }
+    catch (HttpNetworkException ex) when (ex.IsUndecodable) {
+      error = new JsonError();
+    }
+
+    return responseCode switch {
+      >= 500 =>
+        new HttpServerException(requestId, error),
+      >= 400 and not 404 =>
+        new HttpUserException(requestId, error),
+      404 =>
+        new HttpUserCompatibilityException(requestId, error),
+
+      // This should not happen.
+      _ => new HttpNetworkException(requestId, error.Message)
+    };
+  }
+
+  /// <summary>
   /// Parses and maps a JSON body into <typeparamref name="T"/>, touching nothing but its
   /// arguments, so it also runs off the main thread.
+  /// A body it cannot read throws an <see cref="HttpNetworkException"/> marked undecodable.
   /// </summary>
-  private static T DecodeJson<T>(string requestId, string json)
+  internal static T DecodeJson<T>(string requestId, string json)
     where T : new() {
     try {
       if (string.IsNullOrWhiteSpace(json)) {
@@ -364,7 +389,9 @@ internal sealed partial class HttpQueries : IHallOfFameApi {
         $"Failed to parse JSON response into {typeof(T).FullName}: " +
         ex.Message,
         ex
-      );
+      ) {
+        IsUndecodable = true
+      };
     }
   }
 
