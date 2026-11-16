@@ -620,7 +620,9 @@ describe('CreatorDashboard', () => {
         .map(trigger => trigger.args)
     ).toEqual([['a']]);
     expect(screen.queryByText(photoModeNotice)).toBeNull();
-    expect(getUsageEvents()).toEqual([['screenshot_details_opened', { from: 'dashboard' }]]);
+    expect(getUsageEvents()).toEqual([
+      ['screenshot_details_opened', { from: 'dashboard', tab: 'playset' }]
+    ]);
   });
 
   it(`opens the details window on the photo settings from their fact`, () => {

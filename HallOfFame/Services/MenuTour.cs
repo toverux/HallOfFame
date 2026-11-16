@@ -7,8 +7,9 @@ namespace HallOfFame.Services;
 /// Steps the main menu's one-time tour of the slideshow's controls, one balloon on each in turn:
 /// the navigation buttons, the menu visibility toggle, the like button, then the more-actions menu
 /// holding the Creator Dashboard, a step only a creator with a screenshot gets.
-/// Closing it on any step, leaving the main menu while it shows, or opening the more-actions menu
-/// on the dashboard's step ends it for good, saved at once.
+/// It counts as seen, saved at once, from the moment its first balloon is on screen, so a crash or a
+/// quit never brings it back. Closing it on any step, leaving the main menu after a balloon showed,
+/// or opening the more-actions menu on the dashboard's step ends it.
 /// <para>
 /// The screenshot count comes from <see cref="StatsNotifier"/>'s fetch on each main-menu visit:
 /// until one succeeds, the tour ends on the like step.
@@ -48,6 +49,22 @@ internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> 
   }
 
   /// <summary>
+  /// Records that a balloon of the tour is on screen, which makes the tour a seen one, saved at
+  /// once so that a crash or a quit never brings it back.
+  /// The tour goes on showing for the rest of the session.
+  /// </summary>
+  /// <returns>Whether this report started the tour, true only on the first one.</returns>
+  internal bool ReportShown() {
+    if (this.Step is MenuTourStep.None || store.HasSeenMenuTour) {
+      return false;
+    }
+
+    this.MarkSeen();
+
+    return true;
+  }
+
+  /// <summary>
   /// Moves on to the next step, or ends the tour from its last.
   /// </summary>
   internal void Next() {
@@ -69,12 +86,28 @@ internal sealed class MenuTour(IMenuTourStore store, Action<MenuTourStep, bool> 
       return;
     }
 
-    store.HasSeenMenuTour = true;
-    store.Save();
+    if (!store.HasSeenMenuTour) {
+      this.MarkSeen();
+    }
 
     this.Step = MenuTourStep.None;
 
     this.Publish();
+  }
+
+  private void MarkSeen() {
+    store.HasSeenMenuTour = true;
+    store.Save();
+  }
+
+  /// <summary>
+  /// Records that the player left the main menu, which unmounts the tour's balloons without a
+  /// trigger: a tour a balloon showed ends for good, one none showed waits for the next main menu.
+  /// </summary>
+  internal void OnMainMenuLeft() {
+    if (store.HasSeenMenuTour) {
+      this.Close();
+    }
   }
 
   /// <summary>

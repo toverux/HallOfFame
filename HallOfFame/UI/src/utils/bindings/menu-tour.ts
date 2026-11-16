@@ -28,6 +28,13 @@ export function useIsMenuTourLastStep(): boolean {
 }
 
 /**
+ * Tells C# a balloon of the tour is on screen, which makes the tour a seen one at the first report.
+ */
+export function reportMenuTourShown(): void {
+  trigger(GROUP, 'shown');
+}
+
+/**
  * Moves the tour on to its next step, or ends it from its last.
  */
 export function nextMenuTourStep(): void {

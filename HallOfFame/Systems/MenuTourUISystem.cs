@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using Colossal.Serialization.Entities;
 using Colossal.UI.Binding;
 using Game;
-using Game.SceneFlow;
 using Game.UI;
 using HallOfFame.Domain;
 using HallOfFame.Services;
-using HallOfFame.Utils;
 using HallOfFame.Utils.Writers;
 
 namespace HallOfFame.Systems;
@@ -16,7 +14,7 @@ namespace HallOfFame.Systems;
 /// The thin binding shell over <see cref="MenuTour"/>, the main menu's one-time tour of the
 /// slideshow's controls: it publishes the step, forwards the UI's triggers, and takes the
 /// creator's stats from <see cref="StatsNotificationSystem"/>.
-/// It also tracks the tour's start and end as usage events.
+/// It also tracks the tour's start, at its first balloon's report, and its end as usage events.
 /// </summary>
 internal sealed partial class MenuTourUISystem : UISystemBase {
   private const string BindingGroup = "hallOfFame.menuTour";
@@ -27,11 +25,13 @@ internal sealed partial class MenuTourUISystem : UISystemBase {
 
   private ValueBinding<bool> isLastStepBinding = null!;
 
+  #if DEBUG
   /// <summary>
-  /// Whether this session tracked the tour's start, and so showed the tour, which shows again on
-  /// each launch until it ends.
+  /// Debug/development read of the tour's step, its seen flag being
+  /// <see cref="Settings.HasSeenMenuTour"/>.
   /// </summary>
-  private bool isStartTracked;
+  internal MenuTourStep Step => this.tour.Step;
+  #endif
 
   protected override void OnCreate() {
     base.OnCreate();
@@ -57,6 +57,8 @@ internal sealed partial class MenuTourUISystem : UISystemBase {
 
       this.AddBinding(this.stepBinding);
       this.AddBinding(this.isLastStepBinding);
+
+      this.AddBinding(new TriggerBinding(MenuTourUISystem.BindingGroup, "shown", this.ReportShown));
 
       // Reaching the end and opening the more-actions menu on the step that asks for it complete
       // the tour, closing it earlier dismisses it.
@@ -84,11 +86,6 @@ internal sealed partial class MenuTourUISystem : UISystemBase {
           () => this.TrackingFinish(this.tour.OnMoreActionsOpened, isCompleted: true)
         )
       );
-
-      // Replays the main menu's loading completion this system missed when the mod loaded late.
-      if (GameManager.instance.IsMainMenuLoaded) {
-        this.OnGameLoadingComplete(Purpose.Cleanup, GameMode.MainMenu);
-      }
     }
     catch (Exception ex) {
       Mod.Log.ErrorFatal(ex);
@@ -96,33 +93,24 @@ internal sealed partial class MenuTourUISystem : UISystemBase {
   }
 
   /// <summary>
-  /// Tracks the tour's start on the first main-menu load of the session that shows it, which needs
-  /// the slideshow, as the tour's balloons point at its controls.
+  /// Tells the tour the player left the main menu, which ends it when a balloon showed.
   /// </summary>
-  protected override void OnGameLoadingComplete(Purpose purpose, GameMode mode) {
-    if (
-      mode is not GameMode.MainMenu ||
-      !Mod.Settings.EnableMainMenuSlideshow ||
-      this.tour.Step is MenuTourStep.None ||
-      this.isStartTracked) {
+  protected override void OnGamePreload(Purpose purpose, GameMode mode) {
+    if (mode is GameMode.MainMenu) {
       return;
     }
 
-    this.isStartTracked = true;
-
-    Mod.UsageTracker.Track("tour_started");
+    this.TrackingFinish(this.tour.OnMainMenuLeft, isCompleted: false, hasLeftMenu: true);
   }
 
   /// <summary>
-  /// Ends the tour when the player leaves the main menu while it shows, which unmounts its balloons
-  /// without a trigger: the tour counts as seen rather than coming back at the next launch.
+  /// Takes the UI's report that a balloon of the tour is on screen, tracking the tour's start on
+  /// the first one.
   /// </summary>
-  protected override void OnGamePreload(Purpose purpose, GameMode mode) {
-    if (mode is GameMode.MainMenu || !this.isStartTracked) {
-      return;
+  internal void ReportShown() {
+    if (this.tour.ReportShown()) {
+      Mod.UsageTracker.Track("tour_started");
     }
-
-    this.TrackingFinish(this.tour.Close, isCompleted: false, hasLeftMenu: true);
   }
 
   /// <summary>

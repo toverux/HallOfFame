@@ -37,5 +37,5 @@ progress.
 
 ## Prevention
 
-`MenuTourTests.Close_SavesTheSeenTour_OnceAndAtOnce` asserts the tour saves the flag the moment
-it closes.
+`MenuTourTests.ReportShown_SavesTheSeenTour_OnceAndAtOnce` asserts the tour saves the flag the
+moment its first balloon shows.

@@ -90,8 +90,8 @@ describe('MenuControlsContent', () => {
     });
 
     expect(getUsageEvents()).toEqual([
-      ['screenshot_details_opened', { from: 'menu' }],
-      ['screenshot_details_opened', { from: 'menu' }]
+      ['screenshot_details_opened', { from: 'menu', tab: 'description' }],
+      ['screenshot_details_opened', { from: 'menu', tab: 'description' }]
     ]);
   });
 

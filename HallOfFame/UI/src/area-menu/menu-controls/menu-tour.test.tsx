@@ -20,9 +20,23 @@ describe('MenuTourAnchor', () => {
     fireEvent.click(screen.getByText(closeLabel));
 
     expect(getTriggers().map(trigger => trigger.event)).toEqual([
+      'hallOfFame.menuTour.shown',
       'hallOfFame.menuTour.next',
       'hallOfFame.menuTour.close'
     ]);
+  });
+
+  it(`reports its balloon on screen once, when it renders`, () => {
+    setBinding('hallOfFame.menuTour', 'step', 'like');
+
+    renderAnchor();
+
+    expect(getTriggers()).toEqual([]);
+
+    act(() => setBinding('hallOfFame.menuTour', 'step', 'navigation'));
+    act(() => setBinding('hallOfFame.menuTour', 'isLastStep', true));
+
+    expect(getTriggers().map(trigger => trigger.event)).toEqual(['hallOfFame.menuTour.shown']);
   });
 
   it(`offers only Close on the last step`, () => {
@@ -68,7 +82,10 @@ describe('MenuTourAnchor', () => {
 
     fireEvent.mouseDown(screen.getByTestId('control'));
 
-    expect(getTriggers().map(trigger => trigger.event)).toEqual(['hallOfFame.menuTour.next']);
+    expect(getTriggers().map(trigger => trigger.event)).toEqual([
+      'hallOfFame.menuTour.shown',
+      'hallOfFame.menuTour.next'
+    ]);
   });
 
   it(`moves the tour on when the player presses one of its step's keys`, () => {
@@ -80,7 +97,10 @@ describe('MenuTourAnchor', () => {
       setBinding('hallOfFame.slideshow', 'previousScreenshotInputAction.phase', 'Performed')
     );
 
-    expect(getTriggers().map(trigger => trigger.event)).toEqual(['hallOfFame.menuTour.next']);
+    expect(getTriggers().map(trigger => trigger.event)).toEqual([
+      'hallOfFame.menuTour.shown',
+      'hallOfFame.menuTour.next'
+    ]);
   });
 
   it(`leaves the tour alone when its control or keys are used on another step`, () => {

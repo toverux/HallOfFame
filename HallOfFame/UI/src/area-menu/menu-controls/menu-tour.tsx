@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { FocusDisabled } from 'cs2/input';
 import { Button } from 'cs2/ui';
-import { type ReactElement, useState } from 'react';
+import { type ReactElement, useEffect, useState } from 'react';
 import { Tooltip } from '../../components/tooltip';
 import logoSrc from '../../icons/stats-notification.svg';
 import { getClassesModule, useTranslate } from '../../utils';
@@ -162,6 +162,7 @@ export function MenuTourAnchor({
  * Next moves the tour on and Close ends it, Close alone and primary on the last step.
  * The buttons stay out of focus navigation: the balloon sits in its anchor's focus controller,
  * which hosts the anchored control alone.
+ * It reports itself on screen as it mounts, which C# takes as the tour seen at the first balloon.
  */
 function MenuTourBalloon({
   step,
@@ -171,6 +172,10 @@ function MenuTourBalloon({
   isLastStep: boolean;
 }>): ReactElement {
   const translate = useTranslate();
+
+  useEffect(() => {
+    bindings.reportMenuTourShown();
+  }, []);
 
   const { icon, title, message, inputHints } = stepContents[step];
 

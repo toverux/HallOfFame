@@ -119,10 +119,13 @@ export const ScreenshotDetailsWindow = memo(
 
     // On the closed-to-open transition, rather than on the modal's mount: a window reopened while
     // its exit plays keeps the modal it had.
+    // The tab is the one it opens on, read at that transition alone: `openTab` changing while the
+    // window is open is no new opening.
     useEffect(() => {
       if (isOpen) {
-        bindings.trackUsage('screenshot_details_opened', { from });
+        bindings.trackUsage('screenshot_details_opened', { from, tab: openTab });
       }
+      // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, from]);
 
     return (

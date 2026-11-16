@@ -153,7 +153,7 @@ describe('ScreenshotDetailsWindow', () => {
     expect(await screen.findByText(playset)).toBeDefined();
 
     expect(getUsageEvents()).toEqual([
-      ['screenshot_details_opened', { from: 'menu' }],
+      ['screenshot_details_opened', { from: 'menu', tab: 'description' }],
       ['screenshot_details_tab_changed', { tab: 'photoModeSettings' }],
       ['screenshot_details_tab_changed', { tab: 'playset' }],
       ['screenshot_details_tab_changed', { tab: 'description' }],
@@ -200,9 +200,9 @@ describe('ScreenshotDetailsWindow', () => {
     );
 
     expect(getUsageEvents()).toEqual([
-      ['screenshot_details_opened', { from: 'dashboard' }],
+      ['screenshot_details_opened', { from: 'dashboard', tab: 'description' }],
       ['screenshot_details_tab_changed', { tab: 'playset' }],
-      ['screenshot_details_opened', { from: 'dashboard' }]
+      ['screenshot_details_opened', { from: 'dashboard', tab: 'photoModeSettings' }]
     ]);
   });
 

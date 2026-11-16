@@ -13,8 +13,9 @@ interface UsageEvents {
     readonly direction: 'previous' | 'next';
     readonly via: 'button' | 'action';
   };
-  // On the closed-to-open transition only, the tab changes being their own event.
-  readonly screenshot_details_opened: { readonly from: 'menu' | 'dashboard' };
+  // On the closed-to-open transition only, with the tab it opens on, the tab changes being their
+  // own event.
+  readonly screenshot_details_opened: { readonly from: 'menu' | 'dashboard'; readonly tab: string };
   // The tab's ID, as the details window names it.
   readonly screenshot_details_tab_changed: { readonly tab: string };
   readonly viewer_opened: { readonly from: 'menu' | 'dashboard' };
