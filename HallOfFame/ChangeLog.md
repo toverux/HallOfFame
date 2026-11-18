@@ -1,3 +1,4 @@
 - The enlarged image in the upload panel now has a close button showing your Back key, and also closes with Escape or a click anywhere. You can also open it by clicking the preview.
 - When "Send usage statistics and error reports" is on (previously "Send usage statistics"), the mod's unexpected errors are now sent to me with technical context, so I can fix them without waiting for a bug report. Your user folder name is removed from the reports, which are kept for 30 days. Turn the option off to send nothing.
 - The slideshow controls tour is no longer skipped for good if you leave the main menu before it appears.
+- The key that opens the screenshot details window is now I instead of D, as the game's camera took D at the main menu and the key did nothing there.

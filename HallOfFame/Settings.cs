@@ -339,7 +339,7 @@ public sealed class
 
   [SettingsUISection(Settings.GroupKeyBindings)]
   [SettingsUIKeyboardBinding(
-    BindingKeyboard.D,
+    BindingKeyboard.I,
     nameof(Settings.KeyBindingScreenshotDetails)
   )]
   public ProxyBinding KeyBindingScreenshotDetails { get; set; }
@@ -559,6 +559,15 @@ public sealed class
   public bool HasSeenMenuTour { get; set; }
 
   /// <summary>
+  /// Whether <see cref="MoveScreenshotDetailsKeyOffD"/> already ran, so a D the player binds
+  /// afterwards stays.
+  /// <see cref="SetDefaults"/> leaves it alone, as the settings reset calls it, and a D bound after
+  /// a reset is written back to the file too (decompile, <c>ModSetting</c>'s binding watcher).
+  /// </summary>
+  [SettingsUIHidden]
+  public bool HasMovedScreenshotDetailsKeyOffD { get; set; }
+
+  /// <summary>
   /// The latest value the user selected for the "Share playset" option in the upload panel.
   /// It is restored when it opens.
   /// </summary>
@@ -698,6 +707,35 @@ public sealed class
   /// <see cref="SetDefaults"/>; <see cref="NullStrings.Restore{T}"/> tells why.
   /// </summary>
   internal void RestoreNullStrings(Settings defaults) => NullStrings.Restore(this, defaults);
+
+  /// <summary>
+  /// Moves <see cref="KeyBindingScreenshotDetails"/> from D, its former default, to I, once.
+  /// At the main menu the game's camera keeps <c>Camera/Move</c> enabled, and its runtime conflict
+  /// resolution disables a mod action sharing its key whatever their usages (decompile,
+  /// <c>InputConflictResolution</c>), so D never fired there.
+  /// The settings file stores every binding, defaults included, and its stored path overrides the
+  /// attribute's default (decompile, <c>ModSetting.ApplyKeyBindings</c>): changing the default
+  /// alone leaves existing players on D.
+  /// Call it right after loading.
+  /// </summary>
+  internal void MoveScreenshotDetailsKeyOffD() {
+    if (this.HasMovedScreenshotDetailsKeyOffD) {
+      return;
+    }
+
+    this.HasMovedScreenshotDetailsKeyOffD = true;
+
+    var binding = this.KeyBindingScreenshotDetails;
+
+    if (binding.path is not "<Keyboard>/d" || binding.modifiers.Count > 0) {
+      return;
+    }
+
+    this.KeyBindingScreenshotDetails = binding.WithPath("<Keyboard>/i");
+
+    // The property alone does not reach the input system.
+    this.ApplyKeyBindings();
+  }
 
   internal Settings Clone() => (Settings) this.MemberwiseClone();
 

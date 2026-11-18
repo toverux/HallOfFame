@@ -171,6 +171,9 @@ public sealed class Mod : IMod {
       // onSettingsApplied subscription below fires it, cancelling the creator sync it starts.
       this.settingsValue.RestoreNullStrings(defaultSettings);
 
+      // Same as above, in memory only.
+      this.settingsValue.MoveScreenshotDetailsKeyOffD();
+
       // Set singleton instance only when OnLoad is likely to complete.
       Mod.instanceValue = this;
 
