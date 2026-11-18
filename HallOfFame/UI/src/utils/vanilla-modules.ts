@@ -98,6 +98,13 @@ export function getModuleExport<TExport>(
 }
 
 /**
+ * Lists the vanilla modules, classes and exports that failed to resolve so far, keyed as reported.
+ */
+export function listUnresolved(): readonly string[] {
+  return [...ignoreResolveErrorsFor];
+}
+
+/**
  * Type guard for a vanilla component export: a memoized component is an object, not a function, so
  * the guard can only check that this is something React could render.
  */

@@ -33,7 +33,7 @@ mise test:cs --filter-class '*ModLogTests'
 - Logic that grows past a helper goes in a plain class constructed without the engine, its engine-bound collaborators passed in behind a mod-owned interface: here, a `Services/` class (`StatsNotifier`, `ScreenshotCarousel`).
 - A seam earns its place when an off-engine test pins behaviour behind it: data a system reads and binds unchanged stays in the system rather than relaying through such a class.
 - The mod's csproj names the test project in `InternalsVisibleTo`: keep test-only access `internal`, never `public`.
-- What needs the live game (a system over a loaded city, a prefab, a save) is checked in the running game: the `cs2-modding` skill's game-cycle reference.
+- What needs the live game (a system over a loaded city, a prefab, a save) is checked in the running game: the `cs2-modding` skill's game cycle.
 
 ## What loads off-engine
 

@@ -6,7 +6,7 @@ description: Translate the locale keys a change added, reworded or removed into 
 # Translating the mod's strings
 
 Every change to [`en-US.json`](../../../HallOfFame/Locales/en-US.json) reaches the other 13 locale files of [`Locales/`](../../../HallOfFame/Locales) in the same change: a key added or reworded is translated, a key removed is removed.
-The files are flat JSON, keyed `HallOfFame.<Area>.<KEY>` for the mod's own strings and in the game's formats for its settings (`Options.OPTION[…]`); the `cs2-modding` skill's localization reference holds those formats, the `{KEY=…}` references and the placeholders.
+The files are flat JSON, keyed `HallOfFame.<Area>.<KEY>` for the mod's own strings and in the game's formats for its settings (`Options.OPTION[…]`), which the `Get…LocaleID` methods of the decompile's `Game.Modding.ModSetting` build; a `{KEY=…}` reference is replaced by that key's string when `LocaleLoader` loads the file.
 
 **Crowdin** is set up when `CROWDIN_PROJECT_ID` in `mise.toml`'s `[env]` holds a project ID: volunteers then translate on Crowdin, and steps 2 and 7 apply. Without it, skip them.
 

@@ -1,5 +1,6 @@
-import { useValue } from 'cs2/api';
+import { useValue, useValueOnChange } from 'cs2/api';
 import type { ControlPath } from 'cs2/input';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import { lazyBindValue } from './lazy-value-binding';
 
 export interface ProxyBinding {
@@ -16,6 +17,13 @@ export interface InputAction {
 
   readonly useInputBinding: () => ProxyBinding;
   readonly useInputPhase: () => InputActionPhase;
+
+  /**
+   * Calls `onPress` on each press of the action from now on, a press released in the frame it came
+   * in included, which `useInputPhase` misses: it renders only the release.
+   * A press made before the call is not reported.
+   */
+  readonly useInputPress: (onPress: () => void) => void;
 }
 
 export type InputActionPhase = 'Disabled' | 'Waiting' | 'Started' | 'Performed' | 'Canceled';
@@ -26,6 +34,7 @@ export type InputActionPhase = 'Disabled' | 'Waiting' | 'Started' | 'Performed' 
  *
  * @see useInputBinding
  * @see useInputPhase
+ * @see useInputPress
  */
 export function bindInputAction(group: string, name: string): InputAction {
   const binding$ = lazyBindValue<ProxyBinding>(group, `${name}.binding`, {
@@ -40,7 +49,7 @@ export function bindInputAction(group: string, name: string): InputAction {
   const phase$ = lazyBindValue<InputActionPhase>(group, `${name}.phase`, 'Disabled');
 
   // noinspection JSUnusedGlobalSymbols
-  return { id: `${group}.${name}`, useInputBinding, useInputPhase };
+  return { id: `${group}.${name}`, useInputBinding, useInputPhase, useInputPress };
 
   function useInputBinding(): ProxyBinding {
     return useValue(binding$());
@@ -48,5 +57,23 @@ export function bindInputAction(group: string, name: string): InputAction {
 
   function useInputPhase(): InputActionPhase {
     return useValue(phase$());
+  }
+
+  function useInputPress(onPress: () => void): void {
+    // The latest callback, read by one listener: a new listener would subscribe anew, which toggles
+    // the action in the game.
+    const onPressRef = useRef(onPress);
+
+    useLayoutEffect(() => {
+      onPressRef.current = onPress;
+    });
+
+    const onPhase = useCallback((phase: InputActionPhase) => {
+      if (phase == 'Performed') {
+        onPressRef.current();
+      }
+    }, []);
+
+    useValueOnChange(phase$(), onPhase);
   }
 }

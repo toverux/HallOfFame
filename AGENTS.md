@@ -98,10 +98,11 @@ One agent builds a feature and verifies it in the running game, so every feature
 - Every C# action has a Debug entry point, `#if DEBUG`, callable from the unity eval, and the state it changes is readable from there too.
 - Every interactive UI element carries a stable class from its stylesheet, which an agent selects in the running game by its prefixed BEM name with the hash left out: `[class*="hof-<block>-<element>_"]`. A UI test cannot, as the harness leaves the mod's classes undefined. No test ids.
 - Every UI↔C# path is a named binding, declared in a `utils/bindings` module on the TS side and in a UI system on the C# side.
+- A behaviour of the game a feature relies on or works around, which a game update can change with no build error and no logged failure, is pinned by a test that turns red when it does, its failure message saying what to change: an off-engine test where the game's assemblies or files show the behaviour, a scenario otherwise. A check that nothing happened carries its control, the same input where it does happen. The candidates are listed before they are written, each with what turns it red and what it costs, and a `cantrips:deputy`, the session's or a fresh one, weighs each one's value against the complexity it adds, in rounds: its verdicts are applied and it judges again, until a round keeps every test as it stands.
 - A feature is done when an agent has driven it in the running game (the unity eval for C#, the gameface `game_*` tools for the UI, the `cs2-dev` tools around both) and pinned what is stable as a UI test.
 
 Drive the running game yourself to verify a change, during a review or simplify pass as much as during the work itself.
-The `cs2-dev` tools restart the game and read its logs, `mod` set to `HallOfFame`: read the `cs2-modding` skill's game-cycle reference before the first call.
+The `cs2-dev` tools restart the game and read its logs, `mod` set to `HallOfFame`: read the `cs2-modding` skill's game cycle before the first call.
 The mod logs to `Logs/HallOfFame.log` in the game's user data folder, and `mise build` deploys it to `HallOfFame/` in the local Mods folder.
 When the game's debugger port (unity) or its UI debugging port (gameface) is unavailable, the `cs2-modding-setup` skill sets them up.
 
@@ -120,6 +121,7 @@ When the game's debugger port (unity) or its UI debugging port (gameface) is una
 - Focus keys are compared by value, so a plain string like `` `row-${id}` `` keeps a list row attached across re-renders, where a `FocusSymbol` memoized per row costs more for the same result.
 - A `vanilla-modules` stub may declare more of the vanilla API than the mod calls today: its unused members are kept on purpose, for the next consumer.
 - User-facing strings are localized: add their keys to `HallOfFame/Locales/en-US.json`. Every change to `en-US.json`, a key added, removed or reworded, is ported to the other 13 locale files in the same change, through the `hof-translate` skill.
+- A key binding's rebinding dialog reads its title and the mod's name under keys of their own, which `LocaleLoader.ListAliases` fills from the binding's option label and the options section's name: a binding needs its option label in the locale files, never those keys. Strings the same in every locale and not for translators live in `LocaleLoader.ListCodeStrings`.
 - With Crowdin set up, nothing moves between Crowdin and the repo but `mise l10n:push`, which carries the source and the repo's translations out, and `mise l10n:pull`, which brings volunteers' work in.
 - `HallOfFame/Locales/Skyve` holds Skyve's own labels, registered under `HallOfFame.Skyve.`: it stays out of Crowdin and `mise l10n:push`, and changes only through `mise l10n:skyve`.
 - The decompiled game source, the third-party mod corpus, and the readable copy of the game's UI bundle are machine-local: read their paths from `~/.cs2-modding/setup.md` instead of hardcoding them here. A missing key or a `(none)` value means that source does not exist.
@@ -127,7 +129,7 @@ When the game's debugger port (unity) or its UI debugging port (gameface) is una
 - To put a given screenshot on screen in the running game, load it by ID with `SlideshowUISystem.LoadScreenshotById` (debug builds), through the unity-devtools `eval` tool: `world.GetOrCreateSystemManaged<HallOfFame.Systems.SlideshowUISystem>().LoadScreenshotById("<id>")`.
 - To preview a new or changed locale string in the running game without a `mise build`, push it into the live dictionary through the unity-devtools `eval` tool, then raise the change event the UI listens to; it holds until the game restarts, so the edit still goes into `en-US.json`:
   `var lm = Game.SceneFlow.GameManager.instance.localizationManager; lm.activeDictionary.Add("<key>", "<value>", false); typeof(Colossal.Localization.LocalizationManager).GetMethod("NotifyActiveDictionaryChanged", (System.Reflection.BindingFlags)36).Invoke(lm, null)`.
-- The mod patches no game code. When a change cannot be made through systems, prefabs or bindings, read the `cs2-modding` skill's patching reference before adding Harmony.
+- The mod patches no game code. When a change cannot be made through systems, prefabs or bindings, follow the `cs2-modding` skill's working loop, which keeps Harmony for last.
 - The toolchain's `CSII_*` variables are Windows user-scope environment variables, a scope Linux lacks: read one from the user scope with a process-environment fallback, the shape `HallOfFame.csproj` and `HallOfFame.Tests.csproj` use.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org): `<type>(<optional scope>): <summary>`, with the types `feat`, `fix`, `perf`, `refactor`, `test`, `docs`, `style`, `build`, `chore`. The release changelog is written from them.
 
