@@ -95,6 +95,26 @@ describe('MenuControlsContent', () => {
     ]);
   });
 
+  it(`opens the details window from a key pressed and released in one update`, () => {
+    setBinding('hallOfFame.common', 'settings', makeSettings({ showScreenshotDetails: false }));
+
+    setBinding(
+      'hallOfFame.slideshow',
+      'screenshot',
+      makeScreenshot({ description: 'A city.', capabilities: ['description'] })
+    );
+
+    render(<MenuControlsContent />);
+
+    act(() => {
+      setBinding('hallOfFame.slideshow', 'screenshotDetailsInputAction.phase', 'Performed');
+      setBinding('hallOfFame.slideshow', 'screenshotDetailsInputAction.phase', 'Canceled');
+    });
+
+    // The window's body alone.
+    expect(screen.getAllByText('A city.')).toHaveLength(1);
+  });
+
   it(`hides the details row by setting while the key still opens the window`, () => {
     setBinding('hallOfFame.common', 'settings', makeSettings({ showScreenshotDetails: false }));
 

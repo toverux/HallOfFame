@@ -99,7 +99,7 @@ export function MenuControlsContent(): ReactElement {
   // The key opens the window whether or not the details row shows, so it does the same thing on
   // every screenshot, and closes it again.
   useMenuControlsInputAction(
-    bindings.screenshotDetailsInputAction.useInputPhase(),
+    bindings.screenshotDetailsInputAction,
     () => {
       if (shownScreenshotId == undefined) {
         return false;

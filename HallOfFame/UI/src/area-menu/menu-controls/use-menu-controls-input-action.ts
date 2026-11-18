@@ -1,5 +1,5 @@
 import type { UISound } from 'cs2/ui';
-import { useEffect, useState } from 'react';
+import { useRef } from 'react';
 import * as bindings from '../../utils/bindings';
 
 /**
@@ -14,40 +14,38 @@ import * as bindings from '../../utils/bindings';
  * The keys rest while the Creator Dashboard is open: it covers the controls, and their actions
  * reach the UI as C# input phases that its backdrop cannot consume.
  *
- * @param phase The current input action phase.
+ * @param action The input action to listen to.
  * @param handler The function to call when the input action is performed (key down) AND canceled
  *   (key up).
  * @param sound The sound to play when the handler returned `true`.
  */
 export function useMenuControlsInputAction(
-  phase: bindings.InputActionPhase,
+  action: bindings.InputAction,
   handler: () => boolean | undefined | void,
   sound?: `${UISound}`
 ): void {
-  const [replayOnCanceled, setReplayOnCanceled] = useState(false);
+  // A ref, not state: a key tapped within one update changes the phase twice before any render.
+  const replayOnCanceled = useRef(false);
 
   const isDashboardOpen = bindings.useDashboardState().status != 'closed';
 
-  useEffect(() => {
+  // Every phase change, not the rendered phase: React renders only the last change of an update,
+  // which loses the press of a key released in the frame it came in.
+  action.useInputPhaseChange(phase => {
     if (isDashboardOpen) {
       return;
     }
 
     // Performed = keydown
     // Canceled = keyup
-    if (phase == 'Performed' || (phase == 'Canceled' && replayOnCanceled)) {
+    if (phase == 'Performed' || (phase == 'Canceled' && replayOnCanceled.current)) {
       const ready = handler() ?? true;
 
-      setReplayOnCanceled(phase == 'Performed' && !ready);
+      replayOnCanceled.current = phase == 'Performed' && !ready;
 
       if (ready && sound) {
         bindings.playSound(sound);
       }
     }
-    // The effect must fire only on phase transitions: `handler` and `sound` are recreated every
-    // render, and `replayOnCanceled` and `isDashboardOpen` are deliberately reads, not triggers
-    // (re-running on their change would re-invoke the handler). So the narrow `[phase]` dependency
-    // list is intentional.
-    // oxlint-disable-next-line react-hooks/exhaustive-deps - intentional, see above
-  }, [phase]);
+  });
 }

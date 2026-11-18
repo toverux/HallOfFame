@@ -42,7 +42,7 @@ export const MenuControlsNextButton = memo(
     const phase = useInputPhase();
 
     useMenuControlsInputAction(
-      phase,
+      bindings.nextScreenshotInputAction,
       // SetTimeout is used to give time to the key press .*active class to show briefly before
       // [disabled] is set.
       () => !disabled && (setTimeout(() => navigate('next', 'action'), 0), true),
@@ -86,7 +86,7 @@ export const MenuControlsPreviousButton = memo(
     const phase = useInputPhase();
 
     useMenuControlsInputAction(
-      phase,
+      bindings.previousScreenshotInputAction,
       // SetTimeout is used to give time to the key press .*active class to show briefly before
       // [disabled] is set.
       () => !disabled && (setTimeout(() => navigate('previous', 'action'), 0), true),
@@ -132,7 +132,7 @@ function MenuControlsToggleMenuVisibilityButtonBase({
   const binding = useInputBinding();
   const phase = useInputPhase();
 
-  useMenuControlsInputAction(phase, toggleMenuVisibility, selectSound);
+  useMenuControlsInputAction(bindings.toggleMenuInputAction, toggleMenuVisibility, selectSound);
 
   const activeClass = phase == 'Performed' ? styles.buttonActive : '';
 
@@ -164,7 +164,11 @@ export const MenuControlsLikeButton = memo(
     const binding = useInputBinding();
     const phase = useInputPhase();
 
-    useMenuControlsInputAction(phase, bindings.likeScreenshot, selectSound);
+    useMenuControlsInputAction(
+      bindings.likeScreenshotInputAction,
+      bindings.likeScreenshot,
+      selectSound
+    );
 
     const activeClass =
       phase == 'Performed'

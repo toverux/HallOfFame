@@ -281,7 +281,7 @@ function MenuTourInputActionListener({
   action: bindings.InputAction;
   onPerformed: () => void;
 }>): null {
-  useMenuControlsInputAction(action.useInputPhase(), onPerformed);
+  useMenuControlsInputAction(action, onPerformed);
 
   return null;
 }

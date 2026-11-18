@@ -19,6 +19,13 @@ export interface InputAction {
   readonly useInputPhase: () => InputActionPhase;
 
   /**
+   * Calls `onPhase` on each phase change of the action from now on, every change of an update
+   * included, where `useInputPhase` renders only the last one.
+   * A change made before the call is not reported.
+   */
+  readonly useInputPhaseChange: (onPhase: (phase: InputActionPhase) => void) => void;
+
+  /**
    * Calls `onPress` on each press of the action from now on, a press released in the frame it came
    * in included, which `useInputPhase` misses: it renders only the release.
    * A press made before the call is not reported.
@@ -34,6 +41,7 @@ export type InputActionPhase = 'Disabled' | 'Waiting' | 'Started' | 'Performed' 
  *
  * @see useInputBinding
  * @see useInputPhase
+ * @see useInputPhaseChange
  * @see useInputPress
  */
 export function bindInputAction(group: string, name: string): InputAction {
@@ -49,7 +57,13 @@ export function bindInputAction(group: string, name: string): InputAction {
   const phase$ = lazyBindValue<InputActionPhase>(group, `${name}.phase`, 'Disabled');
 
   // noinspection JSUnusedGlobalSymbols
-  return { id: `${group}.${name}`, useInputBinding, useInputPhase, useInputPress };
+  return {
+    id: `${group}.${name}`,
+    useInputBinding,
+    useInputPhase,
+    useInputPhaseChange,
+    useInputPress
+  };
 
   function useInputBinding(): ProxyBinding {
     return useValue(binding$());
@@ -59,21 +73,25 @@ export function bindInputAction(group: string, name: string): InputAction {
     return useValue(phase$());
   }
 
-  function useInputPress(onPress: () => void): void {
+  function useInputPhaseChange(onPhase: (phase: InputActionPhase) => void): void {
     // The latest callback, read by one listener: a new listener would subscribe anew, which toggles
     // the action in the game.
-    const onPressRef = useRef(onPress);
+    const onPhaseRef = useRef(onPhase);
 
     useLayoutEffect(() => {
-      onPressRef.current = onPress;
+      onPhaseRef.current = onPhase;
     });
 
-    const onPhase = useCallback((phase: InputActionPhase) => {
-      if (phase == 'Performed') {
-        onPressRef.current();
-      }
-    }, []);
+    const listener = useCallback((phase: InputActionPhase) => onPhaseRef.current(phase), []);
 
-    useValueOnChange(phase$(), onPhase);
+    useValueOnChange(phase$(), listener);
+  }
+
+  function useInputPress(onPress: () => void): void {
+    useInputPhaseChange(phase => {
+      if (phase == 'Performed') {
+        onPress();
+      }
+    });
   }
 }
