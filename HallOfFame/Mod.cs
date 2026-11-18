@@ -18,7 +18,6 @@ using JetBrains.Annotations;
 using UnityEngine;
 using Version = Game.Version;
 #if DEBUG
-using Game.SceneFlow;
 #endif
 
 namespace HallOfFame;
@@ -134,8 +133,16 @@ public sealed class Mod : IMod {
       // Create directories for settings and data.
       Mod.CreateDirectories();
 
+      // Migration from previous versions.
+      // Does not error if the file does not exist.
+      File.Delete(Path.Combine(Mod.ModSettingsPath, "CreatorID.txt"));
+
+      // Create the settings first: the locales derive strings from them.
+      this.settingsValue = new Settings(this);
+      var defaultSettings = this.settingsValue.Clone();
+
       // Set up locales.
-      LocaleLoader.Setup();
+      LocaleLoader.Setup(this.settingsValue);
 
       #if DEBUG
       // In debug mode, eagerly check reflection hacks are working, once locales are loaded so a
@@ -147,14 +154,7 @@ public sealed class Mod : IMod {
       VolumetricFogBuffersAccessor.Init();
       #endif
 
-      // Migration from previous versions.
-      // Does not error if the file does not exist.
-      File.Delete(Path.Combine(Mod.ModSettingsPath, "CreatorID.txt"));
-
       // Register settings UI and load settings.
-      this.settingsValue = new Settings(this);
-      var defaultSettings = this.settingsValue.Clone();
-
       this.settingsValue.RegisterInOptionsUI();
       this.settingsValue.RegisterKeyBindings();
 
@@ -173,13 +173,6 @@ public sealed class Mod : IMod {
 
       // Set singleton instance only when OnLoad is likely to complete.
       Mod.instanceValue = this;
-
-      #if DEBUG
-      GameManager.instance.localizationManager.AddSource(
-        "en-US",
-        new Settings.DevDictionarySource()
-      );
-      #endif
 
       var session = new UsageSession(
         // One session per launch, for the whole life of the process: the game is usually killed

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,7 +19,6 @@ using JetBrains.Annotations;
 using Unity.Entities;
 using UnityEngine;
 #if DEBUG
-using Colossal;
 using Colossal.Json;
 #endif
 
@@ -65,7 +63,7 @@ public sealed class
 
   private const string GroupLinks = "Links";
 
-  private const string GroupDevelopment = "Development";
+  internal const string GroupDevelopment = "Development";
 
   // Needs to be getter method to be read by the game.
   private static DropdownItem<string>[] ResolutionDropdownItems => [
@@ -811,23 +809,5 @@ public sealed class
     localizationManager.SetActiveLocale(originalLocale);
   }
 
-  internal sealed class DevDictionarySource : IDictionarySource {
-    public IEnumerable<KeyValuePair<string, string>> ReadEntries(
-      IList<IDictionaryEntryError> errors,
-      Dictionary<string, int> indexCounts
-    ) =>
-      new Dictionary<string, string> {
-        ["Options.GROUP[HallOfFame.HallOfFame.Mod.Development]"] = "{ Development }",
-        ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.CaptureWithGlobalIllumination]"] =
-          "Capture with Global Illumination",
-        ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.ScreenshotToLoad]"] = "Screenshot ID",
-        ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.LoadScreenshot]"] = "Load Screenshot",
-        ["Options.OPTION[HallOfFame.HallOfFame.Mod.Settings.DumpTranslations]"] =
-          "Dump Locales as JSON"
-      };
-
-    public void Unload() {
-    }
-  }
   #endif
 }
