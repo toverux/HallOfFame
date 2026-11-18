@@ -345,7 +345,7 @@ dotnet_style_qualification_for_property = true:warning
 dotnet_style_qualification_for_method = true:warning
 dotnet_style_qualification_for_event = true:warning
 # Static members keep an explicit type-name qualifier, like `this.` on instance members.
-resharper_csharp_static_members_qualify_with = current_type
+resharper_csharp_static_members_qualify_with = declared_type
 resharper_csharp_static_members_qualify_members = all
 dotnet_style_predefined_type_for_locals_parameters_members = true:warning
 dotnet_style_predefined_type_for_member_access = true:warning
